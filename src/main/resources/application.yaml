@@ -1,0 +1,43 @@
+server:
+  servlet:
+    context-path: /
+
+spring:
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+  main.banner-mode: "off"
+  datasource:
+    hikari:
+      maximum-pool-size: 2
+      connection-test-query: "select 1"
+      max-lifetime: 30000
+      minimum-idle: 1
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: "org.hibernate.dialect.PostgreSQL95Dialect"
+        temp:
+          use_jdbc_metadata_defaults: false
+  flyway:
+    enabled: true
+
+logging:
+  config: "classpath:logback-spring.xml"
+
+management:
+  endpoint.health.show-details: always
+  endpoints.web:
+    exposure.include: info, health, metrics, prometheus
+    base-path: "/internal"
+    path-mapping:
+      health: "status/isAlive"
+  metrics.export.prometheus.enabled: true
+  health:
+    db:
+      enabled: true
+  metrics:
+    web:
+      server:
+        auto-time-requests: true
+

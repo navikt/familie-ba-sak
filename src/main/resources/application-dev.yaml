@@ -1,0 +1,52 @@
+no.nav.security.jwt:
+  issuer.azuread:
+    discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
+    accepted_audience: ${KS_SAK_CLIENT_ID}
+    cookie_name: azure_token
+  client:
+    registration:
+      ks-oppslag-onbehalfof:
+        resource-url: ${FAMILIE_KS_OPPSLAG_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${KS_OPPSLAG_SCOPE}
+        authentication:
+          client-id: ${KS_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      ks-oppslag-clientcredentials:
+        resource-url: ${FAMILIE_KS_OPPSLAG_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: ${KS_OPPSLAG_SCOPE}
+        authentication:
+          client-id: ${KS_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+
+credential:
+  username: "srv-ks-sak"
+  password: "not-a-real-password"
+
+logging:
+  config: "classpath:logback-test.xml"
+  level:
+    root: INFO
+
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql=false
+    hibernate:
+      ddl-auto: create
+  flyway:
+    enabled: false
+server:
+  port: 8088
+
+FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
+
+#Unleash
+UNLEASH_API_URL: http://localhost
