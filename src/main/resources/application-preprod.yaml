@@ -1,0 +1,36 @@
+no.nav.security.jwt:
+  issuer.azuread:
+    discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
+    accepted_audience: ${KS_SAK_CLIENT_ID}
+    proxyurl: http://webproxy-nais.nav.no:8088
+    cookie_name: azure_token
+  client:
+    registration:
+      ks-oppslag-onbehalfof:
+        resource-url: ${FAMILIE_KS_OPPSLAG_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${KS_OPPSLAG_SCOPE}
+        authentication:
+          client-id: ${KS_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      ks-oppslag-clientcredentials:
+        resource-url: ${FAMILIE_KS_OPPSLAG_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: ${KS_OPPSLAG_SCOPE}
+        authentication:
+          client-id: ${KS_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+
+spring:
+  datasource:
+    url: jdbc:postgresql://b27dbvl008.preprod.local:5432/familie-ks-sak
+
+FAMILIE_KS_OPPSLAG_API_URL: http://familie-ks-oppslag/api
+
+#Unleash
+UNLEASH_API_URL: https://unleash.nais.adeo.no/api/
+ENVIRONMENT_NAME: q2
