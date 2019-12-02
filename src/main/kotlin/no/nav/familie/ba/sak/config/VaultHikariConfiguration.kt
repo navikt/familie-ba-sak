@@ -17,7 +17,7 @@ class VaultHikariConfig(private val container: SecretLeaseContainer,
                         private val props: VaultDatabaseProperties) : InitializingBean {
 
     override fun afterPropertiesSet() {
-        val secret = RequestedSecret.rotating(props.backend + "/creds/" + props.getRole())
+        val secret = RequestedSecret.rotating(props.backend + "/creds/" + props.role)
         container.addLeaseListener { leaseEvent ->
             if (leaseEvent.source === secret && leaseEvent is SecretLeaseCreatedEvent) {
                 LOGGER.info("Rotating creds for path: " + leaseEvent.getSource().path)

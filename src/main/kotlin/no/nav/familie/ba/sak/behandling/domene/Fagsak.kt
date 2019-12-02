@@ -7,35 +7,21 @@ import java.util.*
 import javax.persistence.*
 
 @Entity(name = "Fagsak") @Table(name = "FAGSAK")
-class Fagsak : BaseEntitet {
+data class Fagsak(@Id
+                  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq")
+                  @SequenceGenerator(name = "fagsak_seq")
+                  val id: Long? = null,
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq")
-    @SequenceGenerator(name = "fagsak_seq")
-    val id: Long? = null
+                  @Embedded
+                  @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+                  var aktørId: AktørId? = null,
 
-    @Embedded
-    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
-    var aktørId: AktørId? = null
-
-    @Embedded
-    @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))
-    var personIdent: PersonIdent? = null
-
-
-    internal constructor() { // Hibernate
-    }
-
-    constructor(aktørId: AktørId?, personIdent: PersonIdent?) {
-        this.aktørId = aktørId
-        this.personIdent = personIdent
-    }
+                  @Embedded
+                  @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))
+                  var personIdent: PersonIdent? = null) : BaseEntitet() {
 
 
     override fun toString(): String {
-        return "Fagsak{" +
-               "id=" + id +
-               ", aktørId='" + aktørId + '\'' +
-               '}'
+        return "Fagsak(id=$id, aktørId=$aktørId)"
     }
 }

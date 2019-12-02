@@ -6,5 +6,5 @@ import java.util.*
 
 interface FagsakRepository : JpaRepository<Fagsak?, Long?> {
     @Query(value = "SELECT f FROM Fagsak f WHERE f.id = :fagsakId")
-    fun finnFagsak(fagsakId: Long?): Optional<Fagsak?>?
+    fun finnFagsak(fagsakId: Long?): Optional<Fagsak?>
 }

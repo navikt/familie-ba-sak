@@ -25,12 +25,14 @@ abstract class BaseEntitet : Serializable {
     @Version @Column(name = "versjon", nullable = false)
     private val versjon: Long = 0
 
-    @PrePersist protected fun onCreate() {
+    @PrePersist
+    protected fun onCreate() {
         opprettetAv = finnBrukernavn()
         opprettetTidspunkt = LocalDateTime.now()
     }
 
-    @PreUpdate protected fun onUpdate() {
+    @PreUpdate
+    protected fun onUpdate() {
         endretAv = finnBrukernavn()
         endretTidspunkt = LocalDateTime.now()
     }
