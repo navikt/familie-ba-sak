@@ -1,0 +1,42 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: familie-ba-sak
+  namespace: default
+  labels:
+    team: teamfamilie
+
+spec:
+  image: navikt/familie-ba-sak:{{version}}
+  port: 8084
+  liveness:
+    path: /internal/isAlive
+    initialDelay: 15
+    failureThreshold: 10
+  readiness:
+    path: /internal/isAlive
+    initialDelay: 15
+    failureThreshold: 10
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  vault:
+    enabled: true
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      memory: 1024Mi
+      cpu: "1"
+    requests:
+      memory: 512Mi
+      cpu: 200m
+  secureLogs:
+    enabled: true
+  ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
+    - https://familie-ba-sak.nais.adeo.no
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod

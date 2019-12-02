@@ -10,7 +10,7 @@ spring:
       maximum-pool-size: 2
       connection-test-query: "select 1"
       max-lifetime: 30000
-      minimum-idle: 1
+      minimum-idle: 0
   jpa:
     hibernate:
       ddl-auto: none
@@ -30,8 +30,6 @@ management:
   endpoints.web:
     exposure.include: info, health, metrics, prometheus
     base-path: "/internal"
-    path-mapping:
-      health: "status/isAlive"
   metrics.export.prometheus.enabled: true
   health:
     db:
@@ -39,5 +37,7 @@ management:
   metrics:
     web:
       server:
-        auto-time-requests: true
+        request:
+          autotime:
+            enabled: true
 
