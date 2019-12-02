@@ -77,6 +77,11 @@
 			<version>2.2.0.RELEASE</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.6</version>
+		</dependency>
 
 
 		<!-- NAV-interne avhengigheter -->
