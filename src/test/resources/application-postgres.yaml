@@ -1,0 +1,58 @@
+no.nav.security.jwt:
+  issuer.azuread:
+    discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
+    accepted_audience: ${BA_SAK_CLIENT_ID}
+    cookie_name: azure_token
+  client:
+    registration:
+      ba-sak-clientcredentials:
+        resource-url: ${FAMILIE_BA_SAK_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: ${BA_SAK_SCOPE}
+        authentication:
+          client-id: ${CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      ba-oppslag-clientcredentials:
+        resource-url: ${FAMILIE_BA_OPPSLAG_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: ${BA_OPPSLAG_SCOPE}
+        authentication:
+          client-id: ${CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+
+credential:
+  username: "srv-ks-sak"
+  password: "not-a-real-password"
+
+logging:
+  config: "classpath:logback-test.xml"
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    hikari:
+      password: sak
+      username: sak
+  flyway:
+    enabled: true
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql=false
+    hibernate:
+      ddl-auto: none
+
+  cloud:
+    vault:
+      database:
+        role: mottak
+
+
+
+FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
+FAMILIE_BA_SAK_API_URL: http://localhost:8086/api

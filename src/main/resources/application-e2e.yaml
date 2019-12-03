@@ -1,0 +1,47 @@
+no.nav.security.jwt:
+  issuer.azuread:
+    discoveryurl: http://vtp:8060/rest/isso/oauth2/.well-known/openid-configuration
+    accepted_audience: dummy
+    cookie_name: azure_token
+  client:
+    registration:
+      ks-oppslag-onbehalfof:
+        resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
+        token-endpoint-url: http://vtp:8060/rest/isso/oauth2/access_token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: dummy
+        authentication:
+          client-id: dummy
+          client-secret: dummy
+          client-auth-method: client_secret_basic
+      ks-oppslag-clientcredentials:
+        resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
+        token-endpoint-url: http://vtp:8060/rest/isso/oauth2/access_token
+        grant-type: client_credentials
+        scope: dummy
+        authentication:
+          client-id: dummy
+          client-secret: dummy
+          client-auth-method: client_secret_basic
+
+credential:
+  username: "srv-ba-sak"
+  password: "not-a-real-password"
+
+logging:
+  config: "classpath:logback-spring.xml"
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-sak:5432/familiebasak
+    hikari:
+      username: familie
+      password: familie-pwd
+  flyway:
+    enabled: true
+
+FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner:8085/api
+
+#Unleash
+NAIS_APP_NAME: ""
+UNLEASH_API_URL: http://localhost

@@ -1,0 +1,234 @@
+version: 2.1
+orbs:
+  nais: navikt/nais-deployment@1.1.0
+  slack: circleci/slack@3.3.0
+
+executors:
+  nais-deployer:
+    environment:
+      TEAM: teamfamilie
+    docker:
+      - image: navikt/deployment-cli:latest
+
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:11-jdk
+    steps:
+      - run:
+          name: Add github to known hosts
+          command: |
+            mkdir ~/.ssh
+            echo "github.com,140.82.118.3 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==" >> ~/.ssh/known_hosts
+      - add_ssh_keys:
+          fingerprints:
+            - "04:5d:37:94:ee:89:5e:42:f6:da:51:03:00:41:a0:0f"
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Generate version number and docker image tags
+          command: |
+            export VERSION="$(mvn help:evaluate -Dchangelist= -Dexpression=project.version -q -DforceStdout)-$CIRCLE_SHA1"
+            echo $VERSION
+            echo "export VERSION=$VERSION" >> properties.env
+            echo "export DOCKER_TAG=\"$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$VERSION\"" >> properties.env
+            cat properties.env >> $BASH_ENV
+      - restore_cache:
+          key: familie-ba-sak-{{ checksum "pom.xml" }}
+      - run:
+          name: Hent dependencies
+          command: |
+            mvn --settings .circleci/maven-settings.xml dependency:go-offline
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: familie-ba-sak-{{ checksum "pom.xml" }}
+      - run:
+          name: Bygger produksjon
+          command: |
+            mvn clean package -DexcludedGroups="integration"
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - .
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
+      - store_artifacts:
+          path: ~/test-results/junit
+
+
+  deploy_docker:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - attach_workspace:
+          at: /home/circleci/project
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Set up environment variables
+          command: cat /home/circleci/project/properties.env >> $BASH_ENV
+      - run:
+          name: Bygger Docker image
+          command: |
+            echo $DOCKER_TAG $VERSION
+            docker build -t $DOCKER_TAG .
+      - run:
+          name: Docker push
+          command: |
+            echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_LOGIN" --password-stdin
+            echo "Pushing with tag $DOCKER_TAG"
+            docker push $DOCKER_TAG
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - properties.env
+
+  github_tag:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          name: Set up environment variables
+          command: |
+            cat /home/circleci/project/properties.env >> $BASH_ENV
+      - run:
+          name: Add github to known hosts
+          command: |
+            mkdir ~/.ssh
+            echo "github.com,140.82.118.3 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==" >> ~/.ssh/known_hosts
+      - add_ssh_keys:
+          fingerprints:
+            - "04:5d:37:94:ee:89:5e:42:f6:da:51:03:00:41:a0:0f"
+      - run:
+          name: Github tag
+          command: |
+            git config --global user.email "team.familie@nav.no"
+            git config --global user.name "teamfamilie"
+            git tag -a $VERSION -m "$VERSION [skip ci]"
+            git push --tags
+
+  deploy_dev:
+    executor: nais-deployer
+    steps:
+      - attach_workspace:
+          at: /home/circleci/project
+      - checkout
+      - run:
+          name: Set up environment variables
+          command: cat /home/circleci/project/properties.env >> $BASH_ENV
+      - run:
+          name: Create github deployment for stable test
+          command: |
+            deployment-cli deploy create \
+              --cluster=dev-fss \
+              --repository=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME \
+              --appid=${GITHUB_APP_ID} \
+              --key-base64=${GITHUB_PRIVATE_KEY} \
+              --team=${TEAM} \
+              --version=${VERSION} \
+              --resource=./app-preprod.yaml \
+              --ref=$CIRCLE_BRANCH
+
+  deploy_prod:
+    executor: nais-deployer
+    steps:
+      - attach_workspace:
+          at: /home/circleci/project
+      - checkout
+      - run:
+          name: Set up environment variables
+          command: cat /home/circleci/project/properties.env >> $BASH_ENV
+      - run:
+          name: Create github deployment for production
+          command: |
+            deployment-cli deploy create \
+              --cluster=prod-fss \
+              --repository=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME \
+              --appid=${GITHUB_APP_ID} \
+              --key-base64=${GITHUB_PRIVATE_KEY} \
+              --team=${TEAM} \
+              --version=${VERSION} \
+              --resource=./app-prod.yaml \
+              --ref=$CIRCLE_BRANCH
+
+workflows:
+  version: 2
+  build_n_deploy_master:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master
+      - deploy_docker:
+          context: NAIS deployment
+          requires:
+            - build
+      - deploy_dev:
+          context: familie-ci
+          requires:
+            - deploy_docker
+      - slack/approval-notification:
+          context: familie-ci
+          mentions: 'here'
+          message: Godkjenn deploy av branchen \`master\` til \`prod-fss\`
+          filters:
+            branches:
+              ignore: /pull\/.*/
+          requires:
+            - deploy_dev
+      - await-approval-dev:
+          context: familie-ci
+          type: approval
+          filters:
+            branches:
+              ignore: /pull\/.*/
+          requires:
+            - deploy_dev
+      - github_tag:
+          context: familie-ci
+          requires:
+            - await-approval-dev
+      - deploy_prod:
+          context: familie-ci
+          requires:
+            - github_tag
+  build_n_deploy_branch:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: master
+      - deploy_docker:
+          context: NAIS deployment
+          requires:
+            - build
+      - slack/approval-notification:
+          context: familie-ci
+          message: Godkjenn deploy av branchen \`${CIRCLE_BRANCH}\` til \`dev-fss\`
+          filters:
+            branches:
+              ignore: /pull\/.*/
+          requires:
+            - deploy_docker
+      - await-approval:
+          context: familie-ci
+          type: approval
+          filters:
+            branches:
+              ignore: /pull\/.*/
+          requires:
+            - deploy_docker
+      - deploy_dev:
+          context: familie-ci
+          requires:
+            - await-approval

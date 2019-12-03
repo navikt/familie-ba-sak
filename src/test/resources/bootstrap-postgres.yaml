@@ -1,0 +1,8 @@
+spring:
+  cloud.vault:
+    enabled: false
+    database:
+      enabled: true
+      role: sak
+      adminRole: sak
+      backend: postgresql/preprod-fss
