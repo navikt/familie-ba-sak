@@ -1,7 +1,7 @@
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
-    accepted_audience: ${KS_SAK_CLIENT_ID}
+    accepted_audience: ${BA_SAK_CLIENT_ID}
     proxyurl: http://webproxy-nais.nav.no:8088
     cookie_name: azure_token
   client:
@@ -12,7 +12,7 @@ no.nav.security.jwt:
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${KS_OPPSLAG_SCOPE}
         authentication:
-          client-id: ${KS_SAK_CLIENT_ID}
+          client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
       ks-oppslag-clientcredentials:
@@ -21,7 +21,7 @@ no.nav.security.jwt:
         grant-type: client_credentials
         scope: ${KS_OPPSLAG_SCOPE}
         authentication:
-          client-id: ${KS_SAK_CLIENT_ID}
+          client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
 
