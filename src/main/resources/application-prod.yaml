@@ -1,14 +1,14 @@
 no.nav.security.jwt:
   issuer.azuread:
-    discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
+    discoveryurl: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
     accepted_audience: ${BA_SAK_CLIENT_ID}
     proxyurl: http://webproxy-nais.nav.no:8088
     cookie_name: azure_token
   client:
     registration:
       familie-integrasjoner-onbehalfof:
-        resource-url: ${FAMILIE_KS_OPPSLAG_API_URL}
-        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
@@ -17,7 +17,7 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
       familie-integrasjoner-clientcredentials:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
-        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
         grant-type: client_credentials
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
@@ -27,10 +27,16 @@ no.nav.security.jwt:
 
 spring:
   datasource:
-    url: jdbc:postgresql://b27dbvl008.preprod.local:5432/familie-ks-sak
+    url: jdbc:postgresql://a01dbfl039.adeo.no:5432/familie-ba-sak
+
+# Appdynamics
+APPDYNAMICS_CONTROLLER_HOST_NAME: appdynamics.adeo.no
+APPDYNAMICS_CONTROLLER_PORT: 443
+APPDYNAMICS_CONTROLLER_SSL_ENABLED: true
+APPDYNAMICS_AGENT_ACCOUNT_NAME: PROD
 
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
 
 #Unleash
 UNLEASH_API_URL: https://unleash.nais.adeo.no/api/
-ENVIRONMENT_NAME: q2
+ENVIRONMENT_NAME: p

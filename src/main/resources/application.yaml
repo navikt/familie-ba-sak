@@ -1,6 +1,8 @@
+
 server:
   servlet:
     context-path: /
+  port: 8089
 
 spring:
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration

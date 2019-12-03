@@ -8,14 +8,14 @@ metadata:
 
 spec:
   image: navikt/familie-ba-sak:{{version}}
-  port: 8084
+  port: 8089
   liveness:
     path: /internal/isAlive
-    initialDelay: 15
+    initialDelay: 20
     failureThreshold: 10
   readiness:
     path: /internal/isAlive
-    initialDelay: 15
+    initialDelay: 20
     failureThreshold: 10
   prometheus:
     enabled: true
