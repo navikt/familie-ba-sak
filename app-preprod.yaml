@@ -10,11 +10,11 @@ spec:
   image: navikt/familie-ba-sak:{{version}}
   port: 8089
   liveness:
-    path: /internal/isAlive
+    path: /internal/health
     initialDelay: 20
     failureThreshold: 10
   readiness:
-    path: /internal/isAlive
+    path: /internal/health
     initialDelay: 20
     failureThreshold: 10
   prometheus:

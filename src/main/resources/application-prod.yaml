@@ -27,7 +27,7 @@ no.nav.security.jwt:
 
 spring:
   datasource:
-    url: jdbc:postgresql://a01dbfl039.adeo.no:5432/familie-ba-sak
+    url: jdbc:postgresql://A01DBVL010.adeo.no:5432/familie-ba-sak
 
 # Appdynamics
 APPDYNAMICS_CONTROLLER_HOST_NAME: appdynamics.adeo.no
