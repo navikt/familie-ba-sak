@@ -35,11 +35,11 @@ class MottakController (
         }
 
         fagsakService.lagreFagsak(fagsak)
-        val behandling = Behandling(null, fagsak, nyBehandling.journalpostID, "LagMeg")
+        val behandling = Behandling(null, fagsak, nyBehandling.journalpostID, nyBehandling.barnasFødselsnummer, "LagMeg")
         behandlingslagerService.lagreBehandling(behandling)
 
         return Ressurs.success( data = fagsak )
     }
 }
 
-data class NyBehandling(val fødselsnummer: String, val fødselsnummerBarn: String, val journalpostID: String)
+data class NyBehandling(val fødselsnummer: String, val barnasFødselsnummer: Array<String>, val journalpostID: String)

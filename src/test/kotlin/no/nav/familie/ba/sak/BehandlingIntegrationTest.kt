@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-
+import java.util.*
 
 
 @SpringBootTest
@@ -28,7 +28,7 @@ class BehandlingIntegrationTest  {
     @Test
     @Tag("integration")
     fun `Kjør flyway migreringer og sjekk at behandlingslagerservice klarer å lese å skrive til postgresql`() {
-        behandlingslagerService.nyBehandling("0","123456789010", "sdf")
+        behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), "sdf")
         Assertions.assertEquals(1, behandlingslagerService.hentAlleBehandlinger().size)
     }
 

@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.Query
 
 interface BehandlingRepository : JpaRepository<Behandling?, Long?> {
     @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId")
-    fun finnBehandlinger(fagsakId: Long?): List<Behandling?>?
+    fun finnBehandlinger(fagsakId: Long?): List<Behandling?>
 }

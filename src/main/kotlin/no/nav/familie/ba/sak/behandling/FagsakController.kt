@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.kontrakt.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -21,12 +22,12 @@ class FagsakController (
         private val fagsakService: FagsakService
 ) {
     @GetMapping(path = ["/fagsak/{fagsakId}"])
-    fun fagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Fagsak>> {
+    fun fagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
 
         logger.info("{} henter fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
 
-        val ressurs: Ressurs<Fagsak> = Result.runCatching { fagsakService.hentFagsak(fagsakId) }
+        val ressurs: Ressurs<RestFagsak> = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
                     onSuccess = { it },
                     onFailure = { e -> Ressurs.failure( "Henting av fagsak med fagsakId $fagsakId feilet: ${e.message}", e) }
