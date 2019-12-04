@@ -10,8 +10,7 @@ spring:
         lifecycle.enabled: true
       database:
         enabled: true
-        role: familie-ba-sak-user
-        adminRole: familie-ba-sak-admin
+        role: familie-ba-sak-admin
         backend: postgresql/prod-fss
       authentication: KUBERNETES
       kubernetes:
