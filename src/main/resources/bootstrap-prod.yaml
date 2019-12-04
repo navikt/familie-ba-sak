@@ -11,7 +11,7 @@ spring:
       database:
         enabled: true
         role: familie-ba-sak-user
-        admin-role: familie-ba-sak-admin
+        adminRole: familie-ba-sak-admin
         backend: postgresql/prod-fss
       authentication: KUBERNETES
       kubernetes:
