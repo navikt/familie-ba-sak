@@ -15,7 +15,7 @@ spring:
         backend: postgresql/prod-fss
       authentication: KUBERNETES
       kubernetes:
-        role: familie-ks-sak
+        role: familie-ba-sak
         kubernetes-path: kubernetes/prod/fss
         service-account-token-file: /var/run/secrets/kubernetes.io/serviceaccount/token
       generic:
