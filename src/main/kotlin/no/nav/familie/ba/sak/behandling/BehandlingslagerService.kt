@@ -18,9 +18,9 @@ class BehandlingslagerService @Autowired constructor(private val fagsakRepositor
                      journalpostID: String): Behandling? {
         //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
 
-        var fagsak = Fagsak(null,AktørId("1"), PersonIdent(fødselsnummer))
+        val fagsak = Fagsak(null, AktørId("1"), PersonIdent(fødselsnummer))
         fagsakRepository.save(fagsak)
-        var behandling = Behandling(null, fagsak, journalpostID, "LagMeg")
+        val behandling = Behandling(null, fagsak, journalpostID, "LagMeg")
         behandlingRepository.save(behandling)
 
         return behandling
@@ -30,4 +30,7 @@ class BehandlingslagerService @Autowired constructor(private val fagsakRepositor
         return this.behandlingRepository.findAll();
     }
 
+    fun lagreBehandling(behandling: Behandling) {
+        behandlingRepository.save(behandling)
+    }
 }
