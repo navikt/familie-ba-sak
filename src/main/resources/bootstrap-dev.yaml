@@ -2,3 +2,7 @@ spring:
   cloud:
     vault:
       enabled: false
+    discovery:
+      client:
+        composite-indicator:
+          enabled: false

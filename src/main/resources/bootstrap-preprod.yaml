@@ -22,3 +22,7 @@ spring:
         backend: kv/preprod/fss
         application-name: familie-ba-sak/default
         default-context: familie-ba-sak/default
+    discovery:
+      client:
+        composite-indicator:
+          enabled: false
