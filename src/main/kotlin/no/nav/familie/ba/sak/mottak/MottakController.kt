@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.concurrent.ThreadLocalRandom
+import kotlin.streams.asSequence
 
 @RestController
 @RequestMapping("/api")
@@ -30,6 +32,9 @@ class MottakController (
         private val fagsakService: FagsakService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
+    const val STRING_LENGTH = 10;
+    private val charPool : List<Char> = ('0'..'9')
+
     @PostMapping(path = ["/behandling/opprett"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<RestFagsak> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
@@ -44,7 +49,12 @@ class MottakController (
         }
 
         fagsakService.lagreFagsak(fagsak)
-        val behandling = Behandling(null, fagsak, nyBehandling.journalpostID, "LagMeg")
+        val behandling = Behandling(null, fagsak, nyBehandling.journalpostID, ThreadLocalRandom.current()
+                .ints(STRING_LENGTH.toLong(), 0, charPool.size)
+                .asSequence()
+                .map(charPool::get)
+                .joinToString(""))
+
         behandlingslagerService.lagreBehandling(behandling)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
