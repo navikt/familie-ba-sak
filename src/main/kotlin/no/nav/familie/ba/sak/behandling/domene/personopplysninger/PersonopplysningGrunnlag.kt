@@ -7,7 +7,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "GR_PERSONOPPLYSNINGER")
 class PersonopplysningGrunnlag(
-        @Column(name = "behandling_id", updatable = false, nullable = false)
+        @Column(name = "fk_behandling_id", updatable = false, nullable = false)
         val behandlingId: Long?
 ) : BaseEntitet() {
 
