@@ -32,8 +32,8 @@ class MottakController (
         private val fagsakService: FagsakService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
-    const val STRING_LENGTH = 10;
-    private val charPool : List<Char> = ('0'..'9')
+    val STRING_LENGTH = 10
+    private val charPool : List<Char> = ('A'..'Z') + ('0'..'9')
 
     @PostMapping(path = ["/behandling/opprett"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<RestFagsak> {
