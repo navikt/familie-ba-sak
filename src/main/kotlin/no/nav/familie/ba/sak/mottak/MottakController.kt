@@ -5,13 +5,21 @@ import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakt.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api")
@@ -19,26 +27,38 @@ import org.springframework.web.bind.annotation.*
 class MottakController (
         private val oidcUtil: OIDCUtil,
         private val behandlingslagerService: BehandlingslagerService,
-        private val fagsakService: FagsakService
+        private val fagsakService: FagsakService,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
     @PostMapping(path = ["/behandling/opprett"])
-    fun nyBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<Fagsak> {
+    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<RestFagsak> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
         FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId ?: "VL")
 
         //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
 
-        val personIdent = PersonIdent(nyBehandling.fødselsnummer)
-        val fagsak = when(val it = fagsakService.hentFagsakForPersonident(personIdent)) {
-            null -> Fagsak(null, AktørId("1"), personIdent)
+        val søkerPersonIdent = PersonIdent(nyBehandling.fødselsnummer)
+        val fagsak = when(val it = fagsakService.hentFagsakForPersonident(søkerPersonIdent)) {
+            null -> Fagsak(null, AktørId("1"), søkerPersonIdent)
             else -> it
         }
 
         fagsakService.lagreFagsak(fagsak)
-        val behandling = Behandling(null, fagsak, nyBehandling.journalpostID, nyBehandling.barnasFødselsnummer, "LagMeg")
+        val behandling = Behandling(null, fagsak, nyBehandling.journalpostID, "LagMeg")
         behandlingslagerService.lagreBehandling(behandling)
 
-        return Ressurs.success( data = fagsak )
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+
+        val søker = Person( personIdent = PersonIdent(nyBehandling.fødselsnummer), type = PersonType.SØKER)
+        personopplysningGrunnlag.leggTilPerson(søker)
+
+        nyBehandling.barnasFødselsnummer.map {
+            personopplysningGrunnlag.leggTilPerson( Person( personIdent = PersonIdent(it), type = PersonType.BARN) )
+        }
+        personopplysningGrunnlag.setAktiv(true)
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag);
+
+        return fagsakService.hentRestFagsak(fagsakId = fagsak.id)
     }
 }
 

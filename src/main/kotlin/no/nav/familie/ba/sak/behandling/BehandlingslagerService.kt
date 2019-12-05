@@ -20,7 +20,7 @@ class BehandlingslagerService @Autowired constructor(private val fagsakRepositor
 
         val fagsak = Fagsak(null, AktørId("1"), PersonIdent(fødselsnummer))
         fagsakRepository.save(fagsak)
-        val behandling = Behandling(null, fagsak, journalpostID, barnasFødselsnummer, "LagMeg")
+        val behandling = Behandling(null, fagsak, journalpostID, "LagMeg")
         behandlingRepository.save(behandling)
 
         return behandling

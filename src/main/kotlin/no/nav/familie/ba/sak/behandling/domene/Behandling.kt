@@ -17,9 +17,6 @@ data class Behandling(
         @Column(name = "journalpost_id", nullable = false)
         var journalpostID: String,
 
-        @Column(name = "barnasFødselsnummer")
-        var barnasFødselsnummer: Array<String>,
-
         /**
         * saksnummer fra GSAK.
         */

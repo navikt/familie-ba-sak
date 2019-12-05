@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestBehandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
@@ -11,8 +12,10 @@ import no.nav.familie.kontrakt.Ressurs
 import org.springframework.stereotype.Service
 
 @Service
-class FagsakService(private val behandlingRepository: BehandlingRepository,
-                    private val fagsakRepository: FagsakRepository) {
+class FagsakService(
+        private val behandlingRepository: BehandlingRepository,
+        private val fagsakRepository: FagsakRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
 
     fun hentFagsak(fagsakId: Long): Ressurs<Fagsak> {
         return when(val it = fagsakRepository.finnFagsak(fagsakId)) {
@@ -21,13 +24,15 @@ class FagsakService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
+    fun hentRestFagsak(fagsakId: Long?): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: return Ressurs.failure("Fant ikke fagsak med fagsakId: $fagsakId")
 
         val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
 
         val restBehandlinger: List<RestBehandling> = behandlinger.map {
-            RestBehandling(it?.id, it?.barnasFødselsnummer)
+            val personopplysningGrunnlag = it?.id?.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
+
+            RestBehandling(it?.id, personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent?.ident })
         }
 
         return Ressurs.success( data = fagsak.toRestFagsak(restBehandlinger) )
