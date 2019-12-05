@@ -79,6 +79,17 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.papertrailapp</groupId>
+			<artifactId>logback-syslog4j</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.sentry</groupId>
+			<artifactId>sentry-logback</artifactId>
+			<version>1.7.28</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.2.6</version>
@@ -194,6 +205,7 @@
 				<version>3.0.0-M4</version>
 				<configuration>
 					<!-- exclude tags -->
+					<!--suppress UnresolvedMavenProperty -->
 					<excludedGroups>${excludedGroups}</excludedGroups>
 				</configuration>
 			</plugin>

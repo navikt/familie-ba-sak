@@ -50,7 +50,7 @@ spring:
   cloud:
     vault:
       database:
-        role: mottak
+        role: sak
 
 
 
