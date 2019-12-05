@@ -43,8 +43,6 @@ spring:
       ddl-auto: create
   flyway:
     enabled: false
-server:
-  port: 8088
 
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
 
