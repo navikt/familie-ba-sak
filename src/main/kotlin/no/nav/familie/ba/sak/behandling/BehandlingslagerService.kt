@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service
 class BehandlingslagerService @Autowired constructor(private val fagsakRepository: FagsakRepository,
                                                      private val behandlingRepository: BehandlingRepository) {
     fun nyBehandling(fødselsnummer: String,
-                     fødselsnummerBarn: String,
+                     barnasFødselsnummer: Array<String>,
                      journalpostID: String): Behandling? {
         //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
 
-        var fagsak = Fagsak(null,AktørId("1"), PersonIdent(fødselsnummer))
+        val fagsak = Fagsak(null, AktørId("1"), PersonIdent(fødselsnummer))
         fagsakRepository.save(fagsak)
-        var behandling = Behandling(null, fagsak, journalpostID, "LagMeg")
+        val behandling = Behandling(null, fagsak, journalpostID, "LagMeg")
         behandlingRepository.save(behandling)
 
         return behandling
@@ -30,4 +30,7 @@ class BehandlingslagerService @Autowired constructor(private val fagsakRepositor
         return this.behandlingRepository.findAll();
     }
 
+    fun lagreBehandling(behandling: Behandling) {
+        behandlingRepository.save(behandling)
+    }
 }
