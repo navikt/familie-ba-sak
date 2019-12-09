@@ -18,7 +18,7 @@ class ForhåndsvisVedtakController(
         private val oidcUtil: OIDCUtil
 ) {
 
-    @GetMapping(path = ["/vedtaksbrev/{fagsakId}"])
+    @GetMapping(path = ["/fagsak/{fagsakId}/vedtak-html"])
     fun hentVedtaksBrevHtml(@PathVariable fagsakId: Long): Ressurs<String> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
         FagsakController.logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
