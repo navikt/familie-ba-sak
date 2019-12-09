@@ -23,14 +23,11 @@ class PersonopplysningGrunnlag(
     private var aktiv = true
 
     @OneToMany(mappedBy = "personopplysningGrunnlag", cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
-    private var personer: MutableList<Person> = ArrayList()
+    var personer: MutableList<Person> = LinkedList()
 
     fun setAktiv(aktiv: Boolean) {
         this.aktiv = aktiv
     }
-
-    val registrertePersoner: Optional<List<Person>>
-        get() = Optional.ofNullable(personer)
 
     fun leggTilPerson(person: Person) {
         person.setPersonopplysningGrunnlag(this)
@@ -46,7 +43,7 @@ class PersonopplysningGrunnlag(
         get() {
             val barna: MutableList<Person> = LinkedList()
             for (p in personer) {
-                if (p.type?.equals(PersonType.BARN)?:false){
+                if (p.type?.equals(PersonType.BARN) == true){
                     barna.add(p)
                 }
             }
@@ -56,7 +53,7 @@ class PersonopplysningGrunnlag(
     override fun toString(): String {
         val sb = StringBuilder("PersonopplysningGrunnlagEntitet{")
         sb.append("id=").append(id)
-        sb.append(", personer=").append(registrertePersoner.toString())
+        sb.append(", personer=").append(personer.toString())
         sb.append(", barna=").append(barna.toString())
         sb.append(", aktiv=").append(aktiv)
         sb.append('}')

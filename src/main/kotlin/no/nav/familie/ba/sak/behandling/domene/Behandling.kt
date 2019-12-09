@@ -17,9 +17,19 @@ data class Behandling(
         @Column(name = "journalpost_id", nullable = false)
         var journalpostID: String,
 
+        @Enumerated(EnumType.STRING)
+        @Column(name = "behandling_type", nullable = false)
+        var type: BehandlingType,
+
         /**
         * saksnummer fra GSAK.
         */
         @Column(name = "saksnummer")
         var saksnummer: String? = null) : BaseEntitet() {
+}
+
+enum class BehandlingType {
+        FØRSTEGANGSBEHANDLING,
+        REVURDERING,
+        KLAGE,
 }
