@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingslagerService
 import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
@@ -49,7 +50,8 @@ class MottakController (
         }
 
         fagsakService.lagreFagsak(fagsak)
-        val behandling = Behandling(null, fagsak, nyBehandling.journalpostID, ThreadLocalRandom.current()
+        val behandling = Behandling(null, fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType,
+                ThreadLocalRandom.current()
                 .ints(STRING_LENGTH.toLong(), 0, charPool.size)
                 .asSequence()
                 .map(charPool::get)
@@ -66,10 +68,10 @@ class MottakController (
             personopplysningGrunnlag.leggTilPerson( Person( personIdent = PersonIdent(it), type = PersonType.BARN) )
         }
         personopplysningGrunnlag.setAktiv(true)
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag);
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         return fagsakService.hentRestFagsak(fagsakId = fagsak.id)
     }
 }
 
-data class NyBehandling(val fødselsnummer: String, val barnasFødselsnummer: Array<String>, val journalpostID: String)
+data class NyBehandling(val fødselsnummer: String, val barnasFødselsnummer: Array<String>, val behandlingType: BehandlingType, val journalpostID: String)
