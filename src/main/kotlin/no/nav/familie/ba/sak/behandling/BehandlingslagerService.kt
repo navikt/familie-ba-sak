@@ -3,10 +3,12 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class BehandlingslagerService (
@@ -69,5 +71,29 @@ class BehandlingslagerService (
         }
 
         behandlingVedtakRepository.save(behandlingVedtak)
+    }
+
+    fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): BehandlingVedtak {
+        val behandling = hentBehandlingHvisEksisterer(fagsakId)
+                ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+
+        val tidligsteStønadFom: LocalDate? = nyttVedtak.barnasBeregning.map { barnBeregning -> barnBeregning.stønadFom }.min()
+        val eldsteBarn: LocalDate? = LocalDate.now() // Her må vi ha fødselsdato for barn
+
+        if (tidligsteStønadFom == null || eldsteBarn == null) {
+            throw Error("Fant ikke barn i listen over beregninger")
+        } else {
+            val behandlingVedtak = BehandlingVedtak(
+                    behandling = behandling,
+                    ansvarligSaksbehandler = ansvarligSaksbehandler,
+                    vedtaksdato = LocalDate.now(),
+                    stønadFom = tidligsteStønadFom,
+                    stønadTom = eldsteBarn.plusYears(18),
+                    stønadBrevMarkdown = "" // TODO hent markdown fra dokgen
+            )
+
+            lagreBehandlingVedtak(behandlingVedtak)
+            return behandlingVedtak
+        }
     }
 }

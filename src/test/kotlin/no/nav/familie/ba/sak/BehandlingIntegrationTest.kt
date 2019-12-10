@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak
 import no.nav.familie.ba.sak.behandling.BehandlingslagerService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.domene.vedtak.BarnBeregning
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import org.junit.jupiter.api.Assertions
@@ -101,5 +103,22 @@ class BehandlingIntegrationTest(
         val hentetBehandlingVedtak = behandlingslagerService.hentBehandlingVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetBehandlingVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler2", hentetBehandlingVedtak?.ansvarligSaksbehandler)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Opprett nytt behandling vedtak på aktiv behandling`() {
+        val behandling = behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING,"sdf", lagRandomSaksnummer())
+        Assertions.assertNotNull(behandling.fagsak.id)
+
+        behandlingslagerService.nyttVedtakForAktivBehandling(
+                fagsakId = behandling.fagsak.id?:1L,
+                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789010", beløp = 1054, stønadFom = LocalDate.now()))),
+                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+        )
+
+        val hentetBehandlingVedtak = behandlingslagerService.hentBehandlingVedtakHvisEksisterer(behandling.id)
+        Assertions.assertNotNull(hentetBehandlingVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler", hentetBehandlingVedtak?.ansvarligSaksbehandler)
     }
 }

@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.*
 @ProtectedWithClaims( issuer = "azuread" )
 class FagsakController (
         private val oidcUtil: OIDCUtil,
-        private val fagsakService: FagsakService
+        private val fagsakService: FagsakService,
+        private val behandlingslagerService: BehandlingslagerService
 ) {
     @GetMapping(path = ["/fagsak/{fagsakId}"])
     fun fagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
@@ -39,7 +40,7 @@ class FagsakController (
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
 
-        val behandlingVedtakRessurs: Ressurs<BehandlingVedtak> = Result.runCatching { fagsakService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
+        val behandlingVedtakRessurs: Ressurs<BehandlingVedtak> = Result.runCatching { behandlingslagerService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
                 .fold(
                     onSuccess = { Ressurs.success( data = it ) },
                     onFailure = { e -> Ressurs.failure( "Klarte ikke å opprette nytt vedtak: ${e.message}", e) }
