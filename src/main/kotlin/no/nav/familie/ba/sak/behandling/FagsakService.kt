@@ -61,7 +61,7 @@ class FagsakService(
             throw Error("Fant ikke barn i listen over beregninger")
         } else {
             val behandlingVedtak = BehandlingVedtak(
-                    behandlingId = behandling.id,
+                    behandling = behandling,
                     ansvarligSaksbehandler = ansvarligSaksbehandler,
                     vedtaksdato = LocalDate.now(),
                     stønadFom = tidligsteStønadFom,
