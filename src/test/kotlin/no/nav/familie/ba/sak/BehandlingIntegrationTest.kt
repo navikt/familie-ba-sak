@@ -36,7 +36,8 @@ class BehandlingIntegrationTest(
         private var behandlingslagerService: BehandlingslagerService,
 
         @Autowired
-        private var behandlingVedtakRepository: BehandlingVedtakRepository) {
+        private var behandlingVedtakRepository: BehandlingVedtakRepository
+) {
 
     val STRING_LENGTH = 10
     private val charPool : List<Char> = ('A'..'Z') + ('0'..'9')
@@ -79,11 +80,26 @@ class BehandlingIntegrationTest(
     @Tag("integration")
     fun `Opprett behandling vedtak`() {
         val behandling = behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING,"sdf", lagRandomSaksnummer())
-        val behandlingVedtak = BehandlingVedtak( behandlingId = behandling.id, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
-        behandlingVedtakRepository.save(behandlingVedtak)
+        val behandlingVedtak = BehandlingVedtak( behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
+        behandlingslagerService.lagreBehandlingVedtak(behandlingVedtak)
 
         val hentetBehandlingVedtak = behandlingVedtakRepository.finnBehandlingVedtak(behandling.id)
         Assertions.assertNotNull(hentetBehandlingVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetBehandlingVedtak?.ansvarligSaksbehandler)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Opprett 2 behandling vedtak og se at det siste vedtaket får aktiv satt til true`() {
+        val behandling = behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING,"sdf", lagRandomSaksnummer())
+        val behandlingVedtak = BehandlingVedtak( behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
+        behandlingslagerService.lagreBehandlingVedtak(behandlingVedtak)
+
+        val behandling2Vedtak = BehandlingVedtak( behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler2", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
+        behandlingslagerService.lagreBehandlingVedtak(behandling2Vedtak)
+
+        val hentetBehandlingVedtak = behandlingslagerService.hentBehandlingVedtakHvisEksisterer(behandling.id)
+        Assertions.assertNotNull(hentetBehandlingVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler2", hentetBehandlingVedtak?.ansvarligSaksbehandler)
     }
 }

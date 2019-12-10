@@ -19,7 +19,8 @@ data class Fagsak(
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))
-        var personIdent: PersonIdent? = null) : BaseEntitet() {
+        var personIdent: PersonIdent? = null
+) : BaseEntitet() {
 
     override fun toString(): String {
         return "Fagsak(id=$id, aktørId=$aktørId)"

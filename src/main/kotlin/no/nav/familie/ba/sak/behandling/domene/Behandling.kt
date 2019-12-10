@@ -11,9 +11,6 @@ data class Behandling(
         @SequenceGenerator(name = "behandling_seq")
         val id: Long? = null,
 
-        @Column(name = "aktiv", nullable = false)
-        var aktiv: Boolean = true,
-
         @ManyToOne(optional = false) @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         var fagsak: Fagsak,
 
@@ -28,8 +25,11 @@ data class Behandling(
         * saksnummer fra GSAK.
         */
         @Column(name = "saksnummer")
-        var saksnummer: String? = null) : BaseEntitet() {
-}
+        var saksnummer: String? = null,
+
+        @Column(name = "aktiv", nullable = false)
+        var aktiv: Boolean = true
+) : BaseEntitet()
 
 enum class BehandlingType {
         FØRSTEGANGSBEHANDLING,

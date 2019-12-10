@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestBehandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.toRestBehandlingVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakt.Ressurs
@@ -17,29 +16,27 @@ import java.time.LocalDate
 
 @Service
 class FagsakService(
-        private val behandlingRepository: BehandlingRepository,
+        private val behandlingslagerService: BehandlingslagerService,
         private val fagsakRepository: FagsakRepository,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val behandlingVedtakRepository: BehandlingVedtakRepository) {
-
-    fun hentFagsak(fagsakId: Long): Ressurs<Fagsak> {
-        return when (val it = fagsakRepository.finnFagsak(fagsakId)) {
-            null -> Ressurs.failure("Fant ikke fagsak med fagsakId: $fagsakId")
-            else -> Ressurs.success(data = it)
-        }
-    }
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
 
     fun hentRestFagsak(fagsakId: Long?): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
                 ?: return Ressurs.failure("Fant ikke fagsak med fagsakId: $fagsakId")
 
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
+        val behandlinger = behandlingslagerService.hentBehandlinger(fagsak.id)
 
         val restBehandlinger: List<RestBehandling> = behandlinger.map {
             val personopplysningGrunnlag = it?.id?.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
+            val barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent?.ident }
+            val vedtakForBehandling = behandlingslagerService.hentVedtakForBehandling( it?.id ).map { behandlingVedtak -> behandlingVedtak?.toRestBehandlingVedtak() }
 
-            RestBehandling(aktiv = it?.aktiv
-                    ?: false, behandlingId = it?.id, barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent?.ident })
+            RestBehandling(
+                    aktiv = it?.aktiv ?: false,
+                    behandlingId = it?.id,
+                    barnasFødselsnummer = barnasFødselsnummer,
+                    vedtakForBehandling = vedtakForBehandling
+            )
         }
 
         return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
@@ -54,7 +51,8 @@ class FagsakService(
     }
 
     fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): BehandlingVedtak {
-        val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId)
+        val behandling = behandlingslagerService.hentBehandlingHvisEksisterer(fagsakId)
+                ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
 
         val tidligsteStønadFom: LocalDate? = nyttVedtak.barnasBeregning.map { barnBeregning -> barnBeregning.stønadFom }.min()
         val eldsteBarn: LocalDate? = LocalDate.now() // Her må vi ha fødselsdato for barn
@@ -63,7 +61,7 @@ class FagsakService(
             throw Error("Fant ikke barn i listen over beregninger")
         } else {
             val behandlingVedtak = BehandlingVedtak(
-                    behandlingId = behandling?.id,
+                    behandling = behandling,
                     ansvarligSaksbehandler = ansvarligSaksbehandler,
                     vedtaksdato = LocalDate.now(),
                     stønadFom = tidligsteStønadFom,
@@ -71,7 +69,7 @@ class FagsakService(
                     stønadBrevMarkdown = "" // TODO hent markdown fra dokgen
             )
 
-            behandlingVedtakRepository.save(behandlingVedtak)
+            behandlingslagerService.lagreBehandlingVedtak(behandlingVedtak)
             return behandlingVedtak
         }
     }
