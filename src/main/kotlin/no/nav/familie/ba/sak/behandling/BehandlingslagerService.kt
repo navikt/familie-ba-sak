@@ -61,7 +61,7 @@ class BehandlingslagerService @Autowired constructor(
     }
 
     fun lagreBehandlingVedtak(behandlingVedtak: BehandlingVedtak) {
-        val aktivBehandlingVedtak = hentBehandlingVedtakHvisEksisterer(behandlingVedtak.behandling.id)
+        val aktivBehandlingVedtak = hentBehandlingVedtakHvisEksisterer(behandlingVedtak.behandlingId)
 
         if (aktivBehandlingVedtak != null) {
             aktivBehandlingVedtak.aktiv = false

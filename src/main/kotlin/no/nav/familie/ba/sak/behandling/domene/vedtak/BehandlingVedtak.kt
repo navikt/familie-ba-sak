@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.domene.vedtak
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import javax.persistence.*
@@ -13,8 +12,8 @@ data class BehandlingVedtak(
         @SequenceGenerator(name = "behandling_vedtak_seq")
         val id: Long? = null,
 
-        @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
-        val behandling: Behandling,
+        @Column(name = "fk_behandling_id", updatable = false, nullable = false)
+        val behandlingId: Long?,
 
         @Column(name = "ansvarlig_saksbehandler", nullable = false)
         val ansvarligSaksbehandler: String,
