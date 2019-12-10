@@ -11,6 +11,9 @@ data class Behandling(
         @SequenceGenerator(name = "behandling_seq")
         val id: Long? = null,
 
+        @Column(name = "aktiv", nullable = false)
+        var aktiv: Boolean = true,
+
         @ManyToOne(optional = false) @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         var fagsak: Fagsak,
 

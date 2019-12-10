@@ -32,7 +32,7 @@ class FagsakService(
         val restBehandlinger: List<RestBehandling> = behandlinger.map {
             val personopplysningGrunnlag = it?.id?.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
 
-            RestBehandling(it?.id, personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent?.ident })
+            RestBehandling(aktiv = it?.aktiv?:false, behandlingId = it?.id, barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent?.ident })
         }
 
         return Ressurs.success( data = fagsak.toRestFagsak(restBehandlinger) )
