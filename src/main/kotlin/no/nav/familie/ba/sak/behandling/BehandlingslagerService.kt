@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class BehandlingslagerService @Autowired constructor(
+class BehandlingslagerService (
         private val fagsakRepository: FagsakRepository,
         private val behandlingRepository: BehandlingRepository,
         private val behandlingVedtakRepository: BehandlingVedtakRepository
