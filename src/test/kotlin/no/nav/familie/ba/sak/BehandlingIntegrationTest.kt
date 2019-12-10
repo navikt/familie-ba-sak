@@ -55,8 +55,8 @@ class BehandlingIntegrationTest(
     @Test
     @Tag("integration")
     fun `Kjør flyway migreringer og sjekk at behandlingslagerservice klarer å lese å skrive til postgresql`() {
-        behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING,"sdf", lagRandomSaksnummer())
-        Assertions.assertEquals(1, behandlingslagerService.hentAlleBehandlinger().size)
+        val behandling = behandlingslagerService.nyBehandling("1", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING,"sdf", lagRandomSaksnummer())
+        Assertions.assertEquals(1, behandlingslagerService.hentBehandlinger(behandling.fagsak.id).size)
     }
 
     @Test
