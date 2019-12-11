@@ -30,6 +30,7 @@ spring:
     url: jdbc:postgresql://b27dbvl009.preprod.local:5432/familie-ba-sak
 
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
+FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.nais.preprod.local
 
 #Unleash
 UNLEASH_API_URL: https://unleash.nais.adeo.no/api/
