@@ -42,11 +42,12 @@ class FagsakController (
 
         val behandlingVedtakRessurs: Ressurs<BehandlingVedtak> = Result.runCatching { behandlingslagerService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
                 .fold(
-                    onSuccess = { Ressurs.success( data = it ) },
-                    onFailure = { e -> Ressurs.failure( "Klarte ikke å opprette nytt vedtak: ${e.message}", e) }
+                        onSuccess = { Ressurs.success(data = it) },
+                        onFailure = { e -> Ressurs.failure("Klarte ikke å opprette nytt vedtak: ${e.message}", e) }
                 )
 
         return ResponseEntity.ok(behandlingVedtakRessurs)
+    }
 
     @GetMapping(path = ["/fagsak/{fagsakId}/vedtak-html"])
     fun hentVedtaksBrevHtml(@PathVariable fagsakId: Long): Ressurs<String> {
