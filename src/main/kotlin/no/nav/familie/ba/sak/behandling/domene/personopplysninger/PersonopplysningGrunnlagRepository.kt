@@ -6,5 +6,5 @@ import java.util.*
 
 interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGrunnlag?, Long?> {
     @Query("SELECT gr FROM PersonopplysningGrunnlag gr WHERE behandlingId = ?1 AND aktiv = true")
-    fun findByBehandlingAndAktiv(behandlingId: Long): PersonopplysningGrunnlag?
+    fun findByBehandlingAndAktiv(behandlingId: Long?): PersonopplysningGrunnlag?
 }

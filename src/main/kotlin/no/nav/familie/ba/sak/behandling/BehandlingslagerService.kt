@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
-import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,12 +12,14 @@ class BehandlingslagerService @Autowired constructor(private val fagsakRepositor
                                                      private val behandlingRepository: BehandlingRepository) {
     fun nyBehandling(fødselsnummer: String,
                      barnasFødselsnummer: Array<String>,
-                     journalpostID: String): Behandling? {
+                     behandlingType: BehandlingType,
+                     journalpostID: String,
+                     saksnummer: String): Behandling {
         //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
 
         val fagsak = Fagsak(null, AktørId("1"), PersonIdent(fødselsnummer))
         fagsakRepository.save(fagsak)
-        val behandling = Behandling(null, fagsak, journalpostID, "LagMeg")
+        val behandling = Behandling(null, fagsak, journalpostID, behandlingType, saksnummer)
         behandlingRepository.save(behandling)
 
         return behandling
