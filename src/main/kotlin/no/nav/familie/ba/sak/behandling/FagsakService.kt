@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestBehandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
@@ -15,7 +17,8 @@ import org.springframework.stereotype.Service
 class FagsakService(
         private val behandlingRepository: BehandlingRepository,
         private val fagsakRepository: FagsakRepository,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val behandlingVedtakRepository: BehandlingVedtakRepository) {
 
     fun hentFagsak(fagsakId: Long): Ressurs<Fagsak> {
         return when(val it = fagsakRepository.finnFagsak(fagsakId)) {
@@ -44,5 +47,9 @@ class FagsakService(
 
     fun lagreFagsak(fagsak: Fagsak) {
         fagsakRepository.save(fagsak)
+    }
+
+    fun hentVedtakForBehandling(behandlingId: Long): BehandlingVedtak?{
+        return behandlingVedtakRepository.finnBehandlingVedtak(behandlingId);
     }
 }
