@@ -47,6 +47,15 @@ class FagsakController (
                 )
 
         return ResponseEntity.ok(behandlingVedtakRessurs)
+
+    @GetMapping(path = ["/fagsak/{fagsakId}/vedtak-html"])
+    fun hentVedtaksBrevHtml(@PathVariable fagsakId: Long): Ressurs<String> {
+        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+        FagsakController.logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
+
+        //TODO: integration with DokGen
+
+        return Ressurs.success("<H1>Vedtaksbrev</H1><br/>FagsakID= $fagsakId<br /><P>Backend API not implemented yet</P>");
     }
 
     companion object {
