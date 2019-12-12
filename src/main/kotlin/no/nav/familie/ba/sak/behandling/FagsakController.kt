@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.vedtak.DokGenKlient
 import no.nav.familie.kontrakt.Ressurs
@@ -14,12 +12,11 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api")
-@ProtectedWithClaims( issuer = "azuread" )
-class FagsakController (
+@ProtectedWithClaims(issuer = "azuread")
+class FagsakController(
         private val oidcUtil: OIDCUtil,
         private val docgenKlient: DokGenKlient,
-        private val fagsakService: FagsakService,
-        private val behandlingslagerService: BehandlingslagerService
+        private val fagsakService: FagsakService
 ) {
     @GetMapping(path = ["/fagsak/{fagsakId}"])
     fun fagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
@@ -29,8 +26,8 @@ class FagsakController (
 
         val ressurs = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
-                    onSuccess = { it },
-                    onFailure = { e -> Ressurs.failure( "Henting av fagsak med fagsakId $fagsakId feilet: ${e.message}", e) }
+                        onSuccess = { it },
+                        onFailure = { e -> Ressurs.failure("Henting av fagsak med fagsakId $fagsakId feilet: ${e.message}", e) }
                 )
 
         return ResponseEntity.ok(ressurs)
@@ -41,8 +38,8 @@ class FagsakController (
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
         logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
 
-        val behandlingVedtak= fagsakService.hentVedtakForBehandling(behandlingId);
-        if(behandlingVedtak== null){
+        val behandlingVedtak = fagsakService.hentVedtakForBehandling(behandlingId);
+        if (behandlingVedtak == null) {
             return Ressurs.failure("Vedtak ikke funnet");
         }
 
@@ -51,8 +48,8 @@ class FagsakController (
                 "# Vedtaksbrev");
         */
 
-        val html= docgenKlient.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown);
-        FagsakController.logger.debug("HTML preview generated: "+ html);
+        val html = docgenKlient.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown);
+        FagsakController.logger.debug("HTML preview generated: " + html);
 
         return Ressurs.success(html);
     }
