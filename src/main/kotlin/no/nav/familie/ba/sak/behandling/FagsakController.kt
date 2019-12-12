@@ -2,10 +2,6 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
-import no.nav.familie.ba.sak.behandling.restDomene.RestBehandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.vedtak.DokGenKlient
 import no.nav.familie.kontrakt.Ressurs
@@ -21,8 +17,7 @@ import org.springframework.web.bind.annotation.*
 @ProtectedWithClaims( issuer = "azuread" )
 class FagsakController (
         private val oidcUtil: OIDCUtil,
-        private val fagsakService: FagsakService,
-        private val docgenKlient: DokGenKlient
+        private val docgenKlient: DokGenKlient,
         private val fagsakService: FagsakService,
         private val behandlingslagerService: BehandlingslagerService
 ) {
