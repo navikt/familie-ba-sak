@@ -25,8 +25,11 @@ data class Behandling(
         * saksnummer fra GSAK.
         */
         @Column(name = "saksnummer")
-        var saksnummer: String? = null) : BaseEntitet() {
-}
+        var saksnummer: String? = null,
+
+        @Column(name = "aktiv", nullable = false)
+        var aktiv: Boolean = true
+) : BaseEntitet()
 
 enum class BehandlingType {
         FØRSTEGANGSBEHANDLING,
