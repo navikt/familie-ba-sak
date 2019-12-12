@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -89,7 +88,7 @@ class BehandlingslagerService (
                     vedtaksdato = LocalDate.now(),
                     stønadFom = tidligsteStønadFom,
                     stønadTom = eldsteBarn.plusYears(18),
-                    stønadBrevMarkdown = "" // TODO hent markdown fra dokgen
+                    stønadBrevMarkdown = "# TODO: Integrere med dokgen" // TODO hent markdown fra dokgen
             )
 
             lagreBehandlingVedtak(behandlingVedtak)

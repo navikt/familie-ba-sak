@@ -23,6 +23,7 @@ class PersonIdent : Comparable<PersonIdent> {
     var ident: String? = null
 
     constructor() {}
+
     constructor(ident: String) {
         Objects.requireNonNull(ident, "ident kan ikke være null")
         this.ident = ident
@@ -44,7 +45,7 @@ class PersonIdent : Comparable<PersonIdent> {
 
     fun erDnr(): Boolean {
         val n = Character.digit(ident!![0], 10)
-        return n > 3 && n <= 7
+        return n in 4..7
     }
 
     override fun hashCode(): Int {

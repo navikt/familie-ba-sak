@@ -24,7 +24,7 @@ import org.springframework.retry.annotation.EnableRetry
 class ApplicationConfig {
     @Bean fun logFilter(): FilterRegistrationBean<LogFilter> {
         log.info("Registering LogFilter filter")
-        val filterRegistration: FilterRegistrationBean<LogFilter> = FilterRegistrationBean<LogFilter>()
+        val filterRegistration: FilterRegistrationBean<LogFilter> = FilterRegistrationBean()
         filterRegistration.filter = LogFilter()
         filterRegistration.order = 1
         return filterRegistration

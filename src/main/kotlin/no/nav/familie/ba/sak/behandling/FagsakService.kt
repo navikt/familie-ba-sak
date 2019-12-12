@@ -51,6 +51,6 @@ class FagsakService(
     }
 
     fun hentVedtakForBehandling(behandlingId: Long): BehandlingVedtak?{
-        return behandlingVedtakRepository.finnBehandlingVedtak(behandlingId);
+        return behandlingVedtakRepository.finnBehandlingVedtak(behandlingId)
     }
 }

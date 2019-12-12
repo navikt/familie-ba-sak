@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import java.util.*
 import javax.persistence.*
 
 @Entity(name = "Behandling") @Table(name = "BEHANDLING")

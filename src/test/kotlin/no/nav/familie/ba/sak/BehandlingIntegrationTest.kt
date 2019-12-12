@@ -2,7 +2,10 @@ package no.nav.familie.ba.sak
 
 import no.nav.familie.ba.sak.behandling.BehandlingslagerService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BarnBeregning
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
@@ -19,7 +22,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import javax.transaction.Transactional
 import kotlin.streams.asSequence
