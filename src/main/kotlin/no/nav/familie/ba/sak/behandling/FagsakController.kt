@@ -38,25 +38,8 @@ class FagsakController (
 
     @GetMapping(path = ["/behandling/{behandlingId}/vedtak-html"])
     fun hentVedtakBrevHtml(@PathVariable behandlingId: Long): Ressurs<String> {
-    @PostMapping(path = ["/fagsak/{fagsakId}/nytt-vedtak"])
-    fun nyttVedtak(@PathVariable fagsakId: Long, @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<BehandlingVedtak>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
-
-        logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
-
-        val behandlingVedtakRessurs: Ressurs<BehandlingVedtak> = Result.runCatching { behandlingslagerService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
-                .fold(
-                        onSuccess = { Ressurs.success(data = it) },
-                        onFailure = { e -> Ressurs.failure("Klarte ikke å opprette nytt vedtak: ${e.message}", e) }
-                )
-
-        return ResponseEntity.ok(behandlingVedtakRessurs)
-    }
-
-    @GetMapping(path = ["/fagsak/{fagsakId}/vedtak-html"])
-    fun hentVedtaksBrevHtml(@PathVariable fagsakId: Long): Ressurs<String> {
-        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
-        FagsakController.logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
+        logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
 
         val behandlingVedtak= fagsakService.hentVedtakForBehandling(behandlingId);
         if(behandlingVedtak== null){
