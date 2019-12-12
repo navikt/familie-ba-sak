@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.vedtak
+package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
@@ -6,6 +6,8 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.http.HttpMethod.*
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.TEXT_PLAIN
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.net.URI
@@ -17,8 +19,8 @@ class DokGenKlient(
     private val restTemplate: RestTemplate = RestTemplate()
 
     fun lagHtmlFraMarkdown(markdown: String): String {
-        val url = URI.create(dokgenServiceUri + "/template/Innvilget/preview-html/Innvilget1") // Kan laste opp og erstatte "Innvilget" med "Fritekstmal" f.eks
-        val response = utførRequest(POST, String::class.java, url, markdown)
+        val url = URI.create(dokgenServiceUri + "/template/markdown/to-html")
+        val response = utførRequest(POST, TEXT_PLAIN, url, markdown)
 
         if (!response.statusCode.is2xxSuccessful) {
             throw RuntimeException(response.toString()) //TODO feilhåndtering
@@ -26,9 +28,9 @@ class DokGenKlient(
         return response.body.orEmpty()
     }
 
-    fun hentMarkdownForMal(malNavn: String): String {
-        val url = URI.create(dokgenServiceUri + "/template/" + malNavn + "/markdown")
-        val response = utførRequest(GET, String::class.java, url)
+    fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
+        val url = URI.create(dokgenServiceUri + "/template/" + malNavn + "/create-markdown")
+        val response = utførRequest(POST, APPLICATION_JSON, url, fletteFelter)
 
         if (!response.statusCode.is2xxSuccessful) {
             throw RuntimeException(response.toString()) //TODO feilhåndtering
@@ -36,11 +38,12 @@ class DokGenKlient(
         return response.body.orEmpty()
     }
 
-    fun <T> utførRequest(httpMethod: HttpMethod, responseType: Class<T>, requestUrl: URI, requestBody: Any? = null): ResponseEntity<T> {
+    fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any? = null): ResponseEntity<String> {
         val headers = HttpHeaders()
-        headers.contentType = MediaType.TEXT_PLAIN
+        headers.contentType = mediaType
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-        return restTemplate.exchange(requestUrl, httpMethod, HttpEntity(requestBody, headers), responseType)
+
+        return restTemplate.exchange(requestUrl, httpMethod, HttpEntity(requestBody, headers), String::class.java)
     }
 
 }

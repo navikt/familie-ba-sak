@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -14,7 +13,8 @@ import java.time.LocalDate
 class BehandlingslagerService (
         private val fagsakRepository: FagsakRepository,
         private val behandlingRepository: BehandlingRepository,
-        private val behandlingVedtakRepository: BehandlingVedtakRepository
+        private val behandlingVedtakRepository: BehandlingVedtakRepository,
+        private val dokGenService: DokGenService
 ) {
     fun nyBehandling(fødselsnummer: String,
                      barnasFødselsnummer: Array<String>,
@@ -88,9 +88,9 @@ class BehandlingslagerService (
                     ansvarligSaksbehandler = ansvarligSaksbehandler,
                     vedtaksdato = LocalDate.now(),
                     stønadFom = tidligsteStønadFom,
-                    stønadTom = eldsteBarn.plusYears(18),
-                    stønadBrevMarkdown = "" // TODO hent markdown fra dokgen
+                    stønadTom = eldsteBarn.plusYears(18)
             )
+            dokGenService.hentOgSettStønadBrevMarkdown(behandlingVedtak)
 
             lagreBehandlingVedtak(behandlingVedtak)
             return behandlingVedtak
