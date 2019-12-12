@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.vedtak
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.MDC
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.http.HttpMethod.*
@@ -12,9 +11,10 @@ import org.springframework.web.client.RestTemplate
 import java.net.URI
 
 @Service
-class DokGenKlient @Autowired constructor(
-    @Value("\${FAMILIE_BA_DOKGEN_API_URL}") private val dokgenServiceUri: String,
-    private val restTemplateMedProxy: RestTemplate) {
+class DokGenKlient(
+    @Value("\${FAMILIE_BA_DOKGEN_API_URL}") private val dokgenServiceUri: String
+) {
+    private val restTemplate: RestTemplate = RestTemplate()
 
     fun lagHtmlFraMarkdown(markdown: String): String {
         val url = URI.create(dokgenServiceUri + "/template/Innvilget/preview-html/Innvilget1") // Kan laste opp og erstatte "Innvilget" med "Fritekstmal" f.eks
@@ -26,7 +26,7 @@ class DokGenKlient @Autowired constructor(
         return response.body.orEmpty()
     }
 
-    fun hentMarkdownForMal(malNavn: String) : String {
+    fun hentMarkdownForMal(malNavn: String): String {
         val url = URI.create(dokgenServiceUri + "/template/" + malNavn + "/markdown")
         val response = utførRequest(GET, String::class.java, url)
 
@@ -40,7 +40,7 @@ class DokGenKlient @Autowired constructor(
         val headers = HttpHeaders()
         headers.contentType = MediaType.TEXT_PLAIN
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-        return restTemplateMedProxy.exchange(requestUrl, httpMethod, HttpEntity(requestBody,headers), responseType)
+        return restTemplate.exchange(requestUrl, httpMethod, HttpEntity(requestBody, headers), responseType)
     }
 
 }

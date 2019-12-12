@@ -2,13 +2,9 @@ package no.nav.familie.ba.sak.vedtak
 
 import org.junit.jupiter.api.Test
 
-import org.springframework.web.client.RestTemplate
-
 internal class DokGenKlientTest {
 
-    private val dokgenKlient: DokGenKlient = DokGenKlient(
-        "http://localhost:8080", RestTemplate()
-    )
+    private val dokgenKlient: DokGenKlient = DokGenKlient("http://localhost:8080")
 
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
