@@ -50,8 +50,8 @@ class MottakController (
         }
 
         fagsakService.lagreFagsak(fagsak)
-        val behandling = Behandling(null, fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType,
-                ThreadLocalRandom.current()
+        val behandling = Behandling( fagsak = fagsak, journalpostID = nyBehandling.journalpostID, type = nyBehandling.behandlingType,
+                saksnummer = ThreadLocalRandom.current()
                 .ints(STRING_LENGTH.toLong(), 0, charPool.size)
                 .asSequence()
                 .map(charPool::get)
