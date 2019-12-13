@@ -26,7 +26,11 @@ class FagsakService(
         val restBehandlinger: List<RestBehandling> = behandlinger.map {
             val personopplysningGrunnlag = it?.id?.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
             val barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent?.ident }
-            val vedtakForBehandling = behandlingslagerService.hentVedtakForBehandling( it?.id ).map { behandlingVedtak -> behandlingVedtak?.toRestBehandlingVedtak() }
+
+            val vedtakForBehandling = behandlingslagerService.hentVedtakForBehandling( it?.id ).map { behandlingVedtak ->
+                val barnBeregning = behandlingslagerService.hentBarnBeregningForVedtak(behandlingVedtak?.id)
+                behandlingVedtak?.toRestBehandlingVedtak(barnBeregning)
+            }
 
             RestBehandling(
                     aktiv = it?.aktiv ?: false,

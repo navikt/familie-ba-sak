@@ -20,7 +20,7 @@ class FagsakController (
         private val behandlingslagerService: BehandlingslagerService
 ) {
     @GetMapping(path = ["/fagsak/{fagsakId}"])
-    fun fagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+    fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
 
         logger.info("{} henter fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
