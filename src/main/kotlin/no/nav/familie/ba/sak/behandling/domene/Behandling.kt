@@ -14,8 +14,8 @@ data class Behandling(
         @ManyToOne(optional = false) @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         var fagsak: Fagsak,
 
-        @Column(name = "journalpost_id", nullable = false)
-        var journalpostID: String,
+        @Column(name = "journalpost_id")
+        var journalpostID: String?,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
