@@ -16,7 +16,7 @@ data class BehandlingVedtakBarn (
         @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_vedtak_id", nullable = false, updatable = false)
         val behandlingVedtak: BehandlingVedtak,
 
-        @OneToOne(optional = false) @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
+        @ManyToOne(optional = false) @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
         val barn: Person,
 
         @Column(name = "belop", nullable = false)
