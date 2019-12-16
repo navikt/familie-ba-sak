@@ -8,6 +8,10 @@ import java.time.format.DateTimeFormatter
 class DokGenService(
     private val dokgenKlient: DokGenKlient
 ) {
+    fun genererHtml(markdown: String): String {
+        return dokgenKlient.lagHtmlFraMarkdown(markdown)
+    }
+
     fun hentOgSettStønadBrevMarkdown(behandlingVedtak: BehandlingVedtak) {
         val fletteFelter = mapTilBrevfelter(behandlingVedtak)
         behandlingVedtak.stønadBrevMarkdown =  dokgenKlient.hentMarkdownForMal("Innvilget", fletteFelter)

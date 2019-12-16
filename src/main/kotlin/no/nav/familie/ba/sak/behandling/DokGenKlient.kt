@@ -3,24 +3,21 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.MDC
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
-import org.springframework.http.HttpMethod.*
+import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.http.MediaType.TEXT_PLAIN
-import org.springframework.stereotype.Service
+import org.springframework.http.MediaType.TEXT_MARKDOWN
 import org.springframework.web.client.RestTemplate
 import java.net.URI
 
-@Service
 class DokGenKlient(
-    @Value("\${FAMILIE_BA_DOKGEN_API_URL}") private val dokgenServiceUri: String
+    private val dokgenServiceUri: String,
+    private val restTemplate: RestTemplate
 ) {
-    private val restTemplate: RestTemplate = RestTemplate()
 
     fun lagHtmlFraMarkdown(markdown: String): String {
         val url = URI.create(dokgenServiceUri + "/template/markdown/to-html")
-        val response = utførRequest(POST, TEXT_PLAIN, url, markdown)
+        val response = utførRequest(POST, TEXT_MARKDOWN, url, markdown)
 
         if (!response.statusCode.is2xxSuccessful) {
             throw RuntimeException(response.toString()) //TODO feilhåndtering
