@@ -59,11 +59,6 @@ class FagsakController(
         val behandlingVedtak = fagsakService.hentVedtakForBehandling(behandlingId)
                 ?: return Ressurs.failure("Vedtak ikke funnet")
 
-        /*
-        val behandlingVedtak= BehandlingVedtak(-1, -1, "na", LocalDate.MAX, LocalDate.MIN, LocalDate.MAX,
-                "# Vedtaksbrev");
-        */
-
         val html = docgenKlient.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown)
         logger.debug("HTML preview generated: $html")
 
