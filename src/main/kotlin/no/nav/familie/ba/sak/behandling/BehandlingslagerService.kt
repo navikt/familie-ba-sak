@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Personopplysni
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakt.Ressurs
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -75,7 +76,7 @@ class BehandlingslagerService (
         behandlingVedtakRepository.save(behandlingVedtak)
     }
 
-    fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): BehandlingVedtak {
+    fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): Ressurs<BehandlingVedtak> {
         val behandling = hentBehandlingHvisEksisterer(fagsakId)
                 ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
 
@@ -100,7 +101,7 @@ class BehandlingslagerService (
             val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             nyttVedtak.barnasBeregning.map {
                 val barn = personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer), personopplysningGrunnlagId = personopplysningGrunnlag?.id)
-                        ?: throw Error("Barnet du prøver å registrere vedtaket finnes ikke i systemet")
+                        ?: return Ressurs.failure("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
                 behandlingVedtakBarnRepository.save(
                     BehandlingVedtakBarn(
@@ -112,7 +113,7 @@ class BehandlingslagerService (
                 )
             }
 
-            return behandlingVedtak
+            return Ressurs.success(data = behandlingVedtak)
         }
     }
 }

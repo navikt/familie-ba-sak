@@ -28,7 +28,7 @@ class FagsakController (
         val ressurs = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
                     onSuccess = { it },
-                    onFailure = { e -> Ressurs.failure( "Henting av fagsak med fagsakId $fagsakId feilet: ${e.message}", e) }
+                    onFailure = { e -> Ressurs.failure( "Henting av fagsak med fagsakId $fagsakId feilet", e) }
                 )
 
         return ResponseEntity.ok(ressurs)
@@ -42,10 +42,9 @@ class FagsakController (
 
         val behandlingVedtakRessurs: Ressurs<BehandlingVedtak> = Result.runCatching { behandlingslagerService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
                 .fold(
-                        onSuccess = { Ressurs.success(data = it) },
+                        onSuccess = { it },
                         onFailure = { e ->
-                            logger.error(e.stackTrace.toString())
-                            Ressurs.failure("Klarte ikke å opprette nytt vedtak: ${e.message}", e)
+                            Ressurs.failure("Klarte ikke å opprette nytt vedtak", e)
                         }
                 )
 
