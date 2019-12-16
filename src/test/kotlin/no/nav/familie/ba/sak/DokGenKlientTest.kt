@@ -24,8 +24,8 @@ internal class DokGenKlientTest {
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
         dokgenKlient.runCatching {
-            val markdown = dokGenService.hentOgSettStønadBrevMarkdown(behandlingVedtak)
-            val htmlResponse = lagHtmlFraMarkdown(markdown)
+            dokGenService.hentOgSettStønadBrevMarkdown(behandlingVedtak)
+            val htmlResponse = lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown)
             assert(htmlResponse.startsWith("<html>"))
         }
     }

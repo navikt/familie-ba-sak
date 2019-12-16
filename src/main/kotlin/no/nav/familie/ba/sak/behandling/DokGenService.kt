@@ -8,9 +8,9 @@ import java.time.format.DateTimeFormatter
 class DokGenService(
     private val dokgenKlient: DokGenKlient
 ) {
-    fun hentOgSettStønadBrevMarkdown(behandlingVedtak: BehandlingVedtak): String {
+    fun hentOgSettStønadBrevMarkdown(behandlingVedtak: BehandlingVedtak) {
         val fletteFelter = mapTilBrevfelter(behandlingVedtak)
-        return dokgenKlient.hentMarkdownForMal("Innvilget", fletteFelter)
+        behandlingVedtak.stønadBrevMarkdown =  dokgenKlient.hentMarkdownForMal("Innvilget", fletteFelter)
     }
 
     private fun mapTilBrevfelter(vedtak: BehandlingVedtak): String {
