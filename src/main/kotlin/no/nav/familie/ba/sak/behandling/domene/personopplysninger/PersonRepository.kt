@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.Query
 interface PersonRepository : JpaRepository<Person?, Long?> {
 
     @Query("SELECT p FROM Person p WHERE p.personIdent = :personIdent")
-    fun findByPersonIdent(personIdent: PersonIdent): Person
+    fun findByPersonIdent(personIdent: PersonIdent): Person?
 }

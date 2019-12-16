@@ -95,9 +95,12 @@ class BehandlingslagerService (
             lagreBehandlingVedtak(behandlingVedtak)
 
             nyttVedtak.barnasBeregning.map {
+                val barn = personRepository.findByPersonIdent(PersonIdent(it.fødselsnummer))
+                        ?: throw Error("Barnet du prøver å registrere vedtaket finnes ikke i systemet")
+
                 behandlingVedtakBarnRepository.save(
                     BehandlingVedtakBarn(
-                        barn = personRepository.findByPersonIdent(PersonIdent(it.fødselsnummer)),
+                        barn = barn,
                         behandlingVedtak = behandlingVedtak,
                         beløp = it.beløp,
                         stønadFom = it.stønadFom
