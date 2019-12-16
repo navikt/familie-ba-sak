@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -14,6 +15,7 @@ class BehandlingslagerService (
         private val behandlingRepository: BehandlingRepository,
         private val behandlingVedtakRepository: BehandlingVedtakRepository,
         private val behandlingVedtakBarnRepository: BehandlingVedtakBarnRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository
 ) {
     fun nyBehandling(fødselsnummer: String,
@@ -92,10 +94,12 @@ class BehandlingslagerService (
                     stønadBrevMarkdown = "" // TODO hent markdown fra dokgen
             )
 
+
             lagreBehandlingVedtak(behandlingVedtak)
 
+            val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             nyttVedtak.barnasBeregning.map {
-                val barn = personRepository.findByPersonIdent(PersonIdent(it.fødselsnummer))
+                val barn = personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer), personopplysningGrunnlagId = personopplysningGrunnlag?.id)
                         ?: throw Error("Barnet du prøver å registrere vedtaket finnes ikke i systemet")
 
                 behandlingVedtakBarnRepository.save(

@@ -66,11 +66,11 @@ class MottakController (
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person( personIdent = PersonIdent(nyBehandling.fødselsnummer), type = PersonType.SØKER)
+        val søker = Person( personIdent = PersonIdent(nyBehandling.fødselsnummer), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
         personopplysningGrunnlag.leggTilPerson(søker)
 
         nyBehandling.barnasFødselsnummer.map {
-            personopplysningGrunnlag.leggTilPerson( Person( personIdent = PersonIdent(it), type = PersonType.BARN) )
+            personopplysningGrunnlag.leggTilPerson( Person( personIdent = PersonIdent(it), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag) )
         }
         personopplysningGrunnlag.setAktiv(true)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
