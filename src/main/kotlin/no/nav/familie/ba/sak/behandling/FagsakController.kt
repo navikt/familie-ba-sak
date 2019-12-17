@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.kontrakt.Ressurs
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -20,7 +20,7 @@ class FagsakController (
         private val behandlingslagerService: BehandlingslagerService
 ) {
     @GetMapping(path = ["/fagsak/{fagsakId}"])
-    fun fagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+    fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
 
         logger.info("{} henter fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
@@ -28,7 +28,7 @@ class FagsakController (
         val ressurs = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
                     onSuccess = { it },
-                    onFailure = { e -> Ressurs.failure( "Henting av fagsak med fagsakId $fagsakId feilet: ${e.message}", e) }
+                    onFailure = { e -> Ressurs.failure( "Henting av fagsak med fagsakId $fagsakId feilet", e) }
                 )
 
         return ResponseEntity.ok(ressurs)
@@ -42,8 +42,10 @@ class FagsakController (
 
         val behandlingVedtakRessurs: Ressurs<BehandlingVedtak> = Result.runCatching { behandlingslagerService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
                 .fold(
-                        onSuccess = { Ressurs.success(data = it) },
-                        onFailure = { e -> Ressurs.failure("Klarte ikke å opprette nytt vedtak: ${e.message}", e) }
+                        onSuccess = { it },
+                        onFailure = { e ->
+                            Ressurs.failure("Klarte ikke å opprette nytt vedtak", e)
+                        }
                 )
 
         return ResponseEntity.ok(behandlingVedtakRessurs)

@@ -30,7 +30,6 @@ class PersonopplysningGrunnlag(
     }
 
     fun leggTilPerson(person: Person) {
-        person.setPersonopplysningGrunnlag(this)
         personer.add(person)
     }
 
