@@ -17,7 +17,7 @@ class BehandlingslagerService (
         private val behandlingVedtakRepository: BehandlingVedtakRepository,
         private val behandlingVedtakBarnRepository: BehandlingVedtakBarnRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val personRepository: PersonRepository
+        private val personRepository: PersonRepository,
         private val dokGenService: DokGenService
 ) {
     fun nyBehandling(fødselsnummer: String,
