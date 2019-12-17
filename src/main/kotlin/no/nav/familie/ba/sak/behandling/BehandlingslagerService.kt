@@ -119,4 +119,8 @@ class BehandlingslagerService (
             return Ressurs.success(data = behandlingVedtak)
         }
     }
+
+    fun hentVedtakForBehandling(behandlingId: Long): BehandlingVedtak?{
+        return behandlingVedtakRepository.finnBehandlingVedtak(behandlingId)
+    }
 }

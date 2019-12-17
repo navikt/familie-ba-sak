@@ -53,8 +53,4 @@ class FagsakService(
     fun lagreFagsak(fagsak: Fagsak) {
         fagsakRepository.save(fagsak)
     }
-
-    fun hentVedtakForBehandling(behandlingId: Long): BehandlingVedtak?{
-        return behandlingVedtakRepository.finnBehandlingVedtak(behandlingId)
-    }
 }

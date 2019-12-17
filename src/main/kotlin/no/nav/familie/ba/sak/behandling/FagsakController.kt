@@ -58,12 +58,18 @@ class FagsakController (
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
         logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
 
-        val behandlingVedtak = fagsakService.hentVedtakForBehandling(behandlingId)
+        val behandlingVedtak = behandlingslagerService.hentVedtakForBehandling(behandlingId)
                 ?: return Ressurs.failure("Vedtak ikke funnet")
 
-        val html = docgenKlient.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown)
-        logger.debug("HTML preview generated: $html")
+        val html= Result.runCatching { docgenKlient.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown)}
+                .fold(
+                        onSuccess = {it},
+                        onFailure = {e->
+                            return Ressurs.failure("Klarte ikke å hent vedtaksbrev", e)
+                        }
+                )
 
+        logger.debug(html);
         return Ressurs.success(html)
     }
 
