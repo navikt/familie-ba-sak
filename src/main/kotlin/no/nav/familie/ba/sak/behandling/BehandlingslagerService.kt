@@ -108,7 +108,8 @@ class BehandlingslagerService (
                         barn = barn,
                         behandlingVedtak = behandlingVedtak,
                         beløp = it.beløp,
-                        stønadFom = it.stønadFom
+                        stønadFom = it.stønadFom,
+                        stønadTom = LocalDate.now() // TODO plus 18 år fra fødselsdato
                     )
                 )
             }

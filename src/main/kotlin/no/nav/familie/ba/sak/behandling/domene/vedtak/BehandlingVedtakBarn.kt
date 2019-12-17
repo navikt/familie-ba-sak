@@ -23,5 +23,8 @@ data class BehandlingVedtakBarn (
         val beløp: Int,
 
         @Column(name = "stonad_fom", nullable = false)
-        val stønadFom: LocalDate
+        val stønadFom: LocalDate,
+
+        @Column(name = "stonad_tom", nullable = false)
+        val stønadTom: LocalDate
 ): BaseEntitet()

@@ -7,6 +7,7 @@ create table BEHANDLING_VEDTAK_BARN
     opprettet_av            VARCHAR(20)  default 'VL'                               not null,
     opprettet_tid           TIMESTAMP(3) default localtimestamp                     not null,
     stonad_fom              TIMESTAMP(3)                                            not null,
+    stonad_tom              TIMESTAMP(3)                                            not null,
     belop                   numeric,
     endret_av               VARCHAR(20),
     endret_tid              TIMESTAMP(3)
