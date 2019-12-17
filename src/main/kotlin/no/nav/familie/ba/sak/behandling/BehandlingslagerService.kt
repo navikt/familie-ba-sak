@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import org.springframework.beans.factory.annotation.Autowired
+import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -14,7 +14,10 @@ import java.time.LocalDate
 class BehandlingslagerService (
         private val fagsakRepository: FagsakRepository,
         private val behandlingRepository: BehandlingRepository,
-        private val behandlingVedtakRepository: BehandlingVedtakRepository
+        private val behandlingVedtakRepository: BehandlingVedtakRepository,
+        private val behandlingVedtakBarnRepository: BehandlingVedtakBarnRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val personRepository: PersonRepository
 ) {
     fun nyBehandling(fødselsnummer: String,
                      barnasFødselsnummer: Array<String>,
@@ -43,10 +46,6 @@ class BehandlingslagerService (
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
-    fun hentAlleBehandlinger(): MutableList<Behandling?> {
-        return this.behandlingRepository.findAll()
-    }
-
     fun lagreBehandling(behandling: Behandling) {
         val aktivBehandling = hentBehandlingHvisEksisterer(behandling.fagsak.id)
 
@@ -62,6 +61,10 @@ class BehandlingslagerService (
         return behandlingVedtakRepository.finnVedtakForBehandling(behandlingId)
     }
 
+    fun hentBarnBeregningForVedtak(behandlingVedtakId: Long?): List<BehandlingVedtakBarn?> {
+        return behandlingVedtakBarnRepository.finnBarnBeregningForVedtak(behandlingVedtakId)
+    }
+
     fun lagreBehandlingVedtak(behandlingVedtak: BehandlingVedtak) {
         val aktivBehandlingVedtak = hentBehandlingVedtakHvisEksisterer(behandlingVedtak.behandling.id)
 
@@ -73,14 +76,14 @@ class BehandlingslagerService (
         behandlingVedtakRepository.save(behandlingVedtak)
     }
 
-    fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): BehandlingVedtak {
+    fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): Ressurs<BehandlingVedtak> {
         val behandling = hentBehandlingHvisEksisterer(fagsakId)
                 ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
 
         val tidligsteStønadFom: LocalDate? = nyttVedtak.barnasBeregning.map { barnBeregning -> barnBeregning.stønadFom }.min()
-        val eldsteBarn: LocalDate? = LocalDate.now() // Her må vi ha fødselsdato for barn
+        val yngsteBarn: LocalDate? = LocalDate.now() // Her må vi ha fødselsdato for barn
 
-        if (tidligsteStønadFom == null || eldsteBarn == null) {
+        if (tidligsteStønadFom == null || yngsteBarn == null) {
             throw Error("Fant ikke barn i listen over beregninger")
         } else {
             val behandlingVedtak = BehandlingVedtak(
@@ -88,12 +91,30 @@ class BehandlingslagerService (
                     ansvarligSaksbehandler = ansvarligSaksbehandler,
                     vedtaksdato = LocalDate.now(),
                     stønadFom = tidligsteStønadFom,
-                    stønadTom = eldsteBarn.plusYears(18),
+                    stønadTom = yngsteBarn.plusYears(18),
                     stønadBrevMarkdown = "" // TODO hent markdown fra dokgen
             )
 
+
             lagreBehandlingVedtak(behandlingVedtak)
-            return behandlingVedtak
+
+            val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+            nyttVedtak.barnasBeregning.map {
+                val barn = personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer), personopplysningGrunnlagId = personopplysningGrunnlag?.id)
+                        ?: return Ressurs.failure("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
+
+                behandlingVedtakBarnRepository.save(
+                    BehandlingVedtakBarn(
+                        barn = barn,
+                        behandlingVedtak = behandlingVedtak,
+                        beløp = it.beløp,
+                        stønadFom = it.stønadFom,
+                        stønadTom = LocalDate.now() // TODO plus 18 år fra fødselsdato
+                    )
+                )
+            }
+
+            return Ressurs.success(data = behandlingVedtak)
         }
     }
 }
