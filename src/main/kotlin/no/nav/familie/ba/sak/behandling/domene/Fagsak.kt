@@ -5,7 +5,8 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import javax.persistence.*
 
-@Entity(name = "Fagsak") @Table(name = "FAGSAK")
+@Entity(name = "Fagsak")
+@Table(name = "FAGSAK")
 data class Fagsak(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq")

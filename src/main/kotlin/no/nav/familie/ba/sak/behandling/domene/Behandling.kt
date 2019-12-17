@@ -3,7 +3,8 @@ package no.nav.familie.ba.sak.behandling.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
 
-@Entity(name = "Behandling") @Table(name = "BEHANDLING")
+@Entity(name = "Behandling")
+@Table(name = "BEHANDLING")
 data class Behandling(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq")
@@ -21,8 +22,8 @@ data class Behandling(
         var type: BehandlingType,
 
         /**
-        * saksnummer fra GSAK.
-        */
+         * saksnummer fra GSAK.
+         */
         @Column(name = "saksnummer")
         var saksnummer: String? = null,
 
@@ -31,7 +32,7 @@ data class Behandling(
 ) : BaseEntitet()
 
 enum class BehandlingType {
-        FØRSTEGANGSBEHANDLING,
-        REVURDERING,
-        KLAGE,
+    FØRSTEGANGSBEHANDLING,
+    REVURDERING,
+    KLAGE,
 }

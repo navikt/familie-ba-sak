@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.domene.personopplysninger
 import no.nav.familie.ba.sak.common.BaseEntitet
 import java.util.*
 import javax.persistence.*
+
 @Entity
 @Table(name = "GR_PERSONOPPLYSNINGER")
 class PersonopplysningGrunnlag(
@@ -35,14 +36,14 @@ class PersonopplysningGrunnlag(
 
     val søker: Person?
         get() {
-            return personer.firstOrNull { it.type?.equals(PersonType.SØKER)?:false }
+            return personer.firstOrNull { it.type?.equals(PersonType.SØKER) ?: false }
         }
 
     val barna: List<Person>
         get() {
             val barna: MutableList<Person> = LinkedList()
             for (p in personer) {
-                if (p.type?.equals(PersonType.BARN) == true){
+                if (p.type?.equals(PersonType.BARN) == true) {
                     barna.add(p)
                 }
             }

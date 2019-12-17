@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api")
-@ProtectedWithClaims( issuer = "azuread" )
-class FagsakController (
+@ProtectedWithClaims(issuer = "azuread")
+class FagsakController(
         private val oidcUtil: OIDCUtil,
         private val docgenKlient: DokGenKlient,
         private val fagsakService: FagsakService,
@@ -29,8 +29,8 @@ class FagsakController (
 
         val ressurs = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
-                    onSuccess = { it },
-                    onFailure = { e -> Ressurs.failure( "Henting av fagsak med fagsakId $fagsakId feilet", e) }
+                        onSuccess = { it },
+                        onFailure = { e -> Ressurs.failure("Henting av fagsak med fagsakId $fagsakId feilet", e) }
                 )
 
         return ResponseEntity.ok(ressurs)
@@ -54,23 +54,10 @@ class FagsakController (
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}/vedtak-html"])
-    fun hentVedtakBrevHtml(@PathVariable behandlingId: Long): Ressurs<String> {
+    fun hentHtmlVedtak(@PathVariable behandlingId: Long): Ressurs<String> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
         logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
-
-        val behandlingVedtak = behandlingslagerService.hentVedtakForBehandling(behandlingId)
-                ?: return Ressurs.failure("Vedtak ikke funnet")
-
-        val html= Result.runCatching { docgenKlient.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown)}
-                .fold(
-                        onSuccess = {it},
-                        onFailure = {e->
-                            return Ressurs.failure("Klarte ikke å hent vedtaksbrev", e)
-                        }
-                )
-
-        logger.debug(html);
-        return Ressurs.success(html)
+        return behandlingslagerService.hentHtmlVedtakForBehandling(behandlingId);
     }
 
     companion object {

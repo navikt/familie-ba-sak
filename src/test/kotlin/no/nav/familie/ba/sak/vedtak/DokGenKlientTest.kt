@@ -7,7 +7,7 @@ import org.springframework.web.client.RestTemplate
 internal class DokGenKlientTest {
 
     private val dokgenKlient: DokGenKlient = DokGenKlient(
-        "http://localhost:8080", RestTemplate()
+            "http://localhost:8080", RestTemplate()
     )
 
     @Test

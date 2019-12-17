@@ -18,23 +18,22 @@ import java.time.LocalDate
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 class DokGenServiceTest(
-    @Autowired
-    private var dokGenService: DokGenService
+        @Autowired
+        private var dokGenService: DokGenService
 ) {
 
     private val behandlingVedtak = BehandlingVedtak(
-        behandling = Behandling(fagsak = Fagsak(), journalpostID = "", type = BehandlingType.FØRSTEGANGSBEHANDLING),
-        ansvarligSaksbehandler = "ansvarligSaksbehandler",
-        vedtaksdato = LocalDate.now(),
-        stønadFom = LocalDate.now(),
-        stønadTom = LocalDate.MAX
+            behandling = Behandling(fagsak = Fagsak(), journalpostID = "", type = BehandlingType.FØRSTEGANGSBEHANDLING),
+            ansvarligSaksbehandler = "ansvarligSaksbehandler",
+            vedtaksdato = LocalDate.now(),
+            stønadFom = LocalDate.now(),
+            stønadTom = LocalDate.MAX
     )
 
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
         dokGenService.runCatching {
-            hentOgSettStønadBrevMarkdown(behandlingVedtak)
-            val htmlResponse = genererHtml(behandlingVedtak.stønadBrevMarkdown)
+            val htmlResponse = genererHtml(hentStønadBrevMarkdown(behandlingVedtak))
             assert(htmlResponse.startsWith("<html>"))
         }
     }

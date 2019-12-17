@@ -16,7 +16,8 @@ class AktørId : Serializable, Comparable<AktørId> {
     @JsonValue
     @Column(name = "aktoer_id", updatable = false, length = 50)
     @Pattern(regexp = VALID_REGEXP, flags = [Pattern.Flag.CASE_INSENSITIVE])
-    var id : String? = null
+    var id: String? = null
+
     protected constructor() { // for hibernate
     }
 
@@ -27,7 +28,8 @@ class AktørId : Serializable, Comparable<AktørId> {
 
     constructor(aktørId: String) {
         Objects.requireNonNull(aktørId, "aktørId")
-        require(VALID.matcher(aktørId).matches()) { // skal ikke skje, funksjonelle feilmeldinger håndteres ikke her.
+        require(VALID.matcher(aktørId).matches()) {
+            // skal ikke skje, funksjonelle feilmeldinger håndteres ikke her.
             "Ugyldig aktørId, støtter kun A-Z/0-9/:/-/_ tegn.)"
         }
         id = aktørId
@@ -62,6 +64,6 @@ class AktørId : Serializable, Comparable<AktørId> {
         private val VALID =
                 java.util.regex.Pattern.compile(VALID_REGEXP, java.util.regex.Pattern.CASE_INSENSITIVE)
         private val INVALID = java.util.regex.Pattern.compile(INVALID_REGEXP,
-                                                              java.util.regex.Pattern.DOTALL or java.util.regex.Pattern.CASE_INSENSITIVE)
+                java.util.regex.Pattern.DOTALL or java.util.regex.Pattern.CASE_INSENSITIVE)
     }
 }

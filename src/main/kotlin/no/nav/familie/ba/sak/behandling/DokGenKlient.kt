@@ -11,8 +11,8 @@ import org.springframework.web.client.RestTemplate
 import java.net.URI
 
 class DokGenKlient(
-    private val dokgenServiceUri: String,
-    private val restTemplate: RestTemplate
+        private val dokgenServiceUri: String,
+        private val restTemplate: RestTemplate
 ) {
 
     fun lagHtmlFraMarkdown(markdown: String): String {

@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestBehandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
@@ -30,7 +29,7 @@ class FagsakService(
             val personopplysningGrunnlag = it?.id?.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
             val barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent?.ident }
 
-            val vedtakForBehandling = behandlingslagerService.hentVedtakForBehandling( it?.id ).map { behandlingVedtak ->
+            val vedtakForBehandling = behandlingslagerService.hentVedtakForBehandling(it?.id).map { behandlingVedtak ->
                 val barnBeregning = behandlingslagerService.hentBarnBeregningForVedtak(behandlingVedtak?.id)
                 behandlingVedtak?.toRestBehandlingVedtak(barnBeregning)
             }

@@ -33,4 +33,4 @@ data class BehandlingVedtak(
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true
-): BaseEntitet()
+) : BaseEntitet()

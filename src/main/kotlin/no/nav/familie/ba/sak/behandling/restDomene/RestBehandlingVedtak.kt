@@ -14,10 +14,10 @@ data class RestBehandlingVedtak(
 )
 
 fun BehandlingVedtak.toRestBehandlingVedtak(barnBeregning: List<BehandlingVedtakBarn?>) = RestBehandlingVedtak(
-    aktiv = this.aktiv,
-    ansvarligSaksbehandler = this.ansvarligSaksbehandler,
-    barnasBeregning = barnBeregning.map { it?.toRestBehandlingVedtakBarn() },
-    vedtaksdato = this.vedtaksdato,
-    stønadFom = this.stønadFom,
-    stønadTom = this.stønadTom
+        aktiv = this.aktiv,
+        ansvarligSaksbehandler = this.ansvarligSaksbehandler,
+        barnasBeregning = barnBeregning.map { it?.toRestBehandlingVedtakBarn() },
+        vedtaksdato = this.vedtaksdato,
+        stønadFom = this.stønadFom,
+        stønadTom = this.stønadTom
 )

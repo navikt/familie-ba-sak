@@ -6,30 +6,30 @@ import java.time.format.DateTimeFormatter
 
 @Service
 class DokGenService(
-    private val dokgenKlient: DokGenKlient
+        private val dokgenKlient: DokGenKlient
 ) {
     fun genererHtml(markdown: String): String {
         return dokgenKlient.lagHtmlFraMarkdown(markdown)
     }
 
-    fun hentOgSettStønadBrevMarkdown(behandlingVedtak: BehandlingVedtak) {
+    fun hentStønadBrevMarkdown(behandlingVedtak: BehandlingVedtak): String {
         val fletteFelter = mapTilBrevfelter(behandlingVedtak)
-        behandlingVedtak.stønadBrevMarkdown =  dokgenKlient.hentMarkdownForMal("Innvilget", fletteFelter)
+        return dokgenKlient.hentMarkdownForMal("Innvilget", fletteFelter)
     }
 
     private fun mapTilBrevfelter(vedtak: BehandlingVedtak): String {
         val datoFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val brevfelter = "{\"belop\": %s,\n" + // TODO
-            "\"startDato\": \"%s\",\n" +
-            "\"begrunnelse\": \"%s\",\n" +
-            "\"etterbetaling\": %s,\n" +
-            "\"antallTimer\": %s,\n" +
-            "\"stotteProsent\": %s,\n" +
-            "\"enhet\": \"%s\",\n" +
-            "\"saksbehandler\": \"%s\"}"
+                "\"startDato\": \"%s\",\n" +
+                "\"begrunnelse\": \"%s\",\n" +
+                "\"etterbetaling\": %s,\n" +
+                "\"antallTimer\": %s,\n" +
+                "\"stotteProsent\": %s,\n" +
+                "\"enhet\": \"%s\",\n" +
+                "\"saksbehandler\": \"%s\"}"
 
         return String.format(
-            brevfelter, 123, vedtak.stønadFom.format(datoFormat), "begrunnelse", false, 1, 100, "enhet", vedtak.ansvarligSaksbehandler
+                brevfelter, 123, vedtak.stønadFom.format(datoFormat), "begrunnelse", false, 1, 100, "enhet", vedtak.ansvarligSaksbehandler
         )
     }
 }
