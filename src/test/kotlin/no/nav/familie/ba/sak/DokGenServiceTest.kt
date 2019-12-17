@@ -33,7 +33,7 @@ class DokGenServiceTest(
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
         dokGenService.runCatching {
-            val htmlResponse = genererHtml(hentStønadBrevMarkdown(behandlingVedtak))
+            val htmlResponse = lagHtmlFraMarkdown(hentStønadBrevMarkdown(behandlingVedtak))
             assert(htmlResponse.startsWith("<html>"))
         }
     }

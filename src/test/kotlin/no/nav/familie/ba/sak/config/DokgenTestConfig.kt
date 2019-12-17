@@ -20,7 +20,7 @@ class DokgenTestConfig {
         fun <T> any(): T = Mockito.any<T>()
 
         val dokgenService = mock(DokGenService::class.java)
-        `when`(dokgenService.genererHtml("TEST_MARKDOWN_MOCKUP")).thenReturn("<HTML>HTML_MOCKUP</HTML>")
+        `when`(dokgenService.lagHtmlFraMarkdown("TEST_MARKDOWN_MOCKUP")).thenReturn("<HTML>HTML_MOCKUP</HTML>")
         `when`(dokgenService.hentStønadBrevMarkdown(any())).thenReturn("TEST_MARKDOWN_MOCKUP")
         return dokgenService
     }

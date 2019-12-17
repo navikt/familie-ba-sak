@@ -128,7 +128,7 @@ class BehandlingslagerService(
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
         val behandlingVedtak = behandlingVedtakRepository.finnBehandlingVedtak(behandlingId)
                 ?: return Ressurs.failure("Vedtak ikke funnet")
-        val html = Result.runCatching { dokGenService.genererHtml(behandlingVedtak.stønadBrevMarkdown) }
+        val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown) }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
