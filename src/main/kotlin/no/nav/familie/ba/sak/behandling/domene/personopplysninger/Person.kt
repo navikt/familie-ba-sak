@@ -21,9 +21,5 @@ class Person(
 
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
-        private var personopplysningGrunnlag: PersonopplysningGrunnlag? = null
-) : BaseEntitet() {
-    fun setPersonopplysningGrunnlag(personopplysningGrunnlag: PersonopplysningGrunnlag?) {
-        this.personopplysningGrunnlag = personopplysningGrunnlag
-    }
-}
+        val personopplysningGrunnlag: PersonopplysningGrunnlag
+) : BaseEntitet()

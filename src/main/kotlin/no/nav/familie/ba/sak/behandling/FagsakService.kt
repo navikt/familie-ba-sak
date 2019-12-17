@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.toRestBehandlingVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakt.Ressurs
+import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.stereotype.Service
 
 @Service
@@ -29,7 +29,11 @@ class FagsakService(
         val restBehandlinger: List<RestBehandling> = behandlinger.map {
             val personopplysningGrunnlag = it?.id?.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
             val barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent?.ident }
-            val vedtakForBehandling = behandlingslagerService.hentVedtakForBehandling( it?.id ).map { behandlingVedtak -> behandlingVedtak?.toRestBehandlingVedtak() }
+
+            val vedtakForBehandling = behandlingslagerService.hentVedtakForBehandling( it?.id ).map { behandlingVedtak ->
+                val barnBeregning = behandlingslagerService.hentBarnBeregningForVedtak(behandlingVedtak?.id)
+                behandlingVedtak?.toRestBehandlingVedtak(barnBeregning)
+            }
 
             RestBehandling(
                     aktiv = it?.aktiv ?: false,

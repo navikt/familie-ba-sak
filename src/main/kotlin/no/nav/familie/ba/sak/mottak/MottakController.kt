@@ -13,9 +13,10 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Personopplysni
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakt.Ressurs
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -37,8 +38,13 @@ class MottakController (
 
     @PostMapping(path = ["/behandling/opprett"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<RestFagsak> {
-        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
-        FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId ?: "VL")
+        val saksbehandlerId = try {
+            oidcUtil.getClaim("preferred_username") ?: "VL"
+        } catch (e: JwtTokenValidatorException) {
+            "VL"
+        }
+
+        FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
 
         //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
 
@@ -60,11 +66,11 @@ class MottakController (
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person( personIdent = PersonIdent(nyBehandling.fødselsnummer), type = PersonType.SØKER)
+        val søker = Person( personIdent = PersonIdent(nyBehandling.fødselsnummer), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
         personopplysningGrunnlag.leggTilPerson(søker)
 
         nyBehandling.barnasFødselsnummer.map {
-            personopplysningGrunnlag.leggTilPerson( Person( personIdent = PersonIdent(it), type = PersonType.BARN) )
+            personopplysningGrunnlag.leggTilPerson( Person( personIdent = PersonIdent(it), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag) )
         }
         personopplysningGrunnlag.setAktiv(true)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -73,4 +79,4 @@ class MottakController (
     }
 }
 
-data class NyBehandling(val fødselsnummer: String, val barnasFødselsnummer: Array<String>, val behandlingType: BehandlingType, val journalpostID: String)
+data class NyBehandling(val fødselsnummer: String, val barnasFødselsnummer: Array<String>, val behandlingType: BehandlingType, val journalpostID: String?)

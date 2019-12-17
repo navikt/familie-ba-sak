@@ -36,7 +36,7 @@ APPDYNAMICS_CONTROLLER_SSL_ENABLED: true
 APPDYNAMICS_AGENT_ACCOUNT_NAME: PROD
 
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
-FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.nais.adeo.no
+FAMILIE_BA_DOKGEN_API_URL: http://familie-ba-dokgen
 
 #Unleash
 UNLEASH_API_URL: https://unleash.nais.adeo.no/api/

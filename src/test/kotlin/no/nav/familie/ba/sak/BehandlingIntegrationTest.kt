@@ -30,7 +30,7 @@ import kotlin.streams.asSequence
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres")
+@ActiveProfiles("postgres", "mock-dokgen")
 @Tag("integration")
 class BehandlingIntegrationTest(
         @Autowired
@@ -68,8 +68,8 @@ class BehandlingIntegrationTest(
         val behandling = behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING,"sdf", lagRandomSaksnummer())
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person( personIdent = PersonIdent("0"), type = PersonType.SØKER)
-        val barn = Person( personIdent = PersonIdent("12345678910"), type = PersonType.BARN )
+        val søker = Person( personIdent = PersonIdent("0"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
+        val barn = Person( personIdent = PersonIdent("12345678910"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag )
         personopplysningGrunnlag.leggTilPerson(søker)
         personopplysningGrunnlag.leggTilPerson(barn)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -113,9 +113,18 @@ class BehandlingIntegrationTest(
         val behandling = behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING,"sdf", lagRandomSaksnummer())
         Assertions.assertNotNull(behandling.fagsak.id)
 
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+
+        val søker = Person( personIdent = PersonIdent("123456789010"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
+        personopplysningGrunnlag.leggTilPerson(søker)
+
+        personopplysningGrunnlag.leggTilPerson( Person( personIdent = PersonIdent("123456789011"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag) )
+        personopplysningGrunnlag.setAktiv(true)
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
         behandlingslagerService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id?:1L,
-                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789010", beløp = 1054, stønadFom = LocalDate.now()))),
+                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now()))),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
