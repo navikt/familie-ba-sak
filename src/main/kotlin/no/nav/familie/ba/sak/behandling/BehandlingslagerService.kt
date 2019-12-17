@@ -17,7 +17,8 @@ class BehandlingslagerService (
         private val behandlingVedtakRepository: BehandlingVedtakRepository,
         private val behandlingVedtakBarnRepository: BehandlingVedtakBarnRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val personRepository: PersonRepository
+        private val personRepository: PersonRepository,
+        private val dokGenService: DokGenService
 ) {
     fun nyBehandling(fødselsnummer: String,
                      barnasFødselsnummer: Array<String>,
@@ -94,6 +95,7 @@ class BehandlingslagerService (
                     stønadTom = yngsteBarn.plusYears(18),
                     stønadBrevMarkdown = "" // TODO hent markdown fra dokgen
             )
+            dokGenService.hentOgSettStønadBrevMarkdown(behandlingVedtak)
 
 
             lagreBehandlingVedtak(behandlingVedtak)

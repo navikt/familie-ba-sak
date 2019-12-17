@@ -28,7 +28,7 @@ import kotlin.streams.asSequence
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres")
+@ActiveProfiles("postgres", "mock-dokgen")
 @Tag("integration")
 class BehandlingIntegrationTest(
         @Autowired
