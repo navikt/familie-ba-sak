@@ -25,7 +25,6 @@ import java.time.LocalDate
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("dev")
 @Tag("integration")
 class DokGenIntegrationTest{
