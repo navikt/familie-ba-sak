@@ -54,6 +54,12 @@ class DokGenIntegrationTest{
         }
     }
 
+    class DokGenTestNullBodyService: DokGenService("mock_dokgen_uri", RestTemplate()){
+        override fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any?): ResponseEntity<String>{
+            return ResponseEntity<String>(null, HttpStatus.OK)
+        }
+    }
+
     @Test
     @Tag("integration")
     fun `Test generer markdown`(){
@@ -84,4 +90,30 @@ class DokGenIntegrationTest{
         val html= dokgen.lagHtmlFraMarkdown("markdown")
         assert(html.equals("mockup_response"))
     }
+
+    @Test
+    @Tag("integration")
+    fun `Test null response`(){
+        val dokgen= DokGenTestNullBodyService()
+        val html= dokgen.lagHtmlFraMarkdown("markdown")
+        assert(html.isEmpty())
+
+        val markdown= dokgen.hentStønadBrevMarkdown(BehandlingVedtak(
+                id= 1,
+                behandling= Behandling(
+                        id= 1,
+                        fagsak = Fagsak(),
+                        journalpostID = "invalid",
+                        type= BehandlingType.FØRSTEGANGSBEHANDLING,
+                        saksnummer = null,
+                        aktiv = true
+                ),
+                ansvarligSaksbehandler = "whoknows",
+                vedtaksdato = LocalDate.MIN,
+                stønadFom = LocalDate.MIN,
+                stønadTom = LocalDate.MIN
+        ))
+        assert(markdown.isEmpty())
+    }
+
 }
