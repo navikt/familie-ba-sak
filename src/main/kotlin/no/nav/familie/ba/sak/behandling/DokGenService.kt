@@ -45,14 +45,14 @@ class DokGenService(
         return response.body.orEmpty()
     }
 
-    fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
+    private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
         val url = URI.create(dokgenServiceUri + "/template/" + malNavn + "/create-markdown")
         val response = utførRequest(HttpMethod.POST, MediaType.APPLICATION_JSON, url, fletteFelter)
 
         return response.body.orEmpty()
     }
 
-    fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any? = null): ResponseEntity<String> {
+    protected fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any? = null): ResponseEntity<String> {
         val headers = HttpHeaders()
         headers.contentType = mediaType
         headers.acceptCharset= listOf(Charsets.UTF_8)
