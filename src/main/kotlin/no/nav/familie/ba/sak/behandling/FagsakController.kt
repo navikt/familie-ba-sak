@@ -55,7 +55,9 @@ class FagsakController(
     fun hentHtmlVedtak(@PathVariable behandlingId: Long): Ressurs<String> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
         logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
-        return behandlingslagerService.hentHtmlVedtakForBehandling(behandlingId);
+        val html= behandlingslagerService.hentHtmlVedtakForBehandling(behandlingId)
+        logger.debug(html.data)
+        return html
     }
 
     companion object {
