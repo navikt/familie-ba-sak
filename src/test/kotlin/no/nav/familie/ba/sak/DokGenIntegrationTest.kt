@@ -35,10 +35,9 @@ class DokGenIntegrationTest{
                 val felter= mapper.readValue(requestBody as String, Map::class.java)
                 assert(felter.contains("belop"))
                 assert(felter.contains("startDato"))
-                assert(felter.contains("begrunnelse"))
+                assert(felter.contains("fodselsnummer"))
+                assert(felter.contains("fodselsdato"))
                 assert(felter.contains("etterbetaling"))
-                assert(felter.contains("antallTimer"))
-                assert(felter.contains("stotteProsent"))
                 assert(felter.contains("enhet"))
                 assert(felter.contains("saksbehandler"))
            }else if(requestUrl.path.matches(Regex(".+to-html"))){
