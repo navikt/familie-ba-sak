@@ -5,11 +5,9 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
-import no.nav.familie.ba.sak.util.DbContainerInitializer
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.api.fail
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -54,6 +52,12 @@ class DokGenIntegrationTest{
         }
     }
 
+    class DokGenUtførRequestTestService: DokGenService("mock_dokgen_uri", RestTemplate()){
+        fun testUtførRequest(): ResponseEntity<String> {
+            return utførRequest(HttpMethod.POST, MediaType.TEXT_MARKDOWN, URI.create("mock_dokgen_uri"), "");
+        }
+    }
+
     class DokGenTestNullBodyService: DokGenService("mock_dokgen_uri", RestTemplate()){
         override fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any?): ResponseEntity<String>{
             return ResponseEntity<String>(null, HttpStatus.OK)
@@ -89,6 +93,15 @@ class DokGenIntegrationTest{
         val dokgen= DokGenTestService()
         val html= dokgen.lagHtmlFraMarkdown("markdown")
         assert(html.equals("mockup_response"))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Test utførRequest`(){
+        val dokgen= DokGenUtførRequestTestService()
+        assertThrows(Exception::class.java){
+          dokgen.testUtførRequest()
+        }
     }
 
     @Test
