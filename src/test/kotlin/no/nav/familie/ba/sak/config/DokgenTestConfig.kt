@@ -24,4 +24,17 @@ class DokgenTestConfig {
         `when`(dokgenService.hentStønadBrevMarkdown(any())).thenReturn("TEST_MARKDOWN_MOCKUP")
         return dokgenService
     }
+
+    @Bean
+    @Profile("mock-dokgen-negative")
+    @Primary
+    fun mockDokGenNegativeService(): DokGenService {
+        //eliminate complain from Mockito of null parameter
+        fun <T> any(): T = Mockito.any<T>()
+
+        val dokgenService = mock(DokGenService::class.java)
+        `when`(dokgenService.lagHtmlFraMarkdown("TEST_MARKDOWN_MOCKUP")).thenThrow(RuntimeException())
+        `when`(dokgenService.hentStønadBrevMarkdown(any())).thenReturn("TEST_MARKDOWN_MOCKUP")
+        return dokgenService
+    }
 }
