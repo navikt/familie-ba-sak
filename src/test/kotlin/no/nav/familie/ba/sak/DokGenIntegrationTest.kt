@@ -55,6 +55,7 @@ class DokGenIntegrationTest{
     }
 
     @Test
+    @Tag("integration")
     fun `Test generer markdown`(){
         val dokgen= DokGenTestService()
         val markdown= dokgen.hentStønadBrevMarkdown(BehandlingVedtak(
@@ -77,6 +78,7 @@ class DokGenIntegrationTest{
     }
 
     @Test
+    @Tag("integration")
     fun `Test generer html`(){
         val dokgen= DokGenTestService()
         val html= dokgen.lagHtmlFraMarkdown("markdown")
