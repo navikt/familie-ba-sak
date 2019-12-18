@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api")
-@ProtectedWithClaims( issuer = "azuread" )
-class FagsakController (
+@ProtectedWithClaims(issuer = "azuread")
+class FagsakController(
         private val oidcUtil: OIDCUtil,
         private val fagsakService: FagsakService,
         private val behandlingslagerService: BehandlingslagerService
@@ -27,8 +27,8 @@ class FagsakController (
 
         val ressurs = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
-                    onSuccess = { it },
-                    onFailure = { e -> Ressurs.failure( "Henting av fagsak med fagsakId $fagsakId feilet", e) }
+                        onSuccess = { it },
+                        onFailure = { e -> Ressurs.failure("Henting av fagsak med fagsakId $fagsakId feilet", e) }
                 )
 
         return ResponseEntity.ok(ressurs)
@@ -51,14 +51,13 @@ class FagsakController (
         return ResponseEntity.ok(behandlingVedtakRessurs)
     }
 
-    @GetMapping(path = ["/fagsak/{fagsakId}/vedtak-html"])
-    fun hentVedtaksBrevHtml(@PathVariable fagsakId: Long): Ressurs<String> {
+    @GetMapping(path = ["/behandling/{behandlingId}/vedtak-html"])
+    fun hentHtmlVedtak(@PathVariable behandlingId: Long): Ressurs<String> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
-        FagsakController.logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
-
-        //TODO: integration with DokGen
-
-        return Ressurs.success("<H1>Vedtaksbrev</H1><br/>FagsakID= $fagsakId<br /><P>Backend API not implemented yet</P>");
+        logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
+        val html= behandlingslagerService.hentHtmlVedtakForBehandling(behandlingId)
+        logger.debug(html.data)
+        return html
     }
 
     companion object {

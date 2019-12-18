@@ -7,7 +7,7 @@ import javax.persistence.*
 
 @Entity(name = "BehandlingVedtakBarn")
 @Table(name = "BEHANDLING_VEDTAK_BARN")
-data class BehandlingVedtakBarn (
+data class BehandlingVedtakBarn(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_vedtak_barn_seq")
         @SequenceGenerator(name = "behandling_vedtak_barn_seq")
@@ -27,4 +27,4 @@ data class BehandlingVedtakBarn (
 
         @Column(name = "stonad_tom", nullable = false)
         val stønadTom: LocalDate
-): BaseEntitet()
+) : BaseEntitet()

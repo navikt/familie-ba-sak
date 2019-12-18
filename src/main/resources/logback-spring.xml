@@ -55,7 +55,7 @@
     </root>
 
     <logger name="sporing" level="INFO" additivity="false">
-        <appender-ref ref="SPORING_LOG" />
+        <appender-ref ref="SPORING_LOG"/>
     </logger>
 
     <logger name="no.nav" level="WARN"/>

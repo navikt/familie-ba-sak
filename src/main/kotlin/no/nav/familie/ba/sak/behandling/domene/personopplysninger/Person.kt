@@ -4,7 +4,8 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import javax.persistence.*
 
-@Entity(name = "Person") @Table(name = "PO_PERSON")
+@Entity(name = "Person")
+@Table(name = "PO_PERSON")
 class Person(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq")

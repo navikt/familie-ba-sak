@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class BehandlingslagerService (
+class BehandlingslagerService(
         private val fagsakRepository: FagsakRepository,
         private val behandlingRepository: BehandlingRepository,
         private val behandlingVedtakRepository: BehandlingVedtakRepository,
@@ -29,7 +29,7 @@ class BehandlingslagerService (
 
         val fagsak = Fagsak(null, AktørId("1"), PersonIdent(fødselsnummer))
         fagsakRepository.save(fagsak)
-        val behandling = Behandling( id = null, fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
+        val behandling = Behandling(id = null, fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
         lagreBehandling(behandling)
 
         return behandling
@@ -95,7 +95,12 @@ class BehandlingslagerService (
                     stønadTom = yngsteBarn.plusYears(18),
                     stønadBrevMarkdown = "" // TODO hent markdown fra dokgen
             )
-            dokGenService.hentOgSettStønadBrevMarkdown(behandlingVedtak)
+
+            behandlingVedtak.stønadBrevMarkdown = Result.runCatching { dokGenService.hentStønadBrevMarkdown(behandlingVedtak) }
+                    .fold(
+                            onSuccess = { it },
+                            onFailure = { e -> return Ressurs.failure("Klart ikke å generer markdown", e) }
+                    )
 
 
             lagreBehandlingVedtak(behandlingVedtak)
@@ -106,17 +111,31 @@ class BehandlingslagerService (
                         ?: return Ressurs.failure("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
                 behandlingVedtakBarnRepository.save(
-                    BehandlingVedtakBarn(
-                        barn = barn,
-                        behandlingVedtak = behandlingVedtak,
-                        beløp = it.beløp,
-                        stønadFom = it.stønadFom,
-                        stønadTom = LocalDate.now() // TODO plus 18 år fra fødselsdato
-                    )
+                        BehandlingVedtakBarn(
+                                barn = barn,
+                                behandlingVedtak = behandlingVedtak,
+                                beløp = it.beløp,
+                                stønadFom = it.stønadFom,
+                                stønadTom = LocalDate.now() // TODO plus 18 år fra fødselsdato
+                        )
                 )
             }
 
             return Ressurs.success(data = behandlingVedtak)
         }
+    }
+
+    fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
+        val behandlingVedtak = behandlingVedtakRepository.finnBehandlingVedtak(behandlingId)
+                ?: return Ressurs.failure("Vedtak ikke funnet")
+        val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown) }
+                .fold(
+                        onSuccess = { it },
+                        onFailure = { e ->
+                            return Ressurs.failure("Klarte ikke å hent vedtaksbrev", e)
+                        }
+                )
+
+        return Ressurs.success(html)
     }
 }

@@ -10,8 +10,8 @@ import org.springframework.context.ConfigurableApplicationContext
 class FamilieBaSakApplication
 
 fun main(args: Array<String>) {
-	val app = SpringApplication(ApplicationConfig::class.java)
-	app.setRegisterShutdownHook(false)
-	val applicationContext: ConfigurableApplicationContext = app.run(*args)
-	Runtime.getRuntime().addShutdownHook(DelayedShutdownHook(applicationContext))
+    val app = SpringApplication(ApplicationConfig::class.java)
+    app.setRegisterShutdownHook(false)
+    val applicationContext: ConfigurableApplicationContext = app.run(*args)
+    Runtime.getRuntime().addShutdownHook(DelayedShutdownHook(applicationContext))
 }

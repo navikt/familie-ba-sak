@@ -28,9 +28,9 @@ data class BehandlingVedtak(
         @Column(name = "stonad_tom", nullable = false)
         var stønadTom: LocalDate,
 
-        @Column(name = "stonad_brev_markdown")
+        @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
         var stønadBrevMarkdown: String = "",
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true
-): BaseEntitet()
+) : BaseEntitet()

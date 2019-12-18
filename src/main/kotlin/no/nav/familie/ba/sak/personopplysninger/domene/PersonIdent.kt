@@ -23,6 +23,7 @@ class PersonIdent : Comparable<PersonIdent> {
     var ident: String? = null
 
     constructor() {}
+
     constructor(ident: String) {
         Objects.requireNonNull(ident, "ident kan ikke være null")
         this.ident = ident
@@ -38,13 +39,13 @@ class PersonIdent : Comparable<PersonIdent> {
         } else if (other == null || this.javaClass != other.javaClass) {
             return false
         }
-        val  otherObject = other as PersonIdent
+        val otherObject = other as PersonIdent
         return ident == otherObject.ident
     }
 
     fun erDnr(): Boolean {
         val n = Character.digit(ident!![0], 10)
-        return n > 3 && n <= 7
+        return n in 4..7
     }
 
     override fun hashCode(): Int {
@@ -100,12 +101,12 @@ class PersonIdent : Comparable<PersonIdent> {
                 return false
             }
             var checksumEn = FNR_LENGDE - sum(foedselsnummer,
-                                              *CHECKSUM_EN_VECTOR) % FNR_LENGDE
+                    *CHECKSUM_EN_VECTOR) % FNR_LENGDE
             if (checksumEn == FNR_LENGDE) {
                 checksumEn = 0
             }
             var checksumTo = FNR_LENGDE - sum(foedselsnummer,
-                                              *CHECKSUM_TO_VECTOR) % FNR_LENGDE
+                    *CHECKSUM_TO_VECTOR) % FNR_LENGDE
             if (checksumTo == FNR_LENGDE) {
                 checksumTo = 0
             }

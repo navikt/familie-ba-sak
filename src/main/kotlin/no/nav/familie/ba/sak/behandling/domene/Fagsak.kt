@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.behandling.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import java.util.*
 import javax.persistence.*
 
-@Entity(name = "Fagsak") @Table(name = "FAGSAK")
+@Entity(name = "Fagsak")
+@Table(name = "FAGSAK")
 data class Fagsak(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq")

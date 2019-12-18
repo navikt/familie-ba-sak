@@ -26,15 +26,15 @@ import kotlin.streams.asSequence
 
 @RestController
 @RequestMapping("/api")
-@ProtectedWithClaims( issuer = "azuread" )
-class MottakController (
+@ProtectedWithClaims(issuer = "azuread")
+class MottakController(
         private val oidcUtil: OIDCUtil,
         private val behandlingslagerService: BehandlingslagerService,
         private val fagsakService: FagsakService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
     val STRING_LENGTH = 10
-    private val charPool : List<Char> = ('A'..'Z') + ('0'..'9')
+    private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
 
     @PostMapping(path = ["/behandling/opprett"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<RestFagsak> {
@@ -49,28 +49,28 @@ class MottakController (
         //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
 
         val søkerPersonIdent = PersonIdent(nyBehandling.fødselsnummer)
-        val fagsak = when(val it = fagsakService.hentFagsakForPersonident(søkerPersonIdent)) {
+        val fagsak = when (val it = fagsakService.hentFagsakForPersonident(søkerPersonIdent)) {
             null -> Fagsak(null, AktørId("1"), søkerPersonIdent)
             else -> it
         }
 
         fagsakService.lagreFagsak(fagsak)
-        val behandling = Behandling( fagsak = fagsak, journalpostID = nyBehandling.journalpostID, type = nyBehandling.behandlingType,
+        val behandling = Behandling(fagsak = fagsak, journalpostID = nyBehandling.journalpostID, type = nyBehandling.behandlingType,
                 saksnummer = ThreadLocalRandom.current()
-                .ints(STRING_LENGTH.toLong(), 0, charPool.size)
-                .asSequence()
-                .map(charPool::get)
-                .joinToString(""))
+                        .ints(STRING_LENGTH.toLong(), 0, charPool.size)
+                        .asSequence()
+                        .map(charPool::get)
+                        .joinToString(""))
 
         behandlingslagerService.lagreBehandling(behandling)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person( personIdent = PersonIdent(nyBehandling.fødselsnummer), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
+        val søker = Person(personIdent = PersonIdent(nyBehandling.fødselsnummer), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
         personopplysningGrunnlag.leggTilPerson(søker)
 
         nyBehandling.barnasFødselsnummer.map {
-            personopplysningGrunnlag.leggTilPerson( Person( personIdent = PersonIdent(it), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag) )
+            personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent(it), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag))
         }
         personopplysningGrunnlag.setAktiv(true)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)

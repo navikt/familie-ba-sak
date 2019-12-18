@@ -22,7 +22,8 @@ abstract class BaseEntitet : Serializable {
     @Column(name = "endret_tid")
     var endretTidspunkt: LocalDateTime? = null
 
-    @Version @Column(name = "versjon", nullable = false)
+    @Version
+    @Column(name = "versjon", nullable = false)
     private val versjon: Long = 0
 
     @PrePersist
