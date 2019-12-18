@@ -9,7 +9,6 @@ import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.net.URI
-import java.nio.charset.Charset
 import java.time.format.DateTimeFormatter
 
 @Service
@@ -23,18 +22,17 @@ class DokGenService(
     }
 
     private fun mapTilBrevfelter(vedtak: BehandlingVedtak): String {
-        val datoFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        //val datoFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val brevfelter = "{\"belop\": %s,\n" + // TODO
                 "\"startDato\": \"%s\",\n" +
-                "\"begrunnelse\": \"%s\",\n" +
                 "\"etterbetaling\": %s,\n" +
-                "\"antallTimer\": %s,\n" +
-                "\"stotteProsent\": %s,\n" +
                 "\"enhet\": \"%s\",\n" +
+                "\"fodselsnummer\": %s,\n" +
+                "\"fodselsdato\": \"%s\",\n" +
                 "\"saksbehandler\": \"%s\"}"
 
         return String.format(
-                brevfelter, 123, vedtak.stønadFom.format(datoFormat), "begrunnelse", false, 1, 100, "enhet", vedtak.ansvarligSaksbehandler
+                brevfelter, 123, "februar 2020", false, "enhet", vedtak.behandling.fagsak.personIdent?.ident, "24.12.19", vedtak.ansvarligSaksbehandler
         )
     }
 
