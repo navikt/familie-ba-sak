@@ -8,7 +8,6 @@ import org.springframework.web.client.RestTemplate
 import java.nio.charset.StandardCharsets
 
 @Configuration
-@Profile("!dev")
 class RestTemplateConfig {
     @Bean
     fun restTemplate(): RestTemplate {
