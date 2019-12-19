@@ -5,12 +5,14 @@ import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Profile
 import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.net.URI
 
 @Service
+@Profile("!mock-dokgen-java")
 class DokGenService(
     @Value("\${FAMILIE_BA_DOKGEN_API_URL}") private val dokgenServiceUri: String,
     private val restTemplate: RestTemplate
@@ -63,4 +65,21 @@ class DokGenService(
         return restTemplate.exchange(requestUrl, httpMethod, HttpEntity(requestBody, headers), String::class.java)
     }
 
+}
+
+@Service
+@Profile("mock-dokgen-java")
+class DokGenServiceMock: DokGenService(
+        dokgenServiceUri = "dokgen_uri_mock",
+        restTemplate = RestTemplate()
+){
+    override fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any?): ResponseEntity<String> {
+        if(requestUrl.path.matches(Regex(".+create-markdown"))){
+            return ResponseEntity.ok("# Vedtaksbrev Markdown (Mock)")
+        }else if(requestUrl.path.matches(Regex(".+to-html"))){
+            return ResponseEntity.ok("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>")
+        }
+
+        return ResponseEntity.ok("")
+    }
 }
