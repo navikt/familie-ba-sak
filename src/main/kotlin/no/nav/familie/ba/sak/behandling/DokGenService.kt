@@ -31,7 +31,7 @@ class DokGenService(
             "\"startDato\": \"%s\",\n" +
             "\"etterbetaling\": %s,\n" +
             "\"enhet\": \"%s\",\n" +
-            "\"fodselsnummer\": %s,\n" +
+            "\"fodselsnummer\": \"%s\",\n" +
             "\"fodselsdato\": \"%s\",\n" +
             "\"saksbehandler\": \"%s\"}"
 
