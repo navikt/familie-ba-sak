@@ -123,7 +123,7 @@ class BehandlingslagerService(
                 )
             }
 
-            return fagsakService.hentRestFagsak(behandlingVedtak.behandling.fagsak.id)
+            return fagsakService.hentRestFagsak(fagsakId)
         }
     }
 

@@ -40,7 +40,7 @@ class FagsakController(
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
 
-        val fagsakRess: Ressurs<RestFagsak> = Result.runCatching { behandlingslagerService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
+        val fagsak: Ressurs<RestFagsak> = Result.runCatching { behandlingslagerService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
@@ -48,7 +48,7 @@ class FagsakController(
                         }
                 )
 
-        return ResponseEntity.ok(fagsakRess)
+        return ResponseEntity.ok(fagsak)
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}/vedtak-html"])
