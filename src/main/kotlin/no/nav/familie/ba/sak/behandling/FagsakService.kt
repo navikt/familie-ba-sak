@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.behandling
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakBarnRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestBehandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
@@ -14,23 +16,24 @@ import org.springframework.stereotype.Service
 
 @Service
 class FagsakService(
-        private val behandlingslagerService: BehandlingslagerService,
+        private val behandlingVedtakBarnRepository: BehandlingVedtakBarnRepository,
         private val fagsakRepository: FagsakRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val behandlingVedtakRepository: BehandlingVedtakRepository) {
+        private val behandlingRepository: BehandlingRepository,
+        private val behandlingVedtakRepository: BehandlingVedtakRepository){
 
     fun hentRestFagsak(fagsakId: Long?): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
                 ?: return Ressurs.failure("Fant ikke fagsak med fagsakId: $fagsakId")
 
-        val behandlinger = behandlingslagerService.hentBehandlinger(fagsak.id)
+        val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id);
 
         val restBehandlinger: List<RestBehandling> = behandlinger.map {
             val personopplysningGrunnlag = it?.id?.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
             val barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent?.ident }
 
-            val vedtakForBehandling = behandlingslagerService.hentVedtakForBehandling(it?.id).map { behandlingVedtak ->
-                val barnBeregning = behandlingslagerService.hentBarnBeregningForVedtak(behandlingVedtak?.id)
+            val vedtakForBehandling = behandlingVedtakRepository.finnVedtakForBehandling(it?.id).map { behandlingVedtak ->
+                val barnBeregning = behandlingVedtakBarnRepository.finnBarnBeregningForVedtak(behandlingVedtak?.id)
                 behandlingVedtak?.toRestBehandlingVedtak(barnBeregning)
             }
 

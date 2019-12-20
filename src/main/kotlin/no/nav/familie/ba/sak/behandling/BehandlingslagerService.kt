@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -18,7 +19,8 @@ class BehandlingslagerService(
         private val behandlingVedtakBarnRepository: BehandlingVedtakBarnRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
-        private val dokGenService: DokGenService
+        private val dokGenService: DokGenService,
+        private val fagsakService: FagsakService
 ) {
     fun nyBehandling(fødselsnummer: String,
                      barnasFødselsnummer: Array<String>,
@@ -77,7 +79,7 @@ class BehandlingslagerService(
         behandlingVedtakRepository.save(behandlingVedtak)
     }
 
-    fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): Ressurs<BehandlingVedtak> {
+    fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
         val behandling = hentBehandlingHvisEksisterer(fagsakId)
                 ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
 
@@ -120,7 +122,7 @@ class BehandlingslagerService(
                 )
             }
 
-            return Ressurs.success(data = behandlingVedtak)
+            return fagsakService.hentRestFagsak(fagsakId)
         }
     }
 
