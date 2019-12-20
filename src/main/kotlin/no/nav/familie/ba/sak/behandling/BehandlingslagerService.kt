@@ -94,14 +94,13 @@ class BehandlingslagerService(
                     ansvarligSaksbehandler = ansvarligSaksbehandler,
                     vedtaksdato = LocalDate.now(),
                     stønadFom = tidligsteStønadFom,
-                    stønadTom = yngsteBarn.plusYears(18),
-                    stønadBrevMarkdown = "" // TODO hent markdown fra dokgen
+                    stønadTom = yngsteBarn.plusYears(18)
             )
 
             behandlingVedtak.stønadBrevMarkdown = Result.runCatching { dokGenService.hentStønadBrevMarkdown(behandlingVedtak) }
                     .fold(
                             onSuccess = { it },
-                            onFailure = { e -> return Ressurs.failure("Klart ikke å generer markdown", e) }
+                            onFailure = { e -> return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.", e) }
                     )
 
 
@@ -128,8 +127,8 @@ class BehandlingslagerService(
     }
 
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
-        val behandlingVedtak = behandlingVedtakRepository.finnBehandlingVedtak(behandlingId)
-                ?: return Ressurs.failure("Vedtak ikke funnet")
+        val behandlingVedtak = behandlingVedtakRepository.findByBehandlingAndAktiv(behandlingId)
+                ?: return Ressurs.failure("Behandling ikke funnet")
         val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown) }
                 .fold(
                         onSuccess = { it },

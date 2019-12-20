@@ -88,7 +88,7 @@ class BehandlingIntegrationTest(
         val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
         behandlingslagerService.lagreBehandlingVedtak(behandlingVedtak)
 
-        val hentetBehandlingVedtak = behandlingVedtakRepository.finnBehandlingVedtak(behandling.id)
+        val hentetBehandlingVedtak = behandlingVedtakRepository.findByBehandlingAndAktiv(behandling.id)
         Assertions.assertNotNull(hentetBehandlingVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetBehandlingVedtak?.ansvarligSaksbehandler)
     }
