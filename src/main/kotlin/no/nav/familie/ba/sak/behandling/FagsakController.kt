@@ -35,12 +35,12 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/fagsak/{fagsakId}/nytt-vedtak"])
-    fun nyttVedtak(@PathVariable fagsakId: Long, @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<BehandlingVedtak>> {
+    fun nyttVedtak(@PathVariable fagsakId: Long, @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
 
-        val behandlingVedtakRessurs: Ressurs<BehandlingVedtak> = Result.runCatching { behandlingslagerService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
+        val fagsakRess: Ressurs<RestFagsak> = Result.runCatching { behandlingslagerService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
@@ -48,7 +48,7 @@ class FagsakController(
                         }
                 )
 
-        return ResponseEntity.ok(behandlingVedtakRessurs)
+        return ResponseEntity.ok(fagsakRess)
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}/vedtak-html"])
