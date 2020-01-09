@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -31,6 +32,7 @@ class MottakController(
         private val oidcUtil: OIDCUtil,
         private val behandlingService: BehandlingService,
         private val fagsakService: FagsakService,
+        private val integrasjonTjeneste: IntegrasjonTjeneste,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
     val STRING_LENGTH = 10
@@ -38,6 +40,7 @@ class MottakController(
 
     @PostMapping(path = ["/behandling/opprett"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<RestFagsak> {
+        // TODO flytt dette til en service
         val saksbehandlerId = try {
             oidcUtil.getClaim("preferred_username") ?: "VL"
         } catch (e: JwtTokenValidatorException) {
@@ -46,7 +49,7 @@ class MottakController(
 
         FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
 
-        //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
+        // val søkerAktørId = integrasjonTjeneste.hentAktørId(nyBehandling.fødselsnummer);
 
         val søkerPersonIdent = PersonIdent(nyBehandling.fødselsnummer)
         val fagsak = when (val it = fagsakService.hentFagsakForPersonident(søkerPersonIdent)) {
@@ -66,11 +69,21 @@ class MottakController(
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person(personIdent = PersonIdent(nyBehandling.fødselsnummer), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
+        val søker = Person(
+                personIdent = PersonIdent(nyBehandling.fødselsnummer),
+                type = PersonType.SØKER,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
+        )
         personopplysningGrunnlag.leggTilPerson(søker)
 
         nyBehandling.barnasFødselsnummer.map {
-            personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent(it), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag))
+            personopplysningGrunnlag.leggTilPerson(Person(
+                    personIdent = PersonIdent(it),
+                    type = PersonType.BARN,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fødselsdato = integrasjonTjeneste.hentPersoninfoFor(it)?.fødselsdato
+            ))
         }
         personopplysningGrunnlag.setAktiv(true)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)

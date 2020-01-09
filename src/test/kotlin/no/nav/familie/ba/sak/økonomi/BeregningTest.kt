@@ -9,8 +9,6 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Personopplysni
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakBarn
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.fpsak.tidsserie.LocalDateSegment
-import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -20,8 +18,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.Duration
 import java.time.LocalDate
-import java.util.concurrent.TimeUnit
-import java.util.function.Predicate
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)

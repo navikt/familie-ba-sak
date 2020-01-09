@@ -69,8 +69,8 @@ class BehandlingIntegrationTest(
         val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person(personIdent = PersonIdent("0"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
-        val barn = Person(personIdent = PersonIdent("12345678910"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag)
+        val søker = Person(personIdent = PersonIdent("0"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now())
+        val barn = Person(personIdent = PersonIdent("12345678910"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now())
         personopplysningGrunnlag.leggTilPerson(søker)
         personopplysningGrunnlag.leggTilPerson(barn)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -116,10 +116,10 @@ class BehandlingIntegrationTest(
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person(personIdent = PersonIdent("123456789010"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
+        val søker = Person(personIdent = PersonIdent("123456789010"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now())
         personopplysningGrunnlag.leggTilPerson(søker)
 
-        personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("123456789011"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag))
+        personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("123456789011"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now()))
         personopplysningGrunnlag.setAktiv(true)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 

@@ -34,7 +34,6 @@ class ØkonomiService(
         oAuth2AccessTokenService
 ) {
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<*>> {
-        System.out.println("IVERKSETTER MOT OPPDRAG")
         val headers = HttpHeaders()
         headers.add("Content-Type", "application/json;charset=UTF-8")
         headers.acceptCharset = listOf(Charsets.UTF_8)

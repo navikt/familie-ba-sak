@@ -17,7 +17,8 @@ class Person(
         @Enumerated(EnumType.STRING) @Column(name = "type")
         val type: PersonType? = null,
 
-        val fødselsdato: LocalDate? = null,
+        @Column(name = "fodselsdato", nullable = false)
+        val fødselsdato: LocalDate?,
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))

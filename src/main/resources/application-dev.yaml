@@ -5,20 +5,20 @@ no.nav.security.jwt:
     cookie_name: azure_token
   client:
     registration:
-      integrasjoner-onbehalfof:
+      familie-integrasjoner-onbehalfof:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
         token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${INTEGRASJONER_SCOPE}
+        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
-      integrasjoner-clientcredentials:
+      familie-integrasjoner-clientcredentials:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
         token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
         grant-type: client_credentials
-        scope: ${INTEGRASJONER_SCOPE}
+        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
@@ -54,7 +54,6 @@ spring:
     enabled: false
 
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
-FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 
 #Unleash
 UNLEASH_API_URL: http://localhost

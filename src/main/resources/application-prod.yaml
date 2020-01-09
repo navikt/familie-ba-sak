@@ -24,6 +24,15 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-oppdrag-clientcredentials:
+        resource-url: ${FAMILIE_OPPDRAG_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: ${FAMILIE_OPPDRAG_SCOPE}
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 spring:
   datasource:
@@ -35,6 +44,7 @@ APPDYNAMICS_CONTROLLER_PORT: 443
 APPDYNAMICS_CONTROLLER_SSL_ENABLED: true
 APPDYNAMICS_AGENT_ACCOUNT_NAME: PROD
 
+FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
 FAMILIE_BA_DOKGEN_API_URL: http://familie-ba-dokgen
 
