@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.domene.personopplysninger
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import java.time.LocalDate
 import javax.persistence.*
 
 @Entity(name = "Person")
@@ -15,6 +16,8 @@ class Person(
         //SØKER, BARN, ANNENPART
         @Enumerated(EnumType.STRING) @Column(name = "type")
         val type: PersonType? = null,
+
+        val fødselsdato: LocalDate? = null,
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))

@@ -26,7 +26,8 @@ class BehandlingService(
         private val personRepository: PersonRepository,
         private val dokGenService: DokGenService,
         private val fagsakService: FagsakService,
-        private val økonomiService: ØkonomiService
+        private val økonomiService: ØkonomiService,
+        private val beregning: Beregning
 ) {
     fun nyBehandling(fødselsnummer: String,
                      barnasFødselsnummer: Array<String>,
@@ -70,7 +71,7 @@ class BehandlingService(
         return behandlingVedtakRepository.finnVedtakForBehandling(behandlingId)
     }
 
-    fun hentBarnBeregningForVedtak(behandlingVedtakId: Long?): List<BehandlingVedtakBarn?> {
+    fun hentBarnBeregningForVedtak(behandlingVedtakId: Long?): List<BehandlingVedtakBarn> {
         return behandlingVedtakBarnRepository.finnBarnBeregningForVedtak(behandlingVedtakId)
     }
 
@@ -139,24 +140,32 @@ class BehandlingService(
         val behandlingVedtak = hentBehandlingVedtakHvisEksisterer(behandlingId = behandling.id)
                 ?: throw Error("Fant ikke behandlingsvedtak på behandling ${behandling.id}")
 
+        val barnBeregning = hentBarnBeregningForVedtak(behandlingVedtak.id)
+        val tidslinje = beregning.beregnUtbetalingsperioder(barnBeregning)
+        val utbetalingsperioder = tidslinje.toSegments().map {
+            Utbetalingsperiode(
+                    erEndringPåEksisterendePeriode = false,
+                    datoForVedtak = behandlingVedtak.vedtaksdato,
+                    klassifisering = "BAOROSMS",
+                    vedtakdatoFom = it.fom,
+                    vedtakdatoTom = it.tom,
+                    sats = BigDecimal(it.value),
+                    satsType = Utbetalingsperiode.SatsType.MND,
+                    utbetalesTil = behandling.fagsak.personIdent?.ident.toString(),
+                    behandlingId = behandling.id!!,
+                    opphør = null
+            )
+        }
+
+
+
         val utbetalingsoppdrag = Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
                 kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
                 fagSystem = "IT05",
                 saksnummer = fagsakId.toString(),
                 aktoer = behandling.fagsak.personIdent?.ident.toString(),
-                utbetalingsperiode = listOf(Utbetalingsperiode(
-                        erEndringPåEksisterendePeriode = false,
-                        datoForVedtak = behandlingVedtak.vedtaksdato,
-                        klassifisering = "BAOROSMS",
-                        vedtakdatoFom = behandlingVedtak.stønadFom,
-                        vedtakdatoTom = behandlingVedtak.stønadTom,
-                        sats = BigDecimal(1054),
-                        satsType = Utbetalingsperiode.SatsType.MND,
-                        utbetalesTil = behandling.fagsak.personIdent?.ident.toString(),
-                        behandlingId = behandling.id!!,
-                        opphør = null
-                ))
+                utbetalingsperiode = utbetalingsperioder
         )
 
         Result.runCatching { økonomiService.iverksettOppdrag(utbetalingsoppdrag) }
@@ -167,7 +176,6 @@ class BehandlingService(
                             return fagsakService.hentRestFagsak(fagsakId)
                         },
                         onFailure = {
-                            System.out.println(it)
                             return Ressurs.failure("Iverksetting mot oppdrag feilet", it)
                         }
                 )
