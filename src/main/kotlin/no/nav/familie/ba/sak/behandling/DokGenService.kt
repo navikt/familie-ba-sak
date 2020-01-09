@@ -64,7 +64,6 @@ class DokGenService(
 
         return restTemplate.exchange(requestUrl, httpMethod, HttpEntity(requestBody, headers), String::class.java)
     }
-
 }
 
 @Service

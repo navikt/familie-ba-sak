@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.*
 class FagsakController(
         private val oidcUtil: OIDCUtil,
         private val fagsakService: FagsakService,
-        private val behandlingslagerService: BehandlingslagerService
+        private val behandlingService: BehandlingService
 ) {
     @GetMapping(path = ["/fagsak/{fagsakId}"])
     fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
@@ -40,7 +39,7 @@ class FagsakController(
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
 
-        val fagsak: Ressurs<RestFagsak> = Result.runCatching { behandlingslagerService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
+        val fagsak: Ressurs<RestFagsak> = Result.runCatching { behandlingService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
@@ -51,17 +50,34 @@ class FagsakController(
         return ResponseEntity.ok(fagsak)
     }
 
+    @PostMapping(path = ["/fagsak/{fagsakId}/iverksett-vedtak"])
+    fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+
+        logger.info("{} iverksetter vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
+
+        val fagsak: Ressurs<RestFagsak> = Result.runCatching { behandlingService.iverksettVedtak(fagsakId, saksbehandlerId) }
+                .fold(
+                        onSuccess = { it },
+                        onFailure = { e ->
+                            Ressurs.failure("Klarte ikke å iverksette vedtak", e)
+                        }
+                )
+
+        return ResponseEntity.ok(fagsak)
+    }
+
     @GetMapping(path = ["/behandling/{behandlingId}/vedtak-html"])
     fun hentHtmlVedtak(@PathVariable behandlingId: Long): Ressurs<String> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
         logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
-        val html = behandlingslagerService.hentHtmlVedtakForBehandling(behandlingId)
+        val html = behandlingService.hentHtmlVedtakForBehandling(behandlingId)
         logger.debug(html.data)
 
         return html
     }
 
     companion object {
-        val logger: Logger = LoggerFactory.getLogger(BehandlingslagerService::class.java)
+        val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
 }

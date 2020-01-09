@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.mottak
 
-import no.nav.familie.ba.sak.behandling.BehandlingslagerService
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
@@ -29,7 +29,7 @@ import kotlin.streams.asSequence
 @ProtectedWithClaims(issuer = "azuread")
 class MottakController(
         private val oidcUtil: OIDCUtil,
-        private val behandlingslagerService: BehandlingslagerService,
+        private val behandlingService: BehandlingService,
         private val fagsakService: FagsakService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
@@ -62,7 +62,7 @@ class MottakController(
                         .map(charPool::get)
                         .joinToString(""))
 
-        behandlingslagerService.lagreBehandling(behandling)
+        behandlingService.lagreBehandling(behandling)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 

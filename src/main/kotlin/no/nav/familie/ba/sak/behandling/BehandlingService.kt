@@ -7,12 +7,17 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppdrag.Opphør
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
-class BehandlingslagerService(
+class BehandlingService(
         private val fagsakRepository: FagsakRepository,
         private val behandlingRepository: BehandlingRepository,
         private val behandlingVedtakRepository: BehandlingVedtakRepository,
@@ -20,7 +25,8 @@ class BehandlingslagerService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
         private val dokGenService: DokGenService,
-        private val fagsakService: FagsakService
+        private val fagsakService: FagsakService,
+        private val økonomiService: ØkonomiService
 ) {
     fun nyBehandling(fødselsnummer: String,
                      barnasFødselsnummer: Array<String>,
@@ -124,6 +130,47 @@ class BehandlingslagerService(
 
             return fagsakService.hentRestFagsak(fagsakId)
         }
+    }
+
+    fun iverksettVedtak(fagsakId: Long, saksbehandlerId: String): Ressurs<RestFagsak> {
+        val behandling = hentBehandlingHvisEksisterer(fagsakId)
+                ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+
+        val behandlingVedtak = hentBehandlingVedtakHvisEksisterer(behandlingId = behandling.id)
+                ?: throw Error("Fant ikke behandlingsvedtak på behandling ${behandling.id}")
+
+        val utbetalingsoppdrag = Utbetalingsoppdrag(
+                saksbehandlerId = saksbehandlerId,
+                kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+                fagSystem = "IT05",
+                saksnummer = fagsakId.toString(),
+                aktoer = behandling.fagsak.personIdent?.ident.toString(),
+                utbetalingsperiode = listOf(Utbetalingsperiode(
+                        erEndringPåEksisterendePeriode = false,
+                        datoForVedtak = behandlingVedtak.vedtaksdato,
+                        klassifisering = "BAOROSMS",
+                        vedtakdatoFom = behandlingVedtak.stønadFom,
+                        vedtakdatoTom = behandlingVedtak.stønadTom,
+                        sats = BigDecimal(1054),
+                        satsType = Utbetalingsperiode.SatsType.MND,
+                        utbetalesTil = behandling.fagsak.personIdent?.ident.toString(),
+                        behandlingId = behandling.id!!,
+                        opphør = null
+                ))
+        )
+
+        Result.runCatching { økonomiService.iverksettOppdrag(utbetalingsoppdrag) }
+                .fold(
+                        onSuccess = {
+                            // Oppdater status på vedtak/behandling
+                            behandlingVedtakRepository.save(behandlingVedtak)
+                            return fagsakService.hentRestFagsak(fagsakId)
+                        },
+                        onFailure = {
+                            System.out.println(it)
+                            return Ressurs.failure("Iverksetting mot oppdrag feilet", it)
+                        }
+                )
     }
 
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
