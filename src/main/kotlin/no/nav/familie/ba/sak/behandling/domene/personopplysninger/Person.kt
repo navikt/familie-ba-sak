@@ -17,7 +17,7 @@ class Person(
         @Enumerated(EnumType.STRING) @Column(name = "type")
         val type: PersonType? = null,
 
-        @Column(name = "fodselsdato", nullable = false)
+        @Column(name = "foedselsdato", nullable = false)
         val fødselsdato: LocalDate?,
 
         @Embedded

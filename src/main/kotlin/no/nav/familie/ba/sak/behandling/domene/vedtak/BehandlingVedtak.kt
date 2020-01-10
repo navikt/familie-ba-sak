@@ -31,6 +31,14 @@ data class BehandlingVedtak(
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
         var stønadBrevMarkdown: String = "",
 
+        @Enumerated(EnumType.STRING)
+        @Column(name = "status", nullable = false)
+        var status: BehandlingVedtakStatus = BehandlingVedtakStatus.OPPRETTET,
+
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true
 ) : BaseEntitet()
+
+enum class BehandlingVedtakStatus {
+        OPPRETTET, SENDT_TIL_IVERKSETTING, IVERKSATT
+}

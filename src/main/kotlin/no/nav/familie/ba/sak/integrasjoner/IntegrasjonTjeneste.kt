@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner
 
+import com.fasterxml.jackson.module.kotlin.convertValue
 import no.nav.familie.ba.sak.common.BaseService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -33,23 +34,6 @@ class IntegrasjonTjeneste (
         clientConfigurationProperties: ClientConfigurationProperties,
         oAuth2AccessTokenService: OAuth2AccessTokenService
 ) : BaseService(OAUTH2_CLIENT_CONFIG_KEY, restTemplateBuilderMedProxy, clientConfigurationProperties, oAuth2AccessTokenService) {
-    private fun <T> requestMedPersonIdent(uri: URI, personident: String, clazz: Class<T>): ResponseEntity<T> {
-        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
-        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-        headers.add(NavHttpHeaders.NAV_PERSONIDENT.asString(), personident)
-        val httpEntity: HttpEntity<*> = HttpEntity<Any?>(headers)
-        return request(uri, HttpMethod.GET, clazz, httpEntity)
-    }
-
-    private fun <T> request(uri: URI, method: HttpMethod, clazz: Class<T>, httpEntity: HttpEntity<*>): ResponseEntity<T> {
-        val ressursResponse = restTemplate.exchange(uri, method, httpEntity, Ressurs::class.java)
-        if (ressursResponse.body == null) {
-            throw IntegrasjonException("Response kan ikke være tom", null, uri, null)
-        }
-
-        return ResponseEntity.status(ressursResponse.statusCode).body(objectMapper.convertValue(ressursResponse.body, clazz))
-    }
-
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentAktørId(personident: String?): AktørId? {
         if (personident == null || personident.isEmpty()) {
@@ -58,9 +42,9 @@ class IntegrasjonTjeneste (
         val uri = URI.create("$integrasjonerServiceUri/aktoer/v1")
         logger.info("Henter aktørId fra $integrasjonerServiceUri")
         return try {
-            val response: ResponseEntity<MutableMap<*, *>> = requestMedPersonIdent(uri, personident, MutableMap::class.java)
+            val response: ResponseEntity<Ressurs<MutableMap<*, *>>> = requestMedPersonIdent(uri, personident)
             secureLogger.info("Vekslet inn fnr: {} til aktørId: {}", personident, response.body)
-            val aktørId = response.body?.get("aktørId").toString()
+            val aktørId = response.body?.data?.get("aktørId").toString()
             if (aktørId.isEmpty()) {
                 throw IntegrasjonException("AktørId fra integrasjonstjenesten er tom")
             } else {
@@ -76,9 +60,9 @@ class IntegrasjonTjeneste (
         val uri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info")
         logger.info("Henter personinfo fra $integrasjonerServiceUri")
         return try {
-            val response = requestMedPersonIdent(uri, personIdent, Personinfo::class.java)
-            secureLogger.info("Personinfo for {}: {}", personIdent, response.body)
-            response.body
+            val response = requestMedPersonIdent<Ressurs<Personinfo>>(uri, personIdent)
+            secureLogger.info("Personinfo for {}: {}", personIdent, response.body?.data)
+            objectMapper.convertValue<Personinfo>(response.body?.data, Personinfo::class.java)
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
         }

@@ -124,7 +124,7 @@ class BehandlingService(
                                 behandlingVedtak = behandlingVedtak,
                                 beløp = it.beløp,
                                 stønadFom = it.stønadFom,
-                                stønadTom = LocalDate.now() // TODO plus 18 år fra fødselsdato
+                                stønadTom = barn.fødselsdato?.plusYears(18)!!
                         )
                 )
             }
@@ -139,6 +139,12 @@ class BehandlingService(
 
         val behandlingVedtak = hentBehandlingVedtakHvisEksisterer(behandlingId = behandling.id)
                 ?: throw Error("Fant ikke behandlingsvedtak på behandling ${behandling.id}")
+
+        if (behandlingVedtak.status == BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING) {
+            return Ressurs.failure("Vedtaket er allerede sendt til oppdrag og venter på kvittering")
+        } else if (behandlingVedtak.status == BehandlingVedtakStatus.IVERKSATT) {
+            return Ressurs.failure("Vedtaket er allerede iverksatt")
+        }
 
         val barnBeregning = hentBarnBeregningForVedtak(behandlingVedtak.id)
         val tidslinje = beregning.beregnUtbetalingsperioder(barnBeregning)
@@ -157,8 +163,6 @@ class BehandlingService(
             )
         }
 
-
-
         val utbetalingsoppdrag = Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
                 kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
@@ -171,7 +175,7 @@ class BehandlingService(
         Result.runCatching { økonomiService.iverksettOppdrag(utbetalingsoppdrag) }
                 .fold(
                         onSuccess = {
-                            // Oppdater status på vedtak/behandling
+                            behandlingVedtak.status = BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING
                             behandlingVedtakRepository.save(behandlingVedtak)
                             return fagsakService.hentRestFagsak(fagsakId)
                         },
