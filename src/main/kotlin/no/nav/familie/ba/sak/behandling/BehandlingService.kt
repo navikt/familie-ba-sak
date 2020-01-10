@@ -152,7 +152,7 @@ class BehandlingService(
             Utbetalingsperiode(
                     erEndringPåEksisterendePeriode = false,
                     datoForVedtak = behandlingVedtak.vedtaksdato,
-                    klassifisering = "BAOROSMS",
+                    klassifisering = "BATR",
                     vedtakdatoFom = it.fom,
                     vedtakdatoTom = it.tom,
                     sats = BigDecimal(it.value),
@@ -166,7 +166,7 @@ class BehandlingService(
         val utbetalingsoppdrag = Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
                 kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-                fagSystem = "IT05",
+                fagSystem = "BA",
                 saksnummer = fagsakId.toString(),
                 aktoer = behandling.fagsak.personIdent?.ident.toString(),
                 utbetalingsperiode = utbetalingsperioder
