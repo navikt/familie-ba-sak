@@ -44,12 +44,6 @@ class BehandlingIntegrationTest(
         private var behandlingService: BehandlingService,
 
         @Autowired
-        private var fagsakService: FagsakService,
-
-        @Autowired
-        private var beregning: Beregning,
-
-        @Autowired
         private var behandlingVedtakRepository: BehandlingVedtakRepository
 ) {
     val STRING_LENGTH = 10
@@ -140,52 +134,6 @@ class BehandlingIntegrationTest(
         val hentetBehandlingVedtak = behandlingService.hentBehandlingVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetBehandlingVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetBehandlingVedtak?.ansvarligSaksbehandler)
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Iverksett vedtak på aktiv behandling`() {
-        val økonomiKlientMock: ØkonomiKlient = Mockito.mock(ØkonomiKlient::class.java)
-        val økonomiService = ØkonomiService(fagsakService, økonomiKlientMock, beregning, behandlingService)
-
-        val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        Assertions.assertNotNull(behandling.fagsak.id)
-
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
-
-        val søker = Person(personIdent = PersonIdent("123456789010"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now())
-        personopplysningGrunnlag.leggTilPerson(søker)
-
-        personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("123456789011"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now()))
-        personopplysningGrunnlag.setAktiv(true)
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-
-        behandlingService.nyttVedtakForAktivBehandling(
-                fagsakId = behandling.fagsak.id ?: 1L,
-                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now()))),
-                ansvarligSaksbehandler = "ansvarligSaksbehandler"
-        )
-
-        val hentetBehandlingVedtak = behandlingService.hentBehandlingVedtakHvisEksisterer(behandling.id)
-        Assertions.assertNotNull(hentetBehandlingVedtak)
-        Assertions.assertEquals("ansvarligSaksbehandler", hentetBehandlingVedtak?.ansvarligSaksbehandler)
-
-        Mockito.`when`(økonomiKlientMock.iverksettOppdrag(MockitoHelper.anyObject()))
-                .thenReturn(ResponseEntity.ok(Ressurs.success("Oppdrag sendt ok")))
-        økonomiService.iverksettVedtak(behandlingVedtak = hentetBehandlingVedtak!!, saksbehandlerId = "ansvarligSaksbehandler")
-
-        val oppdatertBehandlingVedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
-        Assertions.assertEquals(BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandlingVedtak?.status)
-    }
-
-    object MockitoHelper {
-        fun <T> anyObject(): T {
-            Mockito.any<T>()
-            return uninitialized()
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        fun <T> uninitialized(): T =  null as T
     }
 
     @Test

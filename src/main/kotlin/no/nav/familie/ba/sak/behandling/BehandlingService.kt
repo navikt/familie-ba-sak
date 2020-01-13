@@ -24,9 +24,7 @@ class BehandlingService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
         private val dokGenService: DokGenService,
-        private val fagsakService: FagsakService,
-        private val økonomiKlient: ØkonomiKlient,
-        private val beregning: Beregning
+        private val fagsakService: FagsakService
 ) {
     fun nyBehandling(fødselsnummer: String,
                      barnasFødselsnummer: Array<String>,
