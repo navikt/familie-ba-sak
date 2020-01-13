@@ -1,48 +1,66 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.common.BaseService
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.Beregning
+import no.nav.familie.ba.sak.behandling.FagsakService
+import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.log.NavHttpHeaders
-import no.nav.familie.log.mdc.MDCConstants
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
-import no.nav.security.token.support.client.spring.ClientConfigurationProperties
-import org.slf4j.MDC
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Service
-import java.net.URI
-
-private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-oppdrag-clientcredentials"
+import java.math.BigDecimal
 
 @Service
 class ØkonomiService(
-        @Value("\${FAMILIE_OPPDRAG_API_URL}")
-        private val familieOppdragUri: String,
-        restTemplateBuilderMedProxy: RestTemplateBuilder,
-        clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService
-): BaseService(
-        OAUTH2_CLIENT_CONFIG_KEY,
-        restTemplateBuilderMedProxy,
-        clientConfigurationProperties,
-        oAuth2AccessTokenService
+        private val fagsakService: FagsakService,
+        private val økonomiKlient: ØkonomiKlient,
+        private val beregning: Beregning,
+        private val behandlingService: BehandlingService
 ) {
-    fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<*>> {
-        val headers = HttpHeaders()
-        headers.add("Content-Type", "application/json;charset=UTF-8")
-        headers.acceptCharset = listOf(Charsets.UTF_8)
-        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+    fun iverksettVedtak(behandlingVedtak: BehandlingVedtak, saksbehandlerId: String): Ressurs<RestFagsak> {
+        if (behandlingVedtak.status == BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING) {
+            return Ressurs.failure("Vedtaket er allerede sendt til oppdrag og venter på kvittering")
+        } else if (behandlingVedtak.status == BehandlingVedtakStatus.IVERKSATT) {
+            return Ressurs.failure("Vedtaket er allerede iverksatt")
+        }
 
-        return restTemplate.exchange(
-                URI.create("$familieOppdragUri/oppdrag"),
-                HttpMethod.POST,
-                HttpEntity(objectMapper.writeValueAsString(utbetalingsoppdrag), headers),
-                Ressurs::class.java)
+        val barnBeregning = behandlingService.hentBarnBeregningForVedtak(behandlingVedtak.id)
+        val tidslinje = beregning.beregnUtbetalingsperioder(barnBeregning)
+        val utbetalingsperioder = tidslinje.toSegments().map {
+            Utbetalingsperiode(
+                    erEndringPåEksisterendePeriode = false,
+                    datoForVedtak = behandlingVedtak.vedtaksdato,
+                    klassifisering = "BATR",
+                    vedtakdatoFom = it.fom,
+                    vedtakdatoTom = it.tom,
+                    sats = BigDecimal(it.value),
+                    satsType = Utbetalingsperiode.SatsType.MND,
+                    utbetalesTil = behandlingVedtak.behandling.fagsak.personIdent?.ident.toString(),
+                    behandlingId = behandlingVedtak.behandling.id!!,
+                    opphør = null
+            )
+        }
+
+        val utbetalingsoppdrag = Utbetalingsoppdrag(
+                saksbehandlerId = saksbehandlerId,
+                kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+                fagSystem = "BA",
+                saksnummer = behandlingVedtak.behandling.fagsak.id.toString(),
+                aktoer = behandlingVedtak.behandling.fagsak.personIdent?.ident.toString(),
+                utbetalingsperiode = utbetalingsperioder
+        )
+
+        Result.runCatching { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
+                .fold(
+                        onSuccess = {
+                            behandlingService.oppdatertStatusPåBehandlingVedtak(behandlingVedtak, BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING)
+                            return fagsakService.hentRestFagsak(behandlingVedtak.behandling.fagsak.id)
+                        },
+                        onFailure = {
+                            return Ressurs.failure("Iverksetting mot oppdrag feilet", it)
+                        }
+                )
     }
 }

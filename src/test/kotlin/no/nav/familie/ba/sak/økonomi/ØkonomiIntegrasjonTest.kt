@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.økonomi
 
-import DevLauncher
 import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.HttpTestBase
 import no.nav.familie.ba.sak.config.ApplicationConfig
@@ -26,7 +25,7 @@ class ØkonomiIntegrasjonTest: HttpTestBase(
         18085
 ) {
     @Autowired
-    lateinit var økonomiService: ØkonomiService
+    lateinit var økonomiKlient: ØkonomiKlient
 
     @Test
     fun `Skal iverksette vedtak mot familie oppdrag`() {
@@ -57,7 +56,7 @@ class ØkonomiIntegrasjonTest: HttpTestBase(
                 ))
         )
 
-        val result = økonomiService.iverksettOppdrag(utbetalingsoppdrag)
+        val result = økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
 
         assertEquals(
                 responseBody,

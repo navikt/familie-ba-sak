@@ -7,9 +7,8 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Service
@@ -26,7 +25,7 @@ class BehandlingService(
         private val personRepository: PersonRepository,
         private val dokGenService: DokGenService,
         private val fagsakService: FagsakService,
-        private val økonomiService: ØkonomiService,
+        private val økonomiKlient: ØkonomiKlient,
         private val beregning: Beregning
 ) {
     fun nyBehandling(fødselsnummer: String,
@@ -67,12 +66,21 @@ class BehandlingService(
         behandlingRepository.save(behandling)
     }
 
+    fun hentAktivVedtakForBehandling(behandlingId: Long?): BehandlingVedtak? {
+        return behandlingVedtakRepository.findByBehandlingAndAktiv(behandlingId);
+    }
+
     fun hentVedtakForBehandling(behandlingId: Long?): List<BehandlingVedtak?> {
         return behandlingVedtakRepository.finnVedtakForBehandling(behandlingId)
     }
 
     fun hentBarnBeregningForVedtak(behandlingVedtakId: Long?): List<BehandlingVedtakBarn> {
         return behandlingVedtakBarnRepository.finnBarnBeregningForVedtak(behandlingVedtakId)
+    }
+
+    fun oppdatertStatusPåBehandlingVedtak(behandlingVedtak: BehandlingVedtak, status: BehandlingVedtakStatus) {
+        behandlingVedtak.status = status
+        behandlingVedtakRepository.save(behandlingVedtak)
     }
 
     fun lagreBehandlingVedtak(behandlingVedtak: BehandlingVedtak) {
@@ -133,60 +141,8 @@ class BehandlingService(
         }
     }
 
-    fun iverksettVedtak(fagsakId: Long, saksbehandlerId: String): Ressurs<RestFagsak> {
-        val behandling = hentBehandlingHvisEksisterer(fagsakId)
-                ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
-
-        val behandlingVedtak = hentBehandlingVedtakHvisEksisterer(behandlingId = behandling.id)
-                ?: throw Error("Fant ikke behandlingsvedtak på behandling ${behandling.id}")
-
-        if (behandlingVedtak.status == BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING) {
-            return Ressurs.failure("Vedtaket er allerede sendt til oppdrag og venter på kvittering")
-        } else if (behandlingVedtak.status == BehandlingVedtakStatus.IVERKSATT) {
-            return Ressurs.failure("Vedtaket er allerede iverksatt")
-        }
-
-        val barnBeregning = hentBarnBeregningForVedtak(behandlingVedtak.id)
-        val tidslinje = beregning.beregnUtbetalingsperioder(barnBeregning)
-        val utbetalingsperioder = tidslinje.toSegments().map {
-            Utbetalingsperiode(
-                    erEndringPåEksisterendePeriode = false,
-                    datoForVedtak = behandlingVedtak.vedtaksdato,
-                    klassifisering = "BATR",
-                    vedtakdatoFom = it.fom,
-                    vedtakdatoTom = it.tom,
-                    sats = BigDecimal(it.value),
-                    satsType = Utbetalingsperiode.SatsType.MND,
-                    utbetalesTil = behandling.fagsak.personIdent?.ident.toString(),
-                    behandlingId = behandling.id!!,
-                    opphør = null
-            )
-        }
-
-        val utbetalingsoppdrag = Utbetalingsoppdrag(
-                saksbehandlerId = saksbehandlerId,
-                kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-                fagSystem = "BA",
-                saksnummer = fagsakId.toString(),
-                aktoer = behandling.fagsak.personIdent?.ident.toString(),
-                utbetalingsperiode = utbetalingsperioder
-        )
-
-        Result.runCatching { økonomiService.iverksettOppdrag(utbetalingsoppdrag) }
-                .fold(
-                        onSuccess = {
-                            behandlingVedtak.status = BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING
-                            behandlingVedtakRepository.save(behandlingVedtak)
-                            return fagsakService.hentRestFagsak(fagsakId)
-                        },
-                        onFailure = {
-                            return Ressurs.failure("Iverksetting mot oppdrag feilet", it)
-                        }
-                )
-    }
-
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
-        val behandlingVedtak = behandlingVedtakRepository.findByBehandlingAndAktiv(behandlingId)
+        val behandlingVedtak = hentAktivVedtakForBehandling(behandlingId)
                 ?: return Ressurs.failure("Behandling ikke funnet")
         val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown) }
                 .fold(
