@@ -87,7 +87,7 @@ class BehandlingIntegrationTest(
     @Tag("integration")
     fun `Opprett behandling vedtak`() {
         val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
+        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
         behandlingService.lagreBehandlingVedtak(behandlingVedtak)
 
         val hentetBehandlingVedtak = behandlingVedtakRepository.findByBehandlingAndAktiv(behandling.id)
@@ -99,10 +99,10 @@ class BehandlingIntegrationTest(
     @Tag("integration")
     fun `Opprett 2 behandling vedtak og se at det siste vedtaket får aktiv satt til true`() {
         val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
+        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
         behandlingService.lagreBehandlingVedtak(behandlingVedtak)
 
-        val behandling2Vedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler2", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
+        val behandling2Vedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler2", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
         behandlingService.lagreBehandlingVedtak(behandling2Vedtak)
 
         val hentetBehandlingVedtak = behandlingService.hentBehandlingVedtakHvisEksisterer(behandling.id)

@@ -22,12 +22,6 @@ data class BehandlingVedtak(
         @Column(name = "vedtaksdato", nullable = false)
         val vedtaksdato: LocalDate,
 
-        @Column(name = "stonad_fom", nullable = false)
-        var stønadFom: LocalDate,
-
-        @Column(name = "stonad_tom", nullable = false)
-        var stønadTom: LocalDate,
-
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
         var stønadBrevMarkdown: String = "",
 

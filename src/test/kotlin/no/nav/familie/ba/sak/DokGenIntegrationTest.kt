@@ -78,9 +78,7 @@ class DokGenIntegrationTest{
                         aktiv = true
                 ),
                 ansvarligSaksbehandler = "whoknows",
-                vedtaksdato = LocalDate.MIN,
-                stønadFom = LocalDate.MIN,
-                stønadTom = LocalDate.MIN
+                vedtaksdato = LocalDate.MIN
         ))
 
         assert(markdown.equals("mockup_response"))
@@ -121,9 +119,7 @@ class DokGenIntegrationTest{
                         aktiv = true
                 ),
                 ansvarligSaksbehandler = "whoknows",
-                vedtaksdato = LocalDate.MIN,
-                stønadFom = LocalDate.MIN,
-                stønadTom = LocalDate.MIN
+                vedtaksdato = LocalDate.MIN
         ))
         assert(markdown.isEmpty())
     }

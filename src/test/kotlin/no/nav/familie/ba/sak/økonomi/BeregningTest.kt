@@ -33,7 +33,7 @@ class BeregningTest(
     @Test
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
         val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "lagRandomSaksnummer")
-        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
+        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
 
         val barn1Fødselsdato = LocalDate.now()
         val barn2Fødselsdato = LocalDate.now().plusYears(2)

@@ -10,9 +10,7 @@ data class RestBehandlingVedtak(
         val ansvarligSaksbehandler: String,
         val vedtaksdato: LocalDate,
         val barnasBeregning: List<RestBehandlingVedtakBarn?>,
-        val status: BehandlingVedtakStatus,
-        val stønadFom: LocalDate,
-        val stønadTom: LocalDate
+        val status: BehandlingVedtakStatus
 )
 
 fun BehandlingVedtak.toRestBehandlingVedtak(barnBeregning: List<BehandlingVedtakBarn?>) = RestBehandlingVedtak(
@@ -20,7 +18,5 @@ fun BehandlingVedtak.toRestBehandlingVedtak(barnBeregning: List<BehandlingVedtak
         ansvarligSaksbehandler = this.ansvarligSaksbehandler,
         barnasBeregning = barnBeregning.map { it?.toRestBehandlingVedtakBarn() },
         vedtaksdato = this.vedtaksdato,
-        status = this.status,
-        stønadFom = this.stønadFom,
-        stønadTom = this.stønadTom
+        status = this.status
 )
