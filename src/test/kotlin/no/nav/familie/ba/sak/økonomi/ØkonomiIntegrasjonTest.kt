@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.økonomi
 
-import junit.framework.Assert.assertEquals
-import no.nav.familie.ba.sak.BehandlingIntegrationTest
 import no.nav.familie.ba.sak.HttpTestBase
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.FagsakController
-import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
@@ -18,22 +15,16 @@ import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import no.nav.familie.sikkerhet.OIDCUtil
+import no.nav.familie.prosessering.domene.TaskRepository
 import okhttp3.mockwebserver.MockResponse
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
-import java.math.BigDecimal
 import java.time.LocalDate
 
 
@@ -50,7 +41,13 @@ class ØkonomiIntegrasjonTest: HttpTestBase(
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Autowired
+    lateinit var økonomiService: ØkonomiService
+
+    @Autowired
     lateinit var fagsakController: FagsakController
+
+    @Autowired
+    lateinit var taskRepository: TaskRepository
 
     @Test
     @Tag("integration")
@@ -82,7 +79,9 @@ class ØkonomiIntegrasjonTest: HttpTestBase(
         )
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
-        fagsakController.iverksettVedtak(behandling.fagsak.id!!)
+        val behandlingVedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
+
+        økonomiService.iverksettVedtak(behandlingVedtak?.id!!, "ansvarligSaksbehandler")
 
         val oppdatertBehandlingVedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
         Assertions.assertEquals(BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandlingVedtak?.status)

@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.ScheduledTaskService
 import no.nav.familie.sikkerhet.OIDCUtil
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -28,7 +30,7 @@ class FagsakControllerTest (
         private val fagsakService: FagsakService,
 
         @Autowired
-        private val økonomiService: ØkonomiService
+        private val taskRepository: TaskRepository
 ){
 
     @Test
@@ -36,7 +38,7 @@ class FagsakControllerTest (
     fun `Test hent html vedtak`(){
         val mockBehandlingLager= mock(BehandlingService::class.java)
         `when`(mockBehandlingLager.hentHtmlVedtakForBehandling(ArgumentMatchers.anyLong())).thenReturn(Ressurs.success(("mock_html")))
-        val fagsakController= FagsakController(oidcUtil, fagsakService, mockBehandlingLager, økonomiService)
+        val fagsakController= FagsakController(oidcUtil, fagsakService, mockBehandlingLager, taskRepository)
         val response= fagsakController.hentHtmlVedtak(1)
         assert(response.status== Ressurs.Status.SUKSESS)
     }

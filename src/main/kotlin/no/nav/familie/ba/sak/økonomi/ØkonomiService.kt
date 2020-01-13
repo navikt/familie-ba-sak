@@ -10,6 +10,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Service
+import java.lang.Error
 import java.math.BigDecimal
 
 @Service
@@ -19,7 +20,10 @@ class ØkonomiService(
         private val beregning: Beregning,
         private val behandlingService: BehandlingService
 ) {
-    fun iverksettVedtak(behandlingVedtak: BehandlingVedtak, saksbehandlerId: String): Ressurs<RestFagsak> {
+    fun iverksettVedtak(behandlingVedtakId: Long, saksbehandlerId: String): Ressurs<RestFagsak> {
+        val behandlingVedtak = behandlingService.hentVedtak(behandlingVedtakId)
+                ?: throw Error("Fant ikke vedtak med id $behandlingVedtakId i forbindelse med iverksetting mot oppdrag")
+
         if (behandlingVedtak.status == BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING) {
             return Ressurs.failure("Vedtaket er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandlingVedtak.status == BehandlingVedtakStatus.IVERKSATT) {

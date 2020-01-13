@@ -24,6 +24,7 @@ spring:
     enabled: true
 
 logging:
+  level: DEBUG
   config: "classpath:logback-spring.xml"
 
 management:
