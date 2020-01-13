@@ -38,8 +38,7 @@ class ØkonomiService(
                     sats = BigDecimal(it.value),
                     satsType = Utbetalingsperiode.SatsType.MND,
                     utbetalesTil = behandlingVedtak.behandling.fagsak.personIdent?.ident.toString(),
-                    behandlingId = behandlingVedtak.behandling.id!!,
-                    opphør = null
+                    behandlingId = behandlingVedtak.behandling.id!!
             )
         }
 
