@@ -83,8 +83,7 @@ class FagsakController(
         )))
         taskRepository.save(task)
 
-        behandlingVedtak.status = BehandlingVedtakStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG
-        behandlingService.lagreBehandlingVedtak(behandlingVedtak)
+        behandlingService.oppdatertStatusPåBehandlingVedtak(behandlingVedtak, BehandlingVedtakStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
 
         return ResponseEntity.ok(Ressurs.success("Task for iverksetting ble opprettet på fagsak $fagsakId på vedtak ${behandlingVedtak.id}"))
     }
