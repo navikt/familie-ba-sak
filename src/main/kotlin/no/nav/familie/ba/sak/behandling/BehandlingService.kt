@@ -66,7 +66,11 @@ class BehandlingService(
     }
 
     fun hentAktivVedtakForBehandling(behandlingId: Long?): BehandlingVedtak? {
-        return behandlingVedtakRepository.findByBehandlingAndAktiv(behandlingId);
+        return behandlingVedtakRepository.findByBehandlingAndAktiv(behandlingId)
+    }
+
+    fun hentVedtak(behandlingId: Long): BehandlingVedtak? {
+        return behandlingVedtakRepository.getOne(behandlingId)
     }
 
     fun hentVedtakForBehandling(behandlingId: Long?): List<BehandlingVedtak?> {

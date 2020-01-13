@@ -34,5 +34,5 @@ data class BehandlingVedtak(
 ) : BaseEntitet()
 
 enum class BehandlingVedtakStatus {
-        OPPRETTET, SENDT_TIL_IVERKSETTING, IVERKSATT
+        OPPRETTET, LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG, SENDT_TIL_IVERKSETTING, IVERKSATT
 }
