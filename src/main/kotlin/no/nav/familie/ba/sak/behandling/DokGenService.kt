@@ -35,7 +35,7 @@ class DokGenService(
             "\"fodselsdato\": \"%s\",\n" +
             "\"saksbehandler\": \"%s\"}"
 
-        val startDato = vedtak.stønadFom.let { dato -> månedMap[dato.monthValue] + " " + dato.year }
+        val startDato = "februar 2020" // TODO hent fra beregningen
 
         return String.format( // TODO Bytt ut hardkodede felter med faktiske verdier
             brevfelter, 123, startDato, false, "enhet", vedtak.behandling.fagsak.personIdent?.ident, "24.12.19", vedtak.ansvarligSaksbehandler
@@ -64,7 +64,6 @@ class DokGenService(
 
         return restTemplate.exchange(requestUrl, httpMethod, HttpEntity(requestBody, headers), String::class.java)
     }
-
 }
 
 @Service

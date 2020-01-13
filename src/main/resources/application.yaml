@@ -42,4 +42,5 @@ management:
           autotime:
             enabled: true
 
+FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 FAMILIE_BA_DOKGEN_API_URL: http://localhost:8080

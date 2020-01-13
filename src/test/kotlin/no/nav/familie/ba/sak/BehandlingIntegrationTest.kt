@@ -1,24 +1,27 @@
 package no.nav.familie.ba.sak
 
-import no.nav.familie.ba.sak.behandling.BehandlingslagerService
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.Beregning
+import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BarnBeregning
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.DbContainerInitializer
+import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
+import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -38,12 +41,11 @@ class BehandlingIntegrationTest(
         private var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
         @Autowired
-        private var behandlingslagerService: BehandlingslagerService,
+        private var behandlingService: BehandlingService,
 
         @Autowired
         private var behandlingVedtakRepository: BehandlingVedtakRepository
 ) {
-
     val STRING_LENGTH = 10
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
 
@@ -58,19 +60,19 @@ class BehandlingIntegrationTest(
     @Test
     @Tag("integration")
     fun `Kjør flyway migreringer og sjekk at behandlingslagerservice klarer å lese å skrive til postgresql`() {
-        val behandling = behandlingslagerService.nyBehandling("1", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        Assertions.assertEquals(1, behandlingslagerService.hentBehandlinger(behandling.fagsak.id).size)
+        val behandling = behandlingService.nyBehandling("1", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        Assertions.assertEquals(1, behandlingService.hentBehandlinger(behandling.fagsak.id).size)
     }
 
     @Test
     @Tag("integration")
     @Transactional
     fun `Opprett behandling og legg til personer`() {
-        val behandling = behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person(personIdent = PersonIdent("0"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
-        val barn = Person(personIdent = PersonIdent("12345678910"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag)
+        val søker = Person(personIdent = PersonIdent("0"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now())
+        val barn = Person(personIdent = PersonIdent("12345678910"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now())
         personopplysningGrunnlag.leggTilPerson(søker)
         personopplysningGrunnlag.leggTilPerson(barn)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -84,9 +86,9 @@ class BehandlingIntegrationTest(
     @Test
     @Tag("integration")
     fun `Opprett behandling vedtak`() {
-        val behandling = behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
-        behandlingslagerService.lagreBehandlingVedtak(behandlingVedtak)
+        val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        behandlingService.lagreBehandlingVedtak(behandlingVedtak)
 
         val hentetBehandlingVedtak = behandlingVedtakRepository.findByBehandlingAndAktiv(behandling.id)
         Assertions.assertNotNull(hentetBehandlingVedtak)
@@ -96,14 +98,14 @@ class BehandlingIntegrationTest(
     @Test
     @Tag("integration")
     fun `Opprett 2 behandling vedtak og se at det siste vedtaket får aktiv satt til true`() {
-        val behandling = behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
-        behandlingslagerService.lagreBehandlingVedtak(behandlingVedtak)
+        val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        behandlingService.lagreBehandlingVedtak(behandlingVedtak)
 
-        val behandling2Vedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler2", vedtaksdato = LocalDate.now(), stønadFom = LocalDate.now(), stønadTom = LocalDate.now().plusDays(1), stønadBrevMarkdown = "")
-        behandlingslagerService.lagreBehandlingVedtak(behandling2Vedtak)
+        val behandling2Vedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler2", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        behandlingService.lagreBehandlingVedtak(behandling2Vedtak)
 
-        val hentetBehandlingVedtak = behandlingslagerService.hentBehandlingVedtakHvisEksisterer(behandling.id)
+        val hentetBehandlingVedtak = behandlingService.hentBehandlingVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetBehandlingVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler2", hentetBehandlingVedtak?.ansvarligSaksbehandler)
     }
@@ -111,25 +113,25 @@ class BehandlingIntegrationTest(
     @Test
     @Tag("integration")
     fun `Opprett nytt behandling vedtak på aktiv behandling`() {
-        val behandling = behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person(personIdent = PersonIdent("123456789010"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag)
+        val søker = Person(personIdent = PersonIdent("123456789010"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now())
         personopplysningGrunnlag.leggTilPerson(søker)
 
-        personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("123456789011"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag))
+        personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("123456789011"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now()))
         personopplysningGrunnlag.setAktiv(true)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        behandlingslagerService.nyttVedtakForAktivBehandling(
+        behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
                 nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now()))),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val hentetBehandlingVedtak = behandlingslagerService.hentBehandlingVedtakHvisEksisterer(behandling.id)
+        val hentetBehandlingVedtak = behandlingService.hentBehandlingVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetBehandlingVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetBehandlingVedtak?.ansvarligSaksbehandler)
     }
@@ -137,17 +139,17 @@ class BehandlingIntegrationTest(
     @Test
     @Tag("integration")
     fun `Hent HTML vedtaksbrev'`() {
-        val behandling = behandlingslagerService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
 
-        behandlingslagerService.nyttVedtakForAktivBehandling(
+        behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
                 nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now()))),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val htmlvedtaksbrevRess = behandlingslagerService.hentHtmlVedtakForBehandling(behandling.id!!);
+        val htmlvedtaksbrevRess = behandlingService.hentHtmlVedtakForBehandling(behandling.id!!);
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
         assert(htmlvedtaksbrevRess.data!!.equals("<HTML>HTML_MOCKUP</HTML>"))
     }

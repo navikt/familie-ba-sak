@@ -26,9 +26,7 @@ class DokGenServiceTest(
     private val behandlingVedtak = BehandlingVedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")), journalpostID = "", type = BehandlingType.FØRSTEGANGSBEHANDLING),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
-            vedtaksdato = LocalDate.now(),
-            stønadFom = LocalDate.now(),
-            stønadTom = LocalDate.MAX
+            vedtaksdato = LocalDate.now()
     )
 
     @Test

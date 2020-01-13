@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakBarn
+import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
 import java.time.LocalDate
 
 data class RestBehandlingVedtak(
@@ -9,8 +10,7 @@ data class RestBehandlingVedtak(
         val ansvarligSaksbehandler: String,
         val vedtaksdato: LocalDate,
         val barnasBeregning: List<RestBehandlingVedtakBarn?>,
-        val stønadFom: LocalDate,
-        val stønadTom: LocalDate
+        val status: BehandlingVedtakStatus
 )
 
 fun BehandlingVedtak.toRestBehandlingVedtak(barnBeregning: List<BehandlingVedtakBarn?>) = RestBehandlingVedtak(
@@ -18,6 +18,5 @@ fun BehandlingVedtak.toRestBehandlingVedtak(barnBeregning: List<BehandlingVedtak
         ansvarligSaksbehandler = this.ansvarligSaksbehandler,
         barnasBeregning = barnBeregning.map { it?.toRestBehandlingVedtakBarn() },
         vedtaksdato = this.vedtaksdato,
-        stønadFom = this.stønadFom,
-        stønadTom = this.stønadTom
+        status = this.status
 )
