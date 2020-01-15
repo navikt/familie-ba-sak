@@ -16,7 +16,7 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient) {
                             return Ressurs.success("Avstemming OK")
                         },
                         onFailure = {
-                            LOG.warn("Avstemming oppdrag feilet")
+                            LOG.error("Avstemming av oppdrag feilet", it)
                             throw it
                         }
                 )

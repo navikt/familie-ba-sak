@@ -7,14 +7,12 @@ import no.nav.familie.ba.sak.task.AvstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
 import no.nav.familie.ba.sak.økonomi.AvstemmingTaskDTO
 import no.nav.familie.ba.sak.økonomi.IverksettingTaskDTO
-import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -94,7 +92,6 @@ class FagsakController(
 
 
     @GetMapping("/avstemming")
-    @Unprotected
     fun settIGangAvstemming(): ResponseEntity<Ressurs<String>> {
 
         val iDag = LocalDateTime.now().toLocalDate().atStartOfDay()
