@@ -13,11 +13,10 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient) {
         Result.runCatching { økonomiKlient.avstemOppdrag(fraDato, tilDato) }
                 .fold(
                         onSuccess = {
-                            LOG.info("Avstemming sendt ok")
                             return Ressurs.success("Avstemming OK")
                         },
                         onFailure = {
-                            LOG.info("Feil i sending til avstemming")
+                            LOG.warn("Avstemming oppdrag feilet")
                             throw it
                         }
                 )
