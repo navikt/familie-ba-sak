@@ -18,7 +18,7 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient) {
                         },
                         onFailure = {
                             LOG.info("Feil i sending til avstemming")
-                            return Ressurs.failure("Iverksetting mot oppdrag feilet", it)
+                            throw it
                         }
                 )
     }
