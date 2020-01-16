@@ -53,7 +53,7 @@ class ØkonomiKlient(
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
         return restTemplate.exchange(
-                URI.create("$familieOppdragUri/avstemming?fom=$fraDato&tom=$tilDato"),
+                URI.create("$familieOppdragUri/avstemming/BA/?fom=$fraDato&tom=$tilDato"),
                 HttpMethod.POST,
                 HttpEntity<String>(headers),
                 Ressurs::class.java)
