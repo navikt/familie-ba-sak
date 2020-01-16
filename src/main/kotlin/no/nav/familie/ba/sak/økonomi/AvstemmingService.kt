@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -8,15 +7,15 @@ import java.time.LocalDateTime
 @Service
 class AvstemmingService(val økonomiKlient: ØkonomiKlient) {
 
-    fun avstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): Ressurs<String> {
+    fun avstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime) {
 
         Result.runCatching { økonomiKlient.avstemOppdrag(fraDato, tilDato) }
                 .fold(
                         onSuccess = {
-                            return Ressurs.success("Avstemming OK")
+                            LOG.debug("Avstemming mot oppdrag utført.")
                         },
                         onFailure = {
-                            LOG.error("Avstemming av oppdrag feilet", it)
+                            LOG.error("Avstemming mot oppdrag feilet", it)
                             throw it
                         }
                 )

@@ -25,7 +25,6 @@ class AvstemMotOppdrag(val avstemmingService: AvstemmingService, val taskReposit
     }
 
     override fun onCompletion(task: Task) {
-        LOG.debug("Avstemming mot oppdrag utført.")
         val nesteAvstemmingTaskDTO = nesteAvstemmingDTO(task.triggerTid!!.toLocalDate().plusDays(1), 1)
 
         val nesteAvstemmingTask = Task.nyTaskMedTriggerTid(
