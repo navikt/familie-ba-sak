@@ -32,7 +32,7 @@ class IverksettMotOppdrag(
         val nyTask = Task.nyTask(StatusFraOppdrag.TASK_STEP_TYPE, objectMapper.writeValueAsString(OppdragId(
                 personIdent = iverksettingTask.personIdent,
                 fagsystem = FAGSYSTEM,
-                behandlingsId = iverksettingTask.behandlingVedtakId.toString()
+                behandlingsId = iverksettingTask.behandlingsId.toString()
         )))
         taskRepository.save(nyTask)
     }
