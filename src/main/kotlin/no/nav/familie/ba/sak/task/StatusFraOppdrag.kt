@@ -28,19 +28,18 @@ class StatusFraOppdrag(
         val oppdragId = objectMapper.readValue(task.payload, OppdragId::class.java)
         Result.runCatching { økonomiService.hentStatus(oppdragId) }
                 .fold(
-                        onFailure = {
-                            task.triggerTid = LocalDateTime.now().plusMinutes(15)
-                            taskRepository.save(task)
-                            throw it
-                        },
+                        onFailure = { throw it },
                         onSuccess = {
                             LOG.debug("Mottok status '$it' fra oppdrag")
                             if (it != OppdragProtokollStatus.KVITTERT_OK) {
-                                task.triggerTid = LocalDateTime.now().plusMinutes(15)
-                                taskRepository.save(task)
+                                if (it == OppdragProtokollStatus.LAGT_PÅ_KØ) {
+                                    task.triggerTid = LocalDateTime.now().plusMinutes(15)
+                                    taskRepository.save(task)
+                                } else {
+                                    // Her ønsker vi å feile HELE tasken
+                                }
 
-                                LOG.error("Fant kvittering, men den var ikke OK")
-                                throw Exception("Fant kvittering, men den var ikke OK")
+                                throw Exception("Mottok status '$it' fra oppdrag")
                             }
                         }
                 )
