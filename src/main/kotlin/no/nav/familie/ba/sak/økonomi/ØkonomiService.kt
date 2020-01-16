@@ -16,20 +16,13 @@ import java.math.BigDecimal
 
 @Service
 class ØkonomiService(
-        private val fagsakService: FagsakService,
         private val økonomiKlient: ØkonomiKlient,
         private val beregning: Beregning,
         private val behandlingService: BehandlingService
 ) {
-    fun iverksettVedtak(behandlingVedtakId: Long, saksbehandlerId: String): Ressurs<RestFagsak> {
+    fun iverksettVedtak(behandlingVedtakId: Long, saksbehandlerId: String) {
         val behandlingVedtak = behandlingService.hentVedtak(behandlingVedtakId)
                 ?: throw Error("Fant ikke vedtak med id $behandlingVedtakId i forbindelse med iverksetting mot oppdrag")
-
-        if (behandlingVedtak.status == BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING) {
-            return Ressurs.failure("Vedtaket er allerede sendt til oppdrag og venter på kvittering")
-        } else if (behandlingVedtak.status == BehandlingVedtakStatus.IVERKSATT) {
-            return Ressurs.failure("Vedtaket er allerede iverksatt")
-        }
 
         val barnBeregning = behandlingService.hentBarnBeregningForVedtak(behandlingVedtak.id)
         val tidslinje = beregning.beregnUtbetalingsperioder(barnBeregning)
@@ -50,7 +43,7 @@ class ØkonomiService(
         val utbetalingsoppdrag = Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
                 kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-                fagSystem = "BA",
+                fagSystem = FAGSYSTEM,
                 saksnummer = behandlingVedtak.behandling.fagsak.id.toString(),
                 aktoer = behandlingVedtak.behandling.fagsak.personIdent?.ident.toString(),
                 utbetalingsperiode = utbetalingsperioder
@@ -60,10 +53,9 @@ class ØkonomiService(
                 .fold(
                         onSuccess = {
                             behandlingService.oppdatertStatusPåBehandlingVedtak(behandlingVedtak, BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING)
-                            return fagsakService.hentRestFagsak(behandlingVedtak.behandling.fagsak.id)
                         },
                         onFailure = {
-                            return Ressurs.failure("Iverksetting mot oppdrag feilet", it)
+                            throw Exception("Iverksetting mot oppdrag feilet", it)
                         }
                 )
     }

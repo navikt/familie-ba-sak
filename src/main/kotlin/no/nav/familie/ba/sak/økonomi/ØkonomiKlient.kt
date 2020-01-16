@@ -17,6 +17,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.net.URI
+import java.time.LocalDateTime
 
 private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-oppdrag-clientcredentials"
 
@@ -56,6 +57,18 @@ class ØkonomiKlient(
                 URI.create("$familieOppdragUri/status"),
                 HttpMethod.POST,
                 HttpEntity(objectMapper.writeValueAsString(oppdragId), headers),
+                Ressurs::class.java)
+    }
+
+    fun avstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<*>> {
+        val headers = HttpHeaders()
+        headers.acceptCharset = listOf(Charsets.UTF_8)
+        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+
+        return restTemplate.exchange(
+                URI.create("$familieOppdragUri/grensesnittavstemming/$FAGSYSTEM/?fom=$fraDato&tom=$tilDato"),
+                HttpMethod.POST,
+                HttpEntity<String>(headers),
                 Ressurs::class.java)
     }
 }

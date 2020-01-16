@@ -9,7 +9,11 @@ import org.springframework.stereotype.Service
 @Service
 class DefaultRestTaskMapper : RestTaskMapper {
     override fun toDto(task: Task): RestTask {
-        val taskDTO = objectMapper.convertValue(task, DefaultTaskDTO::class.java)
-        return RestTask(task, null, null, taskDTO.personIdent)
+        return try {
+            val taskDTO = objectMapper.convertValue(task, DefaultTaskDTO::class.java)
+            RestTask(task, null, null, taskDTO.personIdent)
+        } catch (e: IllegalArgumentException) {
+            RestTask(task, null, null, "")
+        }
     }
 }
