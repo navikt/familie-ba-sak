@@ -45,4 +45,17 @@ class ØkonomiKlient(
                 HttpEntity(objectMapper.writeValueAsString(utbetalingsoppdrag), headers),
                 Ressurs::class.java)
     }
+
+    fun hentStatus(oppdragId: OppdragId): ResponseEntity<Ressurs<*>> {
+        val headers = HttpHeaders()
+        headers.add("Content-Type", "application/json;charset=UTF-8")
+        headers.acceptCharset = listOf(Charsets.UTF_8)
+        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+
+        return restTemplate.exchange(
+                URI.create("$familieOppdragUri/status"),
+                HttpMethod.POST,
+                HttpEntity(objectMapper.writeValueAsString(oppdragId), headers),
+                Ressurs::class.java)
+    }
 }

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Service
@@ -63,6 +64,18 @@ class ØkonomiService(
                         },
                         onFailure = {
                             return Ressurs.failure("Iverksetting mot oppdrag feilet", it)
+                        }
+                )
+    }
+
+    fun hentStatus(oppdragId: OppdragId): OppdragProtokollStatus {
+        Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
+                .fold(
+                        onSuccess = {
+                            return objectMapper.convertValue(it.body?.data, OppdragProtokollStatus::class.java)
+                        },
+                        onFailure = {
+                            throw Exception("Henting av status mot oppdrag feilet", it)
                         }
                 )
     }

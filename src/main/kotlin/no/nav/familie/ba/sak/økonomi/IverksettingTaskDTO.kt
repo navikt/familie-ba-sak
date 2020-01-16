@@ -7,3 +7,5 @@ class IverksettingTaskDTO (
         val saksbehandlerId: String,
         personIdent: String
 ): DefaultTaskDTO(personIdent)
+
+val FAGSYSTEM = "BA"
