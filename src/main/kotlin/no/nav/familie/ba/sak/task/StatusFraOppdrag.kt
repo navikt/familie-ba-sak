@@ -22,7 +22,7 @@ class StatusFraOppdrag(
 
     /**
      * Metoden prøver å hente kvittering i ét døgn.
-     * Får tasken kvittering, men denne er ikke OK feiler vi tasken med en gang.
+     * Får tasken kvittering som ikke er OK feiler vi tasken.
      */
     override fun doTask(task: Task) {
         val oppdragId = objectMapper.readValue(task.payload, OppdragId::class.java)
