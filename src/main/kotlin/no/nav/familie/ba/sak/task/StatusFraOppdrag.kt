@@ -36,22 +36,14 @@ class StatusFraOppdrag(
                         onSuccess = {
                             LOG.debug("Mottok status '$it' fra oppdrag")
                             if (it != OppdragProtokollStatus.KVITTERT_OK) {
-                                task.logg.add(TaskLogg(task = task,
-                                        type = Loggtype.FEILET,
-                                        melding = "Fant kvittering for oppdrag $oppdragId, men den var ikke OK",
-                                        endretAv = TaskLogg.BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES))
-                                task.status = Status.FEILET
+                                task.triggerTid = LocalDateTime.now().plusMinutes(15)
                                 taskRepository.save(task)
 
                                 LOG.error("Fant kvittering, men den var ikke OK")
+                                throw Exception("Fant kvittering, men den var ikke OK")
                             }
                         }
                 )
-
-    }
-
-    override fun onCompletion(task: Task) {
-        LOG.debug("Kvittering mottatt med status OK")
     }
 
     companion object {
