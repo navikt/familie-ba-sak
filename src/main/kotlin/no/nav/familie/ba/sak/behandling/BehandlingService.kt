@@ -26,7 +26,6 @@ class BehandlingService(
         private val fagsakService: FagsakService,
         private val integrasjonTjeneste: IntegrasjonTjeneste
 ) {
-    @Transactional
     fun nyBehandling(fødselsnummer: String,
                      behandlingType: BehandlingType,
                      journalpostID: String?,
@@ -62,8 +61,6 @@ class BehandlingService(
                         .asSequence()
                         .map(charPool::get)
                         .joinToString(""))
-
-        lagreBehandling(behandling)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
@@ -140,7 +137,6 @@ class BehandlingService(
         behandlingVedtakRepository.save(behandlingVedtak)
     }
 
-    @Transactional
     fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
         val behandling = hentBehandlingHvisEksisterer(fagsakId)
                 ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
@@ -160,7 +156,6 @@ class BehandlingService(
                         onSuccess = { it },
                         onFailure = { e -> return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.", e) }
                 )
-
 
         lagreBehandlingVedtak(behandlingVedtak)
 

@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
-import org.springframework.scheduling.config.Task
 import org.springframework.stereotype.Repository
 import java.util.*
 import javax.persistence.LockModeType
