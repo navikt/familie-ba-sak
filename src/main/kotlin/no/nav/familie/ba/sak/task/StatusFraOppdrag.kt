@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-@TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Iverksett vedtak mot oppdrag", maxAntallFeil = 100)
+@TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Henter status fra oppdrag", maxAntallFeil = 100)
 class StatusFraOppdrag(
         private val økonomiService: ØkonomiService,
         private val behandlingService: BehandlingService,
@@ -37,7 +37,8 @@ class StatusFraOppdrag(
                             task.triggerTid = LocalDateTime.now().plusMinutes(15)
                             taskRepository.save(task)
                         } else {
-                            // Her ønsker vi å feile HELE tasken
+                            task.status = Status.MANUELL_OPPFØLGING
+                            taskRepository.save(task)
                         }
 
                         throw Exception("Mottok status '$it' fra oppdrag")
