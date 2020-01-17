@@ -1,0 +1,1 @@
+alter table task alter column status type varchar(50);
