@@ -80,6 +80,7 @@ class FagsakController(
 
         val task = Task.nyTask(IverksettMotOppdrag.TASK_STEP_TYPE, objectMapper.writeValueAsString(IverksettingTaskDTO(
                 personIdent = behandling.fagsak.personIdent?.ident!!,
+                behandlingsId = behandling.id!!,
                 behandlingVedtakId = behandlingVedtak.id!!,
                 saksbehandlerId = saksbehandlerId
         )))

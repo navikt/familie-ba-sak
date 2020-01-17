@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
@@ -10,7 +13,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
@@ -113,7 +115,7 @@ class BehandlingService(
         return behandlingVedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun hentVedtak(behandlingId: Long): BehandlingVedtak? {
+    fun hentBehandlingVedtak(behandlingId: Long): BehandlingVedtak? {
         return behandlingVedtakRepository.getOne(behandlingId)
     }
 
@@ -124,6 +126,16 @@ class BehandlingService(
     fun oppdatertStatusPåBehandlingVedtak(behandlingVedtak: BehandlingVedtak, status: BehandlingVedtakStatus) {
         behandlingVedtak.status = status
         behandlingVedtakRepository.save(behandlingVedtak)
+    }
+
+    fun oppdatertStatusPåBehandlingVedtak(behandlingVedtakId: Long, status: BehandlingVedtakStatus) {
+        when (val behandlingVedtak = hentBehandlingVedtak(behandlingVedtakId)) {
+            null -> throw Exception("Feilet ved oppdatering av status på vedtak. Fant ikke vedtak med id $behandlingVedtakId")
+            else -> {
+                behandlingVedtak.status = status
+                behandlingVedtakRepository.save(behandlingVedtak)
+            }
+        }
     }
 
     fun lagreBehandlingVedtak(behandlingVedtak: BehandlingVedtak) {

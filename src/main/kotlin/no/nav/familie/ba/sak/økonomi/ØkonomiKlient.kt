@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.client.exchange
 import java.net.URI
 import java.time.LocalDateTime
 
@@ -34,28 +35,38 @@ class ØkonomiKlient(
         clientConfigurationProperties,
         oAuth2AccessTokenService
 ) {
-    fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<*>> {
+    fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders()
         headers.add("Content-Type", "application/json;charset=UTF-8")
         headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
-        return restTemplate.exchange(
+        return restOperations.exchange(
                 URI.create("$familieOppdragUri/oppdrag"),
                 HttpMethod.POST,
-                HttpEntity(objectMapper.writeValueAsString(utbetalingsoppdrag), headers),
-                Ressurs::class.java)
+                HttpEntity(objectMapper.writeValueAsString(utbetalingsoppdrag), headers))
     }
 
-    fun avstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<*>> {
+    fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): ResponseEntity<Ressurs<OppdragProtokollStatus>> {
+        val headers = HttpHeaders()
+        headers.add("Content-Type", "application/json;charset=UTF-8")
+        headers.acceptCharset = listOf(Charsets.UTF_8)
+        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+
+        return restOperations.exchange(
+                URI.create("$familieOppdragUri/status"),
+                HttpMethod.POST,
+                HttpEntity(objectMapper.writeValueAsString(statusFraOppdragDTO), headers))
+    }
+
+    fun avstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders()
         headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
-        return restTemplate.exchange(
-                URI.create("$familieOppdragUri/grensesnittavstemming/BA/?fom=$fraDato&tom=$tilDato"),
+        return restOperations.exchange(
+                URI.create("$familieOppdragUri/grensesnittavstemming/$FAGSYSTEM/?fom=$fraDato&tom=$tilDato"),
                 HttpMethod.POST,
-                HttpEntity<String>(headers),
-                Ressurs::class.java)
+                HttpEntity<String>(headers))
     }
 }
