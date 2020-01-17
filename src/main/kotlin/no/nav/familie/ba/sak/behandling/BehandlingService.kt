@@ -26,6 +26,7 @@ class BehandlingService(
         private val fagsakService: FagsakService,
         private val integrasjonTjeneste: IntegrasjonTjeneste
 ) {
+    @Transactional
     fun nyBehandling(fødselsnummer: String,
                      behandlingType: BehandlingType,
                      journalpostID: String?,
@@ -48,7 +49,6 @@ class BehandlingService(
     val STRING_LENGTH = 10
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
 
-    @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
         // val søkerAktørId = integrasjonTjeneste.hentAktørId(nyBehandling.fødselsnummer);
 
@@ -140,6 +140,7 @@ class BehandlingService(
         behandlingVedtakRepository.save(behandlingVedtak)
     }
 
+    @Transactional
     fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
         val behandling = hentBehandlingHvisEksisterer(fagsakId)
                 ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
