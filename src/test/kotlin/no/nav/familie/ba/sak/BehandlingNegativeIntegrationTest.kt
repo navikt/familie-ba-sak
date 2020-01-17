@@ -29,10 +29,10 @@ class BehandlingNegativeIntegrationTest (
     @Test
     @Tag("integration")
     fun `Hent HTML vedtaksbrev Negative'`() {
-        val failRess = behandlingService.hentHtmlVedtakForBehandling(100);
+        val failRess = behandlingService.hentHtmlVedtakForBehandling(100)
         Assertions.assertEquals(Ressurs.Status.FEILET, failRess.status)
 
-        val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "sak1")
+        val behandling = behandlingService.nyBehandling("6", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "sak1")
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
 

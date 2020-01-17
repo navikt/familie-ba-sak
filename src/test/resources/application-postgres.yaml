@@ -42,10 +42,9 @@ logging:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    hikari:
-      password: sak
-      username: sak
+    url: jdbc:postgresql://localhost:5432/familie-ba-sak
+    password: test
+    username: postgres
   flyway:
     enabled: true
   jpa:
@@ -59,7 +58,7 @@ spring:
   cloud:
     vault:
       database:
-        role: sak
+        role: postgres
 
 
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api

@@ -22,8 +22,9 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>2.2.0.RELEASE</spring.cloud.version>
-        <felles.version>1.0_20200110142205_7c24f15</felles.version>
+        <felles.version>1.0_20200117142319_7d0a071</felles.version>
         <felles-kontrakter.version>2.0_20200113101906_b1bcc2f</felles-kontrakter.version>
+        <mockk.version>1.9.3</mockk.version>
         <token-validation-spring.version>1.1.3</token-validation-spring.version>
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -191,6 +192,12 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>4.2.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.mockk</groupId>
+            <artifactId>mockk</artifactId>
+            <version>${mockk.version}</version>
             <scope>test</scope>
         </dependency>
 

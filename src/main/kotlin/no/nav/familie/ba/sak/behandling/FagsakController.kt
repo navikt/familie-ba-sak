@@ -3,9 +3,10 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.task.AvstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
+import no.nav.familie.ba.sak.økonomi.AvstemmingTaskDTO
 import no.nav.familie.ba.sak.økonomi.IverksettingTaskDTO
-import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -16,6 +17,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api")
@@ -78,6 +80,7 @@ class FagsakController(
 
         val task = Task.nyTask(IverksettMotOppdrag.TASK_STEP_TYPE, objectMapper.writeValueAsString(IverksettingTaskDTO(
                 personIdent = behandling.fagsak.personIdent?.ident!!,
+                behandlingsId = behandling.id!!,
                 behandlingVedtakId = behandlingVedtak.id!!,
                 saksbehandlerId = saksbehandlerId
         )))
@@ -86,6 +89,19 @@ class FagsakController(
         behandlingService.oppdatertStatusPåBehandlingVedtak(behandlingVedtak, BehandlingVedtakStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
 
         return ResponseEntity.ok(Ressurs.success("Task for iverksetting ble opprettet på fagsak $fagsakId på vedtak ${behandlingVedtak.id}"))
+    }
+
+
+    @GetMapping("/avstemming")
+    fun settIGangAvstemming(): ResponseEntity<Ressurs<String>> {
+
+        val iDag = LocalDateTime.now().toLocalDate().atStartOfDay()
+        val taskDTO = AvstemmingTaskDTO(iDag.minusDays(1), iDag)
+
+        logger.info("Lager task for avstemming")
+        val initiellAvstemmingTask = Task.nyTaskMedTriggerTid(AvstemMotOppdrag.TASK_STEP_TYPE, objectMapper.writeValueAsString(taskDTO), LocalDateTime.now())
+        taskRepository.save(initiellAvstemmingTask)
+        return ResponseEntity.ok(Ressurs.success("Laget task for avstemming"))
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}/vedtak-html"])

@@ -3,17 +3,8 @@ package no.nav.familie.ba.sak.mottak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -22,8 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.concurrent.ThreadLocalRandom
-import kotlin.streams.asSequence
 
 @RestController
 @RequestMapping("/api")
@@ -31,16 +20,10 @@ import kotlin.streams.asSequence
 class MottakController(
         private val oidcUtil: OIDCUtil,
         private val behandlingService: BehandlingService,
-        private val fagsakService: FagsakService,
-        private val integrasjonTjeneste: IntegrasjonTjeneste,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+        private val fagsakService: FagsakService
 ) {
-    val STRING_LENGTH = 10
-    private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
-
     @PostMapping(path = ["/behandling/opprett"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<RestFagsak> {
-        // TODO flytt dette til en service
         val saksbehandlerId = try {
             oidcUtil.getClaim("preferred_username") ?: "VL"
         } catch (e: JwtTokenValidatorException) {
@@ -49,44 +32,7 @@ class MottakController(
 
         FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
 
-        // val søkerAktørId = integrasjonTjeneste.hentAktørId(nyBehandling.fødselsnummer);
-
-        val søkerPersonIdent = PersonIdent(nyBehandling.fødselsnummer)
-        val fagsak = when (val it = fagsakService.hentFagsakForPersonident(søkerPersonIdent)) {
-            null -> Fagsak(null, AktørId("1"), søkerPersonIdent)
-            else -> it
-        }
-
-        fagsakService.lagreFagsak(fagsak)
-        val behandling = Behandling(fagsak = fagsak, journalpostID = nyBehandling.journalpostID, type = nyBehandling.behandlingType,
-                saksnummer = ThreadLocalRandom.current()
-                        .ints(STRING_LENGTH.toLong(), 0, charPool.size)
-                        .asSequence()
-                        .map(charPool::get)
-                        .joinToString(""))
-
-        behandlingService.lagreBehandling(behandling)
-
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
-
-        val søker = Person(
-                personIdent = PersonIdent(nyBehandling.fødselsnummer),
-                type = PersonType.SØKER,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
-        )
-        personopplysningGrunnlag.leggTilPerson(søker)
-
-        nyBehandling.barnasFødselsnummer.map {
-            personopplysningGrunnlag.leggTilPerson(Person(
-                    personIdent = PersonIdent(it),
-                    type = PersonType.BARN,
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    fødselsdato = integrasjonTjeneste.hentPersoninfoFor(it)?.fødselsdato
-            ))
-        }
-        personopplysningGrunnlag.setAktiv(true)
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        val fagsak = behandlingService.opprettBehandling(nyBehandling)
 
         return fagsakService.hentRestFagsak(fagsakId = fagsak.id)
     }
