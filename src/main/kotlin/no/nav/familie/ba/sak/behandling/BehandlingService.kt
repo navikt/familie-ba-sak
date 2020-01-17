@@ -1,45 +1,89 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
+import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.util.concurrent.ThreadLocalRandom
+import kotlin.streams.asSequence
 
 @Service
 class BehandlingService(
-        private val fagsakRepository: FagsakRepository,
         private val behandlingRepository: BehandlingRepository,
         private val behandlingVedtakRepository: BehandlingVedtakRepository,
         private val behandlingVedtakBarnRepository: BehandlingVedtakBarnRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
         private val dokGenService: DokGenService,
-        private val fagsakService: FagsakService
+        private val fagsakService: FagsakService,
+        private val integrasjonTjeneste: IntegrasjonTjeneste
 ) {
     fun nyBehandling(fødselsnummer: String,
-                     barnasFødselsnummer: Array<String>,
                      behandlingType: BehandlingType,
-                     journalpostID: String,
+                     journalpostID: String?,
                      saksnummer: String): Behandling {
         //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
 
-        val fagsak = Fagsak(null, AktørId("1"), PersonIdent(fødselsnummer))
-        fagsakRepository.save(fagsak)
-        val behandling = Behandling(id = null, fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
+        val personIdent = PersonIdent(fødselsnummer)
+        val fagsak = when (val it = fagsakService.hentFagsakForPersonident(personIdent)) {
+            null -> Fagsak(null, AktørId("1"), personIdent)
+            else -> it
+        }
+        fagsakService.lagreFagsak(fagsak)
+
+        val behandling = Behandling(fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
         lagreBehandling(behandling)
 
         return behandling
+    }
+
+    val STRING_LENGTH = 10
+    private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
+
+    fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
+        // val søkerAktørId = integrasjonTjeneste.hentAktørId(nyBehandling.fødselsnummer);
+
+        val behandling = nyBehandling(
+                fødselsnummer = nyBehandling.fødselsnummer,
+                behandlingType = nyBehandling.behandlingType,
+                journalpostID = nyBehandling.journalpostID,
+                // Saksnummer byttes ut med gsaksnummer senere
+                saksnummer = ThreadLocalRandom.current()
+                        .ints(STRING_LENGTH.toLong(), 0, charPool.size)
+                        .asSequence()
+                        .map(charPool::get)
+                        .joinToString(""))
+
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+
+        val søker = Person(
+                personIdent = behandling.fagsak.personIdent,
+                type = PersonType.SØKER,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
+        )
+        personopplysningGrunnlag.leggTilPerson(søker)
+
+        nyBehandling.barnasFødselsnummer.map {
+            personopplysningGrunnlag.leggTilPerson(Person(
+                    personIdent = PersonIdent(it),
+                    type = PersonType.BARN,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fødselsdato = integrasjonTjeneste.hentPersoninfoFor(it)?.fødselsdato
+            ))
+        }
+        personopplysningGrunnlag.setAktiv(true)
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        return behandling.fagsak
     }
 
     fun hentBehandlingHvisEksisterer(fagsakId: Long?): Behandling? {
@@ -71,10 +115,6 @@ class BehandlingService(
 
     fun hentVedtak(behandlingId: Long): BehandlingVedtak? {
         return behandlingVedtakRepository.getOne(behandlingId)
-    }
-
-    fun hentVedtakForBehandling(behandlingId: Long?): List<BehandlingVedtak?> {
-        return behandlingVedtakRepository.finnVedtakForBehandling(behandlingId)
     }
 
     fun hentBarnBeregningForVedtak(behandlingVedtakId: Long?): List<BehandlingVedtakBarn> {
@@ -116,7 +156,6 @@ class BehandlingService(
                         onSuccess = { it },
                         onFailure = { e -> return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.", e) }
                 )
-
 
         lagreBehandlingVedtak(behandlingVedtak)
 
