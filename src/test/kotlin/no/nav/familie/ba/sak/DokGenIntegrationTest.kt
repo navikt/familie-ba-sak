@@ -21,7 +21,7 @@ import java.time.LocalDate
 @Tag("integration")
 class DokGenIntegrationTest{
     class DokGenTestService: DokGenService("mock_dokgen_uri", RestTemplate()){
-        override fun utførRequest(request: RequestEntity<String>): ResponseEntity<String> {
+        override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
             if(request.url.path.matches(Regex(".+create-markdown"))){
                 assert(request.body is String)
                 val mapper= ObjectMapper()
@@ -34,18 +34,22 @@ class DokGenIntegrationTest{
                 assert(felter.contains("enhet"))
                 assert(felter.contains("saksbehandler"))
             }else if(request.url.path.matches(Regex(".+create-doc"))){
-                assert(request.body is String)
+                if (request.body!!.matches(Regex(".+HTML.+"))) {
+                    return ResponseEntity.ok(responseType.cast("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
+                } else if (request.body!!.matches(Regex(".+PDF.+"))) {
+                    return ResponseEntity.ok(responseType.cast("Vedtaksbrev PDF".toByteArray()))
+                }
             }else{
                 fail("Invalid URI")
             }
 
-            return ResponseEntity("mockup_response", HttpStatus.OK)
+            return ResponseEntity(responseType.cast("mockup_response"), HttpStatus.OK)
         }
     }
 
     class DokGenTestNullBodyService: DokGenService("mock_dokgen_uri", RestTemplate()){
-        override fun utførRequest(request: RequestEntity<String>): ResponseEntity<String>{
-            return ResponseEntity<String>(null, HttpStatus.OK)
+        override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
+            return ResponseEntity<T>(null, HttpStatus.OK)
         }
     }
 
@@ -75,7 +79,15 @@ class DokGenIntegrationTest{
     fun `Test generer html`(){
         val dokgen= DokGenTestService()
         val html= dokgen.lagHtmlFraMarkdown("markdown")
-        assert(html.equals("mockup_response"))
+        assert(html.equals("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
+    }
+
+    @Test
+    @Tag("integration")
+    fun`Test generer pdf`(){
+        val dokgen= DokGenTestService()
+        val pdf= dokgen.lagPdfFraMarkdown("markdown")
+        assert(pdf.contentEquals("Vedtaksbrev PDF".toByteArray()))
     }
 
     @Test

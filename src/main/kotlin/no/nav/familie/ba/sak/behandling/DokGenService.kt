@@ -48,19 +48,19 @@ class DokGenService(
 
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
         val url = URI.create(dokgenServiceUri + "/template/" + malNavn + "/create-markdown")
-        val response = utførRequest(lagPostRequest(url, fletteFelter))
+        val response = utførRequest(lagPostRequest(url, fletteFelter), String::class.java)
         return response.body.orEmpty()
     }
 
     fun lagHtmlFraMarkdown(markdown: String): String {
         val request = lagDokumentRequestForMarkdown(HTML, markdown)
-        val response = utførRequest(request)
+        val response = utførRequest(request, String::class.java)
         return response.body.orEmpty()
     }
 
     fun lagPdfFraMarkdown(markdown: String): ByteArray {
         val request = lagDokumentRequestForMarkdown(PDF, markdown)
-        val response = restTemplate.exchange(request, ByteArray::class.java)
+        val response = utførRequest(request, ByteArray::class.java)
         return response.body!!
     }
 
@@ -78,8 +78,8 @@ class DokGenService(
             .body(body)
     }
 
-    protected fun utførRequest(request: RequestEntity<String>): ResponseEntity<String> {
-        return restTemplate.exchange(request, String::class.java)
+    protected fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
+        return restTemplate.exchange(request, responseType)
     }
 }
 
@@ -89,15 +89,18 @@ class DokGenServiceMock: DokGenService(
         dokgenServiceUri = "dokgen_uri_mock",
         restTemplate = RestTemplate()
 ){
-    override fun utførRequest(request: RequestEntity<String>): ResponseEntity<String> {
+    override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
         if(request.url.path.matches(Regex(".+create-markdown"))){
-            return ResponseEntity.ok("# Vedtaksbrev Markdown (Mock)")
-        }else if(request.url.path.matches(Regex(".+create-doc"))){
+            return ResponseEntity.ok(responseType.cast("# Vedtaksbrev Markdown (Mock)"))
+        } else if(request.url.path.matches(Regex(".+create-doc"))) {
             if (request.body!!.matches(Regex(".+HTML"))) {
-                return ResponseEntity.ok("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>")
+                return ResponseEntity.ok(responseType.cast("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
+            }
+            else if (request.body!!.matches(Regex(".+PDF"))) {
+                return ResponseEntity.ok(responseType.cast("Vedtaksbrev PDF".toByteArray()))
             }
         }
 
-        return ResponseEntity.ok("")
+        return ResponseEntity.ok(responseType.cast(""))
     }
 }
