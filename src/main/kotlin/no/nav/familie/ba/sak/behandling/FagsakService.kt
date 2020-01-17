@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FagsakService(
@@ -22,6 +23,7 @@ class FagsakService(
         private val behandlingRepository: BehandlingRepository,
         private val behandlingVedtakRepository: BehandlingVedtakRepository){
 
+    @Transactional
     fun hentRestFagsak(fagsakId: Long?): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
                 ?: return Ressurs.failure("Fant ikke fagsak med fagsakId: $fagsakId")
@@ -48,10 +50,12 @@ class FagsakService(
         return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
     }
 
+    @Transactional
     fun hentFagsakForPersonident(personIdent: PersonIdent): Fagsak? {
         return fagsakRepository.finnFagsakForPersonIdent(personIdent)
     }
 
+    @Transactional
     fun lagreFagsak(fagsak: Fagsak) {
         fagsakRepository.save(fagsak)
     }
