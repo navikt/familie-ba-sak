@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.økonomi.FAGSYSTEM
 import no.nav.familie.ba.sak.økonomi.IverksettingTaskDTO
-import no.nav.familie.ba.sak.økonomi.OppdragId
+import no.nav.familie.ba.sak.økonomi.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -29,10 +29,11 @@ class IverksettMotOppdrag(
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.behandlingVedtakId} mot oppdrag gikk OK")
 
-        val nyTask = Task.nyTask(StatusFraOppdrag.TASK_STEP_TYPE, objectMapper.writeValueAsString(OppdragId(
+        val nyTask = Task.nyTask(StatusFraOppdrag.TASK_STEP_TYPE, objectMapper.writeValueAsString(StatusFraOppdragDTO(
                 personIdent = iverksettingTask.personIdent,
                 fagsystem = FAGSYSTEM,
-                behandlingsId = iverksettingTask.behandlingsId.toString()
+                behandlingsId = iverksettingTask.behandlingsId.toString(),
+                behandlingVedtakId = iverksettingTask.behandlingVedtakId
         )))
         taskRepository.save(nyTask)
     }

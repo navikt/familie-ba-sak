@@ -47,7 +47,7 @@ class ØkonomiKlient(
                 Ressurs::class.java)
     }
 
-    fun hentStatus(oppdragId: OppdragId): ResponseEntity<Ressurs<*>> {
+    fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): ResponseEntity<Ressurs<*>> {
         val headers = HttpHeaders()
         headers.add("Content-Type", "application/json;charset=UTF-8")
         headers.acceptCharset = listOf(Charsets.UTF_8)
@@ -56,7 +56,7 @@ class ØkonomiKlient(
         return restTemplate.exchange(
                 URI.create("$familieOppdragUri/status"),
                 HttpMethod.POST,
-                HttpEntity(objectMapper.writeValueAsString(oppdragId), headers),
+                HttpEntity(objectMapper.writeValueAsString(statusFraOppdragDTO), headers),
                 Ressurs::class.java)
     }
 

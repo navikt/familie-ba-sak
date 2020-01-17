@@ -12,9 +12,11 @@ import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 
 @Service
 class BehandlingService(
@@ -69,12 +71,8 @@ class BehandlingService(
         return behandlingVedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun hentVedtak(behandlingId: Long): BehandlingVedtak? {
+    fun hentBehandlingVedtak(behandlingId: Long): BehandlingVedtak? {
         return behandlingVedtakRepository.getOne(behandlingId)
-    }
-
-    fun hentVedtakForBehandling(behandlingId: Long?): List<BehandlingVedtak?> {
-        return behandlingVedtakRepository.finnVedtakForBehandling(behandlingId)
     }
 
     fun hentBarnBeregningForVedtak(behandlingVedtakId: Long?): List<BehandlingVedtakBarn> {
@@ -84,6 +82,16 @@ class BehandlingService(
     fun oppdatertStatusPåBehandlingVedtak(behandlingVedtak: BehandlingVedtak, status: BehandlingVedtakStatus) {
         behandlingVedtak.status = status
         behandlingVedtakRepository.save(behandlingVedtak)
+    }
+
+    fun oppdatertStatusPåBehandlingVedtak(behandlingVedtakId: Long, status: BehandlingVedtakStatus) {
+        when (val behandlingVedtak = hentBehandlingVedtak(behandlingVedtakId)) {
+            null -> throw Exception("Feilet ved oppdatering av status på vedtak. Fant ikke vedtak med id $behandlingVedtakId")
+            else -> {
+                behandlingVedtak.status = status
+                behandlingVedtakRepository.save(behandlingVedtak)
+            }
+        }
     }
 
     fun lagreBehandlingVedtak(behandlingVedtak: BehandlingVedtak) {
