@@ -48,13 +48,13 @@ class DokGenService(
 
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
         val url = URI.create(dokgenServiceUri + "/template/" + malNavn + "/create-markdown")
-        val response = restTemplate.exchange(lagPostRequest(url, fletteFelter), String::class.java)
+        val response = utførRequest(lagPostRequest(url, fletteFelter))
         return response.body.orEmpty()
     }
 
     fun lagHtmlFraMarkdown(markdown: String): String {
         val request = lagDokumentRequestForMarkdown(HTML, markdown)
-        val response = restTemplate.exchange(request, String::class.java)
+        val response = utførRequest(request)
         return response.body.orEmpty()
     }
 
@@ -67,24 +67,19 @@ class DokGenService(
     fun lagDokumentRequestForMarkdown(format: DocFormat, markdown: String): RequestEntity<String> {
         val url = URI.create(dokgenServiceUri + "/template/Innvilget/create-doc")
         val body = DokumentRequest(format, markdown, true, null, true, "{\"fodselsnummer\":\"12345678910\",\"navn\": \"navn\",\"adresse\": \"adresse\",\"postnr\": \"1626\",\"returadresse\": \"returadresse\",\"dokumentDato\": \"3. september 2019\"}")
-        return lagPostRequest(url, body)
+        return lagPostRequest(url, objectMapper.writeValueAsString(body))
     }
 
-    private fun lagPostRequest(url: URI, body: Any): RequestEntity<String> {
+    private fun lagPostRequest(url: URI, body: String): RequestEntity<String> {
         return RequestEntity.post(url)
             .contentType(MediaType.APPLICATION_JSON)
             .acceptCharset(Charsets.UTF_8)
             .header(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-            .body(objectMapper.writeValueAsString(body))
+            .body(body)
     }
 
-    protected fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any? = null): ResponseEntity<String> {
-        val headers = HttpHeaders()
-        headers.contentType = mediaType
-        headers.acceptCharset = listOf(Charsets.UTF_8)
-        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-
-        return restTemplate.exchange(requestUrl, httpMethod, HttpEntity(requestBody, headers), String::class.java)
+    protected fun utførRequest(request: RequestEntity<String>): ResponseEntity<String> {
+        return restTemplate.exchange(request, String::class.java)
     }
 }
 
@@ -94,11 +89,13 @@ class DokGenServiceMock: DokGenService(
         dokgenServiceUri = "dokgen_uri_mock",
         restTemplate = RestTemplate()
 ){
-    override fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any?): ResponseEntity<String> {
-        if(requestUrl.path.matches(Regex(".+create-markdown"))){
+    override fun utførRequest(request: RequestEntity<String>): ResponseEntity<String> {
+        if(request.url.path.matches(Regex(".+create-markdown"))){
             return ResponseEntity.ok("# Vedtaksbrev Markdown (Mock)")
-        }else if(requestUrl.path.matches(Regex(".+to-html"))){
-            return ResponseEntity.ok("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>")
+        }else if(request.url.path.matches(Regex(".+create-doc"))){
+            if (request.body!!.matches(Regex(".+HTML"))) {
+                return ResponseEntity.ok("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>")
+            }
         }
 
         return ResponseEntity.ok("")
