@@ -59,7 +59,7 @@
     </logger>
 
     <logger name="no.nav" level="WARN"/>
-    <logger name="no.nav.familie" level="DEBUG"/>
+    <logger name="no.nav.familie" level="INFO"/>
     <logger name="no.nav.familie.http.sts" level="WARN"/>
     <logger name="org.apache" level="INFO"/>
     <logger name="org.apache.cxf" level="ERROR"/>
