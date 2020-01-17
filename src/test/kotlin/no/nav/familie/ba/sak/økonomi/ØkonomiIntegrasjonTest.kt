@@ -60,7 +60,7 @@ class ØkonomiIntegrasjonTest: HttpTestBase(
         mockServer.enqueue(response)
         mockServer.enqueue(response)
 
-        val behandling = behandlingService.nyBehandling("0", arrayOf("123456789010"), BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "randomSaksnummer")
+        val behandling = behandlingService.nyBehandling("0", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "randomSaksnummer")
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
