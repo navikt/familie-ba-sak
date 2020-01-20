@@ -1,6 +1,10 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
+import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
+import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.*
+import no.nav.familie.ba.sak.behandling.restDomene.DokumentRequest
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.MDC
@@ -42,43 +46,39 @@ class DokGenService(
         )
     }
 
-    fun lagHtmlFraMarkdown(markdown: String): String {
-        val url = URI.create(dokgenServiceUri + "/template/markdown/to-html")
-        val response = utførRequest(HttpMethod.POST, MediaType.TEXT_MARKDOWN, url, markdown)
-
-        return response.body.orEmpty()
-    }
-
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
         val url = URI.create(dokgenServiceUri + "/template/" + malNavn + "/create-markdown")
-        val response = utførRequest(HttpMethod.POST, MediaType.APPLICATION_JSON, url, fletteFelter)
-
+        val response = utførRequest(lagPostRequest(url, fletteFelter), String::class.java)
         return response.body.orEmpty()
     }
 
-    protected fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any? = null): ResponseEntity<String> {
-        val headers = HttpHeaders()
-        headers.contentType = mediaType
-        headers.acceptCharset = listOf(Charsets.UTF_8)
-        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-
-        return restTemplate.exchange(requestUrl, httpMethod, HttpEntity(requestBody, headers), String::class.java)
+    fun lagHtmlFraMarkdown(markdown: String): String {
+        val request = lagDokumentRequestForMarkdown(HTML, markdown)
+        val response = utførRequest(request, String::class.java)
+        return response.body.orEmpty()
     }
-}
 
-@Service
-@Profile("mock-dokgen-java")
-class DokGenServiceMock: DokGenService(
-        dokgenServiceUri = "dokgen_uri_mock",
-        restTemplate = RestTemplate()
-){
-    override fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any?): ResponseEntity<String> {
-        if(requestUrl.path.matches(Regex(".+create-markdown"))){
-            return ResponseEntity.ok("# Vedtaksbrev Markdown (Mock)")
-        }else if(requestUrl.path.matches(Regex(".+to-html"))){
-            return ResponseEntity.ok("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>")
-        }
+    fun lagPdfFraMarkdown(markdown: String): ByteArray {
+        val request = lagDokumentRequestForMarkdown(PDF, markdown)
+        val response = utførRequest(request, ByteArray::class.java)
+        return response.body!!
+    }
 
-        return ResponseEntity.ok("")
+    fun lagDokumentRequestForMarkdown(format: DocFormat, markdown: String): RequestEntity<String> {
+        val url = URI.create(dokgenServiceUri + "/template/Innvilget/create-doc")
+        val body = DokumentRequest(format, markdown, true, null, true, "{\"fodselsnummer\":\"12345678910\",\"navn\": \"navn\",\"adresse\": \"adresse\",\"postnr\": \"1626\",\"returadresse\": \"returadresse\",\"dokumentDato\": \"3. september 2019\"}")
+        return lagPostRequest(url, objectMapper.writeValueAsString(body))
+    }
+
+    private fun lagPostRequest(url: URI, body: String): RequestEntity<String> {
+        return RequestEntity.post(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .acceptCharset(Charsets.UTF_8)
+            .header(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+            .body(body)
+    }
+
+    protected fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
+        return restTemplate.exchange(request, responseType)
     }
 }

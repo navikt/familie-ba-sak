@@ -1,24 +1,17 @@
-package no.nav.familie.ba.sak
+package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.DokGenService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
-import java.net.URI
 import java.time.LocalDate
 
 @SpringBootTest
@@ -27,12 +20,11 @@ import java.time.LocalDate
 @Tag("integration")
 class DokGenIntegrationTest{
     class DokGenTestService: DokGenService("mock_dokgen_uri", RestTemplate()){
-        override fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any?): ResponseEntity<String>{
-            if(requestUrl.path.matches(Regex(".+create-markdown"))){
-                assert(mediaType== MediaType.APPLICATION_JSON)
-                assert(requestBody is String)
+        override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
+            if(request.url.path.matches(Regex(".+create-markdown"))){
+                assert(request.body is String)
                 val mapper= ObjectMapper()
-                val felter= mapper.readValue(requestBody as String, Map::class.java)
+                val felter= mapper.readValue(request.body as String, Map::class.java)
                 assert(felter.contains("belop"))
                 assert(felter.contains("startDato"))
                 assert(felter.contains("fodselsnummer"))
@@ -40,26 +32,23 @@ class DokGenIntegrationTest{
                 assert(felter.contains("etterbetaling"))
                 assert(felter.contains("enhet"))
                 assert(felter.contains("saksbehandler"))
-           }else if(requestUrl.path.matches(Regex(".+to-html"))){
-                assert(mediaType== MediaType.TEXT_MARKDOWN)
-                assert(requestBody is String)
+            }else if(request.url.path.matches(Regex(".+create-doc"))){
+                if (request.body!!.matches(Regex(".+HTML.+"))) {
+                    return ResponseEntity.ok(responseType.cast("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
+                } else if (request.body!!.matches(Regex(".+PDF.+"))) {
+                    return ResponseEntity.ok(responseType.cast("Vedtaksbrev PDF".toByteArray()))
+                }
             }else{
                 fail("Invalid URI")
             }
 
-            return ResponseEntity<String>("mockup_response", HttpStatus.OK)
-        }
-    }
-
-    class DokGenUtførRequestTestService: DokGenService("mock_dokgen_uri", RestTemplate()){
-        fun testUtførRequest(): ResponseEntity<String> {
-            return utførRequest(HttpMethod.POST, MediaType.TEXT_MARKDOWN, URI.create("mock_dokgen_uri"), "");
+            return ResponseEntity(responseType.cast("mockup_response"), HttpStatus.OK)
         }
     }
 
     class DokGenTestNullBodyService: DokGenService("mock_dokgen_uri", RestTemplate()){
-        override fun utførRequest(httpMethod: HttpMethod, mediaType: MediaType, requestUrl: URI, requestBody: Any?): ResponseEntity<String>{
-            return ResponseEntity<String>(null, HttpStatus.OK)
+        override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
+            return ResponseEntity<T>(null, HttpStatus.OK)
         }
     }
 
@@ -89,16 +78,15 @@ class DokGenIntegrationTest{
     fun `Test generer html`(){
         val dokgen= DokGenTestService()
         val html= dokgen.lagHtmlFraMarkdown("markdown")
-        assert(html.equals("mockup_response"))
+        assert(html.equals("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
     }
 
     @Test
     @Tag("integration")
-    fun `Test utførRequest`(){
-        val dokgen= DokGenUtførRequestTestService()
-        assertThrows(Exception::class.java){
-          dokgen.testUtførRequest()
-        }
+    fun`Test generer pdf`(){
+        val dokgen= DokGenTestService()
+        val pdf= dokgen.lagPdfFraMarkdown("markdown")
+        assert(pdf.contentEquals("Vedtaksbrev PDF".toByteArray()))
     }
 
     @Test
