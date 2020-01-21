@@ -30,6 +30,20 @@ class BeregningTest(
         private val beregning: Beregning
 ) {
 
+    /**
+     * Testen generer 3 barn. 2 av dem er født dd. og 1 er født 2 år frem i tid.
+     * Videre generer vi tidslinje for utbetaling med stønad fom og tom for samtlige barn.
+     *
+     * Barn 1: 18 år med barnetrygd fra sin fødselsdato
+     * Barn 2: 18 år med barnetrygd fra sin fødselsdato
+     * Barn 3: 15 år med barnetrygd fra 3 år etter sin fødselsdato
+     *
+     * Dette medfører følgende tidslinje:
+     * 1 periode: 1 barn = 1054
+     * 2 periode: 2 barn = 2108
+     * 3 periode: 3 barn = 3162
+     * 4 periode: 1 barn = 1054
+     */
     @Test
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
         val behandling = behandlingService.nyBehandling("0", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "lagRandomSaksnummer")
