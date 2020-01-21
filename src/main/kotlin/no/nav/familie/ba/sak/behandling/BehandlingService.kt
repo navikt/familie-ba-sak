@@ -176,6 +176,10 @@ class BehandlingService(
             val barn = personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer), personopplysningGrunnlagId = personopplysningGrunnlag?.id)
                     ?: return Ressurs.failure("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
+            if (it.stønadFom.isBefore(barn.fødselsdato)) {
+                return Ressurs.failure("Ugyldig fra og med dato", Exception("Ugyldig fra og med dato for ${barn.fødselsdato}"))
+            }
+
             behandlingVedtakBarnRepository.save(
                     BehandlingVedtakBarn(
                             barn = barn,

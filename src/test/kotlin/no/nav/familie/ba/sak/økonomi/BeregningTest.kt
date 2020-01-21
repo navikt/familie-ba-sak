@@ -76,7 +76,7 @@ class BeregningTest(
         ))
 
 
-        Assertions.assertEquals(tidslinje.size(), 6)
+        Assertions.assertEquals(tidslinje.size(), 4)
 
         // Sjekk at første periode er på 2 år
         val nå = LocalDate.now()
@@ -85,7 +85,7 @@ class BeregningTest(
                 tidslinje.datoIntervaller.pollFirst()?.totalDays(),
                 Duration.between(nå.atStartOfDay(), toÅrFrem.atStartOfDay()).toDays())
 
-        val beløp = listOf(1654, 3308, 4962, 4362, 3162, 1054)
+        val beløp = listOf(1054, 2108, 3162, 1054)
         // Sjekk at periodene har riktig beløp
         tidslinje.toSegments().forEachIndexed { index, localDateSegment ->
             Assertions.assertEquals(localDateSegment.value, beløp[index])
