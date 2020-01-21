@@ -84,7 +84,6 @@ class FagsakController(
         }
 
         opprettTaskIverksettMotOppdrag(behandling, behandlingVedtak, saksbehandlerId)
-        opprettTaskJournalførVedtaksbrev(behandlingVedtak)
 
         behandlingService.oppdatertStatusPåBehandlingVedtak(behandlingVedtak, BehandlingVedtakStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
 
@@ -105,17 +104,6 @@ class FagsakController(
                     this["behandlingVedtakId"] = behandlingVedtak.id
                 }
         )
-        taskRepository.save(task)
-    }
-
-    private fun opprettTaskJournalførVedtaksbrev(behandlingVedtak: BehandlingVedtak) {
-        val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, objectMapper.writeValueAsString(JournalførBrevTaskDTO(
-            fnr = behandlingVedtak.behandling.fagsak.personIdent?.ident!!,
-            tittel = "Vedtak om innvilgelse av barnetrygd",
-            pdf = behandlingService.hentPdfForBehandlingVedtak(behandlingVedtak),
-            brevkode = "",
-            behandlingsVedtakId = behandlingVedtak.id
-        )))
         taskRepository.save(task)
     }
 

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.concurrent.ThreadLocalRandom
@@ -204,14 +205,14 @@ class BehandlingService(
         return Ressurs.success(html)
     }
 
-    internal fun hentPdfForBehandlingVedtak(behandlingVedtak: BehandlingVedtak): ByteArray {
-        val pdf = Result.runCatching { dokGenService.lagPdfFraMarkdown(behandlingVedtak.stønadBrevMarkdown) }
+    internal fun hentPdfForBehandlingVedtak(behandlingVedtakId: Long): ByteArray {
+        val behandlingVedtak = behandlingVedtakRepository.findByIdOrNull(behandlingVedtakId)
+        return Result.runCatching { dokGenService.lagPdfFraMarkdown(behandlingVedtak?.stønadBrevMarkdown!!) }
             .fold(
                 onSuccess = { it },
                 onFailure = { e ->
-                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${behandlingVedtak.id}")
+                    throw Exception("Klarte ikke å hente PDF for vedtak med id $behandlingVedtakId")
                 }
             )
-        return pdf
     }
 }

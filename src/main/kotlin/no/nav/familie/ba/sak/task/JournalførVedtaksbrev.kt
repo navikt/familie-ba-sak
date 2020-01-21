@@ -22,9 +22,9 @@ class JournalførVedtaksbrev(
     override fun doTask(task: Task) {
         val journalførTask = objectMapper.readValue(task.payload, JournalførBrevTaskDTO::class.java)
         LOG.debug("Journalfører vedtaksbrev for vedtak med ID ${journalførTask.behandlingsVedtakId}")
-        integrasjonTjeneste.journalFørVedtaksbrev(journalførTask, { journalpostId: String ->
+        integrasjonTjeneste.journalFørVedtaksbrev(journalførTask) { journalpostId: String ->
             this.journalpostId = journalpostId
-        })
+        }
     }
 
     override fun onCompletion(task: Task) {
@@ -33,7 +33,7 @@ class JournalførVedtaksbrev(
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "journalførIJoark"
+        const val TASK_STEP_TYPE = "journalførTilJoark"
         val LOG = LoggerFactory.getLogger(JournalførVedtaksbrev::class.java)
     }
 }
