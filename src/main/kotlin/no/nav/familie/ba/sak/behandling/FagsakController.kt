@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.behandling
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.dokument.JournalførBrevTaskDTO
 import no.nav.familie.ba.sak.task.AvstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrev
 import no.nav.familie.ba.sak.økonomi.AvstemmingTaskDTO
 import no.nav.familie.ba.sak.økonomi.IverksettingTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -79,14 +83,22 @@ class FagsakController(
             return  ResponseEntity.ok(Ressurs.failure("Vedtaket er allerede iverksatt"))
         }
 
-        val task = Task.nyTask(
-                type = IverksettMotOppdrag.TASK_STEP_TYPE,
+        opprettTaskIverksettMotOppdrag(behandling, behandlingVedtak, saksbehandlerId)
+        opprettTaskJournalførVedtaksbrev(behandlingVedtak)
+
+        behandlingService.oppdatertStatusPåBehandlingVedtak(behandlingVedtak, BehandlingVedtakStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
+
+        return ResponseEntity.ok(Ressurs.success("Task for iverksetting ble opprettet på fagsak $fagsakId på vedtak ${behandlingVedtak.id}"))
+    }
+
+    private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, behandlingVedtak: BehandlingVedtak, saksbehandlerId: String) {
+        val task = Task.nyTask(type = IverksettMotOppdrag.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
-                        personIdent = behandling.fagsak.personIdent?.ident!!,
-                        behandlingsId = behandling.id!!,
-                        behandlingVedtakId = behandlingVedtak.id!!,
-                        saksbehandlerId = saksbehandlerId
-                )),
+            personIdent = behandling.fagsak.personIdent?.ident!!,
+            behandlingsId = behandling.id!!,
+            behandlingVedtakId = behandlingVedtak.id!!,
+            saksbehandlerId = saksbehandlerId
+        )),
                 properties = Properties().apply {
                     this["personIdent"] = behandling.fagsak.personIdent?.ident
                     this["behandlingsId"] = behandling.id
@@ -94,10 +106,17 @@ class FagsakController(
                 }
         )
         taskRepository.save(task)
+    }
 
-        behandlingService.oppdatertStatusPåBehandlingVedtak(behandlingVedtak, BehandlingVedtakStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
-
-        return ResponseEntity.ok(Ressurs.success("Task for iverksetting ble opprettet på fagsak $fagsakId på vedtak ${behandlingVedtak.id}"))
+    private fun opprettTaskJournalførVedtaksbrev(behandlingVedtak: BehandlingVedtak) {
+        val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, objectMapper.writeValueAsString(JournalførBrevTaskDTO(
+            fnr = behandlingVedtak.behandling.fagsak.personIdent?.ident!!,
+            tittel = "Vedtak om innvilgelse av barnetrygd",
+            pdf = behandlingService.hentPdfForBehandlingVedtak(behandlingVedtak),
+            brevkode = "",
+            behandlingsVedtakId = behandlingVedtak.id
+        )))
+        taskRepository.save(task)
     }
 
 
