@@ -12,6 +12,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Iverksett vedtak mot oppdrag", maxAntallFeil = 3)
@@ -29,12 +30,20 @@ class IverksettMotOppdrag(
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.behandlingVedtakId} mot oppdrag gikk OK")
 
-        val nyTask = Task.nyTask(StatusFraOppdrag.TASK_STEP_TYPE, objectMapper.writeValueAsString(StatusFraOppdragDTO(
-                personIdent = iverksettingTask.personIdent,
-                fagsystem = FAGSYSTEM,
-                behandlingsId = iverksettingTask.behandlingsId.toString(),
-                behandlingVedtakId = iverksettingTask.behandlingVedtakId
-        )))
+        val nyTask = Task.nyTask(
+                type = StatusFraOppdrag.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(StatusFraOppdragDTO(
+                        personIdent = iverksettingTask.personIdent,
+                        fagsystem = FAGSYSTEM,
+                        behandlingsId = iverksettingTask.behandlingsId.toString(),
+                        behandlingVedtakId = iverksettingTask.behandlingVedtakId
+                )),
+                properties = Properties().apply {
+                    this["personIdent"] = iverksettingTask.personIdent
+                    this["behandlingsId"] = iverksettingTask.behandlingsId
+                    this["behandlingVedtakId"] = iverksettingTask.behandlingVedtakId
+                }
+        )
         taskRepository.save(nyTask)
     }
 

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
+import java.util.*
 
 @RestController
 @RequestMapping("/api")
@@ -78,12 +79,20 @@ class FagsakController(
             return  ResponseEntity.ok(Ressurs.failure("Vedtaket er allerede iverksatt"))
         }
 
-        val task = Task.nyTask(IverksettMotOppdrag.TASK_STEP_TYPE, objectMapper.writeValueAsString(IverksettingTaskDTO(
-                personIdent = behandling.fagsak.personIdent?.ident!!,
-                behandlingsId = behandling.id!!,
-                behandlingVedtakId = behandlingVedtak.id!!,
-                saksbehandlerId = saksbehandlerId
-        )))
+        val task = Task.nyTask(
+                type = IverksettMotOppdrag.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
+                        personIdent = behandling.fagsak.personIdent?.ident!!,
+                        behandlingsId = behandling.id!!,
+                        behandlingVedtakId = behandlingVedtak.id!!,
+                        saksbehandlerId = saksbehandlerId
+                )),
+                properties = Properties().apply {
+                    this["personIdent"] = behandling.fagsak.personIdent?.ident
+                    this["behandlingsId"] = behandling.id
+                    this["behandlingVedtakId"] = behandlingVedtak.id
+                }
+        )
         taskRepository.save(task)
 
         behandlingService.oppdatertStatusPåBehandlingVedtak(behandlingVedtak, BehandlingVedtakStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
