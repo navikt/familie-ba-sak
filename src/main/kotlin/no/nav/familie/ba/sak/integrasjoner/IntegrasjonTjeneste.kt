@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner
 
 import no.nav.familie.ba.sak.common.BaseService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
+import no.nav.familie.ba.sak.dokument.JournalførBrevTaskDTO
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -58,6 +58,16 @@ class IntegrasjonTjeneste (
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
         }
+    }
+
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    fun journalFørVedtaksbrev(journalførBrevTaskDTO: JournalførBrevTaskDTO, callback: (journalpostID: String) -> Unit) {
+        callback("journalpostID: TODO")
+    }
+
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    fun distribuerVedtaksbrev(journalpostId: String) {
+
     }
 
     companion object {
