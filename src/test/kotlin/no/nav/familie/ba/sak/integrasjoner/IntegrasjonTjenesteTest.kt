@@ -57,8 +57,6 @@ class IntegrasjonTjenesteTest{
         every{clientConfigurationProfilesMock.getRegistration()}.answers{
             mapOf(IntegrasjonTjeneste.OAUTH2_CLIENT_CONFIG_KEY to clientProperties) }
 
-        val registration= clientConfigurationProfilesMock.registration
-
         integrasjonTjeneste= IntegrasjonTjeneste(URI.create(mockServiceUri), restTemplateBuilderMock,
                 clientConfigurationProfilesMock, oAuth2AccessTokenServiceMock)
 
@@ -66,17 +64,18 @@ class IntegrasjonTjenesteTest{
         val methodSlot= slot<HttpMethod>()
         val entitySlot= slot<HttpEntity<Any>>()
 
+        val mockJournalpostForVedtakId= "453491843"
         every{restTemplateMock.exchange(capture(endpointSlot), capture(methodSlot), capture(entitySlot), any<Class<*>>())}
                 .answers{ResponseEntity<Ressurs<ArkiverDokumentResponse>>(
                         Ressurs<ArkiverDokumentResponse>(
-                                data= ArkiverDokumentResponse("453491843", true),
+                                data= ArkiverDokumentResponse(mockJournalpostForVedtakId, true),
                                 status= Ressurs.Status.SUKSESS,
                                 melding = "",
                                 stacktrace = ""
                                 ),
                         HttpStatus.CREATED)}
 
-        integrasjonTjeneste.lagerJournalpostForVedtaksbrev(mockFnr, mockPdf)
+        val journpostForVedtakId= integrasjonTjeneste.lagerJournalpostForVedtaksbrev(mockFnr, mockPdf)
 
         val expectedURI= URI.create("$mockServiceUri/arkiv/v1")
 
@@ -89,5 +88,6 @@ class IntegrasjonTjenesteTest{
         assert(arkiverDokumentRequest.dokumenter[0].filType.equals(IntegrasjonTjeneste.VEDTAK_FILTYPE))
         assert(arkiverDokumentRequest.dokumenter[0].filnavn.equals(IntegrasjonTjeneste.VEDTAK_FILNAVN))
         assert(arkiverDokumentRequest.dokumenter[0].dokument.equals(mockPdf))
+        assert(journpostForVedtakId.equals(mockJournalpostForVedtakId))
     }
  }
