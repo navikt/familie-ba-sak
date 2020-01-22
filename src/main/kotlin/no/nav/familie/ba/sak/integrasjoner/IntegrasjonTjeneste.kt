@@ -71,7 +71,11 @@ class IntegrasjonTjeneste (
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun journalFørVedtaksbrev(journalførBrevTaskDTO: JournalførBrevTaskDTO, callback: (journalpostID: String) -> Unit) {
-        callback("journalpostID: TODO")
+        val journalpostId= lagerJournalpostForVedtaksbrev(journalførBrevTaskDTO.fnr, journalførBrevTaskDTO.pdf)
+        if(journalpostId== null){
+            throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost. behandlingsVedtakId: ${journalførBrevTaskDTO.behandlingsVedtakId}")
+        }
+        callback(journalpostId)
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
@@ -79,26 +83,25 @@ class IntegrasjonTjeneste (
 
     }
 
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun arkiverVedtakPdf(fnr: String, pdfByteArray: ByteArray): String?{
+    fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String?{
         val uri = URI.create("$integrasjonerServiceUri/arkiv/v1")
         logger.info("Sender vedtak pdf til DokArkiv: ${uri}");
 
         return runCatching<ArkiverDokumentResponse> {
-            val dokumenter= listOf(Dokument(pdfByteArray, FilType.PDFA, "ba_vb.pdf", null, "BARNETRYGD_VEDTAKSBREV"))
+            val dokumenter= listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, VEDTAK_FILNAVN, null, VEDTAK_DOKUMENT_TYPE))
             val arkiverDokumentRequest= ArkiverDokumentRequest(fnr, true, dokumenter)
-            val arkiverDokumentResponse= sendArkivRequest(uri, arkiverDokumentRequest)
+            val arkiverDokumentResponse= sendJournalFørRequest(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.onFailure {
-            logger.error("Archiving failed for FNR ${fnr}: ${it.message}")
+            throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost.", it, uri, fnr)
         }.getOrNull()?.journalpostId
     }
 
-    private fun sendArkivRequest(integrasjonerDokArkivPath : URI, arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
+    private fun sendJournalFørRequest(journalFørEndpoint : URI, arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-        val response= restTemplate.exchange(integrasjonerDokArkivPath, HttpMethod.POST, HttpEntity<Any>(arkiverDokumentRequest, headers), Ressurs::class.java)
+        val response= restTemplate.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(arkiverDokumentRequest, headers), Ressurs::class.java)
         val mapper= ObjectMapper().registerKotlinModule()
         return mapper.convertValue(response.body!!.data, ArkiverDokumentResponse::class.java)
     }
@@ -106,6 +109,12 @@ class IntegrasjonTjeneste (
     companion object {
         private val logger = LoggerFactory.getLogger(IntegrasjonTjeneste::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
-        private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
+
+        val VEDTAK_FILTYPE= FilType.PDFA
+        const val VEDTAK_FILNAVN= "ba_vb.pdf"
+        const val VEDTAK_DOKUMENT_TYPE= "BARNETRYGD_VEDTAKSBREV"
+
+        //for testability make it visible
+        const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
     }
 }

@@ -12,7 +12,7 @@ class IntegrasjonException : RuntimeException {
     private var responseBody: ByteArray? = null
 
     constructor(msg: String?) : super(msg)
-    constructor(msg: String?, e: Exception?, uri: URI?, ident: String?) : super(msg, e) {
+    constructor(msg: String?, e: Throwable?, uri: URI?, ident: String?) : super(msg, e) {
         var message = ""
         if (e is RestClientResponseException) {
             message = e.responseBodyAsString
