@@ -100,8 +100,8 @@ class FagsakController(
         )),
                 properties = Properties().apply {
                     this["personIdent"] = behandling.fagsak.personIdent?.ident
-                    this["behandlingsId"] = behandling.id
-                    this["behandlingVedtakId"] = behandlingVedtak.id
+                    this["behandlingsId"] = behandling.id.toString()
+                    this["behandlingVedtakId"] = behandlingVedtak.id.toString()
                 }
         )
         taskRepository.save(task)
