@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
@@ -51,6 +52,7 @@ class BehandlingService(
     val STRING_LENGTH = 10
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
 
+    @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
         // val søkerAktørId = integrasjonTjeneste.hentAktørId(nyBehandling.fødselsnummer);
 
@@ -75,6 +77,9 @@ class BehandlingService(
         )
         personopplysningGrunnlag.leggTilPerson(søker)
 
+        if (nyBehandling.barnasFødselsnummer.isEmpty()) {
+            throw Exception("Kan ikke lage en behandling uten barn")
+        }
         nyBehandling.barnasFødselsnummer.map {
             personopplysningGrunnlag.leggTilPerson(Person(
                     personIdent = PersonIdent(it),
@@ -105,6 +110,11 @@ class BehandlingService(
         val aktivBehandling = hentBehandlingHvisEksisterer(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
+            val aktivBehandlingVedtak = hentBehandlingVedtakHvisEksisterer(aktivBehandling.id)
+            if (aktivBehandlingVedtak?.status != BehandlingVedtakStatus.IVERKSATT) {
+                throw IllegalStateException("Den aktive behandlingen er ikke iverksatt. Kan ikke opprette ny behandling.")
+            }
+
             aktivBehandling.aktiv = false
             behandlingRepository.save(aktivBehandling)
         }
