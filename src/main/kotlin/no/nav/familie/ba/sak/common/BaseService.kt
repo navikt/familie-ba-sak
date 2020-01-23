@@ -6,6 +6,7 @@ import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpRequest
@@ -51,4 +52,7 @@ open class BaseService(clientConfigKey: String, restTemplateBuilder: RestTemplat
         val httpEntity: HttpEntity<*> = HttpEntity<Any?>(headers)
         return restOperations.exchange(uri, HttpMethod.GET, httpEntity)
     }
+
+    protected inline fun <reified T> typeReference() = object : ParameterizedTypeReference<T>() {}
+
 }
