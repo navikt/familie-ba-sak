@@ -19,9 +19,7 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.http.HttpMethod
-import org.springframework.http.RequestEntity
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -71,14 +69,12 @@ class IntegrasjonTjeneste (
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun journalFørVedtaksbrev(journalførBrevTaskDTO: JournalførBrevTaskDTO, callback: (journalpostID: String) -> Unit) {
-        val journalpostId= lagerJournalpostForVedtaksbrev(journalførBrevTaskDTO.fnr, journalførBrevTaskDTO.pdf)
+    fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String, callback: (journalpostID: String) -> Unit) {
+        val journalpostId= lagerJournalpostForVedtaksbrev(fnr, pdf)
         if(journalpostId== null){
-            throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost. behandlingsVedtakId: ${journalførBrevTaskDTO.behandlingsVedtakId}")
+            throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost. fnr: ${fnr}")
         }
         callback(journalpostId)
-    fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String, callback: (journalpostID: String) -> Unit) {
-        callback("journalpostID: TODO")
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
