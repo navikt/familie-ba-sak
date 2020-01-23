@@ -44,5 +44,6 @@ management:
 
 BA_SAK_FRONTEND_CLIENT_ID: "dummy"
 BA_MOTTAK_CLIENT_ID: "dummy"
+FAMILIE_PROSESSERING_CLIENT_ID: "dummy"
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 FAMILIE_BA_DOKGEN_API_URL: http://localhost:8080
