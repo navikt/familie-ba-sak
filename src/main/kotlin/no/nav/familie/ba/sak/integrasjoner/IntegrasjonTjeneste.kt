@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.familie.ba.sak.common.BaseService
-import no.nav.familie.ba.sak.dokument.JournalførBrevTaskDTO
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -20,7 +19,9 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.http.*
+import org.springframework.http.HttpMethod
+import org.springframework.http.RequestEntity
+import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -76,11 +77,26 @@ class IntegrasjonTjeneste (
             throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost. behandlingsVedtakId: ${journalførBrevTaskDTO.behandlingsVedtakId}")
         }
         callback(journalpostId)
+    fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String, callback: (journalpostID: String) -> Unit) {
+        callback("journalpostID: TODO")
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun distribuerVedtaksbrev(journalpostId: String) {
-
+        val uri = URI.create("$integrasjonerServiceUri/dist/v1/$journalpostId")
+        val request = RequestEntity<Any>(HttpMethod.GET, uri)
+        logger.info("Kaller dokdist-tjeneste med journalpostId $journalpostId")
+        return try {
+            val response = restOperations.exchange(request, typeReference<Ressurs<String>>())
+            val bestillingsId: String = response.body?.data.orEmpty()
+            if (bestillingsId.isEmpty()) {
+                throw IntegrasjonException("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
+            } else {
+                logger.info("Distribusjon av vedtaksbrev bestilt. BestillingsId:  $bestillingsId")
+            }
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved distribusjon av vedtaksbrev", e, uri, "")
+        }
     }
 
     fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String?{
