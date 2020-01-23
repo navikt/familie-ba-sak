@@ -57,7 +57,6 @@ class StatusFraOppdrag(
         val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, objectMapper.writeValueAsString(JournalførBrevTaskDTO(
             fnr = personIdent,
             tittel = "Vedtak om innvilgelse av barnetrygd",
-            pdf = behandlingService.hentPdfForBehandlingVedtak(behandlingVedtakId),
             brevkode = "",
             behandlingsVedtakId = behandlingVedtakId
         )))
