@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
-import no.nav.familie.ba.sak.dokument.JournalførBrevTaskDTO
 import no.nav.familie.ba.sak.task.StatusFraOppdrag.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.økonomi.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.OppdragProtokollStatus

@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner
 
 import no.nav.familie.ba.sak.common.BaseService
-import no.nav.familie.ba.sak.dokument.JournalførBrevTaskDTO
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -63,7 +62,7 @@ class IntegrasjonTjeneste (
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun journalFørVedtaksbrev(journalførBrevTaskDTO: JournalførBrevTaskDTO, callback: (journalpostID: String) -> Unit) {
+    fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String, callback: (journalpostID: String) -> Unit) {
         callback("journalpostID: TODO")
     }
 
