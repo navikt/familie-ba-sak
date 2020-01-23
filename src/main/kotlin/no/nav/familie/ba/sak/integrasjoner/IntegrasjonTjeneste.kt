@@ -112,7 +112,7 @@ class IntegrasjonTjeneste (
 
         val VEDTAK_FILTYPE= FilType.PDFA
         const val VEDTAK_FILNAVN= "ba_vb.pdf"
-        const val VEDTAK_DOKUMENT_TYPE= "BARNETRYGD_VEDTAKSBREV"
+        const val VEDTAK_DOKUMENT_TYPE= "BARNETRYGD_VEDTAK"
 
         //for testability make it visible
         const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
