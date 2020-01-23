@@ -48,18 +48,13 @@ class StatusFraOppdrag(
                                 statusFraOppdragDTO.behandlingVedtakId,
                                 BehandlingVedtakStatus.IVERKSATT
                         )
-                        opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.behandlingVedtakId, statusFraOppdragDTO.personIdent)
+                        opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.behandlingVedtakId)
                     }
                 }
     }
 
-    private fun opprettTaskJournalførVedtaksbrev(behandlingVedtakId: Long, personIdent: String) {
-        val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, objectMapper.writeValueAsString(JournalførBrevTaskDTO(
-            fnr = personIdent,
-            tittel = "Vedtak om innvilgelse av barnetrygd",
-            brevkode = "",
-            behandlingsVedtakId = behandlingVedtakId
-        )))
+    private fun opprettTaskJournalførVedtaksbrev(behandlingVedtakId: Long) {
+        val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, "$behandlingVedtakId")
         taskRepository.save(task)
     }
 

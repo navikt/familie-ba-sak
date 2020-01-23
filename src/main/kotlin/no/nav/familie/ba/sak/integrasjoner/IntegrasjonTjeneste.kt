@@ -5,12 +5,13 @@ import no.nav.familie.ba.sak.dokument.JournalførBrevTaskDTO
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.http.HttpMethod
+import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
@@ -67,7 +68,20 @@ class IntegrasjonTjeneste (
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun distribuerVedtaksbrev(journalpostId: String) {
-
+        val uri = URI.create("$integrasjonerServiceUri/dist/v1/$journalpostId")
+        val request = RequestEntity<Any>(HttpMethod.GET, uri)
+        logger.info("Kaller dokdist-tjeneste med journalpostId $journalpostId")
+        return try {
+            val response = restOperations.exchange(request, typeReference<Ressurs<String>>())
+            val bestillingsId: String = response.body?.data.orEmpty()
+            if (bestillingsId.isEmpty()) {
+                throw IntegrasjonException("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
+            } else {
+                logger.info("Distribusjon av vedtaksbrev bestilt. BestillingsId:  $bestillingsId")
+            }
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved distribusjon av vedtaksbrev", e, uri, "")
+        }
     }
 
     companion object {

@@ -209,13 +209,12 @@ class BehandlingService(
         return Ressurs.success(html)
     }
 
-    internal fun hentPdfForBehandlingVedtak(behandlingVedtakId: Long): ByteArray {
-        val behandlingVedtak = behandlingVedtakRepository.findByIdOrNull(behandlingVedtakId)
+    internal fun hentPdfForBehandlingVedtak(behandlingVedtak: BehandlingVedtak?): ByteArray {
         return Result.runCatching { dokGenService.lagPdfFraMarkdown(behandlingVedtak?.stønadBrevMarkdown!!) }
             .fold(
                 onSuccess = { it },
                 onFailure = { e ->
-                    throw Exception("Klarte ikke å hente PDF for vedtak med id $behandlingVedtakId")
+                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${behandlingVedtak?.id}")
                 }
             )
     }
