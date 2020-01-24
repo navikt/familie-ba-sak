@@ -26,7 +26,7 @@ class MottakController(
         private val fagsakService: FagsakService
 ) {
     @PostMapping(path = ["/behandling/opprett"])
-    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<RestFagsak> {
+    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<String> {
         val saksbehandlerId = try {
             oidcUtil.getClaim("preferred_username") ?: "VL"
         } catch (e: JwtTokenValidatorException) {
@@ -39,10 +39,10 @@ class MottakController(
 
             val fagsak = behandlingService.opprettBehandling(nyBehandling)
 
-            fagsakService.hentRestFagsak(fagsakId = fagsak.id)
+            //fagsakService.hentRestFagsak(fagsakId = fagsak.id)
         }.fold(
                 onSuccess = {
-                    it
+                    Ressurs.success("OK")
                 },
                 onFailure = {
                     if (it is IllegalStateException)
