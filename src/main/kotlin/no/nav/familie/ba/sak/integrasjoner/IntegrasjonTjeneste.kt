@@ -115,7 +115,8 @@ class IntegrasjonTjeneste (
 
     private fun sendJournalFørRequest(journalFørEndpoint : URI, arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
         val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
+        headers.add("Content-Type", "application/json;charset=UTF-8")
+        headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
         val response= restTemplate.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(arkiverDokumentRequest, headers), Ressurs::class.java)
         val mapper= ObjectMapper().registerKotlinModule()
