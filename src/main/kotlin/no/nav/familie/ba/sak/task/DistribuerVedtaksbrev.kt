@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send vedtaksbrev til Dokdist", maxAntallFeil = 3)
-class IverksettMotDokdist(
+class DistribuerVedtaksbrev(
     private val integrasjonTjeneste: IntegrasjonTjeneste
 ) : AsyncTaskStep {
 
@@ -24,7 +24,7 @@ class IverksettMotDokdist(
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "distribuerJournalPost"
-        val LOG = LoggerFactory.getLogger(IverksettMotDokdist::class.java)
+        const val TASK_STEP_TYPE = "distribuerVedtaksbrev"
+        val LOG = LoggerFactory.getLogger(DistribuerVedtaksbrev::class.java)
     }
 }
