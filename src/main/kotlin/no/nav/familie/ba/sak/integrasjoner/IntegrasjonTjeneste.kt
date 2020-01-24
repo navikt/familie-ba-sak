@@ -28,7 +28,7 @@ import org.springframework.web.client.exchange
 import java.net.URI
 
 @Component
-class IntegrasjonTjeneste (
+class IntegrasjonTjeneste(
         @Value("\${FAMILIE_INTEGRASJONER_API_URL}")
         private val integrasjonerServiceUri: URI,
         restTemplateBuilderMedProxy: RestTemplateBuilder,
@@ -71,8 +71,8 @@ class IntegrasjonTjeneste (
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String, callback: (journalpostID: String) -> Unit) {
-        val journalpostId= lagerJournalpostForVedtaksbrev(fnr, pdf)
-        if(journalpostId== null){
+        val journalpostId = lagerJournalpostForVedtaksbrev(fnr, pdf)
+        if (journalpostId == null) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost. fnr: ${fnr}")
         }
         callback(journalpostId)
@@ -96,14 +96,14 @@ class IntegrasjonTjeneste (
         }
     }
 
-    fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String?{
+    fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String? {
         val uri = URI.create("$integrasjonerServiceUri/arkiv/v1")
         logger.info("Sender vedtak pdf til DokArkiv: ${uri}");
 
         runCatching<ArkiverDokumentResponse> {
-            val dokumenter= listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, VEDTAK_FILNAVN, null, VEDTAK_DOKUMENT_TYPE))
-            val arkiverDokumentRequest= ArkiverDokumentRequest(fnr, true, dokumenter)
-            val arkiverDokumentResponse= sendJournalFørRequest(uri, arkiverDokumentRequest)
+            val dokumenter = listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, VEDTAK_FILNAVN, null, VEDTAK_DOKUMENT_TYPE))
+            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter)
+            val arkiverDokumentResponse = sendJournalFørRequest(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.onFailure {
             throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost.", it, uri, fnr)
@@ -114,7 +114,7 @@ class IntegrasjonTjeneste (
         return null
     }
 
-    private fun sendJournalFørRequest(journalFørEndpoint : URI, arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
+    private fun sendJournalFørRequest(journalFørEndpoint: URI, arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
         val headers = HttpHeaders()
         headers.add("Content-Type", "application/json;charset=UTF-8")
         headers.acceptCharset = listOf(Charsets.UTF_8)
@@ -127,9 +127,9 @@ class IntegrasjonTjeneste (
         private val logger = LoggerFactory.getLogger(IntegrasjonTjeneste::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-        val VEDTAK_FILTYPE= FilType.PDFA
-        const val VEDTAK_FILNAVN= "ba_vb.pdf"
-        const val VEDTAK_DOKUMENT_TYPE= "BARNETRYGD_VEDTAK"
+        val VEDTAK_FILTYPE = FilType.PDFA
+        const val VEDTAK_FILNAVN = "ba_vb.pdf"
+        const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
 
         private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
     }
