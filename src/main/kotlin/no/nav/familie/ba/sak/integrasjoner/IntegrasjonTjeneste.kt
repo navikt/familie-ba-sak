@@ -131,7 +131,6 @@ class IntegrasjonTjeneste (
         const val VEDTAK_FILNAVN= "ba_vb.pdf"
         const val VEDTAK_DOKUMENT_TYPE= "BARNETRYGD_VEDTAK"
 
-        //for testability make it visible
-        const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
+        private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
     }
 }
