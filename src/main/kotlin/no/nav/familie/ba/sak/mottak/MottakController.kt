@@ -26,7 +26,7 @@ class MottakController(
         private val fagsakService: FagsakService
 ) {
     @PostMapping(path = ["/behandling/opprett"])
-    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
+    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<RestFagsak> {
         val saksbehandlerId = try {
             oidcUtil.getClaim("preferred_username") ?: "VL"
         } catch (e: JwtTokenValidatorException) {
@@ -42,14 +42,12 @@ class MottakController(
             fagsakService.hentRestFagsak(fagsakId = fagsak.id)
         }.fold(
                 onSuccess = {
-                    ResponseEntity.ok(it)
+                    it
                 },
                 onFailure = {
                     if (it is IllegalStateException)
-                        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                                Ressurs.failure("Kan ikke opprette ny behandling på fagsak med eksisterende aktiv behandling")
-                        )
-                    else ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Ressurs.failure(it.message))
+                                Ressurs.failure("Kan ikke opprette ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt")
+                    else Ressurs.failure(it.message)
                 }
         )
     }
