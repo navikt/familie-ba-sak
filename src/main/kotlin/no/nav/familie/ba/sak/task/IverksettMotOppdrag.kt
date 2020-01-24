@@ -38,11 +38,7 @@ class IverksettMotOppdrag(
                         behandlingsId = iverksettingTask.behandlingsId.toString(),
                         behandlingVedtakId = iverksettingTask.behandlingVedtakId
                 )),
-                properties = Properties().apply {
-                    this["personIdent"] = iverksettingTask.personIdent
-                    this["behandlingsId"] = iverksettingTask.behandlingsId
-                    this["behandlingVedtakId"] = iverksettingTask.behandlingVedtakId
-                }
+                properties = task.metadata
         )
         taskRepository.save(nyTask)
     }

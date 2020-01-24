@@ -5,10 +5,8 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.dokument.JournalførBrevTaskDTO
 import no.nav.familie.ba.sak.task.AvstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
-import no.nav.familie.ba.sak.task.JournalførVedtaksbrev
 import no.nav.familie.ba.sak.økonomi.AvstemmingTaskDTO
 import no.nav.familie.ba.sak.økonomi.IverksettingTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -100,8 +98,8 @@ class FagsakController(
         )),
                 properties = Properties().apply {
                     this["personIdent"] = behandling.fagsak.personIdent?.ident
-                    this["behandlingsId"] = behandling.id
-                    this["behandlingVedtakId"] = behandlingVedtak.id
+                    this["behandlingsId"] = behandling.id.toString()
+                    this["behandlingVedtakId"] = behandlingVedtak.id.toString()
                 }
         )
         taskRepository.save(task)

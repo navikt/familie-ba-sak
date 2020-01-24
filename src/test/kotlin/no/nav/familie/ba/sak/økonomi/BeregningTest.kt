@@ -30,6 +30,20 @@ class BeregningTest(
         private val beregning: Beregning
 ) {
 
+    /**
+     * Testen generer 3 barn. 2 av dem er født dd. og 1 er født 2 år frem i tid.
+     * Videre generer vi tidslinje for utbetaling med stønad fom og tom for samtlige barn.
+     *
+     * Barn 1: 18 år med barnetrygd fra sin fødselsdato
+     * Barn 2: 18 år med barnetrygd fra sin fødselsdato
+     * Barn 3: 15 år med barnetrygd fra 3 år etter sin fødselsdato
+     *
+     * Dette medfører følgende tidslinje:
+     * 1 periode: 1 barn = 1054
+     * 2 periode: 2 barn = 2108
+     * 3 periode: 3 barn = 3162
+     * 4 periode: 1 barn = 1054
+     */
     @Test
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
         val behandling = behandlingService.nyBehandling("0", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "lagRandomSaksnummer")
@@ -76,7 +90,7 @@ class BeregningTest(
         ))
 
 
-        Assertions.assertEquals(tidslinje.size(), 6)
+        Assertions.assertEquals(tidslinje.size(), 4)
 
         // Sjekk at første periode er på 2 år
         val nå = LocalDate.now()
@@ -85,7 +99,7 @@ class BeregningTest(
                 tidslinje.datoIntervaller.pollFirst()?.totalDays(),
                 Duration.between(nå.atStartOfDay(), toÅrFrem.atStartOfDay()).toDays())
 
-        val beløp = listOf(1654, 3308, 4962, 4362, 3162, 1054)
+        val beløp = listOf(1054, 2108, 3162, 1054)
         // Sjekk at periodene har riktig beløp
         tidslinje.toSegments().forEachIndexed { index, localDateSegment ->
             Assertions.assertEquals(localDateSegment.value, beløp[index])
