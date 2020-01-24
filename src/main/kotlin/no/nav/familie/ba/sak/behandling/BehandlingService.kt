@@ -67,6 +67,7 @@ class BehandlingService(
                         .asSequence()
                         .map(charPool::get)
                         .joinToString(""))
+        LOG.info("Har opprettet ny behandling. Henter personinfo... ")
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
@@ -89,8 +90,10 @@ class BehandlingService(
                     fødselsdato = integrasjonTjeneste.hentPersoninfoFor(it)?.fødselsdato
             ))
         }
+        LOG.info("Hentet personopplysninger for søker og barn. Lagrer personopplysningsgrunnlag")
         personopplysningGrunnlag.setAktiv(true)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        LOG.info("Har lagret personopplysningsgrunnlag")
 
         return behandling.fagsak
     }
