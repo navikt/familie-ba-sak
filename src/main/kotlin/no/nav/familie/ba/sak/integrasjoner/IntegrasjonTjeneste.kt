@@ -96,22 +96,21 @@ class IntegrasjonTjeneste(
         }
     }
 
-    fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String? {
+    fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String{
         val uri = URI.create("$integrasjonerServiceUri/arkiv/v1")
         logger.info("Sender vedtak pdf til DokArkiv: ${uri}");
 
-        runCatching<ArkiverDokumentResponse> {
+        return Result.runCatching{
             val dokumenter = listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, VEDTAK_FILNAVN, null, VEDTAK_DOKUMENT_TYPE))
             val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter)
             val arkiverDokumentResponse = sendJournalFørRequest(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
-        }.onFailure {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost.", it, uri, fnr)
-        }.onSuccess {
-            return it.journalpostId
-        }
-
-        return null
+        }.fold(
+            onSuccess = {it.journalpostId},
+            onFailure = {
+                throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost.", it, uri, fnr)
+            }
+        )
     }
 
     private fun sendJournalFørRequest(journalFørEndpoint: URI, arkiverDokumentRequest: ArkiverDokumentRequest): ArkiverDokumentResponse {
