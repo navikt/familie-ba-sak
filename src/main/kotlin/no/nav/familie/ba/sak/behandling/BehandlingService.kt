@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -110,15 +111,20 @@ class BehandlingService(
         val aktivBehandling = hentBehandlingHvisEksisterer(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
+            LOG.info("Fant aktiv behandling med saksnr ${aktivBehandling.saksnummer} og id ${aktivBehandling.id}")
             val aktivBehandlingVedtak = hentBehandlingVedtakHvisEksisterer(aktivBehandling.id)
             if (aktivBehandlingVedtak?.status != BehandlingVedtakStatus.IVERKSATT) {
+                LOG.info("Den aktive behandlingen har et vedtak som ikke er iverksatt")
                 throw IllegalStateException("Den aktive behandlingen er ikke iverksatt. Kan ikke opprette ny behandling.")
             }
 
+            LOG.info("Den aktive behandlingen har ingen vedtak som ikke er iverksatt. Flipper aktiv-flagg")
             aktivBehandling.aktiv = false
             behandlingRepository.save(aktivBehandling)
+            LOG.info("Har oppdatert aktiv behandling")
         }
 
+        LOG.info("Lagrer ny behandling")
         behandlingRepository.save(behandling)
     }
 
@@ -227,5 +233,9 @@ class BehandlingService(
                     throw Exception("Klarte ikke å hente PDF for vedtak med id ${behandlingVedtak?.id}")
                 }
             )
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(BehandlingService::class.java)
     }
 }
