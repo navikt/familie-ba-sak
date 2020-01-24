@@ -1,93 +1,75 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import io.mockk.MockKAnnotations
-import io.mockk.every
-import io.mockk.impl.annotations.MockK
-import io.mockk.slot
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.familie.ba.sak.HttpTestBase
+import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
-import no.nav.security.token.support.client.core.ClientProperties
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
-import no.nav.security.token.support.client.spring.ClientConfigurationProperties
-import org.junit.jupiter.api.BeforeEach
+import no.nav.familie.kontrakter.felles.objectMapper
+import okhttp3.mockwebserver.MockResponse
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.http.HttpEntity
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
-import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.web.client.RestTemplate
-import java.net.URI
+import org.springframework.test.context.ActiveProfiles
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
 
-@Tag("integration")
-class IntegrasjonTjenesteTest{
 
-    @MockK
-    lateinit var restTemplateMock: RestTemplate
+@SpringBootTest(classes = [ApplicationConfig::class], properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:18085/api"])
+@ActiveProfiles("dev", "mock-oauth")
+@TestInstance(Lifecycle.PER_CLASS)
+class IntegrasjonTjenesteTest: HttpTestBase(
+        18085
+) {
+    @Autowired
+    lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
-    @MockK
-    lateinit var restTemplateBuilderMock: RestTemplateBuilder
-
-    @MockK
-    lateinit var clientConfigurationProfilesMock: ClientConfigurationProperties
-
-    @MockK
-    lateinit var oAuth2AccessTokenServiceMock: OAuth2AccessTokenService
-
-    @MockK
-    lateinit var clientProperties: ClientProperties
-
-    lateinit private var integrasjonTjeneste: IntegrasjonTjeneste
-
-    val mockServiceUri= "mock.integrasjoner.uri"
-    val mockFnr= "12345678910"
-    val mockPdf= "pdf data".toByteArray()
-
-    @BeforeEach
-    fun setUp()= MockKAnnotations.init(this)
+    @Value("\${FAMILIE_INTEGRASJONER_API_URL}")
+    lateinit var integrasjonerUri: String
 
     @Test
-    fun `test å lager journalpost for vedtaksbrev`(){
-        every{restTemplateBuilderMock.additionalInterceptors(any<ClientHttpRequestInterceptor>())}.answers{restTemplateBuilderMock}
-        every{restTemplateBuilderMock.build()}.answers{restTemplateMock}
-
-        every{clientConfigurationProfilesMock.getRegistration()}.answers{
-            mapOf(IntegrasjonTjeneste.OAUTH2_CLIENT_CONFIG_KEY to clientProperties) }
-
-        integrasjonTjeneste= IntegrasjonTjeneste(URI.create(mockServiceUri), restTemplateBuilderMock,
-                clientConfigurationProfilesMock, oAuth2AccessTokenServiceMock)
-
-        val endpointSlot= slot<URI>()
-        val methodSlot= slot<HttpMethod>()
-        val entitySlot= slot<HttpEntity<Any>>()
-
+    @Tag("integration")
+    fun `Iverksett vedtak på aktiv behandling`() {
         val mockJournalpostForVedtakId= "453491843"
-        every{restTemplateMock.exchange(capture(endpointSlot), capture(methodSlot), capture(entitySlot), any<Class<*>>())}
-                .answers{ResponseEntity<Ressurs<ArkiverDokumentResponse>>(
-                        Ressurs<ArkiverDokumentResponse>(
-                                data= ArkiverDokumentResponse(mockJournalpostForVedtakId, true),
-                                status= Ressurs.Status.SUKSESS,
-                                melding = "",
-                                stacktrace = ""
-                                ),
-                        HttpStatus.CREATED)}
+        val responseBody = Ressurs.success(ArkiverDokumentResponse(mockJournalpostForVedtakId, true))
+        val mockFnr= "12345678910"
+        val mockPdf= "mock data".toByteArray()
 
-        val journpostForVedtakId= integrasjonTjeneste.lagerJournalpostForVedtaksbrev(mockFnr, mockPdf)
+        val response: MockResponse = MockResponse()
+                .addHeader("Content-Type", "application/json; charset=utf-8")
+                .setResponseCode(201)
+                .setBody(objectMapper.writeValueAsString(responseBody))
 
-        val expectedURI= URI.create("$mockServiceUri/arkiv/v1")
+        mockServer.enqueue(response)
+        val journalPostId= integrasjonTjeneste.lagerJournalpostForVedtaksbrev(mockFnr, mockPdf)
 
-        assert(endpointSlot.captured.equals(expectedURI))
-        assert(methodSlot.captured.equals(HttpMethod.POST))
-        val arkiverDokumentRequest= entitySlot.captured.body as ArkiverDokumentRequest
-        assert(arkiverDokumentRequest.fnr.equals(mockFnr))
-        assert(arkiverDokumentRequest.dokumenter.size.equals(1))
-        assert(arkiverDokumentRequest.dokumenter[0].dokumentType.equals(IntegrasjonTjeneste.VEDTAK_DOKUMENT_TYPE))
-        assert(arkiverDokumentRequest.dokumenter[0].filType.equals(IntegrasjonTjeneste.VEDTAK_FILTYPE))
-        assert(arkiverDokumentRequest.dokumenter[0].filnavn.equals(IntegrasjonTjeneste.VEDTAK_FILNAVN))
-        assert(arkiverDokumentRequest.dokumenter[0].dokument.equals(mockPdf))
-        assert(journpostForVedtakId.equals(mockJournalpostForVedtakId))
+        assert(mockJournalpostForVedtakId== journalPostId)
+
+        val request= mockServer.takeRequest()
+
+        val expectedUri= "$integrasjonerUri/arkiv/v1"
+
+        Assertions.assertEquals(expectedUri, request.requestUrl.toString())
+        Assertions.assertEquals(HttpMethod.POST.toString(), request.method)
+        val body= request.body.readUtf8()
+        val mapper= jacksonObjectMapper()
+        val arkiverDokumentRequest= mapper.readValue(body, ArkiverDokumentRequest::class.java)
+        Assertions.assertEquals(mockFnr, arkiverDokumentRequest.fnr)
+        Assertions.assertEquals(1, arkiverDokumentRequest.dokumenter.size)
+        Assertions.assertEquals(IntegrasjonTjeneste.VEDTAK_DOKUMENT_TYPE,arkiverDokumentRequest.dokumenter[0].dokumentType)
+        Assertions.assertEquals(IntegrasjonTjeneste.VEDTAK_FILTYPE, arkiverDokumentRequest.dokumenter[0].filType)
+        Assertions.assertEquals(IntegrasjonTjeneste.VEDTAK_FILNAVN, arkiverDokumentRequest.dokumenter[0].filnavn)
+
+        Assertions.assertTrue(arkiverDokumentRequest.dokumenter[0].dokument.foldIndexed(true) {
+            index, acc, byte -> acc && byte== mockPdf[index]
+        })
+        Assertions.assertEquals(mockJournalpostForVedtakId, journalPostId)
     }
- }
+}
