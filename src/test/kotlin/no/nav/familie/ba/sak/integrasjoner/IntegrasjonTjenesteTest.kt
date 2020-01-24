@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.familie.ba.sak.HttpTestBase
 import no.nav.familie.ba.sak.config.ApplicationConfig
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
 import org.springframework.test.context.ActiveProfiles
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
 
 
 @SpringBootTest(classes = [ApplicationConfig::class], properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:18085/api"])

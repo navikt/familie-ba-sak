@@ -108,7 +108,7 @@ class IntegrasjonTjeneste(
                         it.body?.status,
                         it.statusCode))
 
-                val arkiverDokumentResponse = objectMapper.convertValue<ArkiverDokumentResponse>(it.body, ArkiverDokumentResponse::class.java)
+                val arkiverDokumentResponse = objectMapper.convertValue<ArkiverDokumentResponse>(it.body?.data, ArkiverDokumentResponse::class.java)
                 arkiverDokumentResponse.journalpostId
             },
             onFailure = {
