@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import java.time.LocalDate
 import javax.persistence.*
 
+
+// TODO Legg til toString som ikke logger personident
 @Entity(name = "Person")
 @Table(name = "PO_PERSON")
 class Person(

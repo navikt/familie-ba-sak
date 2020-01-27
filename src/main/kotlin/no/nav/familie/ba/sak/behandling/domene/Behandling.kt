@@ -27,6 +27,8 @@ data class Behandling(
         @Column(name = "saksnummer")
         var saksnummer: String? = null,
 
+        // TODO legg til status (ta det fra vedtaket).
+
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true
 ) : BaseEntitet()

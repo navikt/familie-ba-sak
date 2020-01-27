@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import javax.persistence.*
 
+// TODO endre til vedtakBarn
 @Entity(name = "BehandlingVedtakBarn")
 @Table(name = "BEHANDLING_VEDTAK_BARN")
 data class BehandlingVedtakBarn(

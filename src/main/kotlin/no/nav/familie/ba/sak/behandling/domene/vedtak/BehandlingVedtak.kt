@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import javax.persistence.*
 
+
+// TODO Endre til bare "vedtak"
 @Entity(name = "BehandlingVedtak")
 @Table(name = "BEHANDLING_VEDTAK")
 data class BehandlingVedtak(
@@ -25,6 +27,7 @@ data class BehandlingVedtak(
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
         var stønadBrevMarkdown: String = "",
 
+        // TODO Endre til resultat (INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT)
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
         var status: BehandlingVedtakStatus = BehandlingVedtakStatus.OPPRETTET,

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import javax.persistence.*
 
+// TODO legg til status (OPPRETTET, LØPENDE, AVSLUTTET)
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
 data class Fagsak(
