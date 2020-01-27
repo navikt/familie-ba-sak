@@ -63,7 +63,6 @@ class IntegrasjonTjenesteTest : HttpTestBase(
         Assertions.assertEquals(1, arkiverDokumentRequest.dokumenter.size)
         Assertions.assertEquals(IntegrasjonTjeneste.VEDTAK_DOKUMENT_TYPE, arkiverDokumentRequest.dokumenter[0].dokumentType)
         Assertions.assertEquals(IntegrasjonTjeneste.VEDTAK_FILTYPE, arkiverDokumentRequest.dokumenter[0].filType)
-        Assertions.assertEquals(IntegrasjonTjeneste.VEDTAK_FILNAVN, arkiverDokumentRequest.dokumenter[0].filnavn)
 
         Assertions.assertTrue(arkiverDokumentRequest.dokumenter[0].dokument.foldIndexed(true) { index, acc, byte ->
             acc && byte == mockPdf[index]
