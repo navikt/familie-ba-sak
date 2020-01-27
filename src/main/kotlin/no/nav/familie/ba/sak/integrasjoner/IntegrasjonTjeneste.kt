@@ -96,8 +96,8 @@ class IntegrasjonTjeneste(
         logger.info("Sender vedtak pdf til DokArkiv: ${uri}");
 
         return Result.runCatching{
-            val dokumenter = listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, VEDTAK_FILNAVN, null, VEDTAK_DOKUMENT_TYPE))
-            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter)
+            val dokumenter = listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, dokumentType = VEDTAK_DOKUMENT_TYPE))
+            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, journalførendeEnhet = "9999")
             val arkiverDokumentResponse = sendJournalFørRequest(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(
@@ -109,6 +109,7 @@ class IntegrasjonTjeneste(
                         it.statusCode))
 
                 val arkiverDokumentResponse = objectMapper.convertValue<ArkiverDokumentResponse>(it.body?.data, ArkiverDokumentResponse::class.java)
+                Assert.isTrue(arkiverDokumentResponse.ferdigstilt, "Klarte ikke ferdigstille journalpost")
                 arkiverDokumentResponse.journalpostId
             },
             onFailure = {
@@ -131,7 +132,6 @@ class IntegrasjonTjeneste(
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         val VEDTAK_FILTYPE = FilType.PDFA
-        const val VEDTAK_FILNAVN = "ba_vb.pdf"
         const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
 
         private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
