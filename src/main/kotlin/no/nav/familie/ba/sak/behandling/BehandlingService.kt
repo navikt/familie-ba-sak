@@ -220,7 +220,7 @@ class BehandlingService(
             .fold(
                 onSuccess = { it },
                 onFailure = { e ->
-                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${behandlingVedtak?.id}")
+                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${behandlingVedtak?.id}", e)
                 }
             )
     }
