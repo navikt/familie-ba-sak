@@ -97,7 +97,7 @@ class IntegrasjonTjeneste(
 
         return Result.runCatching{
             val dokumenter = listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, dokumentType = VEDTAK_DOKUMENT_TYPE))
-            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, journalførendeEnhet = "9999")
+            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, "140258931", "9999")
             val arkiverDokumentResponse = sendJournalFørRequest(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(
