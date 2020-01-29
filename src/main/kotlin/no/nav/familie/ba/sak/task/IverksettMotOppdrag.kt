@@ -12,7 +12,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Iverksett vedtak mot oppdrag", maxAntallFeil = 3)
@@ -22,21 +21,21 @@ class IverksettMotOppdrag(
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        LOG.debug("Iverksetter vedtak med ID ${iverksettingTask.behandlingVedtakId} mot oppdrag")
-        økonomiService.iverksettVedtak(iverksettingTask.behandlingVedtakId, iverksettingTask.saksbehandlerId)
+        LOG.debug("Iverksetter vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag")
+        økonomiService.iverksettVedtak(iverksettingTask.behandlingsId, iverksettingTask.vedtaksId, iverksettingTask.saksbehandlerId)
     }
 
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.behandlingVedtakId} mot oppdrag gikk OK")
+        LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag gikk OK")
 
         val nyTask = Task.nyTask(
                 type = StatusFraOppdrag.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(StatusFraOppdragDTO(
                         personIdent = iverksettingTask.personIdent,
                         fagsystem = FAGSYSTEM,
-                        behandlingsId = iverksettingTask.behandlingsId.toString(),
-                        behandlingVedtakId = iverksettingTask.behandlingVedtakId
+                        behandlingsId = iverksettingTask.behandlingsId,
+                        vedtaksId = iverksettingTask.vedtaksId
                 )),
                 properties = task.metadata
         )

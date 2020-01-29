@@ -19,13 +19,14 @@ class JournalførVedtaksbrev(
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val behandlingVedtakId = task.payload.toLong()
-        val behandlingVedtak = behandlingService.hentBehandlingVedtak(behandlingVedtakId)
-            ?: throw Exception("Fant ikke vedtak med id $behandlingVedtakId i forbindelse med Journalføring av vedtaksbrev")
-        val fnr = behandlingVedtak.behandling.fagsak.personIdent?.ident!!
-        val pdf = behandlingService.hentPdfForBehandlingVedtak(behandlingVedtak)
+        val vedtakId = task.payload.toLong()
+        val vedtak = behandlingService.hentVedtak(vedtakId)
+            ?: throw Exception("Fant ikke vedtak med id $vedtakId i forbindelse med Journalføring av vedtaksbrev")
 
-        LOG.debug("Journalfører vedtaksbrev for vedtak med ID $behandlingVedtakId")
+        val fnr = vedtak.behandling.fagsak.personIdent.ident!!
+        val pdf = behandlingService.hentPdfForVedtak(vedtak)
+
+        LOG.debug("Journalfører vedtaksbrev for vedtak med ID $vedtakId")
         integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr) { journalpostId: String ->
             val nyTask = Task.nyTask(IverksettMotDokdist.TASK_STEP_TYPE, journalpostId)
             taskRepository.save(nyTask)

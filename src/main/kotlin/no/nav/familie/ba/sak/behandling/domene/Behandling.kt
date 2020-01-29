@@ -12,7 +12,7 @@ data class Behandling(
         val id: Long? = null,
 
         @ManyToOne(optional = false) @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
-        var fagsak: Fagsak,
+        val fagsak: Fagsak,
 
         @Column(name = "journalpost_id")
         var journalpostID: String?,
@@ -27,7 +27,9 @@ data class Behandling(
         @Column(name = "saksnummer")
         var saksnummer: String? = null,
 
-        // TODO legg til status (ta det fra vedtaket).
+        @Enumerated(EnumType.STRING)
+        @Column(name = "status", nullable = false)
+        var status: BehandlingStatus = BehandlingStatus.OPPRETTET,
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true
@@ -37,4 +39,8 @@ enum class BehandlingType {
     FØRSTEGANGSBEHANDLING,
     REVURDERING,
     KLAGE,
+}
+
+enum class BehandlingStatus {
+    OPPRETTET, UNDER_BEHANDLING, LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG, SENDT_TIL_IVERKSETTING, IVERKSATT
 }

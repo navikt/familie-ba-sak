@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.task.StatusFraOppdrag.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.økonomi.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.OppdragProtokollStatus
@@ -43,17 +43,17 @@ class StatusFraOppdrag(
 
                         throw Exception("Mottok status '$it' fra oppdrag")
                     } else {
-                        behandlingService.oppdatertStatusPåBehandlingVedtak(
-                                statusFraOppdragDTO.behandlingVedtakId,
-                                BehandlingVedtakStatus.IVERKSATT
+                        behandlingService.oppdaterStatusPåBehandling(
+                                statusFraOppdragDTO.behandlingsId,
+                                BehandlingStatus.IVERKSATT
                         )
-                        opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.behandlingVedtakId)
+                        opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId)
                     }
                 }
     }
 
-    private fun opprettTaskJournalførVedtaksbrev(behandlingVedtakId: Long) {
-        val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, "$behandlingVedtakId")
+    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
+        val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, "$vedtakId")
         taskRepository.save(task)
     }
 

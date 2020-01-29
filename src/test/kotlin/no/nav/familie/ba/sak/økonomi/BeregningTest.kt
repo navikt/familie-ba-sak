@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakBarn
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakBarn
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -47,7 +47,7 @@ class BeregningTest(
     @Test
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
         val behandling = behandlingService.nyBehandling("0", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "lagRandomSaksnummer")
-        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        val vedtak = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
 
         val barn1Fødselsdato = LocalDate.now()
         val barn2Fødselsdato = LocalDate.now().plusYears(2)
@@ -59,28 +59,28 @@ class BeregningTest(
         val barn2 = Person(personIdent = PersonIdent("00000000002"), fødselsdato = barn2Fødselsdato, type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag)
         val barn3 = Person(personIdent = PersonIdent("00000000003"), fødselsdato = barn2Fødselsdato, type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag)
 
-        val barnBeregning1 = BehandlingVedtakBarn(
+        val barnBeregning1 = VedtakBarn(
                 barn = barn1,
                 stønadFom = barn1Fødselsdato,
                 stønadTom = barn1Fødselsdato.plusYears(18),
                 beløp = 1054,
-                behandlingVedtak = behandlingVedtak
+                vedtak = vedtak
         )
 
-        val barnBeregning2 = BehandlingVedtakBarn(
+        val barnBeregning2 = VedtakBarn(
                 barn = barn2,
                 stønadFom = barn2Fødselsdato,
                 stønadTom = barn2Fødselsdato.plusYears(18),
                 beløp = 1054,
-                behandlingVedtak = behandlingVedtak
+                vedtak = vedtak
         )
 
-        val barnBeregning3 = BehandlingVedtakBarn(
+        val barnBeregning3 = VedtakBarn(
                 barn = barn3,
                 stønadFom = barn3Fødselsdato.plusYears(3),
                 stønadTom = barn3Fødselsdato.plusYears(18),
                 beløp = 1054,
-                behandlingVedtak = behandlingVedtak
+                vedtak = vedtak
         )
 
         val tidslinje = beregning.beregnUtbetalingsperioder(listOf(

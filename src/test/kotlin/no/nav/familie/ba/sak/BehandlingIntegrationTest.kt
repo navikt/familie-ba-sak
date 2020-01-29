@@ -38,7 +38,7 @@ class BehandlingIntegrationTest(
         private var behandlingService: BehandlingService,
 
         @Autowired
-        private var behandlingVedtakRepository: BehandlingVedtakRepository
+        private var VedtakRepository: VedtakRepository
 ) {
     val STRING_LENGTH = 10
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
@@ -81,27 +81,27 @@ class BehandlingIntegrationTest(
     @Tag("integration")
     fun `Opprett behandling vedtak`() {
         val behandling = behandlingService.nyBehandling("2", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
-        behandlingService.lagreBehandlingVedtak(behandlingVedtak)
+        val vedtak = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        behandlingService.lagreVedtak(vedtak)
 
-        val hentetBehandlingVedtak = behandlingVedtakRepository.findByBehandlingAndAktiv(behandling.id)
-        Assertions.assertNotNull(hentetBehandlingVedtak)
-        Assertions.assertEquals("ansvarligSaksbehandler", hentetBehandlingVedtak?.ansvarligSaksbehandler)
+        val hentetVedtak = VedtakRepository.findByBehandlingAndAktiv(behandling.id)
+        Assertions.assertNotNull(hentetVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
     }
 
     @Test
     @Tag("integration")
     fun `Opprett 2 behandling vedtak og se at det siste vedtaket får aktiv satt til true`() {
         val behandling = behandlingService.nyBehandling("3", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        val behandlingVedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
-        behandlingService.lagreBehandlingVedtak(behandlingVedtak)
+        val vedtak = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        behandlingService.lagreVedtak(vedtak)
 
-        val behandling2Vedtak = BehandlingVedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler2", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
-        behandlingService.lagreBehandlingVedtak(behandling2Vedtak)
+        val Vedtak2 = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler2", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        behandlingService.lagreVedtak(Vedtak2)
 
-        val hentetBehandlingVedtak = behandlingService.hentBehandlingVedtakHvisEksisterer(behandling.id)
-        Assertions.assertNotNull(hentetBehandlingVedtak)
-        Assertions.assertEquals("ansvarligSaksbehandler2", hentetBehandlingVedtak?.ansvarligSaksbehandler)
+        val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
+        Assertions.assertNotNull(hentetVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler2", hentetVedtak?.ansvarligSaksbehandler)
     }
 
     @Test
@@ -121,13 +121,13 @@ class BehandlingIntegrationTest(
 
         behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now()))),
+                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now())), resultat = VedtakResultat.INNVILGET),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val hentetBehandlingVedtak = behandlingService.hentBehandlingVedtakHvisEksisterer(behandling.id)
-        Assertions.assertNotNull(hentetBehandlingVedtak)
-        Assertions.assertEquals("ansvarligSaksbehandler", hentetBehandlingVedtak?.ansvarligSaksbehandler)
+        val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
+        Assertions.assertNotNull(hentetVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
     }
 
     @Test
@@ -139,11 +139,11 @@ class BehandlingIntegrationTest(
 
         behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now()))),
+                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now())), resultat = VedtakResultat.INNVILGET),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val htmlvedtaksbrevRess = behandlingService.hentHtmlVedtakForBehandling(behandling.id!!);
+        val htmlvedtaksbrevRess = behandlingService.hentHtmlVedtakForBehandling(behandling.id!!)
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
         assert(htmlvedtaksbrevRess.data!! == "<HTML>HTML_MOCKUP</HTML>")
     }

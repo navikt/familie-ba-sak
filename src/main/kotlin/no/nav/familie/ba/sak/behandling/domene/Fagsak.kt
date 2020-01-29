@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import javax.persistence.*
 
-// TODO legg til status (OPPRETTET, LØPENDE, AVSLUTTET)
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
 data class Fagsak(
@@ -16,14 +15,22 @@ data class Fagsak(
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
-        var aktørId: AktørId? = null,
+        val aktørId: AktørId? = null,
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))
-        var personIdent: PersonIdent? = null
+        val personIdent: PersonIdent,
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "status", nullable = false)
+        var status: FagsakStatus = FagsakStatus.OPPRETTET
 ) : BaseEntitet() {
 
     override fun toString(): String {
         return "Fagsak(id=$id, aktørId=$aktørId)"
     }
+}
+
+enum class FagsakStatus {
+    OPPRETTET, LØPENDE
 }

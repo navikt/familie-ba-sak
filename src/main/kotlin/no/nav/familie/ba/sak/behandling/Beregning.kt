@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakBarn
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakBarn
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class Beregning {
-    fun beregnUtbetalingsperioder(barna: List<BehandlingVedtakBarn>): LocalDateTimeline<Int> {
+    fun beregnUtbetalingsperioder(barna: List<VedtakBarn>): LocalDateTimeline<Int> {
         val tidslinjer = barna.map {
             val segmenter = mutableListOf<LocalDateSegment<Int>>()
 

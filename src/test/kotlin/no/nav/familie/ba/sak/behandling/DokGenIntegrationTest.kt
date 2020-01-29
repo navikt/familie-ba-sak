@@ -3,7 +3,8 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
@@ -56,11 +57,11 @@ class DokGenIntegrationTest{
     @Tag("integration")
     fun `Test generer markdown`(){
         val dokgen= DokGenTestService()
-        val markdown= dokgen.hentStønadBrevMarkdown(BehandlingVedtak(
+        val markdown= dokgen.hentStønadBrevMarkdown(Vedtak(
                 id= 1,
                 behandling= Behandling(
                         id= 1,
-                        fagsak = Fagsak(),
+                        fagsak = Fagsak( personIdent = PersonIdent("")),
                         journalpostID = "invalid",
                         type= BehandlingType.FØRSTEGANGSBEHANDLING,
                         saksnummer = null,
@@ -96,11 +97,11 @@ class DokGenIntegrationTest{
         val html= dokgen.lagHtmlFraMarkdown("markdown")
         assert(html.isEmpty())
 
-        val markdown= dokgen.hentStønadBrevMarkdown(BehandlingVedtak(
+        val markdown= dokgen.hentStønadBrevMarkdown(Vedtak(
                 id= 1,
                 behandling= Behandling(
                         id= 1,
-                        fagsak = Fagsak(),
+                        fagsak = Fagsak( personIdent = PersonIdent("")),
                         journalpostID = "invalid",
                         type= BehandlingType.FØRSTEGANGSBEHANDLING,
                         saksnummer = null,

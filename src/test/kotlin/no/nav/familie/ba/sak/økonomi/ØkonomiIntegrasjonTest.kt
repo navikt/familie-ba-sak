@@ -3,13 +3,14 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.HttpTestBase
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.FagsakController
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BarnBeregning
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -74,16 +75,16 @@ class ØkonomiIntegrasjonTest: HttpTestBase(
 
         val oppdatertFagsak = behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now()))),
+                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now())), resultat = VedtakResultat.INNVILGET),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
-        val behandlingVedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
+        val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
 
-        økonomiService.iverksettVedtak(behandlingVedtak?.id!!, "ansvarligSaksbehandler")
+        økonomiService.iverksettVedtak(behandling.id!!, vedtak?.id!!, "ansvarligSaksbehandler")
 
-        val oppdatertBehandlingVedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
-        Assertions.assertEquals(BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandlingVedtak?.status)
+        val oppdatertBehandling = behandlingService.hentBehandling(behandling.id)
+        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling?.status)
     }
 }

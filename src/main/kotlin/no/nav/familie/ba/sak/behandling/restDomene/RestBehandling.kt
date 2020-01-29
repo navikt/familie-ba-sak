@@ -4,5 +4,5 @@ data class RestBehandling(
         val aktiv: Boolean,
         val behandlingId: Long?,
         var barnasFødselsnummer: List<String?>?,
-        val vedtakForBehandling: List<RestBehandlingVedtak?>
+        val vedtakForBehandling: List<RestVedtak?>
 )

@@ -4,7 +4,8 @@ import java.time.LocalDate
 
 data class NyttVedtak(
         val sakstype: String,
-        val barnasBeregning: Array<BarnBeregning>
+        val barnasBeregning: Array<BarnBeregning>,
+        val resultat: VedtakResultat
 )
 
 data class BarnBeregning(

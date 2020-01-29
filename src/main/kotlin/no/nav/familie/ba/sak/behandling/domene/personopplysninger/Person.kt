@@ -6,13 +6,12 @@ import java.time.LocalDate
 import javax.persistence.*
 
 
-// TODO Legg til toString som ikke logger personident
 @Entity(name = "Person")
 @Table(name = "PO_PERSON")
 class Person(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq")
-        @SequenceGenerator(name = "behandling_seq")
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_person_seq")
+        @SequenceGenerator(name = "po_person_seq")
         val id: Long? = null,
 
         //SØKER, BARN, ANNENPART
@@ -24,9 +23,15 @@ class Person(
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))
-        val personIdent: PersonIdent? = null,
+        val personIdent: PersonIdent,
 
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
         val personopplysningGrunnlag: PersonopplysningGrunnlag
-) : BaseEntitet()
+) : BaseEntitet() {
+        override fun toString(): String {
+                return """Person(id=$id,
+                        |type=$type
+                        |fødselsdato=$fødselsdato)""".trimMargin()
+        }
+}
