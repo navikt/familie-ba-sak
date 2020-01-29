@@ -25,7 +25,7 @@ class JournalførVedtaksbrev(
         val fnr = behandlingVedtak.behandling.fagsak.personIdent?.ident!!
         val pdf = behandlingService.hentPdfForBehandlingVedtak(behandlingVedtak)
 
-        LOG.debug("Journalfører vedtaksbrev for vedtak med ID $behandlingVedtakId")
+        LOG.info("Journalfører vedtaksbrev for vedtak med ID $behandlingVedtakId")
         val journalpostId = integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr)
 
         val nyTask = Task.nyTask(DistribuerVedtaksbrev.TASK_STEP_TYPE, journalpostId)

@@ -15,12 +15,12 @@ class DistribuerVedtaksbrev(
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        LOG.debug("Iverksetter vedtaksbrev med journalpostId ${task.payload} mot dokdist")
+        LOG.info("Iverksetter vedtaksbrev med journalpostId ${task.payload} mot dokdist")
         integrasjonTjeneste.distribuerVedtaksbrev(task.payload)
     }
 
     override fun onCompletion(task: Task) {
-        LOG.debug("Iverksetting vedtaksbrev med journalpostId ${task.payload} gikk OK")
+        LOG.info("Iverksetting vedtaksbrev med journalpostId ${task.payload} gikk OK")
     }
 
     companion object {

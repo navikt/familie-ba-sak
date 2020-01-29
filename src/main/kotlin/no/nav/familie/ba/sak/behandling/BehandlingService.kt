@@ -212,9 +212,9 @@ class BehandlingService(
 
     internal fun hentPdfForBehandlingVedtak(behandlingVedtak: BehandlingVedtak?): ByteArray {
         return Result.runCatching {
-            LOG.debug("henter stønadsbrevMarkdown fra behandlingsVedtak")
+            LOG.info("henter stønadsbrevMarkdown fra behandlingsVedtak")
             val markdown = behandlingVedtak?.stønadBrevMarkdown!!
-            LOG.debug("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
+            LOG.info("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
             dokGenService.lagPdfFraMarkdown(markdown)
         }
             .fold(
