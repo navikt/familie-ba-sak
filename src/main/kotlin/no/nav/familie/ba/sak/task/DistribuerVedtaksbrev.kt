@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
-import no.nav.familie.ba.sak.task.JournalførVedtaksbrev.Companion.TASK_STEP_TYPE
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrev.Companion.TASK_STEP_TYPE
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
