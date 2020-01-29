@@ -28,7 +28,7 @@ class JournalførVedtaksbrev(
         LOG.info("Journalfører vedtaksbrev for vedtak med ID $behandlingVedtakId")
         val journalpostId = integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr)
 
-        val nyTask = Task.nyTask(DistribuerVedtaksbrev.TASK_STEP_TYPE, journalpostId)
+        val nyTask = Task.nyTask(DistribuerVedtaksbrev.TASK_STEP_TYPE, journalpostId, task.metadata)
         taskRepository.save(nyTask)
     }
 
