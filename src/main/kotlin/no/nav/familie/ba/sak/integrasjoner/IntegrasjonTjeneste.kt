@@ -109,7 +109,7 @@ class IntegrasjonTjeneste(
                         it.statusCode))
 
                 val arkiverDokumentResponse = objectMapper.convertValue<ArkiverDokumentResponse>(it.body?.data, ArkiverDokumentResponse::class.java)
-                Assert.isTrue(arkiverDokumentResponse.ferdigstilt, "Klarte ikke ferdigstille journalpost")
+                Assert.isTrue(arkiverDokumentResponse.ferdigstilt, "Klarte ikke ferdigstille journalpost med id ${arkiverDokumentResponse.journalpostId}")
                 arkiverDokumentResponse.journalpostId
             },
             onFailure = {
