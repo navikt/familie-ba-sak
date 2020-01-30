@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.concurrent.ThreadLocalRandom
@@ -210,12 +211,21 @@ class BehandlingService(
     }
 
     internal fun hentPdfForVedtak(vedtak: Vedtak): ByteArray {
-        return Result.runCatching { dokGenService.lagPdfFraMarkdown(vedtak.stønadBrevMarkdown) }
+        return Result.runCatching {
+            LOG.debug("henter stønadsbrevMarkdown fra behandlingsVedtak")
+            val markdown = vedtak.stønadBrevMarkdown
+            LOG.debug("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
+            dokGenService.lagPdfFraMarkdown(markdown)
+        }
             .fold(
                 onSuccess = { it },
                 onFailure = {
-                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${vedtak.id}")
+                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${vedtak.id}", it)
                 }
             )
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(BehandlingService::class.java)
     }
 }

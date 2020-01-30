@@ -27,10 +27,10 @@ class JournalførVedtaksbrev(
         val pdf = behandlingService.hentPdfForVedtak(vedtak)
 
         LOG.debug("Journalfører vedtaksbrev for vedtak med ID $vedtakId")
-        integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr) { journalpostId: String ->
-            val nyTask = Task.nyTask(IverksettMotDokdist.TASK_STEP_TYPE, journalpostId)
-            taskRepository.save(nyTask)
-        }
+        val journalpostId = integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr)
+
+        val nyTask = Task.nyTask(DistribuerVedtaksbrev.TASK_STEP_TYPE, journalpostId, task.metadata)
+        taskRepository.save(nyTask)
     }
 
     companion object {

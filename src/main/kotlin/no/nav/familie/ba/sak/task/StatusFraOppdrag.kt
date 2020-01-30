@@ -47,13 +47,13 @@ class StatusFraOppdrag(
                                 statusFraOppdragDTO.behandlingsId,
                                 BehandlingStatus.IVERKSATT
                         )
-                        opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId)
+                        opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId, task)
                     }
                 }
     }
 
-    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
-        val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, "$vedtakId")
+    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
+        val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, "$vedtakId", gammelTask.metadata)
         taskRepository.save(task)
     }
 

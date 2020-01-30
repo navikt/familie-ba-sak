@@ -4,23 +4,30 @@ import no.nav.familie.ba.sak.common.BaseService
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.arkivering.Dokument
+import no.nav.familie.kontrakter.felles.arkivering.FilType
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.log.NavHttpHeaders
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.http.HttpMethod
-import org.springframework.http.RequestEntity
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
+import org.springframework.util.Assert
 import org.springframework.web.client.RestClientException
+import org.springframework.web.client.exchange
 import java.net.URI
 
 @Component
-class IntegrasjonTjeneste (
+class IntegrasjonTjeneste(
         @Value("\${FAMILIE_INTEGRASJONER_API_URL}")
         private val integrasjonerServiceUri: URI,
         restTemplateBuilderMedProxy: RestTemplateBuilder,
@@ -62,8 +69,8 @@ class IntegrasjonTjeneste (
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String, callback: (journalpostID: String) -> Unit) {
-        callback("journalpostID: TODO")
+    fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String): String {
+        return lagerJournalpostForVedtaksbrev(fnr, pdf)
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
@@ -84,9 +91,49 @@ class IntegrasjonTjeneste (
         }
     }
 
+    fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String{
+        val uri = URI.create("$integrasjonerServiceUri/arkiv/v1")
+        logger.info("Sender vedtak pdf til DokArkiv: ${uri}");
+
+        return Result.runCatching{
+            val dokumenter = listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, dokumentType = VEDTAK_DOKUMENT_TYPE))
+            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, "140258931", "9999")
+            val arkiverDokumentResponse = sendJournalFørRequest(uri, arkiverDokumentRequest)
+            arkiverDokumentResponse
+        }.fold(
+            onSuccess = {
+                Assert.notNull(it.body, "Finner ikke ressurs")
+                Assert.notNull(it.body?.data, "Ressurs mangler data")
+                Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS, String.format("Ressurs returnerer %s men har http status kode %s",
+                        it.body?.status,
+                        it.statusCode))
+
+                val arkiverDokumentResponse = objectMapper.convertValue<ArkiverDokumentResponse>(it.body?.data, ArkiverDokumentResponse::class.java)
+                Assert.isTrue(arkiverDokumentResponse.ferdigstilt, "Klarte ikke ferdigstille journalpost med id ${arkiverDokumentResponse.journalpostId}")
+                arkiverDokumentResponse.journalpostId
+            },
+            onFailure = {
+                throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost.", it, uri, fnr)
+            }
+        )
+    }
+
+    private fun sendJournalFørRequest(journalFørEndpoint: URI, arkiverDokumentRequest: ArkiverDokumentRequest): ResponseEntity<Ressurs<ArkiverDokumentResponse>> {
+        val headers = HttpHeaders()
+        headers.add("Content-Type", "application/json;charset=UTF-8")
+        headers.acceptCharset = listOf(Charsets.UTF_8)
+        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+
+        return restOperations.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(arkiverDokumentRequest, headers))
+    }
+
     companion object {
         private val logger = LoggerFactory.getLogger(IntegrasjonTjeneste::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
+        val VEDTAK_FILTYPE = FilType.PDFA
+        const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
+
         private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
     }
 }
