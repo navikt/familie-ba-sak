@@ -28,12 +28,12 @@ data class Vedtak(
         // TODO Endre til resultat (INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT)
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
-        var resultat: VedtakResultat = VedtakResultat.OPPRETTET,
+        var resultat: VedtakResultat,
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true
 ) : BaseEntitet()
 
 enum class VedtakResultat {
-        OPPRETTET, INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
+        INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
 }

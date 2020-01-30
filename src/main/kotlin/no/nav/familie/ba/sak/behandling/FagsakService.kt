@@ -21,7 +21,7 @@ class FagsakService(
         private val fagsakRepository: FagsakRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val behandlingRepository: BehandlingRepository,
-        private val VedtakRepository: VedtakRepository){
+        private val vedtakRepository: VedtakRepository){
 
     @Transactional
     fun hentRestFagsak(fagsakId: Long?): Ressurs<RestFagsak> {
@@ -34,7 +34,7 @@ class FagsakService(
             val personopplysningGrunnlag = it?.id?.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
             val barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent.ident }
 
-            val vedtakForBehandling = VedtakRepository.finnVedtakForBehandling(it?.id).map { vedtak ->
+            val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it?.id).map { vedtak ->
                 val barnBeregning = vedtakBarnRepository.finnBarnBeregningForVedtak(vedtak?.id)
                 vedtak?.toRestVedtak(barnBeregning)
             }

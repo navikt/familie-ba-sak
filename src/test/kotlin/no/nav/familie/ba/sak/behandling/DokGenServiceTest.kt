@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,7 +26,8 @@ class DokGenServiceTest(
     private val vedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")), journalpostID = "", type = BehandlingType.FØRSTEGANGSBEHANDLING),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
-            vedtaksdato = LocalDate.now()
+            vedtaksdato = LocalDate.now(),
+            resultat = VedtakResultat.INNVILGET
     )
 
     @Test

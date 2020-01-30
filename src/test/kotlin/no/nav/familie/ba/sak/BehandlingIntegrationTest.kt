@@ -81,7 +81,7 @@ class BehandlingIntegrationTest(
     @Tag("integration")
     fun `Opprett behandling vedtak`() {
         val behandling = behandlingService.nyBehandling("2", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        val vedtak = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        val vedtak = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "", resultat = VedtakResultat.INNVILGET)
         behandlingService.lagreVedtak(vedtak)
 
         val hentetVedtak = VedtakRepository.findByBehandlingAndAktiv(behandling.id)
@@ -93,10 +93,10 @@ class BehandlingIntegrationTest(
     @Tag("integration")
     fun `Opprett 2 behandling vedtak og se at det siste vedtaket får aktiv satt til true`() {
         val behandling = behandlingService.nyBehandling("3", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        val vedtak = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        val vedtak = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "", resultat = VedtakResultat.INNVILGET)
         behandlingService.lagreVedtak(vedtak)
 
-        val Vedtak2 = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler2", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        val Vedtak2 = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler2", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "", resultat = VedtakResultat.INNVILGET)
         behandlingService.lagreVedtak(Vedtak2)
 
         val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
@@ -68,7 +69,8 @@ class DokGenIntegrationTest{
                         aktiv = true
                 ),
                 ansvarligSaksbehandler = "whoknows",
-                vedtaksdato = LocalDate.MIN
+                vedtaksdato = LocalDate.MIN,
+                resultat = VedtakResultat.INNVILGET
         ))
 
         assert(markdown.equals("mockup_response"))
@@ -108,7 +110,8 @@ class DokGenIntegrationTest{
                         aktiv = true
                 ),
                 ansvarligSaksbehandler = "whoknows",
-                vedtaksdato = LocalDate.MIN
+                vedtaksdato = LocalDate.MIN,
+                resultat = VedtakResultat.INNVILGET
         ))
         assert(markdown.isEmpty())
     }

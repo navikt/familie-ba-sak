@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.økonomi.FAGSYSTEM
 import no.nav.familie.ba.sak.økonomi.IverksettingTaskDTO
@@ -12,10 +14,12 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.util.Assert
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Iverksett vedtak mot oppdrag", maxAntallFeil = 3)
 class IverksettMotOppdrag(
+        private val behandlingService: BehandlingService,
         private val økonomiService: ØkonomiService,
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
@@ -27,6 +31,10 @@ class IverksettMotOppdrag(
 
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
+        val behandling = behandlingService.hentBehandling(iverksettingTask.behandlingsId)
+        Assert.notNull(behandling, "Skal iverksette mot økonomi, men finner ikke behandling med id ${iverksettingTask.behandlingsId}.")
+        Assert.isTrue(behandling?.status == BehandlingStatus.OPPRETTET, "Skal iverksette mot økonomi, men behandlingen har ${behandling?.status}.")
+
         LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag gikk OK")
 
         val nyTask = Task.nyTask(

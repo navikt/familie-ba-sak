@@ -20,7 +20,7 @@ class ØkonomiService(
         val vedtak = behandlingService.hentVedtak(vedtakId)
                 ?: throw Error("Fant ikke vedtak med id $vedtakId i forbindelse med iverksetting mot oppdrag")
 
-        val barnBeregning = behandlingService.hentBarnBeregningForVedtak(vedtak.id)
+        val barnBeregning = behandlingService.hentBarnForVedtak(vedtak.id)
         val tidslinje = beregning.beregnUtbetalingsperioder(barnBeregning)
         val utbetalingsperioder = tidslinje.toSegments().map {
             Utbetalingsperiode(

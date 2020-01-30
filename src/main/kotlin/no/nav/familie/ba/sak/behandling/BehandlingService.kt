@@ -118,13 +118,13 @@ class BehandlingService(
         return vedtakRepository.getOne(vedtakId)
     }
 
-    fun hentBarnBeregningForVedtak(vedtakId: Long?): List<VedtakBarn> {
+    fun hentBarnForVedtak(vedtakId: Long?): List<VedtakBarn> {
         return vedtakBarnRepository.finnBarnBeregningForVedtak(vedtakId)
     }
 
     fun oppdaterStatusPåBehandling(behandlingId: Long?, status: BehandlingStatus) {
         when (val behandling = hentBehandling(behandlingId)) {
-            null -> throw Exception("Feilet ved oppdatering av status på vedtak. Fant ikke vedtak med id $behandlingId")
+            null -> throw Exception("Feilet ved oppdatering av status på behandling. Fant ikke behandling med id $behandlingId")
             else -> {
                 if (status == BehandlingStatus.IVERKSATT) {
                     val fagsak = behandling.fagsak

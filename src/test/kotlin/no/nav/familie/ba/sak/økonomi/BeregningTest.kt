@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakBarn
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -47,7 +48,7 @@ class BeregningTest(
     @Test
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
         val behandling = behandlingService.nyBehandling("0", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "lagRandomSaksnummer")
-        val vedtak = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "")
+        val vedtak = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "", resultat = VedtakResultat.INNVILGET)
 
         val barn1Fødselsdato = LocalDate.now()
         val barn2Fødselsdato = LocalDate.now().plusYears(2)
