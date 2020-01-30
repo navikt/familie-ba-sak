@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.Beregning
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -18,23 +18,23 @@ class ØkonomiService(
         private val beregning: Beregning,
         private val behandlingService: BehandlingService
 ) {
-    fun iverksettVedtak(behandlingVedtakId: Long, saksbehandlerId: String) {
-        val behandlingVedtak = behandlingService.hentBehandlingVedtak(behandlingVedtakId)
-                ?: throw Error("Fant ikke vedtak med id $behandlingVedtakId i forbindelse med iverksetting mot oppdrag")
+    fun iverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
+        val vedtak = behandlingService.hentVedtak(vedtakId)
+                ?: throw Error("Fant ikke vedtak med id $vedtakId i forbindelse med iverksetting mot oppdrag")
 
-        val barnBeregning = behandlingService.hentBarnBeregningForVedtak(behandlingVedtak.id)
+        val barnBeregning = behandlingService.hentBarnForVedtak(vedtak.id)
         val tidslinje = beregning.beregnUtbetalingsperioder(barnBeregning)
         val utbetalingsperioder = tidslinje.toSegments().map {
             Utbetalingsperiode(
                     erEndringPåEksisterendePeriode = false,
-                    datoForVedtak = behandlingVedtak.vedtaksdato,
+                    datoForVedtak = vedtak.vedtaksdato,
                     klassifisering = "BATR",
                     vedtakdatoFom = it.fom,
                     vedtakdatoTom = it.tom,
                     sats = BigDecimal(it.value),
                     satsType = Utbetalingsperiode.SatsType.MND,
-                    utbetalesTil = behandlingVedtak.behandling.fagsak.personIdent?.ident.toString(),
-                    behandlingId = behandlingVedtak.behandling.id!!
+                    utbetalesTil = vedtak.behandling.fagsak.personIdent.ident.toString(),
+                    behandlingId = vedtak.behandling.id!!
             )
         }
 
@@ -42,8 +42,8 @@ class ØkonomiService(
                 saksbehandlerId = saksbehandlerId,
                 kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
                 fagSystem = FAGSYSTEM,
-                saksnummer = behandlingVedtak.behandling.fagsak.id.toString(),
-                aktoer = behandlingVedtak.behandling.fagsak.personIdent?.ident.toString(),
+                saksnummer = vedtak.behandling.fagsak.id.toString(),
+                aktoer = vedtak.behandling.fagsak.personIdent.ident.toString(),
                 utbetalingsperiode = utbetalingsperioder
         )
 
@@ -56,7 +56,7 @@ class ØkonomiService(
                                     it.body?.status,
                                     it.statusCode))
 
-                            behandlingService.oppdatertStatusPåBehandlingVedtak(behandlingVedtak, BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING)
+                            behandlingService.oppdaterStatusPåBehandling(behandlingsId, BehandlingStatus.SENDT_TIL_IVERKSETTING)
                         },
                         onFailure = {
                             throw Exception("Iverksetting mot oppdrag feilet", it)
@@ -73,7 +73,7 @@ class ØkonomiService(
                             Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS, String.format("Ressurs returnerer %s men har http status kode %s",
                                     it.body?.status,
                                     it.statusCode))
-                            
+
                             return objectMapper.convertValue(it.body?.data, OppdragProtokollStatus::class.java)
                         },
                         onFailure = {

@@ -22,11 +22,6 @@ class IntegrasjonException : RuntimeException {
         logger.warn("Ukjent feil ved integrasjon mot '{}'.", uri)
     }
 
-    val responseBodyAsString: String?
-        get() = if (responseBody == null) {
-            null
-        } else String(responseBody!!, UTF_8)
-
     companion object {
         private val logger = LoggerFactory.getLogger(IntegrasjonTjeneste::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")

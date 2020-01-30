@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtakStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.task.AvstemMotOppdrag
@@ -72,34 +72,34 @@ class FagsakController(
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
                 ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
 
-        val behandlingVedtak = behandlingService.hentBehandlingVedtakHvisEksisterer(behandlingId = behandling.id)
+        val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
                 ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        if (behandlingVedtak.status == BehandlingVedtakStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG || behandlingVedtak.status == BehandlingVedtakStatus.SENDT_TIL_IVERKSETTING) {
-            return  ResponseEntity.ok(Ressurs.failure("Vedtaket er allerede sendt til oppdrag og venter på kvittering"))
-        } else if (behandlingVedtak.status == BehandlingVedtakStatus.IVERKSATT) {
-            return  ResponseEntity.ok(Ressurs.failure("Vedtaket er allerede iverksatt"))
+        if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
+            return  ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede sendt til oppdrag og venter på kvittering"))
+        } else if (behandling.status == BehandlingStatus.IVERKSATT) {
+            return  ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede iverksatt/avsluttet"))
         }
 
-        opprettTaskIverksettMotOppdrag(behandling, behandlingVedtak, saksbehandlerId)
+        opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
 
-        behandlingService.oppdatertStatusPåBehandlingVedtak(behandlingVedtak, BehandlingVedtakStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
 
-        return ResponseEntity.ok(Ressurs.success("Task for iverksetting ble opprettet på fagsak $fagsakId på vedtak ${behandlingVedtak.id}"))
+        return ResponseEntity.ok(Ressurs.success("Task for iverksetting ble opprettet på fagsak $fagsakId på vedtak ${vedtak.id}"))
     }
 
-    private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, behandlingVedtak: BehandlingVedtak, saksbehandlerId: String) {
+    private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
         val task = Task.nyTask(type = IverksettMotOppdrag.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
-            personIdent = behandling.fagsak.personIdent?.ident!!,
+            personIdent = behandling.fagsak.personIdent.ident!!,
             behandlingsId = behandling.id!!,
-            behandlingVedtakId = behandlingVedtak.id!!,
+            vedtaksId = vedtak.id!!,
             saksbehandlerId = saksbehandlerId
         )),
                 properties = Properties().apply {
-                    this["personIdent"] = behandling.fagsak.personIdent?.ident
+                    this["personIdent"] = behandling.fagsak.personIdent.ident
                     this["behandlingsId"] = behandling.id.toString()
-                    this["behandlingVedtakId"] = behandlingVedtak.id.toString()
+                    this["vedtakId"] = vedtak.id.toString()
                 }
         )
         taskRepository.save(task)
