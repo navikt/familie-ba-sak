@@ -9,6 +9,8 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -23,7 +25,7 @@ class MottakController(
         private val fagsakService: FagsakService
 ) {
     @PostMapping(path = ["/behandling/opprett"])
-    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<RestFagsak> {
+    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = try {
             oidcUtil.getClaim("preferred_username") ?: "VL"
         } catch (e: JwtTokenValidatorException) {
@@ -32,9 +34,11 @@ class MottakController(
 
         FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
 
-        val fagsak = behandlingService.opprettBehandling(nyBehandling)
-
-        return fagsakService.hentRestFagsak(fagsakId = fagsak.id)
+        return Result.runCatching { behandlingService.opprettBehandling(nyBehandling) }
+                .fold(
+                        onFailure = { ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure ("Opprettelse av behandling feilet", it)) },
+                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.id)) }
+                )
     }
 }
 
