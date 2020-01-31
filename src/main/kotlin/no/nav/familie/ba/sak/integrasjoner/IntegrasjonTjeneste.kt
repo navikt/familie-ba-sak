@@ -96,7 +96,7 @@ class IntegrasjonTjeneste(
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentBehandlendeEnhetForPersonident(personident: String): List<Arbeidsfordelingsenhet> {
-        val uri = URI.create("$integrasjonerServiceUri/arbeidsfordeling/enhet/bar")
+        val uri = URI.create("$integrasjonerServiceUri/arbeidsfordeling/enhet/BAR")
 
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add("Nav-Personident", personident)
