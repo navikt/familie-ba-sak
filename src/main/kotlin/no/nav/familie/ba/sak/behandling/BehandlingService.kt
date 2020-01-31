@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -31,6 +32,14 @@ class BehandlingService(
                      journalpostID: String?,
                      saksnummer: String): Behandling {
         //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
+
+        // midlertidig kode for sjekk av arbeidsfordelingstjenesten.
+        // skal kjøres i en task i fb.m. oppgaveoppretting.
+        try {
+            integrasjonTjeneste.hentBehandlendeEnhetForPersonident(fødselsnummer)
+        } catch(ex: IntegrasjonException) {
+            LOG.info("Kall mot arbeidsfordeling feilet.")
+        }
 
         val personIdent = PersonIdent(fødselsnummer)
         val fagsak = when (val it = fagsakService.hentFagsakForPersonident(personIdent)) {
