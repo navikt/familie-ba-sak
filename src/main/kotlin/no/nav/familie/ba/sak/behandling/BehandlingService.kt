@@ -37,7 +37,7 @@ class BehandlingService(
         // skal kjøres i en task i fb.m. oppgaveoppretting.
         try {
             integrasjonTjeneste.hentBehandlendeEnhetForPersonident(fødselsnummer)
-        } catch(ex: IntegrasjonException) {
+        } catch(ex: Exception) {
             LOG.info("Kall mot arbeidsfordeling feilet.")
         }
 
