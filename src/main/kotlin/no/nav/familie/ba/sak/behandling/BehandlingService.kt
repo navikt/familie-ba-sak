@@ -36,7 +36,8 @@ class BehandlingService(
         // midlertidig kode for sjekk av arbeidsfordelingstjenesten.
         // skal kjøres i en task i fb.m. oppgaveoppretting.
         try {
-            integrasjonTjeneste.hentBehandlendeEnhetForPersonident(fødselsnummer)
+            val enheter = integrasjonTjeneste.hentBehandlendeEnhetForPersonident(fødselsnummer)
+            enheter.forEach { LOG.info("Tilhørende arbeidsfordelingsenhet: ${it.enhetId} - ${it.enhetNavn}") }
         } catch(ex: Exception) {
             LOG.info("Kall mot arbeidsfordeling feilet.")
         }
