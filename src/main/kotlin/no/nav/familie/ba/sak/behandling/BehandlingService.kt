@@ -37,6 +37,9 @@ class BehandlingService(
         // skal kjøres i en task i fb.m. oppgaveoppretting.
         try {
             val enheter = integrasjonTjeneste.hentBehandlendeEnhetForPersonident(fødselsnummer)
+            if (enheter.isEmpty()) {
+                LOG.warn("Fant ingen arbeidsfordelingsenhet på denne personen.")
+            }
             enheter.forEach { LOG.info("Tilhørende arbeidsfordelingsenhet: ${it.enhetId} - ${it.enhetNavn}") }
         } catch(ex: Exception) {
             LOG.info("Kall mot arbeidsfordeling feilet.")
