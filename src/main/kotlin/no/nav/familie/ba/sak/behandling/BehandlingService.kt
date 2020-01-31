@@ -33,18 +33,6 @@ class BehandlingService(
                      saksnummer: String): Behandling {
         //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
 
-        // midlertidig kode for sjekk av arbeidsfordelingstjenesten.
-        // skal kjøres i en task i fb.m. oppgaveoppretting.
-        try {
-            val enheter = integrasjonTjeneste.hentBehandlendeEnhetForPersonident(fødselsnummer)
-            if (enheter.isEmpty()) {
-                LOG.warn("Fant ingen arbeidsfordelingsenhet på denne personen.")
-            }
-            enheter.forEach { LOG.info("Tilhørende arbeidsfordelingsenhet: ${it.enhetId} - ${it.enhetNavn}") }
-        } catch(ex: Exception) {
-            LOG.info("Kall mot arbeidsfordeling feilet.")
-        }
-
         val personIdent = PersonIdent(fødselsnummer)
         val fagsak = when (val it = fagsakService.hentFagsakForPersonident(personIdent)) {
             null -> Fagsak(null, AktørId("1"), personIdent)
