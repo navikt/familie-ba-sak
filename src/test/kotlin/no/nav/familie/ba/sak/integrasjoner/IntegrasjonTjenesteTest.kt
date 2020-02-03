@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.arkivering.FilType
 import no.nav.familie.kontrakter.felles.objectMapper
 import okhttp3.mockwebserver.MockResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -57,7 +58,7 @@ class IntegrasjonTjenesteTest : HttpTestBase(18085) {
         assertThat(mockFnr).isEqualTo(arkiverDokumentRequest.fnr)
         assertThat(1).isEqualTo(arkiverDokumentRequest.dokumenter.size)
         assertThat(IntegrasjonTjeneste.VEDTAK_DOKUMENT_TYPE).isEqualTo(arkiverDokumentRequest.dokumenter[0].dokumentType)
-        assertThat(IntegrasjonTjeneste.VEDTAK_FILTYPE).isEqualTo(arkiverDokumentRequest.dokumenter[0].filType)
+        assertThat(FilType.PDFA).isEqualTo(arkiverDokumentRequest.dokumenter[0].filType)
         assertThat(arkiverDokumentRequest.dokumenter[0].dokument).isEqualTo(mockPdf)
         assertThat(mockJournalpostForVedtakId).isEqualTo(journalPostId)
     }
