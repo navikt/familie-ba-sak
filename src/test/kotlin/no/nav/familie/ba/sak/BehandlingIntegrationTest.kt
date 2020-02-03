@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.lang.Exception
 import java.time.LocalDate
 import java.util.concurrent.ThreadLocalRandom
 import javax.transaction.Transactional
@@ -102,6 +103,14 @@ class BehandlingIntegrationTest(
         val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler2", hentetVedtak?.ansvarligSaksbehandler)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Ikke opprett ny behandling hvis fagsaken har en behandling som ikke er iverksatt`() {
+        val saksnr = lagRandomSaksnummer()
+        behandlingService.nyBehandling("3", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", saksnr)
+        Assertions.assertThrows(Exception::class.java) { behandlingService.nyBehandling("3", BehandlingType.REVURDERING, "sdf", saksnr) }
     }
 
     @Test
