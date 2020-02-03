@@ -100,14 +100,15 @@ class IntegrasjonTjeneste(
 
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add("Nav-Personident", personident)
+        headers.add(NavHttpHeaders.NAV_CONSUMER_ID.asString(), "familie-ba-sak")
         val httpEntity: HttpEntity<*> = HttpEntity<Any?>(headers)
 
         return try {
             val response = restOperations.exchange<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, HttpMethod.GET, httpEntity)
             val data = response.body?.data
-            data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt")
+            data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt", null, uri, personident)
         } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri, "")
+            throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri, personident)
         }
     }
 
