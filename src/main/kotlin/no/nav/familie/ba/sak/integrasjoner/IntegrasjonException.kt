@@ -12,20 +12,15 @@ class IntegrasjonException : RuntimeException {
     private var responseBody: ByteArray? = null
 
     constructor(msg: String?) : super(msg)
-    constructor(msg: String?, e: Exception?, uri: URI?, ident: String?) : super(msg, e) {
+    constructor(msg: String?, throwable: Throwable?, uri: URI?, ident: String?) : super(msg, throwable) {
         var message = ""
-        if (e is RestClientResponseException) {
-            message = e.responseBodyAsString
-            responseBody = e.responseBodyAsByteArray
+        if (throwable is RestClientResponseException) {
+            message = throwable.responseBodyAsString
+            responseBody = throwable.responseBodyAsByteArray
         }
-        secureLogger.info("Ukjent feil ved integrasjon mot {}. ident={} {} {}", uri, ident, message, e)
+        secureLogger.info("Ukjent feil ved integrasjon mot {}. ident={} {} {}", uri, ident, message, throwable)
         logger.warn("Ukjent feil ved integrasjon mot '{}'.", uri)
     }
-
-    val responseBodyAsString: String?
-        get() = if (responseBody == null) {
-            null
-        } else String(responseBody!!, UTF_8)
 
     companion object {
         private val logger = LoggerFactory.getLogger(IntegrasjonTjeneste::class.java)

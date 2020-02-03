@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.lang.IllegalStateException
 
 @RestController
 @RequestMapping("/api")
@@ -26,30 +25,20 @@ class MottakController(
         private val fagsakService: FagsakService
 ) {
     @PostMapping(path = ["/behandling/opprett"])
-    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): Ressurs<String> {
+    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = try {
             oidcUtil.getClaim("preferred_username") ?: "VL"
         } catch (e: JwtTokenValidatorException) {
             "VL"
         }
 
-        return Result.runCatching {
+        FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
 
-            FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
-
-            val fagsak = behandlingService.opprettBehandling(nyBehandling)
-
-            //fagsakService.hentRestFagsak(fagsakId = fagsak.id)
-        }.fold(
-                onSuccess = {
-                    Ressurs.success("OK")
-                },
-                onFailure = {
-                    if (it is IllegalStateException)
-                                Ressurs.failure("Kan ikke opprette ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt")
-                    else Ressurs.failure(it.message)
-                }
-        )
+        return Result.runCatching { behandlingService.opprettBehandling(nyBehandling) }
+                .fold(
+                        onFailure = { ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure ("Opprettelse av behandling feilet", it)) },
+                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.id)) }
+                )
     }
 }
 

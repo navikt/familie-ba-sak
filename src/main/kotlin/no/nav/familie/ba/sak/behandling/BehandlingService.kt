@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
@@ -13,9 +10,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
@@ -23,8 +18,8 @@ import kotlin.streams.asSequence
 @Service
 class BehandlingService(
         private val behandlingRepository: BehandlingRepository,
-        private val behandlingVedtakRepository: BehandlingVedtakRepository,
-        private val behandlingVedtakBarnRepository: BehandlingVedtakBarnRepository,
+        private val vedtakRepository: VedtakRepository,
+        private val vedtakBarnRepository: VedtakBarnRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
         private val dokGenService: DokGenService,
@@ -53,10 +48,7 @@ class BehandlingService(
     val STRING_LENGTH = 10
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
 
-    @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
-        // val søkerAktørId = integrasjonTjeneste.hentAktørId(nyBehandling.fødselsnummer);
-
         val behandling = nyBehandling(
                 fødselsnummer = nyBehandling.fødselsnummer,
                 behandlingType = nyBehandling.behandlingType,
@@ -67,7 +59,6 @@ class BehandlingService(
                         .asSequence()
                         .map(charPool::get)
                         .joinToString(""))
-        LOG.info("Har opprettet ny behandling. Henter personinfo... ")
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
@@ -79,9 +70,6 @@ class BehandlingService(
         )
         personopplysningGrunnlag.leggTilPerson(søker)
 
-        if (nyBehandling.barnasFødselsnummer.isEmpty()) {
-            throw Exception("Kan ikke lage en behandling uten barn")
-        }
         nyBehandling.barnasFødselsnummer.map {
             personopplysningGrunnlag.leggTilPerson(Person(
                     personIdent = PersonIdent(it),
@@ -90,10 +78,8 @@ class BehandlingService(
                     fødselsdato = integrasjonTjeneste.hentPersoninfoFor(it)?.fødselsdato
             ))
         }
-        LOG.info("Hentet personopplysninger for søker og barn. Lagrer personopplysningsgrunnlag")
         personopplysningGrunnlag.setAktiv(true)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-        LOG.info("Har lagret personopplysningsgrunnlag")
 
         return behandling.fagsak
     }
@@ -102,8 +88,12 @@ class BehandlingService(
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
     }
 
-    fun hentBehandlingVedtakHvisEksisterer(behandlingId: Long?): BehandlingVedtak? {
-        return behandlingVedtakRepository.findByBehandlingAndAktiv(behandlingId)
+    fun hentVedtakHvisEksisterer(behandlingId: Long?): Vedtak? {
+        return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
+    }
+
+    fun hentBehandling(behandlingId: Long?): Behandling? {
+        return behandlingRepository.finnBehandling(behandlingId)
     }
 
     fun hentBehandlinger(fagsakId: Long?): List<Behandling?> {
@@ -114,59 +104,50 @@ class BehandlingService(
         val aktivBehandling = hentBehandlingHvisEksisterer(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
-            LOG.info("Fant aktiv behandling med saksnr ${aktivBehandling.saksnummer} og id ${aktivBehandling.id}")
-            val aktivBehandlingVedtak = hentBehandlingVedtakHvisEksisterer(aktivBehandling.id)
-            if (aktivBehandlingVedtak?.status != BehandlingVedtakStatus.IVERKSATT) {
-                LOG.info("Den aktive behandlingen har et vedtak som ikke er iverksatt")
-                throw IllegalStateException("Den aktive behandlingen er ikke iverksatt. Kan ikke opprette ny behandling.")
-            }
-
-            LOG.info("Den aktive behandlingen har ingen vedtak som ikke er iverksatt. Flipper aktiv-flagg")
             aktivBehandling.aktiv = false
             behandlingRepository.save(aktivBehandling)
-            LOG.info("Har oppdatert aktiv behandling")
         }
 
-        LOG.info("Lagrer ny behandling")
         behandlingRepository.save(behandling)
     }
 
-    fun hentAktivVedtakForBehandling(behandlingId: Long?): BehandlingVedtak? {
-        return behandlingVedtakRepository.findByBehandlingAndAktiv(behandlingId)
+    fun hentAktivVedtakForBehandling(behandlingId: Long?): Vedtak? {
+        return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun hentBehandlingVedtak(behandlingId: Long): BehandlingVedtak? {
-        return behandlingVedtakRepository.getOne(behandlingId)
+    fun hentVedtak(vedtakId: Long): Vedtak? {
+        return vedtakRepository.getOne(vedtakId)
     }
 
-    fun hentBarnBeregningForVedtak(behandlingVedtakId: Long?): List<BehandlingVedtakBarn> {
-        return behandlingVedtakBarnRepository.finnBarnBeregningForVedtak(behandlingVedtakId)
+    fun hentBarnForVedtak(vedtakId: Long?): List<VedtakBarn> {
+        return vedtakBarnRepository.finnBarnBeregningForVedtak(vedtakId)
     }
 
-    fun oppdatertStatusPåBehandlingVedtak(behandlingVedtak: BehandlingVedtak, status: BehandlingVedtakStatus) {
-        behandlingVedtak.status = status
-        behandlingVedtakRepository.save(behandlingVedtak)
-    }
-
-    fun oppdatertStatusPåBehandlingVedtak(behandlingVedtakId: Long, status: BehandlingVedtakStatus) {
-        when (val behandlingVedtak = hentBehandlingVedtak(behandlingVedtakId)) {
-            null -> throw Exception("Feilet ved oppdatering av status på vedtak. Fant ikke vedtak med id $behandlingVedtakId")
+    fun oppdaterStatusPåBehandling(behandlingId: Long?, status: BehandlingStatus) {
+        when (val behandling = hentBehandling(behandlingId)) {
+            null -> throw Exception("Feilet ved oppdatering av status på behandling. Fant ikke behandling med id $behandlingId")
             else -> {
-                behandlingVedtak.status = status
-                behandlingVedtakRepository.save(behandlingVedtak)
+                if (status == BehandlingStatus.IVERKSATT) {
+                    val fagsak = behandling.fagsak
+                    fagsak.status = FagsakStatus.LØPENDE
+                    fagsakService.lagreFagsak(fagsak)
+                }
+
+                behandling.status = status
+                behandlingRepository.save(behandling)
             }
         }
     }
 
-    fun lagreBehandlingVedtak(behandlingVedtak: BehandlingVedtak) {
-        val aktivBehandlingVedtak = hentBehandlingVedtakHvisEksisterer(behandlingVedtak.behandling.id)
+    fun lagreVedtak(vedtak: Vedtak) {
+        val aktivVedtak = hentVedtakHvisEksisterer(vedtak.behandling.id)
 
-        if (aktivBehandlingVedtak != null) {
-            aktivBehandlingVedtak.aktiv = false
-            behandlingVedtakRepository.save(aktivBehandlingVedtak)
+        if (aktivVedtak != null) {
+            aktivVedtak.aktiv = false
+            vedtakRepository.save(aktivVedtak)
         }
 
-        behandlingVedtakRepository.save(behandlingVedtak)
+        vedtakRepository.save(vedtak)
     }
 
     fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
@@ -177,19 +158,20 @@ class BehandlingService(
             throw Error("Fant ingen barn på behandlingen og kan derfor ikke opprette nytt vedtak")
         }
 
-        val behandlingVedtak = BehandlingVedtak(
+        val vedtak = Vedtak(
                 behandling = behandling,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
-                vedtaksdato = LocalDate.now()
+                vedtaksdato = LocalDate.now(),
+                resultat = nyttVedtak.resultat
         )
 
-        behandlingVedtak.stønadBrevMarkdown = Result.runCatching { dokGenService.hentStønadBrevMarkdown(behandlingVedtak) }
+        vedtak.stønadBrevMarkdown = Result.runCatching { dokGenService.hentStønadBrevMarkdown(vedtak) }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e -> return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.", e) }
                 )
 
-        lagreBehandlingVedtak(behandlingVedtak)
+        lagreVedtak(vedtak)
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
         nyttVedtak.barnasBeregning.map {
@@ -200,10 +182,10 @@ class BehandlingService(
                 return Ressurs.failure("Ugyldig fra og med dato", Exception("Ugyldig fra og med dato for ${barn.fødselsdato}"))
             }
 
-            behandlingVedtakBarnRepository.save(
-                    BehandlingVedtakBarn(
+            vedtakBarnRepository.save(
+                    VedtakBarn(
                             barn = barn,
-                            behandlingVedtak = behandlingVedtak,
+                            vedtak = vedtak,
                             beløp = it.beløp,
                             stønadFom = it.stønadFom,
                             stønadTom = barn.fødselsdato?.plusYears(18)!!
@@ -215,9 +197,9 @@ class BehandlingService(
     }
 
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
-        val behandlingVedtak = hentAktivVedtakForBehandling(behandlingId)
+        val vedtak = hentAktivVedtakForBehandling(behandlingId)
                 ?: return Ressurs.failure("Behandling ikke funnet")
-        val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(behandlingVedtak.stønadBrevMarkdown) }
+        val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(vedtak.stønadBrevMarkdown) }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
@@ -228,12 +210,17 @@ class BehandlingService(
         return Ressurs.success(html)
     }
 
-    internal fun hentPdfForBehandlingVedtak(behandlingVedtak: BehandlingVedtak?): ByteArray {
-        return Result.runCatching { dokGenService.lagPdfFraMarkdown(behandlingVedtak?.stønadBrevMarkdown!!) }
+    internal fun hentPdfForVedtak(vedtak: Vedtak): ByteArray {
+        return Result.runCatching {
+            LOG.debug("henter stønadsbrevMarkdown fra behandlingsVedtak")
+            val markdown = vedtak.stønadBrevMarkdown
+            LOG.debug("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
+            dokGenService.lagPdfFraMarkdown(markdown)
+        }
             .fold(
                 onSuccess = { it },
-                onFailure = { e ->
-                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${behandlingVedtak?.id}")
+                onFailure = {
+                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${vedtak.id}", it)
                 }
             )
     }

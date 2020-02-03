@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.*
 import no.nav.familie.ba.sak.behandling.restDomene.DokumentRequest
@@ -25,12 +25,12 @@ class DokGenService(
     private val månedMap = mapOf(1 to "januar", 2 to "februar", 3 to "mars", 4 to "april", 5 to "mai", 6 to "juni",
         7 to "juli", 8 to "august", 9 to "september", 10 to "oktober", 11 to "november", 12 to "desember")
 
-    fun hentStønadBrevMarkdown(behandlingVedtak: BehandlingVedtak): String {
-        val fletteFelter = mapTilBrevfelter(behandlingVedtak)
+    fun hentStønadBrevMarkdown(vedtak: Vedtak): String {
+        val fletteFelter = mapTilBrevfelter(vedtak)
         return hentMarkdownForMal("Innvilget", fletteFelter)
     }
 
-    private fun mapTilBrevfelter(vedtak: BehandlingVedtak): String {
+    private fun mapTilBrevfelter(vedtak: Vedtak): String {
         val brevfelter = "{\"belop\": %s,\n" + // TODO hent fra dokgen (/template/{templateName}/schema)
             "\"startDato\": \"%s\",\n" +
             "\"etterbetaling\": %s,\n" +
@@ -42,7 +42,7 @@ class DokGenService(
         val startDato = "februar 2020" // TODO hent fra beregningen
 
         return String.format( // TODO Bytt ut hardkodede felter med faktiske verdier
-            brevfelter, 123, startDato, false, "enhet", vedtak.behandling.fagsak.personIdent?.ident, "24.12.19", vedtak.ansvarligSaksbehandler
+            brevfelter, 123, startDato, false, "enhet", vedtak.behandling.fagsak.personIdent.ident, "24.12.19", vedtak.ansvarligSaksbehandler
         )
     }
 

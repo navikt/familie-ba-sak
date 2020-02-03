@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import javax.persistence.*
 
-@Entity(name = "BehandlingVedtak")
-@Table(name = "BEHANDLING_VEDTAK")
-data class BehandlingVedtak(
+@Entity(name = "Vedtak")
+@Table(name = "VEDTAK")
+data class Vedtak(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_vedtak_seq")
-        @SequenceGenerator(name = "behandling_vedtak_seq")
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_seq")
+        @SequenceGenerator(name = "vedtak_seq")
         val id: Long? = null,
 
         @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
@@ -25,14 +25,15 @@ data class BehandlingVedtak(
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
         var stønadBrevMarkdown: String = "",
 
+        // TODO Endre til resultat (INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT)
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
-        var status: BehandlingVedtakStatus = BehandlingVedtakStatus.OPPRETTET,
+        var resultat: VedtakResultat,
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true
 ) : BaseEntitet()
 
-enum class BehandlingVedtakStatus {
-        OPPRETTET, LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG, SENDT_TIL_IVERKSETTING, IVERKSATT
+enum class VedtakResultat {
+        INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
 }

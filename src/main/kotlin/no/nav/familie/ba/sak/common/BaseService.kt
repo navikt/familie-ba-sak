@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.common
 
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
@@ -37,10 +36,6 @@ open class BaseService(clientConfigKey: String, restTemplateBuilder: RestTemplat
     private val clientProperties: ClientProperties = Optional.ofNullable(
             clientConfigurationProperties.registration[clientConfigKey])
             .orElseThrow { RuntimeException("could not find oauth2 client config for key=$clientConfigKey") }
-
-    val restTemplate: RestTemplate = restTemplateBuilder
-            .additionalInterceptors(BearerAuthorizationInterceptor(oAuth2AccessTokenService, clientProperties))
-            .build()
 
     val restOperations: RestOperations = restTemplateBuilder
             .additionalInterceptors(BearerAuthorizationInterceptor(oAuth2AccessTokenService, clientProperties))

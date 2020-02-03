@@ -5,16 +5,16 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import javax.persistence.*
 
-@Entity(name = "BehandlingVedtakBarn")
-@Table(name = "BEHANDLING_VEDTAK_BARN")
-data class BehandlingVedtakBarn(
+@Entity(name = "VedtakBarn")
+@Table(name = "VEDTAK_BARN")
+data class VedtakBarn(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_vedtak_barn_seq")
-        @SequenceGenerator(name = "behandling_vedtak_barn_seq")
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_barn_seq")
+        @SequenceGenerator(name = "vedtak_barn_seq")
         val id: Long? = null,
 
-        @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_vedtak_id", nullable = false, updatable = false)
-        val behandlingVedtak: BehandlingVedtak,
+        @ManyToOne(optional = false) @JoinColumn(name = "fk_vedtak_id", nullable = false, updatable = false)
+        val vedtak: Vedtak,
 
         @ManyToOne(optional = false) @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
         val barn: Person,

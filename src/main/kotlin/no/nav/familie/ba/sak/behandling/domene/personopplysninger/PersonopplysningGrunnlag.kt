@@ -34,11 +34,6 @@ class PersonopplysningGrunnlag(
         personer.add(person)
     }
 
-    val søker: Person?
-        get() {
-            return personer.firstOrNull { it.type?.equals(PersonType.SØKER) ?: false }
-        }
-
     val barna: List<Person>
         get() {
             val barna: MutableList<Person> = LinkedList()

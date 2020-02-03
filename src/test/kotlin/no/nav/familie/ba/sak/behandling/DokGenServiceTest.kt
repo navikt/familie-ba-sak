@@ -3,7 +3,8 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BehandlingVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -22,16 +23,17 @@ class DokGenServiceTest(
         private var dokGenService: DokGenService
 ) {
 
-    private val behandlingVedtak = BehandlingVedtak(
+    private val vedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")), journalpostID = "", type = BehandlingType.FØRSTEGANGSBEHANDLING),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
-            vedtaksdato = LocalDate.now()
+            vedtaksdato = LocalDate.now(),
+            resultat = VedtakResultat.INNVILGET
     )
 
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
         dokGenService.runCatching {
-            val htmlResponse = lagHtmlFraMarkdown(hentStønadBrevMarkdown(behandlingVedtak))
+            val htmlResponse = lagHtmlFraMarkdown(hentStønadBrevMarkdown(vedtak))
             assert(htmlResponse.startsWith("<html>"))
         }
     }
