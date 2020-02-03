@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
@@ -30,7 +31,6 @@ class BehandlingService(
                      behandlingType: BehandlingType,
                      journalpostID: String?,
                      saksnummer: String): Behandling {
-        //final var søkerAktørId = oppslagTjeneste.hentAktørId(fødselsnummer);
 
         val personIdent = PersonIdent(fødselsnummer)
         val fagsak = when (val it = fagsakService.hentFagsakForPersonident(personIdent)) {
@@ -48,6 +48,7 @@ class BehandlingService(
     val STRING_LENGTH = 10
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
 
+    @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
         val behandling = nyBehandling(
                 fødselsnummer = nyBehandling.fødselsnummer,
@@ -104,6 +105,9 @@ class BehandlingService(
         val aktivBehandling = hentBehandlingHvisEksisterer(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
+            if (aktivBehandling.status != BehandlingStatus.IVERKSATT) {
+                throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
+            }
             aktivBehandling.aktiv = false
             behandlingRepository.save(aktivBehandling)
         }
