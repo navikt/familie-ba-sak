@@ -36,7 +36,8 @@ class FagsakControllerTest(
     @Tag("integration")
     fun `Test hent html vedtak`() {
         val mockBehandlingLager = mock(BehandlingService::class.java)
-        `when`(mockBehandlingLager.hentHtmlVedtakForBehandling(ArgumentMatchers.anyLong())).thenReturn(Ressurs.success(("mock_html")))
+        `when`(mockBehandlingLager.hentHtmlVedtakForBehandling(ArgumentMatchers.anyLong()))
+                .thenReturn(Ressurs.success(("mock_html")))
         val fagsakController = FagsakController(oidcUtil, fagsakService, mockBehandlingLager, taskRepository)
         val response = fagsakController.hentHtmlVedtak(1)
         assert(response.status == Ressurs.Status.SUKSESS)

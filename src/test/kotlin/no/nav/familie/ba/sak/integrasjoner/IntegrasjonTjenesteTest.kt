@@ -8,7 +8,7 @@ import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.objectMapper
 import okhttp3.mockwebserver.MockResponse
-import org.junit.jupiter.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -23,9 +23,7 @@ import org.springframework.test.context.ActiveProfiles
 @SpringBootTest(classes = [ApplicationConfig::class], properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:18085/api"])
 @ActiveProfiles("dev", "mock-oauth")
 @TestInstance(Lifecycle.PER_CLASS)
-class IntegrasjonTjenesteTest : HttpTestBase(
-        18085
-) {
+class IntegrasjonTjenesteTest : HttpTestBase(18085) {
 
     @Autowired
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
@@ -40,7 +38,6 @@ class IntegrasjonTjenesteTest : HttpTestBase(
         val responseBody = Ressurs.success(ArkiverDokumentResponse(mockJournalpostForVedtakId, true))
         val mockFnr = "12345678910"
         val mockPdf = "mock data".toByteArray()
-
         val response: MockResponse = MockResponse()
                 .addHeader("Content-Type", "application/json; charset=utf-8")
                 .setResponseCode(201)
@@ -49,25 +46,19 @@ class IntegrasjonTjenesteTest : HttpTestBase(
         mockServer.enqueue(response)
         val journalPostId = integrasjonTjeneste.lagerJournalpostForVedtaksbrev(mockFnr, mockPdf)
 
-        assert(mockJournalpostForVedtakId == journalPostId)
+        assertThat(mockJournalpostForVedtakId).isEqualTo(journalPostId)
 
         val request = mockServer.takeRequest()
 
-        val expectedUri = "$integrasjonerUri/arkiv/v1"
-
-        Assertions.assertEquals(expectedUri, request.requestUrl.toString())
-        Assertions.assertEquals(HttpMethod.POST.toString(), request.method)
+        assertThat(HttpMethod.POST.toString()).isEqualTo(request.method)
         val body = request.body.readUtf8()
         val mapper = jacksonObjectMapper()
         val arkiverDokumentRequest = mapper.readValue(body, ArkiverDokumentRequest::class.java)
-        Assertions.assertEquals(mockFnr, arkiverDokumentRequest.fnr)
-        Assertions.assertEquals(1, arkiverDokumentRequest.dokumenter.size)
-        Assertions.assertEquals(IntegrasjonTjeneste.VEDTAK_DOKUMENT_TYPE, arkiverDokumentRequest.dokumenter[0].dokumentType)
-        Assertions.assertEquals(IntegrasjonTjeneste.VEDTAK_FILTYPE, arkiverDokumentRequest.dokumenter[0].filType)
-
-        Assertions.assertTrue(arkiverDokumentRequest.dokumenter[0].dokument.foldIndexed(true) { index, acc, byte ->
-            acc && byte == mockPdf[index]
-        })
-        Assertions.assertEquals(mockJournalpostForVedtakId, journalPostId)
+        assertThat(mockFnr).isEqualTo(arkiverDokumentRequest.fnr)
+        assertThat(1).isEqualTo(arkiverDokumentRequest.dokumenter.size)
+        assertThat(IntegrasjonTjeneste.VEDTAK_DOKUMENT_TYPE).isEqualTo(arkiverDokumentRequest.dokumenter[0].dokumentType)
+        assertThat(IntegrasjonTjeneste.VEDTAK_FILTYPE).isEqualTo(arkiverDokumentRequest.dokumenter[0].filType)
+        assertThat(arkiverDokumentRequest.dokumenter[0].dokument).isEqualTo(mockPdf)
+        assertThat(mockJournalpostForVedtakId).isEqualTo(journalPostId)
     }
 }

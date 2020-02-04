@@ -30,18 +30,17 @@ import kotlin.streams.asSequence
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-dokgen")
 @Tag("integration")
-class BehandlingIntegrationTest(
-        @Autowired
-        private var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+class BehandlingIntegrationTest(@Autowired
+                                private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+                                @Autowired
+                                private val behandlingService: BehandlingService,
+                                @Autowired
+                                private val VedtakRepository: VedtakRepository) {
 
-        @Autowired
-        private var behandlingService: BehandlingService,
+    companion object {
+        const val STRING_LENGTH = 10
+    }
 
-        @Autowired
-        private var VedtakRepository: VedtakRepository
-) {
-
-    val STRING_LENGTH = 10
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
 
     fun lagRandomSaksnummer(): String {
@@ -112,12 +111,12 @@ class BehandlingIntegrationTest(
                             resultat = VedtakResultat.INNVILGET)
         behandlingService.lagreVedtak(vedtak)
 
-        val Vedtak2 = Vedtak(behandling = behandling,
-                             ansvarligSaksbehandler = "ansvarligSaksbehandler2",
-                             vedtaksdato = LocalDate.now(),
-                             stønadBrevMarkdown = "",
-                             resultat = VedtakResultat.INNVILGET)
-        behandlingService.lagreVedtak(Vedtak2)
+        val aktivtVedtak = Vedtak(behandling = behandling,
+                                  ansvarligSaksbehandler = "ansvarligSaksbehandler2",
+                                  vedtaksdato = LocalDate.now(),
+                                  stønadBrevMarkdown = "",
+                                  resultat = VedtakResultat.INNVILGET)
+        behandlingService.lagreVedtak(aktivtVedtak)
 
         val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
@@ -142,7 +141,7 @@ class BehandlingIntegrationTest(
                                                       type = PersonType.BARN,
                                                       personopplysningGrunnlag = personopplysningGrunnlag,
                                                       fødselsdato = LocalDate.now()))
-        personopplysningGrunnlag.setAktiv(true)
+        personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         behandlingService.nyttVedtakForAktivBehandling(

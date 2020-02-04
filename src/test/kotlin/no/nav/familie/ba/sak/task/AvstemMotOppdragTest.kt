@@ -16,8 +16,8 @@ import java.time.LocalDate
 
 class AvstemMotOppdragTest {
 
-    lateinit var avstemMotOppdrag: AvstemMotOppdrag
-    lateinit var taskRepositoryMock: TaskRepository
+    private lateinit var avstemMotOppdrag: AvstemMotOppdrag
+    private lateinit var taskRepositoryMock: TaskRepository
 
     @BeforeEach
     fun setUp() {

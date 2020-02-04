@@ -12,6 +12,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -61,6 +62,6 @@ class StatusFraOppdrag(
 
     companion object {
         const val TASK_STEP_TYPE = "statusFraOppdrag"
-        val LOG = LoggerFactory.getLogger(StatusFraOppdrag::class.java)
+        val LOG: Logger = LoggerFactory.getLogger(StatusFraOppdrag::class.java)
     }
 }

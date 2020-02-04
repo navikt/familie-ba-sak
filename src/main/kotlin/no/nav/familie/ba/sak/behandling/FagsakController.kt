@@ -80,7 +80,8 @@ class FagsakController(
         val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
                      ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
+        if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG
+            || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
             return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede sendt til oppdrag og venter på kvittering"))
         } else if (behandling.status == BehandlingStatus.IVERKSATT) {
             return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede iverksatt/avsluttet"))
@@ -90,13 +91,14 @@ class FagsakController(
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
 
-        return ResponseEntity.ok(Ressurs.success("Task for iverksetting ble opprettet på fagsak $fagsakId på vedtak ${vedtak.id}"))
+        return ResponseEntity
+                .ok(Ressurs.success("Task for iverksetting ble opprettet på fagsak $fagsakId på vedtak ${vedtak.id}"))
     }
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
         val task = Task.nyTask(type = IverksettMotOppdrag.TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
-                                       personIdent = behandling.fagsak.personIdent.ident!!,
+                                       personIdent = behandling.fagsak.personIdent.ident,
                                        behandlingsId = behandling.id!!,
                                        vedtaksId = vedtak.id!!,
                                        saksbehandlerId = saksbehandlerId

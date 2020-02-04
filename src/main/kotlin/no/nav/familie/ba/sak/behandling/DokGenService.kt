@@ -25,19 +25,6 @@ class DokGenService(
         private val restTemplate: RestTemplate
 ) {
 
-    private val månedMap = mapOf(1 to "januar",
-                                 2 to "februar",
-                                 3 to "mars",
-                                 4 to "april",
-                                 5 to "mai",
-                                 6 to "juni",
-                                 7 to "juli",
-                                 8 to "august",
-                                 9 to "september",
-                                 10 to "oktober",
-                                 11 to "november",
-                                 12 to "desember")
-
     fun hentStønadBrevMarkdown(vedtak: Vedtak): String {
         val fletteFelter = mapTilBrevfelter(vedtak)
         return hentMarkdownForMal("Innvilget", fletteFelter)
@@ -67,7 +54,7 @@ class DokGenService(
     }
 
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
-        val url = URI.create(dokgenServiceUri + "/template/" + malNavn + "/create-markdown")
+        val url = URI.create("$dokgenServiceUri/template/$malNavn/create-markdown")
         val response = utførRequest(lagPostRequest(url, fletteFelter), String::class.java)
         return response.body.orEmpty()
     }
@@ -85,13 +72,15 @@ class DokGenService(
     }
 
     fun lagDokumentRequestForMarkdown(format: DocFormat, markdown: String): RequestEntity<String> {
-        val url = URI.create(dokgenServiceUri + "/template/Innvilget/create-doc")
+        val url = URI.create("$dokgenServiceUri/template/Innvilget/create-doc")
         val body = DokumentRequest(format,
                                    markdown,
                                    true,
                                    null,
                                    true,
-                                   "{\"fodselsnummer\":\"12345678910\",\"navn\": \"navn\",\"adresse\": \"adresse\",\"postnr\": \"1626\",\"returadresse\": \"returadresse\",\"dokumentDato\": \"3. september 2019\"}")
+                                   "{\"fodselsnummer\":\"12345678910\",\"navn\": \"navn\",\"adresse\": \"adresse\"," +
+                                   "\"postnr\": \"1626\",\"returadresse\": \"returadresse\"," +
+                                   "\"dokumentDato\": \"3. september 2019\"}")
         return lagPostRequest(url, objectMapper.writeValueAsString(body))
     }
 

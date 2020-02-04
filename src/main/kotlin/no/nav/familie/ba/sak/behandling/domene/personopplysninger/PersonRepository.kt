@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query
 
 interface PersonRepository : JpaRepository<Person?, Long?> {
 
-    @Query("SELECT p FROM Person p JOIN p.personopplysningGrunnlag pog WHERE pog.id = :personopplysningGrunnlagId AND p.personIdent = :personIdent")
+    @Query("SELECT p FROM Person p JOIN p.personopplysningGrunnlag pog " +
+           "WHERE pog.id = :personopplysningGrunnlagId AND p.personIdent = :personIdent")
     fun findByPersonIdentAndPersonopplysningGrunnlag(personIdent: PersonIdent, personopplysningGrunnlagId: Long?): Person?
 }

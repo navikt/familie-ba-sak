@@ -18,10 +18,8 @@ import java.time.LocalDate
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
-class DokGenServiceTest(
-        @Autowired
-        private var dokGenService: DokGenService
-) {
+class DokGenServiceTest(@Autowired
+                        private val dokGenService: DokGenService) {
 
     private val vedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),

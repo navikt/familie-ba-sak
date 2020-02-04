@@ -118,7 +118,7 @@ class IntegrasjonTjeneste(
 
     fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String {
         val uri = URI.create("$integrasjonerServiceUri/arkiv/v1")
-        logger.info("Sender vedtak pdf til DokArkiv: ${uri}");
+        logger.info("Sender vedtak pdf til DokArkiv: $uri")
 
         return Result.runCatching {
             val dokumenter = listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, dokumentType = VEDTAK_DOKUMENT_TYPE))
@@ -147,7 +147,8 @@ class IntegrasjonTjeneste(
     }
 
     private fun sendJournalFørRequest(journalFørEndpoint: URI,
-                                      arkiverDokumentRequest: ArkiverDokumentRequest): ResponseEntity<Ressurs<ArkiverDokumentResponse>> {
+                                      arkiverDokumentRequest: ArkiverDokumentRequest)
+            : ResponseEntity<Ressurs<ArkiverDokumentResponse>> {
         val headers = HttpHeaders()
         headers.add("Content-Type", "application/json;charset=UTF-8")
         headers.acceptCharset = listOf(Charsets.UTF_8)

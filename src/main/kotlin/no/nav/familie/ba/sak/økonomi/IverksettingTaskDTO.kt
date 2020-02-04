@@ -9,4 +9,4 @@ class IverksettingTaskDTO(
         personIdent: String
 ) : DefaultTaskDTO(personIdent)
 
-val FAGSYSTEM = "BA"
+const val FAGSYSTEM = "BA"

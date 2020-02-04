@@ -30,7 +30,8 @@ import java.time.LocalDate
 
 
 @SpringBootTest(classes = [ApplicationConfig::class],
-                properties = ["FAMILIE_OPPDRAG_API_URL=http://localhost:18085/api", "FAMILIE_BA_DOKGEN_API_URL=http://localhost:18085/api"])
+                properties = ["FAMILIE_OPPDRAG_API_URL=http://localhost:18085/api",
+                    "FAMILIE_BA_DOKGEN_API_URL=http://localhost:18085/api"])
 @ActiveProfiles("dev", "mock-oauth")
 @TestInstance(Lifecycle.PER_CLASS)
 class ØkonomiIntegrasjonTest : HttpTestBase(
@@ -78,7 +79,7 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
                                                       type = PersonType.BARN,
                                                       personopplysningGrunnlag = personopplysningGrunnlag,
                                                       fødselsdato = LocalDate.now()))
-        personopplysningGrunnlag.setAktiv(true)
+        personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val oppdatertFagsak = behandlingService.nyttVedtakForAktivBehandling(

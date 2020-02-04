@@ -27,7 +27,7 @@ data class Vedtak(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "resultat", nullable = false)
-        var resultat: VedtakResultat,
+        val resultat: VedtakResultat,
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true

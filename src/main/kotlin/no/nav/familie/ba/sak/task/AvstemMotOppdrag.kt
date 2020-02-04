@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
@@ -58,6 +59,6 @@ class AvstemMotOppdrag(val avstemmingService: AvstemmingService, val taskReposit
                 MonthDay.of(12, 25),
                 MonthDay.of(12, 26)
         )
-        val LOG = LoggerFactory.getLogger(AvstemMotOppdrag::class.java)
+        val LOG: Logger = LoggerFactory.getLogger(AvstemMotOppdrag::class.java)
     }
 }

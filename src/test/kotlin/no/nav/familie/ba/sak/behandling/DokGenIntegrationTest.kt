@@ -78,7 +78,7 @@ class DokGenIntegrationTest {
                 resultat = VedtakResultat.INNVILGET
         ))
 
-        assert(markdown.equals("mockup_response"))
+        assert(markdown == "mockup_response")
     }
 
     @Test
@@ -86,7 +86,7 @@ class DokGenIntegrationTest {
     fun `Test generer html`() {
         val dokgen = DokGenTestService()
         val html = dokgen.lagHtmlFraMarkdown("markdown")
-        assert(html.equals("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
+        assert(html == "<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>")
     }
 
     @Test

@@ -46,7 +46,7 @@ class MottakController(
     }
 }
 
-data class NyBehandling(val fødselsnummer: String,
-                        val barnasFødselsnummer: Array<String>,
-                        val behandlingType: BehandlingType,
-                        val journalpostID: String?)
+class NyBehandling(val fødselsnummer: String,
+                   val barnasFødselsnummer: Array<String>,
+                   val behandlingType: BehandlingType,
+                   val journalpostID: String?)

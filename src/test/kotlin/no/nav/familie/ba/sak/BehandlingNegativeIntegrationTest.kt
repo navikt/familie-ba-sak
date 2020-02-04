@@ -23,10 +23,8 @@ import java.time.LocalDate
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-dokgen-negative")
 @Tag("integration")
-class BehandlingNegativeIntegrationTest(
-        @Autowired
-        private var behandlingService: BehandlingService
-) {
+class BehandlingNegativeIntegrationTest(@Autowired
+                                        private val behandlingService: BehandlingService) {
 
     @Test
     @Tag("integration")

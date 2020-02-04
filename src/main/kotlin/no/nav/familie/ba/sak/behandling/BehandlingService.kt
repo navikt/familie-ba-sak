@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -47,7 +48,6 @@ class BehandlingService(
         return behandling
     }
 
-    val STRING_LENGTH = 10
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
 
     @Transactional
@@ -81,7 +81,7 @@ class BehandlingService(
                     fødselsdato = integrasjonTjeneste.hentPersoninfoFor(it)?.fødselsdato
             ))
         }
-        personopplysningGrunnlag.setAktiv(true)
+        personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         return behandling.fagsak
@@ -186,9 +186,10 @@ class BehandlingService(
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
         nyttVedtak.barnasBeregning.map {
-            val barn = personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
-                                                                                     personopplysningGrunnlagId = personopplysningGrunnlag?.id)
-                       ?: return Ressurs.failure("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
+            val barn =
+                    personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
+                                                                                  personopplysningGrunnlag?.id)
+                    ?: return Ressurs.failure("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
             if (it.stønadFom.isBefore(barn.fødselsdato)) {
                 return Ressurs.failure("Ugyldig fra og med dato", Exception("Ugyldig fra og med dato for ${barn.fødselsdato}"))
@@ -238,6 +239,7 @@ class BehandlingService(
     }
 
     companion object {
-        val LOG = LoggerFactory.getLogger(BehandlingService::class.java)
+        const val STRING_LENGTH = 10
+        val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
 }

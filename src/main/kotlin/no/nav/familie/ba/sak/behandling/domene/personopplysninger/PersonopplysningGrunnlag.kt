@@ -8,7 +8,10 @@ import javax.persistence.*
 @Table(name = "GR_PERSONOPPLYSNINGER")
 class PersonopplysningGrunnlag(
         @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-        val behandlingId: Long?
+        val behandlingId: Long?,
+        @Column(name = "aktiv", nullable = false)
+        var aktiv: Boolean = true
+
 ) : BaseEntitet() {
 
     /**
@@ -20,17 +23,11 @@ class PersonopplysningGrunnlag(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GR_PERSONOPPLYSNINGER_SEQ")
     val id: Long? = null
 
-    @Column(name = "aktiv", nullable = false)
-    private var aktiv = true
 
     @OneToMany(fetch = FetchType.EAGER,
                mappedBy = "personopplysningGrunnlag",
                cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
-    var personer: MutableList<Person> = LinkedList()
-
-    fun setAktiv(aktiv: Boolean) {
-        this.aktiv = aktiv
-    }
+    val personer: MutableList<Person> = LinkedList()
 
     fun leggTilPerson(person: Person) {
         personer.add(person)
