@@ -25,9 +25,8 @@ data class Vedtak(
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
         var stønadBrevMarkdown: String = "",
 
-        // TODO Endre til resultat (INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT)
         @Enumerated(EnumType.STRING)
-        @Column(name = "status", nullable = false)
+        @Column(name = "resultat", nullable = false)
         var resultat: VedtakResultat,
 
         @Column(name = "aktiv", nullable = false)
