@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.task.AvstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
@@ -31,6 +31,7 @@ class FagsakController(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository
 ) {
+
     @GetMapping(path = ["/fagsak/{fagsakId}"])
     fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
@@ -52,7 +53,11 @@ class FagsakController(
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
 
-        val fagsak: Ressurs<RestFagsak> = Result.runCatching { behandlingService.nyttVedtakForAktivBehandling(fagsakId, nyttVedtak, ansvarligSaksbehandler = saksbehandlerId) }
+        val fagsak: Ressurs<RestFagsak> = Result.runCatching {
+            behandlingService.nyttVedtakForAktivBehandling(fagsakId,
+                                                           nyttVedtak,
+                                                           ansvarligSaksbehandler = saksbehandlerId)
+        }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
@@ -70,15 +75,15 @@ class FagsakController(
         logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
-                ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+                         ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
 
         val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
-                ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+                     ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
         if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
-            return  ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede sendt til oppdrag og venter på kvittering"))
+            return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede sendt til oppdrag og venter på kvittering"))
         } else if (behandling.status == BehandlingStatus.IVERKSATT) {
-            return  ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede iverksatt/avsluttet"))
+            return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede iverksatt/avsluttet"))
         }
 
         opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
@@ -90,17 +95,17 @@ class FagsakController(
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
         val task = Task.nyTask(type = IverksettMotOppdrag.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
-            personIdent = behandling.fagsak.personIdent.ident!!,
-            behandlingsId = behandling.id!!,
-            vedtaksId = vedtak.id!!,
-            saksbehandlerId = saksbehandlerId
-        )),
-                properties = Properties().apply {
-                    this["personIdent"] = behandling.fagsak.personIdent.ident
-                    this["behandlingsId"] = behandling.id.toString()
-                    this["vedtakId"] = vedtak.id.toString()
-                }
+                               payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
+                                       personIdent = behandling.fagsak.personIdent.ident!!,
+                                       behandlingsId = behandling.id!!,
+                                       vedtaksId = vedtak.id!!,
+                                       saksbehandlerId = saksbehandlerId
+                               )),
+                               properties = Properties().apply {
+                                   this["personIdent"] = behandling.fagsak.personIdent.ident
+                                   this["behandlingsId"] = behandling.id.toString()
+                                   this["vedtakId"] = vedtak.id.toString()
+                               }
         )
         taskRepository.save(task)
     }
@@ -113,7 +118,9 @@ class FagsakController(
         val taskDTO = AvstemmingTaskDTO(iDag.minusDays(1), iDag)
 
         logger.info("Lager task for avstemming")
-        val initiellAvstemmingTask = Task.nyTaskMedTriggerTid(AvstemMotOppdrag.TASK_STEP_TYPE, objectMapper.writeValueAsString(taskDTO), LocalDateTime.now())
+        val initiellAvstemmingTask = Task.nyTaskMedTriggerTid(AvstemMotOppdrag.TASK_STEP_TYPE,
+                                                              objectMapper.writeValueAsString(taskDTO),
+                                                              LocalDateTime.now())
         taskRepository.save(initiellAvstemmingTask)
         return ResponseEntity.ok(Ressurs.success("Laget task for avstemming"))
     }

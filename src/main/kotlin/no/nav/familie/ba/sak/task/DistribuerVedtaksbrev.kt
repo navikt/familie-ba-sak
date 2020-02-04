@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send vedtaksbrev til Dokdist", maxAntallFeil = 3)
 class DistribuerVedtaksbrev(
-    private val integrasjonTjeneste: IntegrasjonTjeneste
+        private val integrasjonTjeneste: IntegrasjonTjeneste
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

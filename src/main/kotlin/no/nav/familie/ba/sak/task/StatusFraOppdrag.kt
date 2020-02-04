@@ -3,13 +3,15 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.task.StatusFraOppdrag.Companion.TASK_STEP_TYPE
-import no.nav.familie.ba.sak.økonomi.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.OppdragProtokollStatus
+import no.nav.familie.ba.sak.økonomi.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
-import no.nav.familie.prosessering.domene.*
+import no.nav.familie.prosessering.domene.Status
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

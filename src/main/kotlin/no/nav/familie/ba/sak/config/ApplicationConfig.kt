@@ -22,6 +22,7 @@ import org.springframework.retry.annotation.EnableRetry
 @EnableJwtTokenValidation
 @EnableOAuth2Client(cacheEnabled = true)
 class ApplicationConfig {
+
     @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> {
         log.info("Registering LogFilter filter")

@@ -21,7 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 @Tag("integration")
-class FagsakControllerTest (
+class FagsakControllerTest(
         @Autowired
         private val oidcUtil: OIDCUtil,
 
@@ -30,15 +30,15 @@ class FagsakControllerTest (
 
         @Autowired
         private val taskRepository: TaskRepository
-){
+) {
 
     @Test
     @Tag("integration")
-    fun `Test hent html vedtak`(){
-        val mockBehandlingLager= mock(BehandlingService::class.java)
+    fun `Test hent html vedtak`() {
+        val mockBehandlingLager = mock(BehandlingService::class.java)
         `when`(mockBehandlingLager.hentHtmlVedtakForBehandling(ArgumentMatchers.anyLong())).thenReturn(Ressurs.success(("mock_html")))
-        val fagsakController= FagsakController(oidcUtil, fagsakService, mockBehandlingLager, taskRepository)
-        val response= fagsakController.hentHtmlVedtak(1)
-        assert(response.status== Ressurs.Status.SUKSESS)
+        val fagsakController = FagsakController(oidcUtil, fagsakService, mockBehandlingLager, taskRepository)
+        val response = fagsakController.hentHtmlVedtak(1)
+        assert(response.status == Ressurs.Status.SUKSESS)
     }
 }

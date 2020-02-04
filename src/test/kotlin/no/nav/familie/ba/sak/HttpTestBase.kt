@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeAll
 abstract class HttpTestBase(
         private val port: Int
 ) {
+
     var mockServer: MockWebServer = MockWebServer()
     val url = "http://localhost:$port"
 

@@ -24,6 +24,7 @@ class MottakController(
         private val behandlingService: BehandlingService,
         private val fagsakService: FagsakService
 ) {
+
     @PostMapping(path = ["/behandling/opprett"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = try {
@@ -36,10 +37,16 @@ class MottakController(
 
         return Result.runCatching { behandlingService.opprettBehandling(nyBehandling) }
                 .fold(
-                        onFailure = { ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure ("Opprettelse av behandling feilet", it)) },
+                        onFailure = {
+                            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body(Ressurs.failure("Opprettelse av behandling feilet", it))
+                        },
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.id)) }
                 )
     }
 }
 
-data class NyBehandling(val fødselsnummer: String, val barnasFødselsnummer: Array<String>, val behandlingType: BehandlingType, val journalpostID: String?)
+data class NyBehandling(val fødselsnummer: String,
+                        val barnasFødselsnummer: Array<String>,
+                        val behandlingType: BehandlingType,
+                        val journalpostID: String?)

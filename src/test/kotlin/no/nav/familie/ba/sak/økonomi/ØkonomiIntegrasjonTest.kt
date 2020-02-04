@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BarnBeregning
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -29,12 +29,14 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 
-@SpringBootTest(classes = [ApplicationConfig::class], properties = ["FAMILIE_OPPDRAG_API_URL=http://localhost:18085/api", "FAMILIE_BA_DOKGEN_API_URL=http://localhost:18085/api"])
+@SpringBootTest(classes = [ApplicationConfig::class],
+                properties = ["FAMILIE_OPPDRAG_API_URL=http://localhost:18085/api", "FAMILIE_BA_DOKGEN_API_URL=http://localhost:18085/api"])
 @ActiveProfiles("dev", "mock-oauth")
 @TestInstance(Lifecycle.PER_CLASS)
-class ØkonomiIntegrasjonTest: HttpTestBase(
+class ØkonomiIntegrasjonTest : HttpTestBase(
         18085
 ) {
+
     @Autowired
     lateinit var behandlingService: BehandlingService
 
@@ -66,16 +68,26 @@ class ØkonomiIntegrasjonTest: HttpTestBase(
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person(personIdent = PersonIdent("123456789010"), type = PersonType.SØKER, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now())
+        val søker = Person(personIdent = PersonIdent("123456789010"),
+                           type = PersonType.SØKER,
+                           personopplysningGrunnlag = personopplysningGrunnlag,
+                           fødselsdato = LocalDate.now())
         personopplysningGrunnlag.leggTilPerson(søker)
 
-        personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("123456789011"), type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag, fødselsdato = LocalDate.now()))
+        personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("123456789011"),
+                                                      type = PersonType.BARN,
+                                                      personopplysningGrunnlag = personopplysningGrunnlag,
+                                                      fødselsdato = LocalDate.now()))
         personopplysningGrunnlag.setAktiv(true)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val oppdatertFagsak = behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now())), resultat = VedtakResultat.INNVILGET),
+                nyttVedtak = NyttVedtak("sakstype",
+                                        arrayOf(BarnBeregning(fødselsnummer = "123456789011",
+                                                              beløp = 1054,
+                                                              stønadFom = LocalDate.now())),
+                                        resultat = VedtakResultat.INNVILGET),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)

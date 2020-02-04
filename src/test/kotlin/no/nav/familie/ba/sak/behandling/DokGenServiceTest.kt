@@ -24,7 +24,9 @@ class DokGenServiceTest(
 ) {
 
     private val vedtak = Vedtak(
-            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")), journalpostID = "", type = BehandlingType.FØRSTEGANGSBEHANDLING),
+            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
+                                    journalpostID = "",
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now(),
             resultat = VedtakResultat.INNVILGET

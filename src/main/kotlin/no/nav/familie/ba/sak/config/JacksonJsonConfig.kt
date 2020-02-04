@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class JacksonJsonConfig {
+
     companion object {
         private val OM = ObjectMapper()
 

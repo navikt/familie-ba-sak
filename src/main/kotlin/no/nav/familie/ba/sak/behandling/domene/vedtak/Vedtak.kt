@@ -34,5 +34,5 @@ data class Vedtak(
 ) : BaseEntitet()
 
 enum class VedtakResultat {
-        INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
+    INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
 }

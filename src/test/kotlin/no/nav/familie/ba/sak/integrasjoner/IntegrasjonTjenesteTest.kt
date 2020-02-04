@@ -26,6 +26,7 @@ import org.springframework.test.context.ActiveProfiles
 class IntegrasjonTjenesteTest : HttpTestBase(
         18085
 ) {
+
     @Autowired
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 

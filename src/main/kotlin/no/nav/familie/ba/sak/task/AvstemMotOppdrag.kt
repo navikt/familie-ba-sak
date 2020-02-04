@@ -14,7 +14,9 @@ import java.time.LocalDate
 import java.time.MonthDay
 
 @Service
-@TaskStepBeskrivelse(taskStepType = AvstemMotOppdrag.TASK_STEP_TYPE, beskrivelse = "Grensesnittavstemming mot oppdrag", maxAntallFeil = 3)
+@TaskStepBeskrivelse(taskStepType = AvstemMotOppdrag.TASK_STEP_TYPE,
+                     beskrivelse = "Grensesnittavstemming mot oppdrag",
+                     maxAntallFeil = 3)
 class AvstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepository) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -43,8 +45,8 @@ class AvstemMotOppdrag(val avstemmingService: AvstemmingService, val taskReposit
 
     private fun erHelgEllerHelligdag(dato: LocalDate): Boolean {
         return dato.dayOfWeek == DayOfWeek.SATURDAY
-                || dato.dayOfWeek == DayOfWeek.SUNDAY
-                || FASTE_HELLIGDAGER.contains(MonthDay.from(dato))
+               || dato.dayOfWeek == DayOfWeek.SUNDAY
+               || FASTE_HELLIGDAGER.contains(MonthDay.from(dato))
     }
 
     companion object {

@@ -5,7 +5,7 @@ import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table  (name = "GR_PERSONOPPLYSNINGER")
+@Table(name = "GR_PERSONOPPLYSNINGER")
 class PersonopplysningGrunnlag(
         @Column(name = "fk_behandling_id", updatable = false, nullable = false)
         val behandlingId: Long?
@@ -23,7 +23,9 @@ class PersonopplysningGrunnlag(
     @Column(name = "aktiv", nullable = false)
     private var aktiv = true
 
-    @OneToMany(fetch= FetchType.EAGER, mappedBy = "personopplysningGrunnlag", cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
+    @OneToMany(fetch = FetchType.EAGER,
+               mappedBy = "personopplysningGrunnlag",
+               cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
     var personer: MutableList<Person> = LinkedList()
 
     fun setAktiv(aktiv: Boolean) {

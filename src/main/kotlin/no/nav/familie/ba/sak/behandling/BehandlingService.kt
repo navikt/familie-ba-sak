@@ -27,6 +27,7 @@ class BehandlingService(
         private val fagsakService: FagsakService,
         private val integrasjonTjeneste: IntegrasjonTjeneste
 ) {
+
     fun nyBehandling(fødselsnummer: String,
                      behandlingType: BehandlingType,
                      journalpostID: String?,
@@ -39,7 +40,8 @@ class BehandlingService(
         }
         fagsakService.lagreFagsak(fagsak)
 
-        val behandling = Behandling(fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
+        val behandling =
+                Behandling(fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
         lagreBehandling(behandling)
 
         return behandling
@@ -154,9 +156,11 @@ class BehandlingService(
         vedtakRepository.save(vedtak)
     }
 
-    fun nyttVedtakForAktivBehandling(fagsakId: Long, nyttVedtak: NyttVedtak, ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
+    fun nyttVedtakForAktivBehandling(fagsakId: Long,
+                                     nyttVedtak: NyttVedtak,
+                                     ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
         val behandling = hentBehandlingHvisEksisterer(fagsakId)
-                ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+                         ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
 
         if (nyttVedtak.barnasBeregning.isEmpty()) {
             throw Error("Fant ingen barn på behandlingen og kan derfor ikke opprette nytt vedtak")
@@ -172,15 +176,19 @@ class BehandlingService(
         vedtak.stønadBrevMarkdown = Result.runCatching { dokGenService.hentStønadBrevMarkdown(vedtak) }
                 .fold(
                         onSuccess = { it },
-                        onFailure = { e -> return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.", e) }
+                        onFailure = { e ->
+                            return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
+                                                   e)
+                        }
                 )
 
         lagreVedtak(vedtak)
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
         nyttVedtak.barnasBeregning.map {
-            val barn = personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer), personopplysningGrunnlagId = personopplysningGrunnlag?.id)
-                    ?: return Ressurs.failure("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
+            val barn = personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
+                                                                                     personopplysningGrunnlagId = personopplysningGrunnlag?.id)
+                       ?: return Ressurs.failure("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
             if (it.stønadFom.isBefore(barn.fødselsdato)) {
                 return Ressurs.failure("Ugyldig fra og med dato", Exception("Ugyldig fra og med dato for ${barn.fødselsdato}"))
@@ -202,7 +210,7 @@ class BehandlingService(
 
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
         val vedtak = hentAktivVedtakForBehandling(behandlingId)
-                ?: return Ressurs.failure("Behandling ikke funnet")
+                     ?: return Ressurs.failure("Behandling ikke funnet")
         val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(vedtak.stønadBrevMarkdown) }
                 .fold(
                         onSuccess = { it },
@@ -221,12 +229,12 @@ class BehandlingService(
             LOG.debug("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
             dokGenService.lagPdfFraMarkdown(markdown)
         }
-            .fold(
-                onSuccess = { it },
-                onFailure = {
-                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${vedtak.id}", it)
-                }
-            )
+                .fold(
+                        onSuccess = { it },
+                        onFailure = {
+                            throw Exception("Klarte ikke å hente PDF for vedtak med id ${vedtak.id}", it)
+                        }
+                )
     }
 
     companion object {

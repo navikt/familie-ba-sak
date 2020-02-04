@@ -38,7 +38,7 @@ class AvstemMotOppdragTest {
 
     @Test
     fun skalBeregneNesteAvstemmingForSammenhengendeHelligdag() {
-        val førsteJuledag = LocalDate.of(2019, 12,25)
+        val førsteJuledag = LocalDate.of(2019, 12, 25)
 
         val testDto = avstemMotOppdrag.nesteAvstemmingDTO(førsteJuledag, 1)
 
@@ -79,7 +79,9 @@ class AvstemMotOppdragTest {
     @Test
     fun skalLageNyAvstemmingstaskEtterJobb() {
         val iDag = LocalDate.of(2020, 1, 15).atStartOfDay()
-        val testTask = Task.nyTaskMedTriggerTid(AvstemMotOppdrag.TASK_STEP_TYPE, objectMapper.writeValueAsString(AvstemmingTaskDTO(iDag.minusDays(1), iDag)), iDag.toLocalDate().atTime(8,0))
+        val testTask = Task.nyTaskMedTriggerTid(AvstemMotOppdrag.TASK_STEP_TYPE,
+                                                objectMapper.writeValueAsString(AvstemmingTaskDTO(iDag.minusDays(1), iDag)),
+                                                iDag.toLocalDate().atTime(8, 0))
         val slot = slot<Task>()
         every { taskRepositoryMock.save(any()) } returns testTask
 
@@ -87,7 +89,7 @@ class AvstemMotOppdragTest {
 
         verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
         assertEquals(AvstemMotOppdrag.TASK_STEP_TYPE, slot.captured.taskStepType)
-        assertEquals(iDag.plusDays(1).toLocalDate().atTime(8, 0 ), slot.captured.triggerTid)
+        assertEquals(iDag.plusDays(1).toLocalDate().atTime(8, 0), slot.captured.triggerTid)
         val taskDTO = objectMapper.readValue(slot.captured.payload, AvstemmingTaskDTO::class.java)
         assertEquals(taskDTO.fomDato, iDag)
         assertEquals(taskDTO.tomDato, iDag.plusDays(1))
