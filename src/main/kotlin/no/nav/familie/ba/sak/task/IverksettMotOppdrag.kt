@@ -33,7 +33,7 @@ class IverksettMotOppdrag(
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         val behandling = behandlingService.hentBehandling(iverksettingTask.behandlingsId)
         Assert.notNull(behandling, "Skal iverksette mot økonomi, men finner ikke behandling med id ${iverksettingTask.behandlingsId}.")
-        Assert.isTrue(behandling?.status == BehandlingStatus.OPPRETTET, "Skal iverksette mot økonomi, men behandlingen har ${behandling?.status}.")
+        Assert.isTrue(behandling?.status == BehandlingStatus.SENDT_TIL_IVERKSETTING, "Skal iverksette mot økonomi, men behandlingen har status ${behandling?.status}.")
 
         LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag gikk OK")
 
