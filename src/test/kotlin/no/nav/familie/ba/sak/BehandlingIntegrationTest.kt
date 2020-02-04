@@ -153,7 +153,7 @@ class BehandlingIntegrationTest(
     @Tag("integration")
     fun `Ikke opprett ny behandling hvis fagsaken har en behandling som ikke er iverksatt`() {
         val saksnr = lagRandomSaksnummer()
-        behandlingService.nyBehandling("6", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", saksnr)
-        Assertions.assertThrows(Exception::class.java) { behandlingService.nyBehandling("6", BehandlingType.REVURDERING, "sdf", saksnr) }
+        behandlingService.nyBehandling("7", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", saksnr)
+        Assertions.assertThrows(Exception::class.java) { behandlingService.nyBehandling("7", BehandlingType.REVURDERING, "sdf", saksnr) }
     }
 }
