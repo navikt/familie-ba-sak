@@ -107,14 +107,6 @@ class BehandlingIntegrationTest(
 
     @Test
     @Tag("integration")
-    fun `Ikke opprett ny behandling hvis fagsaken har en behandling som ikke er iverksatt`() {
-        val saksnr = lagRandomSaksnummer()
-        behandlingService.nyBehandling("3", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", saksnr)
-        Assertions.assertThrows(Exception::class.java) { behandlingService.nyBehandling("3", BehandlingType.REVURDERING, "sdf", saksnr) }
-    }
-
-    @Test
-    @Tag("integration")
     fun `Opprett nytt behandling vedtak på aktiv behandling`() {
         val behandling = behandlingService.nyBehandling("4", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -155,5 +147,13 @@ class BehandlingIntegrationTest(
         val htmlvedtaksbrevRess = behandlingService.hentHtmlVedtakForBehandling(behandling.id!!)
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
         assert(htmlvedtaksbrevRess.data!! == "<HTML>HTML_MOCKUP</HTML>")
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Ikke opprett ny behandling hvis fagsaken har en behandling som ikke er iverksatt`() {
+        val saksnr = lagRandomSaksnummer()
+        behandlingService.nyBehandling("6", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", saksnr)
+        Assertions.assertThrows(Exception::class.java) { behandlingService.nyBehandling("6", BehandlingType.REVURDERING, "sdf", saksnr) }
     }
 }
