@@ -35,16 +35,7 @@ class IntegrasjonTjenesteTest : HttpTestBase(18085) {
     @Test
     @Tag("integration")
     fun `Iverksett vedtak på aktiv behandling`() {
-        val mockJournalpostForVedtakId = "453491843"
-        val responseBody = Ressurs.success(ArkiverDokumentResponse(mockJournalpostForVedtakId, true))
-        val mockFnr = "12345678910"
-        val mockPdf = "mock data".toByteArray()
-        val response: MockResponse = MockResponse()
-                .addHeader("Content-Type", "application/json; charset=utf-8")
-                .setResponseCode(201)
-                .setBody(objectMapper.writeValueAsString(responseBody))
-
-        mockServer.enqueue(response)
+        mockServer.enqueue(journalpostOkResponse())
         val journalPostId = integrasjonTjeneste.lagerJournalpostForVedtaksbrev(mockFnr, mockPdf)
 
         assertThat(mockJournalpostForVedtakId).isEqualTo(journalPostId)
@@ -61,5 +52,46 @@ class IntegrasjonTjenesteTest : HttpTestBase(18085) {
         assertThat(FilType.PDFA).isEqualTo(arkiverDokumentRequest.dokumenter[0].filType)
         assertThat(arkiverDokumentRequest.dokumenter[0].dokument).isEqualTo(mockPdf)
         assertThat(mockJournalpostForVedtakId).isEqualTo(journalPostId)
+    }
+
+    private fun journalpostOkResponse(): MockResponse {
+        val responseBody = Ressurs.success(ArkiverDokumentResponse(mockJournalpostForVedtakId, true))
+        return mockResponse.setResponseCode(201).setBody(objectMapper.writeValueAsString(responseBody))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `distribuerVedtaksbrev`() {
+        mockServer.enqueue(distribusjonOkResponse())
+        assertDoesNotThrow { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+
+        mockServer.enqueue(blankResponse())
+        assertThrows<IllegalArgumentException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+
+        mockServer.enqueue(failureResponse())
+        assertThrows<IllegalArgumentException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+
+        mockServer.enqueue(non2xxResponse())
+        assertThrows<IntegrasjonException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+    }
+
+    private fun distribusjonOkResponse() = mockResponse.setResponseCode(200)
+        .setBody(objectMapper.writeValueAsString(Ressurs.success("1234567")))
+
+    private fun blankResponse() = mockResponse.setResponseCode(200)
+        .setBody(objectMapper.writeValueAsString(Ressurs.success("")))
+
+    private fun failureResponse() = mockResponse.setResponseCode(200)
+        .setBody(objectMapper.writeValueAsString(Ressurs.failure<Any>("")))
+
+    private fun non2xxResponse() = mockResponse.setResponseCode(400)
+
+
+    companion object {
+        val mockJournalpostForVedtakId = "453491843"
+        val mockFnr = "12345678910"
+        val mockPdf = "mock data".toByteArray()
+        val mockResponse: MockResponse = MockResponse()
+            .addHeader("Content-Type", "application/json; charset=utf-8")
     }
 }
