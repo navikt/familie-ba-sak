@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
@@ -16,6 +17,7 @@ import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
+import java.lang.RuntimeException
 import java.net.URI
 
 @Service
@@ -31,6 +33,16 @@ class DokGenService(
     }
 
     private fun mapTilBrevfelter(vedtak: Vedtak): String {
+        if(vedtak.resultat== VedtakResultat.INNVILGET){
+            return mapTilInnvilgetBrevFelter(vedtak)
+        }else if(vedtak.resultat== VedtakResultat.AVSLÅTT){
+            return mapTilAvslagBrevFelter(vedtak)
+        }
+
+        throw RuntimeException("Invalid/unsupported vedtak.resultat")
+    }
+
+    private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String{
         val brevfelter = "{\"belop\": %s,\n" + // TODO hent fra dokgen (/template/{templateName}/schema)
                          "\"startDato\": \"%s\",\n" +
                          "\"etterbetaling\": %s,\n" +
@@ -50,6 +62,21 @@ class DokGenService(
                 vedtak.behandling.fagsak.personIdent.ident,
                 "24.12.19",
                 vedtak.ansvarligSaksbehandler
+        )
+    }
+
+    private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String{
+        val brevfelter = "{\"fodselsnummer\": \"%s\",\n" +
+                         "\"navn\": \"%s\",\n" +
+                         "\"hjemmel\": \"%s\",\n" +
+                         "\"fritekst\": \"%s\"}"
+
+        return String.format( //TODO: sett navn, hjemmel og firtekst
+                brevfelter,
+                vedtak.behandling.fagsak.personIdent.ident,
+                "No Name",
+                "",
+                ""
         )
     }
 
