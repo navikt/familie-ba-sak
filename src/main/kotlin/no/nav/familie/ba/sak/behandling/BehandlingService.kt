@@ -18,16 +18,14 @@ import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
 @Service
-class BehandlingService(
-        private val behandlingRepository: BehandlingRepository,
-        private val vedtakRepository: VedtakRepository,
-        private val vedtakBarnRepository: VedtakBarnRepository,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val personRepository: PersonRepository,
-        private val dokGenService: DokGenService,
-        private val fagsakService: FagsakService,
-        private val integrasjonTjeneste: IntegrasjonTjeneste
-) {
+class BehandlingService(private val behandlingRepository: BehandlingRepository,
+                        private val vedtakRepository: VedtakRepository,
+                        private val vedtakBarnRepository: VedtakBarnRepository,
+                        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+                        private val personRepository: PersonRepository,
+                        private val dokGenService: DokGenService,
+                        private val fagsakService: FagsakService,
+                        private val integrasjonTjeneste: IntegrasjonTjeneste) {
 
     fun nyBehandling(fødselsnummer: String,
                      behandlingType: BehandlingType,

@@ -9,6 +9,8 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -19,11 +21,11 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
-class MottakController(
-        private val oidcUtil: OIDCUtil,
-        private val behandlingService: BehandlingService,
-        private val fagsakService: FagsakService
-) {
+class MottakController(private val oidcUtil: OIDCUtil,
+                       private val behandlingService: BehandlingService,
+                       private val fagsakService: FagsakService) {
+
+    val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping(path = ["/behandling/opprett"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
@@ -38,6 +40,7 @@ class MottakController(
         return Result.runCatching { behandlingService.opprettBehandling(nyBehandling) }
                 .fold(
                         onFailure = {
+                            logger.info("Opprettelse av behandling feilet", it)
                             ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                     .body(Ressurs.failure("Opprettelse av behandling feilet", it))
                         },
