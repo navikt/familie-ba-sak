@@ -167,9 +167,7 @@ class IntegrasjonTjeneste(
     private inline fun <reified T> assertGenerelleSuksessKriterier(it: ResponseEntity<Ressurs<T>>) {
         Assert.notNull(it.body, "Finner ikke ressurs")
         Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS,
-                      String.format("Ressurs returnerer %s men har http status kode %s",
-                                    it.body?.status,
-                                    it.statusCode))
+            "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}")
     }
 
     companion object {

@@ -59,16 +59,28 @@ class IntegrasjonTjenesteTest : HttpTestBase(18085) {
 
     @Test
     @Tag("integration")
-    fun `distribuerVedtaksbrev`() {
+    fun `distribuerVedtaksbrev returnerer normalt ved vellykket integrasjonskall`() {
         mockServer.enqueue(distribusjonOkResponse())
         assertDoesNotThrow { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+    }
 
+    @Test
+    @Tag("integration")
+    fun `distribuerVedtaksbrev kaster exception hvis integrasjoner gir blank response`() {
         mockServer.enqueue(blankResponse())
         assertThrows<IllegalArgumentException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+    }
 
+    @Test
+    @Tag("integration")
+    fun `distribuerVedtaksbrev kaster exception hvis integrasjoner gir failure response`() {
         mockServer.enqueue(failureResponse())
         assertThrows<IllegalArgumentException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+    }
 
+    @Test
+    @Tag("integration")
+    fun `distribuerVedtaksbrev kaster exception hvis responsekoden ikke er 2xx`() {
         mockServer.enqueue(non2xxResponse())
         assertThrows<IntegrasjonException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
     }
