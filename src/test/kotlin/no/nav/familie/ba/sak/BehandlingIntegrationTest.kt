@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
+import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -54,15 +55,17 @@ class BehandlingIntegrationTest(@Autowired
     @Test
     @Tag("integration")
     fun `Kjør flyway migreringer og sjekk at behandlingslagerservice klarer å lese å skrive til postgresql`() {
-        val behandling = behandlingService.nyBehandling("1", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
-        Assertions.assertEquals(1, behandlingService.hentBehandlinger(behandling.fagsak.id).size)
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
+        behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
+        Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
 
     @Test
     @Tag("integration")
     @Transactional
     fun `Opprett behandling og legg til personer`() {
-        val behandling = behandlingService.nyBehandling("1", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
         val søker = Person(personIdent = PersonIdent("1"),
@@ -87,7 +90,8 @@ class BehandlingIntegrationTest(@Autowired
     @Test
     @Tag("integration")
     fun `Opprett behandling vedtak`() {
-        val behandling = behandlingService.nyBehandling("2", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("2")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
@@ -103,7 +107,8 @@ class BehandlingIntegrationTest(@Autowired
     @Test
     @Tag("integration")
     fun `Opprett 2 behandling vedtak og se at det siste vedtaket får aktiv satt til true`() {
-        val behandling = behandlingService.nyBehandling("3", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("3")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
@@ -126,7 +131,8 @@ class BehandlingIntegrationTest(@Autowired
     @Test
     @Tag("integration")
     fun `Opprett nytt behandling vedtak på aktiv behandling`() {
-        val behandling = behandlingService.nyBehandling("4", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("4")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
@@ -162,7 +168,8 @@ class BehandlingIntegrationTest(@Autowired
     @Test
     @Tag("integration")
     fun `Hent HTML vedtaksbrev'`() {
-        val behandling = behandlingService.nyBehandling("5", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("5")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
 
@@ -180,17 +187,20 @@ class BehandlingIntegrationTest(@Autowired
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
         assert(htmlvedtaksbrevRess.data!! == "<HTML>HTML_MOCKUP</HTML>")
     }
-
+/* må skrives ny test
     @Test
     @Tag("integration")
     fun `Ikke opprett ny behandling hvis fagsaken har en behandling som ikke er iverksatt`() {
         val saksnr = lagRandomSaksnummer()
-        behandlingService.nyBehandling("7", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", saksnr)
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("7")
+        behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, saksnr)
         Assertions.assertThrows(Exception::class.java) {
-            behandlingService.nyBehandling("7",
-                                           BehandlingType.REVURDERING,
-                                           "sdf",
-                                           saksnr)
+            behandlingService.opprettEllerOppdaterBehandling(NyBehandling("7",
+                                                                          BehandlingType.REVURDERING,
+                                                             "sdf",
+                                                                          saksnr)
         }
     }
+*/
+
 }

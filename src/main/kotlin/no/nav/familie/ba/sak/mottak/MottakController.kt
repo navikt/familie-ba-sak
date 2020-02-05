@@ -28,7 +28,7 @@ class MottakController(private val oidcUtil: OIDCUtil,
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping(path = ["/behandling/opprett"])
-    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
+    fun opprettEllerOppdaterBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = try {
             oidcUtil.getClaim("preferred_username") ?: "VL"
         } catch (e: JwtTokenValidatorException) {
@@ -37,7 +37,7 @@ class MottakController(private val oidcUtil: OIDCUtil,
 
         FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
 
-        return Result.runCatching { behandlingService.opprettBehandling(nyBehandling) }
+        return Result.runCatching { behandlingService.opprettEllerOppdaterBehandling(nyBehandling) }
                 .fold(
                         onFailure = {
                             logger.info("Opprettelse av behandling feilet", it)

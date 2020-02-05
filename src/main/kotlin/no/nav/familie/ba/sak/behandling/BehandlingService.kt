@@ -27,62 +27,69 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakService: FagsakService,
                         private val integrasjonTjeneste: IntegrasjonTjeneste) {
 
-    fun nyBehandling(fødselsnummer: String,
-                     behandlingType: BehandlingType,
-                     journalpostID: String?,
-                     saksnummer: String): Behandling {
+    @Transactional
+    fun opprettEllerOppdaterBehandling(nyBehandling: NyBehandling): Fagsak {
+        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
 
-        val personIdent = PersonIdent(fødselsnummer)
-        val fagsak = when (val it = fagsakService.hentFagsakForPersonident(personIdent)) {
-            null -> Fagsak(null, AktørId("1"), personIdent)
-            else -> it
+        val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
+
+        if (aktivBehandling != null) {
+            if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
+                leggTilBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, aktivBehandling)
+            } else if (aktivBehandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG || aktivBehandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
+                throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
+            }
+        } else {
+            val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
+            leggTilSøkerIPersonopplysningsgrunnlaget(nyBehandling, behandling)
         }
+
+        return fagsak
+    }
+
+    fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
+        val personIdent = PersonIdent(fødselsnummer)
+        val fagsak = fagsakService.hentFagsakForPersonident(personIdent) ?: Fagsak(null, AktørId("1"), personIdent)
         fagsakService.lagreFagsak(fagsak)
+        return fagsak
+    }
 
-        val behandling =
-                Behandling(fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
+    fun opprettNyBehandlingPåFagsak(fagsak: Fagsak, journalpostID: String?, behandlingType: BehandlingType, saksnummer: String): Behandling {
+        val behandling = Behandling(fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
         lagreBehandling(behandling)
-
         return behandling
     }
 
-    private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
-
-    @Transactional
-    fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
-        val behandling = nyBehandling(
-                fødselsnummer = nyBehandling.fødselsnummer,
-                behandlingType = nyBehandling.behandlingType,
-                journalpostID = nyBehandling.journalpostID,
-                // Saksnummer byttes ut med gsaksnummer senere
-                saksnummer = ThreadLocalRandom.current()
-                        .ints(STRING_LENGTH.toLong(), 0, charPool.size)
-                        .asSequence()
-                        .map(charPool::get)
-                        .joinToString(""))
-
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+    private fun leggTilSøkerIPersonopplysningsgrunnlaget(nyBehandling: NyBehandling, behandling: Behandling) {
+        val grunnlag = PersonopplysningGrunnlag(behandling.id)
 
         val søker = Person(
                 personIdent = behandling.fagsak.personIdent,
                 type = PersonType.SØKER,
-                personopplysningGrunnlag = personopplysningGrunnlag,
+                personopplysningGrunnlag = grunnlag,
                 fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
         )
-        personopplysningGrunnlag.leggTilPerson(søker)
+        grunnlag.leggTilPerson(søker)
 
-        nyBehandling.barnasFødselsnummer.map {
-            personopplysningGrunnlag.leggTilPerson(Person(
+        leggTilBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, behandling)
+        grunnlag.aktiv = true
+        personopplysningGrunnlagRepository.save(grunnlag)
+    }
+
+    private fun leggTilBarnIPersonopplysningsgrunnlaget(barnasFødselsnummer: Array<String>, behandling: Behandling) {
+        val grunnlag = PersonopplysningGrunnlag(behandling.id)
+
+        barnasFødselsnummer.map {
+            grunnlag.leggTilPerson(Person(
                     personIdent = PersonIdent(it),
                     type = PersonType.BARN,
-                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    personopplysningGrunnlag = grunnlag,
                     fødselsdato = integrasjonTjeneste.hentPersoninfoFor(it)?.fødselsdato
             ))
         }
-        personopplysningGrunnlag.aktiv = true
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        return behandling.fagsak
+        grunnlag.aktiv = true
+        personopplysningGrunnlagRepository.save(grunnlag)
     }
 
     fun hentBehandlingHvisEksisterer(fagsakId: Long?): Behandling? {
@@ -105,9 +112,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val aktivBehandling = hentBehandlingHvisEksisterer(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
-            if (aktivBehandling.status != BehandlingStatus.IVERKSATT) {
-                throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
-            }
             aktivBehandling.aktiv = false
             behandlingRepository.save(aktivBehandling)
         }
@@ -236,7 +240,16 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 )
     }
 
+    private fun randomSaksnummer(): String {
+        return ThreadLocalRandom.current()
+                .ints(STRING_LENGTH.toLong(), 0, charPool.size)
+                .asSequence()
+                .map(charPool::get)
+                .joinToString("")
+    }
+
     companion object {
+        val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
         const val STRING_LENGTH = 10
         val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
