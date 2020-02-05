@@ -23,10 +23,9 @@ import java.time.LocalDate
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-dokgen-negative")
 @Tag("integration")
-class BehandlingNegativeIntegrationTest (
-        @Autowired
-        private var behandlingService: BehandlingService
-        ){
+class BehandlingNegativeIntegrationTest(@Autowired
+                                        private val behandlingService: BehandlingService) {
+
     @Test
     @Tag("integration")
     fun `Hent HTML vedtaksbrev Negative'`() {
@@ -39,11 +38,15 @@ class BehandlingNegativeIntegrationTest (
 
         behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyttVedtak = NyttVedtak("sakstype", arrayOf(BarnBeregning(fødselsnummer = "123456789011", beløp = 1054, stønadFom = LocalDate.now())), resultat = VedtakResultat.INNVILGET),
+                nyttVedtak = NyttVedtak("sakstype",
+                                        arrayOf(BarnBeregning(fødselsnummer = "123456789011",
+                                                              beløp = 1054,
+                                                              stønadFom = LocalDate.now())),
+                                        resultat = VedtakResultat.INNVILGET),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val htmlRess= behandlingService.hentHtmlVedtakForBehandling(behandling.id!!)
-        assert(htmlRess.status== Ressurs.Status.FEILET)
+        val htmlRess = behandlingService.hentHtmlVedtakForBehandling(behandling.id!!)
+        assert(htmlRess.status == Ressurs.Status.FEILET)
     }
 }

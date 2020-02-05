@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class Beregning {
+
     fun beregnUtbetalingsperioder(barna: List<VedtakBarn>): LocalDateTimeline<Int> {
         val tidslinjer = barna.map {
             val segmenter = mutableListOf<LocalDateSegment<Int>>()
@@ -22,9 +23,11 @@ class Beregning {
         }
 
         return tidslinjer.reduce(
-            fun (sammenlagtTidslinje: LocalDateTimeline<Int>, tidslinje: LocalDateTimeline<Int>): LocalDateTimeline<Int> {
-                return sammenlagtTidslinje.combine(tidslinje, StandardCombinators::sum, LocalDateTimeline.JoinStyle.CROSS_JOIN)
-            }
+                fun(sammenlagtTidslinje: LocalDateTimeline<Int>, tidslinje: LocalDateTimeline<Int>): LocalDateTimeline<Int> {
+                    return sammenlagtTidslinje.combine(tidslinje,
+                                                       StandardCombinators::sum,
+                                                       LocalDateTimeline.JoinStyle.CROSS_JOIN)
+                }
         )
     }
 }

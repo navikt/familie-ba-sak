@@ -12,6 +12,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.util.Assert
@@ -23,17 +24,22 @@ class IverksettMotOppdrag(
         private val økonomiService: ØkonomiService,
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
+
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         LOG.debug("Iverksetter vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag")
-        økonomiService.iverksettVedtak(iverksettingTask.behandlingsId, iverksettingTask.vedtaksId, iverksettingTask.saksbehandlerId)
+        økonomiService.iverksettVedtak(iverksettingTask.behandlingsId,
+                                       iverksettingTask.vedtaksId,
+                                       iverksettingTask.saksbehandlerId)
     }
 
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         val behandling = behandlingService.hentBehandling(iverksettingTask.behandlingsId)
-        Assert.notNull(behandling, "Skal iverksette mot økonomi, men finner ikke behandling med id ${iverksettingTask.behandlingsId}.")
-        Assert.isTrue(behandling?.status == BehandlingStatus.SENDT_TIL_IVERKSETTING, "Skal iverksette mot økonomi, men behandlingen har status ${behandling?.status}.")
+        Assert.notNull(behandling,
+                       "Skal iverksette mot økonomi, men finner ikke behandling med id ${iverksettingTask.behandlingsId}.")
+        Assert.isTrue(behandling?.status == BehandlingStatus.SENDT_TIL_IVERKSETTING,
+                      "Skal iverksette mot økonomi, men behandlingen har status ${behandling?.status}.")
 
         LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag gikk OK")
 
@@ -52,6 +58,6 @@ class IverksettMotOppdrag(
 
     companion object {
         const val TASK_STEP_TYPE = "iverksettMotOppdrag"
-        val LOG = LoggerFactory.getLogger(IverksettMotOppdrag::class.java)
+        val LOG: Logger = LoggerFactory.getLogger(IverksettMotOppdrag::class.java)
     }
 }

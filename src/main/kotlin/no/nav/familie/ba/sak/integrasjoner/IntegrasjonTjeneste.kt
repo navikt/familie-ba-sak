@@ -37,6 +37,7 @@ class IntegrasjonTjeneste(
         clientConfigurationProperties: ClientConfigurationProperties,
         oAuth2AccessTokenService: OAuth2AccessTokenService
 ) : BaseService(OAUTH2_CLIENT_CONFIG_KEY, restTemplateBuilderMedProxy, clientConfigurationProperties, oAuth2AccessTokenService) {
+
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentAktørId(personident: String?): AktørId? {
         if (personident == null || personident.isEmpty()) {
@@ -106,40 +107,48 @@ class IntegrasjonTjeneste(
         return try {
             val response = restOperations.exchange<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, HttpMethod.GET, httpEntity)
             val data = response.body?.data
-            data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt", null, uri, personident)
+            data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
+                                               null,
+                                               uri,
+                                               personident)
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri, personident)
         }
     }
 
-    fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String{
+    fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String {
         val uri = URI.create("$integrasjonerServiceUri/arkiv/v1")
-        logger.info("Sender vedtak pdf til DokArkiv: ${uri}");
+        logger.info("Sender vedtak pdf til DokArkiv: $uri")
 
-        return Result.runCatching{
+        return Result.runCatching {
             val dokumenter = listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, dokumentType = VEDTAK_DOKUMENT_TYPE))
             val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, "140258931", "9999")
             val arkiverDokumentResponse = sendJournalFørRequest(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(
-            onSuccess = {
-                Assert.notNull(it.body, "Finner ikke ressurs")
-                Assert.notNull(it.body?.data, "Ressurs mangler data")
-                Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS, String.format("Ressurs returnerer %s men har http status kode %s",
-                        it.body?.status,
-                        it.statusCode))
+                onSuccess = {
+                    Assert.notNull(it.body, "Finner ikke ressurs")
+                    Assert.notNull(it.body?.data, "Ressurs mangler data")
+                    Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS,
+                                  String.format("Ressurs returnerer %s men har http status kode %s",
+                                                it.body?.status,
+                                                it.statusCode))
 
-                val arkiverDokumentResponse = objectMapper.convertValue<ArkiverDokumentResponse>(it.body?.data, ArkiverDokumentResponse::class.java)
-                Assert.isTrue(arkiverDokumentResponse.ferdigstilt, "Klarte ikke ferdigstille journalpost med id ${arkiverDokumentResponse.journalpostId}")
-                arkiverDokumentResponse.journalpostId
-            },
-            onFailure = {
-                throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost.", it, uri, fnr)
-            }
+                    val arkiverDokumentResponse =
+                            objectMapper.convertValue<ArkiverDokumentResponse>(it.body?.data, ArkiverDokumentResponse::class.java)
+                    Assert.isTrue(arkiverDokumentResponse.ferdigstilt,
+                                  "Klarte ikke ferdigstille journalpost med id ${arkiverDokumentResponse.journalpostId}")
+                    arkiverDokumentResponse.journalpostId
+                },
+                onFailure = {
+                    throw IntegrasjonException("Kall mot integrasjon feilet ved lager journalpost.", it, uri, fnr)
+                }
         )
     }
 
-    private fun sendJournalFørRequest(journalFørEndpoint: URI, arkiverDokumentRequest: ArkiverDokumentRequest): ResponseEntity<Ressurs<ArkiverDokumentResponse>> {
+    private fun sendJournalFørRequest(journalFørEndpoint: URI,
+                                      arkiverDokumentRequest: ArkiverDokumentRequest)
+            : ResponseEntity<Ressurs<ArkiverDokumentResponse>> {
         val headers = HttpHeaders()
         headers.add("Content-Type", "application/json;charset=UTF-8")
         headers.acceptCharset = listOf(Charsets.UTF_8)

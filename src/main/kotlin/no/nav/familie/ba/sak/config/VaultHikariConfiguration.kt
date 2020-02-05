@@ -30,7 +30,7 @@ class VaultHikariConfig(private val container: SecretLeaseContainer,
     }
 
     override fun toString(): String {
-        return javaClass.simpleName + " [container=" + container + ", hikariDataSource=" + hikariDataSource + ", props=" + props + "]"
+        return "${javaClass.simpleName} [container=$container, hikariDataSource=$hikariDataSource, props=$props]"
     }
 
     companion object {

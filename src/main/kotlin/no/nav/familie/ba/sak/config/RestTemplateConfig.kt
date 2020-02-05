@@ -13,6 +13,7 @@ import java.time.Duration
 @Configuration
 @Profile("!dev")
 class RestTemplateConfig {
+
     @Bean
     fun restTemplate(): RestTemplate {
         return RestTemplate(listOf(StringHttpMessageConverter(StandardCharsets.UTF_8), ByteArrayHttpMessageConverter()))

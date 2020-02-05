@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -22,6 +23,6 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient) {
     }
 
     companion object {
-        val LOG = LoggerFactory.getLogger(AvstemmingService::class.java)
+        val LOG: Logger = LoggerFactory.getLogger(AvstemmingService::class.java)
     }
 }

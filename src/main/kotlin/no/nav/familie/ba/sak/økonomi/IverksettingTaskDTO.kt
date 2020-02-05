@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.task.DefaultTaskDTO
 
-class IverksettingTaskDTO (
+class IverksettingTaskDTO(
         val behandlingsId: Long,
         val vedtaksId: Long,
         val saksbehandlerId: String,
         personIdent: String
-): DefaultTaskDTO(personIdent)
+) : DefaultTaskDTO(personIdent)
 
-val FAGSYSTEM = "BA"
+const val FAGSYSTEM = "BA"

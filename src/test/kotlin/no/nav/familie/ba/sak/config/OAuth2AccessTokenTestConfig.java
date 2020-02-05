@@ -19,7 +19,10 @@ public class OAuth2AccessTokenTestConfig {
     @Primary
     public OAuth2AccessTokenService oAuth2AccessTokenServiceMock() {
         OAuth2AccessTokenService tokenMockService = Mockito.mock(OAuth2AccessTokenService.class);
-        when(tokenMockService.getAccessToken(any())).thenReturn(new OAuth2AccessTokenResponse("Mock-token-response", 60, 60, null));
+        when(tokenMockService.getAccessToken(any())).thenReturn(new OAuth2AccessTokenResponse("Mock-token-response",
+                                                                                              60,
+                                                                                              60,
+                                                                                              null));
         return tokenMockService;
     }
 }
