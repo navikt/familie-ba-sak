@@ -38,6 +38,7 @@ data class Behandling(
 enum class BehandlingType {
     FØRSTEGANGSBEHANDLING,
     REVURDERING,
+    MIGRERING,
     KLAGE,
 }
 

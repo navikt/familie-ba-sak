@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.task.StatusFraOppdrag.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.økonomi.OppdragProtokollStatus
 import no.nav.familie.ba.sak.økonomi.StatusFraOppdragDTO
@@ -31,6 +32,8 @@ class StatusFraOppdrag(
      */
     override fun doTask(task: Task) {
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
+        val behandling = behandlingService.hentBehandling(statusFraOppdragDTO.behandlingsId)
+
         Result.runCatching { økonomiService.hentStatus(statusFraOppdragDTO) }
                 .onFailure { throw it }
                 .onSuccess {
@@ -50,7 +53,10 @@ class StatusFraOppdrag(
                                 statusFraOppdragDTO.behandlingsId,
                                 BehandlingStatus.IVERKSATT
                         )
-                        opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId, task)
+
+                        if (behandling?.type != BehandlingType.MIGRERING) {
+                            opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId, task)
+                        }
                     }
                 }
     }
