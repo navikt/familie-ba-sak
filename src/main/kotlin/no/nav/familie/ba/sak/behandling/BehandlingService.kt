@@ -33,15 +33,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
-        if (aktivBehandling != null) {
-            if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
-                leggTilBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, aktivBehandling)
-            } else if (aktivBehandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG || aktivBehandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
-                throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
-            }
-        } else {
+        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
             leggTilSøkerIPersonopplysningsgrunnlaget(nyBehandling, behandling)
+        } else  if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
+            leggTilBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, aktivBehandling)
+        } else {
+            throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
         }
 
         return fagsak
