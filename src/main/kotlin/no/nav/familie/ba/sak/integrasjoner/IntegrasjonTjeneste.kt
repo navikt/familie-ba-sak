@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.arkivering.Dokument
 import no.nav.familie.kontrakter.felles.arkivering.FilType
+import no.nav.familie.kontrakter.felles.distribusjon.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
@@ -19,6 +20,7 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.*
+import org.springframework.http.RequestEntity.post
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -73,29 +75,6 @@ class IntegrasjonTjeneste(
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String): String {
-        return lagerJournalpostForVedtaksbrev(fnr, pdf)
-    }
-
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun distribuerVedtaksbrev(journalpostId: String) {
-        val uri = URI.create("$integrasjonerServiceUri/dist/v1/$journalpostId")
-        val request = RequestEntity<Any>(HttpMethod.GET, uri)
-        logger.info("Kaller dokdist-tjeneste med journalpostId $journalpostId")
-        return try {
-            val response = restOperations.exchange(request, typeReference<Ressurs<String>>())
-            val bestillingsId: String = response.body?.data.orEmpty()
-            if (bestillingsId.isEmpty()) {
-                throw IntegrasjonException("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
-            } else {
-                logger.info("Distribusjon av vedtaksbrev bestilt. BestillingsId:  $bestillingsId")
-            }
-        } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved distribusjon av vedtaksbrev", e, uri, "")
-        }
-    }
-
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentBehandlendeEnhetForPersonident(personident: String): List<Arbeidsfordelingsenhet> {
         val uri = URI.create("$integrasjonerServiceUri/arbeidsfordeling/enhet/BAR")
 
@@ -116,23 +95,43 @@ class IntegrasjonTjeneste(
         }
     }
 
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String): String {
+        return lagerJournalpostForVedtaksbrev(fnr, pdf)
+    }
+
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    fun distribuerVedtaksbrev(journalpostId: String) {
+        val uri = URI.create("$integrasjonerServiceUri/dist/v1")
+        logger.info("Kaller dokdist-tjeneste med journalpostId $journalpostId")
+
+        Result.runCatching{
+            sendDistribusjonRequest(uri, DistribuerJournalpostRequest(journalpostId, "BA", "familie-ba-sak"))
+        }.fold(
+            onSuccess = {
+                assertGenerelleSuksessKriterier(it)
+                Assert.hasText(it.body?.data, "BestillingsId fra integrasjonstjenesten mot dokdist er tom")
+                logger.info("Distribusjon av vedtaksbrev bestilt. BestillingsId:  $it")
+            },
+             onFailure = {
+                throw IntegrasjonException("Kall mot integrasjon feilet ved distribusjon av vedtaksbrev", it, uri, "")
+            }
+        )
+    }
+
     fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String {
         val uri = URI.create("$integrasjonerServiceUri/arkiv/v1")
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
 
         return Result.runCatching {
-            val dokumenter = listOf(Dokument(pdfByteArray, VEDTAK_FILTYPE, dokumentType = VEDTAK_DOKUMENT_TYPE))
+            val dokumenter = listOf(Dokument(pdfByteArray, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE))
             val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, "140258931", "9999")
             val arkiverDokumentResponse = sendJournalFørRequest(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(
                 onSuccess = {
-                    Assert.notNull(it.body, "Finner ikke ressurs")
+                    assertGenerelleSuksessKriterier(it)
                     Assert.notNull(it.body?.data, "Ressurs mangler data")
-                    Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS,
-                                  String.format("Ressurs returnerer %s men har http status kode %s",
-                                                it.body?.status,
-                                                it.statusCode))
 
                     val arkiverDokumentResponse =
                             objectMapper.convertValue<ArkiverDokumentResponse>(it.body?.data, ArkiverDokumentResponse::class.java)
@@ -157,11 +156,24 @@ class IntegrasjonTjeneste(
         return restOperations.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(arkiverDokumentRequest, headers))
     }
 
+    private fun sendDistribusjonRequest(uri: URI, distribuerJournalpostRequest: DistribuerJournalpostRequest): ResponseEntity<Ressurs<String>> {
+        return restOperations.exchange(post(uri)
+            .acceptCharset(Charsets.UTF_8)
+            .header("Content-Type", "application/json;charset=UTF-8")
+            .header(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+            .body(distribuerJournalpostRequest))
+    }
+
+    private inline fun <reified T> assertGenerelleSuksessKriterier(it: ResponseEntity<Ressurs<T>>) {
+        Assert.notNull(it.body, "Finner ikke ressurs")
+        Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS,
+            "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}")
+    }
+
     companion object {
         private val logger = LoggerFactory.getLogger(IntegrasjonTjeneste::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-        val VEDTAK_FILTYPE = FilType.PDFA
         const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
 
         private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
