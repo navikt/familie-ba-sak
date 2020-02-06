@@ -37,7 +37,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
             leggTilSøkerIPersonopplysningsgrunnlaget(nyBehandling, behandling)
         } else  if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
-            leggTilBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, aktivBehandling)
+            val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
+            leggTilBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, aktivBehandling, grunnlag!!)
         } else {
             throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
         }
@@ -69,14 +70,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         )
         grunnlag.leggTilPerson(søker)
 
-        leggTilBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, behandling)
+        leggTilBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, behandling, grunnlag)
         grunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(grunnlag)
     }
 
-    private fun leggTilBarnIPersonopplysningsgrunnlaget(barnasFødselsnummer: Array<String>, behandling: Behandling) {
-        val grunnlag = PersonopplysningGrunnlag(behandling.id)
-
+    private fun leggTilBarnIPersonopplysningsgrunnlaget(barnasFødselsnummer: Array<String>, behandling: Behandling, grunnlag: PersonopplysningGrunnlag) {
         barnasFødselsnummer.map {
             grunnlag.leggTilPerson(Person(
                     personIdent = PersonIdent(it),
@@ -86,7 +85,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             ))
         }
 
-        grunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(grunnlag)
     }
 

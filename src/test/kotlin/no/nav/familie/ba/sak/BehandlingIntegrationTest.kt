@@ -1,19 +1,23 @@
 package no.nav.familie.ba.sak
 
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.DokGenService
+import no.nav.familie.ba.sak.behandling.FagsakService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
+import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.Ressurs
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,15 +35,51 @@ import kotlin.streams.asSequence
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-dokgen")
 @Tag("integration")
-class BehandlingIntegrationTest(@Autowired
-                                private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-                                @Autowired
-                                private val behandlingService: BehandlingService,
-                                @Autowired
-                                private val VedtakRepository: VedtakRepository) {
+class BehandlingIntegrationTest {
 
     companion object {
         const val STRING_LENGTH = 10
+    }
+
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
+    lateinit var vedtakBarnRepository: VedtakBarnRepository
+
+    @Autowired
+    lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+
+    @Autowired
+    lateinit var personRepository: PersonRepository
+
+    @Autowired
+    lateinit var dokGenService: DokGenService
+
+    @Autowired
+    lateinit var fagsakService: FagsakService
+
+    @Autowired
+    lateinit var behandlingService: BehandlingService
+
+    @MockK
+    lateinit var integrasjonTjeneste: IntegrasjonTjeneste
+
+    @BeforeEach
+    fun setup() {
+        MockKAnnotations.init(this)
+        behandlingService = BehandlingService(
+                behandlingRepository,
+                vedtakRepository,
+                vedtakBarnRepository,
+                personopplysningGrunnlagRepository,
+                personRepository,
+                dokGenService,
+                fagsakService,
+                integrasjonTjeneste)
     }
 
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
@@ -57,6 +97,18 @@ class BehandlingIntegrationTest(@Autowired
     fun `Kjør flyway migreringer og sjekk at behandlingslagerservice klarer å lese å skrive til postgresql`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
         behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
+        Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Test hele smæla`() {
+        every {
+            integrasjonTjeneste.hentPersoninfoFor("1234567")
+        } returns Personinfo(LocalDate.now())
+
+        val nyBehandling = NyBehandling("1234567", arrayOf("1234567", "1234567"), BehandlingType.FØRSTEGANGSBEHANDLING, "asd")
+        val fagsak = behandlingService.opprettEllerOppdaterBehandling(nyBehandling)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
 
@@ -99,7 +151,7 @@ class BehandlingIntegrationTest(@Autowired
                             resultat = VedtakResultat.INNVILGET)
         behandlingService.lagreVedtak(vedtak)
 
-        val hentetVedtak = VedtakRepository.findByBehandlingAndAktiv(behandling.id)
+        val hentetVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
     }
