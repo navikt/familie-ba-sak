@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestKortVedtak
 import no.nav.familie.ba.sak.task.AvstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
 import no.nav.familie.ba.sak.økonomi.AvstemmingTaskDTO
@@ -45,6 +46,27 @@ class FagsakController(
                 )
 
         return ResponseEntity.ok(ressurs)
+    }
+
+    @PostMapping(path = ["/fagsak/{fagsakId}/kort-vedtak"])
+    fun kortVedtak(@PathVariable fagsakId: Long, @RequestBody kortVedtak: RestKortVedtak): ResponseEntity<Ressurs<RestFagsak>> {
+        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+
+        logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
+
+        val fagsak: Ressurs<RestFagsak> = Result.runCatching {
+            behandlingService.nyttKortVedtakForAktivBehandling(fagsakId,
+                                                           kortVedtak,
+                                                           ansvarligSaksbehandler = saksbehandlerId)
+        }
+                .fold(
+                        onSuccess = { it },
+                        onFailure = { e ->
+                            Ressurs.failure("Klarte ikke å opprette nytt vedtak", e)
+                        }
+                )
+
+        return ResponseEntity.ok(fagsak)
     }
 
     @PostMapping(path = ["/fagsak/{fagsakId}/nytt-vedtak"])

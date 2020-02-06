@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestKortVedtak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -154,13 +155,42 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         vedtakRepository.save(vedtak)
     }
 
+    fun nyttKortVedtakForAktivBehandling(fagsakId: Long,
+                                         kortVedtak: RestKortVedtak,
+                                         ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
+
+        val behandling = hentBehandlingHvisEksisterer(fagsakId)
+                         ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+        val vedtak = Vedtak(
+                behandling = behandling,
+                ansvarligSaksbehandler = ansvarligSaksbehandler,
+                vedtaksdato = LocalDate.now(),
+                resultat = kortVedtak.resultat
+        )
+
+        //kun generer markdown for avslag vedtak, fordi barnasinformasjon er ikke sett
+        if(vedtak.resultat== VedtakResultat.AVSLÅTT){
+            vedtak.stønadBrevMarkdown = Result.runCatching { dokGenService.hentStønadBrevMarkdown(vedtak) }
+                    .fold(
+                            onSuccess = { it },
+                            onFailure = { e ->
+                                return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
+                                                       e)
+                            }
+                    )
+        }
+
+        lagreVedtak(vedtak)
+        return fagsakService.hentRestFagsak(fagsakId)
+    }
+
     fun nyttVedtakForAktivBehandling(fagsakId: Long,
                                      nyttVedtak: NyttVedtak,
                                      ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
         val behandling = hentBehandlingHvisEksisterer(fagsakId)
                          ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
 
-        if (nyttVedtak.resultat== VedtakResultat.INNVILGET && nyttVedtak.barnasBeregning.isEmpty()) {
+        if (nyttVedtak.barnasBeregning.isEmpty()) {
             throw Error("Fant ingen barn på behandlingen og kan derfor ikke opprette nytt vedtak")
         }
 

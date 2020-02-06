@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
+import no.nav.familie.ba.sak.behandling.restDomene.RestKortVedtak
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -121,6 +122,33 @@ class BehandlingIntegrationTest(@Autowired
         val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler2", hentetVedtak?.ansvarligSaksbehandler)
+    }
+
+    @Test
+    @Tag("integrasion")
+    fun `Opprett nytt kort vedtak på aktiv behandling`(){
+        val behandling = behandlingService.nyBehandling("9", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", lagRandomSaksnummer())
+        Assertions.assertNotNull(behandling.fagsak.id)
+
+        behandlingService.nyttKortVedtakForAktivBehandling(
+                fagsakId = behandling.fagsak.id ?: 1L,
+                kortVedtak = RestKortVedtak(resultat = VedtakResultat.INNVILGET),
+                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+        )
+        val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
+        Assertions.assertNotNull(hentetVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
+        Assertions.assertEquals("", hentetVedtak!!.stønadBrevMarkdown)
+
+        behandlingService.nyttKortVedtakForAktivBehandling(
+                fagsakId = behandling.fagsak.id ?: 1L,
+                kortVedtak = RestKortVedtak(resultat = VedtakResultat.AVSLÅTT),
+                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+        )
+        val hentetAvslagVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
+        Assertions.assertNotNull(hentetAvslagVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler", hentetAvslagVedtak?.ansvarligSaksbehandler)
+        Assertions.assertNotEquals("", hentetAvslagVedtak!!.stønadBrevMarkdown)
     }
 
     @Test
