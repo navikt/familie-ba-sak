@@ -64,7 +64,7 @@ class IntegrasjonTjeneste(
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun hentPersoninfoFor(personIdent: String): Personinfo? {
+    fun hentPersoninfoFor(personIdent: String): Personinfo {
         val uri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info")
         logger.info("Henter personinfo fra $integrasjonerServiceUri")
         return try {

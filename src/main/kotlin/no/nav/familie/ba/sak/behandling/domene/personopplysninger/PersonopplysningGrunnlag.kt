@@ -8,32 +8,20 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "GR_PERSONOPPLYSNINGER")
-class PersonopplysningGrunnlag(
+data class PersonopplysningGrunnlag(
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GR_PERSONOPPLYSNINGER_SEQ")
+        val id: Long = 0,
         @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-        val behandlingId: Long?,
+        val behandlingId: Long,
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "personopplysningGrunnlag",
+                   cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
+        val personer: MutableList<Person> = mutableListOf(),
         @Column(name = "aktiv", nullable = false)
-        var aktiv: Boolean = true
+        val aktiv: Boolean = true
 
 ) : BaseEntitet() {
-
-    /**
-     * Kun synlig for abstract test scenario
-     *
-     * @return id
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GR_PERSONOPPLYSNINGER_SEQ")
-    val id: Long? = null
-
-
-    @OneToMany(fetch = FetchType.EAGER,
-               mappedBy = "personopplysningGrunnlag",
-               cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH])
-    val personer: MutableList<Person> = LinkedList()
-
-    fun leggTilPerson(person: Person) {
-        personer.add(person)
-    }
 
     fun leggTilPerson(type: PersonType, personIdent: PersonIdent, fødselsdato: LocalDate) :PersonopplysningGrunnlag {
         personer.add(Person(type=type,personIdent = personIdent,fødselsdato = fødselsdato,personopplysningGrunnlag =  this))
@@ -41,15 +29,7 @@ class PersonopplysningGrunnlag(
     }
 
     val barna: List<Person>
-        get() {
-            val barna: MutableList<Person> = LinkedList()
-            for (p in personer) {
-                if (p.type == PersonType.BARN) {
-                    barna.add(p)
-                }
-            }
-            return barna
-        }
+        get() = personer.filter { it.type == PersonType.BARN }
 
     override fun toString(): String {
         val sb = StringBuilder("PersonopplysningGrunnlagEntitet{")

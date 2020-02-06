@@ -182,35 +182,27 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling: NyBehandling, behandling: Behandling) {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+        val personopplysningGrunnlag =
+                personopplysningGrunnlagRepository.save(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        personopplysningGrunnlag.leggTilPerson(Person(
-                personIdent = behandling.fagsak.personIdent,
-                type = PersonType.SØKER,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
-        ))
+        val søker = Person(personIdent = behandling.fagsak.personIdent,
+                           type = PersonType.SØKER,
+                           personopplysningGrunnlag = personopplysningGrunnlag,
+                           fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer).fødselsdato
+        )
 
-        lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasFødselsnummer, personopplysningGrunnlag)
-
-        personopplysningGrunnlag.aktiv = true
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-    }
-
-    private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: Array<String>,
-                                                                 personopplysningGrunnlag: PersonopplysningGrunnlag) {
-        barnasFødselsnummer.map { nyttBarn ->
+        val personList = nyBehandling.barnasFødselsnummer.map { nyttBarn ->
             if (personopplysningGrunnlag.barna.none { eksisterendeBarn -> eksisterendeBarn.personIdent.ident == nyttBarn }) {
                 personopplysningGrunnlag.leggTilPerson(Person(
-                        personIdent = PersonIdent(nyttBarn),
-                        type = PersonType.BARN,
-                        personopplysningGrunnlag = personopplysningGrunnlag,
-                        fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn)?.fødselsdato
+                    personIdent = PersonIdent(nyttBarn),
+                    type = PersonType.BARN,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn)?.fødselsdato
                 ))
             }
-        }
+        }.plus(søker).toMutableList()
 
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag.copy(personer = personList))
     }
 
     fun hentBehandlingHvisEksisterer(fagsakId: Long?): Behandling? {
@@ -349,7 +341,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                             vedtak = vedtak,
                             beløp = it.beløp,
                             stønadFom = it.stønadFom,
-                            stønadTom = barn.fødselsdato?.plusYears(18)!!
+                            stønadTom = barn.fødselsdato.plusYears(18)
                     )
             )
         }

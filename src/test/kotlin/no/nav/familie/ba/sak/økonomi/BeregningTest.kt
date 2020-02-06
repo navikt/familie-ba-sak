@@ -66,7 +66,7 @@ class BeregningTest(
         val barn2Fødselsdato = LocalDate.now().plusYears(2)
         val barn3Fødselsdato = LocalDate.now()
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(0L)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0L)
 
         val barn1 = Person(personIdent = PersonIdent("00000000001"),
                            fødselsdato = barn1Fødselsdato,
