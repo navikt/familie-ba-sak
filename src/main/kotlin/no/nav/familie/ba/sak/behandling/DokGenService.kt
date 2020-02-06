@@ -17,7 +17,6 @@ import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
-import java.lang.RuntimeException
 import java.net.URI
 
 @Service
@@ -29,20 +28,27 @@ class DokGenService(
 
     fun hentStønadBrevMarkdown(vedtak: Vedtak): String {
         val fletteFelter = mapTilBrevfelter(vedtak)
-        return hentMarkdownForMal("Innvilget", fletteFelter)
+
+        val template = if (vedtak.resultat == VedtakResultat.INNVILGET) {
+            "Innvilget"
+        } else if (vedtak.resultat == VedtakResultat.AVSLÅTT) {
+            "Avslag"
+        } else throw RuntimeException("Invalid/Unsupported vedtak.resultat")
+
+        return hentMarkdownForMal(template, fletteFelter)
     }
 
     private fun mapTilBrevfelter(vedtak: Vedtak): String {
-        if(vedtak.resultat== VedtakResultat.INNVILGET){
+        if (vedtak.resultat == VedtakResultat.INNVILGET) {
             return mapTilInnvilgetBrevFelter(vedtak)
-        }else if(vedtak.resultat== VedtakResultat.AVSLÅTT){
+        } else if (vedtak.resultat == VedtakResultat.AVSLÅTT) {
             return mapTilAvslagBrevFelter(vedtak)
         }
 
         throw RuntimeException("Invalid/unsupported vedtak.resultat")
     }
 
-    private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String{
+    private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
         val brevfelter = "{\"belop\": %s,\n" + // TODO hent fra dokgen (/template/{templateName}/schema)
                          "\"startDato\": \"%s\",\n" +
                          "\"etterbetaling\": %s,\n" +
@@ -65,7 +71,7 @@ class DokGenService(
         )
     }
 
-    private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String{
+    private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
         val brevfelter = "{\"fodselsnummer\": \"%s\",\n" +
                          "\"navn\": \"%s\",\n" +
                          "\"hjemmel\": \"%s\",\n" +

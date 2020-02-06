@@ -30,11 +30,25 @@ class DokGenServiceTest(@Autowired
             resultat = VedtakResultat.INNVILGET
     )
 
+    private val avslagVedtak= Vedtak(
+            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
+                                    journalpostID = "",
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING),
+            ansvarligSaksbehandler = "ansvarligSaksbehandler",
+            vedtaksdato = LocalDate.now(),
+            resultat = VedtakResultat.AVSLÅTT
+    )
+
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
-        dokGenService.runCatching {
-            val htmlResponse = lagHtmlFraMarkdown(hentStønadBrevMarkdown(vedtak))
-            assert(htmlResponse.startsWith("<html>"))
-        }
+        val markdown= dokGenService.hentStønadBrevMarkdown(vedtak)
+        val htmlResponse= dokGenService.lagHtmlFraMarkdown(markdown)
+        assert(htmlResponse.startsWith("<html>"))
+    }
+
+    @Test
+    fun `Test å generer Markdown for avslag brev`(){
+        val markdown= dokGenService.hentStønadBrevMarkdown(avslagVedtak)
+        assert(markdown.startsWith("<br>Du har ikke rett til barnetrygd fordi ."))
     }
 }

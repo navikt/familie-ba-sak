@@ -160,7 +160,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val behandling = hentBehandlingHvisEksisterer(fagsakId)
                          ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
 
-        if (nyttVedtak.barnasBeregning.isEmpty()) {
+        if (nyttVedtak.resultat== VedtakResultat.INNVILGET && nyttVedtak.barnasBeregning.isEmpty()) {
             throw Error("Fant ingen barn på behandlingen og kan derfor ikke opprette nytt vedtak")
         }
 
