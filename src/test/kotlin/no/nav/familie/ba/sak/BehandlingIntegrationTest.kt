@@ -248,15 +248,15 @@ class BehandlingIntegrationTest {
         val barn2Id = "10000010002"
 
         every {
-            integrasjonTjeneste.hentPersoninfoFor("morId")
+            integrasjonTjeneste.hentPersoninfoFor(morId)
         } returns Personinfo(LocalDate.now())
 
         every {
-            integrasjonTjeneste.hentPersoninfoFor("barn1Id")
+            integrasjonTjeneste.hentPersoninfoFor(barn1Id)
         } returns Personinfo(LocalDate.now())
 
         every {
-            integrasjonTjeneste.hentPersoninfoFor("barn2Id")
+            integrasjonTjeneste.hentPersoninfoFor(barn2Id)
         } returns Personinfo(LocalDate.now())
 
         val fagsak1 = behandlingService.opprettEllerOppdaterBehandling(NyBehandling(morId, arrayOf(barn1Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
