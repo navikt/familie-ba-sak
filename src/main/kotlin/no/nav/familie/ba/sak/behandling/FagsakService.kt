@@ -31,19 +31,21 @@ class FagsakService(
         val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
 
         val restBehandlinger: List<RestBehandling> = behandlinger.map {
-            val personopplysningGrunnlag = it?.id?.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
+            val personopplysningGrunnlag = it.id?.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
             val barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent.ident }
 
-            val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it?.id).map { vedtak ->
-                val barnBeregning = vedtakBarnRepository.finnBarnBeregningForVedtak(vedtak?.id)
-                vedtak?.toRestVedtak(barnBeregning)
+            val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
+                val barnBeregning = vedtakBarnRepository.finnBarnBeregningForVedtak(vedtak.id)
+                vedtak.toRestVedtak(barnBeregning)
             }
 
             RestBehandling(
-                    aktiv = it?.aktiv ?: false,
-                    behandlingId = it?.id,
+                    aktiv = it.aktiv,
+                    behandlingId = it.id,
                     barnasFødselsnummer = barnasFødselsnummer,
-                    vedtakForBehandling = vedtakForBehandling
+                    vedtakForBehandling = vedtakForBehandling,
+                    type = it.type,
+                    status = it.status
             )
         }
 
