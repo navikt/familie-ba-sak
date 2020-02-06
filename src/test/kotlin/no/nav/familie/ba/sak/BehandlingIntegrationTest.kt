@@ -273,6 +273,4 @@ class BehandlingIntegrationTest {
         Assertions.assertNotNull(grunnlag.personer.find { it.personIdent.ident == barn1Id })
         Assertions.assertNotNull(grunnlag.personer.find { it.personIdent.ident == barn2Id })
     }
-
-    // strøket test som sjekker at vi kaster feil dersom behandlingen har kommet forbi UNDER_BEHANDLING (men som ikke er IVERKSATT enda)
 }
