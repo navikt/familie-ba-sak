@@ -102,7 +102,7 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
-    fun `Test hele smæla`() {
+    fun `Test at opprettEllerOppdaterBehandling kjører uten feil`() {
         every {
             integrasjonTjeneste.hentPersoninfoFor("1234567")
         } returns Personinfo(LocalDate.now())
