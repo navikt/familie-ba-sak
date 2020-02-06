@@ -25,6 +25,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
@@ -39,6 +40,7 @@ class FagsakController(
         private val taskRepository: TaskRepository
 ) {
     @GetMapping(path = ["/{fagsakId}"])
+    @PreAuthorize("@tilgang.tilFagsak(#fagsakId)")
     fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
@@ -54,6 +56,7 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/nytt-vedtak"])
+    @PreAuthorize("@tilgang.tilFagsak(#fagsakId)")
     fun nyttVedtak(@PathVariable fagsakId: Long, @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
@@ -120,6 +123,7 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
+    @PreAuthorize("@tilgang.tilFagsak(#fagsakId)")
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = hentSaksbehandler()
 
