@@ -219,7 +219,7 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
-    fun `Hent HTML vedtaksbrev'`() {
+    fun `Hent HTML vedtaksbrev`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("5")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -239,20 +239,40 @@ class BehandlingIntegrationTest {
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
         assert(htmlvedtaksbrevRess.data!! == "<HTML>HTML_MOCKUP</HTML>")
     }
-/* må skrives ny test
+
     @Test
     @Tag("integration")
-    fun `Ikke opprett ny behandling hvis fagsaken har en behandling som ikke er iverksatt`() {
-        val saksnr = lagRandomSaksnummer()
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("7")
-        behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, saksnr)
-        Assertions.assertThrows(Exception::class.java) {
-            behandlingService.opprettEllerOppdaterBehandling(NyBehandling("7",
-                                                                          BehandlingType.REVURDERING,
-                                                             "sdf",
-                                                                          saksnr)
-        }
-    }
-*/
+    fun `Legg til barn fra ny behandling på eksisterende behandling dersom behandling er OPPRETTET`() {
+        val morId = "10000010000"
+        val barn1Id = "10000010001"
+        val barn2Id = "10000010002"
 
+        every {
+            integrasjonTjeneste.hentPersoninfoFor("morId")
+        } returns Personinfo(LocalDate.now())
+
+        every {
+            integrasjonTjeneste.hentPersoninfoFor("barn1Id")
+        } returns Personinfo(LocalDate.now())
+
+        every {
+            integrasjonTjeneste.hentPersoninfoFor("barn2Id")
+        } returns Personinfo(LocalDate.now())
+
+        val fagsak1 = behandlingService.opprettEllerOppdaterBehandling(NyBehandling(morId, arrayOf(barn1Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
+        val fagsak2 = behandlingService.opprettEllerOppdaterBehandling(NyBehandling(morId, arrayOf(barn2Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
+
+        Assertions.assertTrue(fagsak1.id == fagsak2.id)
+
+        val behandlinger = behandlingService.hentBehandlinger(fagsak1.id)
+        Assertions.assertEquals(1, behandlinger.size)
+
+        val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlinger.first()!!.id)
+
+        Assertions.assertNotNull(grunnlag!!.personer.find { it.personIdent.ident == morId })
+        Assertions.assertNotNull(grunnlag.personer.find { it.personIdent.ident == barn1Id })
+        Assertions.assertNotNull(grunnlag.personer.find { it.personIdent.ident == barn2Id })
+    }
+
+    // strøket test som sjekker at vi kaster feil dersom behandlingen har kommet forbi UNDER_BEHANDLING (men som ikke er IVERKSATT enda)
 }
