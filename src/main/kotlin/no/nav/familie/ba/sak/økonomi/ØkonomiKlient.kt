@@ -29,12 +29,13 @@ class ØkonomiKlient(
         restTemplateBuilderMedProxy: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,
         oAuth2AccessTokenService: OAuth2AccessTokenService
-): BaseService(
+) : BaseService(
         OAUTH2_CLIENT_CONFIG_KEY,
         restTemplateBuilderMedProxy,
         clientConfigurationProperties,
         oAuth2AccessTokenService
 ) {
+
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders()
         headers.add("Content-Type", "application/json;charset=UTF-8")

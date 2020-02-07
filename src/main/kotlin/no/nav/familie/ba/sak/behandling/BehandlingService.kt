@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,16 +18,14 @@ import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
 @Service
-class BehandlingService(
-        private val behandlingRepository: BehandlingRepository,
-        private val vedtakRepository: VedtakRepository,
-        private val vedtakBarnRepository: VedtakBarnRepository,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val personRepository: PersonRepository,
-        private val dokGenService: DokGenService,
-        private val fagsakService: FagsakService,
-        private val integrasjonTjeneste: IntegrasjonTjeneste
-) {
+class BehandlingService(private val behandlingRepository: BehandlingRepository,
+                        private val vedtakRepository: VedtakRepository,
+                        private val vedtakBarnRepository: VedtakBarnRepository,
+                        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+                        private val personRepository: PersonRepository,
+                        private val dokGenService: DokGenService,
+                        private val fagsakService: FagsakService,
+                        private val integrasjonTjeneste: IntegrasjonTjeneste) {
 
     fun nyBehandling(fødselsnummer: String,
                      behandlingType: BehandlingType,
@@ -47,7 +46,6 @@ class BehandlingService(
         return behandling
     }
 
-    val STRING_LENGTH = 10
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
 
     @Transactional
@@ -81,7 +79,7 @@ class BehandlingService(
                     fødselsdato = integrasjonTjeneste.hentPersoninfoFor(it)?.fødselsdato
             ))
         }
-        personopplysningGrunnlag.setAktiv(true)
+        personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         return behandling.fagsak
@@ -186,9 +184,10 @@ class BehandlingService(
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
         nyttVedtak.barnasBeregning.map {
-            val barn = personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
-                                                                                     personopplysningGrunnlagId = personopplysningGrunnlag?.id)
-                       ?: return Ressurs.failure("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
+            val barn =
+                    personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
+                                                                                  personopplysningGrunnlag?.id)
+                    ?: return Ressurs.failure("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
             if (it.stønadFom.isBefore(barn.fødselsdato)) {
                 return Ressurs.failure("Ugyldig fra og med dato", Exception("Ugyldig fra og med dato for ${barn.fødselsdato}"))
@@ -242,18 +241,15 @@ class BehandlingService(
                                  gjeldendeBehandlingsId: Long,
                                  nyBehandlingType: BehandlingType,
                                  postProsessor: (Vedtak)->Unit): Ressurs<Vedtak> {
-        val gjeldendeBehandling = behandlingRepository.finnBehandling(gjeldendeBehandlingsId)
-        if (gjeldendeBehandling == null) {
-            return Ressurs.failure("Fant ikke aktiv behandling som skal opphøre. BehandlingsId=${gjeldendeBehandlingsId}")
-        }
+        val gjeldendeBehandling = behandlingRepository.finnBehandling(gjeldendeBehandlingsId)?:
+                                  return Ressurs.failure("Fant ikke aktiv behandling som skal opphøre. BehandlingsId=${gjeldendeBehandlingsId}")
 
-        val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
-        if (gjeldendeVedtak == null) {
-            return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling ${gjeldendeBehandlingsId}")
-        }
+        val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId) ?:
+                              return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling ${gjeldendeBehandlingsId}")
+
 
         val gjeldendeVedtakPerson = vedtakBarnRepository.finnBarnBeregningForVedtak(gjeldendeVedtak.id)
-        if (gjeldendeVedtakPerson.size == 0) {
+        if (gjeldendeVedtakPerson.isEmpty()) {
             return Ressurs.failure("Fant ikke vedtak barn tilknyttet behandling ${gjeldendeBehandlingsId} og vedtak ${gjeldendeVedtak.id}")
         }
 
@@ -293,6 +289,7 @@ class BehandlingService(
     }
 
     companion object {
-        val LOG = LoggerFactory.getLogger(BehandlingService::class.java)
+        const val STRING_LENGTH = 10
+        val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
 }

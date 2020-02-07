@@ -5,20 +5,21 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.client.RestClientResponseException
 import java.net.URI
-import kotlin.text.Charsets.UTF_8
 
 @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-class IntegrasjonException : RuntimeException {
-    private var responseBody: ByteArray? = null
+class IntegrasjonException(msg: String?,
+                           throwable: Throwable? = null,
+                           uri: URI? = null,
+                           ident: String? = null) : RuntimeException(msg, throwable) {
 
-    constructor(msg: String?) : super(msg)
-    constructor(msg: String?, throwable: Throwable?, uri: URI?, ident: String?) : super(msg, throwable) {
-        var message = ""
-        if (throwable is RestClientResponseException) {
-            message = throwable.responseBodyAsString
-            responseBody = throwable.responseBodyAsByteArray
-        }
-        secureLogger.info("Ukjent feil ved integrasjon mot {}. ident={} {} {}", uri, ident, message, throwable)
+    init {
+        val message = if (throwable is RestClientResponseException) throwable.responseBodyAsString else ""
+
+        secureLogger.info("Ukjent feil ved integrasjon mot {}. ident={} {} {}",
+                          uri,
+                          ident,
+                          message,
+                          throwable)
         logger.warn("Ukjent feil ved integrasjon mot '{}'.", uri)
     }
 

@@ -9,7 +9,6 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Service
 import org.springframework.util.Assert
-import java.lang.Error
 import java.math.BigDecimal
 
 @Service
@@ -18,9 +17,10 @@ class ØkonomiService(
         private val beregning: Beregning,
         private val behandlingService: BehandlingService
 ) {
+
     fun iverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
         val vedtak = behandlingService.hentVedtak(vedtakId)
-                ?: throw Error("Fant ikke vedtak med id $vedtakId i forbindelse med iverksetting mot oppdrag")
+                     ?: throw Error("Fant ikke vedtak med id $vedtakId i forbindelse med iverksetting mot oppdrag")
 
         val barnBeregning = behandlingService.hentBarnForVedtak(vedtak.id)
         val tidslinje = beregning.beregnUtbetalingsperioder(barnBeregning)
@@ -52,9 +52,10 @@ class ØkonomiService(
                         onSuccess = {
                             Assert.notNull(it.body, "Finner ikke ressurs")
                             Assert.notNull(it.body?.data, "Ressurs mangler data")
-                            Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS, String.format("Ressurs returnerer %s men har http status kode %s",
-                                    it.body?.status,
-                                    it.statusCode))
+                            Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS,
+                                          String.format("Ressurs returnerer %s men har http status kode %s",
+                                                        it.body?.status,
+                                                        it.statusCode))
 
                             behandlingService.oppdaterStatusPåBehandling(behandlingsId, BehandlingStatus.SENDT_TIL_IVERKSETTING)
                         },
@@ -70,9 +71,10 @@ class ØkonomiService(
                         onSuccess = {
                             Assert.notNull(it.body, "Finner ikke ressurs")
                             Assert.notNull(it.body?.data, "Ressurs mangler data")
-                            Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS, String.format("Ressurs returnerer %s men har http status kode %s",
-                                    it.body?.status,
-                                    it.statusCode))
+                            Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS,
+                                          String.format("Ressurs returnerer %s men har http status kode %s",
+                                                        it.body?.status,
+                                                        it.statusCode))
 
                             return objectMapper.convertValue(it.body?.data, OppdragProtokollStatus::class.java)
                         },

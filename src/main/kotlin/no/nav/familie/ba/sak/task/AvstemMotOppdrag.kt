@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
@@ -14,7 +15,9 @@ import java.time.LocalDate
 import java.time.MonthDay
 
 @Service
-@TaskStepBeskrivelse(taskStepType = AvstemMotOppdrag.TASK_STEP_TYPE, beskrivelse = "Grensesnittavstemming mot oppdrag", maxAntallFeil = 3)
+@TaskStepBeskrivelse(taskStepType = AvstemMotOppdrag.TASK_STEP_TYPE,
+                     beskrivelse = "Grensesnittavstemming mot oppdrag",
+                     maxAntallFeil = 3)
 class AvstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepository) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -43,8 +46,8 @@ class AvstemMotOppdrag(val avstemmingService: AvstemmingService, val taskReposit
 
     private fun erHelgEllerHelligdag(dato: LocalDate): Boolean {
         return dato.dayOfWeek == DayOfWeek.SATURDAY
-                || dato.dayOfWeek == DayOfWeek.SUNDAY
-                || FASTE_HELLIGDAGER.contains(MonthDay.from(dato))
+               || dato.dayOfWeek == DayOfWeek.SUNDAY
+               || FASTE_HELLIGDAGER.contains(MonthDay.from(dato))
     }
 
     companion object {
@@ -56,6 +59,6 @@ class AvstemMotOppdrag(val avstemmingService: AvstemmingService, val taskReposit
                 MonthDay.of(12, 25),
                 MonthDay.of(12, 26)
         )
-        val LOG = LoggerFactory.getLogger(AvstemMotOppdrag::class.java)
+        val LOG: Logger = LoggerFactory.getLogger(AvstemMotOppdrag::class.java)
     }
 }

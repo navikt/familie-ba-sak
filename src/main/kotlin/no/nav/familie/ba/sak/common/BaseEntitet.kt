@@ -10,6 +10,7 @@ import javax.persistence.*
  */
 @MappedSuperclass
 abstract class BaseEntitet : Serializable {
+
     @Column(name = "opprettet_av", nullable = false, updatable = false)
     var opprettetAv: String? = null
 

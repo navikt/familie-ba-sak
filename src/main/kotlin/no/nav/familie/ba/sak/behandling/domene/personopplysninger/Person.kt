@@ -29,9 +29,10 @@ class Person(
         @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
         val personopplysningGrunnlag: PersonopplysningGrunnlag
 ) : BaseEntitet() {
-        override fun toString(): String {
-                return """Person(id=$id,
+
+    override fun toString(): String {
+        return """Person(id=$id,
                         |type=$type
                         |fødselsdato=$fødselsdato)""".trimMargin()
-        }
+    }
 }

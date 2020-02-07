@@ -47,8 +47,12 @@ class BeregningTest(
      */
     @Test
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
-        val behandling = behandlingService.nyBehandling("0", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "lagRandomSaksnummer")
-        val vedtak = Vedtak(behandling = behandling, ansvarligSaksbehandler = "ansvarligSaksbehandler", vedtaksdato = LocalDate.now(), stønadBrevMarkdown = "", resultat = VedtakResultat.INNVILGET)
+        val behandling = behandlingService.nyBehandling("12345", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "lagRandomSaksnummer")
+        val vedtak = Vedtak(behandling = behandling,
+                            ansvarligSaksbehandler = "ansvarligSaksbehandler",
+                            vedtaksdato = LocalDate.now(),
+                            stønadBrevMarkdown = "",
+                            resultat = VedtakResultat.INNVILGET)
 
         val barn1Fødselsdato = LocalDate.now()
         val barn2Fødselsdato = LocalDate.now().plusYears(2)
@@ -56,9 +60,18 @@ class BeregningTest(
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(0L)
 
-        val barn1 = Person(personIdent = PersonIdent("00000000001"), fødselsdato = barn1Fødselsdato, type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag)
-        val barn2 = Person(personIdent = PersonIdent("00000000002"), fødselsdato = barn2Fødselsdato, type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag)
-        val barn3 = Person(personIdent = PersonIdent("00000000003"), fødselsdato = barn2Fødselsdato, type = PersonType.BARN, personopplysningGrunnlag = personopplysningGrunnlag)
+        val barn1 = Person(personIdent = PersonIdent("00000000001"),
+                           fødselsdato = barn1Fødselsdato,
+                           type = PersonType.BARN,
+                           personopplysningGrunnlag = personopplysningGrunnlag)
+        val barn2 = Person(personIdent = PersonIdent("00000000002"),
+                           fødselsdato = barn2Fødselsdato,
+                           type = PersonType.BARN,
+                           personopplysningGrunnlag = personopplysningGrunnlag)
+        val barn3 = Person(personIdent = PersonIdent("00000000003"),
+                           fødselsdato = barn2Fødselsdato,
+                           type = PersonType.BARN,
+                           personopplysningGrunnlag = personopplysningGrunnlag)
 
         val barnBeregning1 = VedtakBarn(
                 barn = barn1,

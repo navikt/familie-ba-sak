@@ -15,17 +15,17 @@ data class Behandling(
         val fagsak: Fagsak,
 
         @Column(name = "journalpost_id")
-        var journalpostID: String?,
+        val journalpostID: String?,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
-        var type: BehandlingType,
+        val type: BehandlingType,
 
         /**
          * saksnummer fra GSAK.
          */
         @Column(name = "saksnummer")
-        var saksnummer: String? = null,
+        val saksnummer: String? = null,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
@@ -38,6 +38,7 @@ data class Behandling(
 enum class BehandlingType {
     FØRSTEGANGSBEHANDLING,
     REVURDERING,
+    MIGRERING_FRA_INFOTRYGD,
     KLAGE,
     MIGRERING,
     MIGRERING_OPPHØRT
