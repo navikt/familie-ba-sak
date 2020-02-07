@@ -1,10 +1,8 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.dokument.JournalførVedtaksbrevkDTO
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrev.Companion.TASK_STEP_TYPE
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -22,17 +20,15 @@ class JournalførVedtaksbrev(
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val journalførVedtaksbrevkDTO = objectMapper.readValue(task.payload, JournalførVedtaksbrevkDTO::class.java)
-
-        val vedtakId = journalførVedtaksbrevkDTO.vedtaksId
-        val vedtak = behandlingService.hentVedtak(vedtakId.toLong())
+        val vedtakId = task.payload.toLong()
+        val vedtak = behandlingService.hentVedtak(vedtakId)
                      ?: throw Exception("Fant ikke vedtak med id $vedtakId i forbindelse med Journalføring av vedtaksbrev")
 
         val fnr = vedtak.behandling.fagsak.personIdent.ident
         val pdf = behandlingService.hentPdfForVedtak(vedtak)
 
         LOG.debug("Journalfører vedtaksbrev for vedtak med ID $vedtakId")
-        val journalpostId = integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr, journalførVedtaksbrevkDTO.fagsakId)
+        val journalpostId = integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr)
 
         val nyTask = Task.nyTask(DistribuerVedtaksbrev.TASK_STEP_TYPE, journalpostId, task.metadata)
         taskRepository.save(nyTask)

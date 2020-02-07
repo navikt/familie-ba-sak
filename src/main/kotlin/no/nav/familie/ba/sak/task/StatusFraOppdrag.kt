@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.dokument.JournalførVedtaksbrevkDTO
 import no.nav.familie.ba.sak.task.StatusFraOppdrag.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.økonomi.OppdragProtokollStatus
 import no.nav.familie.ba.sak.økonomi.StatusFraOppdragDTO
@@ -56,19 +55,14 @@ class StatusFraOppdrag(
                         )
 
                         if (behandling?.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
-                            val dto = JournalførVedtaksbrevkDTO("${behandling!!.fagsak.id}", "${statusFraOppdragDTO.vedtaksId}")
-                            opprettTaskJournalførVedtaksbrev(dto, task)
+                            opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId, task)
                         }
                     }
                 }
     }
 
-    private fun opprettTaskJournalførVedtaksbrev(payload: JournalførVedtaksbrevkDTO, gammelTask: Task) {
-        val task = Task.nyTask(
-                type = JournalførVedtaksbrev.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(payload),
-                properties = gammelTask.metadata
-        )
+    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
+        val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, "$vedtakId", gammelTask.metadata)
         taskRepository.save(task)
     }
 
