@@ -47,7 +47,8 @@ class BeregningTest(
      */
     @Test
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
-        val behandling = behandlingService.nyBehandling("12345", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "lagRandomSaksnummer")
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("12345")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, "lagRandomSaksnummer")
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
