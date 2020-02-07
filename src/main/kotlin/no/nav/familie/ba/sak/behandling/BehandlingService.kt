@@ -54,7 +54,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
         } else if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
             val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
-            lagreBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, grunnlag!!)
+            lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasFødselsnummer, grunnlag!!)
             aktivBehandling.status = BehandlingStatus.OPPRETTET
             behandlingRepository.save(aktivBehandling)
         } else {
@@ -66,8 +66,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
         val personIdent = PersonIdent(fødselsnummer)
-        val fagsak = fagsakService.hentFagsakForPersonident(personIdent) ?: Fagsak(null, AktørId("1"), personIdent)
-        fagsakService.lagreFagsak(fagsak)
+
+        val fagsak = fagsakService.hentFagsakForPersonident(personIdent) ?: run {
+            val nyFagsak = Fagsak(null, AktørId("1"), personIdent)
+            fagsakService.lagreFagsak(nyFagsak)
+            nyFagsak
+        }
+
         return fagsak
     }
 
@@ -87,13 +92,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
         ))
 
-        lagreBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, personopplysningGrunnlag)
+        lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasFødselsnummer, personopplysningGrunnlag)
 
         personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    private fun lagreBarnIPersonopplysningsgrunnlaget(barnasFødselsnummer: Array<String>, personopplysningGrunnlag: PersonopplysningGrunnlag) {
+    private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: Array<String>, personopplysningGrunnlag: PersonopplysningGrunnlag) {
         barnasFødselsnummer.map { nyttBarn ->
             if (personopplysningGrunnlag.barna.none { eksisterendeBarn -> eksisterendeBarn.personIdent.ident == nyttBarn }) {
                 personopplysningGrunnlag.leggTilPerson(Person(
@@ -105,7 +110,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             }
         }
 
-        personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
