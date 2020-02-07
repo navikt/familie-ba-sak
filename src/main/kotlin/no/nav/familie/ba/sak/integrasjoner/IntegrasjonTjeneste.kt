@@ -19,8 +19,11 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.RequestEntity.post
+import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -120,7 +123,7 @@ class IntegrasjonTjeneste(
     }
 
     fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String {
-        val uri = URI.create("$integrasjonerServiceUri/arkiv/v1")
+        val uri = URI.create("$integrasjonerServiceUri/arkiv/v2")
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
 
         return Result.runCatching {
@@ -152,6 +155,7 @@ class IntegrasjonTjeneste(
         headers.add("Content-Type", "application/json;charset=UTF-8")
         headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+        headers.add(NavHttpHeaders.NAV_CONSUMER_ID.asString(), MDC.get(MDCConstants.MDC_CONSUMER_ID))
 
         return restOperations.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(arkiverDokumentRequest, headers))
     }
