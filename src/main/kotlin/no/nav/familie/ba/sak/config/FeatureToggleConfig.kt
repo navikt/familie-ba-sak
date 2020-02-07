@@ -49,7 +49,6 @@ class FeatureToggleConfig(private val enabled: Boolean,
     private fun lagUnleashContextProvider(): UnleashContextProvider {
         return UnleashContextProvider {
             UnleashContext.builder()
-                    //.userId("a user") // Må legges til en gang i fremtiden
                     .environment(unleash.environment)
                     .appName(unleash.applicationName)
                     .build()
