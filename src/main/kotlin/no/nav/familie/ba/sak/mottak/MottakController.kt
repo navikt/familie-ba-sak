@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -23,7 +24,8 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 class MottakController(private val oidcUtil: OIDCUtil,
                        private val behandlingService: BehandlingService,
-                       private val fagsakService: FagsakService) {
+                       private val fagsakService: FagsakService,
+                       private val featureToggleService: FeatureToggleService) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -33,6 +35,12 @@ class MottakController(private val oidcUtil: OIDCUtil,
             oidcUtil.getClaim("preferred_username") ?: "VL"
         } catch (e: JwtTokenValidatorException) {
             "VL"
+        }
+
+        if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
+            logger.info("FeatureToggle for lag-oppgave er skrudd på")
+        } else {
+            logger.info("FeatureToggle for lag-oppgave er skrudd av")
         }
 
         FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
