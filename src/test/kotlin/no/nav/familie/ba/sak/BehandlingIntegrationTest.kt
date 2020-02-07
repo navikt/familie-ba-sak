@@ -104,11 +104,11 @@ class BehandlingIntegrationTest {
     @Tag("integration")
     fun `Test at opprettEllerOppdaterBehandling kjører uten feil`() {
         every {
-            integrasjonTjeneste.hentPersoninfoFor("1234567")
+            integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.now())
 
-        val nyBehandling = NyBehandling("1234567", arrayOf("1234567", "1234567"), BehandlingType.FØRSTEGANGSBEHANDLING, "asd")
-        val fagsak = behandlingService.opprettEllerOppdaterBehandling(nyBehandling)
+        val nyBehandling = NyBehandling("4975", arrayOf("4976", "4977"), BehandlingType.FØRSTEGANGSBEHANDLING, "asd")
+        val fagsak = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
 
@@ -248,19 +248,14 @@ class BehandlingIntegrationTest {
         val barn2Id = "10000010002"
 
         every {
-            integrasjonTjeneste.hentPersoninfoFor(morId)
+            integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.now())
 
-        every {
-            integrasjonTjeneste.hentPersoninfoFor(barn1Id)
-        } returns Personinfo(LocalDate.now())
+        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(morId, arrayOf(barn1Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
+        val fagsak2 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(morId, arrayOf(barn2Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
 
-        every {
-            integrasjonTjeneste.hentPersoninfoFor(barn2Id)
-        } returns Personinfo(LocalDate.now())
-
-        val fagsak1 = behandlingService.opprettEllerOppdaterBehandling(NyBehandling(morId, arrayOf(barn1Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
-        val fagsak2 = behandlingService.opprettEllerOppdaterBehandling(NyBehandling(morId, arrayOf(barn2Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
+        // skal ikke føre til flere barn på persongrunnlaget.
+        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(morId, arrayOf(barn1Id, barn2Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
 
         Assertions.assertTrue(fagsak1.id == fagsak2.id)
 
@@ -269,8 +264,25 @@ class BehandlingIntegrationTest {
 
         val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlinger.first()!!.id)
 
-        Assertions.assertNotNull(grunnlag!!.personer.find { it.personIdent.ident == morId })
-        Assertions.assertNotNull(grunnlag.personer.find { it.personIdent.ident == barn1Id })
-        Assertions.assertNotNull(grunnlag.personer.find { it.personIdent.ident == barn2Id })
+        Assertions.assertTrue(grunnlag!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertTrue(grunnlag.personer.any { it.personIdent.ident == barn1Id })
+        Assertions.assertTrue(grunnlag.personer.any { it.personIdent.ident == barn2Id })
+        Assertions.assertEquals(3, grunnlag.personer.size)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Ikke opprett ny behandling hvis fagsaken har en behandling som ikke er iverksatt`() {
+        val morId = "765"
+        val barnId = "766"
+
+        every {
+            integrasjonTjeneste.hentPersoninfoFor(any())
+        } returns Personinfo(LocalDate.now())
+
+        behandlingService.opprettBehandling(NyBehandling(morId, arrayOf(barnId), BehandlingType.FØRSTEGANGSBEHANDLING, null))
+        Assertions.assertThrows(Exception::class.java) {
+            behandlingService.opprettBehandling(NyBehandling(morId, arrayOf(barnId), BehandlingType.REVURDERING, null))
+        }
     }
 }

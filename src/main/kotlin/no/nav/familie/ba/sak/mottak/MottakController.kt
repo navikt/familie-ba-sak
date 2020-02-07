@@ -28,7 +28,7 @@ class MottakController(private val oidcUtil: OIDCUtil,
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping(path = ["/behandling/opprett"])
-    fun opprettEllerOppdaterBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
+    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = try {
             oidcUtil.getClaim("preferred_username") ?: "VL"
         } catch (e: JwtTokenValidatorException) {
@@ -37,16 +37,34 @@ class MottakController(private val oidcUtil: OIDCUtil,
 
         FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
 
-        return Result.runCatching { behandlingService.opprettEllerOppdaterBehandling(nyBehandling) }
+        return Result.runCatching { behandlingService.opprettBehandling(nyBehandling) }
                 .fold(
                         onFailure = {
                             logger.info("Opprettelse av behandling feilet", it)
                             ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                    .body(Ressurs.failure("Opprettelse av behandling feilet", it))
+                                    .body(Ressurs.failure(it.message, it))
                         },
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.id)) }
                 )
     }
+
+    @PostMapping(path = ["/behandling/opprettfrahendelse"])
+    fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
+        val saksbehandlerId = "VL"
+
+        FagsakController.logger.info("{} oppretter ny behandling fra hendelse", saksbehandlerId)
+
+        return Result.runCatching { behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling) }
+                .fold(
+                        onFailure = {
+                            logger.info("Opprettelse av behandling fra hendelse feilet", it)
+                            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    .body(Ressurs.failure(it.message, it))
+                        },
+                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.id)) }
+                )
+    }
+
 }
 
 class NyBehandling(val fødselsnummer: String,

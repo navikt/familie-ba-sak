@@ -28,19 +28,37 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val integrasjonTjeneste: IntegrasjonTjeneste) {
 
     @Transactional
-    fun opprettEllerOppdaterBehandling(nyBehandling: NyBehandling): Fagsak {
+    fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
         val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
-            leggTilSøkerIPersonopplysningsgrunnlaget(nyBehandling, behandling)
-        } else  if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
-            val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
-            leggTilBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, aktivBehandling, grunnlag!!)
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
         } else {
             throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
+        }
+
+        return fagsak
+    }
+
+    @Transactional
+    fun opprettEllerOppdaterBehandlingFraHendelse(nyBehandling: NyBehandling): Fagsak {
+        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
+
+        val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
+
+        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
+            val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
+        } else if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
+            val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
+            lagreBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, grunnlag!!)
+            aktivBehandling.status = BehandlingStatus.OPPRETTET
+            behandlingRepository.save(aktivBehandling)
+        } else {
+            throw Exception("Kan ikke lagre ny behandling. Fagsaken er ferdig behandlet og sendt til iverksetting.")
         }
 
         return fagsak
@@ -59,33 +77,36 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandling
     }
 
-    private fun leggTilSøkerIPersonopplysningsgrunnlaget(nyBehandling: NyBehandling, behandling: Behandling) {
-        val grunnlag = PersonopplysningGrunnlag(behandling.id)
+    private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling: NyBehandling, behandling: Behandling) {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
-        val søker = Person(
+        personopplysningGrunnlag.leggTilPerson(Person(
                 personIdent = behandling.fagsak.personIdent,
                 type = PersonType.SØKER,
-                personopplysningGrunnlag = grunnlag,
+                personopplysningGrunnlag = personopplysningGrunnlag,
                 fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
-        )
-        grunnlag.leggTilPerson(søker)
+        ))
 
-        leggTilBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, behandling, grunnlag)
-        grunnlag.aktiv = true
-        personopplysningGrunnlagRepository.save(grunnlag)
+        lagreBarnIPersonopplysningsgrunnlaget(nyBehandling.barnasFødselsnummer, personopplysningGrunnlag)
+
+        personopplysningGrunnlag.aktiv = true
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    private fun leggTilBarnIPersonopplysningsgrunnlaget(barnasFødselsnummer: Array<String>, behandling: Behandling, grunnlag: PersonopplysningGrunnlag) {
-        barnasFødselsnummer.map {
-            grunnlag.leggTilPerson(Person(
-                    personIdent = PersonIdent(it),
-                    type = PersonType.BARN,
-                    personopplysningGrunnlag = grunnlag,
-                    fødselsdato = integrasjonTjeneste.hentPersoninfoFor(it)?.fødselsdato
-            ))
+    private fun lagreBarnIPersonopplysningsgrunnlaget(barnasFødselsnummer: Array<String>, personopplysningGrunnlag: PersonopplysningGrunnlag) {
+        barnasFødselsnummer.map { nyttBarn ->
+            if (personopplysningGrunnlag.barna.none { eksisterendeBarn -> eksisterendeBarn.personIdent.ident == nyttBarn }) {
+                personopplysningGrunnlag.leggTilPerson(Person(
+                        personIdent = PersonIdent(nyttBarn),
+                        type = PersonType.BARN,
+                        personopplysningGrunnlag = personopplysningGrunnlag,
+                        fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn)?.fødselsdato
+                ))
+            }
         }
 
-        personopplysningGrunnlagRepository.save(grunnlag)
+        personopplysningGrunnlag.aktiv = true
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
     fun hentBehandlingHvisEksisterer(fagsakId: Long?): Behandling? {
