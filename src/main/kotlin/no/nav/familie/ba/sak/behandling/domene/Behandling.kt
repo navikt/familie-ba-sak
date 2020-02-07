@@ -39,6 +39,8 @@ enum class BehandlingType {
     FØRSTEGANGSBEHANDLING,
     REVURDERING,
     KLAGE,
+    MIGRERING,
+    MIGRERING_OPPHØRT
 }
 
 enum class BehandlingStatus {
