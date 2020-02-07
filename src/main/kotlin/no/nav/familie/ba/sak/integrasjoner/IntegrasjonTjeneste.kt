@@ -103,7 +103,6 @@ class IntegrasjonTjeneste(
         return lagerJournalpostForVedtaksbrev(fnr, fagsakId, pdf)
     }
 
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun distribuerVedtaksbrev(journalpostId: String) {
         val uri = URI.create("$integrasjonerServiceUri/dist/v1")
         logger.info("Kaller dokdist-tjeneste med journalpostId $journalpostId")
