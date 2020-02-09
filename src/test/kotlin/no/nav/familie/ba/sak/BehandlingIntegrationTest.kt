@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
@@ -20,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import javax.transaction.Transactional
 import kotlin.streams.asSequence
@@ -193,4 +195,58 @@ class BehandlingIntegrationTest(@Autowired
                                            saksnr)
         }
     }
+
+
+    @Test
+    @Tag("integration")
+    fun `Opphør migrert behandling`() {
+
+        val søkerFnr = tilfeldigFødselsnummer()
+        val barn1Fnr = tilfeldigFødselsnummer()
+        val barn2Fnr = tilfeldigFødselsnummer()
+
+        val personIdent = PersonIdent(søkerFnr)
+        val fagsak = behandlingService.opprettBehandling(
+                personIdent,
+                { fagsak ->
+                    Behandling(fagsak = fagsak,
+                               journalpostID = "jounalpostId",
+                               type = BehandlingType.MIGRERING,
+                               saksnummer = tilfeldigsSaksnummer())
+                },
+                { behandlingId ->
+                    PersonopplysningGrunnlag(behandlingId)
+                            .leggTilPerson(PersonType.SØKER, personIdent, LocalDate.now())
+                            .leggTilPerson(PersonType.BARN, PersonIdent(barn1Fnr), LocalDate.now())
+                            .leggTilPerson(PersonType.BARN, PersonIdent(barn2Fnr), LocalDate.now())
+                })
+
+        val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
+
+        val barnasBeregning = arrayOf(
+                BarnBeregning(barn1Fnr, 1054, LocalDate.now()),
+                BarnBeregning(barn2Fnr, 1054, LocalDate.now())
+        )
+        val nyttVedtak = NyttVedtak("sakstype", barnasBeregning, VedtakResultat.INNVILGET)
+
+        behandlingService.nyttVedtakForAktivBehandling(fagsak.id!!, nyttVedtak, "saksbehandler1")
+
+        behandlingService.opphørBehandlingOgVedtak("saksbehandler2",
+                                                   tilfeldigsSaksnummer(),
+                                                   behandling?.id!!,
+                                                   BehandlingType.MIGRERING_OPPHØRT,
+                                                   { a: Vedtak -> Unit }).data!!.behandling.id;
+
+        val aktivBehandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
+
+        Assertions.assertEquals(BehandlingType.MIGRERING_OPPHØRT, aktivBehandling!!.type)
+        Assertions.assertNotEquals(behandling.id!!, aktivBehandling.id)
+    }
+
+
+    private var løpenummer = 0
+    private fun tilfeldigFødselsnummer() =
+            Base64.getEncoder().encodeToString((System.currentTimeMillis() + (løpenummer++)).toString().toByteArray())
+    private fun tilfeldigsSaksnummer() = UUID.randomUUID().toString().substring(0, 18)
+
 }

@@ -25,6 +25,7 @@ class OpphørBehandlingOgVedtak(
 
         IverksettMotOppdrag.LOG.debug("Opphører behandling og tilhørende vedtak med behandlingsId ${opphørVedtakTask.gjeldendeBehandlingsId}")
         behandlingService.opphørBehandlingOgVedtak(opphørVedtakTask.saksbehandlerId,
+                                                   opphørVedtakTask.saksnummer,
                                                    opphørVedtakTask.gjeldendeBehandlingsId,
                                                    BehandlingType.valueOf(opphørVedtakTask.nyBehandlingType),
                                                    ::opprettIverksettMotOppdragTask)
@@ -47,6 +48,7 @@ class OpphørBehandlingOgVedtak(
         fun opprettTaskOpphoerBehandlingOgVedtak(gjeldendeBehandling: Behandling,
                                                  gjeldendeVedtak: Vedtak,
                                                  saksbehandlerId: String,
+                                                 saksnummer: String,
                                                  nyBehandlingstype: BehandlingType) : Task {
 
             return Task.nyTask(type = TASK_STEP_TYPE,
@@ -55,6 +57,7 @@ class OpphørBehandlingOgVedtak(
                                        gjeldendeBehandlingsId = gjeldendeBehandling.id!!,
                                        gjeldendeVedtaksId = gjeldendeVedtak.id!!,
                                        saksbehandlerId = saksbehandlerId,
+                                       saksnummer = saksnummer,
                                        nyBehandlingType = nyBehandlingstype.name
                                )),
                                properties = Properties().apply {
@@ -72,5 +75,6 @@ data class OpphørVedtakDTO(
         val gjeldendeBehandlingsId : Long,
         val gjeldendeVedtaksId: Long,
         val saksbehandlerId : String,
+        val saksnummer : String,
         val nyBehandlingType : String
 )
