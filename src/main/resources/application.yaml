@@ -30,7 +30,7 @@ funksjonsbrytere:
   enabled: true
   unleash:
     uri: https://unleash.nais.adeo.no/api/
-    environment: ${NAIS_CLUSTER_NAME}
+    cluster: ${NAIS_CLUSTER_NAME}
     applicationName: ${NAIS_APP_NAME}
 
 management:
