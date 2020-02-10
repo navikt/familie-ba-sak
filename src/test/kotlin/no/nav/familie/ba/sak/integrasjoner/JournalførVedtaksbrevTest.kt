@@ -30,7 +30,7 @@ class JournalførVedtaksbrevTest : HttpTestBase(18085) {
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}")
     lateinit var integrasjonerUri: String
 
-    @Test
+
     @Tag("integration")
     fun `Iverksett vedtak på aktiv behandling`() {
         mockServer.enqueue(journalpostOkResponse())
