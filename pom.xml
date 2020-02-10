@@ -319,6 +319,7 @@
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
                     <excludedGroups>${excludedGroups}</excludedGroups>
+                    <threadCount>1</threadCount>
                     <rerunFailingTestsCount>3</rerunFailingTestsCount>
                 </configuration>
             </plugin>
