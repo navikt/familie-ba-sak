@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.økonomi.OppdragId
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -98,8 +99,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     //TODO: Denne skal tas i bruk fra Tasken for Konsistensavstemming
-    fun hentAktiveBehandlingerForLøpendeFagsaker(): List<Behandling> {
-        return fagsakService.hentLøpendeFagsaker().mapNotNull { f -> hentBehandlingHvisEksisterer(f.id) }
+    fun hentAktiveBehandlingerForLøpendeFagsaker(): List<OppdragId> {
+        return fagsakService.hentLøpendeFagsaker()
+                .mapNotNull { fagsak -> hentBehandlingHvisEksisterer(fagsak.id) }
+                .map { behandling -> OppdragId(
+                        hentSøker(behandling)!!.personIdent.ident,
+                        behandling.id!!)
+                }
     }
 
     fun hentBehandlinger(fagsakId: Long?): List<Behandling?> {
@@ -239,6 +245,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                             throw Exception("Klarte ikke å hente PDF for vedtak med id ${vedtak.id}", it)
                         }
                 )
+    }
+
+    private fun hentSøker(behandling: Behandling): Person? {
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer.find { person -> person.type == PersonType.SØKER }
     }
 
     companion object {
