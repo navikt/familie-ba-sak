@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
+//import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrev.Companion.TASK_STEP_TYPE
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -13,16 +13,16 @@ import org.springframework.stereotype.Service
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send vedtaksbrev til Dokdist", maxAntallFeil = 3)
 class DistribuerVedtaksbrev(
-        private val integrasjonTjeneste: IntegrasjonTjeneste,
+        //private val integrasjonTjeneste: IntegrasjonTjeneste,
         private val featureToggleService: FeatureToggleService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         if (featureToggleService.isEnabled("familie-ba-sak.distribuer-vedtaksbrev")){
-            LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${task.payload}")
-            integrasjonTjeneste.distribuerVedtaksbrev(task.payload)
+            //LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${task.payload}")
+            //integrasjonTjeneste.distribuerVedtaksbrev(task.payload)  // TODO: Kommenter inn etter at feature toggle er verifisert i prod
         } else {
-            LOG.info("FeatureToggle for distribuer-vedtaksbrev er skrudd av")
+            LOG.info("Hopper over istribusjon av vedtaksbrev. Funksjonen er skrudd av")
         }
     }
 
