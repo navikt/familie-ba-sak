@@ -60,6 +60,12 @@ class MottakController(private val oidcUtil: OIDCUtil,
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = "VL"
 
+        if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
+            logger.info("FeatureToggle for lag-oppgave er skrudd på")
+        } else {
+            logger.info("FeatureToggle for lag-oppgave er skrudd av")
+        }
+
         FagsakController.logger.info("{} oppretter ny behandling fra hendelse", saksbehandlerId)
 
         return Result.runCatching { behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling) }

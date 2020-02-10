@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.config
 
-import no.finn.unleash.*
+import no.finn.unleash.DefaultUnleash
+import no.finn.unleash.UnleashContext
+import no.finn.unleash.UnleashContextProvider
 import no.finn.unleash.strategy.Strategy
 import no.finn.unleash.util.UnleashConfig
 import org.slf4j.Logger
@@ -17,7 +19,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
     @ConstructorBinding
     data class Unleash(val uri: URI,
-                       val environment: String,
+                       val cluster: String,
                        val applicationName: String)
 
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -37,28 +39,37 @@ class FeatureToggleConfig(private val enabled: Boolean,
                                              .appName(unleash.applicationName)
                                              .unleashAPI(unleash.uri)
                                              .unleashContextProvider(lagUnleashContextProvider())
-                                             .build(), ByEnvironmentStrategy())
+                                             .build(), ByClusterStrategy(unleash.cluster))
 
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
                 return unleash.isEnabled(toggleId, defaultValue)
             }
         }
+
     }
 
     private fun lagUnleashContextProvider(): UnleashContextProvider {
         return UnleashContextProvider {
             UnleashContext.builder()
-                    .environment(unleash.environment)
                     .appName(unleash.applicationName)
                     .build()
         }
     }
 
+    class ByClusterStrategy(private val clusterName: String): Strategy {
+        override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
+            if (parameters.isNullOrEmpty()) return false
+            return parameters["cluster"]?.contains(clusterName) ?: false
+        }
+
+        override fun getName(): String = "byCluster"
+    }
+
     private fun lagDummyFeatureToggleService(): FeatureToggleService {
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-                if (unleash.environment == "dev") {
+                if (unleash.cluster == "lokalutvikling") {
                     return true
                 }
                 return defaultValue
@@ -68,32 +79,6 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
 }
 
-class ByEnvironmentStrategy : Strategy {
-
-    companion object {
-        private const val miljøKey = "miljø"
-
-        fun lagPropertyMapMedMiljø(vararg strings: String): Map<String, String> {
-            return mapOf(miljøKey to strings.joinToString(","))
-        }
-    }
-
-    override fun getName(): String {
-        return "byEnvironment"
-    }
-
-    override fun isEnabled(map: Map<String, String>?): Boolean {
-        return isEnabled(map, UnleashContext.builder().build())
-    }
-
-    override fun isEnabled(map: Map<String, String>?, unleashContext: UnleashContext): Boolean {
-
-        return unleashContext.environment
-                .map { env -> map?.get(miljøKey)?.split(',')?.contains(env) ?: false }
-                .orElse(false)
-    }
-
-}
 
 interface FeatureToggleService {
 
