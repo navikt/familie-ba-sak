@@ -3,18 +3,17 @@ package no.nav.familie.ba.sak
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.DokGenService
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -105,12 +104,12 @@ class BehandlingIntegrationTest {
     @Test
     @Tag("integration")
     fun `Test at opprettEllerOppdaterBehandling kjører uten feil`() {
-        every {
-            integrasjonTjeneste.hentPersoninfoFor(any())
-        } returns Personinfo(LocalDate.now())
 
-        val nyBehandling = NyBehandling("4975", arrayOf("4976", "4977"), BehandlingType.FØRSTEGANGSBEHANDLING, "asd")
-        val fagsak = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling)
+        val fagsak = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(
+                PersonIdent("4975"),
+                {fagsak -> lagNyBehandling(fagsak,BehandlingType.FØRSTEGANGSBEHANDLING)},
+                {grunnlag -> grunnlag.leggTilPersoner("4975","4976", "4977")}
+        )
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
 
@@ -119,7 +118,10 @@ class BehandlingIntegrationTest {
     @Transactional
     fun `Opprett behandling og legg til personer`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                                       "sdf",
+                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                       lagRandomSaksnummer())
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
         val søker = Person(personIdent = PersonIdent("1"),
@@ -145,7 +147,10 @@ class BehandlingIntegrationTest {
     @Tag("integration")
     fun `Opprett behandling vedtak`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("2")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                                       "sdf",
+                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                       lagRandomSaksnummer())
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
@@ -162,7 +167,10 @@ class BehandlingIntegrationTest {
     @Tag("integration")
     fun `Opprett 2 behandling vedtak og se at det siste vedtaket får aktiv satt til true`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("3")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                                       "sdf",
+                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                       lagRandomSaksnummer())
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
@@ -186,7 +194,10 @@ class BehandlingIntegrationTest {
     @Tag("integration")
     fun `Opprett nytt behandling vedtak på aktiv behandling`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("4")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                                       "sdf",
+                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                       lagRandomSaksnummer())
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
@@ -223,7 +234,10 @@ class BehandlingIntegrationTest {
     @Tag("integration")
     fun `Hent HTML vedtaksbrev`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("5")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                                       "sdf",
+                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                       lagRandomSaksnummer())
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
 
@@ -249,15 +263,24 @@ class BehandlingIntegrationTest {
         val barn1Id = "10000010001"
         val barn2Id = "10000010002"
 
-        every {
-            integrasjonTjeneste.hentPersoninfoFor(any())
-        } returns Personinfo(LocalDate.now())
+        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(
+                PersonIdent(morId),
+                { fagsak -> lagNyBehandling(fagsak,BehandlingType.FØRSTEGANGSBEHANDLING)},
+                { grunnlag -> grunnlag.leggTilPersoner(morId,barn1Id)}
+        )
 
-        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(morId, arrayOf(barn1Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
-        val fagsak2 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(morId, arrayOf(barn2Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
+        val fagsak2 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(
+                PersonIdent(morId),
+                { fagsak -> lagNyBehandling(fagsak,BehandlingType.FØRSTEGANGSBEHANDLING)},
+                { grunnlag -> grunnlag.leggTilPersoner(morId,barn2Id)}
+        )
 
         // skal ikke føre til flere barn på persongrunnlaget.
-        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(morId, arrayOf(barn1Id, barn2Id), BehandlingType.FØRSTEGANGSBEHANDLING, null))
+        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(
+                PersonIdent(morId),
+                { fagsak -> lagNyBehandling(fagsak,BehandlingType.FØRSTEGANGSBEHANDLING)},
+                { grunnlag -> grunnlag.leggTilPersoner(morId,barn1Id, barn2Id)}
+        )
 
         Assertions.assertTrue(fagsak1.id == fagsak2.id)
 
@@ -277,17 +300,21 @@ class BehandlingIntegrationTest {
     fun `Ikke opprett ny behandling hvis fagsaken har en behandling som ikke er iverksatt`() {
         val morId = "765"
         val barnId = "766"
+        val personIdent = PersonIdent(morId)
 
-        every {
-            integrasjonTjeneste.hentPersoninfoFor(any())
-        } returns Personinfo(LocalDate.now())
+        val type = BehandlingType.FØRSTEGANGSBEHANDLING
+        behandlingService.opprettBehandling(
+                personIdent,
+                { fagsak -> lagNyBehandling(fagsak, type) },
+                { grunnlag -> grunnlag.leggTilPersoner(morId,barnId) })
 
-        behandlingService.opprettBehandling(NyBehandling(morId, arrayOf(barnId), BehandlingType.FØRSTEGANGSBEHANDLING, null))
         Assertions.assertThrows(Exception::class.java) {
-            behandlingService.opprettBehandling(NyBehandling(morId, arrayOf(barnId), BehandlingType.REVURDERING, null))
+            behandlingService.opprettBehandling(
+                    personIdent,
+                    { fagsak -> lagNyBehandling(fagsak, BehandlingType.REVURDERING) },
+                    { grunnlag -> grunnlag.leggTilPersoner(morId,barnId) })
         }
     }
-
 
     @Test
     @Tag("integration")
@@ -298,20 +325,10 @@ class BehandlingIntegrationTest {
         val barn2Fnr = tilfeldigFødselsnummer()
 
         val personIdent = PersonIdent(søkerFnr)
-        val fagsak = behandlingService.opprettBehandling(
+        val fagsak = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(
                 personIdent,
-                { fagsak ->
-                    Behandling(fagsak = fagsak,
-                               journalpostID = "jounalpostId",
-                               type = BehandlingType.MIGRERING,
-                               saksnummer = tilfeldigsSaksnummer())
-                },
-                { behandlingId ->
-                    PersonopplysningGrunnlag(behandlingId)
-                            .leggTilPerson(PersonType.SØKER, personIdent, LocalDate.now())
-                            .leggTilPerson(PersonType.BARN, PersonIdent(barn1Fnr), LocalDate.now())
-                            .leggTilPerson(PersonType.BARN, PersonIdent(barn2Fnr), LocalDate.now())
-                })
+                { fagsak -> lagNyBehandling(fagsak, BehandlingType.MIGRERING) },
+                { grunnlag -> grunnlag.leggTilPersoner(søkerFnr,barn1Fnr,barn2Fnr) })
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
 
@@ -335,10 +352,30 @@ class BehandlingIntegrationTest {
         Assertions.assertNotEquals(behandling.id!!, aktivBehandling.id)
     }
 
+    private fun lagNyBehandling(fagsak: Fagsak,
+                                type: BehandlingType): Behandling {
+        return Behandling(fagsak = fagsak,
+                          journalpostID = "jounalpostId",
+                          type = type,
+                          saksnummer = tilfeldigsSaksnummer())
+    }
+
+    private fun PersonopplysningGrunnlag.leggTilPersoner(søkerId: String, vararg barnId: String) :PersonopplysningGrunnlag {
+        this.leggTilPerson(PersonType.SØKER, PersonIdent(søkerId), LocalDate.now())
+
+        barnId.forEach {
+            this.leggTilPerson(PersonType.BARN, PersonIdent(it), LocalDate.now())
+        }
+
+        return this
+    }
+
+
 
     private var løpenummer = 0
     private fun tilfeldigFødselsnummer() =
             Base64.getEncoder().encodeToString((System.currentTimeMillis() + (løpenummer++)).toString().toByteArray())
+
     private fun tilfeldigsSaksnummer() = UUID.randomUUID().toString().substring(0, 18)
 
 }

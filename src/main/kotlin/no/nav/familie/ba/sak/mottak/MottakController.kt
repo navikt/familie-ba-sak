@@ -56,10 +56,10 @@ class MottakController(private val oidcUtil: OIDCUtil,
 
         logger.info("{} oppretter ny behandling", saksbehandlerId)
 
-        return Result.runCatching { behandlingService.opprettBehandling(
+        return Result.runCatching { behandlingService.opprettEllerOppdaterBehandlingFraHendelse(
                 PersonIdent(nyBehandling.fødselsnummer),
-                lagBehandlingFraFagsakFunc(nyBehandling),
-                lagPersonopplysningGrunnlagFraBehandlingsIdFunc(nyBehandling)) }
+                lagNyBehandlingFraFagsakFunc(nyBehandling),
+                lagBerikPersonopplysningGrunnlagFunc(nyBehandling)) }
                 .fold(
                         onFailure = {
                             logger.info("Opprettelse av behandling feilet", it)
@@ -76,7 +76,11 @@ class MottakController(private val oidcUtil: OIDCUtil,
 
         logger.info("{} oppretter ny behandling fra hendelse", saksbehandlerId)
 
-        return Result.runCatching { behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling) }
+        return Result.runCatching { behandlingService.opprettEllerOppdaterBehandlingFraHendelse(
+                PersonIdent(nyBehandling.fødselsnummer),
+                lagNyBehandlingFraFagsakFunc(nyBehandling),
+                lagBerikPersonopplysningGrunnlagFunc(nyBehandling)
+        ) }
                 .fold(
                         onFailure = {
                             logger.info("Opprettelse av behandling fra hendelse feilet", it)
@@ -87,33 +91,41 @@ class MottakController(private val oidcUtil: OIDCUtil,
                 )
     }
 
-    private fun lagPersonopplysningGrunnlagFraBehandlingsIdFunc(nyBehandling: NyBehandling): (Long?)-> PersonopplysningGrunnlag {
+    fun lagBerikPersonopplysningGrunnlagFunc(nyBehandling: NyBehandling): (PersonopplysningGrunnlag)-> PersonopplysningGrunnlag {
 
-        return fun(behandlingId:Long?) : PersonopplysningGrunnlag {
-            val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId)
+        return fun(personopplysningGrunnlag:PersonopplysningGrunnlag) : PersonopplysningGrunnlag {
 
-            val søker = Person(
-                    personIdent = PersonIdent(nyBehandling.fødselsnummer),
-                    type = PersonType.SØKER,
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
-            )
-            personopplysningGrunnlag.leggTilPerson(søker)
-
-            nyBehandling.barnasFødselsnummer.map {
-                personopplysningGrunnlag.leggTilPerson(Person(
-                        personIdent = PersonIdent(it),
-                        type = PersonType.BARN,
-                        personopplysningGrunnlag = personopplysningGrunnlag,
-                        fødselsdato = integrasjonTjeneste.hentPersoninfoFor(it)?.fødselsdato
-                ))
+            if(personopplysningGrunnlag.søker?.type==PersonType.SØKER && personopplysningGrunnlag.søker?.personIdent?.ident!=nyBehandling.fødselsnummer) {
+                throw IllegalStateException("Personopplysningsgrunnlaget inneholder en søker som er en annen en den som forsøkes justert")
             }
+
+            if(personopplysningGrunnlag.søker==null) {
+                val søker = Person(
+                        personIdent = PersonIdent(nyBehandling.fødselsnummer),
+                        type = PersonType.SØKER,
+                        personopplysningGrunnlag = personopplysningGrunnlag,
+                        fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
+                )
+                personopplysningGrunnlag.leggTilPerson(søker)
+            }
+
+            nyBehandling.barnasFødselsnummer.map { nyttBarn ->
+                if (personopplysningGrunnlag.barna.none { eksisterendeBarn -> eksisterendeBarn.personIdent.ident == nyttBarn }) {
+                    personopplysningGrunnlag.leggTilPerson(Person(
+                            personIdent = PersonIdent(nyttBarn),
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                            fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn)?.fødselsdato
+                    ))
+                }
+            }
+
             personopplysningGrunnlag.aktiv = true
             return personopplysningGrunnlag
         }
     }
 
-    private fun lagBehandlingFraFagsakFunc(nyBehandling: NyBehandling) : (Fagsak)->Behandling {
+    fun lagNyBehandlingFraFagsakFunc(nyBehandling: NyBehandling) : (Fagsak)->Behandling {
         return fun(fagsak:Fagsak) : Behandling {
             return Behandling(
                     fagsak = fagsak,
@@ -130,7 +142,6 @@ class MottakController(private val oidcUtil: OIDCUtil,
     }
 
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
-
 
 }
 

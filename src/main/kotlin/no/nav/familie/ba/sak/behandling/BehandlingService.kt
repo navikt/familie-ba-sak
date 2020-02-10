@@ -28,14 +28,19 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val integrasjonTjeneste: IntegrasjonTjeneste) {
 
     @Transactional
-    fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
-        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
+    fun opprettBehandling(
+            personIdent: PersonIdent,
+            behandlingFraFagsak: (Fagsak)->Behandling,
+            berikPersonopplysningsgrunnlagFunc : (PersonopplysningGrunnlag)->PersonopplysningGrunnlag ): Fagsak {
 
+        val fagsak = hentEllerOpprettFagsak(personIdent);
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
-            val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
+            val behandling = behandlingFraFagsak(fagsak)
+            lagreBehandling(behandling)
+            val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+            personopplysningGrunnlagRepository.save(berikPersonopplysningsgrunnlagFunc(personopplysningGrunnlag))
         } else {
             throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
         }
@@ -44,34 +49,26 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun opprettBehandling(
+    fun opprettEllerOppdaterBehandlingFraHendelse(
             personIdent: PersonIdent,
-            behandlingFraFagsak: (Fagsak)->Behandling,
-            personopplysningsGrunnlagFraBehandlingId : (Long?)->PersonopplysningGrunnlag ): Fagsak {
-
-        val fagsak = hentEllerOpprettFagsak(personIdent);
-        val behandling = behandlingFraFagsak(fagsak)
-
-        lagreBehandling(behandling)
-
-        personopplysningGrunnlagRepository.save(personopplysningsGrunnlagFraBehandlingId(behandling.id))
-
-        return fagsak
-    }
-
-    @Transactional
-    fun opprettEllerOppdaterBehandlingFraHendelse(nyBehandling: NyBehandling): Fagsak {
-        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
+            nyBehandlingFraFagsak: (Fagsak)->Behandling,
+            berikPersonopplysningsGrunnlag : (PersonopplysningGrunnlag)->PersonopplysningGrunnlag
+    ): Fagsak {
+        val fagsak = hentEllerOpprettFagsak(personIdent)
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
-            val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
+            val behandling = nyBehandlingFraFagsak(fagsak)
+            lagreBehandling(behandling)
+            val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+            berikPersonopplysningsGrunnlag(personopplysningGrunnlag)
+            personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         } else if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
             val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
-            lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasFødselsnummer, grunnlag!!)
+            berikPersonopplysningsGrunnlag(grunnlag!!)
             aktivBehandling.status = BehandlingStatus.OPPRETTET
+            personopplysningGrunnlagRepository.save(grunnlag)
             behandlingRepository.save(aktivBehandling)
         } else {
             throw Exception("Kan ikke lagre ny behandling. Fagsaken er ferdig behandlet og sendt til iverksetting.")
@@ -79,7 +76,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         return fagsak
     }
-
+    
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak =
         hentEllerOpprettFagsak(PersonIdent(fødselsnummer))
 

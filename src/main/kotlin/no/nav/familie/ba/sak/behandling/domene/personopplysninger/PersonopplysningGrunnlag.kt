@@ -32,13 +32,25 @@ class PersonopplysningGrunnlag(
     val personer: MutableList<Person> = LinkedList()
 
     fun leggTilPerson(person: Person) {
-        personer.add(person)
+        if(personer.none { p->p.personIdent.ident.equals(person.personIdent.ident) }) {
+            personer.add(person)
+        }
     }
 
     fun leggTilPerson(type: PersonType, personIdent: PersonIdent, fødselsdato: LocalDate) :PersonopplysningGrunnlag {
-        personer.add(Person(type=type,personIdent = personIdent,fødselsdato = fødselsdato,personopplysningGrunnlag =  this))
+        leggTilPerson(Person(type=type,personIdent = personIdent,fødselsdato = fødselsdato,personopplysningGrunnlag =  this))
         return this;
     }
+
+    val søker: Person?
+        get() {
+            for (p in personer) {
+                if (p.type?.equals(PersonType.SØKER) == true) {
+                    return p
+                }
+            }
+            return null
+        }
 
     val barna: List<Person>
         get() {
