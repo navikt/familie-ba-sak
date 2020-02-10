@@ -64,7 +64,24 @@ class MottakController(private val oidcUtil: OIDCUtil,
                         onFailure = {
                             logger.info("Opprettelse av behandling feilet", it)
                             ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                    .body(Ressurs.failure("Opprettelse av behandling feilet", it))
+                                    .body(Ressurs.failure(it.message, it))
+                        },
+                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.id)) }
+                )
+    }
+
+    @PostMapping(path = ["/behandling/opprettfrahendelse"])
+    fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
+        val saksbehandlerId = "VL"
+
+        logger.info("{} oppretter ny behandling fra hendelse", saksbehandlerId)
+
+        return Result.runCatching { behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling) }
+                .fold(
+                        onFailure = {
+                            logger.info("Opprettelse av behandling fra hendelse feilet", it)
+                            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    .body(Ressurs.failure(it.message, it))
                         },
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.id)) }
                 )
@@ -113,6 +130,7 @@ class MottakController(private val oidcUtil: OIDCUtil,
     }
 
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
+
 
 }
 
