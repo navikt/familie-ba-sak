@@ -33,6 +33,13 @@ credential:
 logging:
   config: "classpath:logback-spring.xml"
 
+funksjonsbrytere:
+  enabled: false
+  unleash:
+    uri: http://dummy/api/
+    cluster: e2e
+    applicationName: familie-ba-sak
+
 spring:
   datasource:
     url: jdbc:postgresql://postgres-sak:5432/familiebasak
