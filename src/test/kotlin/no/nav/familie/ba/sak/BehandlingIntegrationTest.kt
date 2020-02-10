@@ -1,23 +1,22 @@
 package no.nav.familie.ba.sak
 
 import io.mockk.MockKAnnotations
-import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.DokGenService
 import no.nav.familie.ba.sak.behandling.FagsakService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.Ressurs
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -66,9 +65,6 @@ class BehandlingIntegrationTest {
     @Autowired
     lateinit var behandlingService: BehandlingService
 
-    @MockK
-    lateinit var integrasjonTjeneste: IntegrasjonTjeneste
-
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
@@ -79,8 +75,7 @@ class BehandlingIntegrationTest {
                 personopplysningGrunnlagRepository,
                 personRepository,
                 dokGenService,
-                fagsakService,
-                integrasjonTjeneste)
+                fagsakService)
     }
 
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
@@ -352,8 +347,7 @@ class BehandlingIntegrationTest {
         Assertions.assertNotEquals(behandling.id!!, aktivBehandling.id)
     }
 
-    private fun lagNyBehandling(fagsak: Fagsak,
-                                type: BehandlingType): Behandling {
+    private fun lagNyBehandling(fagsak: Fagsak, type: BehandlingType): Behandling {
         return Behandling(fagsak = fagsak,
                           journalpostID = "jounalpostId",
                           type = type,
