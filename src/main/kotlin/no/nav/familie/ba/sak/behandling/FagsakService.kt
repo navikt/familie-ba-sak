@@ -61,4 +61,8 @@ class FagsakService(
     fun lagreFagsak(fagsak: Fagsak) {
         fagsakRepository.save(fagsak)
     }
+
+    fun hentLøpendeFagsaker(): List<Fagsak> {
+        return fagsakRepository.finnLøpendeFagsaker()
+    }
 }

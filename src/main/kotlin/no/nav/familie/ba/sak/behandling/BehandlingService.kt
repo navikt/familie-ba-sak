@@ -97,6 +97,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandling(behandlingId)
     }
 
+    //TODO: Denne skal tas i bruk fra Tasken for Konsistensavstemming
+    fun hentAktiveBehandlingerForLøpendeFagsaker(): List<Behandling> {
+        return fagsakService.hentLøpendeFagsaker().mapNotNull { f -> hentBehandlingHvisEksisterer(f.id) }
+    }
+
     fun hentBehandlinger(fagsakId: Long?): List<Behandling?> {
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
