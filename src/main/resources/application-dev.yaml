@@ -44,6 +44,13 @@ logging:
   level:
     root: INFO
 
+funksjonsbrytere:
+  enabled: false
+  unleash:
+    uri: http://dummy/api/
+    cluster: localhost
+    applicationName: familie-ba-sak
+
 spring:
   jpa:
     show-sql: false
