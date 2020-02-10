@@ -62,6 +62,7 @@ class FagsakService(
         fagsakRepository.save(fagsak)
     }
 
+    @Transactional
     fun hentLøpendeFagsaker(): List<Fagsak> {
         return fagsakRepository.finnLøpendeFagsaker()
     }
