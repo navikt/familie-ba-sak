@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak
 
-import io.mockk.MockKAnnotations
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.DokGenService
@@ -14,8 +13,11 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.task.OpphørVedtak
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -288,7 +290,7 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
-    fun `Opphør migrert behandling`() {
+    fun `Opphør migrert vedtak via task`() {
 
         val søkerFnr = "01010199990"
         val barn1Fnr = "01010199991"
@@ -302,7 +304,7 @@ class BehandlingIntegrationTest {
         val nyBehandling =
                 NyBehandling(søkerFnr, arrayOf(barn1Fnr,barn2Fnr), BehandlingType.MIGRERING_FRA_INFOTRYGD, "journalpostId")
 
-         val fagsak = behandlingService.opprettBehandling(nyBehandling)
+        val fagsak = behandlingService.opprettBehandling(nyBehandling)
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
 
@@ -314,17 +316,34 @@ class BehandlingIntegrationTest {
 
         behandlingService.nyttVedtakForAktivBehandling(fagsak.id!!, nyttVedtak, "saksbehandler1")
 
-        behandlingService.opphørVedtak("saksbehandler2",
-                                       behandling?.id!!,
-                                       BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-                                       { Unit }).data!!.behandling.id;
+        val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling!!.id)
+
+        val task = OpphørVedtak.opprettTaskOpphørVedtak(
+                behandling,
+                vedtak!!,
+                "saksbehandler",
+                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+        )
+
+        val taskRepository : TaskRepository = mockk()
+        val slot = slot<Task>()
+
+        every { taskRepository.save(capture(slot)) } answers { slot.captured }
+
+        OpphørVedtak(
+                behandlingService,
+                taskRepository
+        ).doTask(task)
+
+        verify(exactly=1) {
+            taskRepository.save(any())
+            Assertions.assertEquals("iverksettMotOppdrag", slot.captured.taskStepType)
+        }
 
         val aktivBehandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
 
         Assertions.assertEquals(BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, aktivBehandling!!.type)
         Assertions.assertNotEquals(behandling.id!!, aktivBehandling.id)
     }
-
-    private fun tilfeldigsSaksnummer() = UUID.randomUUID().toString().substring(0, 18)
 
 }
