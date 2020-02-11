@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.task.AvstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
-import no.nav.familie.ba.sak.task.OpphørBehandlingOgVedtak.Companion.opprettTaskOpphoerBehandlingOgVedtak
+import no.nav.familie.ba.sak.task.OpphørBehandlingOgVedtak.Companion.opprettTaskOpphørBehandlingOgVedtak
 import no.nav.familie.ba.sak.økonomi.AvstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -146,10 +146,9 @@ class FagsakController(
             return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt")
         }
 
-        val task = opprettTaskOpphoerBehandlingOgVedtak(behandling,
+        val task = opprettTaskOpphørBehandlingOgVedtak(behandling,
                                                         vedtak,
                                                         saksbehandlerId,
-                                                        "",
                                                         BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
         taskRepository.save(task)
 

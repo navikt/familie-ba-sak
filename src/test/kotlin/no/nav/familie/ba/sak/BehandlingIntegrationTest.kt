@@ -314,11 +314,10 @@ class BehandlingIntegrationTest {
 
         behandlingService.nyttVedtakForAktivBehandling(fagsak.id!!, nyttVedtak, "saksbehandler1")
 
-        behandlingService.opphørBehandlingOgVedtak("saksbehandler2",
-                                                   tilfeldigsSaksnummer(),
-                                                   behandling?.id!!,
-                                                   BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-                                                   { a: Vedtak -> Unit }).data!!.behandling.id;
+        behandlingService.opphørVedtak("saksbehandler2",
+                                       behandling?.id!!,
+                                       BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+                                       { Unit }).data!!.behandling.id;
 
         val aktivBehandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
 

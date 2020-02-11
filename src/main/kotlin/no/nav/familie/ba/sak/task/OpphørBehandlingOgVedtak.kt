@@ -24,16 +24,15 @@ class OpphørBehandlingOgVedtak(
         val opphørVedtakTask = objectMapper.readValue(task.payload, OpphørVedtakDTO::class.java)
 
         IverksettMotOppdrag.LOG.debug("Opphører behandling og tilhørende vedtak med behandlingsId ${opphørVedtakTask.gjeldendeBehandlingsId}")
-        behandlingService.opphørBehandlingOgVedtak(opphørVedtakTask.saksbehandlerId,
-                                                   opphørVedtakTask.saksnummer,
-                                                   opphørVedtakTask.gjeldendeBehandlingsId,
-                                                   BehandlingType.valueOf(opphørVedtakTask.nyBehandlingType),
-                                                   ::opprettIverksettMotOppdragTask)
+        behandlingService.opphørVedtak(opphørVedtakTask.saksbehandlerId,
+                                       opphørVedtakTask.gjeldendeBehandlingsId,
+                                       BehandlingType.valueOf(opphørVedtakTask.nyBehandlingType),
+                                       ::opprettIverksettMotOppdragTask)
     }
 
     fun opprettIverksettMotOppdragTask(vedtak : Vedtak)  {
         val nyTask = IverksettMotOppdrag.opprettTask(
-                vedtak.behandling.fagsak.personIdent.ident!!,
+                vedtak.behandling.fagsak.personIdent.ident,
                 vedtak.behandling.id!!,
                 vedtak.id!!,
                 vedtak.ansvarligSaksbehandler)
@@ -45,19 +44,17 @@ class OpphørBehandlingOgVedtak(
         const val TASK_STEP_TYPE = "opphørVedtak"
         val LOG = LoggerFactory.getLogger(IverksettMotOppdrag::class.java)
 
-        fun opprettTaskOpphoerBehandlingOgVedtak(gjeldendeBehandling: Behandling,
+        fun opprettTaskOpphørBehandlingOgVedtak(gjeldendeBehandling: Behandling,
                                                  gjeldendeVedtak: Vedtak,
                                                  saksbehandlerId: String,
-                                                 saksnummer: String,
                                                  nyBehandlingstype: BehandlingType) : Task {
 
             return Task.nyTask(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(OpphørVedtakDTO(
-                                       personIdent = gjeldendeBehandling.fagsak.personIdent.ident!!,
+                                       personIdent = gjeldendeBehandling.fagsak.personIdent.ident,
                                        gjeldendeBehandlingsId = gjeldendeBehandling.id!!,
                                        gjeldendeVedtaksId = gjeldendeVedtak.id!!,
                                        saksbehandlerId = saksbehandlerId,
-                                       saksnummer = saksnummer,
                                        nyBehandlingType = nyBehandlingstype.name
                                )),
                                properties = Properties().apply {
@@ -75,6 +72,5 @@ data class OpphørVedtakDTO(
         val gjeldendeBehandlingsId : Long,
         val gjeldendeVedtaksId: Long,
         val saksbehandlerId : String,
-        val saksnummer : String,
         val nyBehandlingType : String
 )
