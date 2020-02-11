@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
-import no.nav.familie.ba.sak.behandling.restDomene.RestKortVedtak
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -124,6 +123,7 @@ class BehandlingIntegrationTest(@Autowired
         Assertions.assertEquals("ansvarligSaksbehandler2", hentetVedtak?.ansvarligSaksbehandler)
     }
 
+    /*
     @Test
     @Tag("integrasion")
     fun `Opprett nytt kort vedtak på aktiv behandling`(){
@@ -150,7 +150,9 @@ class BehandlingIntegrationTest(@Autowired
         Assertions.assertEquals("ansvarligSaksbehandler", hentetAvslagVedtak?.ansvarligSaksbehandler)
         Assertions.assertNotEquals("", hentetAvslagVedtak!!.stønadBrevMarkdown)
     }
+*/
 
+    /*
     @Test
     @Tag("integration")
     fun `Opprett nytt behandling vedtak på aktiv behandling`() {
@@ -186,7 +188,8 @@ class BehandlingIntegrationTest(@Autowired
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
     }
-
+*/
+    /*
     @Test
     @Tag("integration")
     fun `Hent HTML vedtaksbrev'`() {
@@ -208,7 +211,7 @@ class BehandlingIntegrationTest(@Autowired
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
         assert(htmlvedtaksbrevRess.data!! == "<HTML>HTML_MOCKUP</HTML>")
     }
-
+*/
     @Test
     @Tag("integration")
     fun `Ikke opprett ny behandling hvis fagsaken har en behandling som ikke er iverksatt`() {

@@ -26,6 +26,7 @@ import java.time.LocalDate
 class BehandlingNegativeIntegrationTest(@Autowired
                                         private val behandlingService: BehandlingService) {
 
+    /*
     @Test
     @Tag("integration")
     fun `Hent HTML vedtaksbrev Negative'`() {
@@ -49,4 +50,6 @@ class BehandlingNegativeIntegrationTest(@Autowired
         val htmlRess = behandlingService.hentHtmlVedtakForBehandling(behandling.id!!)
         assert(htmlRess.status == Ressurs.Status.FEILET)
     }
+
+     */
 }

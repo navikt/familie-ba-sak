@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyeVilkår
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttBeregning
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestKortVedtak
 import no.nav.familie.ba.sak.task.AvstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
 import no.nav.familie.ba.sak.økonomi.AvstemmingTaskDTO
@@ -48,15 +48,15 @@ class FagsakController(
         return ResponseEntity.ok(ressurs)
     }
 
-    @PostMapping(path = ["/fagsak/{fagsakId}/kort-vedtak"])
-    fun kortVedtak(@PathVariable fagsakId: Long, @RequestBody kortVedtak: RestKortVedtak): ResponseEntity<Ressurs<RestFagsak>> {
+    @PostMapping(path = ["/fagsak/{fagsakId}/nye-vilkår"])
+    fun nyeVilkår(@PathVariable fagsakId: Long, @RequestBody nyeVilkår: NyeVilkår): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
 
         val fagsak: Ressurs<RestFagsak> = Result.runCatching {
-            behandlingService.nyttKortVedtakForAktivBehandling(fagsakId,
-                                                           kortVedtak,
+            behandlingService.nyttVedtakForAktivBehandling(fagsakId,
+                                                           nyeVilkår,
                                                            ansvarligSaksbehandler = saksbehandlerId)
         }
                 .fold(
@@ -69,21 +69,21 @@ class FagsakController(
         return ResponseEntity.ok(fagsak)
     }
 
-    @PostMapping(path = ["/fagsak/{fagsakId}/nytt-vedtak"])
-    fun nyttVedtak(@PathVariable fagsakId: Long, @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
+    @PostMapping(path = ["/fagsak/{fagsakId}/oppdater-beregning"])
+    fun oppdaterBeregning(@PathVariable fagsakId: Long, @RequestBody nyttBeregning: NyttBeregning): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
 
         val fagsak: Ressurs<RestFagsak> = Result.runCatching {
-            behandlingService.nyttVedtakForAktivBehandling(fagsakId,
-                                                           nyttVedtak,
-                                                           ansvarligSaksbehandler = saksbehandlerId)
+            behandlingService.oppdaterAktivVedtakMedBeregning(fagsakId,
+                                                              nyttBeregning,
+                                                              ansvarligSaksbehandler = saksbehandlerId)
         }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
-                            Ressurs.failure("Klarte ikke å opprette nytt vedtak", e)
+                            Ressurs.failure("Klarte ikke å oppdater vedtak", e)
                         }
                 )
 

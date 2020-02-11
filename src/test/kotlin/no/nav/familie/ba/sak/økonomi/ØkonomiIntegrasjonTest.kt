@@ -52,7 +52,7 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
 
     @Autowired
     lateinit var taskRepository: TaskRepository
-
+/*
     @Test
     @Tag("integration")
     fun `Iverksett vedtak på aktiv behandling`() {
@@ -100,4 +100,6 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
         val oppdatertBehandling = behandlingService.hentBehandling(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling?.status)
     }
+
+ */
 }

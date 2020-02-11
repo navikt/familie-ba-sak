@@ -20,7 +20,3 @@ fun Vedtak.toRestVedtak(barnBeregning: List<VedtakBarn?>) = RestVedtak(
         vedtaksdato = this.vedtaksdato,
         resultat = this.resultat
 )
-
-data class RestKortVedtak(
-        val resultat: VedtakResultat
-)

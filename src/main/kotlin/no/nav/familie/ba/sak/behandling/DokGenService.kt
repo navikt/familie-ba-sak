@@ -29,23 +29,25 @@ class DokGenService(
     fun hentStønadBrevMarkdown(vedtak: Vedtak): String {
         val fletteFelter = mapTilBrevfelter(vedtak)
 
-        val template = if (vedtak.resultat == VedtakResultat.INNVILGET) {
-            "Innvilget"
-        } else if (vedtak.resultat == VedtakResultat.AVSLÅTT) {
-            "Avslag"
-        } else throw RuntimeException("Invalid/Unsupported vedtak.resultat")
+        val template = when(vedtak.resultat){
+            VedtakResultat.INNVILGET-> "Innvilget"
+            VedtakResultat.AVSLÅTT-> "Avslag"
+            else->{
+                throw RuntimeException("Invalid/Unsupported vedtak.resultat")
+            }
+        }
 
         return hentMarkdownForMal(template, fletteFelter)
     }
 
     private fun mapTilBrevfelter(vedtak: Vedtak): String {
-        if (vedtak.resultat == VedtakResultat.INNVILGET) {
-            return mapTilInnvilgetBrevFelter(vedtak)
-        } else if (vedtak.resultat == VedtakResultat.AVSLÅTT) {
-            return mapTilAvslagBrevFelter(vedtak)
+        when(vedtak.resultat){
+            VedtakResultat.INNVILGET-> return mapTilInnvilgetBrevFelter(vedtak)
+            VedtakResultat.AVSLÅTT-> return mapTilAvslagBrevFelter(vedtak)
+            else->{
+                throw RuntimeException("Invalid/unsupported vedtak.resultat")
+            }
         }
-
-        throw RuntimeException("Invalid/unsupported vedtak.resultat")
     }
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
