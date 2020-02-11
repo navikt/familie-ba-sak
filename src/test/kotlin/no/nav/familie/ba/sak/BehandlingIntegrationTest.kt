@@ -3,9 +3,7 @@ package no.nav.familie.ba.sak
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.DokGenService
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
@@ -288,30 +286,23 @@ class BehandlingIntegrationTest {
         }
     }
 
-
     @Test
     @Tag("integration")
     fun `Opphør migrert behandling`() {
 
-        val søkerFnr = tilfeldigFødselsnummer()
-        val barn1Fnr = tilfeldigFødselsnummer()
-        val barn2Fnr = tilfeldigFødselsnummer()
+        val søkerFnr = "01010199990"
+        val barn1Fnr = "01010199991"
+        val barn2Fnr = "01010199992"
 
-        val personIdent = PersonIdent(søkerFnr)
-        val fagsak = behandlingService.opprettBehandling(
-                personIdent,
-                { fagsak ->
-                    Behandling(fagsak = fagsak,
-                               journalpostID = "jounalpostId",
-                               type = BehandlingType.MIGRERING,
-                               saksnummer = tilfeldigsSaksnummer())
-                },
-                { behandlingId ->
-                    PersonopplysningGrunnlag(behandlingId)
-                            .leggTilPerson(PersonType.SØKER, personIdent, LocalDate.now())
-                            .leggTilPerson(PersonType.BARN, PersonIdent(barn1Fnr), LocalDate.now())
-                            .leggTilPerson(PersonType.BARN, PersonIdent(barn2Fnr), LocalDate.now())
-                })
+        every {
+            integrasjonTjeneste.hentPersoninfoFor(any())
+        } returns Personinfo(LocalDate.now())
+
+
+        val nyBehandling =
+                NyBehandling(søkerFnr, arrayOf(barn1Fnr,barn2Fnr), BehandlingType.MIGRERING_FRA_INFOTRYGD, "journalpostId")
+
+         val fagsak = behandlingService.opprettBehandling(nyBehandling)
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
 
@@ -326,19 +317,15 @@ class BehandlingIntegrationTest {
         behandlingService.opphørBehandlingOgVedtak("saksbehandler2",
                                                    tilfeldigsSaksnummer(),
                                                    behandling?.id!!,
-                                                   BehandlingType.MIGRERING_OPPHØRT,
+                                                   BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
                                                    { a: Vedtak -> Unit }).data!!.behandling.id;
 
         val aktivBehandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
 
-        Assertions.assertEquals(BehandlingType.MIGRERING_OPPHØRT, aktivBehandling!!.type)
+        Assertions.assertEquals(BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, aktivBehandling!!.type)
         Assertions.assertNotEquals(behandling.id!!, aktivBehandling.id)
     }
 
-
-    private var løpenummer = 0
-    private fun tilfeldigFødselsnummer() =
-            Base64.getEncoder().encodeToString((System.currentTimeMillis() + (løpenummer++)).toString().toByteArray())
     private fun tilfeldigsSaksnummer() = UUID.randomUUID().toString().substring(0, 18)
 
 }

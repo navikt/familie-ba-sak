@@ -3,14 +3,9 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.mottak.NyBehandling
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.AvstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
 import no.nav.familie.ba.sak.task.OpphørBehandlingOgVedtak.Companion.opprettTaskOpphoerBehandlingOgVedtak
@@ -132,7 +127,7 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/fagsak/{fagsakId}/opphoer-migrert-vedtak"])
-    fun opphoerMigrertVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+    fun opphørMigrertVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
 
         logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
@@ -143,22 +138,26 @@ class FagsakController(
         val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
                      ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        if(behandling.type!=BehandlingType.MIGRERING) {
+        if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
             return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er migrering")
         }
 
-        if(behandling.status!=BehandlingStatus.IVERKSATT) {
+        if (behandling.status != BehandlingStatus.IVERKSATT) {
             return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt")
         }
 
-        val task = opprettTaskOpphoerBehandlingOgVedtak(behandling, vedtak, saksbehandlerId, "", BehandlingType.MIGRERING_OPPHØRT)
+        val task = opprettTaskOpphoerBehandlingOgVedtak(behandling,
+                                                        vedtak,
+                                                        saksbehandlerId,
+                                                        "",
+                                                        BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
         taskRepository.save(task)
 
         return ResponseEntity.ok(Ressurs.success("Task for opphør av migrert behandling og vedtak på fagsak $fagsakId opprettet"))
     }
 
     private fun notFound(errorMessage: String): ResponseEntity<Ressurs<String>> =
-        errorResponse(HttpStatus.NOT_FOUND, errorMessage)
+            errorResponse(HttpStatus.NOT_FOUND, errorMessage)
 
     private fun forbidden(errorMessage: String): ResponseEntity<Ressurs<String>> =
             errorResponse(HttpStatus.FORBIDDEN, errorMessage)
@@ -166,7 +165,6 @@ class FagsakController(
     private fun errorResponse(notFound: HttpStatus, errorMessage: String): ResponseEntity<Ressurs<String>> {
         return ResponseEntity.status(notFound).body(Ressurs.failure(errorMessage))
     }
-
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)

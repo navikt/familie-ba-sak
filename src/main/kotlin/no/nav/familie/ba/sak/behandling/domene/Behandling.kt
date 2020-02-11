@@ -40,8 +40,7 @@ enum class BehandlingType {
     REVURDERING,
     MIGRERING_FRA_INFOTRYGD,
     KLAGE,
-    MIGRERING,
-    MIGRERING_OPPHØRT
+    MIGRERING_FRA_INFOTRYGD_OPPHØRT
 }
 
 enum class BehandlingStatus {
