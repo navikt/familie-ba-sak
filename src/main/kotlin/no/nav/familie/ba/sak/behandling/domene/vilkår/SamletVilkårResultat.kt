@@ -8,8 +8,8 @@ import javax.persistence.*
 @Table(name = "samlet_vilkar_resultat")
 class SamletVilkårResultat(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vilkars_resultat_seq")
-        @SequenceGenerator(name = "vilkars_resultat_seq")
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "samlet_vilkar_resultat_seq")
+        @SequenceGenerator(name = "samlet_vilkar_resultat_seq")
         private val id: Long? = null,
 
         @OneToMany(mappedBy = "samletVilkårResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])

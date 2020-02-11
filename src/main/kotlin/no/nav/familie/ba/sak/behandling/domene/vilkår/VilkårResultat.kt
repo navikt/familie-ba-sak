@@ -15,7 +15,8 @@ class VilkårResultat(
         @ManyToOne @JoinColumn(name = "samlet_vilkar_resultat_id")
         val samletVilkårResultat: SamletVilkårResultat? = null,
 
-        @ManyToOne(optional = false) @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
+        @ManyToOne(optional = false)
+        @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
         val person: Person,
 
         @Enumerated(EnumType.STRING)
