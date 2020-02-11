@@ -99,11 +99,10 @@ class IntegrasjonTjeneste(
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String): String {
-        return lagerJournalpostForVedtaksbrev(fnr, pdf)
+    fun journalFørVedtaksbrev(pdf: ByteArray, fnr: String, fagsakId: String): String {
+        return lagerJournalpostForVedtaksbrev(fnr, fagsakId, pdf)
     }
 
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun distribuerVedtaksbrev(journalpostId: String) {
         val uri = URI.create("$integrasjonerServiceUri/dist/v1")
         logger.info("Kaller dokdist-tjeneste med journalpostId $journalpostId")
@@ -122,13 +121,13 @@ class IntegrasjonTjeneste(
         )
     }
 
-    fun lagerJournalpostForVedtaksbrev(fnr: String, pdfByteArray: ByteArray): String {
+    fun lagerJournalpostForVedtaksbrev(fnr: String, fagsakId: String, pdfByteArray: ByteArray): String {
         val uri = URI.create("$integrasjonerServiceUri/arkiv/v2")
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
 
         return Result.runCatching {
             val dokumenter = listOf(Dokument(pdfByteArray, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE))
-            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, "140258931", "9999")
+            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, "9999")
             val arkiverDokumentResponse = sendJournalFørRequest(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(

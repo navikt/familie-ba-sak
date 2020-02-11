@@ -30,11 +30,11 @@ class JournalførVedtaksbrevTest : HttpTestBase(18085) {
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}")
     lateinit var integrasjonerUri: String
 
-    @Test
+
     @Tag("integration")
     fun `Iverksett vedtak på aktiv behandling`() {
         mockServer.enqueue(journalpostOkResponse())
-        val journalPostId = integrasjonTjeneste.lagerJournalpostForVedtaksbrev(mockFnr, mockPdf)
+        val journalPostId = integrasjonTjeneste.lagerJournalpostForVedtaksbrev(mockFnr, mockFagsakId, mockPdf)
 
         assertThat(mockJournalpostForVedtakId).isEqualTo(journalPostId)
 
@@ -45,6 +45,7 @@ class JournalførVedtaksbrevTest : HttpTestBase(18085) {
         val mapper = jacksonObjectMapper()
         val arkiverDokumentRequest = mapper.readValue(body, ArkiverDokumentRequest::class.java)
         assertThat(mockFnr).isEqualTo(arkiverDokumentRequest.fnr)
+        assertThat(mockFagsakId).isEqualTo(arkiverDokumentRequest.fagsakId)
         assertThat(1).isEqualTo(arkiverDokumentRequest.dokumenter.size)
         assertThat(IntegrasjonTjeneste.VEDTAK_DOKUMENT_TYPE).isEqualTo(arkiverDokumentRequest.dokumenter[0].dokumentType)
         assertThat(FilType.PDFA).isEqualTo(arkiverDokumentRequest.dokumenter[0].filType)
@@ -60,6 +61,7 @@ class JournalførVedtaksbrevTest : HttpTestBase(18085) {
     companion object {
         val mockJournalpostForVedtakId = "453491843"
         val mockFnr = "12345678910"
+        val mockFagsakId = "140258931"
         val mockPdf = "mock data".toByteArray()
         val mockResponse: MockResponse = MockResponse()
             .addHeader("Content-Type", "application/json; charset=utf-8")
