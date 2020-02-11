@@ -126,6 +126,12 @@
             <version>4.4.12</version>
         </dependency>
 
+        <dependency>
+            <groupId>no.finn.unleash</groupId>
+            <artifactId>unleash-client-java</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+
 
         <!-- NAV-interne avhengigheter -->
         <dependency>
@@ -313,6 +319,7 @@
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
                     <excludedGroups>${excludedGroups}</excludedGroups>
+                    <threadCount>1</threadCount>
                 </configuration>
             </plugin>
         </plugins>

@@ -33,7 +33,8 @@ class BehandlingNegativeIntegrationTest(@Autowired
         val failRess = behandlingService.hentHtmlVedtakForBehandling(100)
         Assertions.assertEquals(Ressurs.Status.FEILET, failRess.status)
 
-        val behandling = behandlingService.nyBehandling("6", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "sak1")
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("6")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, "sak1")
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
 

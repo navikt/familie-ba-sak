@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.HttpTestBase
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.FagsakController
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
@@ -47,12 +48,6 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
     @Autowired
     lateinit var økonomiService: ØkonomiService
 
-    @Autowired
-    lateinit var fagsakController: FagsakController
-
-    @Autowired
-    lateinit var taskRepository: TaskRepository
-/*
     @Test
     @Tag("integration")
     fun `Iverksett vedtak på aktiv behandling`() {
@@ -64,7 +59,8 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
         mockServer.enqueue(response)
         mockServer.enqueue(response)
 
-        val behandling = behandlingService.nyBehandling("0", BehandlingType.FØRSTEGANGSBEHANDLING, "sdf", "randomSaksnummer")
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("0")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, "randomSaksnummer")
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
@@ -73,12 +69,14 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
                            type = PersonType.SØKER,
                            personopplysningGrunnlag = personopplysningGrunnlag,
                            fødselsdato = LocalDate.now())
+
         personopplysningGrunnlag.leggTilPerson(søker)
 
         personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("123456789011"),
                                                       type = PersonType.BARN,
                                                       personopplysningGrunnlag = personopplysningGrunnlag,
                                                       fødselsdato = LocalDate.now()))
+
         personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
@@ -100,6 +98,4 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
         val oppdatertBehandling = behandlingService.hentBehandling(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling?.status)
     }
-
- */
 }
