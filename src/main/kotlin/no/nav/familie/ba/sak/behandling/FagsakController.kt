@@ -69,16 +69,16 @@ class FagsakController(
         return ResponseEntity.ok(fagsak)
     }
 
-    @PostMapping(path = ["/fagsak/{fagsakId}/oppdater-beregning"])
-    fun oppdaterBeregning(@PathVariable fagsakId: Long, @RequestBody nyttBeregning: NyttBeregning): ResponseEntity<Ressurs<RestFagsak>> {
+    @PostMapping(path = ["/fagsak/{fagsakId}/oppdater-vedtak-beregning"])
+    fun oppdaterVedtakMedBeregning(@PathVariable fagsakId: Long, @RequestBody
+    nyttBeregning: NyttBeregning): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
 
         val fagsak: Ressurs<RestFagsak> = Result.runCatching {
             behandlingService.oppdaterAktivVedtakMedBeregning(fagsakId,
-                                                              nyttBeregning,
-                                                              ansvarligSaksbehandler = saksbehandlerId)
+                                                              nyttBeregning)
         }
                 .fold(
                         onSuccess = { it },

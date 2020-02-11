@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.HttpTestBase
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.FagsakController
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
@@ -11,13 +9,13 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BarnBeregning
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyeVilkår
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttBeregning
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.TaskRepository
 import okhttp3.mockwebserver.MockResponse
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
@@ -60,7 +58,10 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
         mockServer.enqueue(response)
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("0")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, "randomSaksnummer")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                                       "sdf",
+                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                       "randomSaksnummer")
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
@@ -80,15 +81,23 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
         personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val oppdatertFagsak = behandlingService.nyttVedtakForAktivBehandling(
+        val nyttVedtak = behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyttVedtak = NyttVedtak("sakstype",
-                                        arrayOf(BarnBeregning(fødselsnummer = "123456789011",
-                                                              beløp = 1054,
-                                                              stønadFom = LocalDate.now())),
-                                        resultat = VedtakResultat.INNVILGET),
+                nyeVilkår = NyeVilkår(
+                        resultat = VedtakResultat.INNVILGET
+                ),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
+
+        val oppdatertFagsak = behandlingService.oppdaterAktivVedtakMedBeregning(
+                fagsakId = behandling.fagsak.id ?: 1L,
+                nyttBeregning = NyttBeregning("sakstype",
+                                              arrayOf(BarnBeregning(fødselsnummer = "123456789011",
+                                                                    beløp = 1054,
+                                                                    stønadFom = LocalDate.now()))
+                )
+        )
+
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
         val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
