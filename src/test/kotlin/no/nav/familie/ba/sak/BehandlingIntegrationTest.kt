@@ -248,13 +248,14 @@ class BehandlingIntegrationTest {
         personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        behandlingService.nyttVedtakForAktivBehandling(
+        val fagsakRes= behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
                 nyeVilkår = NyeVilkår(resultat = VedtakResultat.INNVILGET),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
+        Assertions.assertEquals(behandling.fagsak.id, fagsakRes.data?.id)
 
-        behandlingService.oppdaterAktivVedtakMedBeregning(
+        val updatedFagsakRes= behandlingService.oppdaterAktivVedtakMedBeregning(
                 fagsakId = behandling.fagsak.id ?: 1L,
                 nyttBeregning = NyttBeregning(
                         sakstype = "sakstype",
@@ -262,6 +263,8 @@ class BehandlingIntegrationTest {
                                                                 beløp = 1054,
                                                                 stønadFom = LocalDate.now())))
         )
+        Assertions.assertEquals(behandling.fagsak.id, updatedFagsakRes.data?.id)
+
 
         val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
@@ -390,11 +393,13 @@ class BehandlingIntegrationTest {
         personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        behandlingService.nyttVedtakForAktivBehandling(
+        val fagsakRes= behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
                 nyeVilkår = NyeVilkår(resultat = VedtakResultat.AVSLÅTT),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
+        Assertions.assertEquals(behandling.fagsak.id, fagsakRes.data?.id)
+
         val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
