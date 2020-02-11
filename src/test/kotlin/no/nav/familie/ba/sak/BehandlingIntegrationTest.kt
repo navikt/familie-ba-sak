@@ -288,7 +288,7 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
-    fun `Hent søker for behandling`() {
+    fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
         //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("2")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
