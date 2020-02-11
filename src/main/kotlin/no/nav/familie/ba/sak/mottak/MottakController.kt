@@ -37,12 +37,6 @@ class MottakController(private val oidcUtil: OIDCUtil,
             "VL"
         }
 
-        if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
-            logger.info("FeatureToggle for lag-oppgave er skrudd på")
-        } else {
-            logger.info("FeatureToggle for lag-oppgave er skrudd av")
-        }
-
         FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
 
         return Result.runCatching { behandlingService.opprettBehandling(nyBehandling) }
@@ -59,18 +53,6 @@ class MottakController(private val oidcUtil: OIDCUtil,
     @PostMapping(path = ["/behandling/opprettfrahendelse"])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = "VL"
-
-        if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
-            logger.info("FeatureToggle for lag-oppgave er skrudd på")
-        } else {
-            logger.info("FeatureToggle for lag-oppgave er skrudd av")
-        }
-
-        if (featureToggleService.isEnabled("familie-ba-sak.distribuer-vedtaksbrev")){
-            logger.info("FeatureToggle for distribuer-vedtaksbrev er skrudd på")
-        } else {
-            logger.info("FeatureToggle for distribuer-vedtaksbrev er skrudd av")
-        }
 
         FagsakController.logger.info("{} oppretter ny behandling fra hendelse", saksbehandlerId)
 
