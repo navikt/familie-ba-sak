@@ -15,7 +15,7 @@ import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = IverksettMotOppdrag.TASK_STEP_TYPE, beskrivelse = "Opphør aktiv behandling og vedtak", maxAntallFeil = 3)
-class OpphørBehandlingOgVedtak(
+class OpphørVedtak(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
@@ -44,10 +44,10 @@ class OpphørBehandlingOgVedtak(
         const val TASK_STEP_TYPE = "opphørVedtak"
         val LOG = LoggerFactory.getLogger(IverksettMotOppdrag::class.java)
 
-        fun opprettTaskOpphørBehandlingOgVedtak(gjeldendeBehandling: Behandling,
-                                                 gjeldendeVedtak: Vedtak,
-                                                 saksbehandlerId: String,
-                                                 nyBehandlingstype: BehandlingType) : Task {
+        fun opprettTaskOpphørVedtak(gjeldendeBehandling: Behandling,
+                                    gjeldendeVedtak: Vedtak,
+                                    saksbehandlerId: String,
+                                    nyBehandlingstype: BehandlingType) : Task {
 
             return Task.nyTask(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(OpphørVedtakDTO(
