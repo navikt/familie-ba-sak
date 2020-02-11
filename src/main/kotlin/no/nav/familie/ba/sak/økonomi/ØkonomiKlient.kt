@@ -71,12 +71,12 @@ class ØkonomiKlient(
                 HttpEntity<String>(headers))
     }
 
-    fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime, utbetalingsoppdrag: List<Utbetalingsoppdrag>): ResponseEntity<Ressurs<String>> {
+    fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime, oppdragTilAvstemming: List<OppdragId>): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders()
         headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
-        val requestBody = objectMapper.writeValueAsString(utbetalingsoppdrag)
+        val requestBody = objectMapper.writeValueAsString(oppdragTilAvstemming)
 
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/konsistensavstemming/$FAGSYSTEM/?avstemmingsdato=$avstemmingsdato"),

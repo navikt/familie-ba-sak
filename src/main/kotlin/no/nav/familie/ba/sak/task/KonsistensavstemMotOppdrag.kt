@@ -20,9 +20,9 @@ class KonsistensavstemMotOppdrag(val avstemmingService: AvstemmingService) : Asy
 
     override fun doTask(task: Task) {
         val konsistensavstemmingTask = objectMapper.readValue(task.payload, KonsistensavstemmingTaskDTO::class.java)
-        LOG.info("Gjør konsistensavstemming mot oppdrag datoen ${konsistensavstemmingTask.avstemmingdato} for ${konsistensavstemmingTask.utbetalingsoppdrag.size} antall løpende saker")
+        LOG.info("Gjør konsistensavstemming mot oppdrag datoen ${konsistensavstemmingTask.avstemmingdato}")
 
-        avstemmingService.konsistensavstemOppdrag(konsistensavstemmingTask.avstemmingdato, konsistensavstemmingTask.utbetalingsoppdrag)
+        avstemmingService.konsistensavstemOppdrag(konsistensavstemmingTask.avstemmingdato)
     }
 
     companion object {

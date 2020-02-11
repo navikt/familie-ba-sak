@@ -24,12 +24,11 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient, val behandlingServic
                 )
     }
 
-    fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime, utbetalingsoppdrag: List<Utbetalingsoppdrag>) {
+    fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime) {
 
-        // TODO: Bytt ut Liste av utbetalingsoppdrag med disse oppdragsId-ene. Tror kanskje at vi ikke trenger å lagre det på payloaden på tasken.
         val oppdragTilAvstemming = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
 
-        Result.runCatching { økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, utbetalingsoppdrag) }
+        Result.runCatching { økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, oppdragTilAvstemming) }
                 .fold(
                         onSuccess = {
                             LOG.debug("Konsistensavstemming mot oppdrag utført.")
