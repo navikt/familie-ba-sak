@@ -23,7 +23,7 @@ class OpphørVedtak(
     override fun doTask(task: Task) {
         val opphørVedtakTask = objectMapper.readValue(task.payload, OpphørVedtakDTO::class.java)
 
-        IverksettMotOppdrag.LOG.debug("Opphører behandling og tilhørende vedtak med behandlingsId ${opphørVedtakTask.gjeldendeBehandlingsId}")
+        LOG.debug("Opphører behandling og tilhørende vedtak med behandlingsId ${opphørVedtakTask.gjeldendeBehandlingsId}")
         behandlingService.opphørVedtak(opphørVedtakTask.saksbehandlerId,
                                        opphørVedtakTask.gjeldendeBehandlingsId,
                                        BehandlingType.valueOf(opphørVedtakTask.nyBehandlingType),
@@ -42,7 +42,7 @@ class OpphørVedtak(
 
     companion object {
         const val TASK_STEP_TYPE = "opphørVedtak"
-        val LOG = LoggerFactory.getLogger(IverksettMotOppdrag::class.java)
+        val LOG = LoggerFactory.getLogger(OpphørVedtak::class.java)
 
         fun opprettTaskOpphørVedtak(gjeldendeBehandling: Behandling,
                                     gjeldendeVedtak: Vedtak,
