@@ -34,7 +34,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
-            val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
+            val behandling = opprettNyBehandlingPåFagsak(fagsak,
+                                                         nyBehandling.journalpostID,
+                                                         nyBehandling.behandlingType,
+                                                         randomSaksnummer())
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
         } else {
             throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
@@ -50,7 +53,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
-            val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
+            val behandling = opprettNyBehandlingPåFagsak(fagsak,
+                                                         nyBehandling.journalpostID,
+                                                         nyBehandling.behandlingType,
+                                                         randomSaksnummer())
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
         } else if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
             val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
@@ -76,8 +82,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return fagsak
     }
 
-    fun opprettNyBehandlingPåFagsak(fagsak: Fagsak, journalpostID: String?, behandlingType: BehandlingType, saksnummer: String): Behandling {
-        val behandling = Behandling(fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
+    fun opprettNyBehandlingPåFagsak(fagsak: Fagsak,
+                                    journalpostID: String?,
+                                    behandlingType: BehandlingType,
+                                    saksnummer: String): Behandling {
+        val behandling =
+                Behandling(fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
         lagreBehandling(behandling)
         return behandling
     }
@@ -98,7 +108,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: Array<String>, personopplysningGrunnlag: PersonopplysningGrunnlag) {
+    private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: Array<String>,
+                                                                 personopplysningGrunnlag: PersonopplysningGrunnlag) {
         barnasFødselsnummer.map { nyttBarn ->
             if (personopplysningGrunnlag.barna.none { eksisterendeBarn -> eksisterendeBarn.personIdent.ident == nyttBarn }) {
                 personopplysningGrunnlag.leggTilPerson(Person(

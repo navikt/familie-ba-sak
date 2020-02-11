@@ -16,7 +16,7 @@ class Person(
 
         //SØKER, BARN, ANNENPART
         @Enumerated(EnumType.STRING) @Column(name = "type")
-        val type: PersonType? = null,
+        val type: PersonType,
 
         @Column(name = "foedselsdato", nullable = false)
         val fødselsdato: LocalDate?,

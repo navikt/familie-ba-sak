@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.domene
 
+import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
 
@@ -11,7 +12,8 @@ data class Behandling(
         @SequenceGenerator(name = "behandling_seq")
         val id: Long? = null,
 
-        @ManyToOne(optional = false) @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
+        @ManyToOne(optional = false)
+        @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         val fagsak: Fagsak,
 
         @Column(name = "journalpost_id")
@@ -31,6 +33,10 @@ data class Behandling(
         @Column(name = "status", nullable = false)
         var status: BehandlingStatus = BehandlingStatus.OPPRETTET,
 
+        @ManyToOne
+        @JoinColumn(name = "samlet_vilkar_resultat_id", updatable = false, nullable = true)
+        var samletVilkårResultat: SamletVilkårResultat? = null,
+
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true
 ) : BaseEntitet()
@@ -40,6 +46,16 @@ enum class BehandlingType {
     REVURDERING,
     MIGRERING_FRA_INFOTRYGD,
     KLAGE,
+}
+
+enum class BehandlingKategorier(gyldigeUnderkategorier: List<BehandlingUnderkategorier>) {
+    ORDINÆR(listOf(BehandlingUnderkategorier.EØS, BehandlingUnderkategorier.NATIONAL)),
+    UTVIDET(listOf(BehandlingUnderkategorier.EØS, BehandlingUnderkategorier.NATIONAL))
+}
+
+enum class BehandlingUnderkategorier {
+    EØS,
+    NATIONAL
 }
 
 enum class BehandlingStatus {
