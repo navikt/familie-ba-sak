@@ -35,7 +35,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
-            val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
+            val behandling = opprettNyBehandlingPåFagsak(fagsak,
+                                                         nyBehandling.journalpostID,
+                                                         nyBehandling.behandlingType,
+                                                         randomSaksnummer())
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
         } else {
             throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
@@ -51,7 +54,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
-            val behandling = opprettNyBehandlingPåFagsak(fagsak, nyBehandling.journalpostID, nyBehandling.behandlingType, randomSaksnummer())
+            val behandling = opprettNyBehandlingPåFagsak(fagsak,
+                                                         nyBehandling.journalpostID,
+                                                         nyBehandling.behandlingType,
+                                                         randomSaksnummer())
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
         } else if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
             val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
@@ -65,21 +71,83 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return fagsak
     }
 
-    fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
-        val personIdent = PersonIdent(fødselsnummer)
+    @Transactional
+    fun opphørVedtak(saksbehandler: String,
+                     gjeldendeBehandlingsId: Long,
+                     nyBehandlingType: BehandlingType,
+                     postProsessor: (Vedtak) -> Unit): Ressurs<Vedtak> {
 
-        val fagsak = fagsakService.hentFagsakForPersonident(personIdent) ?: run {
-            val nyFagsak = Fagsak(null, AktørId("1"), personIdent)
-            fagsakService.lagreFagsak(nyFagsak)
-            nyFagsak
+        val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
+                              ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling ${gjeldendeBehandlingsId}")
+
+        val gjeldendeVedtakPerson = vedtakBarnRepository.finnBarnBeregningForVedtak(gjeldendeVedtak.id)
+        if (gjeldendeVedtakPerson.isEmpty()) {
+            return Ressurs.failure("Fant ikke vedtak barn tilknyttet behandling ${gjeldendeBehandlingsId} og vedtak ${gjeldendeVedtak.id}")
         }
 
-        return fagsak
+        val gjeldendeBehandling = gjeldendeVedtak.behandling;
+        if (!gjeldendeBehandling.aktiv) {
+            return Ressurs.failure("Aktivt vedtak er tilknyttet behandling ${gjeldendeBehandlingsId} som IKKE er aktivt")
+        }
+
+        /// TODO Her følger det med samme journalpost_id som forrige behandling. Er det riktig?
+        val nyBehandling = Behandling(fagsak = gjeldendeBehandling.fagsak,
+                                      journalpostID = gjeldendeBehandling.journalpostID,
+                                      saksnummer = randomSaksnummer(),
+                                      type = nyBehandlingType)
+
+        // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
+        behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
+        behandlingRepository.save(nyBehandling)
+
+        val nyttVedtak = Vedtak(
+                ansvarligSaksbehandler = saksbehandler,
+                behandling = nyBehandling,
+                resultat = VedtakResultat.OPPHØRT,
+                vedtaksdato = LocalDate.now())
+
+        // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
+        vedtakRepository.save(gjeldendeVedtak.also { it.aktiv = false })
+        vedtakRepository.save(nyttVedtak)
+
+        /// TODO For opphør er beløpet det samme, men perioden fra nå til gammel til-og-med-dato. Er det riktig?
+        val nyeVedtakPerson = gjeldendeVedtakPerson
+                .map { p ->
+                    VedtakBarn(vedtak = nyttVedtak,
+                               barn = p.barn,
+                               beløp = p.beløp,
+                               stønadFom = LocalDate.now(),
+                               stønadTom = p.stønadTom)
+                }
+
+
+        vedtakBarnRepository.saveAll(nyeVedtakPerson)
+
+        postProsessor(nyttVedtak)
+
+        return Ressurs.success(nyttVedtak)
     }
 
-    fun opprettNyBehandlingPåFagsak(fagsak: Fagsak, journalpostID: String?, behandlingType: BehandlingType, saksnummer: String): Behandling {
-        val behandling = Behandling(fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
-        lagreBehandling(behandling)
+
+    fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak =
+            hentEllerOpprettFagsak(PersonIdent(fødselsnummer))
+
+    private fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak =
+            fagsakService.hentFagsakForPersonident(personIdent) ?: opprettFagsak(personIdent)
+
+    private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
+        val nyFagsak = Fagsak(null, AktørId("1"), personIdent)
+        fagsakService.lagreFagsak(nyFagsak)
+        return nyFagsak
+    }
+
+    fun opprettNyBehandlingPåFagsak(fagsak: Fagsak,
+                                    journalpostID: String?,
+                                    behandlingType: BehandlingType,
+                                    saksnummer: String): Behandling {
+        val behandling =
+                Behandling(fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
+        lagreNyOgDeaktiverGammelBehandling(behandling)
         return behandling
     }
 
@@ -99,7 +167,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: Array<String>, personopplysningGrunnlag: PersonopplysningGrunnlag) {
+    private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: Array<String>,
+                                                                 personopplysningGrunnlag: PersonopplysningGrunnlag) {
         barnasFødselsnummer.map { nyttBarn ->
             if (personopplysningGrunnlag.barna.none { eksisterendeBarn -> eksisterendeBarn.personIdent.ident == nyttBarn }) {
                 personopplysningGrunnlag.leggTilPerson(Person(
@@ -139,7 +208,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
-    fun lagreBehandling(behandling: Behandling) {
+    fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling) {
         val aktivBehandling = hentBehandlingHvisEksisterer(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
