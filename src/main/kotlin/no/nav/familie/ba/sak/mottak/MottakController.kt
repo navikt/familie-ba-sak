@@ -43,7 +43,7 @@ class MottakController(private val oidcUtil: OIDCUtil,
                         onFailure = {
                             logger.info("Opprettelse av behandling feilet", it)
                             ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                    .body(Ressurs.failure(it.message, it))
+                                    .body(Ressurs.failure(it.cause?.message ?: it.message, it))
                         },
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.id)) }
                 )
