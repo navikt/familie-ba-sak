@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak
 
-import io.mockk.MockKAnnotations
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.DokGenService
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
@@ -14,12 +14,16 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.task.OpphørVedtak
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -27,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import javax.transaction.Transactional
 import kotlin.streams.asSequence
@@ -369,6 +374,100 @@ class BehandlingIntegrationTest {
         Assertions.assertThrows(Exception::class.java) {
             behandlingService.opprettBehandling(NyBehandling(morId, arrayOf(barnId), BehandlingType.REVURDERING, null))
         }
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Opphør migrert vedtak via task`() {
+
+        val søkerFnr = "01010199990"
+        val barn1Fnr = "01010199991"
+        val barn2Fnr = "01010199992"
+
+        every {
+            integrasjonTjeneste.hentPersoninfoFor(any())
+        } returns Personinfo(LocalDate.now())
+
+
+        val nyBehandling =
+                NyBehandling(søkerFnr, arrayOf(barn1Fnr,barn2Fnr), BehandlingType.MIGRERING_FRA_INFOTRYGD, "journalpostId")
+
+        val fagsak = behandlingService.opprettBehandling(nyBehandling)
+
+        val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
+
+        val barnasBeregning = arrayOf(
+                BarnBeregning(barn1Fnr, 1054, LocalDate.now()),
+                BarnBeregning(barn2Fnr, 1054, LocalDate.now())
+        )
+        val nyttVedtak = NyttVedtak("sakstype", barnasBeregning, VedtakResultat.INNVILGET)
+
+        behandlingService.nyttVedtakForAktivBehandling(fagsak.id!!, nyttVedtak, "saksbehandler1")
+
+        val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling!!.id)
+
+        val task = OpphørVedtak.opprettTaskOpphørVedtak(
+                behandling,
+                vedtak!!,
+                "saksbehandler",
+                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+        )
+
+        val taskRepository : TaskRepository = mockk()
+        val slot = slot<Task>()
+
+        every { taskRepository.save(capture(slot)) } answers { slot.captured }
+
+        OpphørVedtak(
+                behandlingService,
+                taskRepository
+        ).doTask(task)
+
+        verify(exactly=1) {
+            taskRepository.save(any())
+            Assertions.assertEquals("iverksettMotOppdrag", slot.captured.taskStepType)
+        }
+
+        val aktivBehandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
+
+        Assertions.assertEquals(BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, aktivBehandling!!.type)
+        Assertions.assertNotEquals(behandling.id!!, aktivBehandling.id)
+    }
+
+
+    @Test
+    @Tag("integration")
+    fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
+        //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("2")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
+        val vedtak = Vedtak(behandling = behandling,
+                ansvarligSaksbehandler = "ansvarligSaksbehandler",
+                vedtaksdato = LocalDate.now(),
+                stønadBrevMarkdown = "",
+                resultat = VedtakResultat.INNVILGET)
+        behandlingService.lagreVedtak(vedtak)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+
+        val søker = Person(personIdent = PersonIdent("2"),
+                type = PersonType.SØKER,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                fødselsdato = LocalDate.now())
+        personopplysningGrunnlag.leggTilPerson(søker)
+
+        personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("12345678911"),
+                type = PersonType.BARN,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                fødselsdato = LocalDate.now()))
+        personopplysningGrunnlag.aktiv = true
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        val oppdragIdListe = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
+
+        Assertions.assertEquals(1, oppdragIdListe.size)
+        Assertions.assertEquals(behandling.id, oppdragIdListe[0].behandlingsId)
+        Assertions.assertEquals("2", oppdragIdListe[0].personIdent)
     }
 
     @Test

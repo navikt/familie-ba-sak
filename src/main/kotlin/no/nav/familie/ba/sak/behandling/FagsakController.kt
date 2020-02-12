@@ -4,12 +4,14 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.task.AvstemMotOppdrag
+import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
-import no.nav.familie.ba.sak.økonomi.AvstemmingTaskDTO
-import no.nav.familie.ba.sak.økonomi.IverksettingTaskDTO
+import no.nav.familie.ba.sak.task.OpphørVedtak.Companion.opprettTaskOpphørVedtak
+import no.nav.familie.ba.sak.økonomi.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -18,10 +20,10 @@ import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
-import java.util.*
 
 @RestController
 @RequestMapping("/api")
@@ -118,19 +120,7 @@ class FagsakController(
     }
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
-        val task = Task.nyTask(type = IverksettMotOppdrag.TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
-                                       personIdent = behandling.fagsak.personIdent.ident,
-                                       behandlingsId = behandling.id!!,
-                                       vedtaksId = vedtak.id!!,
-                                       saksbehandlerId = saksbehandlerId
-                               )),
-                               properties = Properties().apply {
-                                   this["personIdent"] = behandling.fagsak.personIdent.ident
-                                   this["behandlingsId"] = behandling.id.toString()
-                                   this["vedtakId"] = vedtak.id.toString()
-                               }
-        )
+        val task = IverksettMotOppdrag.opprettTask(behandling, vedtak, saksbehandlerId)
         taskRepository.save(task)
     }
 
@@ -139,10 +129,10 @@ class FagsakController(
     fun settIGangAvstemming(): ResponseEntity<Ressurs<String>> {
 
         val iDag = LocalDateTime.now().toLocalDate().atStartOfDay()
-        val taskDTO = AvstemmingTaskDTO(iDag.minusDays(1), iDag)
+        val taskDTO = GrensesnittavstemmingTaskDTO(iDag.minusDays(1), iDag)
 
         logger.info("Lager task for avstemming")
-        val initiellAvstemmingTask = Task.nyTaskMedTriggerTid(AvstemMotOppdrag.TASK_STEP_TYPE,
+        val initiellAvstemmingTask = Task.nyTaskMedTriggerTid(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
                                                               objectMapper.writeValueAsString(taskDTO),
                                                               LocalDateTime.now())
         taskRepository.save(initiellAvstemmingTask)
@@ -157,6 +147,45 @@ class FagsakController(
         logger.debug(html.data)
 
         return html
+    }
+
+    @PostMapping(path = ["/fagsak/{fagsakId}/opphoer-migrert-vedtak"])
+    fun opphørMigrertVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+
+        logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
+
+        val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+
+        val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
+                     ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+
+        if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+            return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er migrering")
+        }
+
+        if (behandling.status != BehandlingStatus.IVERKSATT) {
+            return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt")
+        }
+
+        val task = opprettTaskOpphørVedtak(behandling,
+                                           vedtak,
+                                           saksbehandlerId,
+                                           BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
+        taskRepository.save(task)
+
+        return ResponseEntity.ok(Ressurs.success("Task for opphør av migrert behandling og vedtak på fagsak $fagsakId opprettet"))
+    }
+
+    private fun notFound(errorMessage: String): ResponseEntity<Ressurs<String>> =
+            errorResponse(HttpStatus.NOT_FOUND, errorMessage)
+
+    private fun forbidden(errorMessage: String): ResponseEntity<Ressurs<String>> =
+            errorResponse(HttpStatus.FORBIDDEN, errorMessage)
+
+    private fun errorResponse(notFound: HttpStatus, errorMessage: String): ResponseEntity<Ressurs<String>> {
+        return ResponseEntity.status(notFound).body(Ressurs.failure(errorMessage))
     }
 
     companion object {
