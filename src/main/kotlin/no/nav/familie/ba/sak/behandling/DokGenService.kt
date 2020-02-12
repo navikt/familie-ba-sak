@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
@@ -27,10 +28,29 @@ class DokGenService(
 
     fun hentStønadBrevMarkdown(vedtak: Vedtak): String {
         val fletteFelter = mapTilBrevfelter(vedtak)
-        return hentMarkdownForMal("Innvilget", fletteFelter)
+
+        val template = when (vedtak.resultat) {
+            VedtakResultat.INNVILGET -> "Innvilget"
+            VedtakResultat.AVSLÅTT -> "Avslag"
+            else -> {
+                throw RuntimeException("Invalid/Unsupported vedtak.resultat")
+            }
+        }
+
+        return hentMarkdownForMal(template, fletteFelter)
     }
 
     private fun mapTilBrevfelter(vedtak: Vedtak): String {
+        when (vedtak.resultat) {
+            VedtakResultat.INNVILGET -> return mapTilInnvilgetBrevFelter(vedtak)
+            VedtakResultat.AVSLÅTT -> return mapTilAvslagBrevFelter(vedtak)
+            else -> {
+                throw RuntimeException("Invalid/unsupported vedtak.resultat")
+            }
+        }
+    }
+
+    private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
         val brevfelter = "{\"belop\": %s,\n" + // TODO hent fra dokgen (/template/{templateName}/schema)
                          "\"startDato\": \"%s\",\n" +
                          "\"etterbetaling\": %s,\n" +
@@ -50,6 +70,21 @@ class DokGenService(
                 vedtak.behandling.fagsak.personIdent.ident,
                 "24.12.19",
                 vedtak.ansvarligSaksbehandler
+        )
+    }
+
+    private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
+        val brevfelter = "{\"fodselsnummer\": \"%s\",\n" +
+                         "\"navn\": \"%s\",\n" +
+                         "\"hjemmel\": \"%s\",\n" +
+                         "\"fritekst\": \"%s\"}"
+
+        return String.format( //TODO: sett navn, hjemmel og firtekst
+                brevfelter,
+                vedtak.behandling.fagsak.personIdent.ident,
+                "No Name",
+                "",
+                ""
         )
     }
 

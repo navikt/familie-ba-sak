@@ -2,9 +2,10 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
@@ -63,6 +64,27 @@ class FagsakController(
                         onSuccess = { it },
                         onFailure = { e ->
                             Ressurs.failure("Klarte ikke å opprette nytt vedtak", e)
+                        }
+                )
+
+        return ResponseEntity.ok(fagsak)
+    }
+
+    @PostMapping(path = ["/fagsak/{fagsakId}/oppdater-vedtak-beregning"])
+    fun oppdaterVedtakMedBeregning(@PathVariable fagsakId: Long, @RequestBody
+    nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
+        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+
+        logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
+
+        val fagsak: Ressurs<RestFagsak> = Result.runCatching {
+            behandlingService.oppdaterAktivVedtakMedBeregning(fagsakId,
+                                                              nyBeregning)
+        }
+                .fold(
+                        onSuccess = { it },
+                        onFailure = { e ->
+                            Ressurs.failure("Klarte ikke å oppdater vedtak", e)
                         }
                 )
 
