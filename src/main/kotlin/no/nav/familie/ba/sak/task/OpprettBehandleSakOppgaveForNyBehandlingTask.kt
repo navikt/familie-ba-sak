@@ -8,8 +8,8 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 
 @Service
-@TaskStepBeskrivelse(taskStepType = OpprettOppgaveTask.TASK_STEP_TYPE, beskrivelse = "Opprett oppgave i GOSYS", maxAntallFeil = 3)
-class OpprettOppgaveTask(
+@TaskStepBeskrivelse(taskStepType = OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, beskrivelse = "Opprett BEH_SAK oppgave i GOSYS for nye behandlinger", maxAntallFeil = 3)
+class OpprettBehandleSakOppgaveForNyBehandlingTask(
         private val oppgaveService: OppgaveService,
         private val taskRepository: TaskRepository) : AsyncTaskStep {
 
@@ -19,6 +19,6 @@ class OpprettOppgaveTask(
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "opprettOppgaveTask"
+        const val TASK_STEP_TYPE = "opprettBehandleSakOppgaveForNyBehandlingTask"
     }
 }
