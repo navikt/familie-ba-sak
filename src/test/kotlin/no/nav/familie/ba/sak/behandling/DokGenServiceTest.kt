@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,7 @@ import java.time.LocalDate
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
+@Disabled("DokGen must be available")
 class DokGenServiceTest(@Autowired
                         private val dokGenService: DokGenService) {
 
@@ -30,11 +32,25 @@ class DokGenServiceTest(@Autowired
             resultat = VedtakResultat.INNVILGET
     )
 
+    private val avslagVedtak= Vedtak(
+            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
+                                    journalpostID = "",
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING),
+            ansvarligSaksbehandler = "ansvarligSaksbehandler",
+            vedtaksdato = LocalDate.now(),
+            resultat = VedtakResultat.AVSLÅTT
+    )
+
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
-        dokGenService.runCatching {
-            val htmlResponse = lagHtmlFraMarkdown(hentStønadBrevMarkdown(vedtak))
-            assert(htmlResponse.startsWith("<html>"))
-        }
+        val markdown= dokGenService.hentStønadBrevMarkdown(vedtak)
+        val htmlResponse= dokGenService.lagHtmlFraMarkdown(markdown)
+        assert(htmlResponse.startsWith("<html>"))
+    }
+
+    @Test
+    fun `Test å generer Markdown for avslag brev`(){
+        val markdown= dokGenService.hentStønadBrevMarkdown(avslagVedtak)
+        assert(markdown.startsWith("<br>Du har ikke rett til barnetrygd fordi ."))
     }
 }
