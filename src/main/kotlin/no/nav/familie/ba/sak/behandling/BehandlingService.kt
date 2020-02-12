@@ -235,6 +235,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         when (val behandling = hentBehandling(behandlingId)) {
             null -> throw Exception("Feilet ved oppdatering av status på behandling. Fant ikke behandling med id $behandlingId")
             else -> {
+                LOG.info("Endrer status på behandling $behandlingId fra ${behandling.status} til $status")
                 if (status == BehandlingStatus.IVERKSATT) {
                     val fagsak = behandling.fagsak
                     fagsak.status = FagsakStatus.LØPENDE

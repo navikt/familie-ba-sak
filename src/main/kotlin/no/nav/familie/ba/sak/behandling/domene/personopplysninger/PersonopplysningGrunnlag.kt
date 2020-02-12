@@ -44,7 +44,7 @@ class PersonopplysningGrunnlag(
         get() {
             val barna: MutableList<Person> = LinkedList()
             for (p in personer) {
-                if (p.type?.equals(PersonType.BARN) == true) {
+                if (p.type == PersonType.BARN) {
                     barna.add(p)
                 }
             }

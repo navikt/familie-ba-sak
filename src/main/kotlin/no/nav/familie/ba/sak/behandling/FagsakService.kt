@@ -6,10 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakBarnRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.restDomene.RestBehandling
-import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.toRestVedtak
+import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.stereotype.Service
@@ -45,7 +42,8 @@ class FagsakService(
                     barnasFødselsnummer = barnasFødselsnummer,
                     vedtakForBehandling = vedtakForBehandling,
                     type = it.type,
-                    status = it.status
+                    status = it.status,
+                    samletVilkårResultat = it.samletVilkårResultat?.toRestSamletVilkårResultat()
             )
         }
 
