@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.DokGenService
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
@@ -346,4 +347,39 @@ class BehandlingIntegrationTest {
         Assertions.assertNotEquals(behandling.id!!, aktivBehandling.id)
     }
 
+
+    @Test
+    @Tag("integration")
+    fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
+        //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("2")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, lagRandomSaksnummer())
+        val vedtak = Vedtak(behandling = behandling,
+                ansvarligSaksbehandler = "ansvarligSaksbehandler",
+                vedtaksdato = LocalDate.now(),
+                stønadBrevMarkdown = "",
+                resultat = VedtakResultat.INNVILGET)
+        behandlingService.lagreVedtak(vedtak)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+
+        val søker = Person(personIdent = PersonIdent("2"),
+                type = PersonType.SØKER,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                fødselsdato = LocalDate.now())
+        personopplysningGrunnlag.leggTilPerson(søker)
+
+        personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("12345678911"),
+                type = PersonType.BARN,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                fødselsdato = LocalDate.now()))
+        personopplysningGrunnlag.aktiv = true
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        val oppdragIdListe = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
+
+        Assertions.assertEquals(1, oppdragIdListe.size)
+        Assertions.assertEquals(behandling.id, oppdragIdListe[0].behandlingsId)
+        Assertions.assertEquals("2", oppdragIdListe[0].personIdent)
+    }
 }
