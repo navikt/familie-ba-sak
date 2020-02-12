@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
+import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.mottak.NyBehandling
@@ -26,6 +27,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val personRepository: PersonRepository,
                         private val dokGenService: DokGenService,
                         private val fagsakService: FagsakService,
+                        private val vilkårService: VilkårService,
                         private val integrasjonTjeneste: IntegrasjonTjeneste) {
 
     @Transactional
@@ -198,14 +200,20 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun hentAktiveBehandlingerForLøpendeFagsaker(): List<OppdragId> {
         return fagsakService.hentLøpendeFagsaker()
                 .mapNotNull { fagsak -> hentBehandlingHvisEksisterer(fagsak.id) }
-                .map { behandling -> OppdragId(
-                        hentSøker(behandling)!!.personIdent.ident,
-                        behandling.id!!)
+                .map { behandling ->
+                    OppdragId(
+                            hentSøker(behandling)!!.personIdent.ident,
+                            behandling.id!!)
                 }
     }
 
     fun hentBehandlinger(fagsakId: Long?): List<Behandling?> {
         return behandlingRepository.finnBehandlinger(fagsakId)
+    }
+
+    fun lagreBehandling(behandling: Behandling) {
+        // TODO logge saksbehandler?
+        behandlingRepository.save(behandling)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling) {
@@ -259,11 +267,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         vedtakRepository.save(vedtak)
     }
 
-    fun nyttVedtakForAktivBehandling(fagsakId: Long,
+    @Transactional
+    fun nyttVedtakForAktivBehandling(behandling: Behandling,
+                                     personopplysningGrunnlag: PersonopplysningGrunnlag,
                                      nyttVedtak: NyttVedtak,
                                      ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
-        val behandling = hentBehandlingHvisEksisterer(fagsakId)
-                         ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+        val samletVilkårResultat = vilkårService.vurderVilkår(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat)
+
+        behandling.samletVilkårResultat = samletVilkårResultat
+        lagreBehandling(behandling)
 
         val vedtak = Vedtak(
                 behandling = behandling,
@@ -281,45 +293,22 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                        e)
                             }
                     )
-
         }
 
         lagreVedtak(vedtak)
 
-        return fagsakService.hentRestFagsak(fagsakId)
+        return fagsakService.hentRestFagsak(behandling.fagsak.id)
     }
 
 
     @Transactional
-    fun oppdaterAktivVedtakMedBeregning(fagsakId: Long, nyBeregning: NyBeregning)
+    fun oppdaterAktivVedtakMedBeregning(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag, nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
-        if (nyBeregning.barnasBeregning == null || nyBeregning.barnasBeregning.isEmpty()) {
-            return Ressurs.failure("Barnas beregning er null eller tømt")
-        }
-
-        val behandling = hentBehandlingHvisEksisterer(fagsakId)
-        if (behandling == null) {
-            return Ressurs.failure("Fant ikke behandling på fagsak $fagsakId")
-        }
-
-        val vedtak = hentAktivVedtakForBehandling(behandling.id)
-        if (vedtak == null) {
-            return Ressurs.failure("Fant ikke aktiv vedtak på fagsak $fagsakId, behandling ${behandling.id}")
-        }
-
-        if (vedtak.resultat == VedtakResultat.AVSLÅTT) {
-            return Ressurs.failure("Kan ikke legge beregning til avslag vedtak")
-        }
-
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
-
         nyBeregning.barnasBeregning.map {
             val barn =
                     personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
-                                                                                  personopplysningGrunnlag?.id)
-            if (barn == null) {
-                throw RuntimeException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
-            }
+                                                                                  personopplysningGrunnlag.id)
+                    ?: throw RuntimeException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
             if (it.stønadFom.isBefore(barn.fødselsdato)) {
                 throw RuntimeException("Ugyldig fra og med dato for ${barn.fødselsdato}")
@@ -347,7 +336,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         lagreVedtak(vedtak)
 
-        return fagsakService.hentRestFagsak(fagsakId)
+        return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
 
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
