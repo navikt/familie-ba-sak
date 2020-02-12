@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling.domene.personopplysninger
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import java.time.LocalDate
 import java.util.*
 import javax.persistence.*
 
@@ -33,11 +35,16 @@ class PersonopplysningGrunnlag(
         personer.add(person)
     }
 
+    fun leggTilPerson(type: PersonType, personIdent: PersonIdent, fødselsdato: LocalDate) :PersonopplysningGrunnlag {
+        personer.add(Person(type=type,personIdent = personIdent,fødselsdato = fødselsdato,personopplysningGrunnlag =  this))
+        return this;
+    }
+
     val barna: List<Person>
         get() {
             val barna: MutableList<Person> = LinkedList()
             for (p in personer) {
-                if (p.type?.equals(PersonType.BARN) == true) {
+                if (p.type == PersonType.BARN) {
                     barna.add(p)
                 }
             }

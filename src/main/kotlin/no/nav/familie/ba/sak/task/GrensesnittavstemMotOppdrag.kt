@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.økonomi.AvstemmingService
-import no.nav.familie.ba.sak.økonomi.AvstemmingTaskDTO
+import no.nav.familie.ba.sak.økonomi.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -15,16 +15,16 @@ import java.time.LocalDate
 import java.time.MonthDay
 
 @Service
-@TaskStepBeskrivelse(taskStepType = AvstemMotOppdrag.TASK_STEP_TYPE,
+@TaskStepBeskrivelse(taskStepType = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
                      beskrivelse = "Grensesnittavstemming mot oppdrag",
                      maxAntallFeil = 3)
-class AvstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepository) : AsyncTaskStep {
+class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepository) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val avstemmingTask = objectMapper.readValue(task.payload, AvstemmingTaskDTO::class.java)
+        val avstemmingTask = objectMapper.readValue(task.payload, GrensesnittavstemmingTaskDTO::class.java)
         LOG.info("Gjør avstemming mot oppdrag fra og med ${avstemmingTask.fomDato} til og med ${avstemmingTask.tomDato}")
 
-        avstemmingService.avstemOppdrag(avstemmingTask.fomDato, avstemmingTask.tomDato)
+        avstemmingService.grensesnittavstemOppdrag(avstemmingTask.fomDato, avstemmingTask.tomDato)
     }
 
     override fun onCompletion(task: Task) {
@@ -39,9 +39,9 @@ class AvstemMotOppdrag(val avstemmingService: AvstemmingService, val taskReposit
         taskRepository.save(nesteAvstemmingTask)
     }
 
-    fun nesteAvstemmingDTO(nesteDag: LocalDate, antallDager: Int): AvstemmingTaskDTO {
+    fun nesteAvstemmingDTO(nesteDag: LocalDate, antallDager: Int): GrensesnittavstemmingTaskDTO {
         return if (erHelgEllerHelligdag(nesteDag)) nesteAvstemmingDTO(nesteDag.plusDays(1), antallDager + 1)
-        else AvstemmingTaskDTO(nesteDag.minusDays(antallDager.toLong()).atStartOfDay(), nesteDag.atStartOfDay())
+        else GrensesnittavstemmingTaskDTO(nesteDag.minusDays(antallDager.toLong()).atStartOfDay(), nesteDag.atStartOfDay())
     }
 
     private fun erHelgEllerHelligdag(dato: LocalDate): Boolean {
@@ -59,6 +59,6 @@ class AvstemMotOppdrag(val avstemmingService: AvstemmingService, val taskReposit
                 MonthDay.of(12, 25),
                 MonthDay.of(12, 26)
         )
-        val LOG: Logger = LoggerFactory.getLogger(AvstemMotOppdrag::class.java)
+        val LOG: Logger = LoggerFactory.getLogger(GrensesnittavstemMotOppdrag::class.java)
     }
 }

@@ -60,7 +60,7 @@ class ØkonomiKlient(
                 HttpEntity(objectMapper.writeValueAsString(statusFraOppdragDTO), headers))
     }
 
-    fun avstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
+    fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders()
         headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
@@ -69,5 +69,18 @@ class ØkonomiKlient(
                 URI.create("$familieOppdragUri/grensesnittavstemming/$FAGSYSTEM/?fom=$fraDato&tom=$tilDato"),
                 HttpMethod.POST,
                 HttpEntity<String>(headers))
+    }
+
+    fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime, oppdragTilAvstemming: List<OppdragId>): ResponseEntity<Ressurs<String>> {
+        val headers = HttpHeaders()
+        headers.acceptCharset = listOf(Charsets.UTF_8)
+        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+
+        val requestBody = objectMapper.writeValueAsString(oppdragTilAvstemming)
+
+        return restOperations.exchange(
+                URI.create("$familieOppdragUri/konsistensavstemming/$FAGSYSTEM/?avstemmingsdato=$avstemmingsdato"),
+                HttpMethod.POST,
+                HttpEntity<String>(requestBody, headers))
     }
 }
