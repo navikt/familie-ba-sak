@@ -6,10 +6,10 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.task.AvstemMotOppdrag
+import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
 import no.nav.familie.ba.sak.task.OpphørVedtak.Companion.opprettTaskOpphørVedtak
-import no.nav.familie.ba.sak.økonomi.AvstemmingTaskDTO
+import no.nav.familie.ba.sak.økonomi.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -106,10 +106,10 @@ class FagsakController(
     fun settIGangAvstemming(): ResponseEntity<Ressurs<String>> {
 
         val iDag = LocalDateTime.now().toLocalDate().atStartOfDay()
-        val taskDTO = AvstemmingTaskDTO(iDag.minusDays(1), iDag)
+        val taskDTO = GrensesnittavstemmingTaskDTO(iDag.minusDays(1), iDag)
 
         logger.info("Lager task for avstemming")
-        val initiellAvstemmingTask = Task.nyTaskMedTriggerTid(AvstemMotOppdrag.TASK_STEP_TYPE,
+        val initiellAvstemmingTask = Task.nyTaskMedTriggerTid(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
                                                               objectMapper.writeValueAsString(taskDTO),
                                                               LocalDateTime.now())
         taskRepository.save(initiellAvstemmingTask)
