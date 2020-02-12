@@ -6,8 +6,10 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
-import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -29,15 +31,15 @@ class OppgaveServiceTest {
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
     @MockK
-    lateinit var fagsakRepository: FagsakRepository
+    lateinit var behandlingRepository: BehandlingRepository
 
     @InjectMockKs
     lateinit var oppgaveService: OppgaveService
 
     @Test
-    fun `Opprett oppgave skal bruke aktør fra fagsak, kalle arbeidsfordeling og opprettOppgave`() {
-        every { fagsakRepository.finnFagsak(FAGSAK_ID) } returns Fagsak(personIdent = PersonIdent(ident = FNR),
-                                                                        aktørId = AktørId(id = AKTØR_ID_FAGSAK))
+    fun `Opprett oppgave skal lage oppgave med enhetsnummer fra norg2`() {
+        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
+        every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { integrasjonTjeneste.hentBehandlendeEnhetForPersonident(FNR) } returns listOf(
                 mockk {
                     every { enhetId } returns ENHETSNUMMER
@@ -47,7 +49,7 @@ class OppgaveServiceTest {
         val slot = slot<OpprettOppgave>()
         every { integrasjonTjeneste.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
-        oppgaveService.opprettOppgaveForNyBehandling(FAGSAK_ID)
+        oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
@@ -61,13 +63,14 @@ class OppgaveServiceTest {
 
     @Test
     fun `Opprett oppgave skal kalle oppretteOppgave selv om den ikke finner en enhetsnummer, men da med uten tildeltEnhetsnummer`() {
-        every { fagsakRepository.finnFagsak(FAGSAK_ID) } returns Fagsak(personIdent = PersonIdent(ident = FNR))
+        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
+        every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { integrasjonTjeneste.hentAktørId(FNR) } returns AktørId(AKTØR_ID_INTEGRASJONER)
         every { integrasjonTjeneste.hentBehandlendeEnhetForPersonident(FNR) } returns emptyList()
         val slot = slot<OpprettOppgave>()
         every { integrasjonTjeneste.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
-        oppgaveService.opprettOppgaveForNyBehandling(FAGSAK_ID)
+        oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID)
 
         assertThat(slot.captured.enhetsnummer).isNull()
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
@@ -80,24 +83,33 @@ class OppgaveServiceTest {
     }
 
     @Test
-    fun `Opprett oppgave skal kaste IllegalStateException hvis det ikke finnes en fagsak`() {
-        every { fagsakRepository.finnFagsak(FAGSAK_ID) } returns null
-        assertThatThrownBy { oppgaveService.opprettOppgaveForNyBehandling(FAGSAK_ID) }
-                .hasMessageContaining("Kan ikke finne fagsak med id $FAGSAK_ID")
+    fun `Opprett oppgave skal kaste IllegalStateException hvis det ikke finnes en behandling`() {
+        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns null
+        assertThatThrownBy { oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID) }
+                .hasMessageContaining("Kan ikke finne behandling med id $BEHANDLING_ID")
                 .isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test
     fun `Opprett oppgave skal kaste IllegalStateException hvis det ikke finner en aktør`() {
-        every { fagsakRepository.finnFagsak(FAGSAK_ID) } returns Fagsak(personIdent = PersonIdent(ident = FNR))
+        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { integrasjonTjeneste.hentAktørId(FNR) } throws RuntimeException("aktør")
-        assertThatThrownBy { oppgaveService.opprettOppgaveForNyBehandling(FAGSAK_ID) }
+        assertThatThrownBy { oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID) }
                 .hasMessage("aktør")
                 .isInstanceOf(java.lang.RuntimeException::class.java)
     }
 
+    private fun lagTestBehandling(): Behandling {
+        return Behandling(fagsak = Fagsak(id = FAGSAK_ID,
+                                          personIdent = PersonIdent(
+                                                  ident = FNR),
+                                          aktørId = AktørId(id = AKTØR_ID_FAGSAK)),
+                          type = BehandlingType.FØRSTEGANGSBEHANDLING)
+    }
+
     companion object {
         private const val FAGSAK_ID = 10000000L
+        private const val BEHANDLING_ID = 20000000L
         private const val OPPGAVE_ID = "42"
         private const val FNR = "fnr"
         private const val ENHETSNUMMER = "enhet"
