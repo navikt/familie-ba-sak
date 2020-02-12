@@ -193,7 +193,7 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integrasion")
-    fun `Opprett nytt vedtak med vilkår`() {
+    fun `Opprett nytt vedtak`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("666")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
@@ -203,7 +203,7 @@ class BehandlingIntegrationTest {
 
         behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyeVilkår = NyeVilkår(resultat = VedtakResultat.INNVILGET),
+                nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
@@ -214,7 +214,7 @@ class BehandlingIntegrationTest {
 
         behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyeVilkår = NyeVilkår(resultat = VedtakResultat.AVSLÅTT),
+                nyttVedtak = NyttVedtak(resultat = VedtakResultat.AVSLÅTT),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
         val hentetAvslagVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
@@ -250,15 +250,14 @@ class BehandlingIntegrationTest {
 
         val fagsakRes= behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyeVilkår = NyeVilkår(resultat = VedtakResultat.INNVILGET),
+                nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
         Assertions.assertEquals(behandling.fagsak.id, fagsakRes.data?.id)
 
         val updatedFagsakRes= behandlingService.oppdaterAktivVedtakMedBeregning(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyttBeregning = NyttBeregning(
-                        sakstype = "sakstype",
+                nyBeregning = NyBeregning(
                         barnasBeregning = arrayOf(BarnBeregning(fødselsnummer = "123456789011",
                                                                 beløp = 1054,
                                                                 stønadFom = LocalDate.now())))
@@ -299,14 +298,13 @@ class BehandlingIntegrationTest {
 
         behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyeVilkår = NyeVilkår(resultat = VedtakResultat.INNVILGET),
+                nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
         behandlingService.oppdaterAktivVedtakMedBeregning(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyttBeregning = NyttBeregning(
-                        "sakstype",
+                nyBeregning = NyBeregning(
                         arrayOf(BarnBeregning(fødselsnummer = "123456789011",
                                               beløp = 1054,
                                               stønadFom = LocalDate.now()))
@@ -375,7 +373,7 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
-    fun `Opprett nytt avslag vedtak med vikår`() {
+    fun `Opprett nytt avslag vedtak`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("777")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
@@ -395,7 +393,7 @@ class BehandlingIntegrationTest {
 
         val fagsakRes= behandlingService.nyttVedtakForAktivBehandling(
                 fagsakId = behandling.fagsak.id ?: 1L,
-                nyeVilkår = NyeVilkår(resultat = VedtakResultat.AVSLÅTT),
+                nyttVedtak = NyttVedtak(resultat = VedtakResultat.AVSLÅTT),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
         Assertions.assertEquals(behandling.fagsak.id, fagsakRes.data?.id)

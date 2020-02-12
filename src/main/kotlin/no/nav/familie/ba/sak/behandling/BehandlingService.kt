@@ -191,7 +191,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     fun nyttVedtakForAktivBehandling(fagsakId: Long,
-                                     nyeVilkår: NyeVilkår,
+                                     nyttVedtak: NyttVedtak,
                                      ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
         val behandling = hentBehandlingHvisEksisterer(fagsakId)
                          ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
@@ -200,11 +200,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 behandling = behandling,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
-                resultat = nyeVilkår.resultat
+                resultat = nyttVedtak.resultat
         )
 
-        vedtak.stønadBrevMarkdown = if (nyeVilkår.resultat == VedtakResultat.AVSLÅTT)
-            Result.runCatching { dokGenService.hentStønadBrevMarkdown(vedtak) }
+        if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT) {
+            vedtak.stønadBrevMarkdown = Result.runCatching { dokGenService.hentStønadBrevMarkdown(vedtak) }
                     .fold(
                             onSuccess = { it },
                             onFailure = { e ->
@@ -212,7 +212,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                        e)
                             }
                     )
-        else ""
+
+        }
 
         lagreVedtak(vedtak)
 
@@ -221,9 +222,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
 
     @Transactional
-    fun oppdaterAktivVedtakMedBeregning(fagsakId: Long, nyttBeregning: NyttBeregning)
+    fun oppdaterAktivVedtakMedBeregning(fagsakId: Long, nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
-        if (nyttBeregning.barnasBeregning == null || nyttBeregning.barnasBeregning.isEmpty()) {
+        if (nyBeregning.barnasBeregning == null || nyBeregning.barnasBeregning.isEmpty()) {
             return Ressurs.failure("Barnas beregning er null eller tømt")
         }
 
@@ -243,7 +244,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
 
-        nyttBeregning.barnasBeregning.map {
+        nyBeregning.barnasBeregning.map {
             val barn =
                     personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
                                                                                   personopplysningGrunnlag?.id)

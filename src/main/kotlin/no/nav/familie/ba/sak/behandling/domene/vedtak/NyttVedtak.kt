@@ -2,12 +2,11 @@ package no.nav.familie.ba.sak.behandling.domene.vedtak
 
 import java.time.LocalDate
 
-data class NyeVilkår(
+data class NyttVedtak(
         val resultat: VedtakResultat
 )
 
-data class NyttBeregning(
-        val sakstype: String,
+data class NyBeregning(
         val barnasBeregning: Array<BarnBeregning>
 )
 
