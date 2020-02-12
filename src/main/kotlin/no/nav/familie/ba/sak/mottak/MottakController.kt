@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.mottak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
@@ -37,7 +36,7 @@ class MottakController(private val oidcUtil: OIDCUtil,
             "VL"
         }
 
-        FagsakController.logger.info("{} oppretter ny behandling", saksbehandlerId)
+        logger.info("{} oppretter ny behandling", saksbehandlerId)
 
         return Result.runCatching { behandlingService.opprettBehandling(nyBehandling) }
                 .fold(
@@ -54,7 +53,7 @@ class MottakController(private val oidcUtil: OIDCUtil,
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = "VL"
 
-        FagsakController.logger.info("{} oppretter ny behandling fra hendelse", saksbehandlerId)
+        logger.info("{} oppretter ny behandling fra hendelse", saksbehandlerId)
 
         return Result.runCatching { behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling) }
                 .fold(
