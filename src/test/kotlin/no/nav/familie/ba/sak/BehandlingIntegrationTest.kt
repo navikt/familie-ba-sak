@@ -400,9 +400,11 @@ class BehandlingIntegrationTest {
                 BarnBeregning(barn1Fnr, 1054, LocalDate.now()),
                 BarnBeregning(barn2Fnr, 1054, LocalDate.now())
         )
-        val nyttVedtak = NyttVedtak("sakstype", barnasBeregning, VedtakResultat.INNVILGET)
+        val nyttVedtak = NyttVedtak(VedtakResultat.INNVILGET)
+        val nyBeregning= NyBeregning(barnasBeregning)
 
         behandlingService.nyttVedtakForAktivBehandling(fagsak.id!!, nyttVedtak, "saksbehandler1")
+        behandlingService.oppdaterAktivVedtakMedBeregning(fagsak.id!!, nyBeregning)
 
         val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling!!.id)
 
