@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class VilkårService {
+
     fun vurderVilkår(personopplysningGrunnlag: PersonopplysningGrunnlag,
                      restSamletVilkårResultat: List<RestVilkårResultat>): SamletVilkårResultat {
         val samletVilkårResultat = SamletVilkårResultat()
