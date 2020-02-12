@@ -24,11 +24,11 @@ class JournalførVedtaksbrev(
         val vedtak = behandlingService.hentVedtak(vedtakId)
                      ?: throw Exception("Fant ikke vedtak med id $vedtakId i forbindelse med Journalføring av vedtaksbrev")
 
-        val fnr = vedtak.behandling.fagsak.personIdent.ident
         val pdf = behandlingService.hentPdfForVedtak(vedtak)
+        val fnr = vedtak.behandling.fagsak.personIdent.ident
+        val fagsakId = "${vedtak.behandling.fagsak.id}"
 
-        LOG.debug("Journalfører vedtaksbrev for vedtak med ID $vedtakId")
-        val journalpostId = integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr)
+        val journalpostId = integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr, fagsakId)
 
         val nyTask = Task.nyTask(DistribuerVedtaksbrev.TASK_STEP_TYPE, journalpostId, task.metadata)
         taskRepository.save(nyTask)
