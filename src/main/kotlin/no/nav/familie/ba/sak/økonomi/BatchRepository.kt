@@ -18,5 +18,6 @@ interface BatchRepository: JpaRepository<Batch, Long> {
     override fun findById(id: Long): Optional<Batch?>
 
     @Query("SELECT k FROM Batch k where kjoredato = :dato AND status = 'LEDIG'")
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     fun findByKjøredatoAndLedig(dato: LocalDate): Batch?
 }

@@ -29,7 +29,7 @@ class KonsistensavstemmingSchedulerTest {
     lateinit var taskRepository: TaskRepository
 
     @Autowired
-    lateinit var batchRepository: BatchRepository
+    lateinit var batchService: BatchService
 
     @Autowired
     lateinit var konsistensavstemmingScheduler: KonsistensavstemmingScheduler
@@ -37,7 +37,7 @@ class KonsistensavstemmingSchedulerTest {
     @BeforeEach
     fun setUp() {
         MockKAnnotations.init(this)
-        konsistensavstemmingScheduler = KonsistensavstemmingScheduler(taskRepository, batchRepository)
+        konsistensavstemmingScheduler = KonsistensavstemmingScheduler(batchService, taskRepository)
         taskRepository = spyk(taskRepository)
     }
 
@@ -45,7 +45,7 @@ class KonsistensavstemmingSchedulerTest {
     fun `Skal ikke trigge avstemming når det ikke er noen ledige batchkjøringer for dato`() {
         val dagensDato = LocalDate.now()
         val nyBatch = Batch(kjøreDato = dagensDato, status = KjøreStatus.TATT)
-        batchRepository.save(nyBatch)
+        batchService.lagre(nyBatch)
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
@@ -56,7 +56,7 @@ class KonsistensavstemmingSchedulerTest {
     fun `Skal ikke trigge avstemming når det ikke finnes batchkjøringer for dato`() {
         val imorgen = LocalDate.now().plusDays(1)
         val nyBatch = Batch(kjøreDato = imorgen)
-        batchRepository.save(nyBatch)
+        batchService.lagre(nyBatch)
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
@@ -67,7 +67,7 @@ class KonsistensavstemmingSchedulerTest {
     fun `Skal trigge en avstemming når det er ledig batchkjøring for dato`() {
         val dagensDato = LocalDate.now()
         val nyBatch = Batch(kjøreDato = dagensDato)
-        batchRepository.save(nyBatch)
+        batchService.lagre(nyBatch)
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 

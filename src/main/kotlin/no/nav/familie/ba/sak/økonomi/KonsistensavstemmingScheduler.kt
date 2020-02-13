@@ -11,23 +11,27 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Component
-class KonsistensavstemmingScheduler(val taskRepository: TaskRepository,
-                                    val batchRepository: BatchRepository) {
+class KonsistensavstemmingScheduler(val batchService: BatchService, val taskRepository: TaskRepository) {
 
-    @Scheduled(cron = "0 0 8 * * *")
+    //@Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 * * * * *")
     fun utførKonsistensavstemming() {
+        LOG.info("Konsistensavstemming er trigget")
         val dagensDato = LocalDate.now()
-        val ledigBatch = batchRepository.findByKjøredatoAndLedig(dagensDato) ?: return
+        val ledigBatch = batchService.hentLedigeBatchKjøringerFor(dagensDato) ?: return
 
         LOG.info("Kjører konsistensavstemming for $dagensDato")
         ledigBatch.status = KjøreStatus.TATT
-        batchRepository.save(ledigBatch)
+        batchService.lagre(ledigBatch)
 
         val konsistensavstemmingTask = Task.nyTask(
                 KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
                 objectMapper.writeValueAsString(KonsistensavstemmingTaskDTO(LocalDateTime.now()))
         )
         taskRepository.save(konsistensavstemmingTask)
+
+        ledigBatch.status = KjøreStatus.FERDIG
+        batchService.lagre(ledigBatch)
     }
 
     companion object {
@@ -36,6 +40,7 @@ class KonsistensavstemmingScheduler(val taskRepository: TaskRepository,
 }
 
 enum class KjøreStatus {
+    FERDIG,
     TATT,
     LEDIG
 }
