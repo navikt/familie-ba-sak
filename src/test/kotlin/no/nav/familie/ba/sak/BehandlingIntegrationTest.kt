@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
@@ -17,13 +18,12 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpphørVedtak
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,7 +31,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import javax.transaction.Transactional
 import kotlin.streams.asSequence
@@ -75,6 +74,9 @@ class BehandlingIntegrationTest {
     @MockK
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
+    @MockK(relaxed = true)
+    lateinit var featureToggleService: FeatureToggleService
+
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
@@ -86,7 +88,8 @@ class BehandlingIntegrationTest {
                 personRepository,
                 dokGenService,
                 fagsakService,
-                integrasjonTjeneste)
+                integrasjonTjeneste,
+                featureToggleService)
     }
 
     private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
