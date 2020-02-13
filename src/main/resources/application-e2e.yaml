@@ -26,10 +26,6 @@ no.nav.security.jwt:
 
 ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILIE_PROSESSERING_CLIENT_ID}
 
-credential:
-  username: "srv-ba-sak"
-  password: "not-a-real-password"
-
 logging:
   config: "classpath:logback-spring.xml"
 

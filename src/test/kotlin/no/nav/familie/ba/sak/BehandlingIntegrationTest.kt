@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
@@ -78,6 +79,9 @@ class BehandlingIntegrationTest {
     @MockK
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
+    @MockK(relaxed = true)
+    lateinit var featureToggleService: FeatureToggleService
+
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
@@ -90,7 +94,8 @@ class BehandlingIntegrationTest {
                 dokGenService,
                 fagsakService,
                 vilkårService,
-                integrasjonTjeneste)
+                integrasjonTjeneste,
+                featureToggleService)
     }
 
     @Test

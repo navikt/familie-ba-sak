@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -23,8 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 class MottakController(private val oidcUtil: OIDCUtil,
                        private val behandlingService: BehandlingService,
-                       private val fagsakService: FagsakService,
-                       private val featureToggleService: FeatureToggleService) {
+                       private val fagsakService: FagsakService) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 

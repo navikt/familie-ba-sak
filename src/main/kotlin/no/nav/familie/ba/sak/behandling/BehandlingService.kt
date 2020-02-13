@@ -5,12 +5,15 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.task.OpprettBehandleSakOppgaveForNyBehandlingTask
 import no.nav.familie.ba.sak.økonomi.OppdragId
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -28,7 +31,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val dokGenService: DokGenService,
                         private val fagsakService: FagsakService,
                         private val vilkårService: VilkårService,
-                        private val integrasjonTjeneste: IntegrasjonTjeneste) {
+                        private val integrasjonTjeneste: IntegrasjonTjeneste,
+                        private val featureToggleService: FeatureToggleService) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
@@ -42,6 +46,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          nyBehandling.behandlingType,
                                                          randomSaksnummer())
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
+            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
+                Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
+            } else {
+                LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
+            }
         } else {
             throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
         }
@@ -61,6 +70,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          nyBehandling.behandlingType,
                                                          randomSaksnummer())
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
+            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
+                Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
+            } else {
+                LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
+            }
         } else if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
             val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
             lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasFødselsnummer, grunnlag!!)
