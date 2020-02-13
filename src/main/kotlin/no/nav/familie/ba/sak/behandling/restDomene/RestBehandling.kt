@@ -13,9 +13,9 @@ data class RestBehandling(val aktiv: Boolean,
                           val type: BehandlingType,
                           val status: BehandlingStatus,
                           val kategori: BehandlingKategori,
+                          val personer: List<RestPerson>,
                           val underkategori: BehandlingUnderkategori,
                           val samletVilkårResultat: List<RestVilkårResultat>?,
-                          val barnasFødselsnummer: List<String?>?,
                           val vedtakForBehandling: List<RestVedtak?>)
 
 fun SamletVilkårResultat.toRestSamletVilkårResultat() = this.samletVilkårResultat.map {
