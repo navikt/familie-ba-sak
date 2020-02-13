@@ -30,6 +30,7 @@ import org.springframework.util.Assert
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
+import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.exchange
 import java.net.URI
 
@@ -153,7 +154,8 @@ class IntegrasjonTjeneste(
         }.fold(
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
-                    it.body?.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId.",
+                    val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+                    it.body?.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId. response=$message",
                                                                                        null,
                                                                                        uri,
                                                                                        opprettOppgave.ident.ident)
@@ -165,6 +167,19 @@ class IntegrasjonTjeneste(
                                                opprettOppgave.ident.ident)
                 }
         )
+    }
+
+    fun ferdigstillOppgave(oppgaveId: Long) {
+        val uri = URI.create("$integrasjonerServiceUri/oppgave/$oppgaveId/ferdigstill")
+
+        Result.runCatching {
+            val response = restOperations.patchForObject(uri, null, Ressurs::class.java)
+            Assert.isTrue(response?.status == Ressurs.Status.SUKSESS,
+                          "Ferdigstill oppgave returnerte OK, men mottok status $response?.status")
+        }.onFailure {
+            val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+            throw IntegrasjonException("Kan ikke ferdigstille $oppgaveId. response=$message", it, uri)
+        }
     }
 
     private fun sendJournalFørRequest(journalFørEndpoint: URI,
