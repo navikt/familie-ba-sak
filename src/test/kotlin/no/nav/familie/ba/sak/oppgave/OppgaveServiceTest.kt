@@ -6,10 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -104,7 +101,9 @@ class OppgaveServiceTest {
                                           personIdent = PersonIdent(
                                                   ident = FNR),
                                           aktørId = AktørId(id = AKTØR_ID_FAGSAK)),
-                          type = BehandlingType.FØRSTEGANGSBEHANDLING)
+                          type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                          kategori = BehandlingKategori.NATIONAL,
+                          underkategori = BehandlingUnderkategori.ORDINÆR)
     }
 
     companion object {
