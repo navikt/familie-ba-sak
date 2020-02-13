@@ -146,7 +146,7 @@ class BehandlingIntegrationTest {
                                                                        lagRandomSaksnummer(),
                                                                        BehandlingKategori.NATIONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
 
         val søker = Person(personIdent = PersonIdent(fnr),
                            type = PersonType.SØKER,
@@ -156,8 +156,8 @@ class BehandlingIntegrationTest {
                           type = PersonType.BARN,
                           personopplysningGrunnlag = personopplysningGrunnlag,
                           fødselsdato = LocalDate.now())
-        personopplysningGrunnlag.leggTilPerson(søker)
-        personopplysningGrunnlag.leggTilPerson(barn)
+        personopplysningGrunnlag.personer.add(søker)
+        personopplysningGrunnlag.personer.add(barn)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val hentetPersonopplysningGrunnlag =
@@ -393,7 +393,7 @@ class BehandlingIntegrationTest {
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id)
 
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling?.id)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling!!.id)
         Assertions.assertNotNull(personopplysningGrunnlag)
 
         val barnasBeregning = arrayOf(
@@ -508,7 +508,7 @@ class BehandlingIntegrationTest {
 fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                     søkerPersonIdent: String,
                                     barnPersonIdent: String): PersonopplysningGrunnlag {
-    val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId)
+    val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
     val søker = Person(personIdent = PersonIdent(søkerPersonIdent),
                        type = PersonType.SØKER,
                        personopplysningGrunnlag = personopplysningGrunnlag,
@@ -518,8 +518,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                       personopplysningGrunnlag = personopplysningGrunnlag,
                       fødselsdato = LocalDate.now())
 
-    personopplysningGrunnlag.leggTilPerson(søker)
-    personopplysningGrunnlag.leggTilPerson(barn)
+    personopplysningGrunnlag.personer.add(søker)
+    personopplysningGrunnlag.personer.add(barn)
 
     return personopplysningGrunnlag
 }

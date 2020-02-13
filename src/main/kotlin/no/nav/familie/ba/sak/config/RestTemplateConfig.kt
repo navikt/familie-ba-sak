@@ -17,9 +17,8 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 @Configuration
-@Import(ConsumerIdClientInterceptor::class)
-@Profile("!dev")
 @Import(ConsumerIdClientInterceptor::class, ClientCredentialsInterceptor::class, JwtBearerInterceptor::class)
+@Profile("!dev")
 class RestTemplateConfig {
 
     @Bean("jwtBearer")

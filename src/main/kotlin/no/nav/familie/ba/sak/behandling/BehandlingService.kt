@@ -191,18 +191,28 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                            fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer).fødselsdato
         )
 
-        val personList = nyBehandling.barnasFødselsnummer.map { nyttBarn ->
-            if (personopplysningGrunnlag.barna.none { eksisterendeBarn -> eksisterendeBarn.personIdent.ident == nyttBarn }) {
-                personopplysningGrunnlag.leggTilPerson(Person(
-                    personIdent = PersonIdent(nyttBarn),
-                    type = PersonType.BARN,
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn)?.fødselsdato
-                ))
-            }
-        }.plus(søker).toMutableList()
+        personopplysningGrunnlag.personer.add(søker)
+        lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasFødselsnummer, personopplysningGrunnlag)
+    }
 
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag.copy(personer = personList))
+    private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: Array<String>,
+                                                                 personopplysningGrunnlag: PersonopplysningGrunnlag) {
+
+        personopplysningGrunnlag.personer.addAll(leggTilBarnIPersonListe(barnasFødselsnummer, personopplysningGrunnlag))
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+    }
+
+    private fun leggTilBarnIPersonListe(barnasFødselsnummer: Array<String>,
+                                        personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
+        return barnasFødselsnummer.filter{ barn ->
+            personopplysningGrunnlag.barna.none{ eksisterendeBarn -> barn == eksisterendeBarn.personIdent.ident}
+        }.map { nyttBarn ->
+                Person(personIdent = PersonIdent(nyttBarn),
+                       type = PersonType.BARN,
+                       personopplysningGrunnlag = personopplysningGrunnlag,
+                       fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn).fødselsdato
+                )
+        }
     }
 
     fun hentBehandlingHvisEksisterer(fagsakId: Long?): Behandling? {
@@ -223,7 +233,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 .map { behandling ->
                     OppdragId(
                             hentSøker(behandling)!!.personIdent.ident,
-                            behandling.id!!)
+                            behandling.id)
                 }
     }
 
