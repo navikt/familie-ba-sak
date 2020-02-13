@@ -212,7 +212,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     fun lagreBehandling(behandling: Behandling) {
-        // TODO logge saksbehandler?
         behandlingRepository.save(behandling)
     }
 
