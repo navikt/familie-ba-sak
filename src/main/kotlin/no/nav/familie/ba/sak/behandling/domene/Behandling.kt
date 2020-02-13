@@ -17,7 +17,7 @@ data class Behandling(
         val fagsak: Fagsak,
 
         @Column(name = "journalpost_id")
-        val journalpostID: String?,
+        val journalpostID: String? = null,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
@@ -46,7 +46,10 @@ data class Behandling(
         var samletVilkårResultat: SamletVilkårResultat? = null,
 
         @Column(name = "aktiv", nullable = false)
-        var aktiv: Boolean = true
+        var aktiv: Boolean = true,
+
+        @Column(name = "oppgaveId")
+        val oppgaveId: String? = null
 ) : BaseEntitet()
 
 enum class BehandlingType {
