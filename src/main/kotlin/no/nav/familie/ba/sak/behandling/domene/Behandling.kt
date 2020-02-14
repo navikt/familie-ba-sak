@@ -41,10 +41,6 @@ data class Behandling(
         @Column(name = "underkategori", nullable = false)
         var underkategori: BehandlingUnderkategori,
 
-        @ManyToOne
-        @JoinColumn(name = "samlet_vilkar_resultat_id", updatable = false, nullable = true)
-        var samletVilkårResultat: SamletVilkårResultat? = null,
-
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 

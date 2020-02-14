@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakBarnRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultatRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -17,6 +18,7 @@ class FagsakService(
         private val vedtakBarnRepository: VedtakBarnRepository,
         private val fagsakRepository: FagsakRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val samletVilkårResultatRepository: SamletVilkårResultatRepository,
         private val behandlingRepository: BehandlingRepository,
         private val vedtakRepository: VedtakRepository) {
 
@@ -43,7 +45,7 @@ class FagsakService(
                     personer = personopplysningGrunnlag.personer.map { it.toRestPerson() },
                     type = it.type,
                     status = it.status,
-                    samletVilkårResultat = it.samletVilkårResultat?.toRestSamletVilkårResultat(),
+                    samletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(it.id)?.toRestSamletVilkårResultat(),
                     kategori = it.kategori,
                     underkategori = it.underkategori
             )

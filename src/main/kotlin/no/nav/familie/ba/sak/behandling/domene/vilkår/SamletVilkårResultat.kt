@@ -11,6 +11,12 @@ class SamletVilkårResultat(
         @SequenceGenerator(name = "samlet_vilkar_resultat_seq")
         private val id: Long? = null,
 
+        @Column(name = "fk_behandling_id", nullable = false, updatable = false)
+        val behandlingId: Long,
+
+        @Column(name = "aktiv", nullable = false)
+        var aktiv: Boolean = true,
+
         @OneToMany(mappedBy = "samletVilkårResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
         val samletVilkårResultat: Set<VilkårResultat>
 ) : BaseEntitet()
