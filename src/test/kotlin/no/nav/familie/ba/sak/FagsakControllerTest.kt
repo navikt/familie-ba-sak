@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.mottak.BehandlingController
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -41,20 +42,6 @@ class FagsakControllerTest(
         @Autowired
         private val taskRepository: TaskRepository
 ) {
-
-    @Test
-    @Tag("integration")
-    fun `Test hent html vedtak`() {
-        val mockBehandlingLager: BehandlingService = mockk()
-        every { mockBehandlingLager.hentHtmlVedtakForBehandling(any()) } returns Ressurs.success("mock_html")
-
-        val fagsakController =
-                FagsakController(oidcUtil, fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
-        val response = fagsakController.hentHtmlVedtak(1)
-        assert(response.status == Ressurs.Status.SUKSESS)
-    }
-
-
     @Test
     @Tag("integration")
     fun `Test opphør vedtak`() {
