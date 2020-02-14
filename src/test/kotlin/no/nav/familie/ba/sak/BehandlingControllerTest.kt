@@ -37,16 +37,7 @@ class BehandlingControllerTest(
         private val oidcUtil: OIDCUtil,
 
         @Autowired
-        private val behandlingService: BehandlingService,
-
-        @Autowired
-        private val featureToggleService: FeatureToggleService,
-
-        @Autowired
-        private val fagsakService: FagsakService,
-
-        @Autowired
-        private val taskRepository: TaskRepository
+        private val fagsakService: FagsakService
 ) {
 
     @Test
@@ -55,7 +46,7 @@ class BehandlingControllerTest(
         val mockBehandlingLager: BehandlingService = mockk()
         every { mockBehandlingLager.hentHtmlVedtakForBehandling(any()) } returns Ressurs.success("mock_html")
 
-        val behandlingController = BehandlingController(oidcUtil, mockBehandlingLager, fagsakService, featureToggleService)
+        val behandlingController = BehandlingController(oidcUtil, mockBehandlingLager, fagsakService)
         val response = behandlingController.hentHtmlVedtak(1)
         assert(response.status == Ressurs.Status.SUKSESS)
     }
