@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.mottak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.FagsakService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
@@ -66,7 +68,10 @@ class MottakController(private val oidcUtil: OIDCUtil,
 
 }
 
-class NyBehandling(val fødselsnummer: String,
-                   val barnasFødselsnummer: Array<String>,
-                   val behandlingType: BehandlingType,
-                   val journalpostID: String?)
+class NyBehandling(
+        val kategori: BehandlingKategori,
+        val underkategori: BehandlingUnderkategori,
+        val fødselsnummer: String,
+        val barnasFødselsnummer: Array<String>,
+        val behandlingType: BehandlingType,
+        val journalpostID: String?)
