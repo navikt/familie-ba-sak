@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 class KonsistensavstemmingScheduler(val batchService: BatchService, val taskRepository: TaskRepository) {
 
     //@Scheduled(cron = "0 0 8 * * *")
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     fun utførKonsistensavstemming() {
         LOG.info("Konsistensavstemming er trigget")
         val dagensDato = LocalDate.now()
