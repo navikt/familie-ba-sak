@@ -368,7 +368,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
         val vedtak = hentAktivVedtakForBehandling(behandlingId)
                      ?: return Ressurs.failure("Behandling ikke funnet")
-        val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(vedtak.stønadBrevMarkdown) }
+        val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(), vedtak.stønadBrevMarkdown) }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
@@ -384,7 +384,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             LOG.debug("henter stønadsbrevMarkdown fra behandlingsVedtak")
             val markdown = vedtak.stønadBrevMarkdown
             LOG.debug("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
-            dokGenService.lagPdfFraMarkdown(markdown)
+            dokGenService.lagPdfFraMarkdown(vedtak.resultat.toDokGenTemplate(), markdown)
         }
                 .fold(
                         onSuccess = { it },
