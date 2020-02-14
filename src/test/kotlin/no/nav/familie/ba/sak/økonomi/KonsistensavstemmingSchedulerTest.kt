@@ -45,7 +45,7 @@ class KonsistensavstemmingSchedulerTest {
     fun `Skal ikke trigge avstemming når det ikke er noen ledige batchkjøringer for dato`() {
         val dagensDato = LocalDate.now()
         val nyBatch = Batch(kjøreDato = dagensDato, status = KjøreStatus.TATT)
-        batchService.lagre(nyBatch)
+        batchService.lagreNyStatus(nyBatch, KjøreStatus.TATT)
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
@@ -56,7 +56,7 @@ class KonsistensavstemmingSchedulerTest {
     fun `Skal ikke trigge avstemming når det ikke finnes batchkjøringer for dato`() {
         val imorgen = LocalDate.now().plusDays(1)
         val nyBatch = Batch(kjøreDato = imorgen)
-        batchService.lagre(nyBatch)
+        batchService.lagreNyStatus(nyBatch, KjøreStatus.LEDIG)
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
@@ -67,7 +67,7 @@ class KonsistensavstemmingSchedulerTest {
     fun `Skal trigge en avstemming når det er ledig batchkjøring for dato`() {
         val dagensDato = LocalDate.now()
         val nyBatch = Batch(kjøreDato = dagensDato)
-        batchService.lagre(nyBatch)
+        batchService.lagreNyStatus(nyBatch, KjøreStatus.LEDIG)
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
