@@ -13,10 +13,8 @@ import java.time.LocalDateTime
 @Component
 class KonsistensavstemmingScheduler(val batchService: BatchService, val taskRepository: TaskRepository) {
 
-    //@Scheduled(cron = "0 0 8 * * *")
-    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = "0 0 8 * * *")
     fun utførKonsistensavstemming() {
-        LOG.info("Konsistensavstemming er trigget")
         val dagensDato = LocalDate.now()
         val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dagensDato) ?: return
 
@@ -26,7 +24,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService, val taskRepo
                 KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
                 objectMapper.writeValueAsString(KonsistensavstemmingTaskDTO(LocalDateTime.now()))
         )
-        taskRepository.saveAndFlush(konsistensavstemmingTask)
+        taskRepository.save(konsistensavstemmingTask)
 
         batchService.lagreNyStatus(plukketBatch, KjøreStatus.FERDIG)
     }
