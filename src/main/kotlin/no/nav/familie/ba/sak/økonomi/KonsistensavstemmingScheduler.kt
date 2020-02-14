@@ -19,19 +19,17 @@ class KonsistensavstemmingScheduler(val batchService: BatchService, val taskRepo
         LOG.info("Konsistensavstemming er trigget")
         val dagensDato = LocalDate.now()
         val ledigBatch = batchService.hentLedigeBatchKjøringerFor(dagensDato) ?: return
+        batchService.lagreNyStatus(ledigBatch, KjøreStatus.TATT)
 
         LOG.info("Kjører konsistensavstemming for $dagensDato")
-        ledigBatch.status = KjøreStatus.TATT
-        batchService.lagre(ledigBatch)
 
         val konsistensavstemmingTask = Task.nyTask(
                 KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
                 objectMapper.writeValueAsString(KonsistensavstemmingTaskDTO(LocalDateTime.now()))
         )
-        taskRepository.save(konsistensavstemmingTask)
+        taskRepository.saveAndFlush(konsistensavstemmingTask)
 
-        ledigBatch.status = KjøreStatus.FERDIG
-        batchService.lagre(ledigBatch)
+        batchService.lagreNyStatus(ledigBatch, KjøreStatus.FERDIG)
     }
 
     companion object {

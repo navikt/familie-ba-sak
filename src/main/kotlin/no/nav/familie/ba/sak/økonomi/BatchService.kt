@@ -13,7 +13,8 @@ class BatchService(val batchRepository: BatchRepository) {
     }
 
     @Transactional
-    fun lagre(batch: Batch) {
-        batchRepository.save(batch)
+    fun lagreNyStatus(batch: Batch, status: KjøreStatus) {
+        batch.status = status
+        batchRepository.saveAndFlush(batch)
     }
 }
