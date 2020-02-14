@@ -33,6 +33,14 @@ data class Behandling(
         @Column(name = "status", nullable = false)
         var status: BehandlingStatus = BehandlingStatus.OPPRETTET,
 
+        @Enumerated(EnumType.STRING)
+        @Column(name = "kategori", nullable = false)
+        var kategori: BehandlingKategori,
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "underkategori", nullable = false)
+        var underkategori: BehandlingUnderkategori,
+
         @ManyToOne
         @JoinColumn(name = "samlet_vilkar_resultat_id", updatable = false, nullable = true)
         var samletVilkårResultat: SamletVilkårResultat? = null,
@@ -52,14 +60,14 @@ enum class BehandlingType {
     MIGRERING_FRA_INFOTRYGD_OPPHØRT
 }
 
-enum class BehandlingKategorier(gyldigeUnderkategorier: List<BehandlingUnderkategorier>) {
-    ORDINÆR(listOf(BehandlingUnderkategorier.EØS, BehandlingUnderkategorier.NATIONAL)),
-    UTVIDET(listOf(BehandlingUnderkategorier.EØS, BehandlingUnderkategorier.NATIONAL))
-}
-
-enum class BehandlingUnderkategorier {
+enum class BehandlingKategori {
     EØS,
     NATIONAL
+}
+
+enum class BehandlingUnderkategori {
+    UTVIDET,
+    ORDINÆR
 }
 
 enum class BehandlingStatus {

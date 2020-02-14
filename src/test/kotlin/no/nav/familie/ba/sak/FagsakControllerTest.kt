@@ -5,10 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
@@ -65,7 +62,14 @@ class FagsakControllerTest(
 
         val fagsak = Fagsak(1, AktørId("1"), PersonIdent("1"))
         val behandling =
-                Behandling(1, fagsak, null, BehandlingType.MIGRERING_FRA_INFOTRYGD, "1", status = BehandlingStatus.IVERKSATT)
+                Behandling(1,
+                           fagsak,
+                           null,
+                           BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                           "1",
+                           status = BehandlingStatus.IVERKSATT,
+                           kategori = BehandlingKategori.NATIONAL,
+                           underkategori = BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(1, behandling, "sb", LocalDate.now(), "", VedtakResultat.INNVILGET)
 
         every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling

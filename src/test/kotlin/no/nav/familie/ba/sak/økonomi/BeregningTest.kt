@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.Beregning
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
@@ -48,7 +50,12 @@ class BeregningTest(
     @Test
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("12345")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, "lagRandomSaksnummer")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                                       "sdf",
+                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                       "lagRandomSaksnummer",
+                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),

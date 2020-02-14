@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.FagsakController
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.BarnBeregning
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
@@ -46,7 +48,12 @@ class BehandlingNegativeIntegrationTest(
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("6")
         val behandling =
-                behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, "sak1")
+                behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                              "sdf",
+                                                              BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                              "sak1",
+                                                              BehandlingKategori.NATIONAL,
+                                                              BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
     }
@@ -58,7 +65,9 @@ class BehandlingNegativeIntegrationTest(
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       "123")
+                                                                       "123",
+                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")

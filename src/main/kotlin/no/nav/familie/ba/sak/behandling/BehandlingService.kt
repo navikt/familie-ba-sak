@@ -44,7 +44,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          nyBehandling.journalpostID,
                                                          nyBehandling.behandlingType,
-                                                         randomSaksnummer())
+                                                         randomSaksnummer(),
+                                                         nyBehandling.kategori,
+                                                         nyBehandling.underkategori)
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
                 Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
@@ -68,7 +70,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          nyBehandling.journalpostID,
                                                          nyBehandling.behandlingType,
-                                                         randomSaksnummer())
+                                                         randomSaksnummer(),
+                                                         nyBehandling.kategori,
+                                                         nyBehandling.underkategori)
+
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
                 Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
@@ -110,7 +115,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val nyBehandling = Behandling(fagsak = gjeldendeBehandling.fagsak,
                                       journalpostID = gjeldendeBehandling.journalpostID,
                                       saksnummer = randomSaksnummer(),
-                                      type = nyBehandlingType)
+                                      type = nyBehandlingType,
+                                      kategori = gjeldendeBehandling.kategori,
+                                      underkategori = gjeldendeBehandling.underkategori)
 
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
         behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
@@ -160,9 +167,16 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun opprettNyBehandlingPåFagsak(fagsak: Fagsak,
                                     journalpostID: String?,
                                     behandlingType: BehandlingType,
-                                    saksnummer: String): Behandling {
+                                    saksnummer: String,
+                                    kategori: BehandlingKategori,
+                                    underkategori: BehandlingUnderkategori): Behandling {
         val behandling =
-                Behandling(fagsak = fagsak, journalpostID = journalpostID, type = behandlingType, saksnummer = saksnummer)
+                Behandling(fagsak = fagsak,
+                           journalpostID = journalpostID,
+                           type = behandlingType,
+                           saksnummer = saksnummer,
+                           kategori = kategori,
+                           underkategori = underkategori)
         lagreNyOgDeaktiverGammelBehandling(behandling)
         return behandling
     }
@@ -315,7 +329,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
 
     @Transactional
-    fun oppdaterAktivVedtakMedBeregning(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag, nyBeregning: NyBeregning)
+    fun oppdaterAktivVedtakMedBeregning(vedtak: Vedtak,
+                                        personopplysningGrunnlag: PersonopplysningGrunnlag,
+                                        nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
         nyBeregning.barnasBeregning.map {
             val barn =
