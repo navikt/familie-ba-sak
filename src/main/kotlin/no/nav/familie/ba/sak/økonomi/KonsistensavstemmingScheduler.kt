@@ -18,8 +18,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService, val taskRepo
     fun utførKonsistensavstemming() {
         LOG.info("Konsistensavstemming er trigget")
         val dagensDato = LocalDate.now()
-        val ledigBatch = batchService.hentLedigeBatchKjøringerFor(dagensDato) ?: return
-        batchService.lagreNyStatus(ledigBatch, KjøreStatus.TATT)
+        val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dagensDato) ?: return
 
         LOG.info("Kjører konsistensavstemming for $dagensDato")
 
@@ -29,7 +28,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService, val taskRepo
         )
         taskRepository.saveAndFlush(konsistensavstemmingTask)
 
-        batchService.lagreNyStatus(ledigBatch, KjøreStatus.FERDIG)
+        batchService.lagreNyStatus(plukketBatch, KjøreStatus.FERDIG)
     }
 
     companion object {

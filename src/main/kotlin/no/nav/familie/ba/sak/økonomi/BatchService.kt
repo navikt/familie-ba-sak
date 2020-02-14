@@ -8,11 +8,13 @@ import java.time.LocalDate
 class BatchService(val batchRepository: BatchRepository) {
 
     @Transactional
-    fun hentLedigeBatchKjøringerFor(dato: LocalDate): Batch? {
-        return batchRepository.findByKjøredatoAndLedig(dato)
+    fun plukkLedigeBatchKjøringerFor(dato: LocalDate): Batch? {
+        val batch = batchRepository.findByKjøredatoAndLedig(dato)
+        if (batch != null) lagreNyStatus(batch, KjøreStatus.TATT)
+
+        return batch
     }
 
-    @Transactional
     fun lagreNyStatus(batch: Batch, status: KjøreStatus) {
         batch.status = status
         batchRepository.saveAndFlush(batch)
