@@ -24,17 +24,18 @@ class ØkonomiService(
 
         val barnBeregning = behandlingService.hentBarnForVedtak(vedtak.id)
         val tidslinje = beregning.beregnUtbetalingsperioder(barnBeregning)
-        val utbetalingsperioder = tidslinje.toSegments().map {
+        val utbetalingsperioder = tidslinje.toSegments().mapIndexed { indeks, segment->
             Utbetalingsperiode(
                     erEndringPåEksisterendePeriode = false,
                     datoForVedtak = vedtak.vedtaksdato,
                     klassifisering = "BATR",
-                    vedtakdatoFom = it.fom,
-                    vedtakdatoTom = it.tom,
-                    sats = BigDecimal(it.value),
+                    vedtakdatoFom = segment.fom,
+                    vedtakdatoTom = segment.tom,
+                    sats = BigDecimal(segment.value),
                     satsType = Utbetalingsperiode.SatsType.MND,
                     utbetalesTil = vedtak.behandling.fagsak.personIdent.ident.toString(),
-                    behandlingId = vedtak.behandling.id!!
+                    behandlingId = vedtak.behandling.id!!,
+                    periodeId = indeks.toLong() // TODO Dette holder ikke på sikt. Må sendes inn fra klienten
             )
         }
 

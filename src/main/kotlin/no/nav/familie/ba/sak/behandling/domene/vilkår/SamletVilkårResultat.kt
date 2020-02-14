@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.behandling.domene.vilkår
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
 
-
 @Entity
 @Table(name = "samlet_vilkar_resultat")
 class SamletVilkårResultat(
@@ -13,5 +12,5 @@ class SamletVilkårResultat(
         private val id: Long? = null,
 
         @OneToMany(mappedBy = "samletVilkårResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
-        var samletVilkårResultat: Set<VilkårResultat> = emptySet()
-): BaseEntitet()
+        val samletVilkårResultat: Set<VilkårResultat>
+) : BaseEntitet()

@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -38,6 +39,9 @@ class FagsakControllerTest(
         private val fagsakService: FagsakService,
 
         @Autowired
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+
+        @Autowired
         private val taskRepository: TaskRepository
 ) {
 
@@ -47,7 +51,8 @@ class FagsakControllerTest(
         val mockBehandlingLager: BehandlingService = mockk()
         every { mockBehandlingLager.hentHtmlVedtakForBehandling(any()) } returns Ressurs.success("mock_html")
 
-        val fagsakController = FagsakController(oidcUtil, fagsakService, mockBehandlingLager, taskRepository)
+        val fagsakController =
+                FagsakController(oidcUtil, fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
         val response = fagsakController.hentHtmlVedtak(1)
         assert(response.status == Ressurs.Status.SUKSESS)
     }
@@ -59,15 +64,17 @@ class FagsakControllerTest(
         val mockBehandlingLager: BehandlingService = mockk()
 
         val fagsak = Fagsak(1, AktørId("1"), PersonIdent("1"))
-        val behandling = Behandling(1,fagsak,null,BehandlingType.MIGRERING_FRA_INFOTRYGD,"1",status = BehandlingStatus.IVERKSATT)
-        val vedtak = Vedtak(1, behandling, "sb", LocalDate.now(),"",VedtakResultat.INNVILGET)
+        val behandling =
+                Behandling(1, fagsak, null, BehandlingType.MIGRERING_FRA_INFOTRYGD, "1", status = BehandlingStatus.IVERKSATT)
+        val vedtak = Vedtak(1, behandling, "sb", LocalDate.now(), "", VedtakResultat.INNVILGET)
 
-        every { mockBehandlingLager.hentBehandlingHvisEksisterer(any())} returns behandling
-        every { mockBehandlingLager.hentVedtakHvisEksisterer(any())} returns vedtak
-        val fagsakController = FagsakController(oidcUtil, fagsakService, mockBehandlingLager, taskRepository)
+        every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
+        every { mockBehandlingLager.hentVedtakHvisEksisterer(any()) } returns vedtak
+        val fagsakController =
+                FagsakController(oidcUtil, fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
 
         val response = fagsakController.opphørMigrertVedtak(1)
-        assert(response.statusCode ==HttpStatus.OK)
+        assert(response.statusCode == HttpStatus.OK)
     }
 
 }

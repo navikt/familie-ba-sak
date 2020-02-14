@@ -6,11 +6,12 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import org.springframework.stereotype.Service
 
 @Service
-class VilkårService {
+class VilkårService(
+        private val samletVilkårResultatRepository: SamletVilkårResultatRepository
+) {
 
     fun vurderVilkår(personopplysningGrunnlag: PersonopplysningGrunnlag,
                      restSamletVilkårResultat: List<RestVilkårResultat>): SamletVilkårResultat {
-        val samletVilkårResultat = SamletVilkårResultat()
         val listeAvVilkårResultat = mutableSetOf<VilkårResultat>()
 
         personopplysningGrunnlag.personer.map { person ->
@@ -21,8 +22,7 @@ class VilkårService {
                 vilkårForPart.find { vilkårType -> vilkårType == it.vilkårType }
                 ?: throw NotFoundException("Vilkåret $it finnes ikke i grunnlaget for parten $vilkårForPart")
 
-                listeAvVilkårResultat.add(VilkårResultat(samletVilkårResultat = samletVilkårResultat,
-                                                         vilkårType = it.vilkårType,
+                listeAvVilkårResultat.add(VilkårResultat(vilkårType = it.vilkårType,
                                                          utfallType = it.utfallType,
                                                          person = person))
             }
@@ -31,7 +31,10 @@ class VilkårService {
                 throw IllegalStateException("Vilkårene for ${person.type} er ${vilkårForPerson.map { v -> v.vilkårType }}, men vi forventer $vilkårForPart")
             }
         }
-        samletVilkårResultat.samletVilkårResultat = listeAvVilkårResultat
+        val samletVilkårResultat = SamletVilkårResultat(samletVilkårResultat = listeAvVilkårResultat)
+        listeAvVilkårResultat.map { it.samletVilkårResultat = samletVilkårResultat }
+
+        samletVilkårResultatRepository.save(samletVilkårResultat)
 
         return samletVilkårResultat
     }
