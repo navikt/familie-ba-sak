@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -71,7 +69,9 @@ class DokGenIntegrationTest {
                         journalpostID = "invalid",
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         saksnummer = null,
-                        aktiv = true
+                        aktiv = true,
+                        kategori = BehandlingKategori.NATIONAL,
+                        underkategori = BehandlingUnderkategori.ORDINÆR
                 ),
                 ansvarligSaksbehandler = "whoknows",
                 vedtaksdato = LocalDate.MIN,
@@ -112,7 +112,9 @@ class DokGenIntegrationTest {
                         journalpostID = "invalid",
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         saksnummer = null,
-                        aktiv = true
+                        aktiv = true,
+                        kategori = BehandlingKategori.NATIONAL,
+                        underkategori = BehandlingUnderkategori.ORDINÆR
                 ),
                 ansvarligSaksbehandler = "whoknows",
                 vedtaksdato = LocalDate.MIN,

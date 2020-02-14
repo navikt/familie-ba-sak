@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.config
 
+import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
 import org.springframework.http.converter.ByteArrayHttpMessageConverter
 import org.springframework.http.converter.StringHttpMessageConverter
@@ -11,6 +13,7 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 @Configuration
+@Import(ConsumerIdClientInterceptor::class)
 @Profile("!dev")
 class RestTemplateConfig {
 
@@ -20,10 +23,11 @@ class RestTemplateConfig {
     }
 
     @Bean
-    fun restTemplateBuilderMedProxy(): RestTemplateBuilder? {
+    fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestTemplateBuilder? {
         return RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofSeconds(5))
                 .setReadTimeout(Duration.ofSeconds(5))
+                .additionalInterceptors(consumerIdClientInterceptor)
                 .additionalCustomizers(NaisProxyCustomizer())
     }
 }

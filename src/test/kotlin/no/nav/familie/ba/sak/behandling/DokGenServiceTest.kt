@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.domene.vedtak.toDokGenTemplate
@@ -27,7 +25,9 @@ class DokGenServiceTest(@Autowired
     private val vedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
                                     journalpostID = "",
-                                    type = BehandlingType.FØRSTEGANGSBEHANDLING),
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                    kategori = BehandlingKategori.NATIONAL,
+                                    underkategori = BehandlingUnderkategori.ORDINÆR),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now(),
             resultat = VedtakResultat.INNVILGET
@@ -36,7 +36,9 @@ class DokGenServiceTest(@Autowired
     private val avslagVedtak= Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
                                     journalpostID = "",
-                                    type = BehandlingType.FØRSTEGANGSBEHANDLING),
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                    kategori = BehandlingKategori.NATIONAL,
+                                    underkategori = BehandlingUnderkategori.ORDINÆR),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now(),
             resultat = VedtakResultat.AVSLÅTT

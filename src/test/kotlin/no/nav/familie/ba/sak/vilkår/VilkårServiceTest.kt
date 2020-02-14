@@ -1,13 +1,17 @@
 package no.nav.familie.ba.sak.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.lagRandomSaksnummer
+import no.nav.familie.ba.sak.lagTestPersonopplysningGrunnlag
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -16,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.LocalDate
 
 
 @SpringBootTest
@@ -24,85 +27,52 @@ import java.time.LocalDate
 @ActiveProfiles("dev")
 class VilkårServiceTest(
         @Autowired
+        private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+
+        @Autowired
         private val vilkårService: VilkårService
 ) {
+
     @Test
     fun `vurder gyldig vilkårsvurdering`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(1L)
-        val søker = Person(personIdent = PersonIdent("1"),
-                           type = PersonType.SØKER,
-                           personopplysningGrunnlag = personopplysningGrunnlag,
-                           fødselsdato = LocalDate.now())
-        val barn = Person(personIdent = PersonIdent("12345678910"),
-                          type = PersonType.BARN,
-                          personopplysningGrunnlag = personopplysningGrunnlag,
-                          fødselsdato = LocalDate.now())
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                                       "sdf",
+                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                       lagRandomSaksnummer(),
+                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingUnderkategori.ORDINÆR)
 
-        personopplysningGrunnlag.leggTilPerson(søker)
-        personopplysningGrunnlag.leggTilPerson(barn)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val vilkårsvurdering = listOf(RestVilkårResultat(personIdent = "1",
-                                                         vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                         utfallType = UtfallType.OPPFYLT),
-                                      RestVilkårResultat(personIdent = "1",
-                                                         vilkårType = VilkårType.STØNADSPERIODE,
-                                                         utfallType = UtfallType.OPPFYLT),
-                                      RestVilkårResultat(personIdent = "12345678910",
-                                                         vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                                         utfallType = UtfallType.OPPFYLT),
-                                      RestVilkårResultat(personIdent = "12345678910",
-                                                         vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                         utfallType = UtfallType.OPPFYLT),
-                                      RestVilkårResultat(personIdent = "12345678910",
-                                                         vilkårType = VilkårType.STØNADSPERIODE,
-                                                         utfallType = UtfallType.OPPFYLT))
-
-        val samletVilkårResultat = vilkårService.vurderVilkår(personopplysningGrunnlag, vilkårsvurdering)
-        Assertions.assertEquals(samletVilkårResultat.samletVilkårResultat.size, vilkårsvurdering.size)
+        val samletVilkårResultat =
+                vilkårService.vurderVilkår(personopplysningGrunnlag,
+                                           vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")))
+        Assertions.assertEquals(samletVilkårResultat.samletVilkårResultat.size,
+                                vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")).size)
     }
 
     @Test
     fun `vurder ugyldig vilkårsvurdering`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(1L)
-        val søker = Person(personIdent = PersonIdent("1"),
-                           type = PersonType.SØKER,
-                           personopplysningGrunnlag = personopplysningGrunnlag,
-                           fødselsdato = LocalDate.now())
-        val barn = Person(personIdent = PersonIdent("12345678910"),
-                          type = PersonType.BARN,
-                          personopplysningGrunnlag = personopplysningGrunnlag,
-                          fødselsdato = LocalDate.now())
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                                       "sdf",
+                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                       lagRandomSaksnummer(),
+                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingUnderkategori.ORDINÆR)
 
-        personopplysningGrunnlag.leggTilPerson(søker)
-        personopplysningGrunnlag.leggTilPerson(barn)
-
-        val vilkårsvurderingUtenKomplettBarnVurdering = listOf(RestVilkårResultat(personIdent = "1",
-                                                                                  vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                                                  utfallType = UtfallType.OPPFYLT),
-                                                               RestVilkårResultat(personIdent = "1",
-                                                                                  vilkårType = VilkårType.STØNADSPERIODE,
-                                                                                  utfallType = UtfallType.OPPFYLT),
-                                                               RestVilkårResultat(personIdent = "12345678910",
-                                                                                  vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                                                                  utfallType = UtfallType.OPPFYLT))
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         assertThrows<IllegalStateException> {
             vilkårService.vurderVilkår(personopplysningGrunnlag,
                                        vilkårsvurderingUtenKomplettBarnVurdering)
         }
-
-        val vilkårsvurderingUtenKomplettSøkerVurdering = listOf(RestVilkårResultat(personIdent = "1",
-                                                                                   vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                                                   utfallType = UtfallType.OPPFYLT),
-                                                                RestVilkårResultat(personIdent = "12345678910",
-                                                                                   vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                                                                   utfallType = UtfallType.OPPFYLT),
-                                                                RestVilkårResultat(personIdent = "12345678910",
-                                                                                   vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                                                   utfallType = UtfallType.OPPFYLT),
-                                                                RestVilkårResultat(personIdent = "12345678910",
-                                                                                   vilkårType = VilkårType.STØNADSPERIODE,
-                                                                                   utfallType = UtfallType.OPPFYLT))
 
         assertThrows<IllegalStateException> {
             vilkårService.vurderVilkår(personopplysningGrunnlag,
@@ -124,3 +94,51 @@ class VilkårServiceTest(
         ), VilkårType.hentVilkårForPart(PersonType.SØKER))
     }
 }
+
+fun vilkårsvurderingKomplettForBarnOgSøker(søkerPersonIdent: String, barnPersonIdenter: List<String>): List<RestVilkårResultat> {
+    val barnasVilkår = barnPersonIdenter.map {
+        listOf(RestVilkårResultat(personIdent = it,
+                                  vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                                  utfallType = UtfallType.OPPFYLT),
+               RestVilkårResultat(personIdent = it,
+                                  vilkårType = VilkårType.BOSATT_I_RIKET,
+                                  utfallType = UtfallType.OPPFYLT),
+               RestVilkårResultat(personIdent = it,
+                                  vilkårType = VilkårType.STØNADSPERIODE,
+                                  utfallType = UtfallType.OPPFYLT))
+    }.flatten()
+
+    val vilkår = arrayListOf(
+            RestVilkårResultat(personIdent = søkerPersonIdent,
+                               vilkårType = VilkårType.BOSATT_I_RIKET,
+                               utfallType = UtfallType.OPPFYLT),
+            RestVilkårResultat(personIdent = søkerPersonIdent,
+                               vilkårType = VilkårType.STØNADSPERIODE,
+                               utfallType = UtfallType.OPPFYLT))
+
+    vilkår.addAll(barnasVilkår)
+    return vilkår
+}
+
+val vilkårsvurderingUtenKomplettBarnVurdering = listOf(RestVilkårResultat(personIdent = "1",
+                                                                          vilkårType = VilkårType.BOSATT_I_RIKET,
+                                                                          utfallType = UtfallType.OPPFYLT),
+                                                       RestVilkårResultat(personIdent = "1",
+                                                                          vilkårType = VilkårType.STØNADSPERIODE,
+                                                                          utfallType = UtfallType.OPPFYLT),
+                                                       RestVilkårResultat(personIdent = "12345678910",
+                                                                          vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                                                                          utfallType = UtfallType.OPPFYLT))
+
+val vilkårsvurderingUtenKomplettSøkerVurdering = listOf(RestVilkårResultat(personIdent = "1",
+                                                                           vilkårType = VilkårType.BOSATT_I_RIKET,
+                                                                           utfallType = UtfallType.OPPFYLT),
+                                                        RestVilkårResultat(personIdent = "12345678910",
+                                                                           vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                                                                           utfallType = UtfallType.OPPFYLT),
+                                                        RestVilkårResultat(personIdent = "12345678910",
+                                                                           vilkårType = VilkårType.BOSATT_I_RIKET,
+                                                                           utfallType = UtfallType.OPPFYLT),
+                                                        RestVilkårResultat(personIdent = "12345678910",
+                                                                           vilkårType = VilkårType.STØNADSPERIODE,
+                                                                           utfallType = UtfallType.OPPFYLT))

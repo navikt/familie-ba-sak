@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -33,13 +35,14 @@ class FagsakController(
         private val oidcUtil: OIDCUtil,
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val taskRepository: TaskRepository
 ) {
     @GetMapping(path = ["/{fagsakId}"])
     fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+        val saksbehandlerId = hentSaksbehandler()
 
-        logger.info("{} henter fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
+        logger.info("{} henter fagsak med id {}", saksbehandlerId, fagsakId)
 
         val ressurs = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
@@ -52,34 +55,58 @@ class FagsakController(
 
     @PostMapping(path = ["/{fagsakId}/nytt-vedtak"])
     fun nyttVedtak(@PathVariable fagsakId: Long, @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+        val saksbehandlerId = hentSaksbehandler()
 
-        logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
+        logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
-        val fagsak: Ressurs<RestFagsak> = Result.runCatching {
-            behandlingService.nyttVedtakForAktivBehandling(fagsakId,
+        val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                                       ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+
+        return Result.runCatching {
+            behandlingService.nyttVedtakForAktivBehandling(behandling,
+                                                           personopplysningGrunnlag,
                                                            nyttVedtak,
                                                            ansvarligSaksbehandler = saksbehandlerId)
         }
                 .fold(
-                        onSuccess = { it },
+                        onSuccess = { ResponseEntity.ok(it) },
                         onFailure = { e ->
-                            Ressurs.failure("Klarte ikke å opprette nytt vedtak", e)
+                            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure(e.cause?.message ?: e.message, e))
                         }
                 )
-
-        return ResponseEntity.ok(fagsak)
     }
 
     @PostMapping(path = ["/{fagsakId}/oppdater-vedtak-beregning"])
     fun oppdaterVedtakMedBeregning(@PathVariable fagsakId: Long, @RequestBody
     nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+        val saksbehandlerId = hentSaksbehandler()
 
-        logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
+        logger.info("{} oppdaterer vedtak med beregning for fagsak med id {}", saksbehandlerId, fagsakId)
+
+        if (nyBeregning.barnasBeregning.isEmpty()) {
+            return badRequest("Barnas beregning er tom")
+        }
+
+        val behandling =
+                behandlingService.hentBehandlingHvisEksisterer(fagsakId)
+                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+
+        val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
+                     ?: return notFound("Fant ikke aktiv vedtak på fagsak $fagsakId, behandling ${behandling.id}")
+
+        if (vedtak.resultat == VedtakResultat.AVSLÅTT) {
+            return badRequest("Kan ikke lagre beregning på et avslått vedtak")
+        }
+
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                                       ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         val fagsak: Ressurs<RestFagsak> = Result.runCatching {
-            behandlingService.oppdaterAktivVedtakMedBeregning(fagsakId,
+            behandlingService.oppdaterAktivVedtakMedBeregning(vedtak,
+                                                              personopplysningGrunnlag,
                                                               nyBeregning)
         }
                 .fold(
@@ -94,9 +121,9 @@ class FagsakController(
 
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
-        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+        val saksbehandlerId = hentSaksbehandler()
 
-        logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
+        logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
                          ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
@@ -141,9 +168,9 @@ class FagsakController(
 
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak"])
     fun opphørMigrertVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
-        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+        val saksbehandlerId = hentSaksbehandler()
 
-        logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
+        logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
                          ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
@@ -168,13 +195,21 @@ class FagsakController(
         return ResponseEntity.ok(Ressurs.success("Task for opphør av migrert behandling og vedtak på fagsak $fagsakId opprettet"))
     }
 
-    private fun notFound(errorMessage: String): ResponseEntity<Ressurs<String>> =
+    private fun hentSaksbehandler() = Result.runCatching { oidcUtil.getClaim("preferred_username") }.fold(
+            onSuccess = { it },
+            onFailure = { "Ukjent" }
+    )
+
+    private fun <T> notFound(errorMessage: String): ResponseEntity<Ressurs<T>> =
             errorResponse(HttpStatus.NOT_FOUND, errorMessage)
 
-    private fun forbidden(errorMessage: String): ResponseEntity<Ressurs<String>> =
+    private fun <T> badRequest(errorMessage: String): ResponseEntity<Ressurs<T>> =
+            errorResponse(HttpStatus.BAD_REQUEST, errorMessage)
+
+    private fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> =
             errorResponse(HttpStatus.FORBIDDEN, errorMessage)
 
-    private fun errorResponse(notFound: HttpStatus, errorMessage: String): ResponseEntity<Ressurs<String>> {
+    private fun <T> errorResponse(notFound: HttpStatus, errorMessage: String): ResponseEntity<Ressurs<T>> {
         return ResponseEntity.status(notFound).body(Ressurs.failure(errorMessage))
     }
 
