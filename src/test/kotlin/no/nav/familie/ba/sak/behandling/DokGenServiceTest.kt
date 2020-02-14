@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.domene.vedtak.toDokGenTemplate
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -44,7 +45,7 @@ class DokGenServiceTest(@Autowired
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
         val markdown= dokGenService.hentStønadBrevMarkdown(vedtak)
-        val htmlResponse= dokGenService.lagHtmlFraMarkdown(markdown)
+        val htmlResponse= dokGenService.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(), markdown)
         assert(htmlResponse.startsWith("<html>"))
     }
 

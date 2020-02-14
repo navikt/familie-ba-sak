@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.mottak.BehandlingController
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -31,9 +32,15 @@ import java.time.LocalDate
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 @Tag("integration")
-class FagsakControllerTest(
+class BehandlingControllerTest(
         @Autowired
         private val oidcUtil: OIDCUtil,
+
+        @Autowired
+        private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val featureToggleService: FeatureToggleService,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -41,21 +48,15 @@ class FagsakControllerTest(
         @Autowired
         private val taskRepository: TaskRepository
 ) {
+
     @Test
     @Tag("integration")
-    fun `Test opphør vedtak`() {
+    fun `Test hent html vedtak`() {
         val mockBehandlingLager: BehandlingService = mockk()
+        every { mockBehandlingLager.hentHtmlVedtakForBehandling(any()) } returns Ressurs.success("mock_html")
 
-        val fagsak = Fagsak(1, AktørId("1"), PersonIdent("1"))
-        val behandling = Behandling(1,fagsak,null,BehandlingType.MIGRERING_FRA_INFOTRYGD,"1",status = BehandlingStatus.IVERKSATT)
-        val vedtak = Vedtak(1, behandling, "sb", LocalDate.now(),"",VedtakResultat.INNVILGET)
-
-        every { mockBehandlingLager.hentBehandlingHvisEksisterer(any())} returns behandling
-        every { mockBehandlingLager.hentVedtakHvisEksisterer(any())} returns vedtak
-        val fagsakController = FagsakController(oidcUtil, fagsakService, mockBehandlingLager, taskRepository)
-
-        val response = fagsakController.opphørMigrertVedtak(1)
-        assert(response.statusCode ==HttpStatus.OK)
+        val behandlingController = BehandlingController(oidcUtil, mockBehandlingLager, fagsakService, featureToggleService)
+        val response = behandlingController.hentHtmlVedtak(1)
+        assert(response.status == Ressurs.Status.SUKSESS)
     }
-
 }

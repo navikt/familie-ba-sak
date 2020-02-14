@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.mottak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
@@ -13,22 +14,29 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/behandling")
 @ProtectedWithClaims(issuer = "azuread")
-class MottakController(private val oidcUtil: OIDCUtil,
+class BehandlingController(private val oidcUtil: OIDCUtil,
                        private val behandlingService: BehandlingService,
                        private val fagsakService: FagsakService,
                        private val featureToggleService: FeatureToggleService) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @PostMapping(path = ["/behandling/opprett"])
+    @GetMapping(path = ["/{behandlingId}/vedtak-html"])
+    fun hentHtmlVedtak(@PathVariable behandlingId: Long): Ressurs<String> {
+        val saksbehandlerId = oidcUtil.getClaim("preferred_username")
+        FagsakController.logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
+        val html = behandlingService.hentHtmlVedtakForBehandling(behandlingId)
+        FagsakController.logger.debug(html.data)
+
+        return html
+    }
+
+    @PostMapping(path = ["/opprett"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = try {
             oidcUtil.getClaim("preferred_username") ?: "VL"
@@ -49,7 +57,7 @@ class MottakController(private val oidcUtil: OIDCUtil,
                 )
     }
 
-    @PostMapping(path = ["/behandling/opprettfrahendelse"])
+    @PostMapping(path = ["/opprettfrahendelse"])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = "VL"
 

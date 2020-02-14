@@ -85,7 +85,7 @@ class DokGenIntegrationTest {
     @Tag("integration")
     fun `Test generer html`() {
         val dokgen = DokGenTestService()
-        val html = dokgen.lagHtmlFraMarkdown("markdown")
+        val html = dokgen.lagHtmlFraMarkdown("Innvilget", "markdown")
         assert(html == "<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>")
     }
 
@@ -93,7 +93,7 @@ class DokGenIntegrationTest {
     @Tag("integration")
     fun `Test generer pdf`() {
         val dokgen = DokGenTestService()
-        val pdf = dokgen.lagPdfFraMarkdown("markdown")
+        val pdf = dokgen.lagPdfFraMarkdown("Innvilget", "markdown")
         assert(pdf.contentEquals("Vedtaksbrev PDF".toByteArray()))
     }
 
@@ -101,7 +101,7 @@ class DokGenIntegrationTest {
     @Tag("integration")
     fun `Test null response`() {
         val dokgen = DokGenTestNullBodyService()
-        val html = dokgen.lagHtmlFraMarkdown("markdown")
+        val html = dokgen.lagHtmlFraMarkdown("Innvilget", "markdown")
         assert(html.isEmpty())
 
         val markdown = dokgen.hentStønadBrevMarkdown(Vedtak(
