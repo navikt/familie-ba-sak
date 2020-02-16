@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.OpphørVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -66,7 +67,7 @@ class FagsakControllerTest(
         every { mockBehandlingLager.hentVedtakHvisEksisterer(any())} returns vedtak
         val fagsakController = FagsakController(oidcUtil, fagsakService, mockBehandlingLager, taskRepository)
 
-        val response = fagsakController.opphørMigrertVedtak(1)
+        val response = fagsakController.opphørMigrertVedtak(1, OpphørVedtak(LocalDate.now()))
         assert(response.statusCode ==HttpStatus.OK)
     }
 

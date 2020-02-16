@@ -8,10 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BarnBeregning
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -92,9 +89,10 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
         val oppdatertFagsak = behandlingService.oppdaterAktivVedtakMedBeregning(
                 fagsakId = behandling.fagsak.id ?: 1L,
                 nyBeregning = NyBeregning(
-                        arrayOf(BarnBeregning(fødselsnummer = "123456789011",
-                                              beløp = 1054,
-                                              stønadFom = LocalDate.now()))
+                        arrayOf(PersonBeregning(fødselsnummer = "123456789011",
+                                                beløp = 1054,
+                                                stønadFom = LocalDate.now(),
+                                                personberegningType = PersonBeregningType.ORDINÆR_BARNETRYGD))
                 )
         )
 

@@ -6,12 +6,23 @@ data class NyttVedtak(
         val resultat: VedtakResultat
 )
 
-data class NyBeregning(
-        val barnasBeregning: Array<BarnBeregning>
+data class OpphørVedtak(
+        val opphørsdato: LocalDate
 )
 
-data class BarnBeregning(
+data class NyBeregning(
+        val personberegninger: Array<PersonBeregning>
+)
+
+data class PersonBeregning(
         val fødselsnummer: String,
         val beløp: Int,
-        val stønadFom: LocalDate
+        val stønadFom: LocalDate,
+        val personberegningType : PersonBeregningType
 )
+
+enum class PersonBeregningType {
+    ORDINÆR_BARNETRYGD,
+    UTVIDET_BARNETRYGD,
+    SMÅBARNSTILLEGG
+}

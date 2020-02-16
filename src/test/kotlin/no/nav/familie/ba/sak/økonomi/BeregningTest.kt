@@ -6,8 +6,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.vedtak.PersonBeregningType
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakBarn
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Assertions
@@ -74,37 +75,41 @@ class BeregningTest(
                            type = PersonType.BARN,
                            personopplysningGrunnlag = personopplysningGrunnlag)
 
-        val barnBeregning1 = VedtakBarn(
+        val barnBeregning1 = VedtakPerson(
                 barn = barn1,
                 stønadFom = barn1Fødselsdato,
                 stønadTom = barn1Fødselsdato.plusYears(18),
                 beløp = 1054,
-                vedtak = vedtak
+                vedtak = vedtak,
+                type = PersonBeregningType.ORDINÆR_BARNETRYGD
+
         )
 
-        val barnBeregning2 = VedtakBarn(
+        val barnBeregning2 = VedtakPerson(
                 barn = barn2,
                 stønadFom = barn2Fødselsdato,
                 stønadTom = barn2Fødselsdato.plusYears(18),
                 beløp = 1054,
-                vedtak = vedtak
+                vedtak = vedtak,
+                type = PersonBeregningType.ORDINÆR_BARNETRYGD
         )
 
-        val barnBeregning3 = VedtakBarn(
+        val barnBeregning3 = VedtakPerson(
                 barn = barn3,
                 stønadFom = barn3Fødselsdato.plusYears(3),
                 stønadTom = barn3Fødselsdato.plusYears(18),
                 beløp = 1054,
-                vedtak = vedtak
+                vedtak = vedtak,
+                type = PersonBeregningType.ORDINÆR_BARNETRYGD
         )
 
-        val tidslinje = beregning.beregnUtbetalingsperioder(listOf(
+        val tidslinjeMap = beregning.beregnUtbetalingsperioder(listOf(
                 barnBeregning1,
                 barnBeregning2,
-                barnBeregning3
-        ))
+                barnBeregning3),{"BATR"})
 
 
+        val tidslinje = tidslinjeMap["BATR"]!!
         Assertions.assertEquals(tidslinje.size(), 4)
 
         // Sjekk at første periode er på 2 år

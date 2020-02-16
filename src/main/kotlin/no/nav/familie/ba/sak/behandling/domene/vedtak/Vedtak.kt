@@ -30,7 +30,14 @@ data class Vedtak(
         val resultat: VedtakResultat,
 
         @Column(name = "aktiv", nullable = false)
-        var aktiv: Boolean = true
+        var aktiv: Boolean = true,
+
+        @Column(name = "forrige_vedtak_id")
+        var forrigeVedtakId: Long? = null,
+
+        @Column(name = "opphør_dato")
+        var opphørsdato: LocalDate? = null
+
 ) : BaseEntitet()
 
 enum class VedtakResultat {

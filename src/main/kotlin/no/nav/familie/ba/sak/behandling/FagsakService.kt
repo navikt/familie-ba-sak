@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakBarnRepository
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FagsakService(
-        private val vedtakBarnRepository: VedtakBarnRepository,
+        private val vedtakPersonRepository: VedtakPersonRepository,
         private val fagsakRepository: FagsakRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val behandlingRepository: BehandlingRepository,
@@ -32,7 +32,7 @@ class FagsakService(
             val barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent.ident }
 
             val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
-                val barnBeregning = vedtakBarnRepository.finnBarnBeregningForVedtak(vedtak.id)
+                val barnBeregning = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
                 vedtak.toRestVedtak(barnBeregning)
             }
 

@@ -5,11 +5,12 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.vedtak.OpphørVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
-import no.nav.familie.ba.sak.task.OpphørVedtak.Companion.opprettTaskOpphørVedtak
+import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
 import no.nav.familie.ba.sak.økonomi.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -149,7 +150,7 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/fagsak/{fagsakId}/opphoer-migrert-vedtak"])
-    fun opphørMigrertVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+    fun opphørMigrertVedtak(@PathVariable fagsakId: Long, @RequestBody opphørVedtak: OpphørVedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
 
         logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId ?: "Ukjent", fagsakId)
@@ -168,10 +169,11 @@ class FagsakController(
             return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt")
         }
 
-        val task = opprettTaskOpphørVedtak(behandling,
+        val task = opprettOpphørVedtakTask(behandling,
                                            vedtak,
                                            saksbehandlerId,
-                                           BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
+                                           BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+                                           opphørVedtak.opphørsdato)
         taskRepository.save(task)
 
         return ResponseEntity.ok(Ressurs.success("Task for opphør av migrert behandling og vedtak på fagsak $fagsakId opprettet"))

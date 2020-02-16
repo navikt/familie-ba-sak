@@ -11,22 +11,24 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = IverksettMotOppdrag.TASK_STEP_TYPE, beskrivelse = "Opphør aktiv behandling og vedtak", maxAntallFeil = 3)
-class OpphørVedtak(
+class OpphørVedtakTask(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val opphørVedtakTask = objectMapper.readValue(task.payload, OpphørVedtakDTO::class.java)
+        val opphørVedtakTask = objectMapper.readValue(task.payload, OpphørVedtakTaskDTO::class.java)
 
         LOG.debug("Opphører behandling og tilhørende vedtak med behandlingsId ${opphørVedtakTask.gjeldendeBehandlingsId}")
         behandlingService.opphørVedtak(opphørVedtakTask.saksbehandlerId,
                                        opphørVedtakTask.gjeldendeBehandlingsId,
                                        BehandlingType.valueOf(opphørVedtakTask.nyBehandlingType),
+                                       opphørVedtakTask.opphørsdato,
                                        ::opprettIverksettMotOppdragTask)
     }
 
@@ -42,20 +44,22 @@ class OpphørVedtak(
 
     companion object {
         const val TASK_STEP_TYPE = "opphørVedtak"
-        val LOG = LoggerFactory.getLogger(OpphørVedtak::class.java)
+        val LOG = LoggerFactory.getLogger(OpphørVedtakTask::class.java)
 
-        fun opprettTaskOpphørVedtak(gjeldendeBehandling: Behandling,
+        fun opprettOpphørVedtakTask(gjeldendeBehandling: Behandling,
                                     gjeldendeVedtak: Vedtak,
                                     saksbehandlerId: String,
-                                    nyBehandlingstype: BehandlingType) : Task {
+                                    nyBehandlingstype: BehandlingType,
+                                    opphørsdato: LocalDate) : Task {
 
             return Task.nyTask(type = TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(OpphørVedtakDTO(
+                               payload = objectMapper.writeValueAsString(OpphørVedtakTaskDTO(
                                        personIdent = gjeldendeBehandling.fagsak.personIdent.ident,
                                        gjeldendeBehandlingsId = gjeldendeBehandling.id!!,
                                        gjeldendeVedtaksId = gjeldendeVedtak.id!!,
                                        saksbehandlerId = saksbehandlerId,
-                                       nyBehandlingType = nyBehandlingstype.name
+                                       nyBehandlingType = nyBehandlingstype.name,
+                                       opphørsdato = opphørsdato
                                )),
                                properties = Properties().apply {
                                    this["personIdent"] = gjeldendeBehandling.fagsak.personIdent.ident
@@ -67,10 +71,11 @@ class OpphørVedtak(
 
 }
 
-data class OpphørVedtakDTO(
+data class OpphørVedtakTaskDTO(
         val personIdent: String,
         val gjeldendeBehandlingsId : Long,
         val gjeldendeVedtaksId: Long,
         val saksbehandlerId : String,
-        val nyBehandlingType : String
+        val nyBehandlingType : String,
+        val opphørsdato: LocalDate
 )

@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import javax.persistence.*
 
-@Entity(name = "VedtakBarn")
-@Table(name = "VEDTAK_BARN")
-data class VedtakBarn(
+@Entity(name = "VedtakPerson")
+@Table(name = "VEDTAK_PERSON")
+data class VedtakPerson(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_barn_seq")
-        @SequenceGenerator(name = "vedtak_barn_seq")
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_person_seq")
+        @SequenceGenerator(name = "vedtak_person_seq")
         val id: Long? = null,
 
         @ManyToOne(optional = false) @JoinColumn(name = "fk_vedtak_id", nullable = false, updatable = false)
@@ -26,5 +26,10 @@ data class VedtakBarn(
         val stønadFom: LocalDate,
 
         @Column(name = "stonad_tom", nullable = false)
-        val stønadTom: LocalDate
+        val stønadTom: LocalDate,
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "type", nullable = false)
+        val type: PersonBeregningType
+
 ) : BaseEntitet()

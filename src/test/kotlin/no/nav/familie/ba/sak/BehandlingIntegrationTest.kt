@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.task.OpphørVedtak
+import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,7 +30,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import javax.transaction.Transactional
 import kotlin.streams.asSequence
@@ -55,7 +53,7 @@ class BehandlingIntegrationTest {
     lateinit var vedtakRepository: VedtakRepository
 
     @Autowired
-    lateinit var vedtakBarnRepository: VedtakBarnRepository
+    lateinit var vedtakPersonRepository: VedtakPersonRepository
 
     @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
@@ -81,7 +79,7 @@ class BehandlingIntegrationTest {
         behandlingService = BehandlingService(
                 behandlingRepository,
                 vedtakRepository,
-                vedtakBarnRepository,
+                vedtakPersonRepository,
                 personopplysningGrunnlagRepository,
                 personRepository,
                 dokGenService,
@@ -263,9 +261,10 @@ class BehandlingIntegrationTest {
         val updatedFagsakRes= behandlingService.oppdaterAktivVedtakMedBeregning(
                 fagsakId = behandling.fagsak.id ?: 1L,
                 nyBeregning = NyBeregning(
-                        barnasBeregning = arrayOf(BarnBeregning(fødselsnummer = "123456789011",
-                                                                beløp = 1054,
-                                                                stønadFom = LocalDate.now())))
+                        personberegninger = arrayOf(PersonBeregning(fødselsnummer = "123456789011",
+                                                                    beløp = 1054,
+                                                                    stønadFom = LocalDate.now(),
+                                                                    personberegningType = PersonBeregningType.ORDINÆR_BARNETRYGD)))
         )
         Assertions.assertEquals(behandling.fagsak.id, updatedFagsakRes.data?.id)
 
@@ -310,9 +309,10 @@ class BehandlingIntegrationTest {
         behandlingService.oppdaterAktivVedtakMedBeregning(
                 fagsakId = behandling.fagsak.id ?: 1L,
                 nyBeregning = NyBeregning(
-                        arrayOf(BarnBeregning(fødselsnummer = "123456789011",
-                                              beløp = 1054,
-                                              stønadFom = LocalDate.now()))
+                        arrayOf(PersonBeregning(fødselsnummer = "123456789011",
+                                                beløp = 1054,
+                                                stønadFom = LocalDate.now(),
+                                                personberegningType = PersonBeregningType.ORDINÆR_BARNETRYGD))
                 )
         )
 
@@ -397,8 +397,8 @@ class BehandlingIntegrationTest {
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
 
         val barnasBeregning = arrayOf(
-                BarnBeregning(barn1Fnr, 1054, LocalDate.now()),
-                BarnBeregning(barn2Fnr, 1054, LocalDate.now())
+                PersonBeregning(barn1Fnr, 1054, LocalDate.now(), PersonBeregningType.ORDINÆR_BARNETRYGD),
+                PersonBeregning(barn2Fnr, 1054, LocalDate.now(),PersonBeregningType.ORDINÆR_BARNETRYGD)
         )
         val nyttVedtak = NyttVedtak(VedtakResultat.INNVILGET)
         val nyBeregning= NyBeregning(barnasBeregning)
@@ -408,11 +408,12 @@ class BehandlingIntegrationTest {
 
         val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling!!.id)
 
-        val task = OpphørVedtak.opprettTaskOpphørVedtak(
+        val task = OpphørVedtakTask.opprettOpphørVedtakTask(
                 behandling,
                 vedtak!!,
                 "saksbehandler",
-                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+                LocalDate.now()
         )
 
         val taskRepository : TaskRepository = mockk()
@@ -420,7 +421,7 @@ class BehandlingIntegrationTest {
 
         every { taskRepository.save(capture(slot)) } answers { slot.captured }
 
-        OpphørVedtak(
+        OpphørVedtakTask(
                 behandlingService,
                 taskRepository
         ).doTask(task)
