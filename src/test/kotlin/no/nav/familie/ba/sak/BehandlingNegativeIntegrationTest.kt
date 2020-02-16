@@ -1,14 +1,17 @@
 package no.nav.familie.ba.sak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.FagsakController
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
+import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.util.DbContainerInitializer
+import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
@@ -26,11 +29,16 @@ import java.time.LocalDate
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-dokgen-negative")
 @Tag("integration")
-class BehandlingNegativeIntegrationTest(@Autowired
-                                        private val behandlingService: BehandlingService) {
+class BehandlingNegativeIntegrationTest(
+        @Autowired
+        private val fagsakController: FagsakController,
 
-    @Autowired
-    lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+        @Autowired
+        private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
+
 
     @Test
     @Tag("integration")
@@ -40,7 +48,12 @@ class BehandlingNegativeIntegrationTest(@Autowired
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("6")
         val behandling =
-                behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, "sak1")
+                behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                              "sdf",
+                                                              BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                              "sak1",
+                                                              BehandlingKategori.NATIONAL,
+                                                              BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
     }
@@ -48,48 +61,39 @@ class BehandlingNegativeIntegrationTest(@Autowired
     @Test
     @Tag("integration")
     fun `Oppdater avslag vedtak med beregning`() {
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("777")
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       "123")
+                                                                       "123",
+                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
-
-        val søker = Person(personIdent = PersonIdent("777"),
-                           type = PersonType.SØKER,
-                           personopplysningGrunnlag = personopplysningGrunnlag,
-                           fødselsdato = LocalDate.now())
-        personopplysningGrunnlag.leggTilPerson(søker)
-        val barn = Person(personIdent = PersonIdent("12345678910"),
-                          type = PersonType.BARN,
-                          personopplysningGrunnlag = personopplysningGrunnlag,
-                          fødselsdato = LocalDate.now())
-        personopplysningGrunnlag.leggTilPerson(søker)
-        personopplysningGrunnlag.leggTilPerson(barn)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         behandlingService.nyttVedtakForAktivBehandling(
-                fagsakId = behandling.fagsak.id ?: 1L,
-                nyttVedtak = NyttVedtak(resultat = VedtakResultat.AVSLÅTT),
+                behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                nyttVedtak = NyttVedtak(resultat = VedtakResultat.AVSLÅTT,
+                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910"))),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
-        val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
+        val vedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
+        Assertions.assertNotNull(vedtak)
 
-        val fagsakRes = behandlingService.oppdaterAktivVedtakMedBeregning(
-                fagsakId = behandling.fagsak.id ?: 1L,
-                nyBeregning = NyBeregning(
-                        arrayOf(
-                                PersonBeregning(
-                                        fødselsnummer = "123456789011",
-                                        beløp = 1054,
-                                        stønadFom = LocalDate.now(),
-                                        personberegningType = PersonBeregningType.ORDINÆR_BARNETRYGD
-                                ))
-                )
-        )
+        val fagsakRes = fagsakController.oppdaterVedtakMedBeregning(fagsak.id!!, NyBeregning(
+                arrayOf(
+                        PersonBeregning(
+                                fødselsnummer = "12345678910",
+                                beløp = 1054,
+                                stønadFom = LocalDate.now(),
+                                ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
+                        ))
+        ))
 
-        Assertions.assertEquals(Ressurs.Status.FEILET, fagsakRes.status)
+        Assertions.assertEquals(Ressurs.Status.FEILET, fagsakRes.body?.status)
+        Assertions.assertEquals("Kan ikke lagre beregning på et avslått vedtak", fagsakRes.body?.melding)
     }
 }

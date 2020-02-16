@@ -43,3 +43,11 @@ data class Vedtak(
 enum class VedtakResultat {
     INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
 }
+
+fun VedtakResultat.toDokGenTemplate(): String {
+    return when (this) {
+        VedtakResultat.INNVILGET -> "Innvilget"
+        VedtakResultat.AVSLÅTT -> "Avslag"
+        else -> throw RuntimeException("Invalid/Unsupported vedtak result")
+    }
+}

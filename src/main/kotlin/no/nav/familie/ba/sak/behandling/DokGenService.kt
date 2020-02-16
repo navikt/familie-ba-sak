@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.domene.vedtak.toDokGenTemplate
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
@@ -28,16 +29,7 @@ class DokGenService(
 
     fun hentStønadBrevMarkdown(vedtak: Vedtak): String {
         val fletteFelter = mapTilBrevfelter(vedtak)
-
-        val template = when (vedtak.resultat) {
-            VedtakResultat.INNVILGET -> "Innvilget"
-            VedtakResultat.AVSLÅTT -> "Avslag"
-            else -> {
-                throw RuntimeException("Invalid/Unsupported vedtak.resultat")
-            }
-        }
-
-        return hentMarkdownForMal(template, fletteFelter)
+        return hentMarkdownForMal(vedtak.resultat.toDokGenTemplate(), fletteFelter)
     }
 
     private fun mapTilBrevfelter(vedtak: Vedtak): String {
@@ -94,20 +86,20 @@ class DokGenService(
         return response.body.orEmpty()
     }
 
-    fun lagHtmlFraMarkdown(markdown: String): String {
-        val request = lagDokumentRequestForMarkdown(HTML, markdown)
+    fun lagHtmlFraMarkdown(template: String, markdown: String): String {
+        val request = lagDokumentRequestForMarkdown(HTML, template, markdown)
         val response = utførRequest(request, String::class.java)
         return response.body.orEmpty()
     }
 
-    fun lagPdfFraMarkdown(markdown: String): ByteArray {
-        val request = lagDokumentRequestForMarkdown(PDF, markdown)
+    fun lagPdfFraMarkdown(template: String, markdown: String): ByteArray {
+        val request = lagDokumentRequestForMarkdown(PDF, template, markdown)
         val response = utførRequest(request, ByteArray::class.java)
         return response.body!!
     }
 
-    fun lagDokumentRequestForMarkdown(format: DocFormat, markdown: String): RequestEntity<String> {
-        val url = URI.create("$dokgenServiceUri/template/Innvilget/create-doc")
+    fun lagDokumentRequestForMarkdown(format: DocFormat, template: String, markdown: String): RequestEntity<String> {
+        val url = URI.create("$dokgenServiceUri/template/${template}/create-doc")
         val body = DokumentRequest(format,
                                    markdown,
                                    true,

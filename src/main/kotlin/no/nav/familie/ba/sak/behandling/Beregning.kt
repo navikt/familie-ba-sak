@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.vedtak.PersonBeregningType
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 @Service
 class Beregning {
 
-    fun <T> beregnUtbetalingsperioder(personer: List<VedtakPerson>, groupMapper: (PersonBeregningType) -> T): Map<T, LocalDateTimeline<Int>> {
+    fun <T> beregnUtbetalingsperioder(personer: List<VedtakPerson>, groupMapper: (Ytelsetype) -> T): Map<T, LocalDateTimeline<Int>> {
         return personer.groupBy(
                 { groupMapper(it.type) },
                 { personTilTimeline(it) }

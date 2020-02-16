@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.Beregning
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.domene.vedtak.PersonBeregningType
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
@@ -49,7 +51,12 @@ class BeregningTest(
     @Test
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("12345")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak, "sdf", BehandlingType.FØRSTEGANGSBEHANDLING, "lagRandomSaksnummer")
+        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                                       "sdf",
+                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                       "lagRandomSaksnummer",
+                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
@@ -81,7 +88,7 @@ class BeregningTest(
                 stønadTom = barn1Fødselsdato.plusYears(18),
                 beløp = 1054,
                 vedtak = vedtak,
-                type = PersonBeregningType.ORDINÆR_BARNETRYGD
+                type = Ytelsetype.ORDINÆR_BARNETRYGD
 
         )
 
@@ -91,7 +98,7 @@ class BeregningTest(
                 stønadTom = barn2Fødselsdato.plusYears(18),
                 beløp = 1054,
                 vedtak = vedtak,
-                type = PersonBeregningType.ORDINÆR_BARNETRYGD
+                type = Ytelsetype.ORDINÆR_BARNETRYGD
         )
 
         val barnBeregning3 = VedtakPerson(
@@ -100,7 +107,7 @@ class BeregningTest(
                 stønadTom = barn3Fødselsdato.plusYears(18),
                 beløp = 1054,
                 vedtak = vedtak,
-                type = PersonBeregningType.ORDINÆR_BARNETRYGD
+                type = Ytelsetype.ORDINÆR_BARNETRYGD
         )
 
         val tidslinjeMap = beregning.beregnUtbetalingsperioder(listOf(

@@ -30,6 +30,6 @@ data class VedtakPerson(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "type", nullable = false)
-        val type: PersonBeregningType
+        val type: Ytelsetype
 
 ) : BaseEntitet()

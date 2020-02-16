@@ -2,15 +2,15 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.HttpTestBase
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import okhttp3.mockwebserver.MockResponse
@@ -38,6 +38,9 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
     lateinit var behandlingService: BehandlingService
 
     @Autowired
+    lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Autowired
@@ -54,53 +57,45 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
         mockServer.enqueue(response)
         mockServer.enqueue(response)
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("0")
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       "randomSaksnummer")
+                                                                       "randomSaksnummer",
+                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
-
-        val søker = Person(personIdent = PersonIdent("123456789010"),
-                           type = PersonType.SØKER,
-                           personopplysningGrunnlag = personopplysningGrunnlag,
-                           fødselsdato = LocalDate.now())
-
-        personopplysningGrunnlag.leggTilPerson(søker)
-
-        personopplysningGrunnlag.leggTilPerson(Person(personIdent = PersonIdent("123456789011"),
-                                                      type = PersonType.BARN,
-                                                      personopplysningGrunnlag = personopplysningGrunnlag,
-                                                      fødselsdato = LocalDate.now()))
-
-        personopplysningGrunnlag.aktiv = true
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val nyttVedtak = behandlingService.nyttVedtakForAktivBehandling(
-                fagsakId = behandling.fagsak.id ?: 1L,
+        behandlingService.nyttVedtakForAktivBehandling(
+                behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(
-                        resultat = VedtakResultat.INNVILGET
+                        resultat = VedtakResultat.INNVILGET,
+                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910"))
                 ),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
+        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+        Assertions.assertNotNull(vedtak)
+
         val oppdatertFagsak = behandlingService.oppdaterAktivVedtakMedBeregning(
-                fagsakId = behandling.fagsak.id ?: 1L,
+                vedtak = vedtak!!,
+                personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
-                        arrayOf(PersonBeregning(fødselsnummer = "123456789011",
+                        arrayOf(PersonBeregning(fødselsnummer = "12345678910",
                                                 beløp = 1054,
                                                 stønadFom = LocalDate.now(),
-                                                personberegningType = PersonBeregningType.ORDINÆR_BARNETRYGD))
+                                                ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
-        val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
-
-        økonomiService.iverksettVedtak(behandling.id!!, vedtak?.id!!, "ansvarligSaksbehandler")
+        økonomiService.iverksettVedtak(behandling.id!!, vedtak.id!!, "ansvarligSaksbehandler")
 
         val oppdatertBehandling = behandlingService.hentBehandling(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling?.status)

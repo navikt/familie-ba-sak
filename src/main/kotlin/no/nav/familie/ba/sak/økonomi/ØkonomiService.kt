@@ -3,8 +3,7 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.Beregning
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.vedtak.PersonBeregningType
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -84,8 +83,12 @@ class ØkonomiService(
                 )
     }
 
-    private fun betalingstypeTilKlassifisering(type: PersonBeregningType) : String {
-        return "BATR"
+    /// TODO Trenger riktig mapping av disse
+    private fun betalingstypeTilKlassifisering(type: Ytelsetype) : String {
+        return when(type) {
+            Ytelsetype.ORDINÆR_BARNETRYGD->"BATR"
+            else -> "BATR"
+        }
     }
 
     fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): OppdragProtokollStatus {

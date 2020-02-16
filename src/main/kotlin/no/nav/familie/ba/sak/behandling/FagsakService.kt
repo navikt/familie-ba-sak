@@ -43,7 +43,9 @@ class FagsakService(
                     vedtakForBehandling = vedtakForBehandling,
                     type = it.type,
                     status = it.status,
-                    samletVilkårResultat = it.samletVilkårResultat?.toRestSamletVilkårResultat()
+                    samletVilkårResultat = it.samletVilkårResultat?.toRestSamletVilkårResultat(),
+                    kategori = it.kategori,
+                    underkategori = it.underkategori
             )
         }
 
