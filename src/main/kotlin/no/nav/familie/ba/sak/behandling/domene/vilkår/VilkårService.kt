@@ -9,9 +9,20 @@ import org.springframework.stereotype.Service
 class VilkårService(
         private val samletVilkårResultatRepository: SamletVilkårResultatRepository
 ) {
+    fun lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat: SamletVilkårResultat) {
+        val aktivSamletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(samletVilkårResultat.behandlingId)
 
-    fun vurderVilkår(personopplysningGrunnlag: PersonopplysningGrunnlag,
-                     restSamletVilkårResultat: List<RestVilkårResultat>): SamletVilkårResultat {
+        if (aktivSamletVilkårResultat != null) {
+            aktivSamletVilkårResultat.aktiv = false
+            samletVilkårResultatRepository.save(aktivSamletVilkårResultat)
+        }
+
+        samletVilkårResultatRepository.save(samletVilkårResultat)
+    }
+
+    fun vurderVilkårOgLagResultat(personopplysningGrunnlag: PersonopplysningGrunnlag,
+                                  restSamletVilkårResultat: List<RestVilkårResultat>,
+                                  behandlingId: Long): SamletVilkårResultat {
         val listeAvVilkårResultat = mutableSetOf<VilkårResultat>()
 
         personopplysningGrunnlag.personer.map { person ->
@@ -31,10 +42,10 @@ class VilkårService(
                 throw IllegalStateException("Vilkårene for ${person.type} er ${vilkårForPerson.map { v -> v.vilkårType }}, men vi forventer $vilkårForPart")
             }
         }
-        val samletVilkårResultat = SamletVilkårResultat(samletVilkårResultat = listeAvVilkårResultat)
+        val samletVilkårResultat = SamletVilkårResultat(samletVilkårResultat = listeAvVilkårResultat, behandlingId = behandlingId)
         listeAvVilkårResultat.map { it.samletVilkårResultat = samletVilkårResultat }
 
-        samletVilkårResultatRepository.save(samletVilkårResultat)
+        lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat)
 
         return samletVilkårResultat
     }

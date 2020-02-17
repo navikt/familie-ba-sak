@@ -48,7 +48,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          nyBehandling.kategori,
                                                          nyBehandling.underkategori)
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
-            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
+            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
                 Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
             } else {
                 LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
@@ -75,7 +75,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          nyBehandling.underkategori)
 
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
-            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
+            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
                 Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
             } else {
                 LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
@@ -299,10 +299,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                      personopplysningGrunnlag: PersonopplysningGrunnlag,
                                      nyttVedtak: NyttVedtak,
                                      ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
-        val samletVilkårResultat = vilkårService.vurderVilkår(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat)
-
-        behandling.samletVilkårResultat = samletVilkårResultat
-        lagreBehandling(behandling)
+        vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat, behandling.id!!)
 
         val vedtak = Vedtak(
                 behandling = behandling,
