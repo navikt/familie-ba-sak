@@ -30,7 +30,10 @@ data class Vedtak(
         val resultat: VedtakResultat,
 
         @Column(name = "aktiv", nullable = false)
-        var aktiv: Boolean = true
+        var aktiv: Boolean = true,
+
+        @Column(name = "begrunnelse", columnDefinition = "TEXT")
+        var begrunnelse: String = ""
 ) : BaseEntitet()
 
 enum class VedtakResultat {

@@ -305,7 +305,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 behandling = behandling,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
-                resultat = nyttVedtak.resultat
+                resultat = nyttVedtak.resultat,
+                begrunnelse = nyttVedtak.begrunnelse
         )
 
         if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT) {
