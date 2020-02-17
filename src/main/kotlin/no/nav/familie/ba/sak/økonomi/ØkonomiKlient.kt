@@ -77,11 +77,9 @@ class ØkonomiKlient(
         headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
-        val requestBody = objectMapper.writeValueAsString(oppdragTilAvstemming)
-
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/konsistensavstemming/$FAGSYSTEM/?avstemmingsdato=$avstemmingsdato"),
                 HttpMethod.POST,
-                HttpEntity<String>(requestBody, headers))
+                HttpEntity<List<OppdragId>>(oppdragTilAvstemming, headers))
     }
 }
