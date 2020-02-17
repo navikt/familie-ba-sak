@@ -9,10 +9,8 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
-import no.nav.familie.ba.sak.mottak.BehandlingController
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.sikkerhet.OIDCUtil
 import org.junit.jupiter.api.Tag
@@ -55,7 +53,7 @@ class FagsakControllerTest(
                            BehandlingType.MIGRERING_FRA_INFOTRYGD,
                            "1",
                            status = BehandlingStatus.IVERKSATT,
-                           kategori = BehandlingKategori.NATIONAL,
+                           kategori = BehandlingKategori.NASJONAL,
                            underkategori = BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(1, behandling, "sb", LocalDate.now(), "", VedtakResultat.INNVILGET)
 

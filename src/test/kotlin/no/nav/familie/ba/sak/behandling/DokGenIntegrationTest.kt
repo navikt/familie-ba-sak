@@ -70,7 +70,7 @@ class DokGenIntegrationTest {
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         saksnummer = null,
                         aktiv = true,
-                        kategori = BehandlingKategori.NATIONAL,
+                        kategori = BehandlingKategori.NASJONAL,
                         underkategori = BehandlingUnderkategori.ORDINÆR
                 ),
                 ansvarligSaksbehandler = "whoknows",
@@ -113,7 +113,7 @@ class DokGenIntegrationTest {
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         saksnummer = null,
                         aktiv = true,
-                        kategori = BehandlingKategori.NATIONAL,
+                        kategori = BehandlingKategori.NASJONAL,
                         underkategori = BehandlingUnderkategori.ORDINÆR
                 ),
                 ansvarligSaksbehandler = "whoknows",

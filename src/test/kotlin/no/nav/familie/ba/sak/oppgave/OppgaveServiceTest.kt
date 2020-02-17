@@ -102,7 +102,7 @@ class OppgaveServiceTest {
                                                   ident = FNR),
                                           aktørId = AktørId(id = AKTØR_ID_FAGSAK)),
                           type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                          kategori = BehandlingKategori.NATIONAL,
+                          kategori = BehandlingKategori.NASJONAL,
                           underkategori = BehandlingUnderkategori.ORDINÆR)
     }
 
