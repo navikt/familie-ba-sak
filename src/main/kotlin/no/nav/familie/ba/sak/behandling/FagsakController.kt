@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
 import no.nav.familie.ba.sak.task.OpphørVedtak.Companion.opprettTaskOpphørVedtak
@@ -19,6 +20,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -27,7 +29,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/fagsak")
 @ProtectedWithClaims(issuer = "azuread")
 class FagsakController(
         private val oidcUtil: OIDCUtil,
@@ -36,8 +38,7 @@ class FagsakController(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val taskRepository: TaskRepository
 ) {
-
-    @GetMapping(path = ["/fagsak/{fagsakId}"])
+    @GetMapping(path = ["/{fagsakId}"])
     fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
@@ -52,7 +53,7 @@ class FagsakController(
         return ResponseEntity.ok(ressurs)
     }
 
-    @PostMapping(path = ["/fagsak/{fagsakId}/nytt-vedtak"])
+    @PostMapping(path = ["/{fagsakId}/nytt-vedtak"])
     fun nyttVedtak(@PathVariable fagsakId: Long, @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
@@ -78,7 +79,7 @@ class FagsakController(
                 )
     }
 
-    @PostMapping(path = ["/fagsak/{fagsakId}/oppdater-vedtak-beregning"])
+    @PostMapping(path = ["/{fagsakId}/oppdater-vedtak-beregning"])
     fun oppdaterVedtakMedBeregning(@PathVariable fagsakId: Long, @RequestBody
     nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
@@ -118,7 +119,7 @@ class FagsakController(
         return ResponseEntity.ok(fagsak)
     }
 
-    @PostMapping(path = ["/fagsak/{fagsakId}/iverksett-vedtak"])
+    @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = hentSaksbehandler()
 
@@ -165,17 +166,7 @@ class FagsakController(
         return ResponseEntity.ok(Ressurs.success("Laget task for avstemming"))
     }
 
-    @GetMapping(path = ["/behandling/{behandlingId}/vedtak-html"])
-    fun hentHtmlVedtak(@PathVariable behandlingId: Long): Ressurs<String> {
-        val saksbehandlerId = hentSaksbehandler()
-        logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
-        val html = behandlingService.hentHtmlVedtakForBehandling(behandlingId)
-        logger.debug(html.data)
-
-        return html
-    }
-
-    @PostMapping(path = ["/fagsak/{fagsakId}/opphoer-migrert-vedtak"])
+    @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak"])
     fun opphørMigrertVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = hentSaksbehandler()
 
