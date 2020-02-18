@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.common.BaseService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
