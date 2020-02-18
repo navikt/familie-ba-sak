@@ -17,7 +17,7 @@ data class VedtakPerson(
         val vedtak: Vedtak,
 
         @ManyToOne(optional = false) @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
-        val barn: Person,
+        val person: Person,
 
         @Column(name = "belop", nullable = false)
         val beløp: Int,

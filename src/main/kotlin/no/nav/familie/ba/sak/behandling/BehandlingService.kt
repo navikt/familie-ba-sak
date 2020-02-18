@@ -336,7 +336,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
             vedtakPersonRepository.save(
                     VedtakPerson(
-                            barn = person,
+                            person = person,
                             vedtak = vedtak,
                             beløp = it.beløp,
                             stønadFom = it.stønadFom,

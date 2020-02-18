@@ -10,7 +10,7 @@ data class RestVedtakBarn(
 )
 
 fun VedtakPerson.toRestVedtakBarn() = RestVedtakBarn(
-        barn = this.barn.personIdent.ident,
+        barn = this.person.personIdent.ident,
         beløp = this.beløp,
         stønadFom = this.stønadFom
 )

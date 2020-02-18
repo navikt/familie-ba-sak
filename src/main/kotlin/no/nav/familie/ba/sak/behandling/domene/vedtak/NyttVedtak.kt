@@ -23,8 +23,9 @@ data class PersonBeregning(
         val ytelsetype : Ytelsetype
 )
 
-enum class Ytelsetype {
-    ORDINÆR_BARNETRYGD,
-    UTVIDET_BARNETRYGD,
-    SMÅBARNSTILLEGG
+enum class Ytelsetype(val klassifisering: String) {
+    ORDINÆR_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD("BATR"),
+    SMÅBARNSTILLEGG("BATRSMA")
+
 }

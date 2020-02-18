@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.Beregning
+import no.nav.familie.ba.sak.behandling.beregnUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -18,7 +19,6 @@ import java.math.BigDecimal
 @Service
 class ØkonomiService(
         private val økonomiKlient: ØkonomiKlient,
-        private val beregning: Beregning,
         private val behandlingService: BehandlingService
 ) {
 
@@ -26,45 +26,18 @@ class ØkonomiService(
         val vedtak = behandlingService.hentVedtak(vedtakId)
                      ?: throw Error("Fant ikke vedtak med id $vedtakId i forbindelse med iverksetting mot oppdrag")
 
-        val erOpphør = vedtak.resultat==VedtakResultat.OPPHØRT
-
-        val personberegninger = if(erOpphør)
+        val personberegninger = if(vedtak.resultat==VedtakResultat.OPPHØRT)
                 behandlingService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)
                 else behandlingService.hentPersonerForVedtak(vedtak.id)
 
-        val tidslinjeMap = beregning.beregnUtbetalingsperioder(personberegninger,::betalingstypeTilKlassifisering)
-        val utbetalingsperioder = tidslinjeMap.flatMap {
-            (klassifisering,tidslinje) -> tidslinje.toSegments()
-                // Må forsikre oss om at tidslinjesegmentene er i samme rekkefølge for å få konsekvent periodeId
-                // . Sorter etter fraDato, sats, og evt til dato
-                .sortedWith(compareBy<LocalDateSegment<Int>>({it.fom},{it.value},{it.tom}))
-                .mapIndexed { indeks, segment->
-                    Utbetalingsperiode(
-                            erEndringPåEksisterendePeriode = erOpphør,
-                            opphør = vedtak.opphørsdato?.let { Opphør(it) },
-                            datoForVedtak = vedtak.vedtaksdato,
-                            klassifisering = klassifisering,
-                            vedtakdatoFom = segment.fom,
-                            vedtakdatoTom = segment.tom,
-                            sats = BigDecimal(segment.value),
-                            satsType = Utbetalingsperiode.SatsType.MND,
-                            utbetalesTil = vedtak.behandling.fagsak.personIdent.ident.toString(),
-                            behandlingId = vedtak.behandling.id!!,
-                            // Denne måten å sette periodeId på krever at vedtak.id inkrementeres i store nok steg, f.eks 50 og 50
-                            // Og at måten segmentene bygges opp på ikke endrer seg, dvs det kommer ALLTID i samme rekkefølge
-                            periodeId = (if(!erOpphør) vedtakId else vedtak.forrigeVedtakId!!) + indeks.toLong()
-                    )
-        }}
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, personberegninger)
 
-        val utbetalingsoppdrag = Utbetalingsoppdrag(
-                saksbehandlerId = saksbehandlerId,
-                kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-                fagSystem = FAGSYSTEM,
-                saksnummer = vedtak.behandling.fagsak.id.toString(),
-                aktoer = vedtak.behandling.fagsak.personIdent.ident.toString(),
-                utbetalingsperiode = utbetalingsperioder
-        )
+        iverksettOppdrag(vedtak.behandling.id!!, utbetalingsoppdrag)
+    }
 
+
+    private fun iverksettOppdrag(behandlingsId: Long,
+                                 utbetalingsoppdrag: Utbetalingsoppdrag) {
         Result.runCatching { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
                 .fold(
                         onSuccess = {
@@ -81,14 +54,6 @@ class ØkonomiService(
                             throw Exception("Iverksetting mot oppdrag feilet", it)
                         }
                 )
-    }
-
-    /// TODO Trenger riktig mapping av disse
-    private fun betalingstypeTilKlassifisering(type: Ytelsetype) : String {
-        return when(type) {
-            Ytelsetype.ORDINÆR_BARNETRYGD->"BATR"
-            else -> "BATR"
-        }
     }
 
     fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): OppdragProtokollStatus {
