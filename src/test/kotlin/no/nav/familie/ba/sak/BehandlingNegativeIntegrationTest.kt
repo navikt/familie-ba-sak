@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BarnBeregning
+import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
@@ -52,7 +52,7 @@ class BehandlingNegativeIntegrationTest(
                                                               "sdf",
                                                               BehandlingType.FØRSTEGANGSBEHANDLING,
                                                               "sak1",
-                                                              BehandlingKategori.NATIONAL,
+                                                              BehandlingKategori.NASJONAL,
                                                               BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
@@ -66,7 +66,7 @@ class BehandlingNegativeIntegrationTest(
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        "123",
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
@@ -77,7 +77,8 @@ class BehandlingNegativeIntegrationTest(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.AVSLÅTT,
-                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910"))),
+                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")),
+                                        begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
         val vedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
@@ -88,7 +89,8 @@ class BehandlingNegativeIntegrationTest(
                         BarnBeregning(
                                 fødselsnummer = "12345678910",
                                 beløp = 1054,
-                                stønadFom = LocalDate.now()
+                                stønadFom = LocalDate.now(),
+                                ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
                         ))
         ))
 

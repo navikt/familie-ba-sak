@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakBarnRepository
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultatRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FagsakService(
-        private val vedtakBarnRepository: VedtakBarnRepository,
+        private val vedtakPersonRepository: VedtakPersonRepository,
         private val fagsakRepository: FagsakRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val samletVilkårResultatRepository: SamletVilkårResultatRepository,
@@ -34,8 +34,8 @@ class FagsakService(
                                            ?: return Ressurs.failure("Fant ikke personopplysningsgrunnlag på behandling")
 
             val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
-                val barnBeregning = vedtakBarnRepository.finnBarnBeregningForVedtak(vedtak.id)
-                vedtak.toRestVedtak(barnBeregning)
+                val personBeregning = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
+                vedtak.toRestVedtak(personBeregning)
             }
 
             RestBehandling(
@@ -46,6 +46,7 @@ class FagsakService(
                     type = it.type,
                     status = it.status,
                     samletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(it.id)?.toRestSamletVilkårResultat(),
+                    opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori
             )
