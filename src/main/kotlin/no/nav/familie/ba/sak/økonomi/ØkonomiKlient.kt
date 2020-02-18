@@ -45,7 +45,7 @@ class ØkonomiKlient(
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/oppdrag"),
                 HttpMethod.POST,
-                HttpEntity(objectMapper.writeValueAsString(utbetalingsoppdrag), headers))
+                HttpEntity(utbetalingsoppdrag, headers))
     }
 
     fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): ResponseEntity<Ressurs<OppdragProtokollStatus>> {
@@ -57,7 +57,7 @@ class ØkonomiKlient(
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/status"),
                 HttpMethod.POST,
-                HttpEntity(objectMapper.writeValueAsString(statusFraOppdragDTO), headers))
+                HttpEntity(statusFraOppdragDTO, headers))
     }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
