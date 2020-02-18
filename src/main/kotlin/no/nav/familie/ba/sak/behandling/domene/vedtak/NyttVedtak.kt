@@ -6,7 +6,7 @@ import java.time.LocalDate
 data class NyttVedtak(
         val resultat: VedtakResultat,
         val samletVilkårResultat: List<RestVilkårResultat>,
-        val begrunnelse: String = ""
+        val begrunnelse: String
 )
 
 data class NyBeregning(

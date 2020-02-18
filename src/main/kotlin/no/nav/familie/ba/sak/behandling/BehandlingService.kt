@@ -127,7 +127,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 ansvarligSaksbehandler = saksbehandler,
                 behandling = nyBehandling,
                 resultat = VedtakResultat.OPPHØRT,
-                vedtaksdato = LocalDate.now())
+                vedtaksdato = LocalDate.now(),
+                begrunnelse = "")
 
         // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
         vedtakRepository.save(gjeldendeVedtak.also { it.aktiv = false })

@@ -74,7 +74,8 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(
                         resultat = VedtakResultat.INNVILGET,
-                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910"))
+                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")),
+                        begrunnelse = ""
                 ),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
