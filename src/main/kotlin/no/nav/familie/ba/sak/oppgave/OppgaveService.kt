@@ -35,6 +35,11 @@ class OppgaveService(private val integrasjonTjeneste: IntegrasjonTjeneste,
         return opprettetOppgaveId
     }
 
+    fun ferdigstillOppgave(behandlingsId: Long) {
+        val oppgaveId = behandlingRepository.finnBehandling(behandlingsId)?.oppgaveId?.toLong() ?: error("Kan ikke finne oppgave for behandlingId $behandlingsId")
+        integrasjonTjeneste.ferdigstillOppgave(oppgaveId)
+    }
+
 
     private fun lagOppgaveTekst(fagsakId: Long): String {
         //TODO Tekst skal oppdateres når man får et forslag

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.common.BaseService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
@@ -45,7 +44,7 @@ class ØkonomiKlient(
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/oppdrag"),
                 HttpMethod.POST,
-                HttpEntity(objectMapper.writeValueAsString(utbetalingsoppdrag), headers))
+                HttpEntity(utbetalingsoppdrag, headers))
     }
 
     fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): ResponseEntity<Ressurs<OppdragProtokollStatus>> {
@@ -57,7 +56,7 @@ class ØkonomiKlient(
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/status"),
                 HttpMethod.POST,
-                HttpEntity(objectMapper.writeValueAsString(statusFraOppdragDTO), headers))
+                HttpEntity(statusFraOppdragDTO, headers))
     }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
@@ -73,14 +72,13 @@ class ØkonomiKlient(
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime, oppdragTilAvstemming: List<OppdragId>): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders()
+        headers.add("Content-Type", "application/json;charset=UTF-8")
         headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-
-        val requestBody = objectMapper.writeValueAsString(oppdragTilAvstemming)
 
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/konsistensavstemming/$FAGSYSTEM/?avstemmingsdato=$avstemmingsdato"),
                 HttpMethod.POST,
-                HttpEntity<String>(requestBody, headers))
+                HttpEntity<List<OppdragId>>(oppdragTilAvstemming, headers))
     }
 }

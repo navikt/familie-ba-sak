@@ -1,12 +1,16 @@
 package no.nav.familie.ba.sak.oppgave
 
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -88,12 +92,35 @@ class OppgaveServiceTest {
     }
 
     @Test
-    fun `Opprett oppgave skal kaste IllegalStateException hvis det ikke finner en aktør`() {
+    fun `Opprett oppgave skal kaste Exception hvis det ikke finner en aktør`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { integrasjonTjeneste.hentAktørId(FNR) } throws RuntimeException("aktør")
         assertThatThrownBy { oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID) }
                 .hasMessage("aktør")
                 .isInstanceOf(java.lang.RuntimeException::class.java)
+    }
+
+    @Test
+    fun `Ferdigstill oppgave`() {
+        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {
+            every { oppgaveId } returns OPPGAVE_ID
+        }
+        val slot = slot<Long>()
+        every { integrasjonTjeneste.ferdigstillOppgave(capture(slot)) } just runs
+
+        oppgaveService.ferdigstillOppgave(BEHANDLING_ID)
+        assertThat(slot.captured).isEqualTo(OPPGAVE_ID.toLong())
+    }
+
+    @Test
+    fun `Ferdigstill oppgave feiler fordi den ikke finner oppgave på behandlingen`() {
+        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {
+            every { oppgaveId } returns null
+        }
+
+        assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID) }
+                .hasMessage("Kan ikke finne oppgave for behandlingId $BEHANDLING_ID")
+                .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
 
     private fun lagTestBehandling(): Behandling {
@@ -102,7 +129,7 @@ class OppgaveServiceTest {
                                                   ident = FNR),
                                           aktørId = AktørId(id = AKTØR_ID_FAGSAK)),
                           type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                          kategori = BehandlingKategori.NATIONAL,
+                          kategori = BehandlingKategori.NASJONAL,
                           underkategori = BehandlingUnderkategori.ORDINÆR)
     }
 

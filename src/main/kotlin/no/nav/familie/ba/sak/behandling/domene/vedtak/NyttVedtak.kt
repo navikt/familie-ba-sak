@@ -5,7 +5,8 @@ import java.time.LocalDate
 
 data class NyttVedtak(
         val resultat: VedtakResultat,
-        val samletVilkårResultat: List<RestVilkårResultat>
+        val samletVilkårResultat: List<RestVilkårResultat>,
+        val begrunnelse: String
 )
 
 data class OpphørVedtak(

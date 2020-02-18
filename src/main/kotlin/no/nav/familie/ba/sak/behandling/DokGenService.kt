@@ -49,7 +49,8 @@ class DokGenService(
                          "\"enhet\": \"%s\",\n" +
                          "\"fodselsnummer\": \"%s\",\n" +
                          "\"fodselsdato\": \"%s\",\n" +
-                         "\"saksbehandler\": \"%s\"}"
+                         "\"saksbehandler\": \"%s\", \n" +
+                         "\"fritekst\": \"%s\"}"
 
         val startDato = "februar 2020" // TODO hent fra beregningen
 
@@ -61,7 +62,8 @@ class DokGenService(
                 "enhet",
                 vedtak.behandling.fagsak.personIdent.ident,
                 "24.12.19",
-                vedtak.ansvarligSaksbehandler
+                vedtak.ansvarligSaksbehandler,
+                vedtak.begrunnelse
         )
     }
 
@@ -76,8 +78,7 @@ class DokGenService(
                 vedtak.behandling.fagsak.personIdent.ident,
                 "No Name",
                 "",
-                ""
-        )
+                vedtak.begrunnelse)
     }
 
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {

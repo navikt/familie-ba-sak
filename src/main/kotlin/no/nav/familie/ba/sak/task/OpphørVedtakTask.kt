@@ -15,7 +15,10 @@ import java.time.LocalDate
 import java.util.*
 
 @Service
-@TaskStepBeskrivelse(taskStepType = IverksettMotOppdrag.TASK_STEP_TYPE, beskrivelse = "Opphør aktiv behandling og vedtak", maxAntallFeil = 3)
+
+@TaskStepBeskrivelse(taskStepType = OpphørVedtakTask.TASK_STEP_TYPE,
+                     beskrivelse = "Opphør aktiv behandling og vedtak",
+                     maxAntallFeil = 3)
 class OpphørVedtakTask(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository
@@ -32,7 +35,7 @@ class OpphørVedtakTask(
                                        ::opprettIverksettMotOppdragTask)
     }
 
-    fun opprettIverksettMotOppdragTask(vedtak : Vedtak)  {
+    fun opprettIverksettMotOppdragTask(vedtak: Vedtak) {
         val nyTask = IverksettMotOppdrag.opprettTask(
                 vedtak.behandling.fagsak.personIdent.ident,
                 vedtak.behandling.id!!,
@@ -44,7 +47,7 @@ class OpphørVedtakTask(
 
     companion object {
         const val TASK_STEP_TYPE = "opphørVedtak"
-        val LOG = LoggerFactory.getLogger(OpphørVedtakTask::class.java)
+        val LOG = LoggerFactory.getLogger(OpphørVedtakTaskDTO::class.java)
 
         fun opprettOpphørVedtakTask(gjeldendeBehandling: Behandling,
                                     gjeldendeVedtak: Vedtak,
@@ -73,7 +76,7 @@ class OpphørVedtakTask(
 
 data class OpphørVedtakTaskDTO(
         val personIdent: String,
-        val gjeldendeBehandlingsId : Long,
+        val gjeldendeBehandlingsId: Long,
         val gjeldendeVedtaksId: Long,
         val saksbehandlerId : String,
         val nyBehandlingType : String,

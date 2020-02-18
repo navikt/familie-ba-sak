@@ -22,14 +22,16 @@ class BeregningTest(
     val fagsak = Fagsak(null, null, PersonIdent("12345"), FagsakStatus.OPPRETTET)
     val behandling = Behandling(fagsak = fagsak,
                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                kategori = BehandlingKategori.NATIONAL,
+                                kategori = BehandlingKategori.NASJONAL,
                                 underkategori = BehandlingUnderkategori.ORDINÆR)
 
     val vedtak = Vedtak(behandling = behandling,
                         ansvarligSaksbehandler = "ansvarligSaksbehandler",
                         vedtaksdato = LocalDate.now(),
                         stønadBrevMarkdown = "",
-                        resultat = VedtakResultat.INNVILGET)
+                        resultat = VedtakResultat.INNVILGET,
+                        begrunnelse = ""
+                        )
 
     /**
      * Testen generer 3 barn. 2 av dem er født dd. og 1 er født 2 år frem i tid.
@@ -46,7 +48,7 @@ class BeregningTest(
      * 4 periode: 1 barn = 1054
      */
     @Test
-    fun `Skal sjekke at tidslinjen for ordinær barnetrygd for 3 barn blir riktig`() {
+    fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
 
         val tidslinjeMap = beregnUtbetalingsperioder(listOf(
                 lagPersonVedtak(ORDINÆR_BARNETRYGD, "2020-04-01", "2038-03-31", 1054),

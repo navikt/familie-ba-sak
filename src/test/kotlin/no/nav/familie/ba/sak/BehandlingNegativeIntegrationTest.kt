@@ -52,7 +52,7 @@ class BehandlingNegativeIntegrationTest(
                                                               "sdf",
                                                               BehandlingType.FØRSTEGANGSBEHANDLING,
                                                               "sak1",
-                                                              BehandlingKategori.NATIONAL,
+                                                              BehandlingKategori.NASJONAL,
                                                               BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
@@ -66,7 +66,7 @@ class BehandlingNegativeIntegrationTest(
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        "123",
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
@@ -77,7 +77,8 @@ class BehandlingNegativeIntegrationTest(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.AVSLÅTT,
-                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910"))),
+                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")),
+                                        begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
         val vedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)

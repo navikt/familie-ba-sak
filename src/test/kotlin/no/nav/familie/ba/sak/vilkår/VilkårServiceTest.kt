@@ -43,15 +43,17 @@ class VilkårServiceTest(
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val samletVilkårResultat =
-                vilkårService.vurderVilkår(personopplysningGrunnlag,
-                                           vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")))
+                vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+                                                        vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")),
+                                                        behandling.id!!
+                )
         Assertions.assertEquals(samletVilkårResultat.samletVilkårResultat.size,
                                 vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")).size)
     }
@@ -63,20 +65,24 @@ class VilkårServiceTest(
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         assertThrows<IllegalStateException> {
-            vilkårService.vurderVilkår(personopplysningGrunnlag,
-                                       vilkårsvurderingUtenKomplettBarnVurdering)
+            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+                                                    vilkårsvurderingUtenKomplettBarnVurdering,
+                                                    behandling.id!!
+            )
         }
 
         assertThrows<IllegalStateException> {
-            vilkårService.vurderVilkår(personopplysningGrunnlag,
-                                       vilkårsvurderingUtenKomplettSøkerVurdering)
+            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+                                                    vilkårsvurderingUtenKomplettSøkerVurdering,
+                                                    behandling.id!!
+            )
         }
     }
 

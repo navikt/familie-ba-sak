@@ -15,6 +15,9 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
+import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
+import no.nav.familie.ba.sak.task.OpphørVedtakTaskDTO
+
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -109,7 +112,7 @@ class BehandlingIntegrationTest {
                                                       "sdf",
                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
                                                       lagRandomSaksnummer(),
-                                                      BehandlingKategori.NATIONAL,
+                                                      BehandlingKategori.NASJONAL,
                                                       BehandlingUnderkategori.ORDINÆR)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
@@ -123,7 +126,7 @@ class BehandlingIntegrationTest {
             integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.now())
 
-        val nyBehandling = NyBehandling(BehandlingKategori.NATIONAL,
+        val nyBehandling = NyBehandling(BehandlingKategori.NASJONAL,
                                         BehandlingUnderkategori.ORDINÆR,
                                         fnr,
                                         arrayOf(randomFnr(), randomFnr()),
@@ -144,7 +147,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
@@ -177,13 +180,14 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
                             stønadBrevMarkdown = "",
-                            resultat = VedtakResultat.INNVILGET)
+                            resultat = VedtakResultat.INNVILGET,
+                            begrunnelse = "")
         behandlingService.lagreVedtak(vedtak)
 
         val hentetVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
@@ -201,20 +205,22 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
                             stønadBrevMarkdown = "",
-                            resultat = VedtakResultat.INNVILGET)
+                            resultat = VedtakResultat.INNVILGET,
+                            begrunnelse = "")
         behandlingService.lagreVedtak(vedtak)
 
         val aktivtVedtak = Vedtak(behandling = behandling,
                                   ansvarligSaksbehandler = "ansvarligSaksbehandler2",
                                   vedtaksdato = LocalDate.now(),
                                   stønadBrevMarkdown = "",
-                                  resultat = VedtakResultat.INNVILGET)
+                                  resultat = VedtakResultat.INNVILGET,
+                                  begrunnelse = "")
         behandlingService.lagreVedtak(aktivtVedtak)
 
         val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
@@ -232,7 +238,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
@@ -244,7 +250,8 @@ class BehandlingIntegrationTest {
                 behandling = behandling,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET,
                                         samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf("12345678911"))),
+                                                                                                      listOf("12345678911")),
+                                        begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
@@ -264,7 +271,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
@@ -277,7 +284,8 @@ class BehandlingIntegrationTest {
                 behandling = behandling,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET,
                                         samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf("12345678912"))),
+                                                                                                      listOf("12345678912")),
+                                        begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
@@ -311,13 +319,13 @@ class BehandlingIntegrationTest {
             integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.now())
 
-        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NATIONAL,
+        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NASJONAL,
                                                                                                BehandlingUnderkategori.ORDINÆR,
                                                                                                morId,
                                                                                                arrayOf(barn1Id),
                                                                                                BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                                                null))
-        val fagsak2 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NATIONAL,
+        val fagsak2 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NASJONAL,
                                                                                                BehandlingUnderkategori.ORDINÆR,
                                                                                                morId,
                                                                                                arrayOf(barn2Id),
@@ -325,7 +333,7 @@ class BehandlingIntegrationTest {
                                                                                                null))
 
         // skal ikke føre til flere barn på persongrunnlaget.
-        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NATIONAL,
+        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NASJONAL,
                                                                                  BehandlingUnderkategori.ORDINÆR, morId,
                                                                                  arrayOf(barn1Id, barn2Id),
                                                                                  BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -354,14 +362,14 @@ class BehandlingIntegrationTest {
             integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.now())
 
-        behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NATIONAL,
+        behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NASJONAL,
                                                          BehandlingUnderkategori.ORDINÆR,
                                                          morId,
                                                          arrayOf(barnId),
                                                          BehandlingType.FØRSTEGANGSBEHANDLING,
                                                          null))
         Assertions.assertThrows(Exception::class.java) {
-            behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NATIONAL,
+            behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NASJONAL,
                                                              BehandlingUnderkategori.ORDINÆR,
                                                              morId,
                                                              arrayOf(barnId),
@@ -383,7 +391,7 @@ class BehandlingIntegrationTest {
         } returns Personinfo(LocalDate.now())
 
         val nyBehandling =
-                NyBehandling(BehandlingKategori.NATIONAL,
+                NyBehandling(BehandlingKategori.NASJONAL,
                              BehandlingUnderkategori.ORDINÆR,
                              søkerFnr,
                              arrayOf(barn1Fnr, barn2Fnr),
@@ -404,7 +412,8 @@ class BehandlingIntegrationTest {
         val nyttVedtak = NyttVedtak(VedtakResultat.INNVILGET,
                                     samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr,
                                                                                                   listOf(barn1Fnr,
-                                                                                                         barn2Fnr)))
+                                                                                                         barn2Fnr)),
+                                    begrunnelse = "")
         val nyBeregning = NyBeregning(barnasBeregning)
 
         behandlingService.nyttVedtakForAktivBehandling(behandling!!, personopplysningGrunnlag!!, nyttVedtak, "saksbehandler1")
@@ -414,7 +423,7 @@ class BehandlingIntegrationTest {
 
         behandlingService.oppdaterAktivVedtakMedBeregning(vedtak!!, personopplysningGrunnlag, nyBeregning)
 
-        val task = OpphørVedtakTask.opprettOpphørVedtakTask(
+        val task = opprettOpphørVedtakTask(
                 behandling,
                 vedtak, "saksbehandler",
                 BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
@@ -454,13 +463,14 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
                             stønadBrevMarkdown = "",
-                            resultat = VedtakResultat.INNVILGET)
+                            resultat = VedtakResultat.INNVILGET,
+                            begrunnelse = "")
         behandlingService.lagreVedtak(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, "12345678914")
@@ -483,7 +493,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
@@ -495,7 +505,8 @@ class BehandlingIntegrationTest {
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.AVSLÅTT,
                                         samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf("12345678915"))),
+                                                                                                      listOf("12345678915")),
+                                        begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
         Assertions.assertEquals(behandling.fagsak.id, fagsakRes.data?.id)
