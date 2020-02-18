@@ -183,7 +183,8 @@ class BehandlingIntegrationTest {
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
                             stønadBrevMarkdown = "",
-                            resultat = VedtakResultat.INNVILGET)
+                            resultat = VedtakResultat.INNVILGET,
+                            begrunnelse = "")
         behandlingService.lagreVedtak(vedtak)
 
         val hentetVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
@@ -207,14 +208,16 @@ class BehandlingIntegrationTest {
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
                             stønadBrevMarkdown = "",
-                            resultat = VedtakResultat.INNVILGET)
+                            resultat = VedtakResultat.INNVILGET,
+                            begrunnelse = "")
         behandlingService.lagreVedtak(vedtak)
 
         val aktivtVedtak = Vedtak(behandling = behandling,
                                   ansvarligSaksbehandler = "ansvarligSaksbehandler2",
                                   vedtaksdato = LocalDate.now(),
                                   stønadBrevMarkdown = "",
-                                  resultat = VedtakResultat.INNVILGET)
+                                  resultat = VedtakResultat.INNVILGET,
+                                  begrunnelse = "")
         behandlingService.lagreVedtak(aktivtVedtak)
 
         val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
@@ -244,7 +247,8 @@ class BehandlingIntegrationTest {
                 behandling = behandling,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET,
                                         samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf("12345678911"))),
+                                                                                                      listOf("12345678911")),
+                                        begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
@@ -277,7 +281,8 @@ class BehandlingIntegrationTest {
                 behandling = behandling,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET,
                                         samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf("12345678912"))),
+                                                                                                      listOf("12345678912")),
+                                        begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
@@ -403,7 +408,8 @@ class BehandlingIntegrationTest {
         val nyttVedtak = NyttVedtak(VedtakResultat.INNVILGET,
                                     samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr,
                                                                                                   listOf(barn1Fnr,
-                                                                                                         barn2Fnr)))
+                                                                                                         barn2Fnr)),
+                                    begrunnelse = "")
         val nyBeregning = NyBeregning(barnasBeregning)
 
         behandlingService.nyttVedtakForAktivBehandling(behandling!!, personopplysningGrunnlag!!, nyttVedtak, "saksbehandler1")
@@ -458,7 +464,8 @@ class BehandlingIntegrationTest {
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
                             stønadBrevMarkdown = "",
-                            resultat = VedtakResultat.INNVILGET)
+                            resultat = VedtakResultat.INNVILGET,
+                            begrunnelse = "")
         behandlingService.lagreVedtak(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, "12345678914")
@@ -493,7 +500,8 @@ class BehandlingIntegrationTest {
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.AVSLÅTT,
                                         samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf("12345678915"))),
+                                                                                                      listOf("12345678915")),
+                                        begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
         Assertions.assertEquals(behandling.fagsak.id, fagsakRes.data?.id)

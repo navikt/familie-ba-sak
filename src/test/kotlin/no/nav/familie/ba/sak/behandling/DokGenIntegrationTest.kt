@@ -75,7 +75,8 @@ class DokGenIntegrationTest {
                 ),
                 ansvarligSaksbehandler = "whoknows",
                 vedtaksdato = LocalDate.MIN,
-                resultat = VedtakResultat.INNVILGET
+                resultat = VedtakResultat.INNVILGET,
+                begrunnelse = ""
         ))
 
         assert(markdown == "mockup_response")
@@ -118,7 +119,8 @@ class DokGenIntegrationTest {
                 ),
                 ansvarligSaksbehandler = "whoknows",
                 vedtaksdato = LocalDate.MIN,
-                resultat = VedtakResultat.INNVILGET
+                resultat = VedtakResultat.INNVILGET,
+                begrunnelse = ""
         ))
         assert(markdown.isEmpty())
     }

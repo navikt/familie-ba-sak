@@ -21,6 +21,7 @@ class DokgenTestConfig {
 
         val dokgenService = mock(DokGenService::class.java)
         `when`(dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP")).thenReturn("<HTML>HTML_MOCKUP</HTML>")
+        `when`(dokgenService.lagHtmlFraMarkdown("Avslag", "TEST_MARKDOWN_MOCKUP")).thenReturn("<HTML>HTML_MOCKUP</HTML>")
         `when`(dokgenService.hentStønadBrevMarkdown(any())).thenReturn("TEST_MARKDOWN_MOCKUP")
         return dokgenService
     }

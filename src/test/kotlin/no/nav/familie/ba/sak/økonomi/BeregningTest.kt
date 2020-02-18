@@ -60,7 +60,8 @@ class BeregningTest(
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.now(),
                             stønadBrevMarkdown = "",
-                            resultat = VedtakResultat.INNVILGET)
+                            resultat = VedtakResultat.INNVILGET,
+                            begrunnelse = "")
 
         val barn1Fødselsdato = LocalDate.now()
         val barn2Fødselsdato = LocalDate.now().plusYears(2)

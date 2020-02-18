@@ -160,6 +160,44 @@ class IntergrasjonTjenesteTest {
         assertThrows<IntegrasjonException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
     }
 
+
+    @Test
+    @Tag("integration")
+    fun `Ferdigstill oppgave returnerer OK`() {
+        MDC.put("callId", "ferdigstillOppgave")
+        stubFor(patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
+                        .withHeader("Accept", containing("json"))
+                        .willReturn(aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success("")))))
+
+        integrasjonTjeneste.ferdigstillOppgave(123)
+
+        verify(patchRequestedFor(urlEqualTo("/api/oppgave/123/ferdigstill"))
+                       .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("ferdigstillOppgave"))
+                       .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak")))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Ferdigstill oppgave returnerer feil `() {
+        MDC.put("callId", "ferdigstillOppgave")
+        stubFor(patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
+                        .withHeader("Accept", containing("json"))
+                        .willReturn(aResponse()
+                                            .withStatus(400)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
+
+
+
+        assertThatThrownBy {
+            integrasjonTjeneste.ferdigstillOppgave(123)
+        }.isInstanceOf(IntegrasjonException::class.java)
+                .hasMessageContaining("Kan ikke ferdigstille 123")
+    }
+
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> {
         return success(ArkiverDokumentResponse(mockJournalpostForVedtakId, true))
     }
