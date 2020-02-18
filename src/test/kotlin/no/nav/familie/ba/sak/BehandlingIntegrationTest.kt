@@ -13,11 +13,10 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
+import no.nav.familie.ba.sak.mottak.NyBehandlingHendelse
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
-import no.nav.familie.ba.sak.task.OpphørVedtakTaskDTO
-
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -100,12 +99,12 @@ class BehandlingIntegrationTest {
                 featureToggleService)
     }
 
-    private fun randomFnr(): String= UUID.randomUUID().toString()
+    private fun randomFnr(): String = UUID.randomUUID().toString()
 
     @Test
     @Tag("integration")
     fun `Kjør flyway migreringer og sjekk at behandlingslagerservice klarer å lese å skrive til postgresql`() {
-        val fnr= randomFnr()
+        val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         behandlingService.opprettNyBehandlingPåFagsak(fagsak,
@@ -120,18 +119,15 @@ class BehandlingIntegrationTest {
     @Test
     @Tag("integration")
     fun `Test at opprettEllerOppdaterBehandling kjører uten feil`() {
-        val fnr= randomFnr()
+        val fnr = randomFnr()
 
         every {
             integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.now())
 
-        val nyBehandling = NyBehandling(BehandlingKategori.NASJONAL,
-                                        BehandlingUnderkategori.ORDINÆR,
+        val nyBehandling = NyBehandlingHendelse(
                                         fnr,
-                                        arrayOf(randomFnr(), randomFnr()),
-                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                        "asd")
+                                        arrayOf(randomFnr(), randomFnr()))
         val fagsak = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
@@ -140,7 +136,7 @@ class BehandlingIntegrationTest {
     @Tag("integration")
     @Transactional
     fun `Opprett behandling og legg til personer`() {
-        val fnr= randomFnr()
+        val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
@@ -173,7 +169,7 @@ class BehandlingIntegrationTest {
     @Test
     @Tag("integration")
     fun `Opprett behandling vedtak`() {
-        val fnr= randomFnr()
+        val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
@@ -198,7 +194,7 @@ class BehandlingIntegrationTest {
     @Test
     @Tag("integration")
     fun `Opprett 2 behandling vedtak og se at det siste vedtaket får aktiv satt til true`() {
-        val fnr= randomFnr()
+        val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
@@ -231,7 +227,7 @@ class BehandlingIntegrationTest {
     @Test
     @Tag("integrasion")
     fun `Opprett nytt vedtak på aktiv behandling`() {
-        val fnr= randomFnr()
+        val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
@@ -264,7 +260,7 @@ class BehandlingIntegrationTest {
     @Test
     @Tag("integration")
     fun `Hent HTML vedtaksbrev`() {
-        val fnr= randomFnr()
+        val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
@@ -297,9 +293,9 @@ class BehandlingIntegrationTest {
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
                         arrayOf(BarnBeregning(fødselsnummer = fnr,
-                                                   beløp = 1054,
-                                                   stønadFom = LocalDate.now(),
-                                                   ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
+                                              beløp = 1054,
+                                              stønadFom = LocalDate.now(),
+                                              ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
 
@@ -319,25 +315,12 @@ class BehandlingIntegrationTest {
             integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.now())
 
-        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NASJONAL,
-                                                                                               BehandlingUnderkategori.ORDINÆR,
-                                                                                               morId,
-                                                                                               arrayOf(barn1Id),
-                                                                                               BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                                               null))
-        val fagsak2 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NASJONAL,
-                                                                                               BehandlingUnderkategori.ORDINÆR,
-                                                                                               morId,
-                                                                                               arrayOf(barn2Id),
-                                                                                               BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                                               null))
+        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, arrayOf(barn1Id)))
+        val fagsak2 =
+                behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, arrayOf(barn2Id)))
 
         // skal ikke føre til flere barn på persongrunnlaget.
-        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NASJONAL,
-                                                                                 BehandlingUnderkategori.ORDINÆR, morId,
-                                                                                 arrayOf(barn1Id, barn2Id),
-                                                                                 BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                                 null))
+        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, arrayOf(barn1Id, barn2Id)))
 
         Assertions.assertTrue(fagsak1.id == fagsak2.id)
 
@@ -455,7 +438,7 @@ class BehandlingIntegrationTest {
     @Test
     @Tag("integration")
     fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
-        val fnr= randomFnr()
+        val fnr = randomFnr()
 
         //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
@@ -486,7 +469,7 @@ class BehandlingIntegrationTest {
     @Test
     @Tag("integration")
     fun `Opprett nytt avslag vedtak`() {
-        val fnr= randomFnr()
+        val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
