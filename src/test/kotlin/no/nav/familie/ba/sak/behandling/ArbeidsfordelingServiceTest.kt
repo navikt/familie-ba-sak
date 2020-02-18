@@ -3,11 +3,9 @@ package no.nav.familie.ba.sak.behandling
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
@@ -48,7 +46,13 @@ class ArbeidsfordelingServiceTest {
         MockKAnnotations.init(this)
         arbeidsfordelingService = ArbeidsfordelingService(behandlingRepository, personopplysningGrunnlagRepository, integrasjonTjeneste)
         val fagsak = Fagsak(personIdent = PersonIdent(""))
-        behandling = Behandling(fagsak = fagsak, journalpostID = "", type = BehandlingType.FØRSTEGANGSBEHANDLING)
+        behandling = Behandling(
+                fagsak = fagsak,
+                journalpostID = "",
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                kategori = BehandlingKategori.NATIONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR
+        )
 
         finnStrengesteDiskresjonskode = arbeidsfordelingService.javaClass.getDeclaredMethod("finnStrengesteDiskresjonskode", Personinfo::class.java, Behandling::class.java)
         finnStrengesteDiskresjonskode.trySetAccessible()
@@ -60,7 +64,7 @@ class ArbeidsfordelingServiceTest {
         every {
             personopplysningGrunnlag.barna
         } answers {
-            listOf(Person(null, null, null, PersonIdent(identBarn), personopplysningGrunnlag))
+            listOf(Person(null, PersonType.BARN, null, PersonIdent(identBarn), personopplysningGrunnlag))
         }
     }
 
@@ -151,9 +155,9 @@ class ArbeidsfordelingServiceTest {
             personopplysningGrunnlag.barna
         } answers {
             listOf(
-                    Person(null, null, null, PersonIdent("1"), personopplysningGrunnlag),
-                    Person(null, null, null, PersonIdent("2"), personopplysningGrunnlag),
-                    Person(null, null, null, PersonIdent("3"), personopplysningGrunnlag)
+                    Person(null, PersonType.BARN, null, PersonIdent("1"), personopplysningGrunnlag),
+                    Person(null, PersonType.BARN, null, PersonIdent("2"), personopplysningGrunnlag),
+                    Person(null, PersonType.BARN, null, PersonIdent("3"), personopplysningGrunnlag)
             )
         }
 

@@ -105,9 +105,7 @@ class IntegrasjonTjeneste(
                 .queryParam("diskresjonskode", diskresjonskode)
                 .build().toUri()
 
-        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
-        headers.add(NavHttpHeaders.NAV_CONSUMER_ID.asString(), "familie-ba-sak")
-        val httpEntity: HttpEntity<*> = HttpEntity<Any?>(headers)
+        val httpEntity: HttpEntity<*> = HttpEntity<Any?>(LinkedMultiValueMap())
 
         return try {
             val response = restOperations.exchange<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, HttpMethod.GET, httpEntity)
