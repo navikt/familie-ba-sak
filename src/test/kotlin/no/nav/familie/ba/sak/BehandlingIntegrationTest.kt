@@ -14,7 +14,10 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.task.OpphørVedtak
+import no.nav.familie.ba.sak.task.OpphørVedtakTask
+import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
+import no.nav.familie.ba.sak.task.OpphørVedtakTaskDTO
+
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -55,7 +58,7 @@ class BehandlingIntegrationTest {
     lateinit var vedtakRepository: VedtakRepository
 
     @Autowired
-    lateinit var vedtakBarnRepository: VedtakBarnRepository
+    lateinit var vedtakPersonRepository: VedtakPersonRepository
 
     @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
@@ -87,7 +90,7 @@ class BehandlingIntegrationTest {
         behandlingService = BehandlingService(
                 behandlingRepository,
                 vedtakRepository,
-                vedtakBarnRepository,
+                vedtakPersonRepository,
                 personopplysningGrunnlagRepository,
                 personRepository,
                 dokGenService,
@@ -294,8 +297,9 @@ class BehandlingIntegrationTest {
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
                         arrayOf(BarnBeregning(fødselsnummer = fnr,
-                                              beløp = 1054,
-                                              stønadFom = LocalDate.now()))
+                                                   beløp = 1054,
+                                                   stønadFom = LocalDate.now(),
+                                                   ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
 
@@ -402,8 +406,8 @@ class BehandlingIntegrationTest {
         Assertions.assertNotNull(personopplysningGrunnlag)
 
         val barnasBeregning = arrayOf(
-                BarnBeregning(barn1Fnr, 1054, LocalDate.now()),
-                BarnBeregning(barn2Fnr, 1054, LocalDate.now())
+                BarnBeregning(barn1Fnr, 1054, LocalDate.now(), Ytelsetype.ORDINÆR_BARNETRYGD),
+                BarnBeregning(barn2Fnr, 1054, LocalDate.now(), Ytelsetype.ORDINÆR_BARNETRYGD)
         )
         val nyttVedtak = NyttVedtak(VedtakResultat.INNVILGET,
                                     samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr,
@@ -419,10 +423,11 @@ class BehandlingIntegrationTest {
 
         behandlingService.oppdaterAktivVedtakMedBeregning(vedtak!!, personopplysningGrunnlag, nyBeregning)
 
-        val task = OpphørVedtak.opprettTaskOpphørVedtak(
+        val task = opprettOpphørVedtakTask(
                 behandling,
                 vedtak, "saksbehandler",
-                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+                LocalDate.now()
         )
 
         val taskRepository: TaskRepository = mockk()
@@ -430,7 +435,7 @@ class BehandlingIntegrationTest {
 
         every { taskRepository.save(capture(slot)) } answers { slot.captured }
 
-        OpphørVedtak(
+        OpphørVedtakTask(
                 behandlingService,
                 taskRepository
         ).doTask(task)

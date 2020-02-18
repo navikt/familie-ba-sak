@@ -25,7 +25,7 @@ import kotlin.streams.asSequence
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val vedtakRepository: VedtakRepository,
-                        private val vedtakBarnRepository: VedtakBarnRepository,
+                        private val vedtakPersonRepository: VedtakPersonRepository,
                         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
                         private val personRepository: PersonRepository,
                         private val dokGenService: DokGenService,
@@ -96,14 +96,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun opphørVedtak(saksbehandler: String,
                      gjeldendeBehandlingsId: Long,
                      nyBehandlingType: BehandlingType,
+                     opphørsdato: LocalDate,
                      postProsessor: (Vedtak) -> Unit): Ressurs<Vedtak> {
 
         val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
                               ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling ${gjeldendeBehandlingsId}")
 
-        val gjeldendeVedtakPerson = vedtakBarnRepository.finnBarnBeregningForVedtak(gjeldendeVedtak.id)
+        val gjeldendeVedtakPerson = vedtakPersonRepository.finnPersonBeregningForVedtak(gjeldendeVedtak.id)
         if (gjeldendeVedtakPerson.isEmpty()) {
-            return Ressurs.failure("Fant ikke vedtak barn tilknyttet behandling ${gjeldendeBehandlingsId} og vedtak ${gjeldendeVedtak.id}")
+            return Ressurs.failure("Fant ikke vedtak personer tilknyttet behandling ${gjeldendeBehandlingsId} og vedtak ${gjeldendeVedtak.id}")
         }
 
         val gjeldendeBehandling = gjeldendeVedtak.behandling;
@@ -128,24 +129,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 behandling = nyBehandling,
                 resultat = VedtakResultat.OPPHØRT,
                 vedtaksdato = LocalDate.now(),
-                begrunnelse = "")
+                forrigeVedtakId = gjeldendeVedtak.id,
+                opphørsdato = opphørsdato,
+                begrunnelse = ""
+        )
 
         // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
         vedtakRepository.save(gjeldendeVedtak.also { it.aktiv = false })
         vedtakRepository.save(nyttVedtak)
-
-        /// TODO For opphør er beløpet det samme, men perioden fra nå til gammel til-og-med-dato. Er det riktig?
-        val nyeVedtakPerson = gjeldendeVedtakPerson
-                .map { p ->
-                    VedtakBarn(vedtak = nyttVedtak,
-                               barn = p.barn,
-                               beløp = p.beløp,
-                               stønadFom = LocalDate.now(),
-                               stønadTom = p.stønadTom)
-                }
-
-
-        vedtakBarnRepository.saveAll(nyeVedtakPerson)
 
         postProsessor(nyttVedtak)
 
@@ -263,8 +254,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return vedtakRepository.getOne(vedtakId)
     }
 
-    fun hentBarnForVedtak(vedtakId: Long?): List<VedtakBarn> {
-        return vedtakBarnRepository.finnBarnBeregningForVedtak(vedtakId)
+    fun hentPersonerForVedtak(vedtakId: Long?): List<VedtakPerson> {
+        return vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId)
     }
 
     fun oppdaterStatusPåBehandling(behandlingId: Long?, status: BehandlingStatus) {
@@ -333,22 +324,23 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
         nyBeregning.barnasBeregning.map {
-            val barn =
+            val person =
                     personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
                                                                                   personopplysningGrunnlag.id)
                     ?: throw RuntimeException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
-            if (it.stønadFom.isBefore(barn.fødselsdato)) {
-                throw RuntimeException("Ugyldig fra og med dato for ${barn.fødselsdato}")
+            if (it.stønadFom.isBefore(person.fødselsdato)) {
+                throw RuntimeException("Ugyldig fra og med dato for ${person.fødselsdato}")
             }
 
-            vedtakBarnRepository.save(
-                    VedtakBarn(
-                            barn = barn,
+            vedtakPersonRepository.save(
+                    VedtakPerson(
+                            person = person,
                             vedtak = vedtak,
                             beløp = it.beløp,
                             stønadFom = it.stønadFom,
-                            stønadTom = barn.fødselsdato?.plusYears(18)!!
+                            stønadTom = person.fødselsdato?.plusYears(18)!!,
+                            type = it.ytelsetype
                     )
             )
         }

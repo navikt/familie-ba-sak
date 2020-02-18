@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.BarnBeregning
+import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
@@ -89,7 +89,8 @@ class BehandlingNegativeIntegrationTest(
                         BarnBeregning(
                                 fødselsnummer = "12345678910",
                                 beløp = 1054,
-                                stønadFom = LocalDate.now()
+                                stønadFom = LocalDate.now(),
+                                ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
                         ))
         ))
 
