@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service
 class VilkårService(
         private val samletVilkårResultatRepository: SamletVilkårResultatRepository
 ) {
+
     fun lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat: SamletVilkårResultat) {
-        val aktivSamletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(samletVilkårResultat.behandlingId)
+        val aktivSamletVilkårResultat =
+                samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(samletVilkårResultat.behandlingId)
 
         if (aktivSamletVilkårResultat != null) {
             aktivSamletVilkårResultat.aktiv = false

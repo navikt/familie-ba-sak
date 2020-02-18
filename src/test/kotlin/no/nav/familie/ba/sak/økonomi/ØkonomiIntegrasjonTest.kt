@@ -9,7 +9,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
-import no.nav.familie.ba.sak.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.util.lagRandomSaksnummer
+import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -61,7 +62,7 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       "randomSaksnummer",
+                                                                       lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -88,9 +89,9 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
                         arrayOf(BarnBeregning(fødselsnummer = "12345678910",
-                                                beløp = 1054,
-                                                stønadFom = LocalDate.now(),
-                                                ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
+                                              beløp = 1054,
+                                              stønadFom = LocalDate.of(2020, 1, 1),
+                                              ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
 

@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype.*
+import no.nav.familie.ba.sak.behandling.hentOpphørsdatoForBarn
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -17,8 +18,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class BeregningTest(
-) {
+class BeregningTest {
     val fagsak = Fagsak(null, null, PersonIdent("12345"), FagsakStatus.OPPRETTET)
     val behandling = Behandling(fagsak = fagsak,
                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -89,6 +89,14 @@ class BeregningTest(
         Assertions.assertEquals(2,tidslinjeMap.size)
         assertLikeSegmenter(forventedeSegmenterBarnetrygd, tidslinjeMap["BATR"])
         assertLikeSegmenter(forventedeSegmenterSmåbarnstillegg, tidslinjeMap["BATRSMA"])
+    }
+
+    @Test
+    fun `Skal hente riktig opphørsdato for barn`() {
+        val barnFødselsdato = LocalDate.of(2020, 1, 8)
+        val opphørsdato = hentOpphørsdatoForBarn(barnFødselsdato)
+
+        Assertions.assertEquals(LocalDate.of(2037, 12, 31), opphørsdato)
     }
 
 

@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
-import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 fun beregnUtbetalingsperioder(personer: List<VedtakPerson>): Map<String, LocalDateTimeline<Int>> {
     return personer.groupBy(
@@ -21,6 +21,10 @@ private fun reducer(sammenlagtTidslinje: LocalDateTimeline<Int>, tidslinje: Loca
     return sammenlagtTidslinje.combine(tidslinje,
                                        StandardCombinators::sum,
                                        LocalDateTimeline.JoinStyle.CROSS_JOIN)
+}
+
+fun hentOpphørsdatoForBarn(fødselsdato: LocalDate?): LocalDate? {
+    return fødselsdato?.plusYears(18)?.minusMonths(1)?.with(TemporalAdjusters.lastDayOfMonth())
 }
 
 

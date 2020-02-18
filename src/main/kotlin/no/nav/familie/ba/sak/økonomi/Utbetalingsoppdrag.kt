@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.beregnUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat.OPPHØRT
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
@@ -46,7 +47,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                 }
     }
 
-    val utbetalingsoppdrag = Utbetalingsoppdrag(
+    return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
             kodeEndring = if (!erOpphør) NY else UEND,
             fagSystem = FAGSYSTEM,
@@ -54,5 +55,4 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
             aktoer = aktør,
             utbetalingsperiode = utbetalingsperioder
     )
-    return utbetalingsoppdrag
 }

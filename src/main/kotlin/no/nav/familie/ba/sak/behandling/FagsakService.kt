@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
+import no.nav.familie.ba.sak.behandling.domene.FagsakStatus
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakRepository
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultatRepo
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -55,6 +57,13 @@ class FagsakService(
         return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
     }
 
+    fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
+        LOG.info("Endrer status på fagsak $fagsak.id fra ${fagsak.status} til $nyStatus")
+        fagsak.status = nyStatus
+
+        lagreFagsak(fagsak)
+    }
+
     @Transactional
     fun hentFagsakForPersonident(personIdent: PersonIdent): Fagsak? {
         return fagsakRepository.finnFagsakForPersonIdent(personIdent)
@@ -68,5 +77,9 @@ class FagsakService(
     @Transactional
     fun hentLøpendeFagsaker(): List<Fagsak> {
         return fagsakRepository.finnLøpendeFagsaker()
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(FagsakService::class.java)
     }
 }

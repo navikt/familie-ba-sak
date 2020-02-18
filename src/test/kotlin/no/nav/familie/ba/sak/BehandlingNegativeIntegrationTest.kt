@@ -7,10 +7,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.util.DbContainerInitializer
+import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
@@ -89,7 +87,7 @@ class BehandlingNegativeIntegrationTest(
                         BarnBeregning(
                                 fødselsnummer = "12345678910",
                                 beløp = 1054,
-                                stønadFom = LocalDate.now(),
+                                stønadFom = LocalDate.of(2020, 1, 1),
                                 ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
                         ))
         ))

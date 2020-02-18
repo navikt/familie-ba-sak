@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.økonomi
+package no.nav.familie.ba.sak.task.dto
 
 data class StatusFraOppdragDTO(val fagsystem: String,
                                val personIdent: String,

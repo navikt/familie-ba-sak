@@ -336,13 +336,17 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 throw RuntimeException("Ugyldig fra og med dato for ${person.fødselsdato}")
             }
 
+            if (it.stønadFom.dayOfMonth != 1) {
+                throw RuntimeException("Ugyldig fra og med dato, må være første dag i måneden.")
+            }
+
             vedtakPersonRepository.save(
                     VedtakPerson(
                             person = person,
                             vedtak = vedtak,
                             beløp = it.beløp,
                             stønadFom = it.stønadFom,
-                            stønadTom = person.fødselsdato?.plusYears(18)!!,
+                            stønadTom = hentOpphørsdatoForBarn(person.fødselsdato)!!,
                             type = it.ytelsetype
                     )
             )
