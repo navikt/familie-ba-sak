@@ -79,7 +79,7 @@ class FagsakControllerTest(
                            BehandlingType.MIGRERING_FRA_INFOTRYGD,
                            "1",
                            status = BehandlingStatus.IVERKSATT,
-                           kategori = BehandlingKategori.NATIONAL,
+                           kategori = BehandlingKategori.NASJONAL,
                            underkategori = BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(1, behandling, "sb", LocalDate.now(), "", VedtakResultat.INNVILGET,
                             begrunnelse = "")
@@ -126,7 +126,7 @@ class FagsakControllerTest(
                            BehandlingType.MIGRERING_FRA_INFOTRYGD,
                            saksNummer,
                            status = BehandlingStatus.IVERKSATT,
-                           kategori = BehandlingKategori.NATIONAL,
+                           kategori = BehandlingKategori.NASJONAL,
                            underkategori = BehandlingUnderkategori.ORDINÆR)
         behandlingRepository.save(behandling)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(

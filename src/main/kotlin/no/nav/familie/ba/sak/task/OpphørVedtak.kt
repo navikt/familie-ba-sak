@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-@TaskStepBeskrivelse(taskStepType = IverksettMotOppdrag.TASK_STEP_TYPE, beskrivelse = "Opphør aktiv behandling og vedtak", maxAntallFeil = 3)
+@TaskStepBeskrivelse(taskStepType = OpphørVedtak.TASK_STEP_TYPE,
+                     beskrivelse = "Opphør aktiv behandling og vedtak",
+                     maxAntallFeil = 3)
 class OpphørVedtak(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository
@@ -30,7 +32,7 @@ class OpphørVedtak(
                                        ::opprettIverksettMotOppdragTask)
     }
 
-    fun opprettIverksettMotOppdragTask(vedtak : Vedtak)  {
+    fun opprettIverksettMotOppdragTask(vedtak: Vedtak) {
         val nyTask = IverksettMotOppdrag.opprettTask(
                 vedtak.behandling.fagsak.personIdent.ident,
                 vedtak.behandling.id!!,
@@ -47,7 +49,7 @@ class OpphørVedtak(
         fun opprettTaskOpphørVedtak(gjeldendeBehandling: Behandling,
                                     gjeldendeVedtak: Vedtak,
                                     saksbehandlerId: String,
-                                    nyBehandlingstype: BehandlingType) : Task {
+                                    nyBehandlingstype: BehandlingType): Task {
 
             return Task.nyTask(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(OpphørVedtakDTO(
@@ -69,8 +71,8 @@ class OpphørVedtak(
 
 data class OpphørVedtakDTO(
         val personIdent: String,
-        val gjeldendeBehandlingsId : Long,
+        val gjeldendeBehandlingsId: Long,
         val gjeldendeVedtaksId: Long,
-        val saksbehandlerId : String,
-        val nyBehandlingType : String
+        val saksbehandlerId: String,
+        val nyBehandlingType: String
 )

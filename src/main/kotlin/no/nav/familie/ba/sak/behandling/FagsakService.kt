@@ -46,6 +46,7 @@ class FagsakService(
                     type = it.type,
                     status = it.status,
                     samletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(it.id)?.toRestSamletVilkårResultat(),
+                    opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori
             )

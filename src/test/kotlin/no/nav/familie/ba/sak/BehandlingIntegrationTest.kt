@@ -109,7 +109,7 @@ class BehandlingIntegrationTest {
                                                       "sdf",
                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
                                                       lagRandomSaksnummer(),
-                                                      BehandlingKategori.NATIONAL,
+                                                      BehandlingKategori.NASJONAL,
                                                       BehandlingUnderkategori.ORDINÆR)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
@@ -123,7 +123,7 @@ class BehandlingIntegrationTest {
             integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.now())
 
-        val nyBehandling = NyBehandling(BehandlingKategori.NATIONAL,
+        val nyBehandling = NyBehandling(BehandlingKategori.NASJONAL,
                                         BehandlingUnderkategori.ORDINÆR,
                                         fnr,
                                         arrayOf(randomFnr(), randomFnr()),
@@ -144,7 +144,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
@@ -177,7 +177,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
@@ -202,7 +202,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
@@ -235,7 +235,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
@@ -268,7 +268,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
@@ -315,13 +315,13 @@ class BehandlingIntegrationTest {
             integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.now())
 
-        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NATIONAL,
+        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NASJONAL,
                                                                                                BehandlingUnderkategori.ORDINÆR,
                                                                                                morId,
                                                                                                arrayOf(barn1Id),
                                                                                                BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                                                null))
-        val fagsak2 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NATIONAL,
+        val fagsak2 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NASJONAL,
                                                                                                BehandlingUnderkategori.ORDINÆR,
                                                                                                morId,
                                                                                                arrayOf(barn2Id),
@@ -329,7 +329,7 @@ class BehandlingIntegrationTest {
                                                                                                null))
 
         // skal ikke føre til flere barn på persongrunnlaget.
-        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NATIONAL,
+        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandling(BehandlingKategori.NASJONAL,
                                                                                  BehandlingUnderkategori.ORDINÆR, morId,
                                                                                  arrayOf(barn1Id, barn2Id),
                                                                                  BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -358,14 +358,14 @@ class BehandlingIntegrationTest {
             integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.now())
 
-        behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NATIONAL,
+        behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NASJONAL,
                                                          BehandlingUnderkategori.ORDINÆR,
                                                          morId,
                                                          arrayOf(barnId),
                                                          BehandlingType.FØRSTEGANGSBEHANDLING,
                                                          null))
         Assertions.assertThrows(Exception::class.java) {
-            behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NATIONAL,
+            behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NASJONAL,
                                                              BehandlingUnderkategori.ORDINÆR,
                                                              morId,
                                                              arrayOf(barnId),
@@ -387,7 +387,7 @@ class BehandlingIntegrationTest {
         } returns Personinfo(LocalDate.now())
 
         val nyBehandling =
-                NyBehandling(BehandlingKategori.NATIONAL,
+                NyBehandling(BehandlingKategori.NASJONAL,
                              BehandlingUnderkategori.ORDINÆR,
                              søkerFnr,
                              arrayOf(barn1Fnr, barn2Fnr),
@@ -458,7 +458,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
@@ -488,7 +488,7 @@ class BehandlingIntegrationTest {
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
