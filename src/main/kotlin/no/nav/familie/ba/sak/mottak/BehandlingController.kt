@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.validering.BehandlingstilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.sikkerhet.OIDCUtil
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -15,12 +16,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/behandling")
 @ProtectedWithClaims(issuer = "azuread")
+@Validated
 class BehandlingController(private val oidcUtil: OIDCUtil,
                        private val behandlingService: BehandlingService,
                        private val fagsakService: FagsakService) {
@@ -28,8 +30,7 @@ class BehandlingController(private val oidcUtil: OIDCUtil,
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @GetMapping(path = ["/{behandlingId}/vedtak-html"])
-    @PreAuthorize("@tilgang.tilBehandling(#behandlingId)")
-    fun hentHtmlVedtak(@PathVariable behandlingId: Long): Ressurs<String> {
+    fun hentHtmlVedtak(@PathVariable @BehandlingstilgangConstraint behandlingId: Long): Ressurs<String> {
         val saksbehandlerId = oidcUtil.getClaim("preferred_username")
         FagsakController.logger.info("{} henter vedtaksbrev", saksbehandlerId ?: "VL")
         val html = behandlingService.hentHtmlVedtakForBehandling(behandlingId)
