@@ -10,7 +10,8 @@ data class RestVedtak(
         val ansvarligSaksbehandler: String,
         val vedtaksdato: LocalDate,
         val barnasBeregning: List<RestVedtakBarn?>,
-        val resultat: VedtakResultat
+        val resultat: VedtakResultat,
+        val begrunnelse: String
 )
 
 fun Vedtak.toRestVedtak(barnBeregning: List<VedtakBarn?>) = RestVedtak(
@@ -18,5 +19,6 @@ fun Vedtak.toRestVedtak(barnBeregning: List<VedtakBarn?>) = RestVedtak(
         ansvarligSaksbehandler = this.ansvarligSaksbehandler,
         barnasBeregning = barnBeregning.map { it?.toRestVedtakBarn() },
         vedtaksdato = this.vedtaksdato,
-        resultat = this.resultat
+        resultat = this.resultat,
+        begrunnelse = this.begrunnelse
 )
