@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.common.BaseService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
@@ -45,7 +44,7 @@ class ØkonomiKlient(
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/oppdrag"),
                 HttpMethod.POST,
-                HttpEntity(objectMapper.writeValueAsString(utbetalingsoppdrag), headers))
+                HttpEntity(utbetalingsoppdrag, headers))
     }
 
     fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): ResponseEntity<Ressurs<OppdragProtokollStatus>> {
@@ -57,7 +56,7 @@ class ØkonomiKlient(
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/status"),
                 HttpMethod.POST,
-                HttpEntity(objectMapper.writeValueAsString(statusFraOppdragDTO), headers))
+                HttpEntity(statusFraOppdragDTO, headers))
     }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
