@@ -154,14 +154,15 @@ class IntegrasjonTjeneste(
         }.fold(
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
-                    val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
-                    it.body?.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId. response=$message",
+
+                    it.body?.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId.",
                                                                                        null,
                                                                                        uri,
                                                                                        opprettOppgave.ident.ident)
                 },
                 onFailure = {
-                    throw IntegrasjonException("Kall mot integrasjon feilet ved opprett oppgave.",
+                    val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+                    throw IntegrasjonException("Kall mot integrasjon feilet ved opprett oppgave. response=$message",
                                                it,
                                                uri,
                                                opprettOppgave.ident.ident)
