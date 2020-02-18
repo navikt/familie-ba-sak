@@ -165,11 +165,11 @@ class FagsakController(
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak"])
     fun opphørMigrertVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val førsteNesteMåned = LocalDate.now().plusMonths(1).withDayOfMonth(1)
-        return opphørMigrertVedtak(fagsakId, OpphørVedtak(førsteNesteMåned))
+        return opphørMigrertVedtak(fagsakId, Opphørsvedtak(førsteNesteMåned))
     }
 
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
-    fun opphørMigrertVedtak(@PathVariable fagsakId: Long, @RequestBody opphørVedtak: OpphørVedtak): ResponseEntity<Ressurs<String>> {
+    fun opphørMigrertVedtak(@PathVariable fagsakId: Long, @RequestBody opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = hentSaksbehandler()
 
         logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
@@ -192,7 +192,7 @@ class FagsakController(
                                            vedtak,
                                            saksbehandlerId,
                                            BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-                                           opphørVedtak.opphørsdato)
+                                           opphørsvedtak.opphørsdato)
         taskRepository.save(task)
 
         return ResponseEntity.ok(Ressurs.success("Task for opphør av migrert behandling og vedtak på fagsak $fagsakId opprettet"))

@@ -9,7 +9,7 @@ data class NyttVedtak(
         val begrunnelse: String
 )
 
-data class OpphørVedtak(
+data class Opphørsvedtak(
         val opphørsdato: LocalDate
 )
 

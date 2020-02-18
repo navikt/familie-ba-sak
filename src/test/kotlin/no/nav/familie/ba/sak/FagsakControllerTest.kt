@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.OpphørVedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Opphørsvedtak
 
 import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
 
@@ -106,7 +106,7 @@ class FagsakControllerTest(
         val fagsakController =
                 FagsakController(oidcUtil, fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
 
-        val response = fagsakController.opphørMigrertVedtak(1, OpphørVedtak(LocalDate.now()))
+        val response = fagsakController.opphørMigrertVedtak(1, Opphørsvedtak(LocalDate.now()))
         assert(response.statusCode == HttpStatus.OK)
     }
 
