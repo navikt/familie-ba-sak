@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat.OPPHØRT
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.UENDR
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.UEND
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode.SatsType.MND
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -48,7 +48,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
 
     val utbetalingsoppdrag = Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
-            kodeEndring = if (!erOpphør) NY else UENDR,
+            kodeEndring = if (!erOpphør) NY else UEND,
             fagSystem = FAGSYSTEM,
             saksnummer = saksnummer,
             aktoer = aktør,
