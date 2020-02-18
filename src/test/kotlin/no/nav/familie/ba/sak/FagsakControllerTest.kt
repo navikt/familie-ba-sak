@@ -78,16 +78,28 @@ class FagsakControllerTest(
 
         val fagsak = Fagsak(1, AktørId("1"), PersonIdent("1"))
         val behandling =
-                Behandling(1,
-                           fagsak,
-                           null,
-                           BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                           "1",
-                           status = BehandlingStatus.IVERKSATT,
-                           kategori = BehandlingKategori.NASJONAL,
-                           underkategori = BehandlingUnderkategori.ORDINÆR)
-        val vedtak = Vedtak(1, behandling, "sb", LocalDate.now(), "", VedtakResultat.INNVILGET,
-                            begrunnelse = "")
+                lagOrdinærIverksattBehandling(fagsak, BehandlingType.MIGRERING_FRA_INFOTRYGD)
+        val vedtak = lagInnvilgetVedtak(behandling)
+
+        every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
+        every { mockBehandlingLager.hentVedtakHvisEksisterer(any()) } returns vedtak
+        val fagsakController =
+                FagsakController(oidcUtil, fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
+
+        val response = fagsakController.opphørMigrertVedtak(1)
+        assert(response.statusCode == HttpStatus.OK)
+    }
+
+
+    @Test
+    @Tag("integration")
+    fun `Test opphør vedtak v2`() {
+        val mockBehandlingLager: BehandlingService = mockk()
+
+        val fagsak = Fagsak(1, AktørId("1"), PersonIdent("1"))
+        val behandling =
+                lagOrdinærIverksattBehandling(fagsak, BehandlingType.MIGRERING_FRA_INFOTRYGD)
+        val vedtak = lagInnvilgetVedtak(behandling)
 
         every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
         every { mockBehandlingLager.hentVedtakHvisEksisterer(any()) } returns vedtak
@@ -181,4 +193,23 @@ class FagsakControllerTest(
                 vedtak?.begrunnelse
         )
     }
+
+    private fun lagInnvilgetVedtak(behandling: Behandling) =
+            Vedtak(1, behandling, "sb", LocalDate.now(), "", VedtakResultat.INNVILGET,
+                   begrunnelse = "")
+
+    private fun lagOrdinærIverksattBehandling(fagsak: Fagsak,
+                                              migreringFraInfotrygd: BehandlingType): Behandling {
+        val behandling =
+                Behandling(1,
+                           fagsak,
+                           null,
+                           migreringFraInfotrygd,
+                           "1",
+                           status = BehandlingStatus.IVERKSATT,
+                           kategori = BehandlingKategori.NASJONAL,
+                           underkategori = BehandlingUnderkategori.ORDINÆR)
+        return behandling
+    }
+
 }
