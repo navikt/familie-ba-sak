@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.mottak.NyBehandling
+import no.nav.familie.ba.sak.mottak.NyBehandlingHendelse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpprettBehandleSakOppgaveForNyBehandlingTask
@@ -47,7 +48,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          randomSaksnummer(),
                                                          nyBehandling.kategori,
                                                          nyBehandling.underkategori)
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.fødselsnummer, nyBehandling.barnasFødselsnummer, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
                 Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
             } else {
@@ -61,20 +62,20 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun opprettEllerOppdaterBehandlingFraHendelse(nyBehandling: NyBehandling): Fagsak {
+    fun opprettEllerOppdaterBehandlingFraHendelse(nyBehandling: NyBehandlingHendelse): Fagsak {
         val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
-                                                         nyBehandling.journalpostID,
-                                                         nyBehandling.behandlingType,
+                                                         null,
+                                                         BehandlingType.FØRSTEGANGSBEHANDLING,
                                                          randomSaksnummer(),
-                                                         nyBehandling.kategori,
-                                                         nyBehandling.underkategori)
+                                                         BehandlingKategori.NASJONAL,
+                                                         BehandlingUnderkategori.ORDINÆR)
 
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.fødselsnummer, nyBehandling.barnasFødselsnummer, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
                 Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
             } else {
@@ -173,17 +174,19 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandling
     }
 
-    private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling: NyBehandling, behandling: Behandling) {
+    private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
+                                                             barnasFødselsnummer: Array<String>,
+                                                             behandling: Behandling) {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
 
         personopplysningGrunnlag.leggTilPerson(Person(
                 personIdent = behandling.fagsak.personIdent,
                 type = PersonType.SØKER,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
+                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(fødselsnummer)?.fødselsdato
         ))
 
-        lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasFødselsnummer, personopplysningGrunnlag)
+        lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer, personopplysningGrunnlag)
 
         personopplysningGrunnlag.aktiv = true
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -362,7 +365,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
         val vedtak = hentAktivVedtakForBehandling(behandlingId)
                      ?: return Ressurs.failure("Behandling ikke funnet")
-        val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(), vedtak.stønadBrevMarkdown) }
+        val html = Result.runCatching {
+            dokGenService.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(),
+                                             vedtak.stønadBrevMarkdown)
+        }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
