@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.økonomi.FAGSYSTEM
 import no.nav.familie.ba.sak.økonomi.IverksettingTaskDTO
@@ -16,6 +18,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.util.Assert
+import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Iverksett vedtak mot oppdrag", maxAntallFeil = 3)
@@ -58,6 +61,31 @@ class IverksettMotOppdrag(
 
     companion object {
         const val TASK_STEP_TYPE = "iverksettMotOppdrag"
-        val LOG: Logger = LoggerFactory.getLogger(IverksettMotOppdrag::class.java)
+        val LOG = LoggerFactory.getLogger(IverksettMotOppdrag::class.java)
+
+
+        fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) : Task {
+
+            return opprettTask(behandling.fagsak.personIdent.ident,
+                               behandling.id!!,
+                               vedtak.id!!,
+                               saksbehandlerId)
+        }
+
+        fun opprettTask(personIdent: String, behandlingsId: Long, vedtaksId : Long, saksbehandlerId: String) : Task {
+            return Task.nyTask(type = TASK_STEP_TYPE,
+                               payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
+                                       personIdent = personIdent,
+                                       behandlingsId = behandlingsId,
+                                       vedtaksId = vedtaksId,
+                                       saksbehandlerId = saksbehandlerId
+                               )),
+                               properties = Properties().apply {
+                                   this["personIdent"] = personIdent
+                                   this["behandlingsId"] = behandlingsId.toString()
+                                   this["vedtakId"] = vedtaksId.toString()
+                               }
+            )
+        }
     }
 }

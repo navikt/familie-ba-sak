@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.domene.vedtak.toDokGenTemplate
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
@@ -27,10 +29,20 @@ class DokGenService(
 
     fun hentStønadBrevMarkdown(vedtak: Vedtak): String {
         val fletteFelter = mapTilBrevfelter(vedtak)
-        return hentMarkdownForMal("Innvilget", fletteFelter)
+        return hentMarkdownForMal(vedtak.resultat.toDokGenTemplate(), fletteFelter)
     }
 
     private fun mapTilBrevfelter(vedtak: Vedtak): String {
+        when (vedtak.resultat) {
+            VedtakResultat.INNVILGET -> return mapTilInnvilgetBrevFelter(vedtak)
+            VedtakResultat.AVSLÅTT -> return mapTilAvslagBrevFelter(vedtak)
+            else -> {
+                throw RuntimeException("Invalid/unsupported vedtak.resultat")
+            }
+        }
+    }
+
+    private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
         val brevfelter = "{\"belop\": %s,\n" + // TODO hent fra dokgen (/template/{templateName}/schema)
                          "\"startDato\": \"%s\",\n" +
                          "\"etterbetaling\": %s,\n" +
@@ -53,26 +65,41 @@ class DokGenService(
         )
     }
 
+    private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
+        val brevfelter = "{\"fodselsnummer\": \"%s\",\n" +
+                         "\"navn\": \"%s\",\n" +
+                         "\"hjemmel\": \"%s\",\n" +
+                         "\"fritekst\": \"%s\"}"
+
+        return String.format( //TODO: sett navn, hjemmel og firtekst
+                brevfelter,
+                vedtak.behandling.fagsak.personIdent.ident,
+                "No Name",
+                "",
+                ""
+        )
+    }
+
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
         val url = URI.create("$dokgenServiceUri/template/$malNavn/create-markdown")
         val response = utførRequest(lagPostRequest(url, fletteFelter), String::class.java)
         return response.body.orEmpty()
     }
 
-    fun lagHtmlFraMarkdown(markdown: String): String {
-        val request = lagDokumentRequestForMarkdown(HTML, markdown)
+    fun lagHtmlFraMarkdown(template: String, markdown: String): String {
+        val request = lagDokumentRequestForMarkdown(HTML, template, markdown)
         val response = utførRequest(request, String::class.java)
         return response.body.orEmpty()
     }
 
-    fun lagPdfFraMarkdown(markdown: String): ByteArray {
-        val request = lagDokumentRequestForMarkdown(PDF, markdown)
+    fun lagPdfFraMarkdown(template: String, markdown: String): ByteArray {
+        val request = lagDokumentRequestForMarkdown(PDF, template, markdown)
         val response = utførRequest(request, ByteArray::class.java)
         return response.body!!
     }
 
-    fun lagDokumentRequestForMarkdown(format: DocFormat, markdown: String): RequestEntity<String> {
-        val url = URI.create("$dokgenServiceUri/template/Innvilget/create-doc")
+    fun lagDokumentRequestForMarkdown(format: DocFormat, template: String, markdown: String): RequestEntity<String> {
+        val url = URI.create("$dokgenServiceUri/template/${template}/create-doc")
         val body = DokumentRequest(format,
                                    markdown,
                                    true,
