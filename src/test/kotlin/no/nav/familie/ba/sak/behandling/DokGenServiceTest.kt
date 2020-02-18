@@ -30,7 +30,8 @@ class DokGenServiceTest(@Autowired
                                     underkategori = BehandlingUnderkategori.ORDINÆR),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now(),
-            resultat = VedtakResultat.INNVILGET
+            resultat = VedtakResultat.INNVILGET,
+            begrunnelse = ""
     )
 
     private val avslagVedtak= Vedtak(
@@ -41,7 +42,8 @@ class DokGenServiceTest(@Autowired
                                     underkategori = BehandlingUnderkategori.ORDINÆR),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now(),
-            resultat = VedtakResultat.AVSLÅTT
+            resultat = VedtakResultat.AVSLÅTT,
+            begrunnelse = ""
     )
 
     @Test
