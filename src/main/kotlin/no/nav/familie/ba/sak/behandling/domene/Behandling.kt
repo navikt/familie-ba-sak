@@ -58,7 +58,7 @@ enum class BehandlingType {
 
 enum class BehandlingKategori {
     EØS,
-    NATIONAL
+    NASJONAL
 }
 
 enum class BehandlingUnderkategori {

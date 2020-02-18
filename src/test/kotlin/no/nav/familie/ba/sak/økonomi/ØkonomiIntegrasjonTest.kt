@@ -62,7 +62,7 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        "randomSaksnummer",
-                                                                       BehandlingKategori.NATIONAL,
+                                                                       BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
@@ -88,8 +88,9 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
                         arrayOf(BarnBeregning(fødselsnummer = "12345678910",
-                                              beløp = 1054,
-                                              stønadFom = LocalDate.now()))
+                                                beløp = 1054,
+                                                stønadFom = LocalDate.now(),
+                                                ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
 

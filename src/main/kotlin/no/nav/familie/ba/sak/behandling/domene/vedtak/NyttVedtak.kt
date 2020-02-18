@@ -9,6 +9,10 @@ data class NyttVedtak(
         val begrunnelse: String
 )
 
+data class Opphørsvedtak(
+        val opphørsdato: LocalDate
+)
+
 data class NyBeregning(
         val barnasBeregning: Array<BarnBeregning>
 )
@@ -16,5 +20,13 @@ data class NyBeregning(
 data class BarnBeregning(
         val fødselsnummer: String,
         val beløp: Int,
-        val stønadFom: LocalDate
+        val stønadFom: LocalDate,
+        val ytelsetype : Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
 )
+
+enum class Ytelsetype(val klassifisering: String) {
+    ORDINÆR_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD("BATR"),
+    SMÅBARNSTILLEGG("BATRSMA")
+
+}
