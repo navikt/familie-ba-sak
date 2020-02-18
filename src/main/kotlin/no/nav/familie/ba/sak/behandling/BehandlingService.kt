@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.ZoneId
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
@@ -333,7 +335,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                     ?: throw RuntimeException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
             if (it.stønadFom.isBefore(person.fødselsdato)) {
-                throw RuntimeException("Ugyldig fra og med dato for ${person.fødselsdato}")
+                throw RuntimeException("Ugyldig fra-og-med-dato (${it.stønadFom}) for ${person.fødselsdato}")
+            }
+
+            val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
+            val sikkerStønadTom = person.fødselsdato?.plusYears(18)?.sisteDagIForrigeMåned()!!
+
+            if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
+                throw RuntimeException("Stønadens fra-og-med-dato (${sikkerStønadFom}) er ETTER til-og-med-dato (${sikkerStønadTom}). ")
             }
 
             vedtakPersonRepository.save(
@@ -341,8 +350,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                             person = person,
                             vedtak = vedtak,
                             beløp = it.beløp,
-                            stønadFom = it.stønadFom,
-                            stønadTom = person.fødselsdato?.plusYears(18)!!,
+                            stønadFom = sikkerStønadFom,
+                            stønadTom = sikkerStønadTom,
                             type = it.ytelsetype
                     )
             )
@@ -411,4 +420,5 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         const val STRING_LENGTH = 10
         val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
+
 }
