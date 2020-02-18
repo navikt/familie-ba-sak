@@ -89,7 +89,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 personIdent = behandling.fagsak.personIdent,
                 type = PersonType.SØKER,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer)?.fødselsdato
+                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer).fødselsdato
         ))
 
         lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasFødselsnummer, personopplysningGrunnlag)
@@ -105,7 +105,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         personIdent = PersonIdent(nyttBarn),
                         type = PersonType.BARN,
                         personopplysningGrunnlag = personopplysningGrunnlag,
-                        fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn)?.fødselsdato
+                        fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn).fødselsdato
                 ))
             }
         }

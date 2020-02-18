@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.DokGenService
 import no.nav.familie.ba.sak.behandling.FagsakService
@@ -62,11 +61,10 @@ class BehandlingIntegrationTest {
     @Autowired
     lateinit var fagsakService: FagsakService
 
-    @Autowired
-    lateinit var behandlingService: BehandlingService
-
     @MockK
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
+
+    lateinit var behandlingService: BehandlingService
 
     @BeforeEach
     fun setup() {

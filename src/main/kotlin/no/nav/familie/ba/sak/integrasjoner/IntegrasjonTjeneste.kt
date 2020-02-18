@@ -32,6 +32,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.exchange
+import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
@@ -65,7 +66,7 @@ class IntegrasjonTjeneste(
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun hentPersoninfoFor(personIdent: String): Personinfo? {
+    fun hentPersoninfoFor(personIdent: String): Personinfo {
         val uri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info")
         logger.info("Henter personinfo fra $integrasjonerServiceUri")
         return try {
@@ -95,6 +96,29 @@ class IntegrasjonTjeneste(
                                                personident)
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri, personident)
+        }
+    }
+
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    fun hentBehandlendeEnhet(geografiskTilknytning: String?, diskresjonskode: String?): List<Arbeidsfordelingsenhet> {
+        val uri = UriComponentsBuilder.fromPath("$integrasjonerServiceUri/arbeidsfordeling/enhet")
+                .queryParam("tema", "BAR")
+                .queryParam("geografi", geografiskTilknytning)
+                .queryParam("diskresjonskode", diskresjonskode)
+                .build().toUri()
+
+        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
+        headers.add(NavHttpHeaders.NAV_CONSUMER_ID.asString(), "familie-ba-sak")
+        val httpEntity: HttpEntity<*> = HttpEntity<Any?>(headers)
+
+        return try {
+            val response = restOperations.exchange<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, HttpMethod.GET, httpEntity)
+            val data = response.body?.data
+            data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
+                    null,
+                    uri)
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri)
         }
     }
 
