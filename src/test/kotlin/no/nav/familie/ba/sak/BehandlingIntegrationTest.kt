@@ -288,10 +288,10 @@ class BehandlingIntegrationTest {
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
-                        arrayOf(PersonBeregning(fødselsnummer = fnr,
-                                                beløp = 1054,
-                                                stønadFom = LocalDate.now(),
-                                                ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
+                        arrayOf(BarnBeregning(fødselsnummer = fnr,
+                                                   beløp = 1054,
+                                                   stønadFom = LocalDate.now(),
+                                                   ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
 
@@ -398,8 +398,8 @@ class BehandlingIntegrationTest {
         Assertions.assertNotNull(personopplysningGrunnlag)
 
         val barnasBeregning = arrayOf(
-                PersonBeregning(barn1Fnr, 1054, LocalDate.now(), Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr, 1054, LocalDate.now(), Ytelsetype.ORDINÆR_BARNETRYGD)
+                BarnBeregning(barn1Fnr, 1054, LocalDate.now(), Ytelsetype.ORDINÆR_BARNETRYGD),
+                BarnBeregning(barn2Fnr, 1054, LocalDate.now(), Ytelsetype.ORDINÆR_BARNETRYGD)
         )
         val nyttVedtak = NyttVedtak(VedtakResultat.INNVILGET,
                                     samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr,

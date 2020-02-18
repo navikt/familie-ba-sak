@@ -32,10 +32,10 @@ data class Vedtak(
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
-        @Column(name = "forrige_vedtak_id")
+        @Column(name = "fk_forrige_vedtak_id")
         var forrigeVedtakId: Long? = null,
 
-        @Column(name = "opphør_dato")
+        @Column(name = "opphor_dato")
         var opphørsdato: LocalDate? = null
 
 ) : BaseEntitet()

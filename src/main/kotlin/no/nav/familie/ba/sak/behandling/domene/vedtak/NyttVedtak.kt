@@ -13,14 +13,14 @@ data class OpphørVedtak(
 )
 
 data class NyBeregning(
-        val personberegninger: Array<PersonBeregning>
+        val barnasBeregning: Array<BarnBeregning>
 )
 
-data class PersonBeregning(
+data class BarnBeregning(
         val fødselsnummer: String,
         val beløp: Int,
         val stønadFom: LocalDate,
-        val ytelsetype : Ytelsetype
+        val ytelsetype : Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
 )
 
 enum class Ytelsetype(val klassifisering: String) {

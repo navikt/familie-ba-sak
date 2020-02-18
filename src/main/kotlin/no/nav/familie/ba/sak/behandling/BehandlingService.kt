@@ -96,7 +96,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun opphørVedtak(saksbehandler: String,
                      gjeldendeBehandlingsId: Long,
                      nyBehandlingType: BehandlingType,
-                     opphørdato: LocalDate,
+                     opphørsdato: LocalDate,
                      postProsessor: (Vedtak) -> Unit): Ressurs<Vedtak> {
 
         val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
@@ -104,7 +104,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val gjeldendeVedtakPerson = vedtakPersonRepository.finnPersonBeregningForVedtak(gjeldendeVedtak.id)
         if (gjeldendeVedtakPerson.isEmpty()) {
-            return Ressurs.failure("Fant ikke vedtak barn tilknyttet behandling ${gjeldendeBehandlingsId} og vedtak ${gjeldendeVedtak.id}")
+            return Ressurs.failure("Fant ikke vedtak personer tilknyttet behandling ${gjeldendeBehandlingsId} og vedtak ${gjeldendeVedtak.id}")
         }
 
         val gjeldendeBehandling = gjeldendeVedtak.behandling;
@@ -130,7 +130,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 resultat = VedtakResultat.OPPHØRT,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = gjeldendeVedtak.id,
-                opphørsdato = opphørdato
+                opphørsdato = opphørsdato
         )
 
         // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
@@ -324,7 +324,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         personopplysningGrunnlag: PersonopplysningGrunnlag,
                                         nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
-        nyBeregning.personberegninger.map {
+        nyBeregning.barnasBeregning.map {
             val person =
                     personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
                                                                                   personopplysningGrunnlag.id)

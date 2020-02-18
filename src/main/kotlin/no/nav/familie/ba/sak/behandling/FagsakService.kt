@@ -32,8 +32,8 @@ class FagsakService(
             val barnasFødselsnummer = personopplysningGrunnlag?.barna?.map { barn -> barn.personIdent.ident }
 
             val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
-                val barnBeregning = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
-                vedtak.toRestVedtak(barnBeregning)
+                val personBeregning = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
+                vedtak.toRestVedtak(personBeregning)
             }
 
             RestBehandling(

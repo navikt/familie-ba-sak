@@ -86,7 +86,7 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
-                        arrayOf(PersonBeregning(fødselsnummer = "12345678910",
+                        arrayOf(BarnBeregning(fødselsnummer = "12345678910",
                                                 beløp = 1054,
                                                 stønadFom = LocalDate.now(),
                                                 ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))

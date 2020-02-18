@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @RestController
@@ -81,7 +82,7 @@ class FagsakController(
 
         logger.info("{} oppdaterer vedtak med beregning for fagsak med id {}", saksbehandlerId, fagsakId)
 
-        if (nyBeregning.personberegninger.isEmpty()) {
+        if (nyBeregning.barnasBeregning.isEmpty()) {
             return badRequest("Barnas beregning er tom")
         }
 
@@ -162,6 +163,12 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak"])
+    fun opphørMigrertVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+        val førsteNesteMåned = LocalDate.now().plusMonths(1).withDayOfMonth(1)
+        return opphørMigrertVedtak(fagsakId, OpphørVedtak(førsteNesteMåned))
+    }
+
+    @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
     fun opphørMigrertVedtak(@PathVariable fagsakId: Long, @RequestBody opphørVedtak: OpphørVedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = hentSaksbehandler()
 
