@@ -46,6 +46,14 @@ class BehandlingController(private val oidcUtil: OIDCUtil,
 
         logger.info("{} oppretter ny behandling", saksbehandlerId)
 
+        if (nyBehandling.ident.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure("Søkers ident kan ikke være blank"))
+        }
+
+        if (nyBehandling.barnasIdenter.filter { it.isBlank() }.isNotEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure("Minst et av barna mangler ident"))
+        }
+
         return Result.runCatching { behandlingService.opprettBehandling(nyBehandling) }
                 .fold(
                         onFailure = {
@@ -79,8 +87,8 @@ class BehandlingController(private val oidcUtil: OIDCUtil,
 class NyBehandling(
         val kategori: BehandlingKategori,
         val underkategori: BehandlingUnderkategori,
-        val fødselsnummer: String,
-        val barnasFødselsnummer: Array<String>,
+        val ident: String,
+        val barnasIdenter: Array<String>,
         val behandlingType: BehandlingType,
         val journalpostID: String?)
 
