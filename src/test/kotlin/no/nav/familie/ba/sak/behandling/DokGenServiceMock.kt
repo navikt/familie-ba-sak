@@ -17,9 +17,9 @@ class DokGenServiceMock : DokGenService(
         if (request.url.path.matches(Regex(".+create-markdown"))) {
             return ResponseEntity.ok(responseType.cast("# Vedtaksbrev Markdown (Mock)"))
         } else if (request.url.path.matches(Regex(".+create-doc"))) {
-            if (request.body!!.matches(Regex(".+HTML"))) {
+            if (request.body!!.matches(Regex(".+HTML.+"))) {
                 return ResponseEntity.ok(responseType.cast("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
-            } else if (request.body!!.matches(Regex(".+PDF"))) {
+            } else if (request.body!!.matches(Regex(".+PDF.+"))) {
                 return ResponseEntity.ok(responseType.cast("Vedtaksbrev PDF".toByteArray()))
             }
         }

@@ -77,12 +77,12 @@ internal class FagsaktilgangTest {
 
     private val behandlinger = listOf(Behandling(id = 1,
                                                  fagsak = mockk(),
-                                                 kategori = BehandlingKategori.NATIONAL,
+                                                 kategori = BehandlingKategori.NASJONAL,
                                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                  underkategori = BehandlingUnderkategori.ORDINÆR),
                                       Behandling(id = 2,
                                                  fagsak = mockk(),
-                                                 kategori = BehandlingKategori.NATIONAL,
+                                                 kategori = BehandlingKategori.NASJONAL,
                                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                  underkategori = BehandlingUnderkategori.ORDINÆR))
 }

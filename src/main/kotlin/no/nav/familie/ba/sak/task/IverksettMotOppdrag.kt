@@ -44,7 +44,7 @@ class IverksettMotOppdrag(
         Assert.isTrue(behandling?.status == BehandlingStatus.SENDT_TIL_IVERKSETTING,
                       "Skal iverksette mot økonomi, men behandlingen har status ${behandling?.status}.")
 
-        LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag gikk OK")
+        LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag gikk OK.")
 
         val nyTask = Task.nyTask(
                 type = StatusFraOppdrag.TASK_STEP_TYPE,

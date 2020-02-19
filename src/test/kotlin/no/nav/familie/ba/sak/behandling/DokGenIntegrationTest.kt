@@ -70,12 +70,13 @@ class DokGenIntegrationTest {
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         saksnummer = null,
                         aktiv = true,
-                        kategori = BehandlingKategori.NATIONAL,
+                        kategori = BehandlingKategori.NASJONAL,
                         underkategori = BehandlingUnderkategori.ORDINÆR
                 ),
                 ansvarligSaksbehandler = "whoknows",
                 vedtaksdato = LocalDate.MIN,
-                resultat = VedtakResultat.INNVILGET
+                resultat = VedtakResultat.INNVILGET,
+                begrunnelse = ""
         ))
 
         assert(markdown == "mockup_response")
@@ -113,12 +114,13 @@ class DokGenIntegrationTest {
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         saksnummer = null,
                         aktiv = true,
-                        kategori = BehandlingKategori.NATIONAL,
+                        kategori = BehandlingKategori.NASJONAL,
                         underkategori = BehandlingUnderkategori.ORDINÆR
                 ),
                 ansvarligSaksbehandler = "whoknows",
                 vedtaksdato = LocalDate.MIN,
-                resultat = VedtakResultat.INNVILGET
+                resultat = VedtakResultat.INNVILGET,
+                begrunnelse = ""
         ))
         assert(markdown.isEmpty())
     }

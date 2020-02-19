@@ -1,37 +1,37 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.Beregning
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.beregnUtbetalingsperioder
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakBarn
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype.*
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.Duration
 import java.time.LocalDate
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev")
 class BeregningTest(
-        @Autowired
-        private val behandlingService: BehandlingService,
-
-        @Autowired
-        private val beregning: Beregning
 ) {
+    val fagsak = Fagsak(null, null, PersonIdent("12345"), FagsakStatus.OPPRETTET)
+    val behandling = Behandling(fagsak = fagsak,
+                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                kategori = BehandlingKategori.NASJONAL,
+                                underkategori = BehandlingUnderkategori.ORDINÆR)
+
+    val vedtak = Vedtak(behandling = behandling,
+                        ansvarligSaksbehandler = "ansvarligSaksbehandler",
+                        vedtaksdato = LocalDate.now(),
+                        stønadBrevMarkdown = "",
+                        resultat = VedtakResultat.INNVILGET,
+                        begrunnelse = ""
+                        )
 
     /**
      * Testen generer 3 barn. 2 av dem er født dd. og 1 er født 2 år frem i tid.
@@ -49,82 +49,86 @@ class BeregningTest(
      */
     @Test
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("12345")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       "lagRandomSaksnummer",
-                                                                       BehandlingKategori.NATIONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
-        val vedtak = Vedtak(behandling = behandling,
-                            ansvarligSaksbehandler = "ansvarligSaksbehandler",
-                            vedtaksdato = LocalDate.now(),
-                            stønadBrevMarkdown = "",
-                            resultat = VedtakResultat.INNVILGET)
 
-        val barn1Fødselsdato = LocalDate.now()
-        val barn2Fødselsdato = LocalDate.now().plusYears(2)
-        val barn3Fødselsdato = LocalDate.now()
+        val tidslinjeMap = beregnUtbetalingsperioder(listOf(
+                lagPersonVedtak(ORDINÆR_BARNETRYGD, "2020-04-01", "2038-03-31", 1054),
+                lagPersonVedtak(ORDINÆR_BARNETRYGD, "2022-04-01", "2040-03-31", 1054),
+                lagPersonVedtak(ORDINÆR_BARNETRYGD, "2023-04-01", "2038-03-31", 1054)))
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0L)
-
-        val barn1 = Person(personIdent = PersonIdent("00000000001"),
-                           fødselsdato = barn1Fødselsdato,
-                           type = PersonType.BARN,
-                           personopplysningGrunnlag = personopplysningGrunnlag)
-        val barn2 = Person(personIdent = PersonIdent("00000000002"),
-                           fødselsdato = barn2Fødselsdato,
-                           type = PersonType.BARN,
-                           personopplysningGrunnlag = personopplysningGrunnlag)
-        val barn3 = Person(personIdent = PersonIdent("00000000003"),
-                           fødselsdato = barn2Fødselsdato,
-                           type = PersonType.BARN,
-                           personopplysningGrunnlag = personopplysningGrunnlag)
-
-        val barnBeregning1 = VedtakBarn(
-                barn = barn1,
-                stønadFom = barn1Fødselsdato,
-                stønadTom = barn1Fødselsdato.plusYears(18),
-                beløp = 1054,
-                vedtak = vedtak
+        val forventedeSegmenter = listOf(
+                lagSegmentBeløp("2020-04-01","2022-03-31", 1054),
+                lagSegmentBeløp("2022-04-01","2023-03-31", 2108),
+                lagSegmentBeløp("2023-04-01","2038-03-31", 3162),
+                lagSegmentBeløp("2038-04-01","2040-03-31", 1054)
         )
 
-        val barnBeregning2 = VedtakBarn(
-                barn = barn2,
-                stønadFom = barn2Fødselsdato,
-                stønadTom = barn2Fødselsdato.plusYears(18),
-                beløp = 1054,
-                vedtak = vedtak
+        assertLikeSegmenter(forventedeSegmenter, tidslinjeMap["BATR"])
+    }
+
+    @Test
+    fun `Skal sjekke at tidslinjen for ordinær barnetrygd og småbarnstillegg blir riktig`() {
+
+        // Barn født 27/9/2017 -> Barnetrygd 1/10/2017-30/9/2035, småbarnstillegg 1/10/2017-30/9/2020
+        // Barn født 18/4/2020 -> Barnetrygd 1/5/2020-30/4/2038, småbarnstillegg 1/5/2020-30/4/2023
+        // Utvidet barnetrygd 1/4/2020 - 31/1/2021
+
+        val tidslinjeMap = beregnUtbetalingsperioder(listOf(
+                lagPersonVedtak(SMÅBARNSTILLEGG, "2020-04-01", "2023-03-31", 660),
+                lagPersonVedtak(ORDINÆR_BARNETRYGD, "2020-04-01", "2038-03-31", 1054),
+                lagPersonVedtak(UTVIDET_BARNETRYGD, "2020-04-01", "2021-01-31", 1054)))
+
+        val forventedeSegmenterBarnetrygd = listOf(
+                lagSegmentBeløp("2020-04-01","2021-01-31", 2108),
+                lagSegmentBeløp("2021-02-01","2038-03-31", 1054)
         )
 
-        val barnBeregning3 = VedtakBarn(
-                barn = barn3,
-                stønadFom = barn3Fødselsdato.plusYears(3),
-                stønadTom = barn3Fødselsdato.plusYears(18),
-                beløp = 1054,
-                vedtak = vedtak
+        val forventedeSegmenterSmåbarnstillegg = listOf(
+                lagSegmentBeløp("2020-04-01","2023-03-31", 660)
         )
 
-        val tidslinje = beregning.beregnUtbetalingsperioder(listOf(
-                barnBeregning1,
-                barnBeregning2,
-                barnBeregning3
-        ))
+        Assertions.assertEquals(2,tidslinjeMap.size)
+        assertLikeSegmenter(forventedeSegmenterBarnetrygd, tidslinjeMap["BATR"])
+        assertLikeSegmenter(forventedeSegmenterSmåbarnstillegg, tidslinjeMap["BATRSMA"])
+    }
 
 
-        Assertions.assertEquals(tidslinje.size(), 4)
+    private fun assertLikeSegmenter(forventedeSegmenter: List<LocalDateSegment<Int>>,
+                                    tidslinje: LocalDateTimeline<Int>?) {
+        Assertions.assertEquals(forventedeSegmenter.size, tidslinje!!.size(), "Forskjellig antall tidssegmenter")
 
-        // Sjekk at første periode er på 2 år
-        val nå = LocalDate.now()
-        val toÅrFrem = nå.plusYears(2)
-        Assertions.assertEquals(
-                tidslinje.datoIntervaller.pollFirst()?.totalDays(),
-                Duration.between(nå.atStartOfDay(), toÅrFrem.atStartOfDay()).toDays())
-
-        val beløp = listOf(1054, 2108, 3162, 1054)
         // Sjekk at periodene har riktig beløp
         tidslinje.toSegments().forEachIndexed { index, localDateSegment ->
-            Assertions.assertEquals(localDateSegment.value, beløp[index])
+            Assertions.assertEquals(forventedeSegmenter[index].value, localDateSegment.value, "Avvikende beløp")
+            Assertions.assertEquals(forventedeSegmenter[index].fom, localDateSegment.fom, "Forskjell i fra og med")
+            Assertions.assertEquals(forventedeSegmenter[index].tom, localDateSegment.tom, "Forskjell i til og med")
         }
     }
+
+    fun tilfeldigPerson() = Person(
+            personIdent = PersonIdent("00000000001"),
+            fødselsdato = LocalDate.now(),
+            type = PersonType.BARN,
+            personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0)
+    )
+
+    fun lagPersonVedtak(ytelsetype: Ytelsetype, fom: String, tom: String, beløp: Int) : VedtakPerson {
+       return VedtakPerson(
+               person = tilfeldigPerson(),
+               stønadFom = dato(fom),
+               stønadTom = dato(tom),
+               beløp = beløp,
+               vedtak = vedtak,
+               type = ytelsetype
+        )
+
+    }
+
+    fun lagSegmentBeløp(fom: String, tom: String, beløp : Int) : LocalDateSegment<Int> =
+            LocalDateSegment(dato(fom), dato(tom), beløp)
+
+    fun dato(datoSomString : String) :LocalDate {
+        return LocalDate.parse(datoSomString)
+    }
 }
+
+

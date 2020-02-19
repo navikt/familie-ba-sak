@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.mottak.NyBehandling
+import no.nav.familie.ba.sak.mottak.NyBehandlingHendelse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpprettBehandleSakOppgaveForNyBehandlingTask
@@ -19,13 +20,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.ZoneId
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val vedtakRepository: VedtakRepository,
-                        private val vedtakBarnRepository: VedtakBarnRepository,
+                        private val vedtakPersonRepository: VedtakPersonRepository,
                         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
                         private val personRepository: PersonRepository,
                         private val dokGenService: DokGenService,
@@ -47,8 +50,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          randomSaksnummer(),
                                                          nyBehandling.kategori,
                                                          nyBehandling.underkategori)
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
-            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.fødselsnummer, nyBehandling.barnasFødselsnummer, behandling)
+            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
                 Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
             } else {
                 LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
@@ -61,21 +64,21 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun opprettEllerOppdaterBehandlingFraHendelse(nyBehandling: NyBehandling): Fagsak {
+    fun opprettEllerOppdaterBehandlingFraHendelse(nyBehandling: NyBehandlingHendelse): Fagsak {
         val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
-                                                         nyBehandling.journalpostID,
-                                                         nyBehandling.behandlingType,
+                                                         null,
+                                                         BehandlingType.FØRSTEGANGSBEHANDLING,
                                                          randomSaksnummer(),
-                                                         nyBehandling.kategori,
-                                                         nyBehandling.underkategori)
+                                                         BehandlingKategori.NASJONAL,
+                                                         BehandlingUnderkategori.ORDINÆR)
 
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling, behandling)
-            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")){
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.fødselsnummer, nyBehandling.barnasFødselsnummer, behandling)
+            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
                 Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
             } else {
                 LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
@@ -96,14 +99,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun opphørVedtak(saksbehandler: String,
                      gjeldendeBehandlingsId: Long,
                      nyBehandlingType: BehandlingType,
+                     opphørsdato: LocalDate,
                      postProsessor: (Vedtak) -> Unit): Ressurs<Vedtak> {
 
         val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
                               ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling ${gjeldendeBehandlingsId}")
 
-        val gjeldendeVedtakPerson = vedtakBarnRepository.finnBarnBeregningForVedtak(gjeldendeVedtak.id)
+        val gjeldendeVedtakPerson = vedtakPersonRepository.finnPersonBeregningForVedtak(gjeldendeVedtak.id)
         if (gjeldendeVedtakPerson.isEmpty()) {
-            return Ressurs.failure("Fant ikke vedtak barn tilknyttet behandling ${gjeldendeBehandlingsId} og vedtak ${gjeldendeVedtak.id}")
+            return Ressurs.failure("Fant ikke vedtak personer tilknyttet behandling ${gjeldendeBehandlingsId} og vedtak ${gjeldendeVedtak.id}")
         }
 
         val gjeldendeBehandling = gjeldendeVedtak.behandling;
@@ -127,24 +131,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 ansvarligSaksbehandler = saksbehandler,
                 behandling = nyBehandling,
                 resultat = VedtakResultat.OPPHØRT,
-                vedtaksdato = LocalDate.now())
+                vedtaksdato = LocalDate.now(),
+                forrigeVedtakId = gjeldendeVedtak.id,
+                opphørsdato = opphørsdato,
+                begrunnelse = ""
+        )
 
         // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
         vedtakRepository.save(gjeldendeVedtak.also { it.aktiv = false })
         vedtakRepository.save(nyttVedtak)
-
-        /// TODO For opphør er beløpet det samme, men perioden fra nå til gammel til-og-med-dato. Er det riktig?
-        val nyeVedtakPerson = gjeldendeVedtakPerson
-                .map { p ->
-                    VedtakBarn(vedtak = nyttVedtak,
-                               barn = p.barn,
-                               beløp = p.beløp,
-                               stønadFom = LocalDate.now(),
-                               stønadTom = p.stønadTom)
-                }
-
-
-        vedtakBarnRepository.saveAll(nyeVedtakPerson)
 
         postProsessor(nyttVedtak)
 
@@ -181,18 +176,20 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandling
     }
 
-    private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling: NyBehandling, behandling: Behandling) {
+    private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
+                                                             barnasFødselsnummer: Array<String>,
+                                                             behandling: Behandling) {
         val personopplysningGrunnlag =
                 personopplysningGrunnlagRepository.save(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val søker = Person(personIdent = behandling.fagsak.personIdent,
                            type = PersonType.SØKER,
                            personopplysningGrunnlag = personopplysningGrunnlag,
-                           fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyBehandling.fødselsnummer).fødselsdato
+                           fødselsdato = integrasjonTjeneste.hentPersoninfoFor(fødselsnummer).fødselsdato
         )
 
         personopplysningGrunnlag.personer.add(søker)
-        lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasFødselsnummer, personopplysningGrunnlag)
+        lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer, personopplysningGrunnlag)
     }
 
     private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: Array<String>,
@@ -264,8 +261,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return vedtakRepository.getOne(vedtakId)
     }
 
-    fun hentBarnForVedtak(vedtakId: Long?): List<VedtakBarn> {
-        return vedtakBarnRepository.finnBarnBeregningForVedtak(vedtakId)
+    fun hentPersonerForVedtak(vedtakId: Long?): List<VedtakPerson> {
+        return vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId)
     }
 
     fun oppdaterStatusPåBehandling(behandlingId: Long?, status: BehandlingStatus) {
@@ -301,16 +298,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                      personopplysningGrunnlag: PersonopplysningGrunnlag,
                                      nyttVedtak: NyttVedtak,
                                      ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
-        val samletVilkårResultat = vilkårService.vurderVilkår(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat)
-
-        behandling.samletVilkårResultat = samletVilkårResultat
-        lagreBehandling(behandling)
+        vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat, behandling.id!!)
 
         val vedtak = Vedtak(
                 behandling = behandling,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
-                resultat = nyttVedtak.resultat
+                resultat = nyttVedtak.resultat,
+                begrunnelse = nyttVedtak.begrunnelse
         )
 
         if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT) {
@@ -336,22 +331,30 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
         nyBeregning.barnasBeregning.map {
-            val barn =
+            val person =
                     personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
                                                                                   personopplysningGrunnlag.id)
                     ?: throw RuntimeException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
-            if (it.stønadFom.isBefore(barn.fødselsdato)) {
-                throw RuntimeException("Ugyldig fra og med dato for ${barn.fødselsdato}")
+            if (it.stønadFom.isBefore(person.fødselsdato)) {
+                throw RuntimeException("Ugyldig fra-og-med-dato (${it.stønadFom}) for ${person.fødselsdato}")
             }
 
-            vedtakBarnRepository.save(
-                    VedtakBarn(
-                            barn = barn,
+            val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
+            val sikkerStønadTom = person.fødselsdato?.plusYears(18)?.sisteDagIForrigeMåned()!!
+
+            if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
+                throw RuntimeException("Stønadens fra-og-med-dato (${sikkerStønadFom}) er ETTER til-og-med-dato (${sikkerStønadTom}). ")
+            }
+
+            vedtakPersonRepository.save(
+                    VedtakPerson(
+                            person = person,
                             vedtak = vedtak,
                             beløp = it.beløp,
-                            stønadFom = it.stønadFom,
-                            stønadTom = barn.fødselsdato.plusYears(18)
+                            stønadFom = sikkerStønadFom,
+                            stønadTom = sikkerStønadTom,
+                            type = it.ytelsetype
                     )
             )
         }
@@ -373,7 +376,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
         val vedtak = hentAktivVedtakForBehandling(behandlingId)
                      ?: return Ressurs.failure("Behandling ikke funnet")
-        val html = Result.runCatching { dokGenService.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(), vedtak.stønadBrevMarkdown) }
+        val html = Result.runCatching {
+            dokGenService.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(),
+                                             vedtak.stønadBrevMarkdown)
+        }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
@@ -416,4 +422,5 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         const val STRING_LENGTH = 10
         val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
+
 }

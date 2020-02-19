@@ -26,22 +26,24 @@ class DokGenServiceTest(@Autowired
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                    kategori = BehandlingKategori.NATIONAL,
+                                    kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now(),
-            resultat = VedtakResultat.INNVILGET
+            resultat = VedtakResultat.INNVILGET,
+            begrunnelse = ""
     )
 
     private val avslagVedtak= Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                    kategori = BehandlingKategori.NATIONAL,
+                                    kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now(),
-            resultat = VedtakResultat.AVSLÅTT
+            resultat = VedtakResultat.AVSLÅTT,
+            begrunnelse = ""
     )
 
     @Test

@@ -61,7 +61,7 @@ class BehandlingController(private val oidcUtil: OIDCUtil,
     }
 
     @PostMapping(path = ["/opprettfrahendelse"])
-    fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
+    fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = "VL"
 
         logger.info("{} oppretter ny behandling fra hendelse", saksbehandlerId)
@@ -86,3 +86,8 @@ class NyBehandling(
         val barnasFødselsnummer: Array<String>,
         val behandlingType: BehandlingType,
         val journalpostID: String?)
+
+class NyBehandlingHendelse(
+        val fødselsnummer: String,
+        val barnasFødselsnummer: Array<String>
+)

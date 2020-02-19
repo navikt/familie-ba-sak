@@ -1,12 +1,17 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.Beregning
+import no.nav.familie.ba.sak.behandling.beregnUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
+import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.springframework.stereotype.Service
 import org.springframework.util.Assert
 import java.math.BigDecimal
@@ -14,7 +19,6 @@ import java.math.BigDecimal
 @Service
 class ØkonomiService(
         private val økonomiKlient: ØkonomiKlient,
-        private val beregning: Beregning,
         private val behandlingService: BehandlingService
 ) {
 
@@ -22,32 +26,18 @@ class ØkonomiService(
         val vedtak = behandlingService.hentVedtak(vedtakId)
                      ?: throw Error("Fant ikke vedtak med id $vedtakId i forbindelse med iverksetting mot oppdrag")
 
-        val barnBeregning = behandlingService.hentBarnForVedtak(vedtak.id)
-        val tidslinje = beregning.beregnUtbetalingsperioder(barnBeregning)
-        val utbetalingsperioder = tidslinje.toSegments().mapIndexed { indeks, segment->
-            Utbetalingsperiode(
-                    erEndringPåEksisterendePeriode = false,
-                    datoForVedtak = vedtak.vedtaksdato,
-                    klassifisering = "BATR",
-                    vedtakdatoFom = segment.fom,
-                    vedtakdatoTom = segment.tom,
-                    sats = BigDecimal(segment.value),
-                    satsType = Utbetalingsperiode.SatsType.MND,
-                    utbetalesTil = vedtak.behandling.fagsak.personIdent.ident.toString(),
-                    behandlingId = vedtak.behandling.id!!,
-                    periodeId = indeks.toLong() // TODO Dette holder ikke på sikt. Må sendes inn fra klienten
-            )
-        }
+        val personberegninger = if(vedtak.resultat==VedtakResultat.OPPHØRT)
+                behandlingService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)
+                else behandlingService.hentPersonerForVedtak(vedtak.id)
 
-        val utbetalingsoppdrag = Utbetalingsoppdrag(
-                saksbehandlerId = saksbehandlerId,
-                kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-                fagSystem = FAGSYSTEM,
-                saksnummer = vedtak.behandling.fagsak.id.toString(),
-                aktoer = vedtak.behandling.fagsak.personIdent.ident.toString(),
-                utbetalingsperiode = utbetalingsperioder
-        )
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, personberegninger)
 
+        iverksettOppdrag(vedtak.behandling.id!!, utbetalingsoppdrag)
+    }
+
+
+    private fun iverksettOppdrag(behandlingsId: Long,
+                                 utbetalingsoppdrag: Utbetalingsoppdrag) {
         Result.runCatching { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
                 .fold(
                         onSuccess = {
@@ -84,4 +74,5 @@ class ØkonomiService(
                         }
                 )
     }
+
 }
