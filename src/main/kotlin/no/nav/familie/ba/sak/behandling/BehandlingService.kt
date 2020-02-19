@@ -37,7 +37,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
-        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
+        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.ident)
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
@@ -48,7 +48,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          randomSaksnummer(),
                                                          nyBehandling.kategori,
                                                          nyBehandling.underkategori)
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.fødselsnummer, nyBehandling.barnasFødselsnummer, behandling)
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.ident, nyBehandling.barnasIdenter, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
                 Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
             } else {
@@ -183,7 +183,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 personIdent = behandling.fagsak.personIdent,
                 type = PersonType.SØKER,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(fødselsnummer)?.fødselsdato
+                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(fødselsnummer).fødselsdato
         ))
 
         lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer, personopplysningGrunnlag)
@@ -200,7 +200,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         personIdent = PersonIdent(nyttBarn),
                         type = PersonType.BARN,
                         personopplysningGrunnlag = personopplysningGrunnlag,
-                        fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn)?.fødselsdato
+                        fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn).fødselsdato
                 ))
             }
         }
@@ -328,12 +328,19 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             : Ressurs<RestFagsak> {
         nyBeregning.barnasBeregning.map {
             val person =
-                    personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
+                    personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.ident),
                                                                                   personopplysningGrunnlag.id)
-                    ?: throw RuntimeException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
+                    ?: throw IllegalStateException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
             if (it.stønadFom.isBefore(person.fødselsdato)) {
-                throw RuntimeException("Ugyldig fra og med dato for ${person.fødselsdato}")
+                throw IllegalStateException("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
+            }
+
+            val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
+            val sikkerStønadTom = person.fødselsdato?.plusYears(18)?.sisteDagIForrigeMåned()!!
+
+            if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
+                throw IllegalStateException("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
             }
 
             vedtakPersonRepository.save(
@@ -341,8 +348,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                             person = person,
                             vedtak = vedtak,
                             beløp = it.beløp,
-                            stønadFom = it.stønadFom,
-                            stønadTom = person.fødselsdato?.plusYears(18)!!,
+                            stønadFom = sikkerStønadFom,
+                            stønadTom = sikkerStønadTom,
                             type = it.ytelsetype
                     )
             )
@@ -411,4 +418,5 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         const val STRING_LENGTH = 10
         val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
+
 }

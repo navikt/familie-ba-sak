@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdrag
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -22,7 +23,8 @@ class KonsistensavstemmingScheduler(val batchService: BatchService, val taskRepo
 
         val konsistensavstemmingTask = Task.nyTask(
                 KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
-                objectMapper.writeValueAsString(KonsistensavstemmingTaskDTO(LocalDateTime.now()))
+                objectMapper.writeValueAsString(KonsistensavstemmingTaskDTO(
+                        LocalDateTime.now()))
         )
         taskRepository.save(konsistensavstemmingTask)
 

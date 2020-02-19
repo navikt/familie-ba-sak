@@ -32,5 +32,5 @@ data class Fagsak(
 }
 
 enum class FagsakStatus {
-    OPPRETTET, LØPENDE
+    OPPRETTET, LØPENDE, STANSET
 }
