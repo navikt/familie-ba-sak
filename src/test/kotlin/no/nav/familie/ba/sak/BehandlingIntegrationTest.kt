@@ -73,9 +73,6 @@ class BehandlingIntegrationTest {
     lateinit var fagsakService: FagsakService
 
     @Autowired
-    lateinit var behandlingService: BehandlingService
-
-    @Autowired
     lateinit var vilkårService: VilkårService
 
     @MockK
@@ -83,6 +80,8 @@ class BehandlingIntegrationTest {
 
     @MockK(relaxed = true)
     lateinit var featureToggleService: FeatureToggleService
+
+    lateinit var behandlingService: BehandlingService
 
     @BeforeEach
     fun setup() {
@@ -224,7 +223,7 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    @Tag("integrasion")
+    @Tag("integration")
     fun `Opprett nytt vedtak på aktiv behandling`() {
         val fnr = randomFnr()
 
