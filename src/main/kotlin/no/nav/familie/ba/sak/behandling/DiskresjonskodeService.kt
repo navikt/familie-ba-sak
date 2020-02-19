@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 
-class SikkerhetService {
+class DiskresjonskodeService {
     companion object {
         fun finnStrengesteDiskresjonskode(personer: List<Personinfo>): String? {
             return personer.fold(null, fun(kode: String?, personinfo: Personinfo): String? {
