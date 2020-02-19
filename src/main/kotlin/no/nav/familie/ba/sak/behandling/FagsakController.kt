@@ -164,7 +164,7 @@ class FagsakController(
 
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak"])
     fun opphørMigrertVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
-        val førsteNesteMåned = LocalDate.now().plusMonths(1).withDayOfMonth(1)
+        val førsteNesteMåned = LocalDate.now().førsteDagINesteMåned()
         return opphørMigrertVedtak(fagsakId, Opphørsvedtak(førsteNesteMåned))
     }
 
