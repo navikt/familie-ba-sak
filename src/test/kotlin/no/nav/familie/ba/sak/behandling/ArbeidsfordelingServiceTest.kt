@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
-class ArbeidsfordelingIntegrationTest {
+class ArbeidsfordelingServiceTest {
     @MockK
     lateinit var behandlingRepository: BehandlingRepository
 
