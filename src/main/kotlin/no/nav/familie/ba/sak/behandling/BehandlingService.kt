@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.task.OpprettBehandleSakOppgaveForNyBehandlingTask
 import no.nav.familie.ba.sak.økonomi.OppdragId
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -33,7 +34,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakService: FagsakService,
                         private val vilkårService: VilkårService,
                         private val integrasjonTjeneste: IntegrasjonTjeneste,
-                        private val featureToggleService: FeatureToggleService) {
+                        private val featureToggleService: FeatureToggleService,
+                        private val taskRepository: TaskRepository) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
@@ -50,7 +52,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          nyBehandling.underkategori)
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.ident, nyBehandling.barnasIdenter, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
-                Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
+                val nyTask = Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
+                taskRepository.save(nyTask)
             } else {
                 LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
             }
@@ -77,7 +80,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.fødselsnummer, nyBehandling.barnasFødselsnummer, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
-                Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
+                val nyTask = Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
+                taskRepository.save(nyTask)
             } else {
                 LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
             }

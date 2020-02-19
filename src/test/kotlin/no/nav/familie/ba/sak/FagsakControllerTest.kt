@@ -126,7 +126,8 @@ class FagsakControllerTest(
                 fagsakService = fagsakService,
                 vilkårService = vilkårService,
                 integrasjonTjeneste = mockk(),
-                featureToggleService = featureToggleService)
+                featureToggleService = featureToggleService,
+                taskRepository = taskRepository)
 
         val fagsak = Fagsak(fagsakId, AktørId(aktørId), PersonIdent(søkerFnr))
         fagsakService.lagreFagsak(fagsak)
