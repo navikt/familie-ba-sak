@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.util.lagRandomSaksnummer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.util.randomFnr
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.økonomi.OppdragId
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -460,9 +461,7 @@ class BehandlingIntegrationTest {
 
         val oppdragIdListe = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
 
-        Assertions.assertEquals(1, oppdragIdListe.size)
-        Assertions.assertEquals(behandling.id!!, oppdragIdListe[0].behandlingsId)
-        Assertions.assertEquals(fnr, oppdragIdListe[0].personIdent)
+        Assertions.assertTrue(oppdragIdListe.contains(OppdragId(fnr, behandling.id!!)))
     }
 
     @Test
