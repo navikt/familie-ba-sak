@@ -24,7 +24,7 @@ class ArbeidsfordelingService(val behandlingRepository: BehandlingRepository,
             barn -> integrasjonTjeneste.hentPersoninfoFor(barn.personIdent.ident)
         }.plus(søker)
 
-        val strengesteDiskresjonskode = SikkerhetService.finnStrengesteDiskresjonskode(personinfoliste)
+        val strengesteDiskresjonskode = DiskresjonskodeService.finnStrengesteDiskresjonskode(personinfoliste)
 
         return integrasjonTjeneste.hentBehandlendeEnhet(søker.geografiskTilknytning, strengesteDiskresjonskode)
     }
