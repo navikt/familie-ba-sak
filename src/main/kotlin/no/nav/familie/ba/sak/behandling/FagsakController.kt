@@ -118,7 +118,8 @@ class FagsakController(
 
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
-        val saksbehandlerId = hentSaksbehandler()
+        var saksbehandlerId = hentSaksbehandler()
+        if (saksbehandlerId === "Ukjent") saksbehandlerId = "srvfamilie-ba-sak"
 
         logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
