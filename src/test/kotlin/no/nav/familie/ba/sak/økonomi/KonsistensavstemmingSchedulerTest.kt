@@ -65,7 +65,6 @@ class KonsistensavstemmingSchedulerTest {
 
     @Test
     fun `Skal trigge en avstemming når det er ledig batchkjøring for dato`() {
-        println("Test for konsistensavstemming")
         val dagensDato = LocalDate.now()
         val nyBatch = Batch(kjøreDato = dagensDato)
         batchService.lagreNyStatus(nyBatch, KjøreStatus.LEDIG)
