@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.concurrent.ThreadLocalRandom
-import kotlin.streams.asSequence
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
@@ -47,7 +45,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          nyBehandling.journalpostID,
                                                          nyBehandling.behandlingType,
-                                                         randomSaksnummer(),
                                                          nyBehandling.kategori,
                                                          nyBehandling.underkategori)
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.ident, nyBehandling.barnasIdenter, behandling)
@@ -74,7 +71,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          null,
                                                          BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                         randomSaksnummer(),
                                                          BehandlingKategori.NASJONAL,
                                                          BehandlingUnderkategori.ORDINÆR)
 
@@ -105,22 +101,21 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                      postProsessor: (Vedtak) -> Unit): Ressurs<Vedtak> {
 
         val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
-                              ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling ${gjeldendeBehandlingsId}")
+                              ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling $gjeldendeBehandlingsId")
 
         val gjeldendeVedtakPerson = vedtakPersonRepository.finnPersonBeregningForVedtak(gjeldendeVedtak.id)
         if (gjeldendeVedtakPerson.isEmpty()) {
-            return Ressurs.failure("Fant ikke vedtak personer tilknyttet behandling ${gjeldendeBehandlingsId} og vedtak ${gjeldendeVedtak.id}")
+            return Ressurs.failure("Fant ikke vedtak personer tilknyttet behandling $gjeldendeBehandlingsId og vedtak ${gjeldendeVedtak.id}")
         }
 
-        val gjeldendeBehandling = gjeldendeVedtak.behandling;
+        val gjeldendeBehandling = gjeldendeVedtak.behandling
         if (!gjeldendeBehandling.aktiv) {
-            return Ressurs.failure("Aktivt vedtak er tilknyttet behandling ${gjeldendeBehandlingsId} som IKKE er aktivt")
+            return Ressurs.failure("Aktivt vedtak er tilknyttet behandling $gjeldendeBehandlingsId som IKKE er aktivt")
         }
 
         /// TODO Her følger det med samme journalpost_id som forrige behandling. Er det riktig?
         val nyBehandling = Behandling(fagsak = gjeldendeBehandling.fagsak,
                                       journalpostID = gjeldendeBehandling.journalpostID,
-                                      saksnummer = randomSaksnummer(),
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori)
@@ -164,14 +159,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun opprettNyBehandlingPåFagsak(fagsak: Fagsak,
                                     journalpostID: String?,
                                     behandlingType: BehandlingType,
-                                    saksnummer: String,
                                     kategori: BehandlingKategori,
                                     underkategori: BehandlingUnderkategori): Behandling {
         val behandling =
                 Behandling(fagsak = fagsak,
                            journalpostID = journalpostID,
                            type = behandlingType,
-                           saksnummer = saksnummer,
                            kategori = kategori,
                            underkategori = underkategori)
         lagreNyOgDeaktiverGammelBehandling(behandling)
@@ -403,14 +396,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                             throw Exception("Klarte ikke å hente PDF for vedtak med id ${vedtak.id}", it)
                         }
                 )
-    }
-
-    private fun randomSaksnummer(): String {
-        return ThreadLocalRandom.current()
-                .ints(STRING_LENGTH.toLong(), 0, charPool.size)
-                .asSequence()
-                .map(charPool::get)
-                .joinToString("")
     }
 
     private fun hentSøker(behandling: Behandling): Person? {

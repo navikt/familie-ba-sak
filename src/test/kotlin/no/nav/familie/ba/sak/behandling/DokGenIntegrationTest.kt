@@ -68,7 +68,6 @@ class DokGenIntegrationTest {
                         fagsak = Fagsak(personIdent = PersonIdent("")),
                         journalpostID = "invalid",
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                        saksnummer = null,
                         aktiv = true,
                         kategori = BehandlingKategori.NASJONAL,
                         underkategori = BehandlingUnderkategori.ORDINÆR
@@ -112,7 +111,6 @@ class DokGenIntegrationTest {
                         fagsak = Fagsak(personIdent = PersonIdent("")),
                         journalpostID = "invalid",
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                        saksnummer = null,
                         aktiv = true,
                         kategori = BehandlingKategori.NASJONAL,
                         underkategori = BehandlingUnderkategori.ORDINÆR
