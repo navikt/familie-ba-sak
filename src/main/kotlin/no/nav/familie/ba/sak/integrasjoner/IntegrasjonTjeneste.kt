@@ -100,7 +100,8 @@ class IntegrasjonTjeneste(
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentBehandlendeEnhet(geografiskTilknytning: String?, diskresjonskode: String?): List<Arbeidsfordelingsenhet> {
-        val uri = UriComponentsBuilder.fromPath("$integrasjonerServiceUri/arbeidsfordeling/enhet")
+        val uri = UriComponentsBuilder.fromUri(integrasjonerServiceUri)
+                .pathSegment("arbeidsfordeling", "enhet")
                 .queryParam("tema", "BAR")
                 .queryParam("geografi", geografiskTilknytning)
                 .queryParam("diskresjonskode", diskresjonskode)
