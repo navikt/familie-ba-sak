@@ -173,7 +173,8 @@ class FagsakController(
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
     fun opphørMigrertVedtak(@PathVariable fagsakId: Long, @RequestBody
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
-        val saksbehandlerId = hentSaksbehandler()
+        var saksbehandlerId = hentSaksbehandler()
+        if (saksbehandlerId === "Ukjent") saksbehandlerId = "srvfamilie-ba-sak"
 
         logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
