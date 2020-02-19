@@ -17,8 +17,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class BeregningTest(
-) {
+class BeregningTest {
     val fagsak = Fagsak(null, null, PersonIdent("12345"), FagsakStatus.OPPRETTET)
     val behandling = Behandling(fagsak = fagsak,
                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,

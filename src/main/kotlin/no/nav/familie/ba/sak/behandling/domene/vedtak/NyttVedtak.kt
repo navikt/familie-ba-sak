@@ -18,7 +18,7 @@ data class NyBeregning(
 )
 
 data class BarnBeregning(
-        val fødselsnummer: String,
+        val ident: String,
         val beløp: Int,
         val stønadFom: LocalDate,
         val ytelsetype : Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD

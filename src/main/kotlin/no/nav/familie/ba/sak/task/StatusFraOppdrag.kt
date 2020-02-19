@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.task.StatusFraOppdrag.Companion.TASK_STEP_TYPE
+import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.OppdragProtokollStatus
-import no.nav.familie.ba.sak.økonomi.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -56,9 +56,17 @@ class StatusFraOppdrag(
 
                         if (behandling?.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
                             opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId, task)
+                        } else {
+                            opprettFerdigstillBehandling(statusFraOppdragDTO)
                         }
                     }
                 }
+    }
+
+    private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
+        val ferdigstillBehandling = FerdigstillBehandling.opprettTask(personIdent = statusFraOppdragDTO.personIdent,
+                                                                      behandlingsId = statusFraOppdragDTO.behandlingsId)
+        taskRepository.save(ferdigstillBehandling)
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
