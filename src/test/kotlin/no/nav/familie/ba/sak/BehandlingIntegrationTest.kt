@@ -79,6 +79,10 @@ class BehandlingIntegrationTest {
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
     @MockK(relaxed = true)
+    lateinit var taskRepository: TaskRepository
+
+
+    @MockK(relaxed = true)
     lateinit var featureToggleService: FeatureToggleService
 
     lateinit var behandlingService: BehandlingService
@@ -96,7 +100,8 @@ class BehandlingIntegrationTest {
                 fagsakService,
                 vilkårService,
                 integrasjonTjeneste,
-                featureToggleService)
+                featureToggleService,
+                taskRepository)
     }
 
     @Test
