@@ -440,11 +440,12 @@ class BehandlingIntegrationTest {
     @Tag("integration")
     fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
         val fnr = randomFnr()
+        val barnFnr = randomFnr()
 
         //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
+                                                                       null,
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
@@ -457,7 +458,7 @@ class BehandlingIntegrationTest {
                             begrunnelse = "")
         behandlingService.lagreVedtak(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, "12345678914")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, barnFnr)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val oppdragIdListe = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
