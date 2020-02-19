@@ -58,7 +58,7 @@ class FagsakService(
     }
 
     fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
-        LOG.info("Endrer status på fagsak $fagsak.id fra ${fagsak.status} til $nyStatus")
+        LOG.info("Endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
         fagsak.status = nyStatus
 
         lagreFagsak(fagsak)
