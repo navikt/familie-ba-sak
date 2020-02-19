@@ -37,7 +37,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
-        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
+        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.ident)
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
@@ -48,7 +48,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          randomSaksnummer(),
                                                          nyBehandling.kategori,
                                                          nyBehandling.underkategori)
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.fødselsnummer, nyBehandling.barnasFødselsnummer, behandling)
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.ident, nyBehandling.barnasIdenter, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
                 Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
             } else {
@@ -328,16 +328,16 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             : Ressurs<RestFagsak> {
         nyBeregning.barnasBeregning.map {
             val person =
-                    personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
+                    personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.ident),
                                                                                   personopplysningGrunnlag.id)
-                    ?: throw RuntimeException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
+                    ?: throw IllegalStateException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
             if (it.stønadFom.isBefore(person.fødselsdato)) {
-                throw RuntimeException("Ugyldig fra og med dato for ${person.fødselsdato}")
+                throw IllegalStateException("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
             }
 
             if (it.stønadFom.dayOfMonth != 1) {
-                throw RuntimeException("Ugyldig fra og med dato, må være første dag i måneden.")
+                throw IllegalStateException("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}, må være første dag i måneden.")
             }
 
             vedtakPersonRepository.save(

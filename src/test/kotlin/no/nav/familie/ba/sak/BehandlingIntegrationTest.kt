@@ -36,10 +36,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 import javax.transaction.Transactional
-import kotlin.streams.asSequence
 
 
 @SpringBootTest
@@ -293,7 +290,7 @@ class BehandlingIntegrationTest {
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
-                        arrayOf(BarnBeregning(fødselsnummer = fnr,
+                        arrayOf(BarnBeregning(ident = fnr,
                                               beløp = 1054,
                                               stønadFom = LocalDate.of(2020, 1, 1),
                                               ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))

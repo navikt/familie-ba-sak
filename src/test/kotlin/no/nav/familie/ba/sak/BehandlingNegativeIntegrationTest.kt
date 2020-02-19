@@ -85,7 +85,7 @@ class BehandlingNegativeIntegrationTest(
         val fagsakRes = fagsakController.oppdaterVedtakMedBeregning(fagsak.id!!, NyBeregning(
                 arrayOf(
                         BarnBeregning(
-                                fødselsnummer = "12345678910",
+                                ident = "12345678910",
                                 beløp = 1054,
                                 stønadFom = LocalDate.of(2020, 1, 1),
                                 ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
