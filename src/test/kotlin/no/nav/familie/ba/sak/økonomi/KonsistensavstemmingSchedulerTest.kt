@@ -71,6 +71,12 @@ class KonsistensavstemmingSchedulerTest {
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
-        Assertions.assertEquals(1, taskRepository.finnTasksTilFrontend(Status.UBEHANDLET, Pageable.unpaged()).size)
+        val tasks = taskRepository.finnTasksTilFrontend(Status.UBEHANDLET, Pageable.unpaged())
+
+        Assertions.assertEquals(1, tasks.size)
+
+        // Setter task til Ferdig for å unngå at den kjøres fra andre tester.
+        tasks[0].status = Status.FERDIG
+        taskRepository.save(tasks[0])
     }
 }

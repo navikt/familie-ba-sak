@@ -18,7 +18,11 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
 import no.nav.familie.ba.sak.util.DbContainerInitializer
+import no.nav.familie.ba.sak.util.lagRandomSaksnummer
+import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.util.randomFnr
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.økonomi.OppdragId
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -33,10 +37,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
 import javax.transaction.Transactional
-import kotlin.streams.asSequence
 
 
 @SpringBootTest
@@ -72,16 +73,19 @@ class BehandlingIntegrationTest {
     lateinit var fagsakService: FagsakService
 
     @Autowired
-    lateinit var behandlingService: BehandlingService
-
-    @Autowired
     lateinit var vilkårService: VilkårService
 
     @MockK
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
     @MockK(relaxed = true)
+    lateinit var taskRepository: TaskRepository
+
+
+    @MockK(relaxed = true)
     lateinit var featureToggleService: FeatureToggleService
+
+    lateinit var behandlingService: BehandlingService
 
     @BeforeEach
     fun setup() {
@@ -96,10 +100,9 @@ class BehandlingIntegrationTest {
                 fagsakService,
                 vilkårService,
                 integrasjonTjeneste,
-                featureToggleService)
+                featureToggleService,
+                taskRepository)
     }
-
-    private fun randomFnr(): String = UUID.randomUUID().toString()
 
     @Test
     @Tag("integration")
@@ -225,7 +228,7 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    @Tag("integrasion")
+    @Tag("integration")
     fun `Opprett nytt vedtak på aktiv behandling`() {
         val fnr = randomFnr()
 
@@ -292,9 +295,9 @@ class BehandlingIntegrationTest {
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
-                        arrayOf(BarnBeregning(fødselsnummer = fnr,
+                        arrayOf(BarnBeregning(ident = fnr,
                                               beløp = 1054,
-                                              stønadFom = LocalDate.now(),
+                                              stønadFom = LocalDate.of(2020, 1, 1),
                                               ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
@@ -313,7 +316,7 @@ class BehandlingIntegrationTest {
 
         every {
             integrasjonTjeneste.hentPersoninfoFor(any())
-        } returns Personinfo(LocalDate.now())
+        } returns Personinfo(LocalDate.of(2019, 1, 1))
 
         val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, arrayOf(barn1Id)))
         val fagsak2 =
@@ -343,7 +346,7 @@ class BehandlingIntegrationTest {
 
         every {
             integrasjonTjeneste.hentPersoninfoFor(any())
-        } returns Personinfo(LocalDate.now())
+        } returns Personinfo(LocalDate.of(2019, 1, 1))
 
         behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NASJONAL,
                                                          BehandlingUnderkategori.ORDINÆR,
@@ -371,7 +374,7 @@ class BehandlingIntegrationTest {
 
         every {
             integrasjonTjeneste.hentPersoninfoFor(any())
-        } returns Personinfo(LocalDate.now())
+        } returns Personinfo(LocalDate.of(2019, 1, 1))
 
         val nyBehandling =
                 NyBehandling(BehandlingKategori.NASJONAL,
@@ -389,8 +392,8 @@ class BehandlingIntegrationTest {
         Assertions.assertNotNull(personopplysningGrunnlag)
 
         val barnasBeregning = arrayOf(
-                BarnBeregning(barn1Fnr, 1054, LocalDate.now(), Ytelsetype.ORDINÆR_BARNETRYGD),
-                BarnBeregning(barn2Fnr, 1054, LocalDate.now(), Ytelsetype.ORDINÆR_BARNETRYGD)
+                BarnBeregning(barn1Fnr, 1054, LocalDate.of(2020, 1, 1), Ytelsetype.ORDINÆR_BARNETRYGD),
+                BarnBeregning(barn2Fnr, 1054, LocalDate.of(2020, 1, 1), Ytelsetype.ORDINÆR_BARNETRYGD)
         )
         val nyttVedtak = NyttVedtak(VedtakResultat.INNVILGET,
                                     samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr,
@@ -439,31 +442,30 @@ class BehandlingIntegrationTest {
     @Tag("integration")
     fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
         val fnr = randomFnr()
+        val barnFnr = randomFnr()
 
         //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
+                                                                       null,
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
-                            vedtaksdato = LocalDate.now(),
+                            vedtaksdato = LocalDate.of(2020, 1, 1),
                             stønadBrevMarkdown = "",
                             resultat = VedtakResultat.INNVILGET,
                             begrunnelse = "")
         behandlingService.lagreVedtak(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, "12345678914")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, barnFnr)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val oppdragIdListe = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
 
-        Assertions.assertEquals(1, oppdragIdListe.size)
-        Assertions.assertEquals(behandling.id!!, oppdragIdListe[0].behandlingsId)
-        Assertions.assertEquals(fnr, oppdragIdListe[0].personIdent)
+        Assertions.assertTrue(oppdragIdListe.contains(OppdragId(fnr, behandling.id!!)))
     }
 
     @Test
@@ -499,33 +501,4 @@ class BehandlingIntegrationTest {
         Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
         Assertions.assertNotEquals("", hentetVedtak?.stønadBrevMarkdown)
     }
-}
-
-fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
-                                    søkerPersonIdent: String,
-                                    barnPersonIdent: String): PersonopplysningGrunnlag {
-    val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
-    val søker = Person(personIdent = PersonIdent(søkerPersonIdent),
-                       type = PersonType.SØKER,
-                       personopplysningGrunnlag = personopplysningGrunnlag,
-                       fødselsdato = LocalDate.now())
-    val barn = Person(personIdent = PersonIdent(barnPersonIdent),
-                      type = PersonType.BARN,
-                      personopplysningGrunnlag = personopplysningGrunnlag,
-                      fødselsdato = LocalDate.now())
-
-    personopplysningGrunnlag.personer.add(søker)
-    personopplysningGrunnlag.personer.add(barn)
-
-    return personopplysningGrunnlag
-}
-
-private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
-
-fun lagRandomSaksnummer(): String {
-    return ThreadLocalRandom.current()
-            .ints(BehandlingIntegrationTest.STRING_LENGTH.toLong(), 0, charPool.size)
-            .asSequence()
-            .map(charPool::get)
-            .joinToString("")
 }

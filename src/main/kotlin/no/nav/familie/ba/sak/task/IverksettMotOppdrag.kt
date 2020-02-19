@@ -5,16 +5,15 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag.Companion.TASK_STEP_TYPE
-import no.nav.familie.ba.sak.økonomi.FAGSYSTEM
-import no.nav.familie.ba.sak.økonomi.IverksettingTaskDTO
-import no.nav.familie.ba.sak.økonomi.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.util.Assert
@@ -57,6 +56,11 @@ class IverksettMotOppdrag(
                 properties = task.metadata
         )
         taskRepository.save(nyTask)
+
+        if (!behandling?.oppgaveId.isNullOrBlank()) {
+            val ferdigstillTask = FerdigstillOppgave.opprettTask(iverksettingTask.behandlingsId, task.metadata)
+            taskRepository.save(ferdigstillTask)
+        }
     }
 
     companion object {

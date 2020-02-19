@@ -32,6 +32,7 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.exchange
+import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
@@ -94,6 +95,26 @@ class IntegrasjonTjeneste(
                                                personident)
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri, personident)
+        }
+    }
+
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    fun hentBehandlendeEnhet(geografiskTilknytning: String?, diskresjonskode: String?): List<Arbeidsfordelingsenhet> {
+        val uri = UriComponentsBuilder.fromUri(integrasjonerServiceUri)
+                .pathSegment("arbeidsfordeling", "enhet")
+                .queryParam("tema", "BAR")
+                .queryParam("geografi", geografiskTilknytning)
+                .queryParam("diskresjonskode", diskresjonskode)
+                .build().toUri()
+
+        return try {
+            val response = restOperations.exchange<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, HttpMethod.GET)
+            val data = response.body?.data
+            data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
+                    null,
+                    uri)
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri)
         }
     }
 

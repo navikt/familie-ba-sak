@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
-import no.nav.familie.ba.sak.økonomi.GrensesnittavstemmingTaskDTO
+import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -75,7 +75,7 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },
                         onFailure = { e ->
-                            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure(e.cause?.message ?: e.message, e))
+                            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure( e.cause?.message ?: e.message, e))
                         }
                 )
     }
@@ -105,24 +105,25 @@ class FagsakController(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        val fagsak: Ressurs<RestFagsak> = Result.runCatching {
+        return Result.runCatching {
             behandlingService.oppdaterAktivVedtakMedBeregning(vedtak,
                                                               personopplysningGrunnlag,
                                                               nyBeregning)
         }
                 .fold(
-                        onSuccess = { it },
+                        onSuccess = { ResponseEntity.ok(it) },
                         onFailure = { e ->
-                            Ressurs.failure("Klarte ikke å oppdater vedtak", e)
+                            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body(Ressurs.failure(e.cause?.message ?: e.message,
+                                                          e))
                         }
                 )
-
-        return ResponseEntity.ok(fagsak)
     }
 
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
     fun iverksettVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<String>> {
-        val saksbehandlerId = hentSaksbehandler()
+        var saksbehandlerId = hentSaksbehandler()
+        if (saksbehandlerId === "Ukjent") saksbehandlerId = "srvfamilie-ba-sak"
 
         logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -174,8 +175,10 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
-    fun opphørMigrertVedtak(@PathVariable  @FagsaktilgangConstraint fagsakId: Long, @RequestBody opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
-        val saksbehandlerId = hentSaksbehandler()
+    fun opphørMigrertVedtak(@PathVariable  @FagsaktilgangConstraint fagsakId: Long, @RequestBody
+    opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
+        var saksbehandlerId = hentSaksbehandler()
+        if (saksbehandlerId === "Ukjent") saksbehandlerId = "srvfamilie-ba-sak"
 
         logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
