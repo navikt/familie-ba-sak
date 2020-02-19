@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
+import no.nav.familie.ba.sak.auditlogger.AuditLogger
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -38,8 +39,11 @@ class FagsakController(
     @GetMapping(path = ["/{fagsakId}"])
     fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
+                              ?: return forbidden("Saksbehandler er ikke tilgjengelig på forespørsel.")
 
         logger.info("{} henter fagsak med id {}", saksbehandlerId, fagsakId)
+
+        AuditLogger.logLesFagsak(this.javaClass, fagsakId, saksbehandlerId)
 
         val ressurs = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
@@ -53,6 +57,7 @@ class FagsakController(
     @PostMapping(path = ["/{fagsakId}/nytt-vedtak"])
     fun nyttVedtak(@PathVariable fagsakId: Long, @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
+                              ?: return forbidden("Saksbehandler er ikke tilgjengelig på forespørsel.")
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -71,7 +76,7 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },
                         onFailure = { e ->
-                            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure( e.cause?.message ?: e.message, e))
+                            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure(e.cause?.message ?: e.message, e))
                         }
                 )
     }
@@ -80,6 +85,7 @@ class FagsakController(
     fun oppdaterVedtakMedBeregning(@PathVariable fagsakId: Long, @RequestBody
     nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
+                              ?: return forbidden("Saksbehandler er ikke tilgjengelig på forespørsel.")
 
         logger.info("{} oppdaterer vedtak med beregning for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -119,6 +125,7 @@ class FagsakController(
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = hentSaksbehandler()
+                              ?: return forbidden("Saksbehandler er ikke tilgjengelig på forespørsel.")
 
         logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -173,6 +180,7 @@ class FagsakController(
     fun opphørMigrertVedtak(@PathVariable fagsakId: Long, @RequestBody
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = hentSaksbehandler()
+                              ?: return forbidden("Saksbehandler er ikke tilgjengelig på forespørsel.")
 
         logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -202,7 +210,7 @@ class FagsakController(
 
     private fun hentSaksbehandler() = Result.runCatching { oidcUtil.getClaim("preferred_username") }.fold(
             onSuccess = { it },
-            onFailure = { "Ukjent" }
+            onFailure = { null }
     )
 
     private fun <T> notFound(errorMessage: String): ResponseEntity<Ressurs<T>> =
