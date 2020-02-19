@@ -336,8 +336,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 throw IllegalStateException("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
             }
 
-            if (it.stønadFom.dayOfMonth != 1) {
-                throw IllegalStateException("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}, må være første dag i måneden.")
+            val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
+            val sikkerStønadTom = person.fødselsdato?.plusYears(18)?.sisteDagIForrigeMåned()!!
+
+            if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
+                throw IllegalStateException("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
             }
 
             vedtakPersonRepository.save(
@@ -345,8 +348,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                             person = person,
                             vedtak = vedtak,
                             beløp = it.beløp,
-                            stønadFom = it.stønadFom,
-                            stønadTom = hentOpphørsdatoForBarn(person.fødselsdato)!!,
+                            stønadFom = sikkerStønadFom,
+                            stønadTom = sikkerStønadTom,
                             type = it.ytelsetype
                     )
             )
@@ -415,4 +418,5 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         const val STRING_LENGTH = 10
         val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
+
 }

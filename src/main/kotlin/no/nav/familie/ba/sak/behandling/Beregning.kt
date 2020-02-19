@@ -23,9 +23,5 @@ private fun reducer(sammenlagtTidslinje: LocalDateTimeline<Int>, tidslinje: Loca
                                        LocalDateTimeline.JoinStyle.CROSS_JOIN)
 }
 
-fun hentOpphørsdatoForBarn(fødselsdato: LocalDate?): LocalDate? {
-    return fødselsdato?.plusYears(18)?.minusMonths(1)?.with(TemporalAdjusters.lastDayOfMonth())
-}
-
 
 
