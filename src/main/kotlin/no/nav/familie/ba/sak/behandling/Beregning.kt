@@ -4,8 +4,6 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
-import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters
 
 fun beregnUtbetalingsperioder(personer: List<VedtakPerson>): Map<String, LocalDateTimeline<Int>> {
     return personer.groupBy(
