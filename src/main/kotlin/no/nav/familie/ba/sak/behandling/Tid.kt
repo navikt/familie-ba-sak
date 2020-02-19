@@ -7,7 +7,7 @@ import java.util.*
 fun LocalDate.sisteDagIForrigeMåned() : LocalDate {
 
     val kalender = Calendar.getInstance()
-    val sammeDagForrigeMåned = this.plusMonths(-1)
+    val sammeDagForrigeMåned = this.minusMonths(1)
     kalender.time = sammeDagForrigeMåned.toDate()
 
     val sisteDagIForrigeMåned = kalender.getActualMaximum(Calendar.DAY_OF_MONTH);
