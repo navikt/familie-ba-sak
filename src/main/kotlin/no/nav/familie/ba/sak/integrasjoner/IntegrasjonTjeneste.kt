@@ -106,10 +106,8 @@ class IntegrasjonTjeneste(
                 .queryParam("diskresjonskode", diskresjonskode)
                 .build().toUri()
 
-        val httpEntity: HttpEntity<*> = HttpEntity<Any?>(LinkedMultiValueMap())
-
         return try {
-            val response = restOperations.exchange<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, HttpMethod.GET, httpEntity)
+            val response = restOperations.exchange<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, HttpMethod.GET)
             val data = response.body?.data
             data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
                     null,
