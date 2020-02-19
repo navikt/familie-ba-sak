@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class SikkerhetServiceTest {
+class DiskresjonskodeServiceTest {
     val personUtenDiskresjonskode = Personinfo(LocalDate.now(), null, null)
     val personKode7 = Personinfo(LocalDate.now(), null, Diskresjonskode.KODE7.kode)
     val personKode6 = Personinfo(LocalDate.now(), null, Diskresjonskode.KODE6.kode)
