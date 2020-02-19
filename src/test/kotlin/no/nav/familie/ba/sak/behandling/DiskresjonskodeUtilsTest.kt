@@ -13,7 +13,7 @@ class DiskresjonskodeServiceTest {
 
     @Test
     fun `ingen er kode 6 eller kode 7 - skal gi null`() {
-        assertEquals(null, DiskresjonskodeService.finnStrengesteDiskresjonskode(listOf(
+        assertEquals(null, finnStrengesteDiskresjonskode(listOf(
                 personUtenDiskresjonskode,
                 personUtenDiskresjonskode)
         ))
@@ -21,7 +21,7 @@ class DiskresjonskodeServiceTest {
 
     @Test
     fun `en er kode 6, en er kode 7, en har ingen diskresjonskode - skal gi kode 6`() {
-        assertEquals(Diskresjonskode.KODE6.kode, DiskresjonskodeService.finnStrengesteDiskresjonskode(listOf(
+        assertEquals(Diskresjonskode.KODE6.kode, finnStrengesteDiskresjonskode(listOf(
                 personKode7,
                 personKode6,
                 personUtenDiskresjonskode)
@@ -30,12 +30,12 @@ class DiskresjonskodeServiceTest {
 
     @Test
     fun `en har en annen diskresjonskode som vi ikke håndterer - skal gi null`() {
-        assertEquals(null, DiskresjonskodeService.finnStrengesteDiskresjonskode(listOf(personMedAnnenDiskresjonskode)))
+        assertEquals(null, finnStrengesteDiskresjonskode(listOf(personMedAnnenDiskresjonskode)))
     }
 
     @Test
     fun `en har kode 7, en har ingen diskresjonskode, en har en ukjent diskresjonskode - skal gi kode 7`() {
-        assertEquals(Diskresjonskode.KODE7.kode, DiskresjonskodeService.finnStrengesteDiskresjonskode(listOf(
+        assertEquals(Diskresjonskode.KODE7.kode, finnStrengesteDiskresjonskode(listOf(
                 personUtenDiskresjonskode,
                 personKode7,
                 personMedAnnenDiskresjonskode
@@ -44,6 +44,6 @@ class DiskresjonskodeServiceTest {
 
     @Test
     fun `tom liste - skal gi null`() {
-        assertEquals(null, DiskresjonskodeService.finnStrengesteDiskresjonskode(listOf<Personinfo>()))
+        assertEquals(null, finnStrengesteDiskresjonskode(listOf<Personinfo>()))
     }
 }
