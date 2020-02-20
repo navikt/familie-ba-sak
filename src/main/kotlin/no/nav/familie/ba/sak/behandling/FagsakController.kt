@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
+import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -20,6 +21,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,6 +29,7 @@ import java.time.LocalDateTime
 @RestController
 @RequestMapping("/api/fagsak")
 @ProtectedWithClaims(issuer = "azuread")
+@Validated
 class FagsakController(
         private val oidcUtil: OIDCUtil,
         private val fagsakService: FagsakService,
@@ -36,7 +39,7 @@ class FagsakController(
 ) {
 
     @GetMapping(path = ["/{fagsakId}"])
-    fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+    fun hentFagsak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
         logger.info("{} henter fagsak med id {}", saksbehandlerId, fagsakId)
@@ -51,7 +54,8 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/nytt-vedtak"])
-    fun nyttVedtak(@PathVariable fagsakId: Long, @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
+    fun nyttVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
+                   @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
@@ -77,8 +81,8 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/oppdater-vedtak-beregning"])
-    fun oppdaterVedtakMedBeregning(@PathVariable fagsakId: Long, @RequestBody
-    nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
+    fun oppdaterVedtakMedBeregning(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
+                                   @RequestBody nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
         logger.info("{} oppdaterer vedtak med beregning for fagsak med id {}", saksbehandlerId, fagsakId)
@@ -117,7 +121,7 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
-    fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+    fun iverksettVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<String>> {
         var saksbehandlerId = hentSaksbehandler()
         if (saksbehandlerId === "Ukjent") saksbehandlerId = "srvfamilie-ba-sak"
 
@@ -165,13 +169,13 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak"])
-    fun opphørMigrertVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+    fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val førsteNesteMåned = LocalDate.now().førsteDagINesteMåned()
         return opphørMigrertVedtak(fagsakId, Opphørsvedtak(førsteNesteMåned))
     }
 
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
-    fun opphørMigrertVedtak(@PathVariable fagsakId: Long, @RequestBody
+    fun opphørMigrertVedtak(@PathVariable  @FagsaktilgangConstraint fagsakId: Long, @RequestBody
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
         var saksbehandlerId = hentSaksbehandler()
         if (saksbehandlerId === "Ukjent") saksbehandlerId = "srvfamilie-ba-sak"

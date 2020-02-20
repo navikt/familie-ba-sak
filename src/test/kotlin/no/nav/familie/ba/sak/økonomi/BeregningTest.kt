@@ -107,7 +107,7 @@ class BeregningTest {
             personIdent = PersonIdent("00000000001"),
             fødselsdato = LocalDate.now(),
             type = PersonType.BARN,
-            personopplysningGrunnlag = PersonopplysningGrunnlag(null)
+            personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0)
     )
 
     fun lagPersonVedtak(ytelsetype: Ytelsetype, fom: String, tom: String, beløp: Int) : VedtakPerson {

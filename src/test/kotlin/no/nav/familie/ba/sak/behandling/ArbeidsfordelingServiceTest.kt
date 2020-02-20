@@ -40,7 +40,8 @@ class ArbeidsfordelingServiceTest {
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR
         )
-        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) } returns PersonopplysningGrunnlag(null)
+        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) }
+                .returns (PersonopplysningGrunnlag(behandlingId = 0))
 
         arbeidsfordelingService.hentBehandlendeEnhet(fagsak)
     }

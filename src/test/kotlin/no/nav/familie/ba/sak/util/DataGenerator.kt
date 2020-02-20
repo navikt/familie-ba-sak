@@ -15,7 +15,7 @@ private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
 fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                     søkerPersonIdent: String,
                                     barnPersonIdent: String): PersonopplysningGrunnlag {
-    val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId)
+    val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
     val søker = Person(personIdent = PersonIdent(søkerPersonIdent),
                        type = PersonType.SØKER,
                        personopplysningGrunnlag = personopplysningGrunnlag,
@@ -25,8 +25,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                       personopplysningGrunnlag = personopplysningGrunnlag,
                       fødselsdato = LocalDate.of(2019, 1, 1))
 
-    personopplysningGrunnlag.leggTilPerson(søker)
-    personopplysningGrunnlag.leggTilPerson(barn)
+    personopplysningGrunnlag.personer.add(søker)
+    personopplysningGrunnlag.personer.add(barn)
 
     return personopplysningGrunnlag
 }

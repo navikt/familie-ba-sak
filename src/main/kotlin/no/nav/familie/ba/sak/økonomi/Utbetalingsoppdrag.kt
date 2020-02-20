@@ -7,8 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat.OPPHØRT
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.UEND
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode.SatsType.MND
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -39,7 +38,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                             sats = BigDecimal(segment.value),
                             satsType = MND,
                             utbetalesTil = aktør,
-                            behandlingId = vedtak.behandling.id!!,
+                            behandlingId = vedtak.behandling.id,
                             // Denne måten å sette periodeId på krever at vedtak.id inkrementeres i store nok steg, f.eks 50 og 50
                             // Og at måten segmentene bygges opp på ikke endrer seg, dvs det kommer ALLTID i samme rekkefølge
                             periodeId = (if (!erOpphør) vedtak.id else vedtak.forrigeVedtakId)!! + indeks.toLong()
