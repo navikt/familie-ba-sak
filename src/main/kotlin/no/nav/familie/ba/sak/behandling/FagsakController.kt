@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+val SAKSBEHANDLER_IKKE_TILGJGENGELIG = "Saksbehandler er ikke tilgjengelig på forespørsel."
+
 @RestController
 @RequestMapping("/api/fagsak")
 @ProtectedWithClaims(issuer = "azuread")
@@ -39,7 +41,7 @@ class FagsakController(
     @GetMapping(path = ["/{fagsakId}"])
     fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
-                              ?: return forbidden("Saksbehandler er ikke tilgjengelig på forespørsel.")
+                              ?: return forbidden(SAKSBEHANDLER_IKKE_TILGJGENGELIG)
 
         logger.info("{} henter fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -57,7 +59,7 @@ class FagsakController(
     @PostMapping(path = ["/{fagsakId}/nytt-vedtak"])
     fun nyttVedtak(@PathVariable fagsakId: Long, @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
-                              ?: return forbidden("Saksbehandler er ikke tilgjengelig på forespørsel.")
+                              ?: return forbidden(SAKSBEHANDLER_IKKE_TILGJGENGELIG)
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -85,7 +87,7 @@ class FagsakController(
     fun oppdaterVedtakMedBeregning(@PathVariable fagsakId: Long, @RequestBody
     nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
-                              ?: return forbidden("Saksbehandler er ikke tilgjengelig på forespørsel.")
+                              ?: return forbidden(SAKSBEHANDLER_IKKE_TILGJGENGELIG)
 
         logger.info("{} oppdaterer vedtak med beregning for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -125,7 +127,7 @@ class FagsakController(
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = hentSaksbehandler()
-                              ?: return forbidden("Saksbehandler er ikke tilgjengelig på forespørsel.")
+                              ?: return forbidden(SAKSBEHANDLER_IKKE_TILGJGENGELIG)
 
         logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -180,7 +182,7 @@ class FagsakController(
     fun opphørMigrertVedtak(@PathVariable fagsakId: Long, @RequestBody
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = hentSaksbehandler()
-                              ?: return forbidden("Saksbehandler er ikke tilgjengelig på forespørsel.")
+                              ?: return forbidden(SAKSBEHANDLER_IKKE_TILGJGENGELIG)
 
         logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
