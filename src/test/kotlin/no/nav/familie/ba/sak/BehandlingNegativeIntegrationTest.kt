@@ -25,7 +25,7 @@ import java.time.LocalDate
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen-negative")
+@ActiveProfiles("postgres", "mock-dokgen-negative", "mock-auth")
 @Tag("integration")
 class BehandlingNegativeIntegrationTest(
         @Autowired

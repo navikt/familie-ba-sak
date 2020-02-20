@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
+import no.nav.familie.ba.sak.auditlogger.AuditLogger
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+val SAKSBEHANDLER_IKKE_TILGJGENGELIG = "Saksbehandler er ikke tilgjengelig på forespørsel."
+
 @RestController
 @RequestMapping("/api/fagsak")
 @ProtectedWithClaims(issuer = "azuread")
@@ -41,8 +44,11 @@ class FagsakController(
     @GetMapping(path = ["/{fagsakId}"])
     fun hentFagsak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
+                              ?: return forbidden(SAKSBEHANDLER_IKKE_TILGJGENGELIG)
 
         logger.info("{} henter fagsak med id {}", saksbehandlerId, fagsakId)
+
+        AuditLogger.logLesFagsak(this.javaClass, fagsakId, saksbehandlerId)
 
         val ressurs = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
@@ -57,6 +63,7 @@ class FagsakController(
     fun nyttVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
                    @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
+                              ?: return forbidden(SAKSBEHANDLER_IKKE_TILGJGENGELIG)
 
         logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -75,7 +82,7 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },
                         onFailure = { e ->
-                            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure( e.cause?.message ?: e.message, e))
+                            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure(e.cause?.message ?: e.message, e))
                         }
                 )
     }
@@ -84,6 +91,7 @@ class FagsakController(
     fun oppdaterVedtakMedBeregning(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
                                    @RequestBody nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
+                              ?: return forbidden(SAKSBEHANDLER_IKKE_TILGJGENGELIG)
 
         logger.info("{} oppdaterer vedtak med beregning for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -121,9 +129,9 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
-    fun iverksettVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<String>> {
-        var saksbehandlerId = hentSaksbehandler()
-        if (saksbehandlerId === "Ukjent") saksbehandlerId = "srvfamilie-ba-sak"
+    fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+        val saksbehandlerId = hentSaksbehandler()
+                              ?: return forbidden(SAKSBEHANDLER_IKKE_TILGJGENGELIG)
 
         logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -177,8 +185,8 @@ class FagsakController(
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
     fun opphørMigrertVedtak(@PathVariable  @FagsaktilgangConstraint fagsakId: Long, @RequestBody
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
-        var saksbehandlerId = hentSaksbehandler()
-        if (saksbehandlerId === "Ukjent") saksbehandlerId = "srvfamilie-ba-sak"
+        val saksbehandlerId = hentSaksbehandler()
+                              ?: return forbidden(SAKSBEHANDLER_IKKE_TILGJGENGELIG)
 
         logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
@@ -208,7 +216,7 @@ class FagsakController(
 
     private fun hentSaksbehandler() = Result.runCatching { oidcUtil.getClaim("preferred_username") }.fold(
             onSuccess = { it },
-            onFailure = { "Ukjent" }
+            onFailure = { null }
     )
 
     private fun <T> notFound(errorMessage: String): ResponseEntity<Ressurs<T>> =
