@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.domene
 
-import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
 
@@ -22,12 +21,6 @@ data class Behandling(
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
         val type: BehandlingType,
-
-        /**
-         * saksnummer fra GSAK.
-         */
-        @Column(name = "saksnummer")
-        val saksnummer: String? = null,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
