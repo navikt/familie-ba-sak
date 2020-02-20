@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.util.lagRandomSaksnummer
+import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.randomFnr
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 
@@ -46,7 +47,6 @@ class AuditLoggerTest(
         behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                       null,
                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                      lagRandomSaksnummer(),
                                                       BehandlingKategori.NASJONAL,
                                                       BehandlingUnderkategori.ORDINÆR)
 
@@ -54,7 +54,7 @@ class AuditLoggerTest(
 
         val logsList = listAppender.list
         Assertions.assertEquals(1, logsList.size)
-        Assertions.assertEquals("action=FAGSAK actionType=READ FAGSAK_ID=1 ANSVALIG_SAKSBEHANDLER=DEV_preferred_username",
+        Assertions.assertEquals("action=FAGSAK actionType=READ FAGSAK_ID=${fagsak.id} ANSVALIG_SAKSBEHANDLER=DEV_preferred_username",
                                 logsList[0]
                                         .message)
     }
