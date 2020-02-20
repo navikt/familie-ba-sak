@@ -49,7 +49,6 @@ class BehandlingNegativeIntegrationTest(
                 behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                               "sdf",
                                                               BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                              "sak1",
                                                               BehandlingKategori.NASJONAL,
                                                               BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -63,7 +62,6 @@ class BehandlingNegativeIntegrationTest(
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       "123",
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)

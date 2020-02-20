@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.util.lagRandomSaksnummer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.sikkerhet.OIDCUtil
@@ -111,7 +110,6 @@ class FagsakControllerTest(
     fun `Test opprett avslag vedtak`() {
         val fagsakId = 1L
         val behandlingId = 1L
-        val saksNummer = lagRandomSaksnummer()
         val aktørId = randomPin()
         val søkerFnr = randomPin()
         val barnFnr = randomPin()
@@ -136,7 +134,6 @@ class FagsakControllerTest(
                            fagsak,
                            null,
                            BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                           saksNummer,
                            status = BehandlingStatus.IVERKSATT,
                            kategori = BehandlingKategori.NASJONAL,
                            underkategori = BehandlingUnderkategori.ORDINÆR)
@@ -200,7 +197,6 @@ class FagsakControllerTest(
                            fagsak,
                            null,
                            migreringFraInfotrygd,
-                           "1",
                            status = BehandlingStatus.IVERKSATT,
                            kategori = BehandlingKategori.NASJONAL,
                            underkategori = BehandlingUnderkategori.ORDINÆR)

@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
 import no.nav.familie.ba.sak.util.DbContainerInitializer
-import no.nav.familie.ba.sak.util.lagRandomSaksnummer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.util.randomFnr
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
@@ -113,7 +112,6 @@ class BehandlingIntegrationTest {
         behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                       "sdf",
                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                      lagRandomSaksnummer(),
                                                       BehandlingKategori.NASJONAL,
                                                       BehandlingUnderkategori.ORDINÆR)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
@@ -145,7 +143,6 @@ class BehandlingIntegrationTest {
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
@@ -178,7 +175,6 @@ class BehandlingIntegrationTest {
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
@@ -203,7 +199,6 @@ class BehandlingIntegrationTest {
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
@@ -236,7 +231,6 @@ class BehandlingIntegrationTest {
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -269,7 +263,6 @@ class BehandlingIntegrationTest {
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -431,7 +424,7 @@ class BehandlingIntegrationTest {
             Assertions.assertEquals("iverksettMotOppdrag", slot.captured.taskStepType)
         }
 
-        val aktivBehandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id);
+        val aktivBehandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id)
 
         Assertions.assertEquals(BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, aktivBehandling!!.type)
         Assertions.assertNotEquals(behandling.id!!, aktivBehandling.id)
@@ -449,7 +442,6 @@ class BehandlingIntegrationTest {
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        null,
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         val vedtak = Vedtak(behandling = behandling,
@@ -477,7 +469,6 @@ class BehandlingIntegrationTest {
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
