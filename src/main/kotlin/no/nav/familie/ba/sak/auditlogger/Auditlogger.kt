@@ -16,7 +16,7 @@ object AuditLogger {
                     .append(SPACE_SEPARATOR)
         }
 
-        val sanitizedMsg: String = msg.toString().replace("(\\r|\\n)".toRegex(), "")
+        val sanitizedMsg: String = msg.toString().replace("(\\r|\\n)".toRegex(), "").trim()
         LoggerFactory.getLogger("auditLogger" + "." + clazz.name).info(sanitizedMsg)
     }
 
