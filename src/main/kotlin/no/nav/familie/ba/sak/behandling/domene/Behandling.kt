@@ -9,7 +9,7 @@ data class Behandling(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq")
         @SequenceGenerator(name = "behandling_seq")
-        val id: Long? = null,
+        val id: Long = 0,
 
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
