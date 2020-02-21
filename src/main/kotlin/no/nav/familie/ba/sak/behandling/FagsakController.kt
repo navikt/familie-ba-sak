@@ -152,27 +152,34 @@ class FagsakController(
             return forbidden("Kan ikke iverksette et vedtak som ikke er foreslått av en saksbehandler")
         }
 
-        behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId)
+        return Result.runCatching { behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
+                .fold(
+                        onSuccess = {
+                            val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
+                                         ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
-                     ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+                            if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG
+                                || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
+                                return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede sendt til oppdrag og venter på kvittering"))
+                            } else if (behandling.status == BehandlingStatus.IVERKSATT) {
+                                return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede iverksatt/avsluttet"))
+                            }
 
-        if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG
-            || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
-            return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede sendt til oppdrag og venter på kvittering"))
-        } else if (behandling.status == BehandlingStatus.IVERKSATT) {
-            return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede iverksatt/avsluttet"))
-        }
+                            opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
 
-        opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
-
-        return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
-                onSuccess = { ResponseEntity.ok(it) },
-                onFailure = { e ->
-                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(Ressurs.failure(e.cause?.message ?: e.message, e))
-                }
-        )
+                            return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
+                                    onSuccess = { ResponseEntity.ok(it) },
+                                    onFailure = {
+                                        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                .body(Ressurs.failure(it.cause?.message ?: it.message, it))
+                                    }
+                            )
+                        },
+                        onFailure = {
+                            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    .body(Ressurs.failure(it.cause?.message ?: it.message, it))
+                        }
+                )
     }
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {

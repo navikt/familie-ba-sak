@@ -263,7 +263,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun valider2trinnVedIverksetting(behandling: Behandling, ansvarligSaksbehandler: String) {
         if (behandling.endretAv == ansvarligSaksbehandler) {
-            throw IllegalStateException("Samme saksbehandler kan ikke foreslå og iverksette et vedtak")
+            throw IllegalStateException("Samme saksbehandler kan ikke foreslå og iverksette samme vedtak")
         }
 
         oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_IVERKSETTING)
