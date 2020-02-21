@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import java.net.URI
 
 @ConfigurationProperties("funksjonsbrytere")
@@ -58,7 +57,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
         }
     }
 
-    class ByClusterStrategy(private val clusterName: String): Strategy {
+    class ByClusterStrategy(private val clusterName: String) : Strategy {
         override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
             if (parameters.isNullOrEmpty()) return false
             return parameters["cluster"]?.contains(clusterName) ?: false
