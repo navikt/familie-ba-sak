@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner
 
 import no.nav.familie.ba.sak.common.BaseService
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -40,7 +41,8 @@ class IntegrasjonTjeneste(
         private val integrasjonerServiceUri: URI,
         restTemplateBuilderMedProxy: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+        private val featureToggleService: FeatureToggleService
 ) : BaseService(OAUTH2_CLIENT_CONFIG_KEY, restTemplateBuilderMedProxy, clientConfigurationProperties, oAuth2AccessTokenService) {
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
@@ -66,14 +68,35 @@ class IntegrasjonTjeneste(
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentPersoninfoFor(personIdent: String): Personinfo? {
-        val uri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info")
-        logger.info("Henter personinfo fra $integrasjonerServiceUri")
+        val pdlEnabled = featureToggleService.isEnabled("familie-ba-sak.personinfo-fra-pdl")
+        val uri = "$integrasjonerServiceUri/personopplysning/v1/info"
+        val uriTps = URI.create(uri)
+        logger.info("Henter personinfo fra $integrasjonerServiceUri, toggle familie-ba-sak.personinfo-fra-pdl=$pdlEnabled")
         return try {
-            val response = requestMedPersonIdent<Ressurs<Personinfo>>(uri, personIdent)
-            secureLogger.info("Personinfo for {}: {}", personIdent, response.body?.data)
-            objectMapper.convertValue<Personinfo>(response.body?.data, Personinfo::class.java)
+            val responseTps = requestMedPersonIdent<Ressurs<Personinfo>>(uriTps, personIdent)
+            secureLogger.info("Personinfo fra TPS for {}: {}", personIdent, responseTps.body?.data)
+            val personinfoTps = objectMapper.convertValue<Personinfo>(responseTps.body?.data, Personinfo::class.java)
+            val personinfoPdl = hentPersoninfoPdl(personIdent, "$uri/$TEMA", pdlEnabled, personinfoTps)
+            if (pdlEnabled) personinfoPdl else personinfoTps
         } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
+            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uriTps, personIdent)
+        }
+    }
+
+    private fun hentPersoninfoPdl(personIdent: String, uri: String, pdlEnabled: Boolean, personinfoTps: Personinfo): Personinfo? {
+        val uriPdl = URI.create(uri)
+        return try {
+            val responsePdl = requestMedPersonIdent<Ressurs<Personinfo>>(uriPdl, personIdent)
+            secureLogger.info("Personinfo fra PDL for {}: {}", personIdent, responsePdl.body?.data)
+            val personinfoPdl = objectMapper.convertValue<Personinfo>(responsePdl.body?.data, Personinfo::class.java)
+            if (personinfoPdl.fødselsdato.isEqual(personinfoTps.fødselsdato)) {
+                logger.info("Fødselsdato var lik for tps og pdl!")
+            } else {
+                logger.warn("Fødselsdato var ulik for tps og pdl!")
+            }
+            personinfoPdl
+        } catch (e: Exception) {
+            if (pdlEnabled) throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uriPdl, personIdent) else null
         }
     }
 
@@ -223,5 +246,6 @@ class IntegrasjonTjeneste(
         const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
 
         private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
+        private const val TEMA = "BAR"
     }
 }
