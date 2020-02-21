@@ -1,37 +1,14 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.beregnUtbetalingsperioder
-import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype.*
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
-class BeregningTest {
-    val fagsak = Fagsak(null, null, PersonIdent("12345"), FagsakStatus.OPPRETTET)
-    val behandling = Behandling(fagsak = fagsak,
-                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                kategori = BehandlingKategori.NASJONAL,
-                                underkategori = BehandlingUnderkategori.ORDINÆR)
-
-    val vedtak = Vedtak(behandling = behandling,
-                        ansvarligSaksbehandler = "ansvarligSaksbehandler",
-                        vedtaksdato = LocalDate.now(),
-                        stønadBrevMarkdown = "",
-                        resultat = VedtakResultat.INNVILGET,
-                        begrunnelse = ""
-                        )
-
+class BeregningTest(
+) {
     /**
      * Testen generer 3 barn. 2 av dem er født dd. og 1 er født 2 år frem i tid.
      * Videre generer vi tidslinje for utbetaling med stønad fom og tom for samtlige barn.
@@ -50,9 +27,9 @@ class BeregningTest {
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
 
         val tidslinjeMap = beregnUtbetalingsperioder(listOf(
-                lagPersonVedtak(ORDINÆR_BARNETRYGD, "2020-04-01", "2038-03-31", 1054),
-                lagPersonVedtak(ORDINÆR_BARNETRYGD, "2022-04-01", "2040-03-31", 1054),
-                lagPersonVedtak(ORDINÆR_BARNETRYGD, "2023-04-01", "2038-03-31", 1054)))
+                lagPersonVedtak("2020-04-01", "2038-03-31", ORDINÆR_BARNETRYGD, 1054),
+                lagPersonVedtak("2022-04-01", "2040-03-31", ORDINÆR_BARNETRYGD, 1054),
+                lagPersonVedtak("2023-04-01", "2038-03-31", ORDINÆR_BARNETRYGD, 1054)))
 
         val forventedeSegmenter = listOf(
                 lagSegmentBeløp("2020-04-01","2022-03-31", 1054),
@@ -72,9 +49,9 @@ class BeregningTest {
         // Utvidet barnetrygd 1/4/2020 - 31/1/2021
 
         val tidslinjeMap = beregnUtbetalingsperioder(listOf(
-                lagPersonVedtak(SMÅBARNSTILLEGG, "2020-04-01", "2023-03-31", 660),
-                lagPersonVedtak(ORDINÆR_BARNETRYGD, "2020-04-01", "2038-03-31", 1054),
-                lagPersonVedtak(UTVIDET_BARNETRYGD, "2020-04-01", "2021-01-31", 1054)))
+                lagPersonVedtak("2020-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660),
+                lagPersonVedtak("2020-04-01", "2038-03-31", ORDINÆR_BARNETRYGD, 1054),
+                lagPersonVedtak("2020-04-01", "2021-01-31", UTVIDET_BARNETRYGD, 1054)))
 
         val forventedeSegmenterBarnetrygd = listOf(
                 lagSegmentBeløp("2020-04-01","2021-01-31", 2108),
@@ -103,31 +80,6 @@ class BeregningTest {
         }
     }
 
-    fun tilfeldigPerson() = Person(
-            personIdent = PersonIdent("00000000001"),
-            fødselsdato = LocalDate.now(),
-            type = PersonType.BARN,
-            personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0)
-    )
-
-    fun lagPersonVedtak(ytelsetype: Ytelsetype, fom: String, tom: String, beløp: Int) : VedtakPerson {
-       return VedtakPerson(
-               person = tilfeldigPerson(),
-               stønadFom = dato(fom),
-               stønadTom = dato(tom),
-               beløp = beløp,
-               vedtak = vedtak,
-               type = ytelsetype
-        )
-
-    }
-
-    fun lagSegmentBeløp(fom: String, tom: String, beløp : Int) : LocalDateSegment<Int> =
-            LocalDateSegment(dato(fom), dato(tom), beløp)
-
-    fun dato(datoSomString : String) :LocalDate {
-        return LocalDate.parse(datoSomString)
-    }
 }
 
 
