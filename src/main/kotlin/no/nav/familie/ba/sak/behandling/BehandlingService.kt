@@ -257,16 +257,23 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId)
     }
 
+    fun sendBehandlingTilBeslutter(behandling: Behandling) {
+        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+    }
+
+    fun valider2trinnVedIverksetting(behandling: Behandling, ansvarligSaksbehandler: String) {
+        if (behandling.endretAv == ansvarligSaksbehandler) {
+            throw IllegalStateException("Samme saksbehandler kan ikke foreslå og iverksette et vedtak")
+        }
+
+        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_IVERKSETTING)
+    }
+
     fun oppdaterStatusPåBehandling(behandlingId: Long?, status: BehandlingStatus) {
         when (val behandling = hentBehandling(behandlingId)) {
             null -> throw Exception("Feilet ved oppdatering av status på behandling. Fant ikke behandling med id $behandlingId")
             else -> {
                 LOG.info("Endrer status på behandling $behandlingId fra ${behandling.status} til $status")
-                if (status == BehandlingStatus.IVERKSATT) {
-                    val fagsak = behandling.fagsak
-                    fagsak.status = FagsakStatus.LØPENDE
-                    fagsakService.lagreFagsak(fagsak)
-                }
 
                 behandling.status = status
                 behandlingRepository.save(behandling)

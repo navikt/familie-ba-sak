@@ -51,6 +51,12 @@ class FagsakControllerTest(
         private val behandlingRepository: BehandlingRepository,
 
         @Autowired
+        private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val fagsakController: FagsakController,
+
+        @Autowired
         private val dokGenService: DokGenService,
 
         @Autowired
@@ -187,16 +193,13 @@ class FagsakControllerTest(
                    begrunnelse = "")
 
     private fun lagOrdinærIverksattBehandling(fagsak: Fagsak,
-                                              migreringFraInfotrygd: BehandlingType): Behandling {
-        val behandling =
-                Behandling(1,
-                           fagsak,
-                           null,
-                           migreringFraInfotrygd,
-                           status = BehandlingStatus.IVERKSATT,
-                           kategori = BehandlingKategori.NASJONAL,
-                           underkategori = BehandlingUnderkategori.ORDINÆR)
-        return behandling
+                                              behandlingType: BehandlingType): Behandling {
+        return Behandling(1,
+                  fagsak,
+                  null,
+                  behandlingType,
+                  status = BehandlingStatus.IVERKSATT,
+                  kategori = BehandlingKategori.NASJONAL,
+                  underkategori = BehandlingUnderkategori.ORDINÆR)
     }
-
 }

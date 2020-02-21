@@ -119,14 +119,40 @@ class FagsakController(
                 )
     }
 
+    @PostMapping(path = ["/{fagsakId}/send-til-beslutter"])
+    fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+        val saksbehandlerId = hentSaksbehandler()
+
+        logger.info("{} sender behandling til beslutter for fagsak med id {}", saksbehandlerId, fagsakId)
+
+        val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
+                         ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+
+        return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
+                onSuccess = { ResponseEntity.ok(it) },
+                onFailure = { e ->
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(Ressurs.failure(e.cause?.message ?: e.message, e))
+                }
+        )
+    }
+
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
-    fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+    fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
         logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
                          ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+
+        if (behandling.status != BehandlingStatus.SENDT_TIL_BESLUTTER) {
+            return forbidden("Kan ikke iverksette et vedtak som ikke er foreslått av en saksbehandler")
+        }
+
+        behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId)
 
         val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
                      ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
@@ -140,10 +166,13 @@ class FagsakController(
 
         opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
 
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
-
-        return ResponseEntity
-                .ok(Ressurs.success("Task for iverksetting ble opprettet på fagsak $fagsakId på vedtak ${vedtak.id}"))
+        return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
+                onSuccess = { ResponseEntity.ok(it) },
+                onFailure = { e ->
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(Ressurs.failure(e.cause?.message ?: e.message, e))
+                }
+        )
     }
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
