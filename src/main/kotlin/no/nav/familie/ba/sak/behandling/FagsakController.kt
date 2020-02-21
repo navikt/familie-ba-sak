@@ -126,7 +126,7 @@ class FagsakController(
         logger.info("{} sender behandling til beslutter for fagsak med id {}", saksbehandlerId, fagsakId)
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
-                         ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
 
@@ -146,10 +146,17 @@ class FagsakController(
         logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
-                         ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         if (behandling.status != BehandlingStatus.SENDT_TIL_BESLUTTER) {
             return forbidden("Kan ikke iverksette et vedtak som ikke er foreslått av en saksbehandler")
+        }
+
+        if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG
+            || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
+            return badRequest("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
+        } else if (behandling.status == BehandlingStatus.IVERKSATT) {
+            return badRequest("Behandlingen er allerede iverksatt/avsluttet")
         }
 
         return Result.runCatching { behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
@@ -157,13 +164,6 @@ class FagsakController(
                         onSuccess = {
                             val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
                                          ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-
-                            if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG
-                                || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
-                                return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede sendt til oppdrag og venter på kvittering"))
-                            } else if (behandling.status == BehandlingStatus.IVERKSATT) {
-                                return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede iverksatt/avsluttet"))
-                            }
 
                             opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
 
