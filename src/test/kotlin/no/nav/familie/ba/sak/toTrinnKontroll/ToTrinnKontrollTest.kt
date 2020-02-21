@@ -1,10 +1,7 @@
 package no.nav.familie.ba.sak.toTrinnKontroll
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.randomFnr
 import org.junit.jupiter.api.Assertions
@@ -27,6 +24,9 @@ class ToTrinnKontrollTest {
 
     @Autowired
     lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     @Tag("integration")
@@ -59,9 +59,13 @@ class ToTrinnKontrollTest {
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
 
-        behandlingService.sendBehandlingTilBeslutter(behandling)
-        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hentBehandling(behandling.id)?.status)
+        behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
+        behandlingRepository.saveAndFlush(behandling)
 
-        assertThrows<IllegalArgumentException> { behandlingService.valider2trinnVedIverksetting (behandling, "beslutter") }
+        val endretBehandling = behandlingService.hentBehandling(behandling.id)
+        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, endretBehandling?.status)
+        Assertions.assertNotNull(endretBehandling?.endretAv)
+
+        assertThrows<IllegalStateException> { behandlingService.valider2trinnVedIverksetting (endretBehandling!!, "VL") }
     }
 }
