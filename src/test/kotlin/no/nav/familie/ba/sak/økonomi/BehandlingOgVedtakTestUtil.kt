@@ -13,23 +13,22 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 import java.util.*
 
-var nesteVedtakId: Long = 1
-    get() {
-        val v = field
-        field += 50
-        return v
-    }
+private var gjeldendeVedtakId:Long=1
+private var gjeldendeBehandlingId:Long=1
+private val id_inkrement=50
 
-var nesteBehandlingId: Long = 1
-    get() {
-        val v = field
-        field += 50
-        return v
-    }
+fun nesteVedtakId() : Long {
+    gjeldendeVedtakId+= id_inkrement
+    return gjeldendeVedtakId
+}
 
+fun nesteBehandlingId() : Long {
+    gjeldendeBehandlingId+= id_inkrement
+    return gjeldendeBehandlingId
+}
 
 val defaultFagsak = Fagsak(1, null, PersonIdent("12345"), FagsakStatus.OPPRETTET)
-fun lagBehandling() = Behandling(id = nesteBehandlingId,
+fun lagBehandling() = Behandling(id = nesteBehandlingId(),
                                  fagsak = defaultFagsak,
                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                  kategori = BehandlingKategori.NASJONAL,
@@ -46,7 +45,7 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
               resultat: VedtakResultat = VedtakResultat.INNVILGET,
               forrigeVedtak: Vedtak? = null,
               opphørsdato: LocalDate? = null) =
-        Vedtak(id = nesteVedtakId,
+        Vedtak(id = nesteVedtakId(),
                behandling = behandling,
                ansvarligSaksbehandler = "ansvarligSaksbehandler",
                vedtaksdato = LocalDate.now(),
