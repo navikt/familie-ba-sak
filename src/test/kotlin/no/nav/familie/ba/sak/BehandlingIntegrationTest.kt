@@ -46,10 +46,6 @@ import javax.transaction.Transactional
 @Tag("integration")
 class BehandlingIntegrationTest {
 
-    companion object {
-        const val STRING_LENGTH = 10
-    }
-
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
@@ -127,8 +123,8 @@ class BehandlingIntegrationTest {
         } returns Personinfo(LocalDate.now())
 
         val nyBehandling = NyBehandlingHendelse(
-                                        fnr,
-                                        arrayOf(randomFnr(), randomFnr()))
+                fnr,
+                arrayOf(randomFnr(), randomFnr()))
         val fagsak = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
@@ -235,7 +231,7 @@ class BehandlingIntegrationTest {
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, "12345678911")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, "12345678911")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         behandlingService.nyttVedtakForAktivBehandling(
@@ -268,7 +264,7 @@ class BehandlingIntegrationTest {
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, "12345678912")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, "12345678912")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         behandlingService.nyttVedtakForAktivBehandling(
@@ -295,7 +291,7 @@ class BehandlingIntegrationTest {
                 )
         )
 
-        val htmlvedtaksbrevRess = behandlingService.hentHtmlVedtakForBehandling(behandling.id!!)
+        val htmlvedtaksbrevRess = behandlingService.hentHtmlVedtakForBehandling(behandling.id)
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
         assert(htmlvedtaksbrevRess.data!! == "<HTML>HTML_MOCKUP</HTML>")
     }
@@ -395,7 +391,7 @@ class BehandlingIntegrationTest {
                                     begrunnelse = "")
         val nyBeregning = NyBeregning(barnasBeregning)
 
-        behandlingService.nyttVedtakForAktivBehandling(behandling!!, personopplysningGrunnlag!!, nyttVedtak, "saksbehandler1")
+        behandlingService.nyttVedtakForAktivBehandling(behandling, personopplysningGrunnlag!!, nyttVedtak, "saksbehandler1")
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
@@ -427,7 +423,7 @@ class BehandlingIntegrationTest {
         val aktivBehandling = behandlingService.hentBehandlingHvisEksisterer(fagsak.id)
 
         Assertions.assertEquals(BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, aktivBehandling!!.type)
-        Assertions.assertNotEquals(behandling.id!!, aktivBehandling.id)
+        Assertions.assertNotEquals(behandling.id, aktivBehandling.id)
     }
 
 
@@ -452,12 +448,12 @@ class BehandlingIntegrationTest {
                             begrunnelse = "")
         behandlingService.lagreVedtak(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, barnFnr)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val oppdragIdListe = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
 
-        Assertions.assertTrue(oppdragIdListe.contains(OppdragId(fnr, behandling.id!!)))
+        Assertions.assertTrue(oppdragIdListe.contains(OppdragId(fnr, behandling.id)))
     }
 
     @Test
@@ -473,7 +469,7 @@ class BehandlingIntegrationTest {
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, "12345678915")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, "12345678915")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val fagsakRes = behandlingService.nyttVedtakForAktivBehandling(

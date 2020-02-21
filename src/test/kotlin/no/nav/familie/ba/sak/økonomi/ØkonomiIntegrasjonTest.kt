@@ -65,7 +65,7 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, "1", "12345678910")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         behandlingService.nyttVedtakForAktivBehandling(
@@ -95,7 +95,7 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
-        økonomiService.iverksettVedtak(behandling.id!!, vedtak.id!!, "ansvarligSaksbehandler")
+        økonomiService.iverksettVedtak(behandling.id, vedtak.id!!, "ansvarligSaksbehandler")
 
         val oppdatertBehandling = behandlingService.hentBehandling(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling?.status)

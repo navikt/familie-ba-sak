@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.common
 
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.io.Serializable
 import java.time.LocalDateTime
 import javax.persistence.*
@@ -42,7 +43,7 @@ abstract class BaseEntitet : Serializable {
     companion object {
         private const val BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES = "VL"
         private fun finnBrukernavn(): String {
-            val brukerident: String? = null // FIXME hent fra auth context
+            val brukerident: String? = SikkerhetContext.hentSaksbehandler()
             return brukerident ?: BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES
         }
     }

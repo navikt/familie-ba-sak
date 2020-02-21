@@ -10,8 +10,6 @@ import java.util.*
 
 fun randomFnr(): String = UUID.randomUUID().toString()
 
-private val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
-
 fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                     søkerPersonIdent: String,
                                     barnPersonIdent: String): PersonopplysningGrunnlag {

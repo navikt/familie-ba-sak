@@ -61,7 +61,7 @@ class FerdigstillBehandlingTest {
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, fnr, fnrBarn)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, fnrBarn)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         behandlingService.nyttVedtakForAktivBehandling(
@@ -76,7 +76,7 @@ class FerdigstillBehandlingTest {
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
 
-        return FerdigstillBehandling.opprettTask(personIdent = fnr, behandlingsId = behandling.id!!)
+        return FerdigstillBehandling.opprettTask(personIdent = fnr, behandlingsId = behandling.id)
     }
 
     @Test

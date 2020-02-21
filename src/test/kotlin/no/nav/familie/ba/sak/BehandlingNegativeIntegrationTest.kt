@@ -66,7 +66,7 @@ class BehandlingNegativeIntegrationTest(
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, "1", "12345678910")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         behandlingService.nyttVedtakForAktivBehandling(

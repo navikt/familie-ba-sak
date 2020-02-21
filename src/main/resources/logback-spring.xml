@@ -58,10 +58,6 @@
         <!-- <appender-ref ref="Sentry" /> -->
     </root>
 
-    <logger name="sporing" level="INFO" additivity="false">
-        <appender-ref ref="SPORING_LOG"/>
-    </logger>
-
     <logger name="no.nav" level="WARN"/>
     <logger name="no.nav.familie" level="INFO"/>
     <logger name="no.nav.familie.http.sts" level="WARN"/>
