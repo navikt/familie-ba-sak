@@ -57,7 +57,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
         }
     }
 
-    class ByClusterStrategy(private val clusterName: String): Strategy {
+    class ByClusterStrategy(private val clusterName: String) : Strategy {
         override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
             if (parameters.isNullOrEmpty()) return false
             return parameters["cluster"]?.contains(clusterName) ?: false

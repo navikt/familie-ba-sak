@@ -26,7 +26,7 @@ class ØkonomiService(
 
         val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, personberegninger)
 
-        iverksettOppdrag(vedtak.behandling.id!!, utbetalingsoppdrag)
+        iverksettOppdrag(vedtak.behandling.id, utbetalingsoppdrag)
     }
 
 
