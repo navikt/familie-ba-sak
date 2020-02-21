@@ -105,7 +105,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val gjeldendeVedtakPerson = vedtakPersonRepository.finnPersonBeregningForVedtak(gjeldendeVedtak.id)
         if (gjeldendeVedtakPerson.isEmpty()) {
-            return Ressurs.failure("Fant ikke vedtak personer tilknyttet behandling $gjeldendeBehandlingsId og vedtak ${gjeldendeVedtak.id}")
+            return Ressurs.failure(
+                    "Fant ikke vedtak personer tilknyttet behandling $gjeldendeBehandlingsId og vedtak ${gjeldendeVedtak.id}")
         }
 
         val gjeldendeBehandling = gjeldendeVedtak.behandling
@@ -196,14 +197,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun leggTilBarnIPersonListe(barnasFødselsnummer: Array<String>,
                                         personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
-        return barnasFødselsnummer.filter{ barn ->
-            personopplysningGrunnlag.barna.none{ eksisterendeBarn -> barn == eksisterendeBarn.personIdent.ident}
+        return barnasFødselsnummer.filter { barn ->
+            personopplysningGrunnlag.barna.none { eksisterendeBarn -> barn == eksisterendeBarn.personIdent.ident }
         }.map { nyttBarn ->
-                Person(personIdent = PersonIdent(nyttBarn),
-                       type = PersonType.BARN,
-                       personopplysningGrunnlag = personopplysningGrunnlag,
-                       fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn).fødselsdato
-                )
+            Person(personIdent = PersonIdent(nyttBarn),
+                   type = PersonType.BARN,
+                   personopplysningGrunnlag = personopplysningGrunnlag,
+                   fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn).fødselsdato
+            )
         }
     }
 
@@ -231,10 +232,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun hentBehandlinger(fagsakId: Long?): List<Behandling?> {
         return behandlingRepository.finnBehandlinger(fagsakId)
-    }
-
-    fun lagreBehandling(behandling: Behandling) {
-        behandlingRepository.save(behandling)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling) {
@@ -293,7 +290,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                      personopplysningGrunnlag: PersonopplysningGrunnlag,
                                      nyttVedtak: NyttVedtak,
                                      ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
-        vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat, behandling.id!!)
+        vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat, behandling.id)
 
         val vedtak = Vedtak(
                 behandling = behandling,
@@ -336,10 +333,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             }
 
             val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-            val sikkerStønadTom = person.fødselsdato?.plusYears(18)?.sisteDagIForrigeMåned()!!
+            val sikkerStønadTom = person.fødselsdato.plusYears(18)?.sisteDagIForrigeMåned()!!
 
             if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
-                throw IllegalStateException("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
+                throw IllegalStateException(
+                        "Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
             }
 
             vedtakPersonRepository.save(
@@ -401,13 +399,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun hentSøker(behandling: Behandling): Person? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer.find { person -> person.type == PersonType.SØKER }
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer
+                .find { person -> person.type == PersonType.SØKER }
     }
 
     companion object {
-        val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
-        const val STRING_LENGTH = 10
         val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
-
 }
