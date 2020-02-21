@@ -27,8 +27,6 @@ import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.util.Assert
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.exchange
@@ -75,26 +73,6 @@ class IntegrasjonTjeneste(
             objectMapper.convertValue<Personinfo>(response.body?.data, Personinfo::class.java)
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
-        }
-    }
-
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun hentBehandlendeEnhetForPersonident(personident: String): List<Arbeidsfordelingsenhet> {
-        val uri = URI.create("$integrasjonerServiceUri/arbeidsfordeling/enhet/BAR")
-
-        val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
-        headers.add("Nav-Personident", personident)
-        val httpEntity: HttpEntity<*> = HttpEntity<Any?>(headers)
-
-        return try {
-            val response = restOperations.exchange<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, HttpMethod.GET, httpEntity)
-            val data = response.body?.data
-            data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
-                                               null,
-                                               uri,
-                                               personident)
-        } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri, personident)
         }
     }
 
