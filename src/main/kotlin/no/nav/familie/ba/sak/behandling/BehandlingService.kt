@@ -150,6 +150,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             fagsakService.hentFagsakForPersonident(personIdent) ?: opprettFagsak(personIdent)
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
+        // TODO Denne bør fikses
         val nyFagsak = Fagsak(null, AktørId("1"), personIdent)
         fagsakService.lagreFagsak(nyFagsak)
         return nyFagsak
@@ -292,7 +293,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                      personopplysningGrunnlag: PersonopplysningGrunnlag,
                                      nyttVedtak: NyttVedtak,
                                      ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
-        vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat, behandling.id!!)
+        vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat, behandling.id)
 
         val vedtak = Vedtak(
                 behandling = behandling,
@@ -335,7 +336,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             }
 
             val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-            val sikkerStønadTom = person.fødselsdato?.plusYears(18)?.sisteDagIForrigeMåned()!!
+            val sikkerStønadTom = person.fødselsdato.plusYears(18)?.sisteDagIForrigeMåned()!!
 
             if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
                 throw IllegalStateException("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")

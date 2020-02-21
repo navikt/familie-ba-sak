@@ -139,7 +139,7 @@ class FagsakControllerTest(
                            underkategori = BehandlingUnderkategori.ORDINÆR)
         behandlingRepository.save(behandling)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-                behandling.id!!, søkerFnr, barnFnr)
+                behandling.id, søkerFnr, barnFnr)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val fagsakController =

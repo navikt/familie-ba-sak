@@ -41,7 +41,9 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                             behandlingId = vedtak.behandling.id,
                             // Denne måten å sette periodeId på krever at vedtak.id inkrementeres i store nok steg, f.eks 50 og 50
                             // Og at måten segmentene bygges opp på ikke endrer seg, dvs det kommer ALLTID i samme rekkefølge
-                            periodeId = (if (!erOpphør) vedtak.id else vedtak.forrigeVedtakId)!! + indeks.toLong()
+                            periodeId = (if (!erOpphør) vedtak.id else vedtak.forrigeVedtakId)!! + indeks.toLong(),
+                            forrigePeriodeId = (if (!erOpphør) vedtak.id else vedtak.forrigeVedtakId)!! + indeks.toLong()
+
                     )
                 }
     }
