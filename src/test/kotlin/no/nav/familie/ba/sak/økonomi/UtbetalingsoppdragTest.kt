@@ -1,0 +1,74 @@
+package no.nav.familie.ba.sak.økonomi
+
+import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype.*
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+
+internal class UtbetalingsoppdragPeriodiseringTest {
+
+    @Test
+    fun `skal opprette et nytt utbetalingsoppdrag med løpende periodeId fordelt på flere klasser`() {
+        val vedtak = lagVedtak()
+        val personvedtak = listOf(
+                lagPersonVedtak("2018-07-01", "2021-06-30", SMÅBARNSTILLEGG, 660, vedtak),
+                lagPersonVedtak("2020-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, vedtak),
+                lagPersonVedtak("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, vedtak),
+                lagPersonVedtak("2020-05-01", "2021-02-28", UTVIDET_BARNETRYGD, 1054, vedtak))
+
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, personvedtak)
+
+        assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
+        assertEquals(6,utbetalingsoppdrag.utbetalingsperiode.size)
+
+        val utbetalingsperioderPerKlasse= utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!!,vedtak.id,0,660,"2018-07-01","2020-03-31")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!!,vedtak.id,1,1320,"2020-04-01","2021-06-30")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!!,vedtak.id,2,660,"2021-07-01","2023-03-31")
+
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!!,vedtak.id,0,1054,"2020-03-01","2020-04-30")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!!,vedtak.id,1,2108,"2020-05-01","2021-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!!,vedtak.id,2,1054,"2021-03-01","2038-02-28")
+    }
+
+    @Test
+    fun `skal opprette et opphør med løpende periodeId fordelt på flere klasser`() {
+        val vedtak = lagVedtak()
+        val personvedtak = listOf(
+                lagPersonVedtak("2018-07-01", "2021-06-30", SMÅBARNSTILLEGG, 660, vedtak),
+                lagPersonVedtak("2020-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, vedtak),
+                lagPersonVedtak("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, vedtak),
+                lagPersonVedtak("2020-05-01", "2021-02-28", UTVIDET_BARNETRYGD, 1054, vedtak))
+
+        var opphørVedtak = lagVedtak(forrigeVedtak = vedtak,resultat = VedtakResultat.OPPHØRT, opphørsdato=LocalDate.now())
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, personvedtak)
+
+        assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
+        assertEquals(6,utbetalingsoppdrag.utbetalingsperiode.size)
+
+        val utbetalingsperioderPerKlasse= utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!!,vedtak.id,0,660,"2018-07-01","2020-03-31")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!!,vedtak.id,1,1320,"2020-04-01","2021-06-30")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!!,vedtak.id,2,660,"2021-07-01","2023-03-31")
+
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!!,vedtak.id,0,1054,"2020-03-01","2020-04-30")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!!,vedtak.id,1,2108,"2020-05-01","2021-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!!,vedtak.id,2,1054,"2021-03-01","2038-02-28")
+    }
+
+    fun assertUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>,
+                                 vedtakId: Long?,
+                                 offset: Int,
+                                 sats: Int,
+                                 fom: String,
+                                 tom: String
+    ) {
+        assertEquals(vedtakId!!+offset, utbetalingsperioder[offset].periodeId)
+        assertEquals(sats, utbetalingsperioder[offset].sats.toInt())
+        assertEquals(dato(fom), utbetalingsperioder[offset].vedtakdatoFom)
+        assertEquals(dato(tom), utbetalingsperioder[offset].vedtakdatoTom)
+    }
+}
