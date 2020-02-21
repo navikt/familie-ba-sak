@@ -80,7 +80,6 @@ class BeregningTest(
         }
     }
 
-
 }
 
 

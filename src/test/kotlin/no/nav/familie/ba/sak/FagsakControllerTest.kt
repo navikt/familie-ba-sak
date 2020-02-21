@@ -8,22 +8,15 @@ import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Opphørsvedtak
-
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
-
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
-
+import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.config.FeatureToggleService
-
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.sikkerhet.OIDCUtil
 import org.junit.jupiter.api.Assertions
@@ -116,8 +109,7 @@ class FagsakControllerTest(
     @Tag("integration")
     fun `Test opprett avslag vedtak`() {
         val fagsakId = 1L
-        val behandlingId= 1L
-        val saksNummer= lagRandomSaksnummer()
+        val behandlingId = 1L
         val aktørId = randomPin()
         val søkerFnr = randomPin()
         val barnFnr = randomPin()
@@ -132,7 +124,8 @@ class FagsakControllerTest(
                 fagsakService = fagsakService,
                 vilkårService = vilkårService,
                 integrasjonTjeneste = mockk(),
-                featureToggleService = featureToggleService)
+                featureToggleService = featureToggleService,
+                taskRepository = taskRepository)
 
         val fagsak = Fagsak(fagsakId, AktørId(aktørId), PersonIdent(søkerFnr))
         fagsakService.lagreFagsak(fagsak)
@@ -141,7 +134,6 @@ class FagsakControllerTest(
                            fagsak,
                            null,
                            BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                           saksNummer,
                            status = BehandlingStatus.IVERKSATT,
                            kategori = BehandlingKategori.NASJONAL,
                            underkategori = BehandlingUnderkategori.ORDINÆR)
@@ -205,7 +197,6 @@ class FagsakControllerTest(
                            fagsak,
                            null,
                            migreringFraInfotrygd,
-                           "1",
                            status = BehandlingStatus.IVERKSATT,
                            kategori = BehandlingKategori.NASJONAL,
                            underkategori = BehandlingUnderkategori.ORDINÆR)

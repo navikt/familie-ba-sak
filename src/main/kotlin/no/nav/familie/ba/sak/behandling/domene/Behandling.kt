@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.domene
 
-import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
 
@@ -10,7 +9,7 @@ data class Behandling(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq")
         @SequenceGenerator(name = "behandling_seq")
-        val id: Long? = null,
+        val id: Long = 0,
 
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
@@ -22,12 +21,6 @@ data class Behandling(
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
         val type: BehandlingType,
-
-        /**
-         * saksnummer fra GSAK.
-         */
-        @Column(name = "saksnummer")
-        val saksnummer: String? = null,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
@@ -67,5 +60,5 @@ enum class BehandlingUnderkategori {
 }
 
 enum class BehandlingStatus {
-    OPPRETTET, UNDER_BEHANDLING, LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG, SENDT_TIL_IVERKSETTING, IVERKSATT
+    OPPRETTET, UNDER_BEHANDLING, LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG, SENDT_TIL_IVERKSETTING, IVERKSATT, FERDIGSTILT
 }

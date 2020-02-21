@@ -7,10 +7,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyBeregning
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.util.DbContainerInitializer
+import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
@@ -27,7 +25,7 @@ import java.time.LocalDate
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen-negative")
+@ActiveProfiles("postgres", "mock-dokgen-negative", "mock-auth")
 @Tag("integration")
 class BehandlingNegativeIntegrationTest(
         @Autowired
@@ -51,7 +49,6 @@ class BehandlingNegativeIntegrationTest(
                 behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                               "sdf",
                                                               BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                              "sak1",
                                                               BehandlingKategori.NASJONAL,
                                                               BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -65,7 +62,6 @@ class BehandlingNegativeIntegrationTest(
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       "123",
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -87,9 +83,9 @@ class BehandlingNegativeIntegrationTest(
         val fagsakRes = fagsakController.oppdaterVedtakMedBeregning(fagsak.id!!, NyBeregning(
                 arrayOf(
                         BarnBeregning(
-                                fødselsnummer = "12345678910",
+                                ident = "12345678910",
                                 beløp = 1054,
-                                stønadFom = LocalDate.now(),
+                                stønadFom = LocalDate.of(2020, 1, 1),
                                 ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
                         ))
         ))

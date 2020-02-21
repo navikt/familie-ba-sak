@@ -38,7 +38,7 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: Perso
         personIdent = PersonIdent(UUID.randomUUID().toString().substring(0, 18)),
         fødselsdato = fødselsdato,
         type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(null)
+        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0)
 )
 
 fun lagVedtak(behandling: Behandling = lagBehandling(),
