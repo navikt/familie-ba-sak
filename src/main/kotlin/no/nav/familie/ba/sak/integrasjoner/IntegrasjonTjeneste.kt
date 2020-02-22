@@ -207,27 +207,22 @@ class IntegrasjonTjeneste(
     private fun sendJournalFørRequest(journalFørEndpoint: URI,
                                       arkiverDokumentRequest: ArkiverDokumentRequest)
             : ResponseEntity<Ressurs<ArkiverDokumentResponse>> {
-        val headers = HttpHeaders()
-        headers.add("Content-Type", "application/json;charset=UTF-8")
-        headers.acceptCharset = listOf(Charsets.UTF_8)
+        val headers = HttpHeaders().medContentTypeJsonUTF8()
         return restOperations.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(arkiverDokumentRequest, headers))
     }
 
     private fun sendOppgave(journalFørEndpoint: URI,
                             opprettOppgave: OpprettOppgave)
             : ResponseEntity<Ressurs<OppgaveResponse>> {
-        val headers = HttpHeaders()
-        headers.add("Content-Type", "application/json;charset=UTF-8")
-        headers.acceptCharset = listOf(Charsets.UTF_8)
+        val headers = HttpHeaders().medContentTypeJsonUTF8()
+
         return restOperations.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(opprettOppgave, headers))
     }
 
 
     private fun sendDistribusjonRequest(uri: URI,
                                         distribuerJournalpostRequest: DistribuerJournalpostRequest): ResponseEntity<Ressurs<String>> {
-        return restOperations.exchange(post(uri)
-                                               .acceptCharset(Charsets.UTF_8)
-                                               .header("Content-Type", "application/json;charset=UTF-8")
+        return restOperations.exchange(post(uri).headers { it.medContentTypeJsonUTF8() }
                                                .body(distribuerJournalpostRequest))
     }
 
