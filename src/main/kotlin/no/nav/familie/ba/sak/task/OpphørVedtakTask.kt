@@ -15,7 +15,6 @@ import java.time.LocalDate
 import java.util.*
 
 @Service
-
 @TaskStepBeskrivelse(taskStepType = OpphørVedtakTask.TASK_STEP_TYPE,
                      beskrivelse = "Opphør aktiv behandling og vedtak",
                      maxAntallFeil = 3)

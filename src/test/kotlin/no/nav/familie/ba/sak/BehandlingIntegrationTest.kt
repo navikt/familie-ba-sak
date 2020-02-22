@@ -46,10 +46,6 @@ import javax.transaction.Transactional
 @Tag("integration")
 class BehandlingIntegrationTest {
 
-    companion object {
-        const val STRING_LENGTH = 10
-    }
-
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
@@ -127,8 +123,8 @@ class BehandlingIntegrationTest {
         } returns Personinfo(LocalDate.now())
 
         val nyBehandling = NyBehandlingHendelse(
-                                        fnr,
-                                        arrayOf(randomFnr(), randomFnr()))
+                fnr,
+                arrayOf(randomFnr(), randomFnr()))
         val fagsak = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }

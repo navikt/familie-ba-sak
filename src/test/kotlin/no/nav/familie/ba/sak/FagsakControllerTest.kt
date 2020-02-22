@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.familie.sikkerhet.OIDCUtil
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -36,9 +35,6 @@ import java.util.*
 @ActiveProfiles("dev", "mock-dokgen")
 @Tag("integration")
 class FagsakControllerTest(
-        @Autowired
-        private val oidcUtil: OIDCUtil,
-
         @Autowired
         private val fagsakService: FagsakService,
 
@@ -77,7 +73,7 @@ class FagsakControllerTest(
         every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
         every { mockBehandlingLager.hentVedtakHvisEksisterer(any()) } returns vedtak
         val fagsakController =
-                FagsakController(oidcUtil, fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
+                FagsakController(fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
 
         val response = fagsakController.opphørMigrertVedtak(1)
         assert(response.statusCode == HttpStatus.OK)
@@ -97,7 +93,7 @@ class FagsakControllerTest(
         every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
         every { mockBehandlingLager.hentVedtakHvisEksisterer(any()) } returns vedtak
         val fagsakController =
-                FagsakController(oidcUtil, fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
+                FagsakController(fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
 
         val response = fagsakController.opphørMigrertVedtak(1, Opphørsvedtak(LocalDate.now()))
         assert(response.statusCode == HttpStatus.OK)
@@ -143,7 +139,7 @@ class FagsakControllerTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val fagsakController =
-                FagsakController(oidcUtil, fagsakService, behandlingService,
+                FagsakController(fagsakService, behandlingService,
                                  personopplysningGrunnlagRepository, taskRepository)
 
         val response = fagsakController.nyttVedtak(1, NyttVedtak(
