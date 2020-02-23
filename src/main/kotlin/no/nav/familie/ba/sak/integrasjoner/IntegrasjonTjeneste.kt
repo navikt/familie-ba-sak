@@ -56,7 +56,7 @@ class IntegrasjonTjeneste(
             secureLogger.info("Vekslet inn fnr: {} til aktørId: {}", personident, response.body)
             val aktørId = response.body?.data?.get("aktørId").toString()
             if (aktørId.isEmpty()) {
-                throw IntegrasjonException("AktørId fra integrasjonstjenesten er tom")
+                throw IntegrasjonException(msg = "AktørId fra integrasjonstjenesten er tom", ident = personident)
             } else {
                 AktørId(aktørId)
             }

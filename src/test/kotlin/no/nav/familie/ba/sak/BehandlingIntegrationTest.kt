@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.mottak.NyBehandlingHendelse
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
@@ -98,6 +99,8 @@ class BehandlingIntegrationTest {
                 integrasjonTjeneste,
                 featureToggleService,
                 taskRepository)
+
+        every { integrasjonTjeneste.hentAktørId(any()) } returns AktørId(id = "1")
     }
 
     @Test
