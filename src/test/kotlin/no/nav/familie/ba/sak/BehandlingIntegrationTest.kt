@@ -105,12 +105,22 @@ class BehandlingIntegrationTest {
         val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                      "sdf",
-                                                      BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                      BehandlingKategori.NASJONAL,
-                                                      BehandlingUnderkategori.ORDINÆR)
+        opprettNyOrdinærBehandling(fagsak)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Sjekk at id på vedtak inkrementeres i store steg`() {
+        val fnr = randomFnr()
+
+        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = opprettNyOrdinærBehandling(fagsak)
+
+        val vedtak1 = opprettNyttInvilgetVedtak(behandling)
+        val vedtak2 = opprettNyttInvilgetVedtak(behandling)
+
+        Assertions.assertEquals(vedtak1.id!!+50,vedtak2.id)
     }
 
     @Test
@@ -136,11 +146,7 @@ class BehandlingIntegrationTest {
         val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
+        val behandling = opprettNyOrdinærBehandling(fagsak)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
 
         val søker = Person(personIdent = PersonIdent(fnr),
@@ -168,18 +174,9 @@ class BehandlingIntegrationTest {
         val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
-        val vedtak = Vedtak(behandling = behandling,
-                            ansvarligSaksbehandler = "ansvarligSaksbehandler",
-                            vedtaksdato = LocalDate.now(),
-                            stønadBrevMarkdown = "",
-                            resultat = VedtakResultat.INNVILGET,
-                            begrunnelse = "")
-        behandlingService.lagreVedtak(vedtak)
+        val behandling = opprettNyOrdinærBehandling(fagsak)
+
+        opprettNyttInvilgetVedtak(behandling)
 
         val hentetVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
@@ -192,26 +189,10 @@ class BehandlingIntegrationTest {
         val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
-        val vedtak = Vedtak(behandling = behandling,
-                            ansvarligSaksbehandler = "ansvarligSaksbehandler",
-                            vedtaksdato = LocalDate.now(),
-                            stønadBrevMarkdown = "",
-                            resultat = VedtakResultat.INNVILGET,
-                            begrunnelse = "")
-        behandlingService.lagreVedtak(vedtak)
+        val behandling = opprettNyOrdinærBehandling(fagsak)
 
-        val aktivtVedtak = Vedtak(behandling = behandling,
-                                  ansvarligSaksbehandler = "ansvarligSaksbehandler2",
-                                  vedtaksdato = LocalDate.now(),
-                                  stønadBrevMarkdown = "",
-                                  resultat = VedtakResultat.INNVILGET,
-                                  begrunnelse = "")
-        behandlingService.lagreVedtak(aktivtVedtak)
+        opprettNyttInvilgetVedtak(behandling, saksbehandler="ansvarligSaksbehandler1")
+        opprettNyttInvilgetVedtak(behandling, saksbehandler="ansvarligSaksbehandler2")
 
         val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
@@ -224,11 +205,8 @@ class BehandlingIntegrationTest {
         val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
+        val behandling = opprettNyOrdinærBehandling(fagsak)
+
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, "12345678911")
@@ -256,11 +234,8 @@ class BehandlingIntegrationTest {
         val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
+        val behandling = opprettNyOrdinærBehandling(fagsak)
+
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
 
@@ -435,11 +410,8 @@ class BehandlingIntegrationTest {
 
         //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       null,
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
+        val behandling = opprettNyOrdinærBehandling(fagsak)
+
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.of(2020, 1, 1),
@@ -462,11 +434,8 @@ class BehandlingIntegrationTest {
         val fnr = randomFnr()
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
+        val behandling = opprettNyOrdinærBehandling(fagsak)
+
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, "12345678915")
@@ -488,4 +457,28 @@ class BehandlingIntegrationTest {
         Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
         Assertions.assertNotEquals("", hentetVedtak?.stønadBrevMarkdown)
     }
+
+    private fun opprettNyOrdinærBehandling(fagsak: Fagsak) =
+            behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+                                                          "sdf",
+                                                          BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                          BehandlingKategori.NASJONAL,
+                                                          BehandlingUnderkategori.ORDINÆR)
+
+    private fun opprettNyttInvilgetVedtak(behandling: Behandling, saksbehandler: String = "ansvarligSaksbehandler"): Vedtak {
+        behandlingService.lagreVedtak(Vedtak(behandling = behandling,
+                                             ansvarligSaksbehandler = saksbehandler,
+                                             vedtaksdato = LocalDate.now(),
+                                             stønadBrevMarkdown = "",
+                                             resultat = VedtakResultat.INNVILGET,
+                                             begrunnelse = "")
+
+
+        )
+
+        return behandlingService.hentVedtakHvisEksisterer(behandling.id)!!
+    }
+
+
+
 }

@@ -10,7 +10,7 @@ import javax.persistence.*
 data class Vedtak(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_seq")
-        @SequenceGenerator(name = "vedtak_seq")
+        @SequenceGenerator(name = "vedtak_seq", allocationSize = 1)
         val id: Long? = null,
 
         @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
