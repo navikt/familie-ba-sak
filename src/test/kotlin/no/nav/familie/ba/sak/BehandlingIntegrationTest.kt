@@ -5,6 +5,7 @@ import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.DokGenService
 import no.nav.familie.ba.sak.behandling.FagsakService
+import no.nav.familie.ba.sak.behandling.NyFagsak
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
@@ -337,6 +338,7 @@ class BehandlingIntegrationTest {
             integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.of(2019, 1, 1))
 
+        fagsakService.nyFagsak(NyFagsak(personIdent = morId))
         behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NASJONAL,
                                                          BehandlingUnderkategori.ORDINÆR,
                                                          morId,
@@ -365,6 +367,7 @@ class BehandlingIntegrationTest {
             integrasjonTjeneste.hentPersoninfoFor(any())
         } returns Personinfo(LocalDate.of(2019, 1, 1))
 
+        fagsakService.nyFagsak(NyFagsak(personIdent = søkerFnr))
         val nyBehandling =
                 NyBehandling(BehandlingKategori.NASJONAL,
                              BehandlingUnderkategori.ORDINÆR,
