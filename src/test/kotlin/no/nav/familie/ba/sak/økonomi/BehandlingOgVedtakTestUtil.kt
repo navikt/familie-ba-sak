@@ -71,28 +71,12 @@ fun lagPersonVedtak(fom: String,
     )
 }
 
-fun lagKjedeAvVedtakPerson(antall: Long, vedtak: Vedtak = lagVedtak()): List<VedtakPerson> {
-
-    return (1..antall)
-            .map {
-                VedtakPerson(
-                        person = tilfeldigPerson(),
-                        stønadFom = LocalDate.now().plusDays(it),
-                        stønadTom = LocalDate.now().plusDays(it + 1),
-                        beløp = 1054,
-                        vedtak = vedtak,
-                        type = Ytelsetype.ORDINÆR_BARNETRYGD
-                )
-            }
-}
-
 fun sats(ytelsetype: Ytelsetype) =
         when (ytelsetype) {
             Ytelsetype.ORDINÆR_BARNETRYGD -> 1054
             Ytelsetype.UTVIDET_BARNETRYGD -> 1054
             Ytelsetype.SMÅBARNSTILLEGG -> 660
         }
-
 
 fun lagSegmentBeløp(fom: String, tom: String, beløp: Int): LocalDateSegment<Int> =
         LocalDateSegment(dato(fom), dato(tom), beløp)

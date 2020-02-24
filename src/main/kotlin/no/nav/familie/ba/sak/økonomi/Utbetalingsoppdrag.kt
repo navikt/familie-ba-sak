@@ -15,10 +15,8 @@ import java.math.BigDecimal
 
 // Må forsikre oss om at tidslinjesegmentene er i samme rekkefølge for å få konsekvent periodeId
 // Sorter etter fraDato, sats, og evt til dato
-// Denne måten å sette periodeId på krever at vedtak.id inkrementeres i store nok steg, f.eks 50 og 50
-// Og at måten segmentene bygges opp på ikke endrer seg, dvs det kommer ALLTID i samme rekkefølge
+// PeriodeId = Vedtak.id * 1000 + offset
 // Beholder bare siste utbetalingsperiode hvis det er opphør.
-
 fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                           vedtak: Vedtak,
                           personberegninger: List<VedtakPerson>): Utbetalingsoppdrag {
@@ -26,10 +24,10 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
     val erOpphør = vedtak.resultat == OPPHØRT
 
     val utbetalingsperiodeMal =
-            when (erOpphør) {
-                true -> UtbetalingsperiodeMal(vedtak, true, vedtak.forrigeVedtakId!!)
-                false -> UtbetalingsperiodeMal(vedtak)
-            }
+            if (erOpphør)
+                UtbetalingsperiodeMal(vedtak, true, vedtak.forrigeVedtakId!!)
+            else
+                UtbetalingsperiodeMal(vedtak)
 
     val tidslinjeMap = beregnUtbetalingsperioder(personberegninger)
 
@@ -63,21 +61,24 @@ data class UtbetalingsperiodeMal(
         val periodeIdStart: Long = vedtak.id!!
 ) {
 
-    val MAX_PERIODEID_OFFSET = 49
+    val MAX_PERIODEID_OFFSET = 1000
 
     fun lagPeriode(klassifisering: String, segment: LocalDateSegment<Int>, periodeIdOffset: Int): Utbetalingsperiode {
 
         // Vedtak-id øker med 50, så vi kan ikke risikere overflow
-        if (periodeIdOffset > MAX_PERIODEID_OFFSET) {
+        if (periodeIdOffset >= MAX_PERIODEID_OFFSET) {
             throw IllegalArgumentException("periodeIdOffset forsøkt satt høyere enn ${MAX_PERIODEID_OFFSET}. " +
                                            "Det ville ført til duplisert periodeId")
         }
 
+        // Skaper "plass" til offset
+        val utvidetPeriodeIdStart = periodeIdStart * MAX_PERIODEID_OFFSET
+
         return Utbetalingsperiode(
                 erEndringPåEksisterendePeriode,
                 vedtak.opphørsdato?.let { Opphør(it) },
-                periodeIdStart + periodeIdOffset,
-                if (periodeIdOffset > 0) periodeIdStart + (periodeIdOffset - 1).toLong() else null,
+                utvidetPeriodeIdStart + periodeIdOffset,
+                if (periodeIdOffset > 0) utvidetPeriodeIdStart + (periodeIdOffset - 1).toLong() else null,
                 vedtak.vedtaksdato,
                 klassifisering,
                 segment.fom,

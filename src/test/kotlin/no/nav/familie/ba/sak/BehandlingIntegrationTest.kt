@@ -111,20 +111,6 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
-    fun `Sjekk at id på vedtak inkrementeres i store steg`() {
-        val fnr = randomFnr()
-
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = opprettNyOrdinærBehandling(fagsak)
-
-        val vedtak1 = opprettNyttInvilgetVedtak(behandling)
-        val vedtak2 = opprettNyttInvilgetVedtak(behandling)
-
-        Assertions.assertEquals(vedtak1.id!!+50,vedtak2.id)
-    }
-
-    @Test
-    @Tag("integration")
     fun `Test at opprettEllerOppdaterBehandling kjører uten feil`() {
         val fnr = randomFnr()
 
