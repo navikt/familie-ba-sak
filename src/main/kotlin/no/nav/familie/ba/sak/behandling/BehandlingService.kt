@@ -43,7 +43,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
-        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
+        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          nyBehandling.journalpostID,
                                                          nyBehandling.behandlingType,
