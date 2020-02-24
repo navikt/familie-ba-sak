@@ -114,9 +114,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return Ressurs.failure("Aktivt vedtak er tilknyttet behandling $gjeldendeBehandlingsId som IKKE er aktivt")
         }
 
-        /// TODO Her følger det med samme journalpost_id som forrige behandling. Er det riktig?
         val nyBehandling = Behandling(fagsak = gjeldendeBehandling.fagsak,
-                                      journalpostID = gjeldendeBehandling.journalpostID,
+                                      journalpostID = null,
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori)
@@ -152,6 +151,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             fagsakService.hentFagsakForPersonident(personIdent) ?: opprettFagsak(personIdent)
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
+        // TODO Denne bør fikses
         val nyFagsak = Fagsak(null, AktørId("1"), personIdent)
         fagsakService.lagreFagsak(nyFagsak)
         return nyFagsak
