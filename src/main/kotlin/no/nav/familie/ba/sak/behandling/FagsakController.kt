@@ -167,8 +167,8 @@ class FagsakController(
         if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG
             || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
             return badRequest("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
-        } else if (behandling.status == BehandlingStatus.IVERKSATT) {
-            return badRequest("Behandlingen er allerede iverksatt/avsluttet")
+        } else if (behandling.status == BehandlingStatus.IVERKSATT || behandling.status == BehandlingStatus.FERDIGSTILT) {
+            return badRequest("Behandlingen er allerede iverksatt/ferdigstilt")
         }
 
         logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
@@ -239,8 +239,8 @@ class FagsakController(
             return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er migrering")
         }
 
-        if (behandling.status != BehandlingStatus.IVERKSATT) {
-            return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt")
+        if (behandling.status != BehandlingStatus.IVERKSATT && behandling.status != BehandlingStatus.FERDIGSTILT) {
+            return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt/ferdigstilt")
         }
 
         val task = opprettOpphørVedtakTask(behandling,
