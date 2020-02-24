@@ -51,8 +51,7 @@ class ØkonomiKlient(
 
     fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): ResponseEntity<Ressurs<OppdragProtokollStatus>> {
         val headers = HttpHeaders()
-        headers.add("Content-Type", "application/json;charset=UTF-8")
-        headers.acceptCharset = listOf(Charsets.UTF_8)
+                .medContentTypeJsonUTF8()
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
         return restOperations.exchange(
@@ -73,9 +72,8 @@ class ØkonomiKlient(
     }
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime, oppdragTilAvstemming: List<OppdragId>): ResponseEntity<Ressurs<String>> {
-        val headers = HttpHeaders()
-        headers.add("Content-Type", "application/json;charset=UTF-8")
-        headers.acceptCharset = listOf(Charsets.UTF_8)
+        val headers = HttpHeaders().medContentTypeJsonUTF8()
+
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
         return restOperations.exchange(
