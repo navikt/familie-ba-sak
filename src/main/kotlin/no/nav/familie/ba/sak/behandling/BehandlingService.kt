@@ -57,7 +57,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
             }
         } else {
-            throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
+            throw IllegalStateException("Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
 
         return fagsak
