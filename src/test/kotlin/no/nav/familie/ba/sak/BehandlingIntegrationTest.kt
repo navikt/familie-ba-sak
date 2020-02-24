@@ -447,9 +447,13 @@ class BehandlingIntegrationTest {
                             resultat = VedtakResultat.INNVILGET,
                             begrunnelse = "")
         behandlingService.lagreVedtak(vedtak)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        fagsak.status = FagsakStatus.LØPENDE
+        fagsakService.lagreFagsak(fagsak)
 
         val oppdragIdListe = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
 

@@ -119,31 +119,67 @@ class FagsakController(
                 )
     }
 
-    @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
-    fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+    @PostMapping(path = ["/{fagsakId}/send-til-beslutter"])
+    fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
-        logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
+        logger.info("{} sender behandling til beslutter for fagsak med id {}", saksbehandlerId, fagsakId)
 
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
-                         ?: throw Error("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
-        val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
-                     ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+
+        return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
+                onSuccess = { ResponseEntity.ok(it) },
+                onFailure = { e ->
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(Ressurs.failure(e.cause?.message ?: e.message, e))
+                }
+        )
+    }
+
+    @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
+    fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+        val saksbehandlerId = hentSaksbehandler()
+
+        val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+
+        if (behandling.status != BehandlingStatus.SENDT_TIL_BESLUTTER) {
+            return forbidden("Kan ikke iverksette et vedtak som ikke er foreslått av en saksbehandler")
+        }
 
         if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG
             || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
-            return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede sendt til oppdrag og venter på kvittering"))
+            return badRequest("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandling.status == BehandlingStatus.IVERKSATT) {
-            return ResponseEntity.ok(Ressurs.failure("Behandlingen er allerede iverksatt/avsluttet"))
+            return badRequest("Behandlingen er allerede iverksatt/avsluttet")
         }
 
-        opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
+        logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG)
+        return Result.runCatching { behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
+                .fold(
+                        onSuccess = {
+                            val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
+                                         ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        return ResponseEntity
-                .ok(Ressurs.success("Task for iverksetting ble opprettet på fagsak $fagsakId på vedtak ${vedtak.id}"))
+                            opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
+
+                            return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
+                                    onSuccess = { ResponseEntity.ok(it) },
+                                    onFailure = {
+                                        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                .body(Ressurs.failure(it.cause?.message ?: it.message, it))
+                                    }
+                            )
+                        },
+                        onFailure = {
+                            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    .body(Ressurs.failure(it.cause?.message ?: it.message, it))
+                        }
+                )
     }
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
