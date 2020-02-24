@@ -143,8 +143,6 @@ class FagsakController(
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
-        logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
-
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
                          ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
@@ -158,6 +156,8 @@ class FagsakController(
         } else if (behandling.status == BehandlingStatus.IVERKSATT) {
             return badRequest("Behandlingen er allerede iverksatt/avsluttet")
         }
+
+        logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
         return Result.runCatching { behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
                 .fold(

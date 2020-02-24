@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.mottak.NyBehandlingHendelse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.OpprettBehandleSakOppgaveForNyBehandlingTask
 import no.nav.familie.ba.sak.økonomi.OppdragId
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -266,14 +267,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             throw IllegalStateException("Samme saksbehandler kan ikke foreslå og iverksette samme vedtak")
         }
 
-        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_IVERKSETTING)
+        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.GODKJENT)
     }
 
     fun oppdaterStatusPåBehandling(behandlingId: Long?, status: BehandlingStatus) {
         when (val behandling = hentBehandling(behandlingId)) {
             null -> throw Exception("Feilet ved oppdatering av status på behandling. Fant ikke behandling med id $behandlingId")
             else -> {
-                LOG.info("Endrer status på behandling $behandlingId fra ${behandling.status} til $status")
+                LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
                 behandling.status = status
                 behandlingRepository.save(behandling)
