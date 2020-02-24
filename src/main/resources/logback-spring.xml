@@ -37,6 +37,10 @@
         <appender-ref ref="secureLog"/>
     </logger>
 
+    <logger name="auditLogger" level="INFO" additivity="false">
+        <appender-ref ref="SPORING_LOG" />
+    </logger>
+
     <!-- Spesiell håndtering av loggeren no.nav.log.LogFilter for å forhindre logging av isAlive-sjekker o.l. -->
     <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
@@ -53,10 +57,6 @@
         <appender-ref ref="stdout_json"/>
         <!-- <appender-ref ref="Sentry" /> -->
     </root>
-
-    <logger name="sporing" level="INFO" additivity="false">
-        <appender-ref ref="SPORING_LOG"/>
-    </logger>
 
     <logger name="no.nav" level="WARN"/>
     <logger name="no.nav.familie" level="INFO"/>

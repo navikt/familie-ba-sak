@@ -8,26 +8,26 @@ import javax.persistence.*
 
 @Entity(name = "Person")
 @Table(name = "PO_PERSON")
-class Person(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_person_seq")
-        @SequenceGenerator(name = "po_person_seq")
-        val id: Long? = null,
+data class Person(@Id
+                  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_person_seq")
+                  @SequenceGenerator(name = "po_person_seq")
+                  val id: Long = 0,
 
-        //SØKER, BARN, ANNENPART
-        @Enumerated(EnumType.STRING) @Column(name = "type")
-        val type: PersonType,
+                  //SØKER, BARN, ANNENPART
+                  @Enumerated(EnumType.STRING) @Column(name = "type")
+                  val type: PersonType,
 
-        @Column(name = "foedselsdato", nullable = false)
-        val fødselsdato: LocalDate?,
+                  @Column(name = "foedselsdato", nullable = false)
+                  val fødselsdato: LocalDate,
 
-        @Embedded
-        @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))
-        val personIdent: PersonIdent,
+                  @Embedded
+                  @AttributeOverrides(AttributeOverride(name = "ident",
+                                                        column = Column(name = "person_ident", updatable = false)))
+                  val personIdent: PersonIdent,
 
-        @ManyToOne(optional = false)
-        @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
-        val personopplysningGrunnlag: PersonopplysningGrunnlag
+                  @ManyToOne(optional = false)
+                  @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
+                  val personopplysningGrunnlag: PersonopplysningGrunnlag
 ) : BaseEntitet() {
 
     override fun toString(): String {

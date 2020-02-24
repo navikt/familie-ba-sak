@@ -33,6 +33,7 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.exchange
+import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
@@ -67,7 +68,7 @@ class IntegrasjonTjeneste(
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun hentPersoninfoFor(personIdent: String): Personinfo? {
+    fun hentPersoninfoFor(personIdent: String): Personinfo {
         val pdlEnabled = featureToggleService.isEnabled("familie-ba-sak.personinfo-fra-pdl")
         val uri = "$integrasjonerServiceUri/personopplysning/v1/info"
         val uriTps = URI.create(uri)
@@ -83,7 +84,7 @@ class IntegrasjonTjeneste(
         }
     }
 
-    private fun hentPersoninfoPdl(personIdent: String, uri: String, pdlEnabled: Boolean, personinfoTps: Personinfo): Personinfo? {
+    private fun hentPersoninfoPdl(personIdent: String, uri: String, pdlEnabled: Boolean, personinfoTps: Personinfo): Personinfo {
         val uriPdl = URI.create(uri)
         return try {
             val responsePdl = requestMedPersonIdent<Ressurs<Personinfo>>(uriPdl, personIdent)
@@ -96,7 +97,7 @@ class IntegrasjonTjeneste(
             }
             personinfoPdl
         } catch (e: Exception) {
-            if (pdlEnabled) throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uriPdl, personIdent) else null
+            if (pdlEnabled) throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uriPdl, personIdent) else personinfoTps
         }
     }
 
@@ -117,6 +118,26 @@ class IntegrasjonTjeneste(
                                                personident)
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri, personident)
+        }
+    }
+
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    fun hentBehandlendeEnhet(geografiskTilknytning: String?, diskresjonskode: String?): List<Arbeidsfordelingsenhet> {
+        val uri = UriComponentsBuilder.fromUri(integrasjonerServiceUri)
+                .pathSegment("arbeidsfordeling", "enhet")
+                .queryParam("tema", "BAR")
+                .queryParam("geografi", geografiskTilknytning)
+                .queryParam("diskresjonskode", diskresjonskode)
+                .build().toUri()
+
+        return try {
+            val response = restOperations.exchange<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, HttpMethod.GET)
+            val data = response.body?.data
+            data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
+                    null,
+                    uri)
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri)
         }
     }
 
@@ -209,27 +230,22 @@ class IntegrasjonTjeneste(
     private fun sendJournalFørRequest(journalFørEndpoint: URI,
                                       arkiverDokumentRequest: ArkiverDokumentRequest)
             : ResponseEntity<Ressurs<ArkiverDokumentResponse>> {
-        val headers = HttpHeaders()
-        headers.add("Content-Type", "application/json;charset=UTF-8")
-        headers.acceptCharset = listOf(Charsets.UTF_8)
+        val headers = HttpHeaders().medContentTypeJsonUTF8()
         return restOperations.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(arkiverDokumentRequest, headers))
     }
 
     private fun sendOppgave(journalFørEndpoint: URI,
                             opprettOppgave: OpprettOppgave)
             : ResponseEntity<Ressurs<OppgaveResponse>> {
-        val headers = HttpHeaders()
-        headers.add("Content-Type", "application/json;charset=UTF-8")
-        headers.acceptCharset = listOf(Charsets.UTF_8)
+        val headers = HttpHeaders().medContentTypeJsonUTF8()
+
         return restOperations.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(opprettOppgave, headers))
     }
 
 
     private fun sendDistribusjonRequest(uri: URI,
                                         distribuerJournalpostRequest: DistribuerJournalpostRequest): ResponseEntity<Ressurs<String>> {
-        return restOperations.exchange(post(uri)
-                                               .acceptCharset(Charsets.UTF_8)
-                                               .header("Content-Type", "application/json;charset=UTF-8")
+        return restOperations.exchange(post(uri).headers { it.medContentTypeJsonUTF8() }
                                                .body(distribuerJournalpostRequest))
     }
 

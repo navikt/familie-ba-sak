@@ -7,7 +7,7 @@ no.nav.security.jwt:
   client:
     registration:
       familie-integrasjoner-onbehalfof:
-        resource-url: ${FAMILIE_KS_OPPSLAG_API_URL}
+        resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
         token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}

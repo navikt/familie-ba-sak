@@ -10,8 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.lagRandomSaksnummer
-import no.nav.familie.ba.sak.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -42,17 +41,16 @@ class VilkårServiceTest(
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, "1", "12345678910")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val samletVilkårResultat =
                 vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
                                                         vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")),
-                                                        behandling.id!!
+                                                        behandling.id
                 )
         Assertions.assertEquals(samletVilkårResultat.samletVilkårResultat.size,
                                 vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")).size)
@@ -64,24 +62,23 @@ class VilkårServiceTest(
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       lagRandomSaksnummer(),
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, "1", "12345678910")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         assertThrows<IllegalStateException> {
             vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
                                                     vilkårsvurderingUtenKomplettBarnVurdering,
-                                                    behandling.id!!
+                                                    behandling.id
             )
         }
 
         assertThrows<IllegalStateException> {
             vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
                                                     vilkårsvurderingUtenKomplettSøkerVurdering,
-                                                    behandling.id!!
+                                                    behandling.id
             )
         }
     }

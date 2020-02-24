@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -196,6 +197,21 @@ class IntergrasjonTjenesteTest {
             integrasjonTjeneste.ferdigstillOppgave(123)
         }.isInstanceOf(IntegrasjonException::class.java)
                 .hasMessageContaining("Kan ikke ferdigstille 123")
+    }
+
+    @Test
+    @Tag("integration")
+    fun `hentBehandlendeEnhet returnerer OK`() {
+        stubFor(get(urlEqualTo("/api/arbeidsfordeling/enhet?tema=BAR&geografi=1&diskresjonskode"))
+                .withHeader("Accept", containing("json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(Ressurs.success(listOf(Arbeidsfordelingsenhet("2", "foo")))))))
+
+        val enhet = integrasjonTjeneste.hentBehandlendeEnhet("1", null)
+        assertThat(enhet).isNotEmpty()
+        assertThat(enhet.first().enhetId).isEqualTo("2")
     }
 
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> {

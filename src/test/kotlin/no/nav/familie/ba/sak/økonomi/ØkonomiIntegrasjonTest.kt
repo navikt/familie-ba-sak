@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
-import no.nav.familie.ba.sak.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -61,12 +61,11 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       "randomSaksnummer",
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id!!, "1", "12345678910")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, "1", "12345678910")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         behandlingService.nyttVedtakForAktivBehandling(
@@ -87,16 +86,16 @@ class ØkonomiIntegrasjonTest : HttpTestBase(
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
-                        arrayOf(BarnBeregning(fødselsnummer = "12345678910",
-                                                beløp = 1054,
-                                                stønadFom = LocalDate.now(),
-                                                ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
+                        arrayOf(BarnBeregning(ident = "12345678910",
+                                              beløp = 1054,
+                                              stønadFom = LocalDate.of(2020, 1, 1),
+                                              ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
-        økonomiService.iverksettVedtak(behandling.id!!, vedtak.id!!, "ansvarligSaksbehandler")
+        økonomiService.iverksettVedtak(behandling.id, vedtak.id!!, "ansvarligSaksbehandler")
 
         val oppdatertBehandling = behandlingService.hentBehandling(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling?.status)

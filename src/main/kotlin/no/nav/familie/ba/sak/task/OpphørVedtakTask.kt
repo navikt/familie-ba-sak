@@ -15,7 +15,6 @@ import java.time.LocalDate
 import java.util.*
 
 @Service
-
 @TaskStepBeskrivelse(taskStepType = OpphørVedtakTask.TASK_STEP_TYPE,
                      beskrivelse = "Opphør aktiv behandling og vedtak",
                      maxAntallFeil = 3)
@@ -38,7 +37,7 @@ class OpphørVedtakTask(
     fun opprettIverksettMotOppdragTask(vedtak: Vedtak) {
         val nyTask = IverksettMotOppdrag.opprettTask(
                 vedtak.behandling.fagsak.personIdent.ident,
-                vedtak.behandling.id!!,
+                vedtak.behandling.id,
                 vedtak.id!!,
                 vedtak.ansvarligSaksbehandler)
 
@@ -58,7 +57,7 @@ class OpphørVedtakTask(
             return Task.nyTask(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(OpphørVedtakTaskDTO(
                                        personIdent = gjeldendeBehandling.fagsak.personIdent.ident,
-                                       gjeldendeBehandlingsId = gjeldendeBehandling.id!!,
+                                       gjeldendeBehandlingsId = gjeldendeBehandling.id,
                                        gjeldendeVedtaksId = gjeldendeVedtak.id!!,
                                        saksbehandlerId = saksbehandlerId,
                                        nyBehandlingType = nyBehandlingstype.name,

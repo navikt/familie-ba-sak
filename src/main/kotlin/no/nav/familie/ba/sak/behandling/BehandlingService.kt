@@ -15,15 +15,12 @@ import no.nav.familie.ba.sak.task.OpprettBehandleSakOppgaveForNyBehandlingTask
 import no.nav.familie.ba.sak.økonomi.OppdragId
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.ZoneId
-import java.util.*
-import java.util.concurrent.ThreadLocalRandom
-import kotlin.streams.asSequence
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
@@ -35,11 +32,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakService: FagsakService,
                         private val vilkårService: VilkårService,
                         private val integrasjonTjeneste: IntegrasjonTjeneste,
-                        private val featureToggleService: FeatureToggleService) {
+                        private val featureToggleService: FeatureToggleService,
+                        private val taskRepository: TaskRepository) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
-        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
+        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.ident)
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
@@ -47,12 +45,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          nyBehandling.journalpostID,
                                                          nyBehandling.behandlingType,
-                                                         randomSaksnummer(),
                                                          nyBehandling.kategori,
                                                          nyBehandling.underkategori)
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.fødselsnummer, nyBehandling.barnasFødselsnummer, behandling)
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.ident, nyBehandling.barnasIdenter, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
-                Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
+                val nyTask = Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
+                taskRepository.save(nyTask)
             } else {
                 LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
             }
@@ -73,13 +71,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          null,
                                                          BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                         randomSaksnummer(),
                                                          BehandlingKategori.NASJONAL,
                                                          BehandlingUnderkategori.ORDINÆR)
 
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.fødselsnummer, nyBehandling.barnasFødselsnummer, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
-                Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
+                val nyTask = Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
+                taskRepository.save(nyTask)
             } else {
                 LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
             }
@@ -103,22 +101,22 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                      postProsessor: (Vedtak) -> Unit): Ressurs<Vedtak> {
 
         val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
-                              ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling ${gjeldendeBehandlingsId}")
+                              ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling $gjeldendeBehandlingsId")
 
         val gjeldendeVedtakPerson = vedtakPersonRepository.finnPersonBeregningForVedtak(gjeldendeVedtak.id)
         if (gjeldendeVedtakPerson.isEmpty()) {
-            return Ressurs.failure("Fant ikke vedtak personer tilknyttet behandling ${gjeldendeBehandlingsId} og vedtak ${gjeldendeVedtak.id}")
+            return Ressurs.failure(
+                    "Fant ikke vedtak personer tilknyttet behandling $gjeldendeBehandlingsId og vedtak ${gjeldendeVedtak.id}")
         }
 
-        val gjeldendeBehandling = gjeldendeVedtak.behandling;
+        val gjeldendeBehandling = gjeldendeVedtak.behandling
         if (!gjeldendeBehandling.aktiv) {
-            return Ressurs.failure("Aktivt vedtak er tilknyttet behandling ${gjeldendeBehandlingsId} som IKKE er aktivt")
+            return Ressurs.failure("Aktivt vedtak er tilknyttet behandling $gjeldendeBehandlingsId som IKKE er aktivt")
         }
 
         /// TODO Her følger det med samme journalpost_id som forrige behandling. Er det riktig?
         val nyBehandling = Behandling(fagsak = gjeldendeBehandling.fagsak,
                                       journalpostID = gjeldendeBehandling.journalpostID,
-                                      saksnummer = randomSaksnummer(),
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori)
@@ -162,14 +160,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun opprettNyBehandlingPåFagsak(fagsak: Fagsak,
                                     journalpostID: String?,
                                     behandlingType: BehandlingType,
-                                    saksnummer: String,
                                     kategori: BehandlingKategori,
                                     underkategori: BehandlingUnderkategori): Behandling {
         val behandling =
                 Behandling(fagsak = fagsak,
                            journalpostID = journalpostID,
                            type = behandlingType,
-                           saksnummer = saksnummer,
                            kategori = kategori,
                            underkategori = underkategori)
         lagreNyOgDeaktiverGammelBehandling(behandling)
@@ -179,35 +175,37 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
                                                              barnasFødselsnummer: Array<String>,
                                                              behandling: Behandling) {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandling.id)
+        val personopplysningGrunnlag =
+                personopplysningGrunnlagRepository.save(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        personopplysningGrunnlag.leggTilPerson(Person(
-                personIdent = behandling.fagsak.personIdent,
-                type = PersonType.SØKER,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fødselsdato = integrasjonTjeneste.hentPersoninfoFor(fødselsnummer)?.fødselsdato
-        ))
+        val søker = Person(personIdent = behandling.fagsak.personIdent,
+                           type = PersonType.SØKER,
+                           personopplysningGrunnlag = personopplysningGrunnlag,
+                           fødselsdato = integrasjonTjeneste.hentPersoninfoFor(fødselsnummer).fødselsdato
+        )
 
+        personopplysningGrunnlag.personer.add(søker)
         lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer, personopplysningGrunnlag)
-
-        personopplysningGrunnlag.aktiv = true
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
     private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: Array<String>,
                                                                  personopplysningGrunnlag: PersonopplysningGrunnlag) {
-        barnasFødselsnummer.map { nyttBarn ->
-            if (personopplysningGrunnlag.barna.none { eksisterendeBarn -> eksisterendeBarn.personIdent.ident == nyttBarn }) {
-                personopplysningGrunnlag.leggTilPerson(Person(
-                        personIdent = PersonIdent(nyttBarn),
-                        type = PersonType.BARN,
-                        personopplysningGrunnlag = personopplysningGrunnlag,
-                        fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn)?.fødselsdato
-                ))
-            }
-        }
 
+        personopplysningGrunnlag.personer.addAll(leggTilBarnIPersonListe(barnasFødselsnummer, personopplysningGrunnlag))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+    }
+
+    private fun leggTilBarnIPersonListe(barnasFødselsnummer: Array<String>,
+                                        personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
+        return barnasFødselsnummer.filter { barn ->
+            personopplysningGrunnlag.barna.none { eksisterendeBarn -> barn == eksisterendeBarn.personIdent.ident }
+        }.map { nyttBarn ->
+            Person(personIdent = PersonIdent(nyttBarn),
+                   type = PersonType.BARN,
+                   personopplysningGrunnlag = personopplysningGrunnlag,
+                   fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn).fødselsdato
+            )
+        }
     }
 
     fun hentBehandlingHvisEksisterer(fagsakId: Long?): Behandling? {
@@ -228,16 +226,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 .map { behandling ->
                     OppdragId(
                             hentSøker(behandling)!!.personIdent.ident,
-                            behandling.id!!)
+                            behandling.id)
                 }
     }
 
     fun hentBehandlinger(fagsakId: Long?): List<Behandling?> {
         return behandlingRepository.finnBehandlinger(fagsakId)
-    }
-
-    fun lagreBehandling(behandling: Behandling) {
-        behandlingRepository.save(behandling)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling) {
@@ -296,7 +290,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                      personopplysningGrunnlag: PersonopplysningGrunnlag,
                                      nyttVedtak: NyttVedtak,
                                      ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
-        vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat, behandling.id!!)
+        vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat, behandling.id)
 
         val vedtak = Vedtak(
                 behandling = behandling,
@@ -330,19 +324,20 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             : Ressurs<RestFagsak> {
         nyBeregning.barnasBeregning.map {
             val person =
-                    personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.fødselsnummer),
+                    personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.ident),
                                                                                   personopplysningGrunnlag.id)
-                    ?: throw RuntimeException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
+                    ?: throw IllegalStateException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
             if (it.stønadFom.isBefore(person.fødselsdato)) {
-                throw RuntimeException("Ugyldig fra-og-med-dato (${it.stønadFom}) for ${person.fødselsdato}")
+                throw IllegalStateException("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
             }
 
             val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-            val sikkerStønadTom = person.fødselsdato?.plusYears(18)?.sisteDagIForrigeMåned()!!
+            val sikkerStønadTom = person.fødselsdato.plusYears(18)?.sisteDagIForrigeMåned()!!
 
             if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
-                throw RuntimeException("Stønadens fra-og-med-dato (${sikkerStønadFom}) er ETTER til-og-med-dato (${sikkerStønadTom}). ")
+                throw IllegalStateException(
+                        "Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
             }
 
             vedtakPersonRepository.save(
@@ -403,22 +398,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 )
     }
 
-    private fun randomSaksnummer(): String {
-        return ThreadLocalRandom.current()
-                .ints(STRING_LENGTH.toLong(), 0, charPool.size)
-                .asSequence()
-                .map(charPool::get)
-                .joinToString("")
-    }
-
     private fun hentSøker(behandling: Behandling): Person? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer.find { person -> person.type == PersonType.SØKER }
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer
+                .find { person -> person.type == PersonType.SØKER }
     }
 
     companion object {
-        val charPool: List<Char> = ('A'..'Z') + ('0'..'9')
-        const val STRING_LENGTH = 10
         val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
-
 }

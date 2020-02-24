@@ -4,10 +4,10 @@ import no.nav.familie.ba.sak.behandling.beregnUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat.OPPHØRT
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.UEND
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode.SatsType.MND
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -38,7 +38,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                             sats = BigDecimal(segment.value),
                             satsType = MND,
                             utbetalesTil = aktør,
-                            behandlingId = vedtak.behandling.id!!,
+                            behandlingId = vedtak.behandling.id,
                             // Denne måten å sette periodeId på krever at vedtak.id inkrementeres i store nok steg, f.eks 50 og 50
                             // Og at måten segmentene bygges opp på ikke endrer seg, dvs det kommer ALLTID i samme rekkefølge
                             periodeId = (if (!erOpphør) vedtak.id else vedtak.forrigeVedtakId)!! + indeks.toLong()
@@ -46,7 +46,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                 }
     }
 
-    val utbetalingsoppdrag = Utbetalingsoppdrag(
+    return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
             kodeEndring = if (!erOpphør) NY else UEND,
             fagSystem = FAGSYSTEM,
@@ -54,5 +54,4 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
             aktoer = aktør,
             utbetalingsperiode = utbetalingsperioder
     )
-    return utbetalingsoppdrag
 }

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
 import org.springframework.http.converter.ByteArrayHttpMessageConverter
 import org.springframework.http.converter.StringHttpMessageConverter
+import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 import java.nio.charset.StandardCharsets
 import java.time.Duration
@@ -22,11 +23,28 @@ class RestTemplateConfig {
         return RestTemplate(listOf(StringHttpMessageConverter(StandardCharsets.UTF_8), ByteArrayHttpMessageConverter()))
     }
 
+    @Bean("jwtBearer")
+    fun restTemplateJwtBearer(): RestOperations {
+
+        return RestTemplateBuilder()
+                .additionalCustomizers(NaisProxyCustomizer())
+                .build()
+    }
+
     @Bean
     fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestTemplateBuilder {
         return RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofSeconds(5))
                 .additionalInterceptors(consumerIdClientInterceptor)
                 .setReadTimeout(Duration.ofSeconds(5))
+    }
+
+
+
+    @Bean("clientCredentials")
+    fun restTemplateClientCredentials(): RestOperations {
+        return RestTemplateBuilder()
+                .additionalCustomizers(NaisProxyCustomizer())
+                .build()
     }
 }

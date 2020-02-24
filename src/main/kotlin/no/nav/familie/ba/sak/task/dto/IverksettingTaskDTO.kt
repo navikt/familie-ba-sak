@@ -1,6 +1,4 @@
-package no.nav.familie.ba.sak.økonomi
-
-import no.nav.familie.ba.sak.task.DefaultTaskDTO
+package no.nav.familie.ba.sak.task.dto
 
 class IverksettingTaskDTO(
         val behandlingsId: Long,
