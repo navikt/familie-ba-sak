@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalArgumentException
 import java.time.LocalDate.now
 
 internal class UtbetalingsoppdragPeriodiseringTest {
@@ -58,6 +57,17 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], id + 2, id + 1, 660, "2021-07-01", "2023-03-31")
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], id + 2, id + 1, 1054, "2021-03-01", "2038-02-28")
+    }
+
+    @Test()
+    fun `skal ikke tillate for lange kjeder av utbetalingsperioder`() {
+        val vedtak = lagVedtak()
+
+        lagUtbetalingsoppdrag("saksbehandler", vedtak, lagKjedeAvVedtakPerson(49, vedtak)) //OK
+
+        assertThrows<IllegalArgumentException> {
+            lagUtbetalingsoppdrag("saksbehandler", vedtak, lagKjedeAvVedtakPerson(50, vedtak))
+        }
     }
 
     fun assertUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode,

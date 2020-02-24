@@ -63,20 +63,29 @@ data class UtbetalingsperiodeMal(
         val periodeIdStart: Long = vedtak.id!!
 ) {
 
-    fun lagPeriode(klassifisering: String, segment: LocalDateSegment<Int>, periodeIdOffset: Int): Utbetalingsperiode =
-            Utbetalingsperiode(
-                    erEndringPåEksisterendePeriode,
-                    vedtak.opphørsdato?.let { Opphør(it) },
-                    periodeIdStart + periodeIdOffset,
-                    if (periodeIdOffset > 0) periodeIdStart + (periodeIdOffset - 1).toLong() else null,
-                    vedtak.vedtaksdato,
-                    klassifisering,
-                    segment.fom,
-                    segment.tom,
-                    BigDecimal(segment.value),
-                    MND,
-                    vedtak.behandling.fagsak.personIdent.ident,
-                    vedtak.behandling.id
-            )
+    val MAX_PERIODEID_OFFSET = 49
 
+    fun lagPeriode(klassifisering: String, segment: LocalDateSegment<Int>, periodeIdOffset: Int): Utbetalingsperiode {
+
+        // Vedtak-id øker med 50, så vi kan ikke risikere overflow
+        if (periodeIdOffset > MAX_PERIODEID_OFFSET) {
+            throw IllegalArgumentException("periodeIdOffset forsøkt satt høyere enn ${MAX_PERIODEID_OFFSET}. " +
+                                           "Det ville ført til duplisert periodeId")
+        }
+
+        return Utbetalingsperiode(
+                erEndringPåEksisterendePeriode,
+                vedtak.opphørsdato?.let { Opphør(it) },
+                periodeIdStart + periodeIdOffset,
+                if (periodeIdOffset > 0) periodeIdStart + (periodeIdOffset - 1).toLong() else null,
+                vedtak.vedtaksdato,
+                klassifisering,
+                segment.fom,
+                segment.tom,
+                BigDecimal(segment.value),
+                MND,
+                vedtak.behandling.fagsak.personIdent.ident,
+                vedtak.behandling.id
+        )
+    }
 }

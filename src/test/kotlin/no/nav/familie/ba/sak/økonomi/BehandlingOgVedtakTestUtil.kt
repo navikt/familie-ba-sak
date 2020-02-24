@@ -13,17 +13,17 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 import java.util.*
 
-private var gjeldendeVedtakId:Long=1
-private var gjeldendeBehandlingId:Long=1
-private val id_inkrement=50
+private var gjeldendeVedtakId: Long = 1
+private var gjeldendeBehandlingId: Long = 1
+private val id_inkrement = 50
 
-fun nesteVedtakId() : Long {
-    gjeldendeVedtakId+= id_inkrement
+fun nesteVedtakId(): Long {
+    gjeldendeVedtakId += id_inkrement
     return gjeldendeVedtakId
 }
 
-fun nesteBehandlingId() : Long {
-    gjeldendeBehandlingId+= id_inkrement
+fun nesteBehandlingId(): Long {
+    gjeldendeBehandlingId += id_inkrement
     return gjeldendeBehandlingId
 }
 
@@ -69,6 +69,21 @@ fun lagPersonVedtak(fom: String,
             vedtak = vedtak,
             type = ytelsetype
     )
+}
+
+fun lagKjedeAvVedtakPerson(antall: Long, vedtak: Vedtak = lagVedtak()): List<VedtakPerson> {
+
+    return (1..antall)
+            .map {
+                VedtakPerson(
+                        person = tilfeldigPerson(),
+                        stønadFom = LocalDate.now().plusDays(it),
+                        stønadTom = LocalDate.now().plusDays(it + 1),
+                        beløp = 1054,
+                        vedtak = vedtak,
+                        type = Ytelsetype.ORDINÆR_BARNETRYGD
+                )
+            }
 }
 
 fun sats(ytelsetype: Ytelsetype) =
