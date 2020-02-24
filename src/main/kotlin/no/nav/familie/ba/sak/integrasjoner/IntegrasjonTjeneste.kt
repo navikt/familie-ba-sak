@@ -70,34 +70,45 @@ class IntegrasjonTjeneste(
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentPersoninfoFor(personIdent: String): Personinfo {
         val pdlEnabled = featureToggleService.isEnabled("familie-ba-sak.personinfo-fra-pdl")
-        val uri = "$integrasjonerServiceUri/personopplysning/v1/info"
-        val uriTps = URI.create(uri)
         logger.info("Henter personinfo fra $integrasjonerServiceUri, toggle familie-ba-sak.personinfo-fra-pdl=$pdlEnabled")
-        return try {
-            val responseTps = requestMedPersonIdent<Ressurs<Personinfo>>(uriTps, personIdent)
-            secureLogger.info("Personinfo fra TPS for {}: {}", personIdent, responseTps.body?.data)
-            val personinfoTps = objectMapper.convertValue<Personinfo>(responseTps.body?.data, Personinfo::class.java)
-            val personinfoPdl = hentPersoninfoPdl(personIdent, "$uri/$TEMA", pdlEnabled, personinfoTps)
-            if (pdlEnabled) personinfoPdl else personinfoTps
-        } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uriTps, personIdent)
+
+        val tpsUri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info")
+        val pdlUri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info$TEMA")
+
+        val uri = if (pdlEnabled) pdlUri else tpsUri
+        val uriForSammenligning = if (pdlEnabled) tpsUri else pdlUri
+
+        val personinfo = hentPersoninfo(personIdent, uri)
+        sammenlignPersoninfo(personinfo, hentPersonInfoForSammenligning(personIdent, uriForSammenligning))
+        return personinfo
+    }
+
+    private fun sammenlignPersoninfo(personinfo: Personinfo, personinfoForSammenlign: Personinfo?) {
+        if (personinfo.fødselsdato.isEqual(personinfoForSammenlign?.fødselsdato)) {
+            logger.info("Fødselsdato fra PDL og TPS var identisk.")
+        } else {
+            logger.warn("Fødselsdato fra PDL og TPS var ulik!")
         }
     }
 
-    private fun hentPersoninfoPdl(personIdent: String, uri: String, pdlEnabled: Boolean, personinfoTps: Personinfo): Personinfo {
-        val uriPdl = URI.create(uri)
+    private fun hentPersoninfo(personIdent: String, uri: URI): Personinfo {
         return try {
-            val responsePdl = requestMedPersonIdent<Ressurs<Personinfo>>(uriPdl, personIdent)
-            secureLogger.info("Personinfo fra PDL for {}: {}", personIdent, responsePdl.body?.data)
-            val personinfoPdl = objectMapper.convertValue<Personinfo>(responsePdl.body?.data, Personinfo::class.java)
-            if (personinfoPdl.fødselsdato.isEqual(personinfoTps.fødselsdato)) {
-                logger.info("Fødselsdato var lik for tps og pdl!")
-            } else {
-                logger.warn("Fødselsdato var ulik for tps og pdl!")
-            }
-            personinfoPdl
+            val response = requestMedPersonIdent<Ressurs<Personinfo>>(uri, personIdent)
+            secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.body?.data)
+            objectMapper.convertValue<Personinfo>(response.body?.data, Personinfo::class.java)
         } catch (e: Exception) {
-            if (pdlEnabled) throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uriPdl, personIdent) else personinfoTps
+            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
+        }
+    }
+
+    private fun hentPersonInfoForSammenligning(personIdent: String, uri: URI): Personinfo? {
+        return try {
+            val response = requestMedPersonIdent<Ressurs<Personinfo>>(uri, personIdent)
+            secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.body?.data)
+            objectMapper.convertValue<Personinfo>(response.body?.data, Personinfo::class.java)
+        } catch (e: Exception) {
+            logger.warn("Feil ved oppslag på personinfo for sammenligning av data: ${e.message}")
+            null
         }
     }
 
