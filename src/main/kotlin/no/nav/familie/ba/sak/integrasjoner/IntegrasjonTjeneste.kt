@@ -73,7 +73,7 @@ class IntegrasjonTjeneste(
         logger.info("Henter personinfo fra $integrasjonerServiceUri, toggle familie-ba-sak.personinfo-fra-pdl=$pdlEnabled")
 
         val tpsUri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info")
-        val pdlUri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info$TEMA")
+        val pdlUri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info/$TEMA")
 
         val uri = if (pdlEnabled) pdlUri else tpsUri
         val uriForSammenligning = if (pdlEnabled) tpsUri else pdlUri
