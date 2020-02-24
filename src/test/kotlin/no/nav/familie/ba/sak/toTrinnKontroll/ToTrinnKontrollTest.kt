@@ -35,7 +35,7 @@ class ToTrinnKontrollTest {
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
+                                                                       null,
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
@@ -44,7 +44,7 @@ class ToTrinnKontrollTest {
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hentBehandling(behandling.id)?.status)
 
         behandlingService.valider2trinnVedIverksetting(behandling, "beslutter")
-        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, behandlingService.hentBehandling(behandling.id)?.status)
+        Assertions.assertEquals(BehandlingStatus.GODKJENT, behandlingService.hentBehandling(behandling.id)?.status)
     }
 
     @Test
@@ -54,7 +54,7 @@ class ToTrinnKontrollTest {
 
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
+                                                                       null,
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
