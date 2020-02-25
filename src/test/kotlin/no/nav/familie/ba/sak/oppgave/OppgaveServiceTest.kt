@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ba.sak.behandling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
@@ -32,6 +33,9 @@ class OppgaveServiceTest {
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
     @MockK
+    lateinit var arbeidsfordelingService: ArbeidsfordelingService
+
+    @MockK
     lateinit var behandlingRepository: BehandlingRepository
 
     @InjectMockKs
@@ -41,7 +45,7 @@ class OppgaveServiceTest {
     fun `Opprett oppgave skal lage oppgave med enhetsnummer fra norg2`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
-        every { integrasjonTjeneste.hentBehandlendeEnhetForPersonident(FNR) } returns listOf(
+        every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns listOf(
                 mockk {
                     every { enhetId } returns ENHETSNUMMER
                 }
@@ -67,7 +71,7 @@ class OppgaveServiceTest {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { integrasjonTjeneste.hentAktørId(FNR) } returns AktørId(AKTØR_ID_INTEGRASJONER)
-        every { integrasjonTjeneste.hentBehandlendeEnhetForPersonident(FNR) } returns emptyList()
+        every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
         val slot = slot<OpprettOppgave>()
         every { integrasjonTjeneste.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
