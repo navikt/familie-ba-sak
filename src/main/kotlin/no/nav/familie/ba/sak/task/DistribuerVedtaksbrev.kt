@@ -25,7 +25,7 @@ class DistribuerVedtaksbrev(
 
         if (featureToggleService.isEnabled("familie-ba-sak.distribuer-vedtaksbrev")) {
             LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${distribuerVedtaksbrevDTO.journalpostId}")
-            integrasjonTjeneste.distribuerVedtaksbrev(task.payload)
+            integrasjonTjeneste.distribuerVedtaksbrev(distribuerVedtaksbrevDTO.journalpostId)
         } else {
             LOG.info("Hopper over istribusjon av vedtaksbrev. Funksjonen er skrudd av")
         }
