@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner
 
 import no.nav.familie.ba.sak.common.BaseService
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -39,7 +40,8 @@ class IntegrasjonTjeneste(
         private val integrasjonerServiceUri: URI,
         restTemplateBuilderMedProxy: RestTemplateBuilder,
         clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+        private val featureToggleService: FeatureToggleService
 ) : BaseService(OAUTH2_CLIENT_CONFIG_KEY, restTemplateBuilderMedProxy, clientConfigurationProperties, oAuth2AccessTokenService) {
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
@@ -65,14 +67,46 @@ class IntegrasjonTjeneste(
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentPersoninfoFor(personIdent: String): Personinfo {
-        val uri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info")
-        logger.info("Henter personinfo fra $integrasjonerServiceUri")
+        val pdlEnabled = featureToggleService.isEnabled("familie-ba-sak.personinfo-fra-pdl")
+        logger.info("Henter personinfo fra $integrasjonerServiceUri, toggle familie-ba-sak.personinfo-fra-pdl=$pdlEnabled")
+
+        val tpsUri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info")
+        val pdlUri = URI.create("$integrasjonerServiceUri/personopplysning/v1/info/$TEMA")
+
+        val uri = if (pdlEnabled) pdlUri else tpsUri
+        val uriForSammenligning = if (pdlEnabled) tpsUri else pdlUri
+
+        val personinfo = hentPersoninfo(personIdent, uri)
+        sammenlignPersoninfo(personinfo, hentPersonInfoForSammenligning(personIdent, uriForSammenligning))
+        return personinfo
+    }
+
+    private fun sammenlignPersoninfo(personinfo: Personinfo, personinfoForSammenlign: Personinfo?) {
+        if (personinfo.fødselsdato.isEqual(personinfoForSammenlign?.fødselsdato)) {
+            logger.info("Fødselsdato fra PDL og TPS var identisk.")
+        } else {
+            logger.warn("Fødselsdato fra PDL og TPS var ulik!")
+        }
+    }
+
+    private fun hentPersoninfo(personIdent: String, uri: URI): Personinfo {
         return try {
             val response = requestMedPersonIdent<Ressurs<Personinfo>>(uri, personIdent)
-            secureLogger.info("Personinfo for {}: {}", personIdent, response.body?.data)
+            secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.body?.data)
             objectMapper.convertValue<Personinfo>(response.body?.data, Personinfo::class.java)
-        } catch (e: RestClientException) {
+        } catch (e: Exception) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
+        }
+    }
+
+    private fun hentPersonInfoForSammenligning(personIdent: String, uri: URI): Personinfo? {
+        return try {
+            val response = requestMedPersonIdent<Ressurs<Personinfo>>(uri, personIdent)
+            secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.body?.data)
+            objectMapper.convertValue<Personinfo>(response.body?.data, Personinfo::class.java)
+        } catch (e: Exception) {
+            logger.warn("Feil ved oppslag på personinfo for sammenligning av data: ${e.message}")
+            null
         }
     }
 
@@ -185,27 +219,22 @@ class IntegrasjonTjeneste(
     private fun sendJournalFørRequest(journalFørEndpoint: URI,
                                       arkiverDokumentRequest: ArkiverDokumentRequest)
             : ResponseEntity<Ressurs<ArkiverDokumentResponse>> {
-        val headers = HttpHeaders()
-        headers.add("Content-Type", "application/json;charset=UTF-8")
-        headers.acceptCharset = listOf(Charsets.UTF_8)
+        val headers = HttpHeaders().medContentTypeJsonUTF8()
         return restOperations.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(arkiverDokumentRequest, headers))
     }
 
     private fun sendOppgave(journalFørEndpoint: URI,
                             opprettOppgave: OpprettOppgave)
             : ResponseEntity<Ressurs<OppgaveResponse>> {
-        val headers = HttpHeaders()
-        headers.add("Content-Type", "application/json;charset=UTF-8")
-        headers.acceptCharset = listOf(Charsets.UTF_8)
+        val headers = HttpHeaders().medContentTypeJsonUTF8()
+
         return restOperations.exchange(journalFørEndpoint, HttpMethod.POST, HttpEntity<Any>(opprettOppgave, headers))
     }
 
 
     private fun sendDistribusjonRequest(uri: URI,
                                         distribuerJournalpostRequest: DistribuerJournalpostRequest): ResponseEntity<Ressurs<String>> {
-        return restOperations.exchange(post(uri)
-                                               .acceptCharset(Charsets.UTF_8)
-                                               .header("Content-Type", "application/json;charset=UTF-8")
+        return restOperations.exchange(post(uri).headers { it.medContentTypeJsonUTF8() }
                                                .body(distribuerJournalpostRequest))
     }
 
@@ -222,5 +251,6 @@ class IntegrasjonTjeneste(
         const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
 
         private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
+        private const val TEMA = "BAR"
     }
 }

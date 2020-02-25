@@ -7,10 +7,7 @@ import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpRequest
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
@@ -54,4 +51,9 @@ open class BaseService(clientConfigKey: String, restTemplateBuilder: RestTemplat
         return restOperations.exchange(uri, HttpMethod.GET, httpEntity)
     }
 
+    protected fun HttpHeaders.medContentTypeJsonUTF8(): HttpHeaders {
+        this.add("Content-Type", "application/json;charset=UTF-8")
+        this.acceptCharset = listOf(Charsets.UTF_8)
+        return this
+    }
 }

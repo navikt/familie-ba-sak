@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.mottak.NyBehandlingHendelse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.OpprettBehandleSakOppgaveForNyBehandlingTask
 import no.nav.familie.ba.sak.økonomi.OppdragId
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -114,9 +115,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             return Ressurs.failure("Aktivt vedtak er tilknyttet behandling $gjeldendeBehandlingsId som IKKE er aktivt")
         }
 
-        /// TODO Her følger det med samme journalpost_id som forrige behandling. Er det riktig?
         val nyBehandling = Behandling(fagsak = gjeldendeBehandling.fagsak,
-                                      journalpostID = gjeldendeBehandling.journalpostID,
+                                      journalpostID = null,
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori)
@@ -152,6 +152,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             fagsakService.hentFagsakForPersonident(personIdent) ?: opprettFagsak(personIdent)
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
+        // TODO Denne bør fikses
         val nyFagsak = Fagsak(null, AktørId("1"), personIdent)
         fagsakService.lagreFagsak(nyFagsak)
         return nyFagsak
@@ -257,16 +258,23 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId)
     }
 
+    fun sendBehandlingTilBeslutter(behandling: Behandling) {
+        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+    }
+
+    fun valider2trinnVedIverksetting(behandling: Behandling, ansvarligSaksbehandler: String) {
+        if (behandling.endretAv == ansvarligSaksbehandler) {
+            throw IllegalStateException("Samme saksbehandler kan ikke foreslå og iverksette samme vedtak")
+        }
+
+        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.GODKJENT)
+    }
+
     fun oppdaterStatusPåBehandling(behandlingId: Long?, status: BehandlingStatus) {
         when (val behandling = hentBehandling(behandlingId)) {
             null -> throw Exception("Feilet ved oppdatering av status på behandling. Fant ikke behandling med id $behandlingId")
             else -> {
-                LOG.info("Endrer status på behandling $behandlingId fra ${behandling.status} til $status")
-                if (status == BehandlingStatus.IVERKSATT) {
-                    val fagsak = behandling.fagsak
-                    fagsak.status = FagsakStatus.LØPENDE
-                    fagsakService.lagreFagsak(fagsak)
-                }
+                LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
                 behandling.status = status
                 behandlingRepository.save(behandling)
