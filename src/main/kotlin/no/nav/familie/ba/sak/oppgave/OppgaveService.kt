@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.oppgave
 
+import no.nav.familie.ba.sak.behandling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.kontrakter.felles.oppgave.IdentType
@@ -13,14 +14,15 @@ import java.time.format.DateTimeFormatter
 
 @Service
 class OppgaveService(private val integrasjonTjeneste: IntegrasjonTjeneste,
-                     private val behandlingRepository: BehandlingRepository) {
+                     private val behandlingRepository: BehandlingRepository,
+                     private val arbeidsfordelingService: ArbeidsfordelingService) {
 
     fun opprettOppgaveForNyBehandling(behandlingsId: Long): String {
         val behandling = behandlingRepository.finnBehandling(behandlingsId) ?: error("Kan ikke finne behandling med id $behandlingsId")
         val fagsakId = behandling.fagsak.id ?: error("Kan ikke finne fagsakId for behandling $behandlingsId")
 
-        val aktørId = Result.run { integrasjonTjeneste.hentAktørId(behandling.fagsak.personIdent.ident) }.id
-        val enhetsnummer = integrasjonTjeneste.hentBehandlendeEnhetForPersonident(behandling.fagsak.personIdent.ident).firstOrNull()
+        val aktørId = integrasjonTjeneste.hentAktørId(behandling.fagsak.personIdent.ident).id
+        val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
 
         val opprettOppgave = OpprettOppgave(ident = OppgaveIdent(ident = aktørId, type = IdentType.Aktør),
                                             saksId = fagsakId.toString(),

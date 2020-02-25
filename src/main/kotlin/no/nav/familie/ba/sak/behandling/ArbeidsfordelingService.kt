@@ -5,12 +5,14 @@ import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import org.springframework.stereotype.Service
 
 import java.lang.RuntimeException
 
-class ArbeidsfordelingService(val behandlingRepository: BehandlingRepository,
-                              val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-                              val integrasjonTjeneste: IntegrasjonTjeneste) {
+@Service
+class ArbeidsfordelingService(private val behandlingRepository: BehandlingRepository,
+                              private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+                              private val integrasjonTjeneste: IntegrasjonTjeneste) {
     fun hentBehandlendeEnhet(fagsak: Fagsak): List<Arbeidsfordelingsenhet> {
         val søker = integrasjonTjeneste.hentPersoninfoFor(fagsak.personIdent.ident)
 
