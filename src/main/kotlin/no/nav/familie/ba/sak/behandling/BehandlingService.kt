@@ -49,12 +49,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          nyBehandling.kategori,
                                                          nyBehandling.underkategori)
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.ident, nyBehandling.barnasIdenter, behandling)
-            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
-                val nyTask = Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
-                taskRepository.save(nyTask)
-            } else {
-                LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
-            }
         } else {
             throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
         }
