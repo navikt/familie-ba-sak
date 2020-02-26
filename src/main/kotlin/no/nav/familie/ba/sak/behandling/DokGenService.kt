@@ -85,7 +85,7 @@ class DokGenService(
     private fun mapTilOpphørtBrevFelter(vedtak: Vedtak): String {
         val brevfelter = "{\"fodselsnummer\": \"%s\",\n" +
                          "\"navn\": \"%s\",\n" +
-                         "\"tDato\": \"%s\",\n" +
+                         "\"tdato\": \"%s\",\n" +
                          "\"hjemmel\": \"%s\",\n" +
                          "\"fritekst\": \"%s\"}"
 
