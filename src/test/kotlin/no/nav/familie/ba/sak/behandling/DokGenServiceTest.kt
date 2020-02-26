@@ -46,6 +46,18 @@ class DokGenServiceTest(@Autowired
             begrunnelse = ""
     )
 
+    private val opphørtVedtak= Vedtak(
+            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
+                                    journalpostID = "",
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                    kategori = BehandlingKategori.NASJONAL,
+                                    underkategori = BehandlingUnderkategori.ORDINÆR),
+            ansvarligSaksbehandler = "ansvarligSaksbehandler",
+            vedtaksdato = LocalDate.now(),
+            resultat = VedtakResultat.OPPHØRT,
+            begrunnelse = ""
+    )
+
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
         val markdown= dokGenService.hentStønadBrevMarkdown(vedtak)
@@ -57,5 +69,11 @@ class DokGenServiceTest(@Autowired
     fun `Test å generer Markdown for avslag brev`(){
         val markdown= dokGenService.hentStønadBrevMarkdown(avslagVedtak)
         assert(markdown.startsWith("<br>Du har ikke rett til barnetrygd fordi ."))
+    }
+
+    @Test
+    fun `Test å generer Markdown for opphørt brev`(){
+        val markdown= dokGenService.hentStønadBrevMarkdown(opphørtVedtak)
+        assert(markdown.startsWith("<br>Barnetrygden din stanses fra"))
     }
 }
