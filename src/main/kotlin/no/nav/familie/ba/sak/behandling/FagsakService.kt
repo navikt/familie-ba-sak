@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultatRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
@@ -23,6 +24,23 @@ class FagsakService(
         private val samletVilkårResultatRepository: SamletVilkårResultatRepository,
         private val behandlingRepository: BehandlingRepository,
         private val vedtakRepository: VedtakRepository) {
+
+    @Transactional
+    fun nyFagsak(nyFagsak: NyFagsak): Ressurs<RestFagsak> {
+        return when (val hentetFagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(nyFagsak.personIdent))) {
+            null -> {
+                val fagsak = Fagsak(
+                        aktørId = AktørId("1"),
+                        personIdent = PersonIdent(nyFagsak.personIdent)
+                )
+                lagreFagsak(fagsak)
+
+                hentRestFagsak(fagsakId = fagsak.id)
+            }
+            else -> Ressurs.failure(
+                    "Kan ikke opprette fagsak på person som allerede finnes. Gå til fagsak ${hentetFagsak.id} for å se på saken")
+        }
+    }
 
     @Transactional
     fun hentRestFagsak(fagsakId: Long?): Ressurs<RestFagsak> {

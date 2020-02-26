@@ -37,6 +37,20 @@ class FagsakController(
         private val taskRepository: TaskRepository
 ) {
 
+    @PostMapping(path = ["/ny-fagsak"])
+    fun nyFagsak(@RequestBody nyFagsak: NyFagsak): ResponseEntity<Ressurs<RestFagsak>> {
+        val saksbehandlerId = hentSaksbehandler()
+
+        logger.info("{} oppretter ny fagsak", saksbehandlerId)
+
+
+        return Result.runCatching { fagsakService.nyFagsak(nyFagsak) }
+                .fold(
+                        onSuccess = { ResponseEntity.ok(it) },
+                        onFailure = { e -> ResponseEntity.ok(Ressurs.failure("Opprettelse av fagsak feilet", e)) }
+                )
+    }
+
     @GetMapping(path = ["/{fagsakId}"])
     fun hentFagsak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
@@ -256,3 +270,7 @@ class FagsakController(
         val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
 }
+
+data class NyFagsak(
+        val personIdent: String
+)

@@ -39,7 +39,7 @@ class BehandlingController(private val oidcUtil: OIDCUtil,
         return html
     }
 
-    @PostMapping(path = ["/opprett"])
+    @PostMapping(path = ["/ny-behandling"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = try {
             oidcUtil.getClaim("preferred_username") ?: "VL"

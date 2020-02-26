@@ -38,11 +38,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
-        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.ident)
+        val fagsak = fagsakService.hentFagsakForPersonident(personIdent = PersonIdent(nyBehandling.ident))
+                     ?: throw IllegalStateException("Kan ikke lage behandling på person uten tilknyttet fagsak")
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
-        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
+        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          nyBehandling.journalpostID,
                                                          nyBehandling.behandlingType,
@@ -50,7 +51,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          nyBehandling.underkategori)
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.ident, nyBehandling.barnasIdenter, behandling)
         } else {
-            throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
+            throw IllegalStateException("Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
 
         return fagsak
@@ -62,7 +63,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
-        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
+        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          null,
                                                          BehandlingType.FØRSTEGANGSBEHANDLING,

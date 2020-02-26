@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrev.Companion.TASK_STEP_TYPE
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -30,7 +31,15 @@ class JournalførVedtaksbrev(
 
         val journalpostId = integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr, fagsakId)
 
-        val nyTask = Task.nyTask(DistribuerVedtaksbrev.TASK_STEP_TYPE, journalpostId, task.metadata)
+        val nyTask = Task.nyTask(
+                type = DistribuerVedtaksbrev.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                        DistribuerVedtaksbrevDTO(
+                                personIdent = vedtak.behandling.fagsak.personIdent.ident,
+                                behandlingId = vedtak.behandling.id,
+                                journalpostId = journalpostId
+                        )),
+                properties = task.metadata)
         taskRepository.save(nyTask)
     }
 
