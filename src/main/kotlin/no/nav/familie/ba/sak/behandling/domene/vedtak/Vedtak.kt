@@ -52,6 +52,7 @@ fun VedtakResultat.toDokGenTemplate(): String {
     return when (this) {
         VedtakResultat.INNVILGET -> "Innvilget"
         VedtakResultat.AVSLÅTT -> "Avslag"
+        VedtakResultat.OPPHØRT -> "Opphør"
         else -> throw RuntimeException("Invalid/Unsupported vedtak result")
     }
 }

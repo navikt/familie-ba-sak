@@ -303,7 +303,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 begrunnelse = nyttVedtak.begrunnelse
         )
 
-        if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT) {
+        if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT || nyttVedtak.resultat == VedtakResultat.OPPHØRT) {
             vedtak.stønadBrevMarkdown = Result.runCatching { dokGenService.hentStønadBrevMarkdown(vedtak) }
                     .fold(
                             onSuccess = { it },

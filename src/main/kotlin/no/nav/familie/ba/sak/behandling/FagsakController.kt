@@ -111,8 +111,8 @@ class FagsakController(
         val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
                      ?: return notFound("Fant ikke aktiv vedtak på fagsak $fagsakId, behandling ${behandling.id}")
 
-        if (vedtak.resultat == VedtakResultat.AVSLÅTT) {
-            return badRequest("Kan ikke lagre beregning på et avslått vedtak")
+        if (vedtak.resultat == VedtakResultat.AVSLÅTT || vedtak.resultat == VedtakResultat.OPPHØRT) {
+            return badRequest("Kan ikke lagre beregning på et avslått/opphørt vedtak")
         }
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)

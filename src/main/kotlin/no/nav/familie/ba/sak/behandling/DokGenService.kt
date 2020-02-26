@@ -36,6 +36,7 @@ class DokGenService(
         when (vedtak.resultat) {
             VedtakResultat.INNVILGET -> return mapTilInnvilgetBrevFelter(vedtak)
             VedtakResultat.AVSLÅTT -> return mapTilAvslagBrevFelter(vedtak)
+            VedtakResultat.OPPHØRT -> return mapTilOpphørtBrevFelter(vedtak)
             else -> {
                 throw RuntimeException("Invalid/unsupported vedtak.resultat")
             }
@@ -77,6 +78,22 @@ class DokGenService(
                 brevfelter,
                 vedtak.behandling.fagsak.personIdent.ident,
                 "No Name",
+                "",
+                vedtak.begrunnelse)
+    }
+
+    private fun mapTilOpphørtBrevFelter(vedtak: Vedtak): String {
+        val brevfelter = "{\"fodselsnummer\": \"%s\",\n" +
+                         "\"navn\": \"%s\",\n" +
+                         "\"tDato\": \"%s\",\n" +
+                         "\"hjemmel\": \"%s\",\n" +
+                         "\"fritekst\": \"%s\"}"
+
+        return String.format( //TODO: sett navn, hjemmel og firtekst
+                brevfelter,
+                vedtak.behandling.fagsak.personIdent.ident,
+                "No Name",
+                "01.01.01",
                 "",
                 vedtak.begrunnelse)
     }
