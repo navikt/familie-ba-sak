@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak
 
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.DokGenService
 import no.nav.familie.ba.sak.behandling.FagsakService
+import no.nav.familie.ba.sak.behandling.NyFagsak
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
@@ -23,6 +25,7 @@ import no.nav.familie.ba.sak.util.randomFnr
 import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.økonomi.OppdragId
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
@@ -32,6 +35,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -39,11 +43,12 @@ import java.time.LocalDate
 import javax.transaction.Transactional
 
 
-@SpringBootTest
+@SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth")
 @Tag("integration")
+@AutoConfigureWireMock(port = 28085)
 class BehandlingIntegrationTest {
 
     @Autowired
@@ -70,7 +75,7 @@ class BehandlingIntegrationTest {
     @Autowired
     lateinit var vilkårService: VilkårService
 
-    @MockK
+    @Autowired
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
     @MockK(relaxed = true)
@@ -97,6 +102,19 @@ class BehandlingIntegrationTest {
                 integrasjonTjeneste,
                 featureToggleService,
                 taskRepository)
+
+        stubFor(get(urlEqualTo("/api/aktoer/v1"))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
+        stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019, 1, 1)))))))
+        stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019, 1, 1)))))))
     }
 
     @Test
@@ -113,10 +131,6 @@ class BehandlingIntegrationTest {
     @Tag("integration")
     fun `Test at opprettEllerOppdaterBehandling kjører uten feil`() {
         val fnr = randomFnr()
-
-        every {
-            integrasjonTjeneste.hentPersoninfoFor(any())
-        } returns Personinfo(LocalDate.now())
 
         val nyBehandling = NyBehandlingHendelse(
                 fnr,
@@ -177,8 +191,8 @@ class BehandlingIntegrationTest {
         val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = opprettNyOrdinærBehandling(fagsak)
 
-        opprettNyttInvilgetVedtak(behandling, saksbehandler="ansvarligSaksbehandler1")
-        opprettNyttInvilgetVedtak(behandling, saksbehandler="ansvarligSaksbehandler2")
+        opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler1")
+        opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler2")
 
         val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
@@ -264,10 +278,6 @@ class BehandlingIntegrationTest {
         val barn1Id = randomFnr()
         val barn2Id = randomFnr()
 
-        every {
-            integrasjonTjeneste.hentPersoninfoFor(any())
-        } returns Personinfo(LocalDate.of(2019, 1, 1))
-
         val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, arrayOf(barn1Id)))
         val fagsak2 =
                 behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, arrayOf(barn2Id)))
@@ -294,10 +304,7 @@ class BehandlingIntegrationTest {
         val morId = randomFnr()
         val barnId = randomFnr()
 
-        every {
-            integrasjonTjeneste.hentPersoninfoFor(any())
-        } returns Personinfo(LocalDate.of(2019, 1, 1))
-
+        fagsakService.nyFagsak(NyFagsak(personIdent = morId))
         behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NASJONAL,
                                                          BehandlingUnderkategori.ORDINÆR,
                                                          morId,
@@ -322,10 +329,7 @@ class BehandlingIntegrationTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        every {
-            integrasjonTjeneste.hentPersoninfoFor(any())
-        } returns Personinfo(LocalDate.of(2019, 1, 1))
-
+        fagsakService.nyFagsak(NyFagsak(personIdent = søkerFnr))
         val nyBehandling =
                 NyBehandling(BehandlingKategori.NASJONAL,
                              BehandlingUnderkategori.ORDINÆR,
@@ -468,7 +472,6 @@ class BehandlingIntegrationTest {
 
         return behandlingService.hentVedtakHvisEksisterer(behandling.id)!!
     }
-
 
 
 }

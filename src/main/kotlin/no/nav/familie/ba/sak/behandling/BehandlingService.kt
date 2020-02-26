@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.mottak.NyBehandlingHendelse
@@ -38,25 +39,20 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
-        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.ident)
+        val fagsak = fagsakService.hentFagsakForPersonident(personIdent = PersonIdent(nyBehandling.ident))
+                     ?: throw IllegalStateException("Kan ikke lage behandling på person uten tilknyttet fagsak")
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
-        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
+        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          nyBehandling.journalpostID,
                                                          nyBehandling.behandlingType,
                                                          nyBehandling.kategori,
                                                          nyBehandling.underkategori)
             lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.ident, nyBehandling.barnasIdenter, behandling)
-            if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
-                val nyTask = Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
-                taskRepository.save(nyTask)
-            } else {
-                LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
-            }
         } else {
-            throw Exception("Kan ikke lagre ny behandling. Fagsaken har en aktiv behandling som ikke er iverksatt.")
+            throw IllegalStateException("Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
 
         return fagsak
@@ -68,7 +64,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
-        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.IVERKSATT) {
+        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
                                                          null,
                                                          BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -152,8 +148,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             fagsakService.hentFagsakForPersonident(personIdent) ?: opprettFagsak(personIdent)
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
-        // TODO Denne bør fikses
-        val nyFagsak = Fagsak(null, AktørId("1"), personIdent)
+        val aktørId = integrasjonTjeneste.hentAktørId(personIdent.ident)
+        val nyFagsak = Fagsak(null, aktørId, personIdent)
         fagsakService.lagreFagsak(nyFagsak)
         return nyFagsak
     }
@@ -182,7 +178,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val søker = Person(personIdent = behandling.fagsak.personIdent,
                            type = PersonType.SØKER,
                            personopplysningGrunnlag = personopplysningGrunnlag,
-                           fødselsdato = integrasjonTjeneste.hentPersoninfoFor(fødselsnummer).fødselsdato
+                           fødselsdato = integrasjonTjeneste.hentPersoninfoFor(fødselsnummer).fødselsdato,
+                           aktørId = behandling.fagsak.aktørId
         )
 
         personopplysningGrunnlag.personer.add(søker)
@@ -204,7 +201,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             Person(personIdent = PersonIdent(nyttBarn),
                    type = PersonType.BARN,
                    personopplysningGrunnlag = personopplysningGrunnlag,
-                   fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn).fødselsdato
+                   fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn).fødselsdato,
+                   aktørId = hentAktørIdOrNull(nyttBarn)
             )
         }
     }
@@ -409,6 +407,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun hentSøker(behandling: Behandling): Person? {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer
                 .find { person -> person.type == PersonType.SØKER }
+    }
+
+    private fun hentAktørIdOrNull(ident: String): AktørId? {
+        return Result.runCatching {
+            return integrasjonTjeneste.hentAktørId(ident)
+        }.fold(
+                onSuccess = { it },
+                onFailure = { null }
+        )
     }
 
     companion object {
