@@ -8,8 +8,8 @@ import javax.persistence.*
 @Table(name = "VILKAR_RESULTAT")
 class VilkårResultat(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vilkar_resultat_seq")
-        @SequenceGenerator(name = "vilkar_resultat_seq")
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vilkar_resultat_seq_generator")
+        @SequenceGenerator(name = "vilkar_resultat_seq_generator", sequenceName = "vilkar_resultat_seq", allocationSize = 50)
         val id: Long? = null,
 
         @ManyToOne @JoinColumn(name = "samlet_vilkar_resultat_id")
