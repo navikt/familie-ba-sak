@@ -9,8 +9,8 @@ import javax.persistence.*
 @Table(name = "FAGSAK")
 data class Fagsak(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq")
-        @SequenceGenerator(name = "fagsak_seq")
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq_generator")
+        @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
         val id: Long? = null,
 
         @Embedded
