@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
@@ -27,7 +28,7 @@ fun nesteBehandlingId(): Long {
     return gjeldendeBehandlingId
 }
 
-val defaultFagsak = Fagsak(1, null, PersonIdent("12345"), FagsakStatus.OPPRETTET)
+val defaultFagsak = Fagsak(1, AktørId("1"), PersonIdent("12345"), FagsakStatus.OPPRETTET)
 fun lagBehandling() = Behandling(id = nesteBehandlingId(),
                                  fagsak = defaultFagsak,
                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,

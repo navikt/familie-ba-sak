@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Personopplysni
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -30,7 +31,7 @@ class ArbeidsfordelingServiceTest {
 
     @Test
     fun `hentBehandlendeEnhet skal kjøre uten feil`() {
-        val fagsak = Fagsak(personIdent = PersonIdent(""))
+        val fagsak = Fagsak(personIdent = PersonIdent(""), aktørId = AktørId("1"))
 
         every { integrasjonTjeneste.hentBehandlendeEnhet(any(), any()) } returns listOf()
         every { integrasjonTjeneste.hentPersoninfoFor(any()) } returns Personinfo(LocalDate.now())

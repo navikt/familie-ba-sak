@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.domene.personopplysninger
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import java.time.LocalDate
 import javax.persistence.*
@@ -27,7 +28,11 @@ data class Person(@Id
 
                   @ManyToOne(optional = false)
                   @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
-                  val personopplysningGrunnlag: PersonopplysningGrunnlag
+                  val personopplysningGrunnlag: PersonopplysningGrunnlag,
+
+                  @Embedded
+                  @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+                  val aktørId: AktørId? = null
 ) : BaseEntitet() {
 
     override fun toString(): String {
