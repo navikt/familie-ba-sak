@@ -33,6 +33,7 @@ import java.time.LocalDateTime
 class FagsakController(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
+        private val toTrinnKontrollService: ToTrinnKontrollService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val taskRepository: TaskRepository
 ) {
@@ -173,7 +174,7 @@ class FagsakController(
 
         logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
-        return Result.runCatching { behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
+        return Result.runCatching { toTrinnKontrollService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
                 .fold(
                         onSuccess = {
                             val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)

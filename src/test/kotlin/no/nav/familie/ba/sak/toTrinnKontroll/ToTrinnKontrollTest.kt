@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.toTrinnKontroll
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.randomFnr
@@ -26,6 +27,9 @@ class ToTrinnKontrollTest {
     lateinit var behandlingService: BehandlingService
 
     @Autowired
+    lateinit var toTrinnKontrollService: ToTrinnKontrollService
+
+    @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
     @Test
@@ -40,10 +44,10 @@ class ToTrinnKontrollTest {
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
 
-        behandlingService.sendBehandlingTilBeslutter(behandling)
+        toTrinnKontrollService.sendBehandlingTilBeslutter(behandling)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hentBehandling(behandling.id)?.status)
 
-        behandlingService.valider2trinnVedIverksetting(behandling, "beslutter")
+        toTrinnKontrollService.valider2trinnVedIverksetting(behandling, "beslutter")
         Assertions.assertEquals(BehandlingStatus.GODKJENT, behandlingService.hentBehandling(behandling.id)?.status)
     }
 
@@ -66,6 +70,6 @@ class ToTrinnKontrollTest {
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, endretBehandling?.status)
         Assertions.assertNotNull(endretBehandling?.endretAv)
 
-        assertThrows<IllegalStateException> { behandlingService.valider2trinnVedIverksetting (endretBehandling!!, "VL") }
+        assertThrows<IllegalStateException> { toTrinnKontrollService.valider2trinnVedIverksetting (endretBehandling!!, "VL") }
     }
 }

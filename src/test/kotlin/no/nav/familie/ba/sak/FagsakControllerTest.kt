@@ -38,6 +38,9 @@ class FagsakControllerTest(
         private val fagsakService: FagsakService,
 
         @Autowired
+        private val toTrinnKontrollService: ToTrinnKontrollService,
+
+        @Autowired
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
         @Autowired
@@ -48,9 +51,6 @@ class FagsakControllerTest(
 
         @Autowired
         private val behandlingRepository: BehandlingRepository,
-
-        @Autowired
-        private val behandlingService: BehandlingService,
 
         @Autowired
         private val fagsakController: FagsakController,
@@ -102,7 +102,11 @@ class FagsakControllerTest(
         every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
         every { mockBehandlingLager.hentVedtakHvisEksisterer(any()) } returns vedtak
         val fagsakController =
-                FagsakController(fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
+                FagsakController(fagsakService,
+                                 mockBehandlingLager,
+                                 toTrinnKontrollService,
+                                 personopplysningGrunnlagRepository,
+                                 taskRepository)
 
         val response = fagsakController.opphørMigrertVedtak(1)
         assert(response.statusCode == HttpStatus.OK)
@@ -122,7 +126,11 @@ class FagsakControllerTest(
         every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
         every { mockBehandlingLager.hentVedtakHvisEksisterer(any()) } returns vedtak
         val fagsakController =
-                FagsakController(fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
+                FagsakController(fagsakService,
+                                 mockBehandlingLager,
+                                 toTrinnKontrollService,
+                                 personopplysningGrunnlagRepository,
+                                 taskRepository)
 
         val response = fagsakController.opphørMigrertVedtak(1, Opphørsvedtak(LocalDate.now()))
         assert(response.statusCode == HttpStatus.OK)
@@ -168,8 +176,11 @@ class FagsakControllerTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val fagsakController =
-                FagsakController(fagsakService, behandlingService,
-                                 personopplysningGrunnlagRepository, taskRepository)
+                FagsakController(fagsakService,
+                                 behandlingService,
+                                 toTrinnKontrollService,
+                                 personopplysningGrunnlagRepository,
+                                 taskRepository)
 
         val response = fagsakController.nyttVedtak(1, NyttVedtak(
                 resultat = VedtakResultat.AVSLÅTT,
