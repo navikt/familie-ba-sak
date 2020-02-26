@@ -2,10 +2,7 @@ package no.nav.familie.ba.sak
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.DokGenService
-import no.nav.familie.ba.sak.behandling.FagsakController
-import no.nav.familie.ba.sak.behandling.FagsakService
+import no.nav.familie.ba.sak.behandling.*
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.*
@@ -17,6 +14,8 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.util.randomFnr
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
@@ -65,6 +64,30 @@ class FagsakControllerTest(
         @Autowired
         private val featureToggleService: FeatureToggleService
 ) {
+
+    @Test
+    @Tag("integration")
+    fun `Skal opprette fagsak`() {
+        val fnr = randomFnr()
+
+        fagsakController.nyFagsak(NyFagsak(personIdent = fnr))
+        Assertions.assertEquals(fnr, fagsakService.hentFagsakForPersonident(PersonIdent(fnr))?.personIdent?.ident)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Skal kaste feil ved opprettelse av fagsak på person som allerede finnes`() {
+        val fnr = randomFnr()
+
+        val restFagsak = fagsakController.nyFagsak(NyFagsak(personIdent = fnr))
+        Assertions.assertEquals(Ressurs.Status.SUKSESS, restFagsak.body?.status)
+        Assertions.assertEquals(fnr, fagsakService.hentFagsakForPersonident(PersonIdent(fnr))?.personIdent?.ident)
+
+        val feilendeRestFagsak = fagsakController.nyFagsak(NyFagsak(personIdent = fnr))
+        Assertions.assertEquals(Ressurs.Status.FEILET, feilendeRestFagsak.body?.status)
+        Assertions.assertEquals("Kan ikke opprette fagsak på person som allerede finnes. Gå til fagsak ${restFagsak.body?.data?.id} for å se på saken",
+                                feilendeRestFagsak.body?.melding)
+    }
 
     @Test
     @Tag("integration")
@@ -195,11 +218,11 @@ class FagsakControllerTest(
     private fun lagOrdinærIverksattBehandling(fagsak: Fagsak,
                                               behandlingType: BehandlingType): Behandling {
         return Behandling(1,
-                  fagsak,
-                  null,
-                  behandlingType,
-                  status = BehandlingStatus.IVERKSATT,
-                  kategori = BehandlingKategori.NASJONAL,
-                  underkategori = BehandlingUnderkategori.ORDINÆR)
+                          fagsak,
+                          null,
+                          behandlingType,
+                          status = BehandlingStatus.IVERKSATT,
+                          kategori = BehandlingKategori.NASJONAL,
+                          underkategori = BehandlingUnderkategori.ORDINÆR)
     }
 }
