@@ -27,7 +27,7 @@ class DistribuerVedtaksbrev(
             LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${distribuerVedtaksbrevDTO.journalpostId}")
             integrasjonTjeneste.distribuerVedtaksbrev(distribuerVedtaksbrevDTO.journalpostId)
         } else {
-            LOG.info("Hopper over istribusjon av vedtaksbrev. Funksjonen er skrudd av")
+            LOG.info("Hopper over distribusjon av vedtaksbrev. Funksjonen er skrudd av")
         }
 
         val ferdigstillBehandlingTask = FerdigstillBehandling.opprettTask(
