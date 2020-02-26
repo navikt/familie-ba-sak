@@ -44,7 +44,7 @@ class ToTrinnKontrollTest {
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
 
-        toTrinnKontrollService.sendBehandlingTilBeslutter(behandling)
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hentBehandling(behandling.id)?.status)
 
         toTrinnKontrollService.valider2trinnVedIverksetting(behandling, "beslutter")
