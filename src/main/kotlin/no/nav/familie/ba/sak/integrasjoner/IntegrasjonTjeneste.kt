@@ -56,12 +56,12 @@ class IntegrasjonTjeneste(
             secureLogger.info("Vekslet inn fnr: {} til aktørId: {}", personident, response.body)
             val aktørId = response.body?.data?.get("aktørId").toString()
             if (aktørId.isEmpty()) {
-                throw IntegrasjonException(msg = "AktørId fra integrasjonstjenesten er tom", ident = personident)
+                throw IntegrasjonException(msg = "Kan ikke finne aktørId for ident", ident = personident)
             } else {
                 AktørId(aktørId)
             }
         } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av aktørId", e, uri, personident)
+            throw IntegrasjonException("Ukjent feil ved henting av aktørId", e, uri, personident)
         }
     }
 
