@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandler
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
@@ -34,7 +34,8 @@ class FagsakController(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val taskRepository: TaskRepository
+        private val taskRepository: TaskRepository,
+        private val vedtakService: VedtakService
 ) {
 
     @PostMapping(path = ["/ny-fagsak"])
@@ -80,7 +81,7 @@ class FagsakController(
                                        ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         return Result.runCatching {
-            behandlingService.nyttVedtakForAktivBehandling(behandling,
+            vedtakService.nyttVedtakForAktivBehandling(behandling,
                                                            personopplysningGrunnlag,
                                                            nyttVedtak,
                                                            ansvarligSaksbehandler = saksbehandlerId)
@@ -119,7 +120,7 @@ class FagsakController(
                                        ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         return Result.runCatching {
-            behandlingService.oppdaterAktivVedtakMedBeregning(vedtak,
+            vedtakService.oppdaterAktivVedtakMedBeregning(vedtak,
                                                               personopplysningGrunnlag,
                                                               nyBeregning)
         }
@@ -176,7 +177,7 @@ class FagsakController(
         return Result.runCatching { behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
                 .fold(
                         onSuccess = {
-                            val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
+                            val vedtak = vedtakService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
                                          ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
                             opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
@@ -219,7 +220,8 @@ class FagsakController(
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak"])
     fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val førsteNesteMåned = LocalDate.now().førsteDagINesteMåned()
-        return opphørMigrertVedtak(fagsakId, Opphørsvedtak(førsteNesteMåned))
+        return opphørMigrertVedtak(fagsakId,
+                                   Opphørsvedtak(førsteNesteMåned))
     }
 
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
@@ -232,7 +234,7 @@ class FagsakController(
         val behandling = behandlingService.hentBehandlingHvisEksisterer(fagsakId)
                          ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
-        val vedtak = behandlingService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
                      ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
         if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {

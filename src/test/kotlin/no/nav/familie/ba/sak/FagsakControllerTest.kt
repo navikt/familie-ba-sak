@@ -5,11 +5,11 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.*
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -67,7 +67,11 @@ class FagsakControllerTest(
         private val vilkårService: VilkårService,
 
         @Autowired
-        private val featureToggleService: FeatureToggleService
+        private val featureToggleService: FeatureToggleService,
+
+        @Autowired
+        private val vedtakService: VedtakService
+
 ) {
 
 
@@ -107,6 +111,7 @@ class FagsakControllerTest(
     @Tag("integration")
     fun `Test opphør vedtak`() {
         val mockBehandlingLager: BehandlingService = mockk()
+        val mockVedtakService: VedtakService = mockk()
 
         val fagsak = Fagsak(1, AktørId("1"), PersonIdent("1"))
         val behandling =
@@ -114,9 +119,9 @@ class FagsakControllerTest(
         val vedtak = lagInnvilgetVedtak(behandling)
 
         every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
-        every { mockBehandlingLager.hentVedtakHvisEksisterer(any()) } returns vedtak
+        every { mockVedtakService.hentVedtakHvisEksisterer(any()) } returns vedtak
         val fagsakController =
-                FagsakController(fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
+                FagsakController(fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository, vedtakService)
 
         val response = fagsakController.opphørMigrertVedtak(1)
         assert(response.statusCode == HttpStatus.OK)
@@ -127,6 +132,7 @@ class FagsakControllerTest(
     @Tag("integration")
     fun `Test opphør vedtak v2`() {
         val mockBehandlingLager: BehandlingService = mockk()
+        val mockVedtakService: VedtakService = mockk()
 
         val fagsak = Fagsak(1, AktørId("1"), PersonIdent("1"))
         val behandling =
@@ -134,11 +140,13 @@ class FagsakControllerTest(
         val vedtak = lagInnvilgetVedtak(behandling)
 
         every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
-        every { mockBehandlingLager.hentVedtakHvisEksisterer(any()) } returns vedtak
+        every { mockVedtakService.hentVedtakHvisEksisterer(any()) } returns vedtak
         val fagsakController =
-                FagsakController(fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository)
+                FagsakController(fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository, vedtakService)
 
-        val response = fagsakController.opphørMigrertVedtak(1, Opphørsvedtak(LocalDate.now()))
+        val response = fagsakController.opphørMigrertVedtak(1,
+                                                            Opphørsvedtak(
+                                                                    LocalDate.now()))
         assert(response.statusCode == HttpStatus.OK)
     }
 
@@ -183,7 +191,7 @@ class FagsakControllerTest(
 
         val fagsakController =
                 FagsakController(fagsakService, behandlingService,
-                                 personopplysningGrunnlagRepository, taskRepository)
+                                 personopplysningGrunnlagRepository, taskRepository, vedtakService)
 
         val response = fagsakController.nyttVedtak(1, NyttVedtak(
                 resultat = VedtakResultat.AVSLÅTT,
@@ -226,7 +234,12 @@ class FagsakControllerTest(
     }
 
     private fun lagInnvilgetVedtak(behandling: Behandling) =
-            Vedtak(1, behandling, "sb", LocalDate.now(), "", VedtakResultat.INNVILGET,
+            Vedtak(1,
+                   behandling,
+                   "sb",
+                   LocalDate.now(),
+                   "",
+                   VedtakResultat.INNVILGET,
                    begrunnelse = "")
 
     private fun lagOrdinærIverksattBehandling(fagsak: Fagsak,

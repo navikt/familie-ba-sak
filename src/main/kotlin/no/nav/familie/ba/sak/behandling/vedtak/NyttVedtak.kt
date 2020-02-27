@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.domene.vedtak
+package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import java.time.LocalDate

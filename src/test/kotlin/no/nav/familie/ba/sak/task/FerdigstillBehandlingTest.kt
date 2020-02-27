@@ -4,8 +4,9 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
@@ -43,6 +44,9 @@ class FerdigstillBehandlingTest {
     @Autowired
     private lateinit var taskRepositoryMock: TaskRepository
 
+    @Autowired
+    private lateinit var vedtakService: VedtakService
+
     @MockBean
     private lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
@@ -73,13 +77,14 @@ class FerdigstillBehandlingTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, fnrBarn)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        behandlingService.nyttVedtakForAktivBehandling(
+        vedtakService.nyttVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(resultat = vedtakResultat,
-                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf(fnrBarn)),
-                                        begrunnelse = ""),
+                                                                                                   samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                                                                                                           fnr,
+                                                                                                           listOf(fnrBarn)),
+                                                                                                   begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 

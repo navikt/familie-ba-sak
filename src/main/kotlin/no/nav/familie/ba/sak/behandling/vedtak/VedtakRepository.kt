@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.domene.vedtak
+package no.nav.familie.ba.sak.behandling.vedtak
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query

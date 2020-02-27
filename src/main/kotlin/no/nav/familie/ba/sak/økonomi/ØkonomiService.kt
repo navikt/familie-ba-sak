@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -20,7 +20,7 @@ class ØkonomiService(
         val vedtak = behandlingService.hentVedtak(vedtakId)
                      ?: throw Error("Fant ikke vedtak med id $vedtakId i forbindelse med iverksetting mot oppdrag")
 
-        val personberegninger = if(vedtak.resultat==VedtakResultat.OPPHØRT)
+        val personberegninger = if(vedtak.resultat== VedtakResultat.OPPHØRT)
                 behandlingService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)
                 else behandlingService.hentPersonerForVedtak(vedtak.id)
 

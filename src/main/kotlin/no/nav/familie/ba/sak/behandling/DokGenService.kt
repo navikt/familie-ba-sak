@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
-import no.nav.familie.ba.sak.behandling.domene.vedtak.toDokGenTemplate
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
 import no.nav.familie.ba.sak.behandling.restDomene.DokumentRequest
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.vedtak.toDokGenTemplate
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants

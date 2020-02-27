@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.NyFagsak
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
-import no.nav.familie.ba.sak.behandling.domene.vedtak.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
+import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -56,6 +56,9 @@ class BehandlingIntegrationTest {
 
     @Autowired
     lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
+    lateinit var vedtakService: VedtakService
 
     @Autowired
     lateinit var vedtakPersonRepository: VedtakPersonRepository
@@ -194,7 +197,7 @@ class BehandlingIntegrationTest {
         opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler1")
         opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler2")
 
-        val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
+        val hentetVedtak = vedtakService.hentVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler2", hentetVedtak?.ansvarligSaksbehandler)
     }
@@ -212,17 +215,18 @@ class BehandlingIntegrationTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, "12345678911")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        behandlingService.nyttVedtakForAktivBehandling(
+        vedtakService.nyttVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET,
-                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf("12345678911")),
+                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                                                                                                           fnr,
+                                                                                                           listOf("12345678911")),
                                         begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
+        val hentetVedtak = vedtakService.hentVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
         Assertions.assertEquals("", hentetVedtak?.stønadBrevMarkdown)
@@ -242,12 +246,13 @@ class BehandlingIntegrationTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, "12345678912")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        behandlingService.nyttVedtakForAktivBehandling(
+        vedtakService.nyttVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET,
-                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf("12345678912")),
+                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                                                                                                           fnr,
+                                                                                                           listOf("12345678912")),
                                         begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
@@ -255,13 +260,16 @@ class BehandlingIntegrationTest {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        behandlingService.oppdaterAktivVedtakMedBeregning(
+        vedtakService.oppdaterAktivVedtakMedBeregning(
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
                         arrayOf(BarnBeregning(ident = fnr,
                                               beløp = 1054,
-                                              stønadFom = LocalDate.of(2020, 1, 1),
+                                              stønadFom = LocalDate.of(
+                                                                                                                 2020,
+                                                                                                                 1,
+                                                                                                                 1),
                                               ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
@@ -346,22 +354,29 @@ class BehandlingIntegrationTest {
         Assertions.assertNotNull(personopplysningGrunnlag)
 
         val barnasBeregning = arrayOf(
-                BarnBeregning(barn1Fnr, 1054, LocalDate.of(2020, 1, 1), Ytelsetype.ORDINÆR_BARNETRYGD),
-                BarnBeregning(barn2Fnr, 1054, LocalDate.of(2020, 1, 1), Ytelsetype.ORDINÆR_BARNETRYGD)
+                BarnBeregning(barn1Fnr,
+                                                                                         1054,
+                                                                                         LocalDate.of(2020, 1, 1),
+                                                                                         Ytelsetype.ORDINÆR_BARNETRYGD),
+                BarnBeregning(barn2Fnr,
+                                                                                         1054,
+                                                                                         LocalDate.of(2020, 1, 1),
+                                                                                         Ytelsetype.ORDINÆR_BARNETRYGD)
         )
         val nyttVedtak = NyttVedtak(VedtakResultat.INNVILGET,
-                                    samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr,
-                                                                                                  listOf(barn1Fnr,
-                                                                                                         barn2Fnr)),
+                                    samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                                                                                                       søkerFnr,
+                                                                                                       listOf(barn1Fnr,
+                                                                                                              barn2Fnr)),
                                     begrunnelse = "")
         val nyBeregning = NyBeregning(barnasBeregning)
 
-        behandlingService.nyttVedtakForAktivBehandling(behandling, personopplysningGrunnlag!!, nyttVedtak, "saksbehandler1")
+        vedtakService.nyttVedtakForAktivBehandling(behandling, personopplysningGrunnlag!!, nyttVedtak, "saksbehandler1")
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        behandlingService.oppdaterAktivVedtakMedBeregning(vedtak!!, personopplysningGrunnlag, nyBeregning)
+        vedtakService.oppdaterAktivVedtakMedBeregning(vedtak!!, personopplysningGrunnlag, nyBeregning)
 
         val task = opprettOpphørVedtakTask(
                 behandling,
@@ -376,7 +391,7 @@ class BehandlingIntegrationTest {
         every { taskRepository.save(capture(slot)) } answers { slot.captured }
 
         OpphørVedtakTask(
-                behandlingService,
+                vedtakService,
                 taskRepository
         ).doTask(task)
 
@@ -408,7 +423,7 @@ class BehandlingIntegrationTest {
                             stønadBrevMarkdown = "",
                             resultat = VedtakResultat.INNVILGET,
                             begrunnelse = "")
-        behandlingService.lagreVedtak(vedtak)
+        vedtakService.lagreVedtak(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)
@@ -435,18 +450,19 @@ class BehandlingIntegrationTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, "12345678915")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val fagsakRes = behandlingService.nyttVedtakForAktivBehandling(
+        val fagsakRes = vedtakService.nyttVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.AVSLÅTT,
-                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf("12345678915")),
+                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                                                                                                           fnr,
+                                                                                                           listOf("12345678915")),
                                         begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
         Assertions.assertEquals(behandling.fagsak.id, fagsakRes.data?.id)
 
-        val hentetVedtak = behandlingService.hentVedtakHvisEksisterer(behandling.id)
+        val hentetVedtak = vedtakService.hentVedtakHvisEksisterer(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
         Assertions.assertNotEquals("", hentetVedtak?.stønadBrevMarkdown)
@@ -460,7 +476,7 @@ class BehandlingIntegrationTest {
                                                           BehandlingUnderkategori.ORDINÆR)
 
     private fun opprettNyttInvilgetVedtak(behandling: Behandling, saksbehandler: String = "ansvarligSaksbehandler"): Vedtak {
-        behandlingService.lagreVedtak(Vedtak(behandling = behandling,
+        vedtakService.lagreVedtak(Vedtak(behandling = behandling,
                                              ansvarligSaksbehandler = saksbehandler,
                                              vedtaksdato = LocalDate.now(),
                                              stønadBrevMarkdown = "",
@@ -470,7 +486,7 @@ class BehandlingIntegrationTest {
 
         )
 
-        return behandlingService.hentVedtakHvisEksisterer(behandling.id)!!
+        return vedtakService.hentVedtakHvisEksisterer(behandling.id)!!
     }
 
 

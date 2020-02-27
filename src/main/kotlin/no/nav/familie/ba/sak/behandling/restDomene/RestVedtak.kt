@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import java.time.LocalDate
 
 data class RestVedtak(
