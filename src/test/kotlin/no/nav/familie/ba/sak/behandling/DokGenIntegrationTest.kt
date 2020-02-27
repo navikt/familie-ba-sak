@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -65,7 +66,7 @@ class DokGenIntegrationTest {
                 id = 1,
                 behandling = Behandling(
                         id = 1,
-                        fagsak = Fagsak(personIdent = PersonIdent("")),
+                        fagsak = Fagsak(personIdent = PersonIdent(""), aktørId = AktørId("1")),
                         journalpostID = "invalid",
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         aktiv = true,
@@ -108,7 +109,7 @@ class DokGenIntegrationTest {
                 id = 1,
                 behandling = Behandling(
                         id = 1,
-                        fagsak = Fagsak(personIdent = PersonIdent("")),
+                        fagsak = Fagsak(personIdent = PersonIdent(""), aktørId = AktørId("1")),
                         journalpostID = "invalid",
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         aktiv = true,

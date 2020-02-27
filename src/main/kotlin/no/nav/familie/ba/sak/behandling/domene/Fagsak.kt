@@ -9,13 +9,13 @@ import javax.persistence.*
 @Table(name = "FAGSAK")
 data class Fagsak(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq")
-        @SequenceGenerator(name = "fagsak_seq")
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq_generator")
+        @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
         val id: Long? = null,
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
-        val aktørId: AktørId? = null,
+        val aktørId: AktørId,
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))

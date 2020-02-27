@@ -9,8 +9,8 @@ import javax.persistence.*
 @Table(name = "VEDTAK_PERSON")
 data class VedtakPerson(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_person_seq")
-        @SequenceGenerator(name = "vedtak_person_seq")
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_person_seq_generator")
+        @SequenceGenerator(name = "vedtak_person_seq_generator", sequenceName = "vedtak_person_seq", allocationSize = 50)
         val id: Long? = null,
 
         @ManyToOne(optional = false) @JoinColumn(name = "fk_vedtak_id", nullable = false, updatable = false)

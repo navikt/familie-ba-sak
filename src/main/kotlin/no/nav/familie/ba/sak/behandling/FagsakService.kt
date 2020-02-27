@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultatRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
@@ -23,14 +23,15 @@ class FagsakService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val samletVilkårResultatRepository: SamletVilkårResultatRepository,
         private val behandlingRepository: BehandlingRepository,
-        private val vedtakRepository: VedtakRepository) {
+        private val vedtakRepository: VedtakRepository,
+        private val integrasjonTjeneste: IntegrasjonTjeneste) {
 
     @Transactional
     fun nyFagsak(nyFagsak: NyFagsak): Ressurs<RestFagsak> {
         return when (val hentetFagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(nyFagsak.personIdent))) {
             null -> {
                 val fagsak = Fagsak(
-                        aktørId = AktørId("1"),
+                        aktørId = integrasjonTjeneste.hentAktørId(nyFagsak.personIdent),
                         personIdent = PersonIdent(nyFagsak.personIdent)
                 )
                 lagreFagsak(fagsak)

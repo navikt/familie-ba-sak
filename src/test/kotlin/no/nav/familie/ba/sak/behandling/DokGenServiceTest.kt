@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.domene.vedtak.toDokGenTemplate
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -23,7 +24,7 @@ class DokGenServiceTest(@Autowired
                         private val dokGenService: DokGenService) {
 
     private val vedtak = Vedtak(
-            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
+            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910"), aktørId = AktørId("1")),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
@@ -35,7 +36,7 @@ class DokGenServiceTest(@Autowired
     )
 
     private val avslagVedtak= Vedtak(
-            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
+            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910"), aktørId = AktørId("1")),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
