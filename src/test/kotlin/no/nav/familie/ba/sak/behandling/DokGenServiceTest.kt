@@ -48,7 +48,7 @@ class DokGenServiceTest(@Autowired
     )
 
     private val opphørtVedtak= Vedtak(
-            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910")),
+            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910"), aktørId = AktørId("1")),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
