@@ -5,11 +5,11 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.DokGenService
-import no.nav.familie.ba.sak.behandling.FagsakService
-import no.nav.familie.ba.sak.behandling.NyFagsak
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fagsak.NyFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
@@ -125,7 +125,7 @@ class BehandlingIntegrationTest {
     fun `Kjør flyway migreringer og sjekk at behandlingslagerservice klarer å lese å skrive til postgresql`() {
         val fnr = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         opprettNyOrdinærBehandling(fagsak)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
@@ -148,7 +148,7 @@ class BehandlingIntegrationTest {
     fun `Opprett behandling og legg til personer`() {
         val fnr = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = opprettNyOrdinærBehandling(fagsak)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
 
@@ -176,7 +176,7 @@ class BehandlingIntegrationTest {
     fun `Opprett behandling vedtak`() {
         val fnr = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = opprettNyOrdinærBehandling(fagsak)
 
         opprettNyttInvilgetVedtak(behandling)
@@ -191,7 +191,7 @@ class BehandlingIntegrationTest {
     fun `Opprett 2 behandling vedtak og se at det siste vedtaket får aktiv satt til true`() {
         val fnr = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = opprettNyOrdinærBehandling(fagsak)
 
         opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler1")
@@ -207,7 +207,7 @@ class BehandlingIntegrationTest {
     fun `Opprett nytt vedtak på aktiv behandling`() {
         val fnr = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = opprettNyOrdinærBehandling(fagsak)
 
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -237,7 +237,7 @@ class BehandlingIntegrationTest {
     fun `Hent HTML vedtaksbrev`() {
         val fnr = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = opprettNyOrdinærBehandling(fagsak)
 
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -414,7 +414,7 @@ class BehandlingIntegrationTest {
         val barnFnr = randomFnr()
 
         //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = opprettNyOrdinærBehandling(fagsak)
 
         val vedtak = Vedtak(behandling = behandling,
@@ -442,7 +442,7 @@ class BehandlingIntegrationTest {
     fun `Opprett nytt avslag vedtak`() {
         val fnr = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = opprettNyOrdinærBehandling(fagsak)
 
         Assertions.assertNotNull(behandling.fagsak.id)

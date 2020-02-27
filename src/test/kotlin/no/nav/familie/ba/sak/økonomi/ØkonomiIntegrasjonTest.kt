@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
@@ -38,6 +39,9 @@ class ØkonomiIntegrasjonTest {
     lateinit var behandlingService: BehandlingService
 
     @Autowired
+    lateinit var fagsakService: FagsakService
+
+    @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Autowired
@@ -62,7 +66,7 @@ class ØkonomiIntegrasjonTest {
                                             .withBody(objectMapper.writeValueAsString(responseBody))))
 
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent("1")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -94,9 +98,9 @@ class ØkonomiIntegrasjonTest {
                         arrayOf(BarnBeregning(ident = "12345678910",
                                               beløp = 1054,
                                               stønadFom = LocalDate.of(
-                                                                                                                 2020,
-                                                                                                                 1,
-                                                                                                                 1),
+                                                      2020,
+                                                      1,
+                                                      1),
                                               ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )

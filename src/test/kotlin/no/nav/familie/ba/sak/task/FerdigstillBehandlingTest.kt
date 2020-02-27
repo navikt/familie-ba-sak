@@ -4,6 +4,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -47,6 +48,9 @@ class FerdigstillBehandlingTest {
     @Autowired
     private lateinit var vedtakService: VedtakService
 
+    @Autowired
+    private lateinit var fagsakService: FagsakService
+
     @MockBean
     private lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
@@ -66,7 +70,7 @@ class FerdigstillBehandlingTest {
         val fnr = randomFnr()
         val fnrBarn = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,

@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.FagsakController
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -46,6 +47,9 @@ class BehandlingNegativeIntegrationTest() {
     private lateinit var behandlingService: BehandlingService
 
     @Autowired
+    private lateinit var fagsakService: FagsakService
+
+    @Autowired
     private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Autowired
@@ -63,7 +67,7 @@ class BehandlingNegativeIntegrationTest() {
         val failRess = behandlingService.hentHtmlVedtakForBehandling(100)
         Assertions.assertEquals(Ressurs.Status.FEILET, failRess.status)
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("6")
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent("6")
         val behandling =
                 behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                               "sdf",
@@ -77,7 +81,7 @@ class BehandlingNegativeIntegrationTest() {
     @Test
     @Tag("integration")
     fun `Oppdater avslag vedtak med beregning`() {
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent("1")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,

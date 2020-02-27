@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
@@ -57,7 +58,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun opprettEllerOppdaterBehandlingFraHendelse(nyBehandling: NyBehandlingHendelse): Fagsak {
-        val fagsak = hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
 
         val aktivBehandling = hentBehandlingHvisEksisterer(fagsak.id)
 
@@ -89,18 +90,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
 
 
-    fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak =
-            hentEllerOpprettFagsak(PersonIdent(fødselsnummer))
 
-    private fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak =
-            fagsakService.hentFagsakForPersonident(personIdent) ?: opprettFagsak(personIdent)
-
-    private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
-        val aktørId = integrasjonTjeneste.hentAktørId(personIdent.ident)
-        val nyFagsak = Fagsak(null, aktørId, personIdent)
-        fagsakService.lagreFagsak(nyFagsak)
-        return nyFagsak
-    }
 
     fun opprettNyBehandlingPåFagsak(fagsak: Fagsak,
                                     journalpostID: String?,

@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Personopplysni
 import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -35,6 +36,9 @@ class VilkårServiceTest() {
     @Autowired
     private lateinit var behandlingService: BehandlingService
 
+    @Autowired
+    private lateinit var fagsakService: FagsakService
+
     @MockBean
     private lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
@@ -51,7 +55,7 @@ class VilkårServiceTest() {
 
     @Test
     fun `vurder gyldig vilkårsvurdering`() {
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent("1")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -72,7 +76,7 @@ class VilkårServiceTest() {
 
     @Test
     fun `vurder ugyldig vilkårsvurdering`() {
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent("1")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,

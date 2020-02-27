@@ -2,12 +2,16 @@ package no.nav.familie.ba.sak
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.*
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.DokGenService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fagsak.NyFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -101,7 +105,8 @@ class FagsakControllerTest(
         Assertions.assertEquals(Ressurs.Status.SUKSESS, restFagsak.body?.status)
         Assertions.assertEquals(fnr, fagsakService.hentFagsakForPersonident(PersonIdent(fnr))?.personIdent?.ident)
 
-        val feilendeRestFagsak = fagsakController.nyFagsak(NyFagsak(personIdent = fnr))
+        val feilendeRestFagsak = fagsakController.nyFagsak(NyFagsak(
+                personIdent = fnr))
         Assertions.assertEquals(Ressurs.Status.FEILET, feilendeRestFagsak.body?.status)
         Assertions.assertEquals("Kan ikke opprette fagsak på person som allerede finnes. Gå til fagsak ${restFagsak.body?.data?.id} for å se på saken",
                                 feilendeRestFagsak.body?.melding)
@@ -121,7 +126,11 @@ class FagsakControllerTest(
         every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
         every { mockVedtakService.hentVedtakHvisEksisterer(any()) } returns vedtak
         val fagsakController =
-                FagsakController(fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository, vedtakService)
+                FagsakController(fagsakService,
+                                 mockBehandlingLager,
+                                 personopplysningGrunnlagRepository,
+                                 taskRepository,
+                                 vedtakService)
 
         val response = fagsakController.opphørMigrertVedtak(1)
         assert(response.statusCode == HttpStatus.OK)
@@ -142,7 +151,11 @@ class FagsakControllerTest(
         every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
         every { mockVedtakService.hentVedtakHvisEksisterer(any()) } returns vedtak
         val fagsakController =
-                FagsakController(fagsakService, mockBehandlingLager, personopplysningGrunnlagRepository, taskRepository, vedtakService)
+                FagsakController(fagsakService,
+                                 mockBehandlingLager,
+                                 personopplysningGrunnlagRepository,
+                                 taskRepository,
+                                 vedtakService)
 
         val response = fagsakController.opphørMigrertVedtak(1,
                                                             Opphørsvedtak(
@@ -190,8 +203,11 @@ class FagsakControllerTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val fagsakController =
-                FagsakController(fagsakService, behandlingService,
-                                 personopplysningGrunnlagRepository, taskRepository, vedtakService)
+                FagsakController(fagsakService,
+                                 behandlingService,
+                                 personopplysningGrunnlagRepository,
+                                 taskRepository,
+                                 vedtakService)
 
         val response = fagsakController.nyttVedtak(1, NyttVedtak(
                 resultat = VedtakResultat.AVSLÅTT,

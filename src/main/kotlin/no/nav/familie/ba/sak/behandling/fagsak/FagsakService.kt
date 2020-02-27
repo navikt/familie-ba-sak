@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
@@ -83,7 +83,19 @@ class FagsakService(
         lagreFagsak(fagsak)
     }
 
-    @Transactional
+    fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak =
+            hentEllerOpprettFagsak(PersonIdent(fødselsnummer))
+
+    private fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak =
+            hentFagsakForPersonident(personIdent) ?: opprettFagsak(personIdent)
+
+    private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
+        val aktørId = integrasjonTjeneste.hentAktørId(personIdent.ident)
+        val nyFagsak = Fagsak(null, aktørId, personIdent)
+        lagreFagsak(nyFagsak)
+        return nyFagsak
+    }
+
     fun hentFagsakForPersonident(personIdent: PersonIdent): Fagsak? {
         return fagsakRepository.finnFagsakForPersonIdent(personIdent)
     }
@@ -93,7 +105,6 @@ class FagsakService(
         fagsakRepository.save(fagsak)
     }
 
-    @Transactional
     fun hentLøpendeFagsaker(): List<Fagsak> {
         return fagsakRepository.finnLøpendeFagsaker()
     }
