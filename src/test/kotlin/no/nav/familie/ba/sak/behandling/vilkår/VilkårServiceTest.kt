@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.vilkår
+package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori

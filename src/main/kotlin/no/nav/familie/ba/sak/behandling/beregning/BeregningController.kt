@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.vedtak.NyBeregning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.notFound
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 
 // TODO: endre til beregning
 @RestController
@@ -69,3 +70,14 @@ class BeregningController(
                 )
     }
 }
+
+data class NyBeregning(
+        val barnasBeregning: Array<BarnBeregning>
+)
+
+data class BarnBeregning(
+        val ident: String,
+        val beløp: Int,
+        val stønadFom: LocalDate,
+        val ytelsetype : Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
+)

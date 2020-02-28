@@ -31,5 +31,10 @@ data class VedtakPerson(
         @Enumerated(EnumType.STRING)
         @Column(name = "type", nullable = false)
         val type: Ytelsetype
-
 ) : BaseEntitet()
+
+enum class Ytelsetype(val klassifisering: String) {
+        ORDINÆR_BARNETRYGD("BATR"),
+        UTVIDET_BARNETRYGD("BATR"),
+        SMÅBARNSTILLEGG("BATRSMA")
+}

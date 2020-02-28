@@ -5,12 +5,17 @@ import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.DokGenService
+import no.nav.familie.ba.sak.behandling.beregning.BarnBeregning
+import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.NyFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.*
+import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -22,7 +27,6 @@ import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedt
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.util.randomFnr
-import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.økonomi.OppdragId
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -61,22 +65,13 @@ class BehandlingIntegrationTest {
     lateinit var vedtakService: VedtakService
 
     @Autowired
-    lateinit var vedtakPersonRepository: VedtakPersonRepository
-
-    @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
-
-    @Autowired
-    lateinit var personRepository: PersonRepository
 
     @Autowired
     lateinit var dokGenService: DokGenService
 
     @Autowired
     lateinit var fagsakService: FagsakService
-
-    @Autowired
-    lateinit var vilkårService: VilkårService
 
     @Autowired
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
@@ -483,12 +478,8 @@ class BehandlingIntegrationTest {
                                          stønadBrevMarkdown = "",
                                          resultat = VedtakResultat.INNVILGET,
                                          begrunnelse = "")
-
-
         )
 
         return vedtakService.hentVedtakHvisEksisterer(behandling.id)!!
     }
-
-
 }
