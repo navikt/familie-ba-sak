@@ -113,11 +113,15 @@ class BehandlingIntegrationTest {
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
                         .willReturn(aResponse()
                                             .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019, 1, 1)))))))
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019,
+                                                                                                                              1,
+                                                                                                                              1)))))))
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
                         .willReturn(aResponse()
                                             .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019, 1, 1)))))))
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019,
+                                                                                                                              1,
+                                                                                                                              1)))))))
     }
 
     @Test
@@ -220,8 +224,8 @@ class BehandlingIntegrationTest {
                 behandling = behandling,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET,
                                         samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                                                                                                           fnr,
-                                                                                                           listOf("12345678911")),
+                                                fnr,
+                                                listOf("12345678911")),
                                         begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
@@ -251,8 +255,8 @@ class BehandlingIntegrationTest {
                 behandling = behandling,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET,
                                         samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                                                                                                           fnr,
-                                                                                                           listOf("12345678912")),
+                                                fnr,
+                                                listOf("12345678912")),
                                         begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
@@ -267,9 +271,9 @@ class BehandlingIntegrationTest {
                         arrayOf(BarnBeregning(ident = fnr,
                                               beløp = 1054,
                                               stønadFom = LocalDate.of(
-                                                                                                                 2020,
-                                                                                                                 1,
-                                                                                                                 1),
+                                                      2020,
+                                                      1,
+                                                      1),
                                               ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
@@ -355,19 +359,19 @@ class BehandlingIntegrationTest {
 
         val barnasBeregning = arrayOf(
                 BarnBeregning(barn1Fnr,
-                                                                                         1054,
-                                                                                         LocalDate.of(2020, 1, 1),
-                                                                                         Ytelsetype.ORDINÆR_BARNETRYGD),
+                              1054,
+                              LocalDate.of(2020, 1, 1),
+                              Ytelsetype.ORDINÆR_BARNETRYGD),
                 BarnBeregning(barn2Fnr,
-                                                                                         1054,
-                                                                                         LocalDate.of(2020, 1, 1),
-                                                                                         Ytelsetype.ORDINÆR_BARNETRYGD)
+                              1054,
+                              LocalDate.of(2020, 1, 1),
+                              Ytelsetype.ORDINÆR_BARNETRYGD)
         )
         val nyttVedtak = NyttVedtak(VedtakResultat.INNVILGET,
                                     samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                                                                                                       søkerFnr,
-                                                                                                       listOf(barn1Fnr,
-                                                                                                              barn2Fnr)),
+                                            søkerFnr,
+                                            listOf(barn1Fnr,
+                                                   barn2Fnr)),
                                     begrunnelse = "")
         val nyBeregning = NyBeregning(barnasBeregning)
 
@@ -455,8 +459,8 @@ class BehandlingIntegrationTest {
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(resultat = VedtakResultat.AVSLÅTT,
                                         samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                                                                                                           fnr,
-                                                                                                           listOf("12345678915")),
+                                                fnr,
+                                                listOf("12345678915")),
                                         begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
@@ -477,11 +481,11 @@ class BehandlingIntegrationTest {
 
     private fun opprettNyttInvilgetVedtak(behandling: Behandling, saksbehandler: String = "ansvarligSaksbehandler"): Vedtak {
         vedtakService.lagreVedtak(Vedtak(behandling = behandling,
-                                             ansvarligSaksbehandler = saksbehandler,
-                                             vedtaksdato = LocalDate.now(),
-                                             stønadBrevMarkdown = "",
-                                             resultat = VedtakResultat.INNVILGET,
-                                             begrunnelse = "")
+                                         ansvarligSaksbehandler = saksbehandler,
+                                         vedtaksdato = LocalDate.now(),
+                                         stønadBrevMarkdown = "",
+                                         resultat = VedtakResultat.INNVILGET,
+                                         begrunnelse = "")
 
 
         )

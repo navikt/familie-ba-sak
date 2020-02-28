@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.arbeidsfordeling
 
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 

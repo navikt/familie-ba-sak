@@ -1,6 +1,5 @@
-package no.nav.familie.ba.sak.oppgave
+package no.nav.familie.ba.sak.arbeidsfordeling
 
-import no.nav.familie.ba.sak.behandling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.kontrakter.felles.oppgave.IdentType
@@ -18,7 +17,8 @@ class OppgaveService(private val integrasjonTjeneste: IntegrasjonTjeneste,
                      private val arbeidsfordelingService: ArbeidsfordelingService) {
 
     fun opprettOppgaveForNyBehandling(behandlingsId: Long): String {
-        val behandling = behandlingRepository.finnBehandling(behandlingsId) ?: error("Kan ikke finne behandling med id $behandlingsId")
+        val behandling =
+                behandlingRepository.finnBehandling(behandlingsId) ?: error("Kan ikke finne behandling med id $behandlingsId")
         val fagsakId = behandling.fagsak.id ?: error("Kan ikke finne fagsakId for behandling $behandlingsId")
 
         val aktørId = integrasjonTjeneste.hentAktørId(behandling.fagsak.personIdent.ident).id
@@ -38,7 +38,8 @@ class OppgaveService(private val integrasjonTjeneste: IntegrasjonTjeneste,
     }
 
     fun ferdigstillOppgave(behandlingsId: Long) {
-        val oppgaveId = behandlingRepository.finnBehandling(behandlingsId)?.oppgaveId?.toLong() ?: error("Kan ikke finne oppgave for behandlingId $behandlingsId")
+        val oppgaveId = behandlingRepository.finnBehandling(behandlingsId)?.oppgaveId?.toLong()
+                        ?: error("Kan ikke finne oppgave for behandlingId $behandlingsId")
         integrasjonTjeneste.ferdigstillOppgave(oppgaveId)
     }
 

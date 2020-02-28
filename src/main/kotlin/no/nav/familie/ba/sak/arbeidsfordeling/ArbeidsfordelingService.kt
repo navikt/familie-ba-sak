@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.arbeidsfordeling
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
@@ -26,7 +26,8 @@ class ArbeidsfordelingService(private val behandlingRepository: BehandlingReposi
             barn -> integrasjonTjeneste.hentPersoninfoFor(barn.personIdent.ident)
         }.plus(søker)
 
-        val strengesteDiskresjonskode = finnStrengesteDiskresjonskode(personinfoliste)
+        val strengesteDiskresjonskode =
+                finnStrengesteDiskresjonskode(personinfoliste)
 
         return integrasjonTjeneste.hentBehandlendeEnhet(søker.geografiskTilknytning, strengesteDiskresjonskode)
     }
