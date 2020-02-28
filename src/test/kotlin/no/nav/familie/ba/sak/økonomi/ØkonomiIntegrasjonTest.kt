@@ -2,15 +2,21 @@ package no.nav.familie.ba.sak.økonomi
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.beregning.BarnBeregning
+import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.*
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions
@@ -38,13 +44,16 @@ class ØkonomiIntegrasjonTest {
     lateinit var behandlingService: BehandlingService
 
     @Autowired
-    lateinit var vedtakRepository: VedtakRepository
+    lateinit var fagsakService: FagsakService
 
     @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Autowired
     lateinit var økonomiService: ØkonomiService
+
+    @Autowired
+    private lateinit var vedtakService: VedtakService
 
     @Test
     @Tag("integration")
@@ -62,7 +71,7 @@ class ØkonomiIntegrasjonTest {
                                             .withBody(objectMapper.writeValueAsString(responseBody))))
 
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent("1")
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent("1")
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -73,7 +82,7 @@ class ØkonomiIntegrasjonTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, "1", "12345678910")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        behandlingService.nyttVedtakForAktivBehandling(
+        vedtakService.nyttVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(
@@ -84,16 +93,19 @@ class ØkonomiIntegrasjonTest {
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        val oppdatertFagsak = behandlingService.oppdaterAktivVedtakMedBeregning(
+        val oppdatertFagsak = vedtakService.oppdaterAktivVedtakMedBeregning(
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
                         arrayOf(BarnBeregning(ident = "12345678910",
                                               beløp = 1054,
-                                              stønadFom = LocalDate.of(2020, 1, 1),
+                                              stønadFom = LocalDate.of(
+                                                      2020,
+                                                      1,
+                                                      1),
                                               ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
@@ -102,7 +114,7 @@ class ØkonomiIntegrasjonTest {
 
         økonomiService.iverksettVedtak(behandling.id, vedtak.id!!, "ansvarligSaksbehandler")
 
-        val oppdatertBehandling = behandlingService.hentBehandling(behandling.id)
+        val oppdatertBehandling = behandlingService.hent(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling?.status)
     }
 }

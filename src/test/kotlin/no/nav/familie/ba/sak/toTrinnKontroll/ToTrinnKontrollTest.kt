@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.toTrinnKontroll
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.util.DbContainerInitializer
@@ -30,6 +31,9 @@ class ToTrinnKontrollTest {
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
+    @Autowired
+    lateinit var fagsakService: FagsakService
+
     @MockBean
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
@@ -43,7 +47,7 @@ class ToTrinnKontrollTest {
     fun `Skal validere 2 trinnskontroll`() {
         val fnr = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        null,
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -51,10 +55,10 @@ class ToTrinnKontrollTest {
                                                                        BehandlingUnderkategori.ORDINÆR)
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
-        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hentBehandling(behandling.id)?.status)
+        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hent(behandling.id)?.status)
 
         behandlingService.valider2trinnVedIverksetting(behandling, "beslutter")
-        Assertions.assertEquals(BehandlingStatus.GODKJENT, behandlingService.hentBehandling(behandling.id)?.status)
+        Assertions.assertEquals(BehandlingStatus.GODKJENT, behandlingService.hent(behandling.id)?.status)
     }
 
     @Test
@@ -62,7 +66,7 @@ class ToTrinnKontrollTest {
     fun `Skal kaste feil ved lik fatter og beslutter`() {
         val fnr = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        null,
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -72,7 +76,7 @@ class ToTrinnKontrollTest {
         behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
         behandlingRepository.saveAndFlush(behandling)
 
-        val endretBehandling = behandlingService.hentBehandling(behandling.id)
+        val endretBehandling = behandlingService.hent(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, endretBehandling?.status)
         Assertions.assertNotNull(endretBehandling?.endretAv)
 

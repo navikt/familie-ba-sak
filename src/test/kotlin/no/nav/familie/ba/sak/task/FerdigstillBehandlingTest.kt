@@ -4,15 +4,17 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.NyttVedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.util.randomFnr
-import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -43,6 +45,12 @@ class FerdigstillBehandlingTest {
     @Autowired
     private lateinit var taskRepositoryMock: TaskRepository
 
+    @Autowired
+    private lateinit var vedtakService: VedtakService
+
+    @Autowired
+    private lateinit var fagsakService: FagsakService
+
     @MockBean
     private lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
@@ -62,7 +70,7 @@ class FerdigstillBehandlingTest {
         val fnr = randomFnr()
         val fnrBarn = randomFnr()
 
-        val fagsak = behandlingService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -73,13 +81,14 @@ class FerdigstillBehandlingTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, fnrBarn)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        behandlingService.nyttVedtakForAktivBehandling(
+        vedtakService.nyttVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyttVedtak = NyttVedtak(resultat = vedtakResultat,
-                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf(fnrBarn)),
-                                        begrunnelse = ""),
+                                                                                                   samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                                                                                                           fnr,
+                                                                                                           listOf(fnrBarn)),
+                                                                                                   begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
@@ -96,7 +105,7 @@ class FerdigstillBehandlingTest {
         ferdigstillBehandling.doTask(testTask)
         ferdigstillBehandling.onCompletion(testTask)
 
-        val ferdigstiltBehandling = behandlingService.hentBehandling(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
+        val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
         Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling?.status)
 
         val ferdigstiltFagsak = ferdigstiltBehandling?.fagsak
@@ -111,7 +120,7 @@ class FerdigstillBehandlingTest {
         ferdigstillBehandling.doTask(testTask)
         ferdigstillBehandling.onCompletion(testTask)
 
-        val ferdigstiltBehandling = behandlingService.hentBehandling(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
+        val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
         Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling?.status)
 
         val ferdigstiltFagsak = ferdigstiltBehandling?.fagsak

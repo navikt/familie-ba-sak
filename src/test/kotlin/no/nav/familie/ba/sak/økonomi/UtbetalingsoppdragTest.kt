@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat.OPPHØRT
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype.*
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat.OPPHØRT
+import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalArgumentException
 import java.time.LocalDate.now
 
 internal class UtbetalingsoppdragPeriodiseringTest {

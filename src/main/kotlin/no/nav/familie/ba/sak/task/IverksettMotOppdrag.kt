@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
@@ -37,7 +37,7 @@ class IverksettMotOppdrag(
 
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        val behandling = behandlingService.hentBehandling(iverksettingTask.behandlingsId)
+        val behandling = behandlingService.hent(iverksettingTask.behandlingsId)
         Assert.notNull(behandling,
                        "Skal iverksette mot økonomi, men finner ikke behandling med id ${iverksettingTask.behandlingsId}.")
         Assert.isTrue(behandling?.status == BehandlingStatus.SENDT_TIL_IVERKSETTING,
