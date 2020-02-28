@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
@@ -22,7 +22,7 @@ import java.net.URI
 
 @Service
 @Profile("!mock-dokgen-java")
-class DokGenService(
+class DokumentKlient(
         @Value("\${FAMILIE_BA_DOKGEN_API_URL}") private val dokgenServiceUri: String,
         private val restTemplate: RestTemplate
 ) {
@@ -33,9 +33,9 @@ class DokGenService(
     }
 
     private fun mapTilBrevfelter(vedtak: Vedtak): String {
-        when (vedtak.resultat) {
-            VedtakResultat.INNVILGET -> return mapTilInnvilgetBrevFelter(vedtak)
-            VedtakResultat.AVSLÅTT -> return mapTilAvslagBrevFelter(vedtak)
+        return when (vedtak.resultat) {
+            VedtakResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
+            VedtakResultat.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
             else -> {
                 throw RuntimeException("Invalid/unsupported vedtak.resultat")
             }

@@ -37,7 +37,7 @@ class IverksettMotOppdrag(
 
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        val behandling = behandlingService.hentBehandling(iverksettingTask.behandlingsId)
+        val behandling = behandlingService.hent(iverksettingTask.behandlingsId)
         Assert.notNull(behandling,
                        "Skal iverksette mot økonomi, men finner ikke behandling med id ${iverksettingTask.behandlingsId}.")
         Assert.isTrue(behandling?.status == BehandlingStatus.SENDT_TIL_IVERKSETTING,

@@ -7,14 +7,12 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.util.randomFnr
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -58,8 +56,8 @@ class VedtakControllerTest(
                 lagOrdinærIverksattBehandling(fagsak, BehandlingType.MIGRERING_FRA_INFOTRYGD)
         val vedtak = lagInnvilgetVedtak(behandling)
 
-        every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
-        every { mockVedtakService.hentVedtakHvisEksisterer(any()) } returns vedtak
+        every { mockBehandlingLager.hentAktiv(any()) } returns behandling
+        every { mockVedtakService.hentAktiv(any()) } returns vedtak
 
         val response = vedtakController.opphørMigrertVedtak(1)
         assert(response.statusCode == HttpStatus.OK)
@@ -76,8 +74,8 @@ class VedtakControllerTest(
                 lagOrdinærIverksattBehandling(fagsak, BehandlingType.MIGRERING_FRA_INFOTRYGD)
         val vedtak = lagInnvilgetVedtak(behandling)
 
-        every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
-        every { mockVedtakService.hentVedtakHvisEksisterer(any()) } returns vedtak
+        every { mockBehandlingLager.hentAktiv(any()) } returns behandling
+        every { mockVedtakService.hentAktiv(any()) } returns vedtak
 
         val response = vedtakController.opphørMigrertVedtak(1,
                                                             Opphørsvedtak(

@@ -88,7 +88,7 @@ class FagsakService(
             hentEllerOpprettFagsak(PersonIdent(fødselsnummer))
 
     private fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak =
-            hentFagsakForPersonident(personIdent) ?: opprettFagsak(personIdent)
+            hentForPersonident(personIdent) ?: opprettFagsak(personIdent)
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
         val aktørId = integrasjonTjeneste.hentAktørId(personIdent.ident)
@@ -97,7 +97,7 @@ class FagsakService(
         return nyFagsak
     }
 
-    fun hentFagsakForPersonident(personIdent: PersonIdent): Fagsak? {
+    fun hentForPersonident(personIdent: PersonIdent): Fagsak? {
         return fagsakRepository.finnFagsakForPersonIdent(personIdent)
     }
 

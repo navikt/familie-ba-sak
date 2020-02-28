@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -20,8 +20,8 @@ import java.time.LocalDate
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 @Disabled("DokGen must be available")
-class DokGenServiceTest(@Autowired
-                        private val dokGenService: DokGenService) {
+class DokumentKlientTest(@Autowired
+                        private val dokumentKlient: DokumentKlient) {
 
     private val vedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910"), aktørId = AktørId("1")),
@@ -49,14 +49,14 @@ class DokGenServiceTest(@Autowired
 
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
-        val markdown= dokGenService.hentStønadBrevMarkdown(vedtak)
-        val htmlResponse= dokGenService.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(), markdown)
+        val markdown= dokumentKlient.hentStønadBrevMarkdown(vedtak)
+        val htmlResponse= dokumentKlient.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(), markdown)
         assert(htmlResponse.startsWith("<html>"))
     }
 
     @Test
     fun `Test å generer Markdown for avslag brev`(){
-        val markdown= dokGenService.hentStønadBrevMarkdown(avslagVedtak)
+        val markdown= dokumentKlient.hentStønadBrevMarkdown(avslagVedtak)
         assert(markdown.startsWith("<br>Du har ikke rett til barnetrygd fordi ."))
     }
 }

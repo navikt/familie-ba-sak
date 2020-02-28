@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.dokument
 
 import org.springframework.context.annotation.Profile
 import org.springframework.http.RequestEntity
@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate
 
 @Service
 @Profile("mock-dokgen-java")
-class DokGenServiceMock : DokGenService(
+class DokumentKlientMock : DokumentKlient(
         dokgenServiceUri = "dokgen_uri_mock",
         restTemplate = RestTemplate()
 ) {

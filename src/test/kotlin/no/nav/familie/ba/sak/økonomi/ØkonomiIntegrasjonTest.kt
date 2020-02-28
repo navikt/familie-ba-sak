@@ -93,7 +93,7 @@ class ØkonomiIntegrasjonTest {
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val vedtak = vedtakService.hentVedtakHvisEksisterer(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktiv(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
         val oppdatertFagsak = vedtakService.oppdaterAktivVedtakMedBeregning(
@@ -114,7 +114,7 @@ class ØkonomiIntegrasjonTest {
 
         økonomiService.iverksettVedtak(behandling.id, vedtak.id!!, "ansvarligSaksbehandler")
 
-        val oppdatertBehandling = behandlingService.hentBehandling(behandling.id)
+        val oppdatertBehandling = behandlingService.hent(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling?.status)
     }
 }

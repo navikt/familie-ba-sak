@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak
+package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -47,7 +47,7 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         fagsakController.nyFagsak(NyFagsak(personIdent = fnr))
-        Assertions.assertEquals(fnr, fagsakService.hentFagsakForPersonident(PersonIdent(fnr))?.personIdent?.ident)
+        Assertions.assertEquals(fnr, fagsakService.hentForPersonident(PersonIdent(fnr))?.personIdent?.ident)
     }
 
     @Test
@@ -57,7 +57,7 @@ class FagsakControllerTest(
 
         val restFagsak = fagsakController.nyFagsak(NyFagsak(personIdent = fnr))
         Assertions.assertEquals(Ressurs.Status.SUKSESS, restFagsak.body?.status)
-        Assertions.assertEquals(fnr, fagsakService.hentFagsakForPersonident(PersonIdent(fnr))?.personIdent?.ident)
+        Assertions.assertEquals(fnr, fagsakService.hentForPersonident(PersonIdent(fnr))?.personIdent?.ident)
 
         val feilendeRestFagsak = fagsakController.nyFagsak(NyFagsak(
                 personIdent = fnr))
