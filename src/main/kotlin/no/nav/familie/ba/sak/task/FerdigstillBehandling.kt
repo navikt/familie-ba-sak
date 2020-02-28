@@ -29,7 +29,7 @@ class FerdigstillBehandling(
         val ferdigstillBehandling = objectMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
         LOG.info("Forsøker å ferdigstille behandling ${ferdigstillBehandling.behandlingsId}")
 
-        val behandling = behandlingService.hentBehandling(ferdigstillBehandling.behandlingsId)
+        val behandling = behandlingService.hent(ferdigstillBehandling.behandlingsId)
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandling?.id)
         val fagsak = behandling?.fagsak
 

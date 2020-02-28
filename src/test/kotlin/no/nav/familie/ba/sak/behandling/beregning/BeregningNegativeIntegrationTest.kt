@@ -83,7 +83,7 @@ class BeregningNegativeIntegrationTest {
                                         begrunnelse = ""),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
-        val vedtak = vedtakService.hentVedtakHvisEksisterer(behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(vedtak)
 
         val fagsakRes = beregningController.oppdaterVedtakMedBeregning(fagsak.id!!,

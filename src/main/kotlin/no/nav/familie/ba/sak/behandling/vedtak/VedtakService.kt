@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import no.nav.familie.ba.sak.behandling.DokGenService
+import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
@@ -22,7 +22,7 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
                      private val vedtakRepository: VedtakRepository,
                      private val vedtakPersonRepository: VedtakPersonRepository,
                      private val vilkårService: VilkårService,
-                     private val dokGenService: DokGenService,
+                     private val dokGenKlient: DokGenKlient,
                      private val personRepository: PersonRepository,
                      private val fagsakService: FagsakService) {
 
@@ -92,7 +92,7 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
         )
 
         if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT) {
-            vedtak.stønadBrevMarkdown = Result.runCatching { dokGenService.hentStønadBrevMarkdown(vedtak) }
+            vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
                     .fold(
                             onSuccess = { it },
                             onFailure = { e ->
@@ -102,7 +102,7 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
                     )
         }
 
-        lagreVedtak(vedtak)
+        lagre(vedtak)
 
         return fagsakService.hentRestFagsak(behandling.fagsak.id)
     }
@@ -143,7 +143,7 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
             )
         }
 
-        vedtak.stønadBrevMarkdown = Result.runCatching { dokGenService.hentStønadBrevMarkdown(vedtak) }
+        vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
@@ -152,17 +152,21 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
                         }
                 )
 
-        lagreVedtak(vedtak)
+        lagre(vedtak)
 
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
 
-    fun hentVedtakHvisEksisterer(behandlingId: Long?): Vedtak? {
+    fun hent(vedtakId: Long): Vedtak? {
+        return vedtakRepository.getOne(vedtakId)
+    }
+
+    fun hentAktivForBehandling(behandlingId: Long?): Vedtak? {
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun lagreVedtak(vedtak: Vedtak) {
-        val aktivVedtak = hentVedtakHvisEksisterer(vedtak.behandling.id)
+    fun lagre(vedtak: Vedtak) {
+        val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
 
         if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
             aktivVedtak.aktiv = false

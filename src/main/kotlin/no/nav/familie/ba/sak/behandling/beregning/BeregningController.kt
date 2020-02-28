@@ -42,10 +42,10 @@ class BeregningController(
         }
 
         val behandling =
-                behandlingService.hentBehandlingHvisEksisterer(fagsakId)
+                behandlingService.hentAktivForFagsak(fagsakId)
                 ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
-        val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
                      ?: return notFound("Fant ikke aktiv vedtak på fagsak $fagsakId, behandling ${behandling.id}")
 
         if (vedtak.resultat == VedtakResultat.AVSLÅTT) {

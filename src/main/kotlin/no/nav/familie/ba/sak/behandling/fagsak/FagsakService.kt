@@ -36,13 +36,18 @@ class FagsakService(
                         aktørId = integrasjonTjeneste.hentAktørId(nyFagsak.personIdent),
                         personIdent = PersonIdent(nyFagsak.personIdent)
                 )
-                lagreFagsak(fagsak)
+                lagre(fagsak)
 
                 hentRestFagsak(fagsakId = fagsak.id)
             }
             else -> Ressurs.failure(
                     "Kan ikke opprette fagsak på person som allerede finnes. Gå til fagsak ${hentetFagsak.id} for å se på saken")
         }
+    }
+
+    @Transactional
+    fun lagre(fagsak: Fagsak) {
+        fagsakRepository.save(fagsak)
     }
 
     fun hentRestFagsak(fagsakId: Long?): Ressurs<RestFagsak> {
@@ -81,29 +86,24 @@ class FagsakService(
         LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
         fagsak.status = nyStatus
 
-        lagreFagsak(fagsak)
+        lagre(fagsak)
+    }
+
+    private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
+        val aktørId = integrasjonTjeneste.hentAktørId(personIdent.ident)
+        val nyFagsak = Fagsak(null, aktørId, personIdent)
+        lagre(nyFagsak)
+        return nyFagsak
     }
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak =
             hentEllerOpprettFagsak(PersonIdent(fødselsnummer))
 
     private fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak =
-            hentFagsakForPersonident(personIdent) ?: opprettFagsak(personIdent)
+            hent(personIdent) ?: opprettFagsak(personIdent)
 
-    private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
-        val aktørId = integrasjonTjeneste.hentAktørId(personIdent.ident)
-        val nyFagsak = Fagsak(null, aktørId, personIdent)
-        lagreFagsak(nyFagsak)
-        return nyFagsak
-    }
-
-    fun hentFagsakForPersonident(personIdent: PersonIdent): Fagsak? {
+    fun hent(personIdent: PersonIdent): Fagsak? {
         return fagsakRepository.finnFagsakForPersonIdent(personIdent)
-    }
-
-    @Transactional
-    fun lagreFagsak(fagsak: Fagsak) {
-        fagsakRepository.save(fagsak)
     }
 
     fun hentLøpendeFagsaker(): List<Fagsak> {

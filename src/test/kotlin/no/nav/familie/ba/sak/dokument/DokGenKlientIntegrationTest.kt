@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -23,9 +23,9 @@ import java.time.LocalDate
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 @Tag("integration")
-class DokGenIntegrationTest {
+class DokGenKlientIntegrationTest {
 
-    class DokGenTestService : DokGenService("mock_dokgen_uri", RestTemplate()) {
+    class DokGenTestKlient : DokGenKlient("mock_dokgen_uri", RestTemplate()) {
         override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
             if (request.url.path.matches(Regex(".+create-markdown"))) {
                 assert(request.body is String)
@@ -52,7 +52,7 @@ class DokGenIntegrationTest {
         }
     }
 
-    class DokGenTestNullBodyService : DokGenService("mock_dokgen_uri", RestTemplate()) {
+    class DokGenTestNullBodyKlient : DokGenKlient("mock_dokgen_uri", RestTemplate()) {
         override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
             return ResponseEntity<T>(null, HttpStatus.OK)
         }
@@ -61,7 +61,7 @@ class DokGenIntegrationTest {
     @Test
     @Tag("integration")
     fun `Test generer markdown`() {
-        val dokgen = DokGenTestService()
+        val dokgen = DokGenTestKlient()
         val markdown = dokgen.hentStønadBrevMarkdown(Vedtak(
                 id = 1,
                 behandling = Behandling(
@@ -85,7 +85,7 @@ class DokGenIntegrationTest {
     @Test
     @Tag("integration")
     fun `Test generer html`() {
-        val dokgen = DokGenTestService()
+        val dokgen = DokGenTestKlient()
         val html = dokgen.lagHtmlFraMarkdown("Innvilget", "markdown")
         assert(html == "<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>")
     }
@@ -93,7 +93,7 @@ class DokGenIntegrationTest {
     @Test
     @Tag("integration")
     fun `Test generer pdf`() {
-        val dokgen = DokGenTestService()
+        val dokgen = DokGenTestKlient()
         val pdf = dokgen.lagPdfFraMarkdown("Innvilget", "markdown")
         assert(pdf.contentEquals("Vedtaksbrev PDF".toByteArray()))
     }
@@ -101,7 +101,7 @@ class DokGenIntegrationTest {
     @Test
     @Tag("integration")
     fun `Test null response`() {
-        val dokgen = DokGenTestNullBodyService()
+        val dokgen = DokGenTestNullBodyKlient()
         val html = dokgen.lagHtmlFraMarkdown("Innvilget", "markdown")
         assert(html.isEmpty())
 
@@ -123,5 +123,4 @@ class DokGenIntegrationTest {
         ))
         assert(markdown.isEmpty())
     }
-
 }
