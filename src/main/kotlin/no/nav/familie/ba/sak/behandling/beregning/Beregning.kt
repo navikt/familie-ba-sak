@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.behandling.beregning
 
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
 import no.nav.fpsak.tidsserie.LocalDateSegment

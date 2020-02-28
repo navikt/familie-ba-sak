@@ -1,0 +1,71 @@
+package no.nav.familie.ba.sak.behandling.beregning
+
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.vedtak.NyBeregning
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.common.RessursResponse.badRequest
+import no.nav.familie.ba.sak.common.RessursResponse.notFound
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.*
+
+// TODO: endre til beregning
+@RestController
+@RequestMapping("/api/fagsak")
+@ProtectedWithClaims(issuer = "azuread")
+@Validated
+class BeregningController(
+        private val behandlingService: BehandlingService,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val vedtakService: VedtakService
+) {
+
+    @PostMapping(path = ["/{fagsakId}/oppdater-vedtak-beregning"])
+    fun oppdaterVedtakMedBeregning(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
+                                   @RequestBody nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
+        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+
+        FagsakController.logger.info("{} oppdaterer vedtak med beregning for fagsak med id {}", saksbehandlerId, fagsakId)
+
+        if (nyBeregning.barnasBeregning.isEmpty()) {
+            return badRequest("Barnas beregning er tom")
+        }
+
+        val behandling =
+                behandlingService.hentBehandlingHvisEksisterer(fagsakId)
+                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+
+        val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
+                     ?: return notFound("Fant ikke aktiv vedtak på fagsak $fagsakId, behandling ${behandling.id}")
+
+        if (vedtak.resultat == VedtakResultat.AVSLÅTT) {
+            return badRequest("Kan ikke lagre beregning på et avslått vedtak")
+        }
+
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                                       ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+
+        return Result.runCatching {
+            vedtakService.oppdaterAktivVedtakMedBeregning(vedtak,
+                                                          personopplysningGrunnlag,
+                                                          nyBeregning)
+        }
+                .fold(
+                        onSuccess = { ResponseEntity.ok(it) },
+                        onFailure = { e ->
+                            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body(Ressurs.failure(e.cause?.message ?: e.message,
+                                                          e))
+                        }
+                )
+    }
+}
