@@ -41,9 +41,7 @@ class ØkonomiService(
                             checkNotNull(it.body?.data) { "Ressurs mangler data" }
 
                             check(it.body?.status == Ressurs.Status.SUKSESS) {
-                                String.format("Ressurs returnerer %s men har http status kode %s",
-                                              it.body?.status,
-                                              it.statusCode)
+                                "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}"
                             }
 
                             behandlingService.oppdaterStatusPåBehandling(behandlingsId, BehandlingStatus.SENDT_TIL_IVERKSETTING)
@@ -61,9 +59,7 @@ class ØkonomiService(
                             checkNotNull(it.body) { "Finner ikke ressurs" }
                             checkNotNull(it.body?.data) { "Ressurs mangler data" }
                             check(it.body?.status == Ressurs.Status.SUKSESS) {
-                                String.format("Ressurs returnerer %s men har http status kode %s",
-                                              it.body?.status,
-                                              it.statusCode)
+                                "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}"
                             }
 
                             return it.body?.data!!
