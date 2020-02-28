@@ -30,7 +30,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
         val fagsak = fagsakService.hent(personIdent = PersonIdent(nyBehandling.ident))
-                     ?: throw IllegalStateException("Kan ikke lage behandling på person uten tilknyttet fagsak")
+                     ?: error("Kan ikke lage behandling på person uten tilknyttet fagsak")
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
