@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.fagsak.NyFagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
