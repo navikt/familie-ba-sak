@@ -40,10 +40,4 @@ class PersonIdent(
     override fun hashCode(): Int {
         return Objects.hash(ident)
     }
-
-    companion object {
-        fun fra(ident: String?): PersonIdent? {
-            return ident?.let { PersonIdent(it) }
-        }
-    }
 }

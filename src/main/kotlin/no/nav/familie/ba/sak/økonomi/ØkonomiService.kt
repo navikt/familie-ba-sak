@@ -20,7 +20,6 @@ class ØkonomiService(
 
     fun iverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
         val vedtak = vedtakService.hent(vedtakId)
-                     ?: error("Fant ikke vedtak med id $vedtakId i forbindelse med iverksetting mot oppdrag")
 
         val personberegninger = if (vedtak.resultat == VedtakResultat.OPPHØRT)
             beregningService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)

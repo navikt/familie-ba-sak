@@ -37,9 +37,6 @@ class IverksettMotOppdrag(
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         val behandling = behandlingService.hent(iverksettingTask.behandlingsId)
-        checkNotNull(behandling) {
-            "Skal iverksette mot økonomi, men finner ikke behandling med id ${iverksettingTask.behandlingsId}."
-        }
         check(behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
             "Skal iverksette mot økonomi, men behandlingen har status ${behandling.status}."
         }
@@ -58,7 +55,7 @@ class IverksettMotOppdrag(
         )
         taskRepository.save(nyTask)
 
-        if (!behandling?.oppgaveId.isNullOrBlank()) {
+        if (!behandling.oppgaveId.isNullOrBlank()) {
             val ferdigstillTask = FerdigstillOppgave.opprettTask(iverksettingTask.behandlingsId, task.metadata)
             taskRepository.save(ferdigstillTask)
         }
@@ -73,7 +70,7 @@ class IverksettMotOppdrag(
 
             return opprettTask(behandling.fagsak.personIdent.ident,
                                behandling.id,
-                               vedtak.id!!,
+                               vedtak.id,
                                saksbehandlerId)
         }
 

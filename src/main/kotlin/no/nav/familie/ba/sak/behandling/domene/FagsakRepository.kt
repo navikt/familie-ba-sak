@@ -9,17 +9,17 @@ import java.util.*
 import javax.persistence.LockModeType
 
 @Repository
-interface FagsakRepository : JpaRepository<Fagsak?, Long?> {
+interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
     fun save(fagsak: Fagsak): Fagsak
 
     @Lock(LockModeType.NONE)
-    override fun findById(id: Long): Optional<Fagsak?>
+    override fun findById(id: Long): Optional<Fagsak>
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f FROM Fagsak f WHERE f.id = :fagsakId")
-    fun finnFagsak(fagsakId: Long?): Fagsak?
+    fun finnFagsak(fagsakId: Long): Fagsak
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f FROM Fagsak f WHERE f.personIdent = :personIdent")

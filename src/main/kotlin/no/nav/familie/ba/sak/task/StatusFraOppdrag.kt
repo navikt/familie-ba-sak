@@ -54,7 +54,7 @@ class StatusFraOppdrag(
                                 BehandlingStatus.IVERKSATT
                         )
 
-                        if (behandling?.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+                        if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
                             opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId, task)
                         } else {
                             opprettFerdigstillBehandling(statusFraOppdragDTO)

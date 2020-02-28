@@ -112,7 +112,7 @@ class DokumentServiceTest(
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
-                        arrayOf(BarnBeregning(ident = fnr,
+                        listOf(BarnBeregning(ident = fnr,
                                               beløp = 1054,
                                               stønadFom = LocalDate.of(
                                                       2020,

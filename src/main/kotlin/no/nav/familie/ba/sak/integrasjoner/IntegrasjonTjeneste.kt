@@ -44,8 +44,8 @@ class IntegrasjonTjeneste(
 ) : BaseService(OAUTH2_CLIENT_CONFIG_KEY, restTemplateBuilderMedProxy, clientConfigurationProperties, oAuth2AccessTokenService) {
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun hentAktørId(personident: String?): AktørId {
-        if (personident == null || personident.isEmpty()) {
+    fun hentAktørId(personident: String): AktørId {
+        if (personident.isEmpty()) {
             throw IntegrasjonException("Ved henting av aktør id er personident null eller tom")
         }
         val uri = URI.create("$integrasjonerServiceUri/aktoer/v1")

@@ -38,7 +38,7 @@ class OpphørVedtakTask(
         val nyTask = IverksettMotOppdrag.opprettTask(
                 vedtak.behandling.fagsak.personIdent.ident,
                 vedtak.behandling.id,
-                vedtak.id!!,
+                vedtak.id,
                 vedtak.ansvarligSaksbehandler)
 
         taskRepository.save(nyTask)
@@ -58,7 +58,7 @@ class OpphørVedtakTask(
                                payload = objectMapper.writeValueAsString(OpphørVedtakTaskDTO(
                                        personIdent = gjeldendeBehandling.fagsak.personIdent.ident,
                                        gjeldendeBehandlingsId = gjeldendeBehandling.id,
-                                       gjeldendeVedtaksId = gjeldendeVedtak.id!!,
+                                       gjeldendeVedtaksId = gjeldendeVedtak.id,
                                        saksbehandlerId = saksbehandlerId,
                                        nyBehandlingType = nyBehandlingstype.name,
                                        opphørsdato = opphørsdato

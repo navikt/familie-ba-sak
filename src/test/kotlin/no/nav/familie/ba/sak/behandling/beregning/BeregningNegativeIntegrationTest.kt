@@ -86,9 +86,9 @@ class BeregningNegativeIntegrationTest {
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        val fagsakRes = beregningController.oppdaterVedtakMedBeregning(fagsak.id!!,
+        val fagsakRes = beregningController.oppdaterVedtakMedBeregning(fagsak.id,
                                                                        NyBeregning(
-                                                                               arrayOf(
+                                                                               listOf(
                                                                                        BarnBeregning(
                                                                                                ident = "12345678910",
                                                                                                beløp = 1054,

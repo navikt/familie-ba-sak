@@ -124,7 +124,7 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
             }
 
             val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-            val sikkerStønadTom = person.fødselsdato.plusYears(18)?.sisteDagIForrigeMåned()!!
+            val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
 
             if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
                 error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
@@ -156,11 +156,11 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
 
-    fun hent(vedtakId: Long): Vedtak? {
+    fun hent(vedtakId: Long): Vedtak {
         return vedtakRepository.getOne(vedtakId)
     }
 
-    fun hentAktivForBehandling(behandlingId: Long?): Vedtak? {
+    fun hentAktivForBehandling(behandlingId: Long): Vedtak? {
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
