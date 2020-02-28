@@ -1,27 +1,13 @@
 package no.nav.familie.ba.sak
 
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.DokGenService
-import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.NyFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.behandling.vedtak.*
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.util.randomFnr
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -32,11 +18,8 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.LocalDate
-import java.util.*
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -47,37 +30,8 @@ class FagsakControllerTest(
         private val fagsakService: FagsakService,
 
         @Autowired
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-
-        @Autowired
-        private val taskRepository: TaskRepository,
-
-        @Autowired
-        private val vedtakRepository: VedtakRepository,
-
-        @Autowired
-        private val behandlingRepository: BehandlingRepository,
-
-        @Autowired
-        private val behandlingService: BehandlingService,
-
-        @Autowired
-        private val fagsakController: FagsakController,
-
-        @Autowired
-        private val dokGenService: DokGenService,
-
-        @Autowired
-        private val vilkårService: VilkårService,
-
-        @Autowired
-        private val featureToggleService: FeatureToggleService,
-
-        @Autowired
-        private val vedtakService: VedtakService
-
+        private val fagsakController: FagsakController
 ) {
-
 
     @MockBean
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
@@ -108,161 +62,8 @@ class FagsakControllerTest(
         val feilendeRestFagsak = fagsakController.nyFagsak(NyFagsak(
                 personIdent = fnr))
         Assertions.assertEquals(Ressurs.Status.FEILET, feilendeRestFagsak.body?.status)
-        Assertions.assertEquals("Kan ikke opprette fagsak på person som allerede finnes. Gå til fagsak ${restFagsak.body?.data?.id} for å se på saken",
-                                feilendeRestFagsak.body?.melding)
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Test opphør vedtak`() {
-        val mockBehandlingLager: BehandlingService = mockk()
-        val mockVedtakService: VedtakService = mockk()
-
-        val fagsak = Fagsak(1, AktørId("1"), PersonIdent("1"))
-        val behandling =
-                lagOrdinærIverksattBehandling(fagsak, BehandlingType.MIGRERING_FRA_INFOTRYGD)
-        val vedtak = lagInnvilgetVedtak(behandling)
-
-        every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
-        every { mockVedtakService.hentVedtakHvisEksisterer(any()) } returns vedtak
-        val fagsakController =
-                FagsakController(fagsakService,
-                                 mockBehandlingLager,
-                                 personopplysningGrunnlagRepository,
-                                 taskRepository,
-                                 vedtakService)
-
-        val response = fagsakController.opphørMigrertVedtak(1)
-        assert(response.statusCode == HttpStatus.OK)
-    }
-
-
-    @Test
-    @Tag("integration")
-    fun `Test opphør vedtak v2`() {
-        val mockBehandlingLager: BehandlingService = mockk()
-        val mockVedtakService: VedtakService = mockk()
-
-        val fagsak = Fagsak(1, AktørId("1"), PersonIdent("1"))
-        val behandling =
-                lagOrdinærIverksattBehandling(fagsak, BehandlingType.MIGRERING_FRA_INFOTRYGD)
-        val vedtak = lagInnvilgetVedtak(behandling)
-
-        every { mockBehandlingLager.hentBehandlingHvisEksisterer(any()) } returns behandling
-        every { mockVedtakService.hentVedtakHvisEksisterer(any()) } returns vedtak
-        val fagsakController =
-                FagsakController(fagsakService,
-                                 mockBehandlingLager,
-                                 personopplysningGrunnlagRepository,
-                                 taskRepository,
-                                 vedtakService)
-
-        val response = fagsakController.opphørMigrertVedtak(1,
-                                                            Opphørsvedtak(
-                                                                    LocalDate.now()))
-        assert(response.statusCode == HttpStatus.OK)
-    }
-
-    private fun randomPin() = UUID.randomUUID().toString()
-
-    @Test
-    @Tag("integration")
-    fun `Test opprett avslag vedtak`() {
-        val fagsakId = 1L
-        val behandlingId = 1L
-        val aktørId = randomPin()
-        val søkerFnr = randomPin()
-        val barnFnr = randomPin()
-
-        val behandlingService = BehandlingService(
-                behandlingRepository = behandlingRepository,
-                vedtakRepository = vedtakRepository,
-                personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-                dokGenService = dokGenService,
-                fagsakService = fagsakService,
-                integrasjonTjeneste = mockk(),
-                featureToggleService = featureToggleService,
-                taskRepository = taskRepository)
-
-        val fagsak = Fagsak(fagsakId, AktørId(aktørId), PersonIdent(søkerFnr))
-        fagsakService.lagreFagsak(fagsak)
-        val behandling =
-                Behandling(behandlingId,
-                           fagsak,
-                           null,
-                           BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                           status = BehandlingStatus.IVERKSATT,
-                           kategori = BehandlingKategori.NASJONAL,
-                           underkategori = BehandlingUnderkategori.ORDINÆR)
-        behandlingRepository.save(behandling)
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-                behandling.id, søkerFnr, barnFnr)
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-
-        val fagsakController =
-                FagsakController(fagsakService,
-                                 behandlingService,
-                                 personopplysningGrunnlagRepository,
-                                 taskRepository,
-                                 vedtakService)
-
-        val response = fagsakController.nyttVedtak(1, NyttVedtak(
-                resultat = VedtakResultat.AVSLÅTT,
-                samletVilkårResultat = listOf(
-                        RestVilkårResultat(
-                                personIdent = søkerFnr,
-                                vilkårType = VilkårType.BOSATT_I_RIKET,
-                                utfallType = UtfallType.IKKE_OPPFYLT
-                        ),
-                        RestVilkårResultat(
-                                personIdent = søkerFnr,
-                                vilkårType = VilkårType.STØNADSPERIODE,
-                                utfallType = UtfallType.IKKE_OPPFYLT
-                        ),
-                        RestVilkårResultat(
-                                personIdent = barnFnr,
-                                vilkårType = VilkårType.BOSATT_I_RIKET,
-                                utfallType = UtfallType.IKKE_OPPFYLT
-                        ),
-                        RestVilkårResultat(
-                                personIdent = barnFnr,
-                                vilkårType = VilkårType.STØNADSPERIODE,
-                                utfallType = UtfallType.IKKE_OPPFYLT
-                        ),
-                        RestVilkårResultat(
-                                personIdent = barnFnr,
-                                vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                utfallType = UtfallType.IKKE_OPPFYLT
-                        )
-                ),
-                begrunnelse = "mock begrunnelse"
-        ))
-
-        Assertions.assertEquals(HttpStatus.OK, response.statusCode)
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
         Assertions.assertEquals(
-                "mock begrunnelse",
-                vedtak?.begrunnelse
-        )
-    }
-
-    private fun lagInnvilgetVedtak(behandling: Behandling) =
-            Vedtak(1,
-                   behandling,
-                   "sb",
-                   LocalDate.now(),
-                   "",
-                   VedtakResultat.INNVILGET,
-                   begrunnelse = "")
-
-    private fun lagOrdinærIverksattBehandling(fagsak: Fagsak,
-                                              behandlingType: BehandlingType): Behandling {
-        return Behandling(1,
-                          fagsak,
-                          null,
-                          behandlingType,
-                          status = BehandlingStatus.IVERKSATT,
-                          kategori = BehandlingKategori.NASJONAL,
-                          underkategori = BehandlingUnderkategori.ORDINÆR)
+                "Kan ikke opprette fagsak på person som allerede finnes. Gå til fagsak ${restFagsak.body?.data?.id} for å se på saken",
+                feilendeRestFagsak.body?.melding)
     }
 }

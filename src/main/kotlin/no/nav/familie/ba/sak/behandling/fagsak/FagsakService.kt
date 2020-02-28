@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -28,7 +29,8 @@ class FagsakService(
 
     @Transactional
     fun nyFagsak(nyFagsak: NyFagsak): Ressurs<RestFagsak> {
-        return when (val hentetFagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(nyFagsak.personIdent))) {
+        return when (val hentetFagsak =
+                fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(nyFagsak.personIdent))) {
             null -> {
                 val fagsak = Fagsak(
                         aktørId = integrasjonTjeneste.hentAktørId(nyFagsak.personIdent),
@@ -43,7 +45,6 @@ class FagsakService(
         }
     }
 
-    @Transactional
     fun hentRestFagsak(fagsakId: Long?): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
                      ?: return Ressurs.failure("Fant ikke fagsak med fagsakId: $fagsakId")
@@ -77,7 +78,7 @@ class FagsakService(
     }
 
     fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
-        LOG.info("Endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
+        LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
         fagsak.status = nyStatus
 
         lagreFagsak(fagsak)

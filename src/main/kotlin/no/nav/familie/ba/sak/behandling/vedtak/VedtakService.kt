@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.DokGenService
+import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -15,7 +16,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-
 
 @Service
 class VedtakService (private val behandlingRepository: BehandlingRepository,

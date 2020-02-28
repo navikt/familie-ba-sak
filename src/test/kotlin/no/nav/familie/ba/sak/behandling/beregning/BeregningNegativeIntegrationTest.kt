@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
