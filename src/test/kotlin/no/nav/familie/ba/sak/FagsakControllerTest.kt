@@ -177,12 +177,9 @@ class FagsakControllerTest(
         val behandlingService = BehandlingService(
                 behandlingRepository = behandlingRepository,
                 vedtakRepository = vedtakRepository,
-                vedtakPersonRepository = mockk(),
                 personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-                personRepository = mockk(),
                 dokGenService = dokGenService,
                 fagsakService = fagsakService,
-                vilkårService = vilkårService,
                 integrasjonTjeneste = mockk(),
                 featureToggleService = featureToggleService,
                 taskRepository = taskRepository)

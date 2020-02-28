@@ -1,19 +1,12 @@
-package no.nav.familie.ba.sak.oppgave
+package no.nav.familie.ba.sak.arbeidsfordeling
 
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import io.mockk.slot
-import no.nav.familie.ba.sak.behandling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.arbeidsfordeling.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
-import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.oppgave.IdentType
@@ -50,7 +43,8 @@ class OppgaveServiceTest {
                     every { enhetId } returns ENHETSNUMMER
                 }
         )
-        every { integrasjonTjeneste.hentAktørId(FNR) } returns AktørId(AKTØR_ID_INTEGRASJONER)
+        every { integrasjonTjeneste.hentAktørId(FNR) } returns AktørId(
+                AKTØR_ID_INTEGRASJONER)
         val slot = slot<OpprettOppgave>()
         every { integrasjonTjeneste.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
@@ -63,14 +57,15 @@ class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.BAR)
-        assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/${FAGSAK_ID}/behandle")
+        assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/$FAGSAK_ID/behandle")
     }
 
     @Test
     fun `Opprett oppgave skal kalle oppretteOppgave selv om den ikke finner en enhetsnummer, men da med uten tildeltEnhetsnummer`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
-        every { integrasjonTjeneste.hentAktørId(FNR) } returns AktørId(AKTØR_ID_INTEGRASJONER)
+        every { integrasjonTjeneste.hentAktørId(FNR) } returns AktørId(
+                AKTØR_ID_INTEGRASJONER)
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
         val slot = slot<OpprettOppgave>()
         every { integrasjonTjeneste.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
@@ -84,7 +79,7 @@ class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.BAR)
-        assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/${FAGSAK_ID}/behandle")
+        assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/$FAGSAK_ID/behandle")
     }
 
     @Test

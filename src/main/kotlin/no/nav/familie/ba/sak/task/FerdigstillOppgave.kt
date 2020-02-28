@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.oppgave.OppgaveService
+import no.nav.familie.ba.sak.arbeidsfordeling.OppgaveService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task

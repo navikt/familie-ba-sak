@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.beregning.BeregningService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
@@ -13,7 +14,8 @@ import org.springframework.util.Assert
 @Service
 class ØkonomiService(
         private val økonomiKlient: ØkonomiKlient,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val beregningService: BeregningService
 ) {
 
     fun iverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
@@ -21,8 +23,8 @@ class ØkonomiService(
                      ?: throw Error("Fant ikke vedtak med id $vedtakId i forbindelse med iverksetting mot oppdrag")
 
         val personberegninger = if(vedtak.resultat== VedtakResultat.OPPHØRT)
-                behandlingService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)
-                else behandlingService.hentPersonerForVedtak(vedtak.id)
+            beregningService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)
+                else beregningService.hentPersonerForVedtak(vedtak.id)
 
         val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, personberegninger)
 
