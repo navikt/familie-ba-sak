@@ -47,7 +47,7 @@ class VedtakControllerTest(
         val fnr = randomFnr()
 
         fagsakController.nyFagsak(NyFagsak(personIdent = fnr))
-        Assertions.assertEquals(fnr, fagsakService.hentForPersonident(PersonIdent(fnr))?.personIdent?.ident)
+        Assertions.assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
     }
 
     @Test
@@ -57,7 +57,7 @@ class VedtakControllerTest(
 
         val restFagsak = fagsakController.nyFagsak(NyFagsak(personIdent = fnr))
         Assertions.assertEquals(Ressurs.Status.SUKSESS, restFagsak.body?.status)
-        Assertions.assertEquals(fnr, fagsakService.hentForPersonident(PersonIdent(fnr))?.personIdent?.ident)
+        Assertions.assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
 
         val feilendeRestFagsak = fagsakController.nyFagsak(NyFagsak(
                 personIdent = fnr))

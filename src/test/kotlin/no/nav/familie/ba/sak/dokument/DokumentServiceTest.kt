@@ -1,19 +1,19 @@
 package no.nav.familie.ba.sak.dokument
 
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.beregning.BarnBeregning
 import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.opprettNyOrdinærBehandling
 import no.nav.familie.ba.sak.behandling.vedtak.NyttVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.ba.sak.behandling.opprettNyOrdinærBehandling
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.util.randomFnr
@@ -59,19 +59,19 @@ class DokumentServiceTest(
     fun setup() {
         MockKAnnotations.init(this)
 
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/aktoer/v1"))
-                                 .willReturn(WireMock.aResponse()
+        stubFor(get(urlEqualTo("/api/aktoer/v1"))
+                                 .willReturn(aResponse()
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/personopplysning/v1/info"))
-                                 .willReturn(WireMock.aResponse()
+        stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
+                                 .willReturn(aResponse()
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
                                                              LocalDate.of(2019,
                                                                           1,
                                                                           1)))))))
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/personopplysning/v1/info/BAR"))
-                                 .willReturn(WireMock.aResponse()
+        stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
+                                 .willReturn(aResponse()
                                                      .withHeader("Content-Type", "application/json")
                                                      .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
                                                              LocalDate.of(2019,

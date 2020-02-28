@@ -10,15 +10,15 @@ import org.springframework.stereotype.Service
 @Service
 class DokumentService(
         private val vedtakService: VedtakService,
-        private val dokumentKlient: DokumentKlient
+        private val dokGenKlient: DokGenKlient
 ) {
 
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
         val vedtak = vedtakService.hentAktiv(behandlingId)
                      ?: return Ressurs.failure("Vedtak ikke funnet")
         val html = Result.runCatching {
-            dokumentKlient.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(),
-                                              vedtak.stønadBrevMarkdown)
+            dokGenKlient.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(),
+                                            vedtak.stønadBrevMarkdown)
         }
                 .fold(
                         onSuccess = { it },
@@ -35,7 +35,7 @@ class DokumentService(
             BehandlingService.LOG.debug("henter stønadsbrevMarkdown fra behandlingsVedtak")
             val markdown = vedtak.stønadBrevMarkdown
             BehandlingService.LOG.debug("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
-            dokumentKlient.lagPdfFraMarkdown(vedtak.resultat.toDokGenTemplate(), markdown)
+            dokGenKlient.lagPdfFraMarkdown(vedtak.resultat.toDokGenTemplate(), markdown)
         }
                 .fold(
                         onSuccess = { it },

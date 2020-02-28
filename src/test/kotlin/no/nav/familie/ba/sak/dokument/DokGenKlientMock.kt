@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate
 
 @Service
 @Profile("mock-dokgen-java")
-class DokumentKlientMock : DokumentKlient(
+class DokGenKlientMock : DokGenKlient(
         dokgenServiceUri = "dokgen_uri_mock",
         restTemplate = RestTemplate()
 ) {

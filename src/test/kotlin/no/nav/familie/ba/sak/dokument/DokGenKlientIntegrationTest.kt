@@ -23,9 +23,9 @@ import java.time.LocalDate
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 @Tag("integration")
-class DokumentKlientIntegrationTest {
+class DokGenKlientIntegrationTest {
 
-    class DokGenTestKlient : DokumentKlient("mock_dokgen_uri", RestTemplate()) {
+    class DokGenTestKlient : DokGenKlient("mock_dokgen_uri", RestTemplate()) {
         override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
             if (request.url.path.matches(Regex(".+create-markdown"))) {
                 assert(request.body is String)
@@ -52,7 +52,7 @@ class DokumentKlientIntegrationTest {
         }
     }
 
-    class DokGenTestNullBodyKlient : DokumentKlient("mock_dokgen_uri", RestTemplate()) {
+    class DokGenTestNullBodyKlient : DokGenKlient("mock_dokgen_uri", RestTemplate()) {
         override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
             return ResponseEntity<T>(null, HttpStatus.OK)
         }
@@ -123,5 +123,4 @@ class DokumentKlientIntegrationTest {
         ))
         assert(markdown.isEmpty())
     }
-
 }

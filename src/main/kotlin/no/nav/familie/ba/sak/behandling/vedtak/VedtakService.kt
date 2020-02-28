@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import no.nav.familie.ba.sak.dokument.DokumentKlient
+import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
@@ -22,7 +22,7 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
                      private val vedtakRepository: VedtakRepository,
                      private val vedtakPersonRepository: VedtakPersonRepository,
                      private val vilkårService: VilkårService,
-                     private val dokumentKlient: DokumentKlient,
+                     private val dokGenKlient: DokGenKlient,
                      private val personRepository: PersonRepository,
                      private val fagsakService: FagsakService) {
 
@@ -92,7 +92,7 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
         )
 
         if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT) {
-            vedtak.stønadBrevMarkdown = Result.runCatching { dokumentKlient.hentStønadBrevMarkdown(vedtak) }
+            vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
                     .fold(
                             onSuccess = { it },
                             onFailure = { e ->
@@ -143,7 +143,7 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
             )
         }
 
-        vedtak.stønadBrevMarkdown = Result.runCatching { dokumentKlient.hentStønadBrevMarkdown(vedtak) }
+        vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->

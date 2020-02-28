@@ -20,8 +20,8 @@ import java.time.LocalDate
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 @Disabled("DokGen must be available")
-class DokumentKlientTest(@Autowired
-                        private val dokumentKlient: DokumentKlient) {
+class DokGenKlientTest(@Autowired
+                       private val dokGenKlient: DokGenKlient) {
 
     private val vedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910"), aktørId = AktørId("1")),
@@ -35,7 +35,7 @@ class DokumentKlientTest(@Autowired
             begrunnelse = ""
     )
 
-    private val avslagVedtak= Vedtak(
+    private val avslagVedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910"), aktørId = AktørId("1")),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -49,14 +49,14 @@ class DokumentKlientTest(@Autowired
 
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
-        val markdown= dokumentKlient.hentStønadBrevMarkdown(vedtak)
-        val htmlResponse= dokumentKlient.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(), markdown)
+        val markdown = dokGenKlient.hentStønadBrevMarkdown(vedtak)
+        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(), markdown)
         assert(htmlResponse.startsWith("<html>"))
     }
 
     @Test
-    fun `Test å generer Markdown for avslag brev`(){
-        val markdown= dokumentKlient.hentStønadBrevMarkdown(avslagVedtak)
+    fun `Test å generer Markdown for avslag brev`() {
+        val markdown = dokGenKlient.hentStønadBrevMarkdown(avslagVedtak)
         assert(markdown.startsWith("<br>Du har ikke rett til barnetrygd fordi ."))
     }
 }

@@ -22,7 +22,7 @@ import java.net.URI
 
 @Service
 @Profile("!mock-dokgen-java")
-class DokumentKlient(
+class DokGenKlient(
         @Value("\${FAMILIE_BA_DOKGEN_API_URL}") private val dokgenServiceUri: String,
         private val restTemplate: RestTemplate
 ) {
@@ -32,14 +32,10 @@ class DokumentKlient(
         return hentMarkdownForMal(vedtak.resultat.toDokGenTemplate(), fletteFelter)
     }
 
-    private fun mapTilBrevfelter(vedtak: Vedtak): String {
-        return when (vedtak.resultat) {
-            VedtakResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
-            VedtakResultat.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
-            else -> {
-                throw RuntimeException("Invalid/unsupported vedtak.resultat")
-            }
-        }
+    private fun mapTilBrevfelter(vedtak: Vedtak): String = when (vedtak.resultat) {
+        VedtakResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
+        VedtakResultat.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
+        else -> throw RuntimeException("Invalid/unsupported vedtak.resultat")
     }
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
