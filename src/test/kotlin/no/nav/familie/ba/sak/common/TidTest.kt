@@ -1,6 +1,7 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.common
 
-import org.junit.jupiter.api.Assertions
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

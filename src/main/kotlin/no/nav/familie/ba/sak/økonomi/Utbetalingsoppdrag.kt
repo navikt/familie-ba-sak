@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.beregnUtbetalingsperioder
+import no.nav.familie.ba.sak.behandling.beregning.beregnUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat.OPPHØRT

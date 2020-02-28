@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -25,12 +24,9 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val vedtakRepository: VedtakRepository,
-                        private val vedtakPersonRepository: VedtakPersonRepository,
                         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-                        private val personRepository: PersonRepository,
                         private val dokGenService: DokGenService,
                         private val fagsakService: FagsakService,
-                        private val vilkårService: VilkårService,
                         private val integrasjonTjeneste: IntegrasjonTjeneste,
                         private val featureToggleService: FeatureToggleService,
                         private val taskRepository: TaskRepository) {
@@ -87,10 +83,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         return fagsak
     }
-
-
-
-
 
     fun opprettNyBehandlingPåFagsak(fagsak: Fagsak,
                                     journalpostID: String?,
@@ -184,10 +176,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun hentVedtak(vedtakId: Long): Vedtak? {
         return vedtakRepository.getOne(vedtakId)
-    }
-
-    fun hentPersonerForVedtak(vedtakId: Long?): List<VedtakPerson> {
-        return vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId)
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {

@@ -1,14 +1,14 @@
-package no.nav.familie.ba.sak.økonomi
+package no.nav.familie.ba.sak.behandling.beregning
 
-import no.nav.familie.ba.sak.behandling.beregnUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype.*
+import no.nav.familie.ba.sak.økonomi.lagPersonVedtak
+import no.nav.familie.ba.sak.økonomi.lagSegmentBeløp
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class BeregningTest(
-) {
+class BeregningTest {
     /**
      * Testen generer 3 barn. 2 av dem er født dd. og 1 er født 2 år frem i tid.
      * Videre generer vi tidslinje for utbetaling med stønad fom og tom for samtlige barn.
@@ -27,15 +27,24 @@ class BeregningTest(
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
 
         val tidslinjeMap = beregnUtbetalingsperioder(listOf(
-                lagPersonVedtak("2020-04-01", "2038-03-31", ORDINÆR_BARNETRYGD, 1054),
-                lagPersonVedtak("2022-04-01", "2040-03-31", ORDINÆR_BARNETRYGD, 1054),
-                lagPersonVedtak("2023-04-01", "2038-03-31", ORDINÆR_BARNETRYGD, 1054)))
+                lagPersonVedtak("2020-04-01",
+                                "2038-03-31",
+                                ORDINÆR_BARNETRYGD,
+                                1054),
+                lagPersonVedtak("2022-04-01",
+                                "2040-03-31",
+                                ORDINÆR_BARNETRYGD,
+                                1054),
+                lagPersonVedtak("2023-04-01",
+                                "2038-03-31",
+                                ORDINÆR_BARNETRYGD,
+                                1054)))
 
         val forventedeSegmenter = listOf(
-                lagSegmentBeløp("2020-04-01","2022-03-31", 1054),
-                lagSegmentBeløp("2022-04-01","2023-03-31", 2108),
-                lagSegmentBeløp("2023-04-01","2038-03-31", 3162),
-                lagSegmentBeløp("2038-04-01","2040-03-31", 1054)
+                lagSegmentBeløp("2020-04-01", "2022-03-31", 1054),
+                lagSegmentBeløp("2022-04-01", "2023-03-31", 2108),
+                lagSegmentBeløp("2023-04-01", "2038-03-31", 3162),
+                lagSegmentBeløp("2038-04-01", "2040-03-31", 1054)
         )
 
         assertLikeSegmenter(forventedeSegmenter, tidslinjeMap["BATR"])
@@ -49,20 +58,29 @@ class BeregningTest(
         // Utvidet barnetrygd 1/4/2020 - 31/1/2021
 
         val tidslinjeMap = beregnUtbetalingsperioder(listOf(
-                lagPersonVedtak("2020-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660),
-                lagPersonVedtak("2020-04-01", "2038-03-31", ORDINÆR_BARNETRYGD, 1054),
-                lagPersonVedtak("2020-04-01", "2021-01-31", UTVIDET_BARNETRYGD, 1054)))
+                lagPersonVedtak("2020-04-01",
+                                "2023-03-31",
+                                SMÅBARNSTILLEGG,
+                                660),
+                lagPersonVedtak("2020-04-01",
+                                "2038-03-31",
+                                ORDINÆR_BARNETRYGD,
+                                1054),
+                lagPersonVedtak("2020-04-01",
+                                "2021-01-31",
+                                UTVIDET_BARNETRYGD,
+                                1054)))
 
         val forventedeSegmenterBarnetrygd = listOf(
-                lagSegmentBeløp("2020-04-01","2021-01-31", 2108),
-                lagSegmentBeløp("2021-02-01","2038-03-31", 1054)
+                lagSegmentBeløp("2020-04-01", "2021-01-31", 2108),
+                lagSegmentBeløp("2021-02-01", "2038-03-31", 1054)
         )
 
         val forventedeSegmenterSmåbarnstillegg = listOf(
-                lagSegmentBeløp("2020-04-01","2023-03-31", 660)
+                lagSegmentBeløp("2020-04-01", "2023-03-31", 660)
         )
 
-        Assertions.assertEquals(2,tidslinjeMap.size)
+        Assertions.assertEquals(2, tidslinjeMap.size)
         assertLikeSegmenter(forventedeSegmenterBarnetrygd, tidslinjeMap["BATR"])
         assertLikeSegmenter(forventedeSegmenterSmåbarnstillegg, tidslinjeMap["BATRSMA"])
     }

@@ -96,12 +96,9 @@ class BehandlingIntegrationTest {
         behandlingService = BehandlingService(
                 behandlingRepository,
                 vedtakRepository,
-                vedtakPersonRepository,
                 personopplysningGrunnlagRepository,
-                personRepository,
                 dokGenService,
                 fagsakService,
-                vilkårService,
                 integrasjonTjeneste,
                 featureToggleService,
                 taskRepository)

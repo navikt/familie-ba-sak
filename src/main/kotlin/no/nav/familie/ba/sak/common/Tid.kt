@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling
+package no.nav.familie.ba.sak.common
 
 import java.time.LocalDate
 import java.time.ZoneId

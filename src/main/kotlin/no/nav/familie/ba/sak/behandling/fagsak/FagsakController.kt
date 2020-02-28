@@ -5,9 +5,12 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.*
+import no.nav.familie.ba.sak.common.RessursResponse.badRequest
+import no.nav.familie.ba.sak.common.RessursResponse.forbidden
+import no.nav.familie.ba.sak.common.RessursResponse.notFound
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandler
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
@@ -92,46 +95,6 @@ class FagsakController(
                         onSuccess = { ResponseEntity.ok(it) },
                         onFailure = { e ->
                             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure(e.cause?.message ?: e.message, e))
-                        }
-                )
-    }
-
-    @PostMapping(path = ["/{fagsakId}/oppdater-vedtak-beregning"])
-    fun oppdaterVedtakMedBeregning(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
-                                   @RequestBody nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = hentSaksbehandler()
-
-        logger.info("{} oppdaterer vedtak med beregning for fagsak med id {}", saksbehandlerId, fagsakId)
-
-        if (nyBeregning.barnasBeregning.isEmpty()) {
-            return badRequest("Barnas beregning er tom")
-        }
-
-        val behandling =
-                behandlingService.hentBehandlingHvisEksisterer(fagsakId)
-                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
-
-        val vedtak = behandlingService.hentAktivVedtakForBehandling(behandling.id)
-                     ?: return notFound("Fant ikke aktiv vedtak på fagsak $fagsakId, behandling ${behandling.id}")
-
-        if (vedtak.resultat == VedtakResultat.AVSLÅTT) {
-            return badRequest("Kan ikke lagre beregning på et avslått vedtak")
-        }
-
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                                       ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
-
-        return Result.runCatching {
-            vedtakService.oppdaterAktivVedtakMedBeregning(vedtak,
-                                                              personopplysningGrunnlag,
-                                                              nyBeregning)
-        }
-                .fold(
-                        onSuccess = { ResponseEntity.ok(it) },
-                        onFailure = { e ->
-                            ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                    .body(Ressurs.failure(e.cause?.message ?: e.message,
-                                                          e))
                         }
                 )
     }
@@ -255,19 +218,6 @@ class FagsakController(
         taskRepository.save(task)
 
         return ResponseEntity.ok(Ressurs.success("Task for opphør av migrert behandling og vedtak på fagsak $fagsakId opprettet"))
-    }
-
-    private fun <T> notFound(errorMessage: String): ResponseEntity<Ressurs<T>> =
-            errorResponse(HttpStatus.NOT_FOUND, errorMessage)
-
-    private fun <T> badRequest(errorMessage: String): ResponseEntity<Ressurs<T>> =
-            errorResponse(HttpStatus.BAD_REQUEST, errorMessage)
-
-    private fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> =
-            errorResponse(HttpStatus.FORBIDDEN, errorMessage)
-
-    private fun <T> errorResponse(notFound: HttpStatus, errorMessage: String): ResponseEntity<Ressurs<T>> {
-        return ResponseEntity.status(notFound).body(Ressurs.failure(errorMessage))
     }
 
     companion object {
