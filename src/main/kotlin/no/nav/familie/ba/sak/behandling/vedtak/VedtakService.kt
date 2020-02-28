@@ -102,7 +102,7 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
                     )
         }
 
-        lagreVedtak(vedtak)
+        lagre(vedtak)
 
         return fagsakService.hentRestFagsak(behandling.fagsak.id)
     }
@@ -152,7 +152,7 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
                         }
                 )
 
-        lagreVedtak(vedtak)
+        lagre(vedtak)
 
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
@@ -161,12 +161,12 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
         return vedtakRepository.getOne(vedtakId)
     }
 
-    fun hentAktiv(behandlingId: Long?): Vedtak? {
+    fun hentAktivForBehandling(behandlingId: Long?): Vedtak? {
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun lagreVedtak(vedtak: Vedtak) {
-        val aktivVedtak = hentAktiv(vedtak.behandling.id)
+    fun lagre(vedtak: Vedtak) {
+        val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
 
         if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
             aktivVedtak.aktiv = false

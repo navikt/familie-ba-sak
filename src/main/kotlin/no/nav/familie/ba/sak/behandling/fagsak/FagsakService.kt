@@ -36,7 +36,7 @@ class FagsakService(
                         aktørId = integrasjonTjeneste.hentAktørId(nyFagsak.personIdent),
                         personIdent = PersonIdent(nyFagsak.personIdent)
                 )
-                lagreFagsak(fagsak)
+                lagre(fagsak)
 
                 hentRestFagsak(fagsakId = fagsak.id)
             }
@@ -46,7 +46,7 @@ class FagsakService(
     }
 
     @Transactional
-    fun lagreFagsak(fagsak: Fagsak) {
+    fun lagre(fagsak: Fagsak) {
         fagsakRepository.save(fagsak)
     }
 
@@ -86,13 +86,13 @@ class FagsakService(
         LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
         fagsak.status = nyStatus
 
-        lagreFagsak(fagsak)
+        lagre(fagsak)
     }
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
         val aktørId = integrasjonTjeneste.hentAktørId(personIdent.ident)
         val nyFagsak = Fagsak(null, aktørId, personIdent)
-        lagreFagsak(nyFagsak)
+        lagre(nyFagsak)
         return nyFagsak
     }
 

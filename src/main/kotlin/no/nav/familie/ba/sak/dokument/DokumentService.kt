@@ -14,7 +14,7 @@ class DokumentService(
 ) {
 
     fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
-        val vedtak = vedtakService.hentAktiv(behandlingId)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
                      ?: return Ressurs.failure("Vedtak ikke funnet")
         val html = Result.runCatching {
             dokGenKlient.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(),

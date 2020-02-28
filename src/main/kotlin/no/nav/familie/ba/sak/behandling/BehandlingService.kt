@@ -32,7 +32,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val fagsak = fagsakService.hent(personIdent = PersonIdent(nyBehandling.ident))
                      ?: throw IllegalStateException("Kan ikke lage behandling på person uten tilknyttet fagsak")
 
-        val aktivBehandling = hentAktiv(fagsak.id)
+        val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
@@ -52,7 +52,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun opprettEllerOppdaterBehandlingFraHendelse(nyBehandling: NyBehandlingHendelse): Fagsak {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
 
-        val aktivBehandling = hentAktiv(fagsak.id)
+        val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
         if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             val behandling = opprettNyBehandlingPåFagsak(fagsak,
@@ -133,7 +133,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    fun hentAktiv(fagsakId: Long?): Behandling? {
+    fun hentAktivForFagsak(fagsakId: Long?): Behandling? {
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
     }
 
@@ -143,7 +143,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun hentAktiveBehandlingerForLøpendeFagsaker(): List<OppdragId> {
         return fagsakService.hentLøpendeFagsaker()
-                .mapNotNull { fagsak -> hentAktiv(fagsak.id) }
+                .mapNotNull { fagsak -> hentAktivForFagsak(fagsak.id) }
                 .map { behandling ->
                     OppdragId(
                             hentSøker(behandling)!!.personIdent.ident,
@@ -156,7 +156,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling) {
-        val aktivBehandling = hentAktiv(behandling.fagsak.id)
+        val aktivBehandling = hentAktivForFagsak(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
             aktivBehandling.aktiv = false

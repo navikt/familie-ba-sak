@@ -186,7 +186,7 @@ class BehandlingIntegrationTest {
         opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler1")
         opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler2")
 
-        val hentetVedtak = vedtakService.hentAktiv(behandling.id)
+        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler2", hentetVedtak?.ansvarligSaksbehandler)
     }
@@ -216,7 +216,7 @@ class BehandlingIntegrationTest {
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val hentetVedtak = vedtakService.hentAktiv(behandling.id)
+        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
         Assertions.assertEquals("", hentetVedtak?.stønadBrevMarkdown)
@@ -291,7 +291,7 @@ class BehandlingIntegrationTest {
 
         val fagsak = behandlingService.opprettBehandling(nyBehandling)
 
-        val behandling = behandlingService.hentAktiv(fagsak.id)
+        val behandling = behandlingService.hentAktivForFagsak(fagsak.id)
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling!!.id)
         Assertions.assertNotNull(personopplysningGrunnlag)
@@ -343,7 +343,7 @@ class BehandlingIntegrationTest {
             Assertions.assertEquals("iverksettMotOppdrag", slot.captured.taskStepType)
         }
 
-        val aktivBehandling = behandlingService.hentAktiv(fagsak.id)
+        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsak.id)
 
         Assertions.assertEquals(BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, aktivBehandling!!.type)
         Assertions.assertNotEquals(behandling.id, aktivBehandling.id)
@@ -366,14 +366,14 @@ class BehandlingIntegrationTest {
                             stønadBrevMarkdown = "",
                             resultat = VedtakResultat.INNVILGET,
                             begrunnelse = "")
-        vedtakService.lagreVedtak(vedtak)
+        vedtakService.lagre(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         fagsak.status = FagsakStatus.LØPENDE
-        fagsakService.lagreFagsak(fagsak)
+        fagsakService.lagre(fagsak)
 
         val oppdragIdListe = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
 
@@ -406,22 +406,22 @@ class BehandlingIntegrationTest {
         )
         Assertions.assertEquals(behandling.fagsak.id, fagsakRes.data?.id)
 
-        val hentetVedtak = vedtakService.hentAktiv(behandling.id)
+        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
         Assertions.assertNotEquals("", hentetVedtak?.stønadBrevMarkdown)
     }
 
     private fun opprettNyttInvilgetVedtak(behandling: Behandling, saksbehandler: String = "ansvarligSaksbehandler"): Vedtak {
-        vedtakService.lagreVedtak(Vedtak(behandling = behandling,
-                                         ansvarligSaksbehandler = saksbehandler,
-                                         vedtaksdato = LocalDate.now(),
-                                         stønadBrevMarkdown = "",
-                                         resultat = VedtakResultat.INNVILGET,
-                                         begrunnelse = "")
+        vedtakService.lagre(Vedtak(behandling = behandling,
+                                   ansvarligSaksbehandler = saksbehandler,
+                                   vedtaksdato = LocalDate.now(),
+                                   stønadBrevMarkdown = "",
+                                   resultat = VedtakResultat.INNVILGET,
+                                   begrunnelse = "")
         )
 
-        return vedtakService.hentAktiv(behandling.id)!!
+        return vedtakService.hentAktivForBehandling(behandling.id)!!
     }
 }
 

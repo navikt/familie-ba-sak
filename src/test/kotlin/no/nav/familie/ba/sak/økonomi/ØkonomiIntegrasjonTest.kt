@@ -93,7 +93,7 @@ class ØkonomiIntegrasjonTest {
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val vedtak = vedtakService.hentAktiv(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
         val oppdatertFagsak = vedtakService.oppdaterAktivVedtakMedBeregning(

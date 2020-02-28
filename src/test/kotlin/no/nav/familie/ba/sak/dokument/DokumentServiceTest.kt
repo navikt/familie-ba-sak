@@ -105,7 +105,7 @@ class DokumentServiceTest(
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val vedtak = vedtakService.hentAktiv(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
         vedtakService.oppdaterAktivVedtakMedBeregning(

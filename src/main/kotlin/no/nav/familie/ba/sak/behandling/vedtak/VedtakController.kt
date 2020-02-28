@@ -42,7 +42,7 @@ class VedtakController(
 
         FagsakController.logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
-        val behandling = behandlingService.hentAktiv(fagsakId)
+        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
@@ -69,7 +69,7 @@ class VedtakController(
 
         FagsakController.logger.info("{} sender behandling til beslutter for fagsak med id {}", saksbehandlerId, fagsakId)
 
-        val behandling = behandlingService.hentAktiv(fagsakId)
+        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
@@ -87,7 +87,7 @@ class VedtakController(
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
-        val behandling = behandlingService.hentAktiv(fagsakId)
+        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
 
         if (behandling.status != BehandlingStatus.SENDT_TIL_BESLUTTER) {
@@ -108,7 +108,7 @@ class VedtakController(
         return Result.runCatching { behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
                 .fold(
                         onSuccess = {
-                            val vedtak = vedtakService.hentAktiv(behandlingId = behandling.id)
+                            val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                                          ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
                             opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
@@ -144,10 +144,10 @@ class VedtakController(
                                      saksbehandlerId,
                                      fagsakId)
 
-        val behandling = behandlingService.hentAktiv(fagsakId)
+        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
 
-        val vedtak = vedtakService.hentAktiv(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: return RessursResponse.notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
         if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
