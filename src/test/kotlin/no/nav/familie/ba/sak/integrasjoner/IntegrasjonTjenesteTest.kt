@@ -146,7 +146,7 @@ class IntergrasjonTjenesteTest {
                                             .withHeader("Content-Type", "application/json")
                                             .withBody(objectMapper.writeValueAsString(failure<Any>("")))))
 
-        assertThrows<IllegalArgumentException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+        assertThrows<IllegalStateException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
     }
 
     @Test

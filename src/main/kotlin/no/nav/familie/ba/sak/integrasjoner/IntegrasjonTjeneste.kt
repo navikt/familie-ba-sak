@@ -164,11 +164,12 @@ class IntegrasjonTjeneste(
         }.fold(
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
-                    Assert.notNull(it.body?.data, "Ressurs mangler data")
+                    checkNotNull(it.body?.data) { "Ressurs mangler data" }
 
                     val arkiverDokumentResponse = it.body?.data!!
-                    Assert.isTrue(arkiverDokumentResponse.ferdigstilt,
-                                  "Klarte ikke ferdigstille journalpost med id ${arkiverDokumentResponse.journalpostId}")
+                    check(arkiverDokumentResponse.ferdigstilt) {
+                        "Klarte ikke ferdigstille journalpost med id ${arkiverDokumentResponse.journalpostId}"
+                    }
                     arkiverDokumentResponse.journalpostId
                 },
                 onFailure = {
@@ -206,8 +207,9 @@ class IntegrasjonTjeneste(
 
         Result.runCatching {
             val response = restOperations.patchForObject(uri, null, Ressurs::class.java)
-            Assert.isTrue(response?.status == Ressurs.Status.SUKSESS,
-                          "Ferdigstill oppgave returnerte OK, men mottok status $response?.status")
+            check(response?.status == Ressurs.Status.SUKSESS) {
+                "Ferdigstill oppgave returnerte OK, men mottok status $response?.status"
+            }
         }.onFailure {
             val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
             throw IntegrasjonException("Kan ikke ferdigstille $oppgaveId. response=$message", it, uri)
@@ -237,9 +239,10 @@ class IntegrasjonTjeneste(
     }
 
     private inline fun <reified T> assertGenerelleSuksessKriterier(it: ResponseEntity<Ressurs<T>>) {
-        Assert.notNull(it.body, "Finner ikke ressurs")
-        Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS,
-                      "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}")
+        checkNotNull(it.body) { "Finner ikke ressurs" }
+        check(it.body?.status == Ressurs.Status.SUKSESS) {
+            "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}"
+        }
     }
 
     companion object {
