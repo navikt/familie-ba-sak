@@ -65,7 +65,7 @@ class ØkonomiService(
                                                         it.body?.status,
                                                         it.statusCode))
 
-                            return objectMapper.convertValue(it.body?.data, OppdragProtokollStatus::class.java)
+                            return it.body?.data!!
                         },
                         onFailure = {
                             throw Exception("Henting av status mot oppdrag feilet", it)
