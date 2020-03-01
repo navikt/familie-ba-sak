@@ -4,17 +4,15 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.randomFnr
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -37,14 +35,6 @@ class ToTrinnKontrollTest {
 
     @Autowired
     lateinit var fagsakService: FagsakService
-
-    @MockBean
-    lateinit var integrasjonTjeneste: IntegrasjonTjeneste
-
-    @BeforeEach
-    fun setup() {
-        Mockito.`when`(integrasjonTjeneste.hentAktørId(ArgumentMatchers.anyString())).thenReturn(AktørId("1"))
-    }
 
     @Test
     @Tag("integration")

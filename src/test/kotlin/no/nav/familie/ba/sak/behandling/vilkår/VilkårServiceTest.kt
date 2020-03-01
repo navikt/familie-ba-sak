@@ -11,19 +11,13 @@ import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
@@ -39,19 +33,11 @@ class VilkårServiceTest() {
     @Autowired
     private lateinit var fagsakService: FagsakService
 
-    @MockBean
-    private lateinit var integrasjonTjeneste: IntegrasjonTjeneste
-
     @Autowired
     private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Autowired
     private lateinit var vilkårService: VilkårService
-
-    @BeforeEach
-    fun setup() {
-        Mockito.`when`(integrasjonTjeneste.hentAktørId(ArgumentMatchers.anyString())).thenReturn(AktørId("1"))
-    }
 
     @Test
     fun `vurder gyldig vilkårsvurdering`() {
