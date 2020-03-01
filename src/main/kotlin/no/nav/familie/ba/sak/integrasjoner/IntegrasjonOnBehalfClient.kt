@@ -200,7 +200,7 @@ class IntegrasjonOnBehalfClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") priv
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
 
         return Result.runCatching {
-            val dokumenter = listOf(Dokument(pdfByteArray, FilType.PDFA, dokumentType = IntegrasjonTjeneste.VEDTAK_DOKUMENT_TYPE))
+            val dokumenter = listOf(Dokument(pdfByteArray, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE))
             val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, "9999")
             val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
@@ -240,5 +240,8 @@ class IntegrasjonOnBehalfClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") priv
         private const val PATH_PING = "isAlive"
         private const val PATH_TILGANGER = "tilgang/personer"
         private val logger = LoggerFactory.getLogger(this::class.java)
+        const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
+
+        private const val OAUTH2_CLIENT_CONFIG_KEY = "familie-integrasjoner-clientcredentials"
     }
 }

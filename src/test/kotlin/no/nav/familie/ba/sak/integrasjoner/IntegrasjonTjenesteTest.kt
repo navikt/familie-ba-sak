@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient.Companion.VEDTAK_DOKUMENT_TYPE
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -33,9 +34,6 @@ import java.time.LocalDate
 @AutoConfigureWireMock(port = 28085)
 @TestInstance(Lifecycle.PER_CLASS)
 class IntergrasjonTjenesteTest {
-
-    @Autowired
-    lateinit var integrasjonTjeneste: IntegrasjonTjeneste
 
     @Autowired
     @Qualifier("integrasjonOnBehalfClient")
@@ -274,7 +272,7 @@ class IntergrasjonTjenesteTest {
                                       journalførendeEnhet = "9999",
                                       dokumenter = listOf(Dokument(dokument = mockPdf,
                                                                    filType = FilType.PDFA,
-                                                                   dokumentType = IntegrasjonTjeneste.VEDTAK_DOKUMENT_TYPE)))
+                                                                   dokumentType = VEDTAK_DOKUMENT_TYPE)))
     }
 
 

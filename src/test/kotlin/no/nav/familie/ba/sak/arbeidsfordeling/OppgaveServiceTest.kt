@@ -7,7 +7,6 @@ import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.arbeidsfordeling.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.oppgave.IdentType
@@ -58,7 +57,7 @@ class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.BAR)
-        assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/$FAGSAK_ID/behandle")
+        assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/$FAGSAK_ID/vedtak")
     }
 
     @Test
@@ -80,7 +79,7 @@ class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.BAR)
-        assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/$FAGSAK_ID/behandle")
+        assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/$FAGSAK_ID/vedtak")
     }
 
     @Test

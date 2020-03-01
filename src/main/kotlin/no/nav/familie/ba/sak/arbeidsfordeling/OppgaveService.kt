@@ -49,7 +49,7 @@ class OppgaveService(private val integrasjonOnBehalfClient: IntegrasjonOnBehalfC
         var oppgaveTekst =
                 "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n"
         oppgaveTekst += "Ny sak om behandling av ordinær barnetrygd \n"
-        oppgaveTekst += "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}/behandle"
+        oppgaveTekst += "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}/vedtak"
         return oppgaveTekst
     }
 
