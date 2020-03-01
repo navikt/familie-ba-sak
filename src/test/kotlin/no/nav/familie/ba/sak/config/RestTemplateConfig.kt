@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
+import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -8,6 +10,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
 import org.springframework.http.converter.ByteArrayHttpMessageConverter
 import org.springframework.http.converter.StringHttpMessageConverter
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 import java.nio.charset.StandardCharsets
@@ -15,7 +18,7 @@ import java.time.Duration
 
 @Configuration
 @Profile("dev")
-@Import(ConsumerIdClientInterceptor::class)
+@Import(ConsumerIdClientInterceptor::class, MdcValuesPropagatingClientInterceptor::class)
 class RestTemplateConfig {
 
     @Bean
@@ -24,10 +27,13 @@ class RestTemplateConfig {
     }
 
     @Bean("jwtBearer")
-    fun restTemplateJwtBearer(): RestOperations {
+    fun restTemplateJwtBearer(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                              mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestOperations {
 
         return RestTemplateBuilder()
                 .additionalCustomizers(NaisProxyCustomizer())
+                .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
+                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
                 .build()
     }
 

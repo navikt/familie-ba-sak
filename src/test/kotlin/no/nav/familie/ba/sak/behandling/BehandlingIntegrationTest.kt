@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.NyFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.*
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.mottak.NyBehandlingHendelse
@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
@@ -69,7 +70,8 @@ class BehandlingIntegrationTest {
     lateinit var fagsakService: FagsakService
 
     @Autowired
-    lateinit var integrasjonTjeneste: IntegrasjonTjeneste
+    @Qualifier("integrasjonOnBehalfClient")
+    lateinit var integrasjonOnBehalfClient: IntegrasjonOnBehalfClient
 
     @MockK(relaxed = true)
     lateinit var taskRepository: TaskRepository
@@ -86,7 +88,7 @@ class BehandlingIntegrationTest {
                 behandlingRepository,
                 personopplysningGrunnlagRepository,
                 fagsakService,
-                integrasjonTjeneste,
+                integrasjonOnBehalfClient,
                 featureToggleService,
                 taskRepository)
 
@@ -319,7 +321,7 @@ class BehandlingIntegrationTest {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        vedtakService.oppdaterAktivVedtakMedBeregning(vedtak!!, personopplysningGrunnlag, nyBeregning)
+            vedtakService.oppdaterAktivVedtakMedBeregning(vedtak!!, personopplysningGrunnlag, nyBeregning)
 
         val task = opprettOpphørVedtakTask(
                 behandling,

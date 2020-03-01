@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.dokument.DokumentService
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrev.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Journalfør brev i Joark", maxAntallFeil = 3)
 class JournalførVedtaksbrev(
-        private val integrasjonTjeneste: IntegrasjonTjeneste,
+        private val integrasjonOnBehalfClient: IntegrasjonOnBehalfClient,
         private val vedtakService: VedtakService,
         private val dokumentService: DokumentService,
         private val taskRepository: TaskRepository
@@ -31,7 +32,7 @@ class JournalførVedtaksbrev(
         val fnr = vedtak.behandling.fagsak.personIdent.ident
         val fagsakId = "${vedtak.behandling.fagsak.id}"
 
-        val journalpostId = integrasjonTjeneste.journalFørVedtaksbrev(pdf, fnr, fagsakId)
+        val journalpostId = integrasjonOnBehalfClient.journalFørVedtaksbrev(fnr, fagsakId, pdf)
 
         val nyTask = Task.nyTask(
                 type = DistribuerVedtaksbrev.TASK_STEP_TYPE,

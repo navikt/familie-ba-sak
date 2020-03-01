@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
@@ -34,6 +36,10 @@ class IntergrasjonTjenesteTest {
 
     @Autowired
     lateinit var integrasjonTjeneste: IntegrasjonTjeneste
+
+    @Autowired
+    @Qualifier("integrasjonOnBehalfClient")
+    lateinit var integrasjonOnBehalfClient: IntegrasjonOnBehalfClient
 
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}")
     lateinit var integrasjonerUri: String
@@ -52,11 +58,12 @@ class IntergrasjonTjenesteTest {
         stubFor(post(urlEqualTo("/api/oppgave/"))
                         .willReturn(aResponse()
                                             .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))))
+                                            .withBody(
+                                                    objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))))
 
         val request = lagTestOppgave()
 
-        val opprettOppgaveResponse = integrasjonTjeneste.opprettOppgave(request)
+        val opprettOppgaveResponse = integrasjonOnBehalfClient.opprettOppgave(request)
 
         assertThat(opprettOppgaveResponse).isEqualTo("1234")
         verify(anyRequestedFor(anyUrl())
@@ -74,7 +81,7 @@ class IntergrasjonTjenesteTest {
                                             .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
 
         assertThatThrownBy {
-            integrasjonTjeneste.opprettOppgave(lagTestOppgave())
+            integrasjonOnBehalfClient.opprettOppgave(lagTestOppgave())
         }.isInstanceOf(IntegrasjonException::class.java)
                 .hasMessageContaining("Kall mot integrasjon feilet ved opprett oppgave")
 
@@ -93,7 +100,7 @@ class IntergrasjonTjenesteTest {
                                             .withHeader("Content-Type", "application/json")
                                             .withBody(objectMapper.writeValueAsString(journalpostOkResponse()))))
 
-        val journalPostId = integrasjonTjeneste.lagerJournalpostForVedtaksbrev(mockFnr, mockFagsakId, mockPdf)
+        val journalPostId = integrasjonOnBehalfClient.lagJournalpostForVedtaksbrev(mockFnr, mockFagsakId, mockPdf)
 
         assertThat(journalPostId).isEqualTo(mockJournalpostForVedtakId)
         verify(anyRequestedFor(anyUrl())
@@ -116,7 +123,7 @@ class IntergrasjonTjenesteTest {
 
 
 
-        assertDoesNotThrow { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+        assertDoesNotThrow { integrasjonOnBehalfClient.distribuerVedtaksbrev("123456789") }
         verify(postRequestedFor(anyUrl())
                        .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
@@ -133,7 +140,7 @@ class IntergrasjonTjenesteTest {
                                             .withHeader("Content-Type", "application/json")
                                             .withBody(objectMapper.writeValueAsString(success("")))))
 
-        assertThrows<IllegalArgumentException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+        assertThrows<IllegalStateException> { integrasjonOnBehalfClient.distribuerVedtaksbrev("123456789") }
     }
 
     @Test
@@ -146,7 +153,7 @@ class IntergrasjonTjenesteTest {
                                             .withHeader("Content-Type", "application/json")
                                             .withBody(objectMapper.writeValueAsString(failure<Any>("")))))
 
-        assertThrows<IllegalArgumentException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+        assertThrows<IllegalStateException> { integrasjonOnBehalfClient.distribuerVedtaksbrev("123456789") }
     }
 
     @Test
@@ -158,7 +165,7 @@ class IntergrasjonTjenesteTest {
                                             .withStatus(400)
                                             .withHeader("Content-Type", "application/json")))
 
-        assertThrows<IntegrasjonException> { integrasjonTjeneste.distribuerVedtaksbrev("123456789") }
+        assertThrows<IntegrasjonException> { integrasjonOnBehalfClient.distribuerVedtaksbrev("123456789") }
     }
 
 
@@ -171,9 +178,9 @@ class IntergrasjonTjenesteTest {
                         .willReturn(aResponse()
                                             .withStatus(200)
                                             .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success("")))))
+                                            .withBody(objectMapper.writeValueAsString(success("")))))
 
-        integrasjonTjeneste.ferdigstillOppgave(123)
+        integrasjonOnBehalfClient.ferdigstillOppgave(123)
 
         verify(patchRequestedFor(urlEqualTo("/api/oppgave/123/ferdigstill"))
                        .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("ferdigstillOppgave"))
@@ -194,7 +201,7 @@ class IntergrasjonTjenesteTest {
 
 
         assertThatThrownBy {
-            integrasjonTjeneste.ferdigstillOppgave(123)
+            integrasjonOnBehalfClient.ferdigstillOppgave(123)
         }.isInstanceOf(IntegrasjonException::class.java)
                 .hasMessageContaining("Kan ikke ferdigstille 123")
     }
@@ -203,15 +210,57 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `hentBehandlendeEnhet returnerer OK`() {
         stubFor(get(urlEqualTo("/api/arbeidsfordeling/enhet?tema=BAR&geografi=1&diskresjonskode"))
-                .withHeader("Accept", containing("json"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(listOf(Arbeidsfordelingsenhet("2", "foo")))))))
+                        .withHeader("Accept", containing("json"))
+                        .willReturn(aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(success(listOf(
+                                                    Arbeidsfordelingsenhet("2", "foo")))))))
 
-        val enhet = integrasjonTjeneste.hentBehandlendeEnhet("1", null)
-        assertThat(enhet).isNotEmpty()
+        val enhet = integrasjonOnBehalfClient.hentBehandlendeEnhet("1", null)
+        assertThat(enhet).isNotEmpty
         assertThat(enhet.first().enhetId).isEqualTo("2")
+    }
+
+    @Test
+    @Tag("integration")
+    fun `hentAktør returnerer OK`() {
+        stubFor(get(urlEqualTo("/api/aktoer/v1"))
+                        .willReturn(aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(success(mapOf("aktørId" to 1L))))))
+
+        val aktørId = integrasjonOnBehalfClient.hentAktørId("12")
+        assertThat(aktørId.id).isEqualTo("1")
+
+        verify(getRequestedFor(urlEqualTo("/api/aktoer/v1"))
+                       .withHeader("Nav-Personident", equalTo("12")))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `hentPerson returnerer OK`() {
+        stubFor(get(urlMatching("/api/personopplysning/v1/info"))
+                        .willReturn(aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(
+                                                    success(Personinfo(fødselsdato = LocalDate.now()))))))
+        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR"))
+                        .willReturn(aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(
+                                                    success(Personinfo(fødselsdato = LocalDate.now()))))))
+
+        val personinfo = integrasjonOnBehalfClient.hentPersoninfoFor("12")
+        assertThat(personinfo.fødselsdato).isEqualTo(LocalDate.now())
+
+        verify(getRequestedFor(urlEqualTo("/api/personopplysning/v1/info"))
+                       .withHeader("Nav-Personident", equalTo("12")))
+        verify(getRequestedFor(urlEqualTo("/api/personopplysning/v1/info/BAR"))
+                       .withHeader("Nav-Personident", equalTo("12")))
     }
 
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> {
@@ -240,10 +289,10 @@ class IntergrasjonTjenesteTest {
     }
 
     companion object {
-        val mockJournalpostForVedtakId = "453491843"
-        val mockFnr = "12345678910"
+        const val mockJournalpostForVedtakId = "453491843"
+        const val mockFnr = "12345678910"
         val mockPdf = "mock data".toByteArray()
-        val mockFagsakId = "140258931"
+        const val mockFagsakId = "140258931"
     }
 
 }

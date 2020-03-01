@@ -4,11 +4,10 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -25,7 +24,7 @@ class ArbeidsfordelingServiceTest {
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @MockK
-    lateinit var integrasjonTjeneste: IntegrasjonTjeneste
+    lateinit var integrasjonOnBehalfClient: IntegrasjonOnBehalfClient
 
     @InjectMockKs
     lateinit var arbeidsfordelingService: ArbeidsfordelingService
@@ -34,8 +33,8 @@ class ArbeidsfordelingServiceTest {
     fun `hentBehandlendeEnhet skal kjøre uten feil`() {
         val fagsak = Fagsak(personIdent = PersonIdent(""), aktørId = AktørId("1"))
 
-        every { integrasjonTjeneste.hentBehandlendeEnhet(any(), any()) } returns listOf()
-        every { integrasjonTjeneste.hentPersoninfoFor(any()) } returns Personinfo(LocalDate.now())
+        every { integrasjonOnBehalfClient.hentBehandlendeEnhet(any(), any()) } returns listOf()
+        every { integrasjonOnBehalfClient.hentPersoninfoFor(any()) } returns Personinfo(LocalDate.now())
         every { behandlingRepository.findByFagsakAndAktiv(any()) } returns Behandling(
                 fagsak = fagsak,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,

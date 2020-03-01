@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.arbeidsfordeling.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -23,7 +24,7 @@ import java.time.LocalDate
 class OppgaveServiceTest {
 
     @MockK
-    lateinit var integrasjonTjeneste: IntegrasjonTjeneste
+    lateinit var integrasjonOnBehalfClient: IntegrasjonOnBehalfClient
 
     @MockK
     lateinit var arbeidsfordelingService: ArbeidsfordelingService
@@ -43,10 +44,10 @@ class OppgaveServiceTest {
                     every { enhetId } returns ENHETSNUMMER
                 }
         )
-        every { integrasjonTjeneste.hentAktørId(FNR) } returns AktørId(
+        every { integrasjonOnBehalfClient.hentAktørId(FNR) } returns AktørId(
                 AKTØR_ID_INTEGRASJONER)
         val slot = slot<OpprettOppgave>()
-        every { integrasjonTjeneste.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
+        every { integrasjonOnBehalfClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
         oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID)
 
@@ -64,11 +65,11 @@ class OppgaveServiceTest {
     fun `Opprett oppgave skal kalle oppretteOppgave selv om den ikke finner en enhetsnummer, men da med uten tildeltEnhetsnummer`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
-        every { integrasjonTjeneste.hentAktørId(FNR) } returns AktørId(
+        every { integrasjonOnBehalfClient.hentAktørId(FNR) } returns AktørId(
                 AKTØR_ID_INTEGRASJONER)
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
         val slot = slot<OpprettOppgave>()
-        every { integrasjonTjeneste.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
+        every { integrasjonOnBehalfClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
         oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID)
 
@@ -93,7 +94,7 @@ class OppgaveServiceTest {
     @Test
     fun `Opprett oppgave skal kaste Exception hvis det ikke finner en aktør`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
-        every { integrasjonTjeneste.hentAktørId(FNR) } throws RuntimeException("aktør")
+        every { integrasjonOnBehalfClient.hentAktørId(FNR) } throws RuntimeException("aktør")
         assertThatThrownBy { oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID) }
                 .hasMessage("aktør")
                 .isInstanceOf(java.lang.RuntimeException::class.java)
@@ -105,7 +106,7 @@ class OppgaveServiceTest {
             every { oppgaveId } returns OPPGAVE_ID
         }
         val slot = slot<Long>()
-        every { integrasjonTjeneste.ferdigstillOppgave(capture(slot)) } just runs
+        every { integrasjonOnBehalfClient.ferdigstillOppgave(capture(slot)) } just runs
 
         oppgaveService.ferdigstillOppgave(BEHANDLING_ID)
         assertThat(slot.captured).isEqualTo(OPPGAVE_ID.toLong())

@@ -51,20 +51,12 @@ class FerdigstillBehandlingTest {
     @Autowired
     private lateinit var fagsakService: FagsakService
 
-    @MockBean
-    private lateinit var integrasjonTjeneste: IntegrasjonTjeneste
-
     @Autowired
     lateinit var behandlingService: BehandlingService
 
     @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
-    @BeforeEach
-    fun setUp() {
-        taskRepositoryMock = mockk()
-        Mockito.`when`(integrasjonTjeneste.hentAktørId(ArgumentMatchers.anyString())).thenReturn(AktørId("1"))
-    }
 
     fun lagTestTask(vedtakResultat: VedtakResultat): Task {
         val fnr = randomFnr()
