@@ -9,7 +9,7 @@ class BeregningService(
         private val vedtakPersonRepository: VedtakPersonRepository
 ) {
 
-    fun hentPersonerForVedtak(vedtakId: Long?): List<VedtakPerson> {
+    fun hentPersonerForVedtak(vedtakId: Long): List<VedtakPerson> {
         return vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId)
     }
 }

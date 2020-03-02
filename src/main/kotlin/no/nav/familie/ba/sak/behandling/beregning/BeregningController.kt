@@ -48,8 +48,8 @@ class BeregningController(
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
                      ?: return notFound("Fant ikke aktiv vedtak på fagsak $fagsakId, behandling ${behandling.id}")
 
-        if (vedtak.resultat == VedtakResultat.AVSLÅTT) {
-            return badRequest("Kan ikke lagre beregning på et avslått vedtak")
+        if (vedtak.resultat != VedtakResultat.INNVILGET) {
+            return badRequest("Kan ikke lagre beregning på et avslått/opphørt vedtak")
         }
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
@@ -72,7 +72,7 @@ class BeregningController(
 }
 
 data class NyBeregning(
-        val barnasBeregning: Array<BarnBeregning>
+        val barnasBeregning: List<BarnBeregning>
 )
 
 data class BarnBeregning(

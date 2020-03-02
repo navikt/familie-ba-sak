@@ -82,13 +82,6 @@ class OppgaveServiceTest {
         assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/$FAGSAK_ID/behandle")
     }
 
-    @Test
-    fun `Opprett oppgave skal kaste IllegalStateException hvis det ikke finnes en behandling`() {
-        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns null
-        assertThatThrownBy { oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID) }
-                .hasMessageContaining("Kan ikke finne behandling med id $BEHANDLING_ID")
-                .isInstanceOf(IllegalStateException::class.java)
-    }
 
     @Test
     fun `Opprett oppgave skal kaste Exception hvis det ikke finner en aktør`() {

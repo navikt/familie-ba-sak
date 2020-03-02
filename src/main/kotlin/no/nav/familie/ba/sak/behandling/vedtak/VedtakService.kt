@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.stereotype.Service
@@ -18,13 +18,13 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class VedtakService (private val behandlingRepository: BehandlingRepository,
-                     private val vedtakRepository: VedtakRepository,
-                     private val vedtakPersonRepository: VedtakPersonRepository,
-                     private val vilkårService: VilkårService,
-                     private val dokGenKlient: DokGenKlient,
-                     private val personRepository: PersonRepository,
-                     private val fagsakService: FagsakService) {
+class VedtakService(private val behandlingRepository: BehandlingRepository,
+                    private val vedtakRepository: VedtakRepository,
+                    private val vedtakPersonRepository: VedtakPersonRepository,
+                    private val vilkårService: VilkårService,
+                    private val dokGenKlient: DokGenKlient,
+                    private val personRepository: PersonRepository,
+                    private val fagsakService: FagsakService) {
 
     @Transactional
     fun opphørVedtak(saksbehandler: String,
@@ -88,10 +88,11 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
                 resultat = nyttVedtak.resultat,
-                begrunnelse = nyttVedtak.begrunnelse
+                begrunnelse = nyttVedtak.begrunnelse,
+                opphørsdato = if (nyttVedtak.resultat == VedtakResultat.OPPHØRT) LocalDate.now() else null
         )
 
-        if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT) {
+        if (nyttVedtak.resultat != VedtakResultat.INNVILGET) {
             vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
                     .fold(
                             onSuccess = { it },
@@ -117,18 +118,17 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
             val person =
                     personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.ident),
                                                                                   personopplysningGrunnlag.id)
-                    ?: throw IllegalStateException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
+                    ?: error("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
             if (it.stønadFom.isBefore(person.fødselsdato)) {
-                throw IllegalStateException("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
+                error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
             }
 
             val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-            val sikkerStønadTom = person.fødselsdato.plusYears(18)?.sisteDagIForrigeMåned()!!
+            val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
 
             if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
-                throw IllegalStateException(
-                        "Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
+                error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
             }
 
             vedtakPersonRepository.save(
@@ -157,11 +157,11 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
 
-    fun hent(vedtakId: Long): Vedtak? {
+    fun hent(vedtakId: Long): Vedtak {
         return vedtakRepository.getOne(vedtakId)
     }
 
-    fun hentAktivForBehandling(behandlingId: Long?): Vedtak? {
+    fun hentAktivForBehandling(behandlingId: Long): Vedtak? {
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 

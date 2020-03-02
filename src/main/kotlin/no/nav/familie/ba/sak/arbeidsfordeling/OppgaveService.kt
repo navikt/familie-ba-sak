@@ -2,10 +2,7 @@ package no.nav.familie.ba.sak.arbeidsfordeling
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
-import no.nav.familie.kontrakter.felles.oppgave.IdentType
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdent
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
-import no.nav.familie.kontrakter.felles.oppgave.Tema
+import no.nav.familie.kontrakter.felles.oppgave.*
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -17,9 +14,8 @@ class OppgaveService(private val integrasjonTjeneste: IntegrasjonTjeneste,
                      private val arbeidsfordelingService: ArbeidsfordelingService) {
 
     fun opprettOppgaveForNyBehandling(behandlingsId: Long): String {
-        val behandling =
-                behandlingRepository.finnBehandling(behandlingsId) ?: error("Kan ikke finne behandling med id $behandlingsId")
-        val fagsakId = behandling.fagsak.id ?: error("Kan ikke finne fagsakId for behandling $behandlingsId")
+        val behandling = behandlingRepository.finnBehandling(behandlingsId)
+        val fagsakId = behandling.fagsak.id
 
         val aktørId = integrasjonTjeneste.hentAktørId(behandling.fagsak.personIdent.ident).id
         val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
@@ -27,6 +23,7 @@ class OppgaveService(private val integrasjonTjeneste: IntegrasjonTjeneste,
         val opprettOppgave = OpprettOppgave(ident = OppgaveIdent(ident = aktørId, type = IdentType.Aktør),
                                             saksId = fagsakId.toString(),
                                             tema = Tema.BAR,
+                                            oppgavetype = Oppgavetype.BehandleSak,
                                             fristFerdigstillelse = LocalDate.now().plusDays(1), //TODO få denne til å funke på helg og eventuellle andre helligdager
                                             beskrivelse = lagOppgaveTekst(fagsakId),
                                             enhetsnummer = enhetsnummer?.enhetId,
@@ -38,7 +35,7 @@ class OppgaveService(private val integrasjonTjeneste: IntegrasjonTjeneste,
     }
 
     fun ferdigstillOppgave(behandlingsId: Long) {
-        val oppgaveId = behandlingRepository.finnBehandling(behandlingsId)?.oppgaveId?.toLong()
+        val oppgaveId = behandlingRepository.finnBehandling(behandlingsId).oppgaveId?.toLong()
                         ?: error("Kan ikke finne oppgave for behandlingId $behandlingsId")
         integrasjonTjeneste.ferdigstillOppgave(oppgaveId)
     }

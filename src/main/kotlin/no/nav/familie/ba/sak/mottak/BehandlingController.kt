@@ -77,11 +77,11 @@ class NyBehandling(
         val kategori: BehandlingKategori,
         val underkategori: BehandlingUnderkategori,
         val ident: String,
-        val barnasIdenter: Array<String>,
+        val barnasIdenter: List<String>,
         val behandlingType: BehandlingType,
         val journalpostID: String?)
 
 class NyBehandlingHendelse(
         val fødselsnummer: String,
-        val barnasFødselsnummer: Array<String>
+        val barnasFødselsnummer: List<String>
 )

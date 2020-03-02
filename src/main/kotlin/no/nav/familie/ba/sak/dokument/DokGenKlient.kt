@@ -35,37 +35,14 @@ class DokGenKlient(
     private fun mapTilBrevfelter(vedtak: Vedtak): String = when (vedtak.resultat) {
         VedtakResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
         VedtakResultat.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
+        VedtakResultat.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak)
         else -> throw RuntimeException("Invalid/unsupported vedtak.resultat")
     }
 
-    private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
-        val brevfelter = "{\"belop\": %s,\n" + // TODO hent fra dokgen (/template/{templateName}/schema)
-                         "\"startDato\": \"%s\",\n" +
-                         "\"etterbetaling\": %s,\n" +
-                         "\"enhet\": \"%s\",\n" +
-                         "\"fodselsnummer\": \"%s\",\n" +
-                         "\"fodselsdato\": \"%s\",\n" +
-                         "\"saksbehandler\": \"%s\", \n" +
-                         "\"fritekst\": \"%s\"}"
-
-        val startDato = "februar 2020" // TODO hent fra beregningen
-
-        return String.format( // TODO Bytt ut hardkodede felter med faktiske verdier
-                brevfelter,
-                123,
-                startDato,
-                false,
-                "enhet",
-                vedtak.behandling.fagsak.personIdent.ident,
-                "24.12.19",
-                vedtak.ansvarligSaksbehandler,
-                vedtak.begrunnelse
-        )
-    }
-
-    private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
+    private fun mapTilOpphørtBrevFelter(vedtak: Vedtak): String {
         val brevfelter = "{\"fodselsnummer\": \"%s\",\n" +
                          "\"navn\": \"%s\",\n" +
+                         "\"tdato\": \"%s\",\n" +
                          "\"hjemmel\": \"%s\",\n" +
                          "\"fritekst\": \"%s\"}"
 
@@ -73,8 +50,34 @@ class DokGenKlient(
                 brevfelter,
                 vedtak.behandling.fagsak.personIdent.ident,
                 "No Name",
+                "01.01.01",
                 "",
                 vedtak.begrunnelse)
+    }
+
+    private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
+
+        val startDato = "februar 2020" // TODO hent fra beregningen
+
+        // TODO hent fra dokgen (/template/{templateName}/schema)
+        // TODO Bytt ut hardkodede felter med faktiske verdier
+        return "{\"belop\": 123,\n" +
+               "\"startDato\": \"$startDato\",\n" +
+               "\"etterbetaling\": false,\n" +
+               "\"enhet\": \"enhet\",\n" +
+               "\"fodselsnummer\": \"${vedtak.behandling.fagsak.personIdent.ident}\",\n" +
+               "\"fodselsdato\": \"24.12.19\",\n" +
+               "\"saksbehandler\": \"${vedtak.ansvarligSaksbehandler}\", \n" +
+               "\"fritekst\": \"${vedtak.begrunnelse}\"}"
+    }
+
+    private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
+
+        //TODO: sett navn, hjemmel og firtekst
+        return "{\"fodselsnummer\": \"${vedtak.behandling.fagsak.personIdent.ident}\",\n" +
+               "\"navn\": \"No Name\",\n" +
+               "\"hjemmel\": \"\",\n" +
+               "\"fritekst\": \"${vedtak.begrunnelse}\"}"
     }
 
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
