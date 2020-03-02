@@ -70,7 +70,7 @@ class BeregningNegativeIntegrationTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
+                                                                       null,
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
@@ -105,6 +105,6 @@ class BeregningNegativeIntegrationTest {
                                                                        ))
 
         Assertions.assertEquals(Ressurs.Status.FEILET, fagsakRes.body?.status)
-        Assertions.assertEquals("Kan ikke lagre beregning på et avslått/opphørt vedtak", fagsakRes.body?.melding)
+        Assertions.assertEquals("Kan ikke lage beregning på et vedtak som ikke er innvilget", fagsakRes.body?.melding)
     }
 }

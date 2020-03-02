@@ -201,7 +201,8 @@ class BehandlingIntegrationTest {
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = opprettNyOrdinærBehandling(fagsak, behandlingService)
+        var behandling = opprettNyOrdinærBehandling(fagsak, behandlingService)
+        behandling = behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
 
         Assertions.assertNotNull(behandling.fagsak.id)
 
@@ -422,25 +423,24 @@ class BehandlingIntegrationTest {
     @Tag("integration")
     fun `Opprett nytt opphørt vedtak`() {
         val fnr = randomFnr()
+        val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = opprettNyOrdinærBehandling(fagsak, behandlingService)
 
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, "12345678915")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val fagsakRes = vedtakService.nyttVedtakForAktivBehandling(
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                nyttVedtak = NyttVedtak(resultat = VedtakResultat.OPPHØRT,
-                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
-                                                                                                      listOf("12345678915")),
-                                        begrunnelse = ""),
+                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
+                                                                                  listOf(barnFnr)),
+
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
-        Assertions.assertEquals(behandling.fagsak.id, fagsakRes.data?.id)
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)

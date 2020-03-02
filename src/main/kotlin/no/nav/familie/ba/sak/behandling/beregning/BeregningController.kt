@@ -49,7 +49,7 @@ class BeregningController(
                      ?: return notFound("Fant ikke aktiv vedtak på fagsak $fagsakId, behandling ${behandling.id}")
 
         if (behandling.resultat != BehandlingResultat.INNVILGET) {
-            return badRequest("Kan ikke lagre beregning på et avslått vedtak")
+            return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget")
         }
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)

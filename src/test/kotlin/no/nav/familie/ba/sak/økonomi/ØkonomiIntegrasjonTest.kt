@@ -70,12 +70,12 @@ class ØkonomiIntegrasjonTest {
 
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
+        var behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
                                                                        "sdf",
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
-        behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
+        behandling = behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)

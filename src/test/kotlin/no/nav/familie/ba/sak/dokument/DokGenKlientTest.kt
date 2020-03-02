@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Disabled
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-
 import java.time.LocalDate
 
 @SpringBootTest
@@ -44,16 +42,15 @@ class DokGenKlientTest(@Autowired
             vedtaksdato = LocalDate.now()
     )
 
-    private val opphørtVedtak= Vedtak(
+    private val opphørtVedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910"), aktørId = AktørId("1")),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR),
+                                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                                    resultat = BehandlingResultat.OPPHØRT),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
-            vedtaksdato = LocalDate.now(),
-            resultat = VedtakResultat.OPPHØRT,
-            begrunnelse = ""
+            vedtaksdato = LocalDate.now()
     )
 
     @Test
@@ -70,8 +67,8 @@ class DokGenKlientTest(@Autowired
     }
 
     @Test
-    fun `Test å generer Markdown for opphørt brev`(){
-        val markdown= dokGenKlient.hentStønadBrevMarkdown(opphørtVedtak)
+    fun `Test å generer Markdown for opphørt brev`() {
+        val markdown = dokGenKlient.hentStønadBrevMarkdown(opphørtVedtak)
         assert(markdown.startsWith("<br>Barnetrygden din stanses fra"))
     }
 }
