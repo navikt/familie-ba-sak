@@ -72,7 +72,7 @@ class BeregningController(
 }
 
 data class NyBeregning(
-        val barnasBeregning: Array<BarnBeregning>
+        val barnasBeregning: List<BarnBeregning>
 )
 
 data class BarnBeregning(

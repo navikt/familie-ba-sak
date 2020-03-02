@@ -7,7 +7,7 @@ import org.springframework.web.client.RestClientResponseException
 import java.net.URI
 
 @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-class IntegrasjonException(msg: String?,
+class IntegrasjonException(msg: String,
                            throwable: Throwable? = null,
                            uri: URI? = null,
                            ident: String? = null) : RuntimeException(msg, throwable) {

@@ -25,7 +25,6 @@ class JournalførVedtaksbrev(
     override fun doTask(task: Task) {
         val vedtakId = task.payload.toLong()
         val vedtak = vedtakService.hent(vedtakId)
-                     ?: throw Exception("Fant ikke vedtak med id $vedtakId i forbindelse med Journalføring av vedtaksbrev")
 
         val pdf = dokumentService.hentPdfForVedtak(vedtak)
         val fnr = vedtak.behandling.fagsak.personIdent.ident

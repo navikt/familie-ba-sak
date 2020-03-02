@@ -9,15 +9,15 @@ data class RestVedtak(
         val aktiv: Boolean,
         val ansvarligSaksbehandler: String,
         val vedtaksdato: LocalDate,
-        val barnasBeregning: List<RestVedtakBarn?>,
+        val barnasBeregning: List<RestVedtakBarn>,
         val resultat: VedtakResultat,
         val begrunnelse: String
 )
 
-fun Vedtak.toRestVedtak(personBeregning: List<VedtakPerson?>) = RestVedtak(
+fun Vedtak.toRestVedtak(personBeregning: List<VedtakPerson>) = RestVedtak(
         aktiv = this.aktiv,
         ansvarligSaksbehandler = this.ansvarligSaksbehandler,
-        barnasBeregning = personBeregning.map { it?.toRestVedtakBarn() },
+        barnasBeregning = personBeregning.map { it.toRestVedtakBarn() },
         vedtaksdato = this.vedtaksdato,
         resultat = this.resultat,
         begrunnelse = this.begrunnelse

@@ -17,9 +17,8 @@ class OppgaveService(private val integrasjonTjeneste: IntegrasjonTjeneste,
                      private val arbeidsfordelingService: ArbeidsfordelingService) {
 
     fun opprettOppgaveForNyBehandling(behandlingsId: Long): String {
-        val behandling =
-                behandlingRepository.finnBehandling(behandlingsId) ?: error("Kan ikke finne behandling med id $behandlingsId")
-        val fagsakId = behandling.fagsak.id ?: error("Kan ikke finne fagsakId for behandling $behandlingsId")
+        val behandling = behandlingRepository.finnBehandling(behandlingsId)
+        val fagsakId = behandling.fagsak.id
 
         val aktørId = integrasjonTjeneste.hentAktørId(behandling.fagsak.personIdent.ident).id
         val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
@@ -38,7 +37,7 @@ class OppgaveService(private val integrasjonTjeneste: IntegrasjonTjeneste,
     }
 
     fun ferdigstillOppgave(behandlingsId: Long) {
-        val oppgaveId = behandlingRepository.finnBehandling(behandlingsId)?.oppgaveId?.toLong()
+        val oppgaveId = behandlingRepository.finnBehandling(behandlingsId).oppgaveId?.toLong()
                         ?: error("Kan ikke finne oppgave for behandlingId $behandlingsId")
         integrasjonTjeneste.ferdigstillOppgave(oppgaveId)
     }

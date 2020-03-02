@@ -11,7 +11,7 @@ data class VedtakPerson(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_person_seq_generator")
         @SequenceGenerator(name = "vedtak_person_seq_generator", sequenceName = "vedtak_person_seq", allocationSize = 50)
-        val id: Long? = null,
+        val id: Long = 0,
 
         @ManyToOne(optional = false) @JoinColumn(name = "fk_vedtak_id", nullable = false, updatable = false)
         val vedtak: Vedtak,

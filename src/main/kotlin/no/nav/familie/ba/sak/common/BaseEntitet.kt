@@ -13,38 +13,24 @@ import javax.persistence.*
 abstract class BaseEntitet : Serializable {
 
     @Column(name = "opprettet_av", nullable = false, updatable = false)
-    var opprettetAv: String? = null
+    val opprettetAv: String = SikkerhetContext.hentSaksbehandler()
 
     @Column(name = "opprettet_tid", nullable = false, updatable = false)
-    var opprettetTidspunkt: LocalDateTime? = null
+    val opprettetTidspunkt: LocalDateTime = LocalDateTime.now()
 
     @Column(name = "endret_av")
-    var endretAv: String? = null
+    var endretAv: String = SikkerhetContext.hentSaksbehandler()
 
     @Column(name = "endret_tid")
-    var endretTidspunkt: LocalDateTime? = null
+    var endretTidspunkt: LocalDateTime = LocalDateTime.now()
 
     @Version
     @Column(name = "versjon", nullable = false)
     private val versjon: Long = 0
 
-    @PrePersist
-    protected fun onCreate() {
-        opprettetAv = finnBrukernavn()
-        opprettetTidspunkt = LocalDateTime.now()
-    }
-
     @PreUpdate
     protected fun onUpdate() {
-        endretAv = finnBrukernavn()
+        endretAv = SikkerhetContext.hentSaksbehandler()
         endretTidspunkt = LocalDateTime.now()
-    }
-
-    companion object {
-        private const val BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES = "VL"
-        private fun finnBrukernavn(): String {
-            val brukerident: String? = SikkerhetContext.hentSaksbehandler()
-            return brukerident ?: BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES
-        }
     }
 }

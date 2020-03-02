@@ -33,7 +33,7 @@ class VilkårService(
 
             vilkårForPerson.forEach {
                 vilkårForPart.find { vilkårType -> vilkårType == it.vilkårType }
-                ?: throw NotFoundException("Vilkåret $it finnes ikke i grunnlaget for parten $vilkårForPart")
+                ?: error("Vilkåret $it finnes ikke i grunnlaget for parten $vilkårForPart")
 
                 listeAvVilkårResultat.add(VilkårResultat(vilkårType = it.vilkårType,
                                                          utfallType = it.utfallType,

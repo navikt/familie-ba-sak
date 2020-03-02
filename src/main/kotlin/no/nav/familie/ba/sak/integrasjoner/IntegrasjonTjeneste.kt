@@ -11,7 +11,6 @@ import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.arkivering.Dokument
 import no.nav.familie.kontrakter.felles.arkivering.FilType
 import no.nav.familie.kontrakter.felles.distribusjon.DistribuerJournalpostRequest
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
@@ -45,8 +44,8 @@ class IntegrasjonTjeneste(
 ) : BaseService(OAUTH2_CLIENT_CONFIG_KEY, restTemplateBuilderMedProxy, clientConfigurationProperties, oAuth2AccessTokenService) {
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun hentAktørId(personident: String?): AktørId {
-        if (personident == null || personident.isEmpty()) {
+    fun hentAktørId(personident: String): AktørId {
+        if (personident.isEmpty()) {
             throw IntegrasjonException("Ved henting av aktør id er personident null eller tom")
         }
         val uri = URI.create("$integrasjonerServiceUri/aktoer/v1")
@@ -93,7 +92,7 @@ class IntegrasjonTjeneste(
         return try {
             val response = requestMedPersonIdent<Ressurs<Personinfo>>(uri, personIdent)
             secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.body?.data)
-            objectMapper.convertValue<Personinfo>(response.body?.data, Personinfo::class.java)
+            response.body?.data!!
         } catch (e: Exception) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
         }
@@ -103,7 +102,7 @@ class IntegrasjonTjeneste(
         return try {
             val response = requestMedPersonIdent<Ressurs<Personinfo>>(uri, personIdent)
             secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.body?.data)
-            objectMapper.convertValue<Personinfo>(response.body?.data, Personinfo::class.java)
+            response.body?.data
         } catch (e: Exception) {
             logger.warn("Feil ved oppslag på personinfo for sammenligning av data: ${e.message}")
             null
@@ -123,8 +122,8 @@ class IntegrasjonTjeneste(
             val response = restOperations.exchange<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, HttpMethod.GET)
             val data = response.body?.data
             data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
-                    null,
-                    uri)
+                                               null,
+                                               uri)
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri)
         }
@@ -165,12 +164,12 @@ class IntegrasjonTjeneste(
         }.fold(
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
-                    Assert.notNull(it.body?.data, "Ressurs mangler data")
+                    checkNotNull(it.body?.data) { "Ressurs mangler data" }
 
-                    val arkiverDokumentResponse =
-                            objectMapper.convertValue<ArkiverDokumentResponse>(it.body?.data, ArkiverDokumentResponse::class.java)
-                    Assert.isTrue(arkiverDokumentResponse.ferdigstilt,
-                                  "Klarte ikke ferdigstille journalpost med id ${arkiverDokumentResponse.journalpostId}")
+                    val arkiverDokumentResponse = it.body?.data!!
+                    check(arkiverDokumentResponse.ferdigstilt) {
+                        "Klarte ikke ferdigstille journalpost med id ${arkiverDokumentResponse.journalpostId}"
+                    }
                     arkiverDokumentResponse.journalpostId
                 },
                 onFailure = {
@@ -208,8 +207,9 @@ class IntegrasjonTjeneste(
 
         Result.runCatching {
             val response = restOperations.patchForObject(uri, null, Ressurs::class.java)
-            Assert.isTrue(response?.status == Ressurs.Status.SUKSESS,
-                          "Ferdigstill oppgave returnerte OK, men mottok status $response?.status")
+            check(response?.status == Ressurs.Status.SUKSESS) {
+                "Ferdigstill oppgave returnerte OK, men mottok status $response?.status"
+            }
         }.onFailure {
             val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
             throw IntegrasjonException("Kan ikke ferdigstille $oppgaveId. response=$message", it, uri)
@@ -232,16 +232,17 @@ class IntegrasjonTjeneste(
     }
 
 
-    private fun sendDistribusjonRequest(uri: URI,
-                                        distribuerJournalpostRequest: DistribuerJournalpostRequest): ResponseEntity<Ressurs<String>> {
+    private fun sendDistribusjonRequest(uri: URI, distribuerJournalpostRequest: DistribuerJournalpostRequest)
+            : ResponseEntity<Ressurs<String>> {
         return restOperations.exchange(post(uri).headers { it.medContentTypeJsonUTF8() }
                                                .body(distribuerJournalpostRequest))
     }
 
     private inline fun <reified T> assertGenerelleSuksessKriterier(it: ResponseEntity<Ressurs<T>>) {
-        Assert.notNull(it.body, "Finner ikke ressurs")
-        Assert.isTrue(it.body?.status == Ressurs.Status.SUKSESS,
-                      "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}")
+        checkNotNull(it.body) { "Finner ikke ressurs" }
+        check(it.body?.status == Ressurs.Status.SUKSESS) {
+            "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}"
+        }
     }
 
     companion object {

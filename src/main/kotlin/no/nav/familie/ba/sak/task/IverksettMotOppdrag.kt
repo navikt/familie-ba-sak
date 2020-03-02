@@ -16,7 +16,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.util.Assert
 import java.util.*
 
 @Service
@@ -38,10 +37,9 @@ class IverksettMotOppdrag(
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         val behandling = behandlingService.hent(iverksettingTask.behandlingsId)
-        Assert.notNull(behandling,
-                       "Skal iverksette mot økonomi, men finner ikke behandling med id ${iverksettingTask.behandlingsId}.")
-        Assert.isTrue(behandling?.status == BehandlingStatus.SENDT_TIL_IVERKSETTING,
-                      "Skal iverksette mot økonomi, men behandlingen har status ${behandling?.status}.")
+        check(behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
+            "Skal iverksette mot økonomi, men behandlingen har status ${behandling.status}."
+        }
 
         LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag gikk OK.")
 
@@ -57,7 +55,7 @@ class IverksettMotOppdrag(
         )
         taskRepository.save(nyTask)
 
-        if (!behandling?.oppgaveId.isNullOrBlank()) {
+        if (!behandling.oppgaveId.isNullOrBlank()) {
             val ferdigstillTask = FerdigstillOppgave.opprettTask(iverksettingTask.behandlingsId, task.metadata)
             taskRepository.save(ferdigstillTask)
         }
@@ -68,15 +66,15 @@ class IverksettMotOppdrag(
         val LOG = LoggerFactory.getLogger(IverksettMotOppdrag::class.java)
 
 
-        fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) : Task {
+        fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String): Task {
 
             return opprettTask(behandling.fagsak.personIdent.ident,
                                behandling.id,
-                               vedtak.id!!,
+                               vedtak.id,
                                saksbehandlerId)
         }
 
-        fun opprettTask(personIdent: String, behandlingsId: Long, vedtaksId : Long, saksbehandlerId: String) : Task {
+        fun opprettTask(personIdent: String, behandlingsId: Long, vedtaksId: Long, saksbehandlerId: String): Task {
             return Task.nyTask(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(IverksettingTaskDTO(
                                        personIdent = personIdent,

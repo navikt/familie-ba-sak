@@ -55,10 +55,10 @@ class ToTrinnKontrollTest {
                                                                        BehandlingUnderkategori.ORDINÆR)
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
-        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hent(behandling.id)?.status)
+        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hent(behandling.id).status)
 
         behandlingService.valider2trinnVedIverksetting(behandling, "beslutter")
-        Assertions.assertEquals(BehandlingStatus.GODKJENT, behandlingService.hent(behandling.id)?.status)
+        Assertions.assertEquals(BehandlingStatus.GODKJENT, behandlingService.hent(behandling.id).status)
     }
 
     @Test
@@ -77,9 +77,9 @@ class ToTrinnKontrollTest {
         behandlingRepository.saveAndFlush(behandling)
 
         val endretBehandling = behandlingService.hent(behandling.id)
-        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, endretBehandling?.status)
-        Assertions.assertNotNull(endretBehandling?.endretAv)
+        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, endretBehandling.status)
+        Assertions.assertNotNull(endretBehandling.endretAv)
 
-        assertThrows<IllegalStateException> { behandlingService.valider2trinnVedIverksetting (endretBehandling!!, "VL") }
+        assertThrows<IllegalStateException> { behandlingService.valider2trinnVedIverksetting (endretBehandling, "VL") }
     }
 }
