@@ -5,11 +5,10 @@ import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.beregning.BarnBeregning
 import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.opprettNyOrdinærBehandling
-import no.nav.familie.ba.sak.behandling.vedtak.NyttVedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
@@ -60,23 +59,23 @@ class DokumentServiceTest(
         MockKAnnotations.init(this)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
-                                 .willReturn(aResponse()
-                                                     .withHeader("Content-Type", "application/json")
-                                                     .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
-                                 .willReturn(aResponse()
-                                                     .withHeader("Content-Type", "application/json")
-                                                     .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
-                                                             LocalDate.of(2019,
-                                                                          1,
-                                                                          1)))))))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
+                                                    LocalDate.of(2019,
+                                                                 1,
+                                                                 1)))))))
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
-                                 .willReturn(aResponse()
-                                                     .withHeader("Content-Type", "application/json")
-                                                     .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
-                                                             LocalDate.of(2019,
-                                                                          1,
-                                                                          1)))))))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
+                                                    LocalDate.of(2019,
+                                                                 1,
+                                                                 1)))))))
     }
 
     @Test
@@ -87,6 +86,7 @@ class DokumentServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = opprettNyOrdinærBehandling(fagsak, behandlingService)
+        behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
 
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
@@ -94,14 +94,12 @@ class DokumentServiceTest(
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        vedtakService.nyttVedtakForAktivBehandling(
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
-                nyttVedtak = NyttVedtak(resultat = VedtakResultat.INNVILGET,
-                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                                                fnr,
-                                                listOf(barnFnr)),
-                                        begrunnelse = ""),
+                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                        fnr,
+                        listOf(barnFnr)),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 

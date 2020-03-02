@@ -2,12 +2,15 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.RessursResponse
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -32,17 +35,18 @@ class VedtakController(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vedtakService: VedtakService,
         private val fagsakService: FagsakService,
+        private val vilkårService: VilkårService,
         private val taskRepository: TaskRepository
 ) {
 
-    @PostMapping(path = ["/{fagsakId}/nytt-vedtak"])
+    @PutMapping(path = ["/{fagsakId}/vedtak"])
     fun nyttVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
-                   @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
+                   @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
         FagsakController.logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
+        var behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
@@ -50,13 +54,20 @@ class VedtakController(
                                                "Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         return Result.runCatching {
-            vedtakService.nyttVedtakForAktivBehandling(behandling,
-                                                       personopplysningGrunnlag,
-                                                       nyttVedtak,
-                                                       ansvarligSaksbehandler = saksbehandlerId)
+            behandling = behandlingService.settVilkårsvurdering(behandling,
+                                                                restVilkårsvurdering.resultat,
+                                                                restVilkårsvurdering.begrunnelse)
+            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+                                                    restVilkårsvurdering.samletVilkårResultat,
+                                                    behandling.id)
+
+            vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(behandling,
+                                                                     personopplysningGrunnlag,
+                                                                     restVilkårsvurdering.samletVilkårResultat,
+                                                                     ansvarligSaksbehandler = saksbehandlerId)
         }
                 .fold(
-                        onSuccess = { ResponseEntity.ok(it) },
+                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
                         onFailure = { e ->
                             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure(e.cause?.message ?: e.message, e))
                         }
@@ -174,3 +185,13 @@ class VedtakController(
         taskRepository.save(task)
     }
 }
+
+data class RestVilkårsvurdering(
+        val resultat: BehandlingResultat,
+        val samletVilkårResultat: List<RestVilkårResultat>,
+        val begrunnelse: String
+)
+
+data class Opphørsvedtak(
+        val opphørsdato: LocalDate
+)

@@ -22,9 +22,8 @@ data class Behandling(
         @Column(name = "behandling_type", nullable = false)
         val type: BehandlingType,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "status", nullable = false)
-        var status: BehandlingStatus = BehandlingStatus.OPPRETTET,
+        @Column(name = "oppgaveId")
+        val oppgaveId: String? = null,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "kategori", nullable = false)
@@ -37,9 +36,25 @@ data class Behandling(
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
-        @Column(name = "oppgaveId")
-        val oppgaveId: String? = null
+        @Enumerated(EnumType.STRING)
+        @Column(name = "status", nullable = false)
+        var status: BehandlingStatus = BehandlingStatus.OPPRETTET,
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "resultat", nullable = false)
+        val resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
+
+        @Column(name = "begrunnelse", columnDefinition = "TEXT")
+        var begrunnelse: String = ""
 ) : BaseEntitet()
+
+fun BehandlingResultat.toDokGenTemplate(): String {
+    return when (this) {
+        BehandlingResultat.INNVILGET -> "Innvilget"
+        BehandlingResultat.AVSLÅTT -> "Avslag"
+        else -> throw RuntimeException("Invalid/Unsupported vedtak result")
+    }
+}
 
 enum class BehandlingType {
     FØRSTEGANGSBEHANDLING,
@@ -47,6 +62,10 @@ enum class BehandlingType {
     MIGRERING_FRA_INFOTRYGD,
     KLAGE,
     MIGRERING_FRA_INFOTRYGD_OPPHØRT
+}
+
+enum class BehandlingResultat {
+    IKKE_VURDERT, INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
 }
 
 enum class BehandlingKategori {

@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.Query
 
 interface SamletVilkårResultatRepository : JpaRepository<SamletVilkårResultat, Long> {
     @Query(value = "SELECT svr FROM SamletVilkårResultat svr WHERE svr.behandlingId = :behandlingsId and svr.aktiv = true")
-    fun finnSamletVilkårResultatPåBehandlingOgAktiv(behandlingsId: Long?): SamletVilkårResultat?
+    fun finnSamletVilkårResultatPåBehandlingOgAktiv(behandlingsId: Long): SamletVilkårResultat?
 }

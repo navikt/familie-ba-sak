@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.dokument
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.toDokGenTemplate
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
 import no.nav.familie.ba.sak.behandling.restDomene.DokumentRequest
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
-import no.nav.familie.ba.sak.behandling.vedtak.toDokGenTemplate
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
@@ -29,12 +29,12 @@ class DokGenKlient(
 
     fun hentStønadBrevMarkdown(vedtak: Vedtak): String {
         val fletteFelter = mapTilBrevfelter(vedtak)
-        return hentMarkdownForMal(vedtak.resultat.toDokGenTemplate(), fletteFelter)
+        return hentMarkdownForMal(vedtak.behandling.resultat.toDokGenTemplate(), fletteFelter)
     }
 
-    private fun mapTilBrevfelter(vedtak: Vedtak): String = when (vedtak.resultat) {
-        VedtakResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
-        VedtakResultat.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
+    private fun mapTilBrevfelter(vedtak: Vedtak): String = when (vedtak.behandling.resultat) {
+        BehandlingResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
+        BehandlingResultat.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
         else -> throw RuntimeException("Invalid/unsupported vedtak.resultat")
     }
 
@@ -59,7 +59,7 @@ class DokGenKlient(
                 vedtak.behandling.fagsak.personIdent.ident,
                 "24.12.19",
                 vedtak.ansvarligSaksbehandler,
-                vedtak.begrunnelse
+                vedtak.behandling.begrunnelse
         )
     }
 
@@ -74,7 +74,7 @@ class DokGenKlient(
                 vedtak.behandling.fagsak.personIdent.ident,
                 "No Name",
                 "",
-                vedtak.begrunnelse)
+                vedtak.behandling.begrunnelse)
     }
 
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {

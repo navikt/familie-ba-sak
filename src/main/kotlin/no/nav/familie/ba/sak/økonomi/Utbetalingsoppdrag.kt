@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.behandling.beregning.beregnUtbetalingsperioder
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat.OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -22,7 +22,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                           vedtak: Vedtak,
                           personberegninger: List<VedtakPerson>): Utbetalingsoppdrag {
 
-    val erOpphør = vedtak.resultat == OPPHØRT
+    val erOpphør = vedtak.behandling.resultat == OPPHØRT
 
     val utbetalingsperiodeMal =
             if (erOpphør)
@@ -62,7 +62,7 @@ data class UtbetalingsperiodeMal(
         val periodeIdStart: Long = vedtak.id!!
 ) {
 
-    val MAX_PERIODEID_OFFSET = 1000
+    private val MAX_PERIODEID_OFFSET = 1_000
 
     fun lagPeriode(klassifisering: String, segment: LocalDateSegment<Int>, periodeIdOffset: Int): Utbetalingsperiode {
 

@@ -25,10 +25,6 @@ data class Vedtak(
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
         var stønadBrevMarkdown: String = "",
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "resultat", nullable = false)
-        val resultat: VedtakResultat,
-
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
@@ -36,21 +32,5 @@ data class Vedtak(
         var forrigeVedtakId: Long? = null,
 
         @Column(name = "opphor_dato")
-        var opphørsdato: LocalDate? = null,
-
-        @Column(name = "begrunnelse", columnDefinition = "TEXT")
-        var begrunnelse: String
-
+        var opphørsdato: LocalDate? = null
 ) : BaseEntitet()
-
-enum class VedtakResultat {
-    INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
-}
-
-fun VedtakResultat.toDokGenTemplate(): String {
-    return when (this) {
-        VedtakResultat.INNVILGET -> "Innvilget"
-        VedtakResultat.AVSLÅTT -> "Avslag"
-        else -> throw RuntimeException("Invalid/Unsupported vedtak result")
-    }
-}

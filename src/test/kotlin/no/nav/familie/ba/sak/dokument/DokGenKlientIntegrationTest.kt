@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Tag
@@ -71,12 +70,11 @@ class DokGenKlientIntegrationTest {
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         aktiv = true,
                         kategori = BehandlingKategori.NASJONAL,
-                        underkategori = BehandlingUnderkategori.ORDINÆR
+                        underkategori = BehandlingUnderkategori.ORDINÆR,
+                        resultat = BehandlingResultat.INNVILGET
                 ),
                 ansvarligSaksbehandler = "whoknows",
-                vedtaksdato = LocalDate.MIN,
-                resultat = VedtakResultat.INNVILGET,
-                begrunnelse = ""
+                vedtaksdato = LocalDate.MIN
         ))
 
         assert(markdown == "mockup_response")
@@ -114,12 +112,11 @@ class DokGenKlientIntegrationTest {
                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         aktiv = true,
                         kategori = BehandlingKategori.NASJONAL,
-                        underkategori = BehandlingUnderkategori.ORDINÆR
+                        underkategori = BehandlingUnderkategori.ORDINÆR,
+                        resultat = BehandlingResultat.INNVILGET
                 ),
                 ansvarligSaksbehandler = "whoknows",
-                vedtaksdato = LocalDate.MIN,
-                resultat = VedtakResultat.INNVILGET,
-                begrunnelse = ""
+                vedtaksdato = LocalDate.MIN
         ))
         assert(markdown.isEmpty())
     }

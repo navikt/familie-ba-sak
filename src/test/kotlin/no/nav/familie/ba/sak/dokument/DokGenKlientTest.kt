@@ -2,8 +2,7 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
-import no.nav.familie.ba.sak.behandling.vedtak.toDokGenTemplate
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Disabled
@@ -28,11 +27,10 @@ class DokGenKlientTest(@Autowired
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR),
+                                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                                    resultat = BehandlingResultat.INNVILGET),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
-            vedtaksdato = LocalDate.now(),
-            resultat = VedtakResultat.INNVILGET,
-            begrunnelse = ""
+            vedtaksdato = LocalDate.now()
     )
 
     private val avslagVedtak = Vedtak(
@@ -40,17 +38,16 @@ class DokGenKlientTest(@Autowired
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR),
+                                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                                    resultat = BehandlingResultat.AVSLÅTT),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
-            vedtaksdato = LocalDate.now(),
-            resultat = VedtakResultat.AVSLÅTT,
-            begrunnelse = ""
+            vedtaksdato = LocalDate.now()
     )
 
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
         val markdown = dokGenKlient.hentStønadBrevMarkdown(vedtak)
-        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(), markdown)
+        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(), markdown)
         assert(htmlResponse.startsWith("<html>"))
     }
 

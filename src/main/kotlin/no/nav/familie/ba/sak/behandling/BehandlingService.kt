@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
@@ -80,6 +83,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return fagsak
     }
 
+    fun settVilkårsvurdering(behandling: Behandling, resultat: BehandlingResultat, begrunnelse: String): Behandling {
+        return lagre(behandling.copy(
+                begrunnelse = begrunnelse,
+                resultat = resultat
+        ))
+    }
+
     fun opprettNyBehandlingPåFagsak(fagsak: Fagsak,
                                     journalpostID: String?,
                                     behandlingType: BehandlingType,
@@ -153,6 +163,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun hentBehandlinger(fagsakId: Long?): List<Behandling?> {
         return behandlingRepository.finnBehandlinger(fagsakId)
+    }
+
+    fun lagre(behandling: Behandling): Behandling {
+        return behandlingRepository.save(behandling)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling) {

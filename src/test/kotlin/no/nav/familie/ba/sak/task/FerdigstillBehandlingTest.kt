@@ -5,16 +5,14 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.vedtak.NyttVedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.util.randomFnr
-import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -66,29 +64,28 @@ class FerdigstillBehandlingTest {
         Mockito.`when`(integrasjonTjeneste.hentAktørId(ArgumentMatchers.anyString())).thenReturn(AktørId("1"))
     }
 
-    fun lagTestTask(vedtakResultat: VedtakResultat): Task {
+    fun lagTestTask(behandlingResultat: BehandlingResultat): Task {
         val fnr = randomFnr()
         val fnrBarn = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
+                                                                       null,
                                                                        BehandlingType.FØRSTEGANGSBEHANDLING,
                                                                        BehandlingKategori.NASJONAL,
                                                                        BehandlingUnderkategori.ORDINÆR)
+        behandlingService.settVilkårsvurdering(behandling, behandlingResultat, "")
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, fnrBarn)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        vedtakService.nyttVedtakForAktivBehandling(
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                nyttVedtak = NyttVedtak(resultat = vedtakResultat,
-                                                                                                   samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                                                                                                           fnr,
-                                                                                                           listOf(fnrBarn)),
-                                                                                                   begrunnelse = ""),
+                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                        fnr,
+                        listOf(fnrBarn)),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
@@ -99,7 +96,7 @@ class FerdigstillBehandlingTest {
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til løpende`() {
-        val testTask = lagTestTask(VedtakResultat.INNVILGET)
+        val testTask = lagTestTask(BehandlingResultat.INNVILGET)
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
         ferdigstillBehandling.doTask(testTask)
@@ -114,7 +111,7 @@ class FerdigstillBehandlingTest {
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
-        val testTask = lagTestTask(VedtakResultat.AVSLÅTT)
+        val testTask = lagTestTask(BehandlingResultat.AVSLÅTT)
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
         ferdigstillBehandling.doTask(testTask)
