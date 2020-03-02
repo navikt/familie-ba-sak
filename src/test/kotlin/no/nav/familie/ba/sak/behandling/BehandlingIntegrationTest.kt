@@ -423,6 +423,36 @@ class BehandlingIntegrationTest {
 
         return vedtakService.hentAktivForBehandling(behandling.id)!!
     }
+
+    @Test
+    @Tag("integration")
+    fun `Opprett nytt opphørt vedtak`() {
+        val fnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = opprettNyOrdinærBehandling(fagsak, behandlingService)
+
+        Assertions.assertNotNull(behandling.fagsak.id)
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, "12345678915")
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        val fagsakRes = vedtakService.nyttVedtakForAktivBehandling(
+                behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                nyttVedtak = NyttVedtak(resultat = VedtakResultat.OPPHØRT,
+                                        samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr,
+                                                                                                      listOf("12345678915")),
+                                        begrunnelse = ""),
+                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+        )
+        Assertions.assertEquals(behandling.fagsak.id, fagsakRes.data?.id)
+
+        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
+        Assertions.assertNotNull(hentetVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
+        Assertions.assertNotEquals("", hentetVedtak?.stønadBrevMarkdown)
+    }
 }
 
 fun opprettNyOrdinærBehandling(fagsak: Fagsak, behandlingService: BehandlingService) =
