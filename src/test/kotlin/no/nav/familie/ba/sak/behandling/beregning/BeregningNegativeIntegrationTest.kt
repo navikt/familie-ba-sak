@@ -91,9 +91,9 @@ class BeregningNegativeIntegrationTest {
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        val fagsakRes = beregningController.oppdaterVedtakMedBeregning(fagsak.id!!,
+        val fagsakRes = beregningController.oppdaterVedtakMedBeregning(fagsak.id,
                                                                        NyBeregning(
-                                                                               arrayOf(
+                                                                               listOf(
                                                                                        BarnBeregning(
                                                                                                ident = barnFnr,
                                                                                                beløp = 1054,
@@ -105,6 +105,6 @@ class BeregningNegativeIntegrationTest {
                                                                        ))
 
         Assertions.assertEquals(Ressurs.Status.FEILET, fagsakRes.body?.status)
-        Assertions.assertEquals("Kan ikke lagre beregning på et avslått vedtak", fagsakRes.body?.melding)
+        Assertions.assertEquals("Kan ikke lagre beregning på et avslått/opphørt vedtak", fagsakRes.body?.melding)
     }
 }

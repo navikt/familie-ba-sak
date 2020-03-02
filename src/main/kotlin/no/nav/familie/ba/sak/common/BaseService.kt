@@ -47,7 +47,7 @@ open class BaseService(clientConfigKey: String, restTemplateBuilder: RestTemplat
     protected inline fun <reified T> requestMedPersonIdent(uri: URI, personident: String): ResponseEntity<T> {
         val headers: MultiValueMap<String, String> = LinkedMultiValueMap()
         headers.add(NavHttpHeaders.NAV_PERSONIDENT.asString(), personident)
-        val httpEntity: HttpEntity<*> = HttpEntity<Any?>(headers)
+        val httpEntity: HttpEntity<*> = HttpEntity<Any>(headers)
         return restOperations.exchange(uri, HttpMethod.GET, httpEntity)
     }
 

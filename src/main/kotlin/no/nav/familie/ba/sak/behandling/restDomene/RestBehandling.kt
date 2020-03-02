@@ -8,12 +8,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class RestBehandling(val aktiv: Boolean,
-                          val behandlingId: Long?,
+                          val behandlingId: Long,
                           val type: BehandlingType,
                           val status: BehandlingStatus,
                           val kategori: BehandlingKategori,
                           val personer: List<RestPerson>,
-                          val opprettetTidspunkt: LocalDateTime?,
+                          val opprettetTidspunkt: LocalDateTime,
                           val underkategori: BehandlingUnderkategori,
                           val samletVilkårResultat: List<RestVilkårResultat>,
                           val vedtakForBehandling: List<RestVedtak?>,

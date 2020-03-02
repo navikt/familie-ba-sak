@@ -85,10 +85,11 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
         val vedtak = Vedtak(
                 behandling = behandling,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
-                vedtaksdato = LocalDate.now()
+                vedtaksdato = LocalDate.now(),
+                opphørsdato = if (behandling.resultat == BehandlingResultat.OPPHØRT) LocalDate.now() else null
         )
 
-        if (behandling.resultat == BehandlingResultat.AVSLÅTT) {
+        if (behandling.resultat != BehandlingResultat.INNVILGET) {
             vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
                     .fold(
                             onSuccess = { it },
@@ -98,9 +99,7 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
                     )
         }
 
-        lagreOgDeaktiverGammel(vedtak)
-
-        return vedtak
+        return lagreOgDeaktiverGammel(vedtak)
     }
 
 
@@ -113,18 +112,17 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
             val person =
                     personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.ident),
                                                                                   personopplysningGrunnlag.id)
-                    ?: throw IllegalStateException("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
+                    ?: error("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
             if (it.stønadFom.isBefore(person.fødselsdato)) {
-                throw IllegalStateException("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
+                error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
             }
 
             val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-            val sikkerStønadTom = person.fødselsdato.plusYears(18)?.sisteDagIForrigeMåned()!!
+            val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
 
             if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
-                throw IllegalStateException(
-                        "Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
+                error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
             }
 
             vedtakPersonRepository.save(
@@ -153,15 +151,15 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
 
-    fun hent(vedtakId: Long): Vedtak? {
+    fun hent(vedtakId: Long): Vedtak {
         return vedtakRepository.getOne(vedtakId)
     }
 
-    fun hentAktivForBehandling(behandlingId: Long?): Vedtak? {
+    fun hentAktivForBehandling(behandlingId: Long): Vedtak? {
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun lagreOgDeaktiverGammel(vedtak: Vedtak) {
+    fun lagreOgDeaktiverGammel(vedtak: Vedtak): Vedtak {
         val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
 
         if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
@@ -169,7 +167,7 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
             vedtakRepository.save(aktivVedtak)
         }
 
-        vedtakRepository.save(vedtak)
+        return vedtakRepository.save(vedtak)
     }
 }
 

@@ -103,10 +103,10 @@ class FerdigstillBehandlingTest {
         ferdigstillBehandling.onCompletion(testTask)
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
-        Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling?.status)
+        Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling.status)
 
-        val ferdigstiltFagsak = ferdigstiltBehandling?.fagsak
-        Assertions.assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak?.status)
+        val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
+        Assertions.assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
     }
 
     @Test
@@ -118,9 +118,9 @@ class FerdigstillBehandlingTest {
         ferdigstillBehandling.onCompletion(testTask)
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
-        Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling?.status)
+        Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling.status)
 
-        val ferdigstiltFagsak = ferdigstiltBehandling?.fagsak
-        Assertions.assertEquals(FagsakStatus.STANSET, ferdigstiltFagsak?.status)
+        val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
+        Assertions.assertEquals(FagsakStatus.STANSET, ferdigstiltFagsak.status)
     }
 }

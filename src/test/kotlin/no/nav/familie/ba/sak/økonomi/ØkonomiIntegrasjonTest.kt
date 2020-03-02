@@ -95,7 +95,7 @@ class ØkonomiIntegrasjonTest {
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
-                        arrayOf(BarnBeregning(ident = barnFnr,
+                        listOf(BarnBeregning(ident = barnFnr,
                                               beløp = 1054,
                                               stønadFom = LocalDate.of(
                                                       2020,
@@ -107,9 +107,9 @@ class ØkonomiIntegrasjonTest {
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
-        økonomiService.iverksettVedtak(behandling.id, vedtak.id!!, "ansvarligSaksbehandler")
+        økonomiService.iverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
 
         val oppdatertBehandling = behandlingService.hent(behandling.id)
-        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling?.status)
+        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling.status)
     }
 }

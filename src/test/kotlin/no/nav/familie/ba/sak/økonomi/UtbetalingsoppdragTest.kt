@@ -26,7 +26,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(6, utbetalingsoppdrag.utbetalingsperiode.size)
 
-        val id = vedtak.id!! * 1000
+        val id = vedtak.id * 1000
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], id + 0, null, 660, "2018-07-01", "2020-03-31")
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], id + 1, id + 0, 1320, "2020-04-01", "2021-06-30")
@@ -52,7 +52,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
 
-        val id = vedtak.id!!*1000
+        val id = vedtak.id * 1000
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], id + 2, id + 1, 660, "2021-07-01", "2023-03-31")

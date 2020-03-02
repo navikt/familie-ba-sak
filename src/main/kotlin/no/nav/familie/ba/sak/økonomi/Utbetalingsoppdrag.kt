@@ -59,7 +59,7 @@ fun <T> List<T>.kunSisteHvis(kunSiste: Boolean): List<T> {
 data class UtbetalingsperiodeMal(
         val vedtak: Vedtak,
         val erEndringPåEksisterendePeriode: Boolean = false,
-        val periodeIdStart: Long = vedtak.id!!
+        val periodeIdStart: Long = vedtak.id
 ) {
 
     private val MAX_PERIODEID_OFFSET = 1_000

@@ -28,16 +28,16 @@ class FerdigstillBehandling(
         LOG.info("Forsøker å ferdigstille behandling ${ferdigstillBehandling.behandlingsId}")
 
         val behandling = behandlingService.hent(ferdigstillBehandling.behandlingsId)
-        val fagsak = behandling?.fagsak
+        val fagsak = behandling.fagsak
 
-        if (behandling?.status !== BehandlingStatus.IVERKSATT) {
-            throw IllegalStateException("Prøver å ferdigstille behandling ${ferdigstillBehandling.behandlingsId}, men status er ${behandling?.status}")
+        if (behandling.status !== BehandlingStatus.IVERKSATT) {
+            throw IllegalStateException("Prøver å ferdigstille behandling ${ferdigstillBehandling.behandlingsId}, men status er ${behandling.status}")
         }
 
-        if (behandling.resultat == BehandlingResultat.INNVILGET && fagsak?.status != FagsakStatus.LØPENDE) {
-            fagsakService.oppdaterStatus(fagsak!!, FagsakStatus.LØPENDE)
+        if (behandling.resultat == BehandlingResultat.INNVILGET && fagsak.status != FagsakStatus.LØPENDE) {
+            fagsakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
         } else {
-            fagsakService.oppdaterStatus(fagsak!!, FagsakStatus.STANSET)
+            fagsakService.oppdaterStatus(fagsak, FagsakStatus.STANSET)
         }
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)

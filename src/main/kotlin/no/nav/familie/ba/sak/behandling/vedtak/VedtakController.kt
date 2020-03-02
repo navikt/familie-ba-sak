@@ -120,7 +120,7 @@ class VedtakController(
                 .fold(
                         onSuccess = {
                             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                                         ?: throw Error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+                                         ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
                             opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
 
