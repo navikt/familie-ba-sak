@@ -30,7 +30,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
         val fagsak = fagsakService.hent(personIdent = PersonIdent(nyBehandling.ident))
-                     ?: throw IllegalStateException("Kan ikke lage behandling på person uten tilknyttet fagsak")
+                     ?: error("Kan ikke lage behandling på person uten tilknyttet fagsak")
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
@@ -96,7 +96,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
-                                                             barnasFødselsnummer: Array<String>,
+                                                             barnasFødselsnummer: List<String>,
                                                              behandling: Behandling) {
         val personopplysningGrunnlag =
                 personopplysningGrunnlagRepository.save(PersonopplysningGrunnlag(behandlingId = behandling.id))
@@ -112,14 +112,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer, personopplysningGrunnlag)
     }
 
-    private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: Array<String>,
+    private fun lagreBarnPåEksisterendePersonopplysningsgrunnlag(barnasFødselsnummer: List<String>,
                                                                  personopplysningGrunnlag: PersonopplysningGrunnlag) {
 
         personopplysningGrunnlag.personer.addAll(leggTilBarnIPersonListe(barnasFødselsnummer, personopplysningGrunnlag))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    private fun leggTilBarnIPersonListe(barnasFødselsnummer: Array<String>,
+    private fun leggTilBarnIPersonListe(barnasFødselsnummer: List<String>,
                                         personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
         return barnasFødselsnummer.filter { barn ->
             personopplysningGrunnlag.barna.none { eksisterendeBarn -> barn == eksisterendeBarn.personIdent.ident }
@@ -133,11 +133,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    fun hentAktivForFagsak(fagsakId: Long?): Behandling? {
+    fun hentAktivForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
     }
 
-    fun hent(behandlingId: Long?): Behandling? {
+    fun hent(behandlingId: Long): Behandling {
         return behandlingRepository.finnBehandling(behandlingId)
     }
 
@@ -151,7 +151,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 }
     }
 
-    fun hentBehandlinger(fagsakId: Long?): List<Behandling?> {
+    fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
@@ -178,7 +178,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.GODKJENT)
     }
 
-    fun oppdaterStatusPåBehandling(behandlingId: Long?, status: BehandlingStatus) {
+    fun oppdaterStatusPåBehandling(behandlingId: Long, status: BehandlingStatus) {
         when (val behandling = hent(behandlingId)) {
             null -> throw Exception("Feilet ved oppdatering av status på behandling. Fant ikke behandling med id $behandlingId")
             else -> {

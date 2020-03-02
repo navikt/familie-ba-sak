@@ -10,7 +10,7 @@ data class Batch(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "batch_seq")
         @SequenceGenerator(name = "batch_seq")
-        val id: Long? = null,
+        val id: Long = 0,
 
         @Column(name = "kjoredato", nullable = false)
         val kjøreDato: LocalDate,

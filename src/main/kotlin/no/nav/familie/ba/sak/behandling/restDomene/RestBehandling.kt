@@ -11,15 +11,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class RestBehandling(val aktiv: Boolean,
-                          val behandlingId: Long?,
+                          val behandlingId: Long,
                           val type: BehandlingType,
                           val status: BehandlingStatus,
                           val kategori: BehandlingKategori,
                           val personer: List<RestPerson>,
-                          val opprettetTidspunkt: LocalDateTime?,
+                          val opprettetTidspunkt: LocalDateTime,
                           val underkategori: BehandlingUnderkategori,
-                          val samletVilkårResultat: List<RestVilkårResultat>?,
-                          val vedtakForBehandling: List<RestVedtak?>)
+                          val samletVilkårResultat: List<RestVilkårResultat>,
+                          val vedtakForBehandling: List<RestVedtak>)
 
 fun SamletVilkårResultat.toRestSamletVilkårResultat() = this.samletVilkårResultat.map {
     RestVilkårResultat(vilkårType = it.vilkårType, utfallType = it.utfallType, personIdent = it.person.personIdent.ident)

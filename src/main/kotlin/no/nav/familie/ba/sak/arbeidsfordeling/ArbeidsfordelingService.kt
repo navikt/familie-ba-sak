@@ -16,10 +16,10 @@ class ArbeidsfordelingService(private val behandlingRepository: BehandlingReposi
         val søker = integrasjonTjeneste.hentPersoninfoFor(fagsak.personIdent.ident)
 
         val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsak.id)
-                              ?: throw RuntimeException("Kunne ikke finne en aktiv behandling på fagsak med ID: ${fagsak.id}")
+                              ?: error("Kunne ikke finne en aktiv behandling på fagsak med ID: ${fagsak.id}")
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
-                                       ?: throw RuntimeException("Kunne ikke finne et aktivt personopplysningsgrunnlag på behandling med ID: ${aktivBehandling.id}")
+                                       ?: error("Kunne ikke finne et aktivt personopplysningsgrunnlag på behandling med ID: ${aktivBehandling.id}")
 
         val personinfoliste = personopplysningGrunnlag.barna.map { barn ->
             integrasjonTjeneste.hentPersoninfoFor(barn.personIdent.ident)

@@ -15,7 +15,7 @@ interface BatchRepository: JpaRepository<Batch, Long> {
     fun save(batch: Batch): Batch
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    override fun findById(id: Long): Optional<Batch?>
+    override fun findById(id: Long): Optional<Batch>
 
     @Query("SELECT k FROM Batch k where kjoredato = :dato AND status = 'LEDIG'")
     @Lock(LockModeType.PESSIMISTIC_WRITE)

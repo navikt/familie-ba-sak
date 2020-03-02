@@ -50,7 +50,7 @@ class RestTemplateConfig {
     }
 
     @Bean
-    fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestTemplateBuilder? {
+    fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestTemplateBuilder {
         return RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofSeconds(5))
                 .setReadTimeout(Duration.ofSeconds(5))

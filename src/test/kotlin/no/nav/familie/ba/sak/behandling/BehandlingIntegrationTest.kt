@@ -125,7 +125,7 @@ class BehandlingIntegrationTest {
 
         val nyBehandling = NyBehandlingHendelse(
                 fnr,
-                arrayOf(randomFnr(), randomFnr()))
+                listOf(randomFnr(), randomFnr()))
         val fagsak = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling)
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
@@ -229,19 +229,19 @@ class BehandlingIntegrationTest {
         val barn1Id = randomFnr()
         val barn2Id = randomFnr()
 
-        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, arrayOf(barn1Id)))
+        val fagsak1 = behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, listOf(barn1Id)))
         val fagsak2 =
-                behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, arrayOf(barn2Id)))
+                behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, listOf(barn2Id)))
 
         // skal ikke føre til flere barn på persongrunnlaget.
-        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, arrayOf(barn1Id, barn2Id)))
+        behandlingService.opprettEllerOppdaterBehandlingFraHendelse(NyBehandlingHendelse(morId, listOf(barn1Id, barn2Id)))
 
         Assertions.assertTrue(fagsak1.id == fagsak2.id)
 
         val behandlinger = behandlingService.hentBehandlinger(fagsak1.id)
         Assertions.assertEquals(1, behandlinger.size)
 
-        val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlinger.first()!!.id)
+        val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlinger.first().id)
 
         Assertions.assertTrue(grunnlag!!.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag.personer.any { it.personIdent.ident == barn1Id })
@@ -259,14 +259,14 @@ class BehandlingIntegrationTest {
         behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NASJONAL,
                                                          BehandlingUnderkategori.ORDINÆR,
                                                          morId,
-                                                         arrayOf(barnId),
+                                                         listOf(barnId),
                                                          BehandlingType.FØRSTEGANGSBEHANDLING,
                                                          null))
         Assertions.assertThrows(Exception::class.java) {
             behandlingService.opprettBehandling(NyBehandling(BehandlingKategori.NASJONAL,
                                                              BehandlingUnderkategori.ORDINÆR,
                                                              morId,
-                                                             arrayOf(barnId),
+                                                             listOf(barnId),
                                                              BehandlingType.REVURDERING,
                                                              null))
         }
@@ -285,7 +285,7 @@ class BehandlingIntegrationTest {
                 NyBehandling(BehandlingKategori.NASJONAL,
                              BehandlingUnderkategori.ORDINÆR,
                              søkerFnr,
-                             arrayOf(barn1Fnr, barn2Fnr),
+                             listOf(barn1Fnr, barn2Fnr),
                              BehandlingType.MIGRERING_FRA_INFOTRYGD,
                              "journalpostId")
 
@@ -296,7 +296,7 @@ class BehandlingIntegrationTest {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling!!.id)
         Assertions.assertNotNull(personopplysningGrunnlag)
 
-        val barnasBeregning = arrayOf(
+        val barnasBeregning = listOf(
                 BarnBeregning(barn1Fnr,
                               1054,
                               LocalDate.of(2020, 1, 1),

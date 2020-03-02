@@ -46,13 +46,12 @@ class FagsakService(
     }
 
     @Transactional
-    fun lagre(fagsak: Fagsak) {
-        fagsakRepository.save(fagsak)
+    fun lagre(fagsak: Fagsak): Fagsak {
+        return fagsakRepository.save(fagsak)
     }
 
-    fun hentRestFagsak(fagsakId: Long?): Ressurs<RestFagsak> {
+    fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
-                     ?: return Ressurs.failure("Fant ikke fagsak med fagsakId: $fagsakId")
 
         val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
 
@@ -72,7 +71,8 @@ class FagsakService(
                     personer = personopplysningGrunnlag.personer.map { it.toRestPerson() },
                     type = it.type,
                     status = it.status,
-                    samletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(it.id)?.toRestSamletVilkårResultat(),
+                    samletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(it.id)
+                                                   ?.toRestSamletVilkårResultat() ?: emptyList(),
                     opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori
@@ -91,9 +91,8 @@ class FagsakService(
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
         val aktørId = integrasjonTjeneste.hentAktørId(personIdent.ident)
-        val nyFagsak = Fagsak(null, aktørId, personIdent)
-        lagre(nyFagsak)
-        return nyFagsak
+        val nyFagsak = Fagsak(aktørId = aktørId, personIdent = personIdent)
+        return lagre(nyFagsak)
     }
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak =
