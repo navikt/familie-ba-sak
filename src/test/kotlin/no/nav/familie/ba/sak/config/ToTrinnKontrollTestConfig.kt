@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import org.mockito.ArgumentMatchers.anyString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -24,9 +23,9 @@ class ToTrinnKontrollTestConfig {
     @Primary
     fun mockToTrinnKontrollService(): ToTrinnKontrollService {
         val toTrinnKontrollService: ToTrinnKontrollService = mockk()
-        every { toTrinnKontrollService.valider2trinnVedIverksetting(any(), anyString()) } answers { //FIX ANY OF TYPE BEHANDLING
-            val b = firstArg<Behandling>()
-            behandlingService.oppdaterStatusPåBehandling(b.id, BehandlingStatus.GODKJENT)
+        every { toTrinnKontrollService.valider2trinnVedIverksetting(any<Behandling>(), any<String>()) } answers {
+            val behandling = firstArg<Behandling>()
+            behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.GODKJENT)
         }
         return toTrinnKontrollService
     }
