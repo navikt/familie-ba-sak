@@ -1,0 +1,16 @@
+[
+  {
+    "personident": "1111111111111",
+    "ytelsetype": "ORDINÆR_BARNETRYGD",
+    "stønadFraOgMed": "2019-1",
+    "stønadTilOgMed": "2037-2",
+    "fullYtelse": true
+  },
+  {
+    "personident": "2222222222222",
+    "ytelsetype": "SMÅBARNSTILLEGG",
+    "stønadFraOgMed": "2019-1",
+    "stønadTilOgMed": "2023-6",
+    "fullYtelse": false
+  }
+]
