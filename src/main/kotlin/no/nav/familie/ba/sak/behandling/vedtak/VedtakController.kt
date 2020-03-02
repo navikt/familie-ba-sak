@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -29,6 +30,7 @@ import java.time.LocalDate
 @Validated
 class VedtakController(
         private val behandlingService: BehandlingService,
+        private val toTrinnKontrollService: ToTrinnKontrollService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vedtakService: VedtakService,
         private val fagsakService: FagsakService,
@@ -105,7 +107,7 @@ class VedtakController(
                                      saksbehandlerId,
                                      fagsakId)
 
-        return Result.runCatching { behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
+        return Result.runCatching { toTrinnKontrollService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
                 .fold(
                         onSuccess = {
                             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
