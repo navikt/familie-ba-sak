@@ -92,7 +92,7 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
                 opphørsdato = if (nyttVedtak.resultat == VedtakResultat.OPPHØRT) LocalDate.now() else null
         )
 
-        if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT || nyttVedtak.resultat == VedtakResultat.OPPHØRT) {
+        if (nyttVedtak.resultat != VedtakResultat.INNVILGET) {
             vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
                     .fold(
                             onSuccess = { it },

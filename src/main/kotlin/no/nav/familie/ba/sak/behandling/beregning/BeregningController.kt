@@ -48,7 +48,7 @@ class BeregningController(
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
                      ?: return notFound("Fant ikke aktiv vedtak på fagsak $fagsakId, behandling ${behandling.id}")
 
-        if (vedtak.resultat == VedtakResultat.AVSLÅTT || vedtak.resultat == VedtakResultat.OPPHØRT) {
+        if (vedtak.resultat != VedtakResultat.INNVILGET) {
             return badRequest("Kan ikke lagre beregning på et avslått/opphørt vedtak")
         }
 
