@@ -4,10 +4,10 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -47,14 +47,14 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
               forrigeVedtak: Vedtak? = null,
               opphørsdato: LocalDate? = null) =
         Vedtak(id = nesteVedtakId(),
-               behandling = behandling,
-               ansvarligSaksbehandler = "ansvarligSaksbehandler",
-               vedtaksdato = LocalDate.now(),
-               stønadBrevMarkdown = "",
-               resultat = resultat,
-               begrunnelse = "",
-               forrigeVedtakId = forrigeVedtak?.id,
-               opphørsdato = opphørsdato
+                                                                          behandling = behandling,
+                                                                          ansvarligSaksbehandler = "ansvarligSaksbehandler",
+                                                                          vedtaksdato = LocalDate.now(),
+                                                                          stønadBrevMarkdown = "",
+                                                                          resultat = resultat,
+                                                                          begrunnelse = "",
+                                                                          forrigeVedtakId = forrigeVedtak?.id,
+                                                                          opphørsdato = opphørsdato
         )
 
 fun lagPersonVedtak(fom: String,

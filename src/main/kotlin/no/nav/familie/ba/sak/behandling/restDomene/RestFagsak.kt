@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.behandling.domene.FagsakStatus
 import java.time.LocalDateTime
 
 data class RestFagsak(
-        val opprettetTidspunkt: LocalDateTime?,
-        val id: Long?,
-        val søkerFødselsnummer: String?,
+        val opprettetTidspunkt: LocalDateTime,
+        val id: Long,
+        val søkerFødselsnummer: String,
         val status: FagsakStatus,
         val behandlinger: List<RestBehandling>)
 

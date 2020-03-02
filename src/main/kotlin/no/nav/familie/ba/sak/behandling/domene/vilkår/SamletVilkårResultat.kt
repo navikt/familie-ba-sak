@@ -7,9 +7,9 @@ import javax.persistence.*
 @Table(name = "samlet_vilkar_resultat")
 class SamletVilkårResultat(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "samlet_vilkar_resultat_seq")
-        @SequenceGenerator(name = "samlet_vilkar_resultat_seq")
-        private val id: Long? = null,
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "samlet_vilkar_resultat_seq_generator")
+        @SequenceGenerator(name = "samlet_vilkar_resultat_seq_generator", sequenceName = "samlet_vilkar_resultat_seq", allocationSize = 50)
+        private val id: Long = 0,
 
         @Column(name = "fk_behandling_id", nullable = false, updatable = false)
         val behandlingId: Long,

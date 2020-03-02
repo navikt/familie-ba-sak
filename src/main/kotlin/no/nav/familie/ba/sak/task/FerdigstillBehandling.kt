@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.FagsakService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.FagsakStatus
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -29,18 +29,18 @@ class FerdigstillBehandling(
         val ferdigstillBehandling = objectMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
         LOG.info("Forsøker å ferdigstille behandling ${ferdigstillBehandling.behandlingsId}")
 
-        val behandling = behandlingService.hentBehandling(ferdigstillBehandling.behandlingsId)
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandling?.id)
-        val fagsak = behandling?.fagsak
+        val behandling = behandlingService.hent(ferdigstillBehandling.behandlingsId)
+        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
+        val fagsak = behandling.fagsak
 
-        if (behandling?.status !== BehandlingStatus.IVERKSATT) {
-            throw IllegalStateException("Prøver å ferdigstille behandling ${ferdigstillBehandling.behandlingsId}, men status er ${behandling?.status}")
+        if (behandling.status !== BehandlingStatus.IVERKSATT) {
+            throw IllegalStateException("Prøver å ferdigstille behandling ${ferdigstillBehandling.behandlingsId}, men status er ${behandling.status}")
         }
 
         if (vedtak?.resultat == VedtakResultat.INNVILGET) {
-            fagsakService.oppdaterStatus(fagsak!!, FagsakStatus.LØPENDE)
+            fagsakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
         } else {
-            fagsakService.oppdaterStatus(fagsak!!, FagsakStatus.STANSET)
+            fagsakService.oppdaterStatus(fagsak, FagsakStatus.STANSET)
         }
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)

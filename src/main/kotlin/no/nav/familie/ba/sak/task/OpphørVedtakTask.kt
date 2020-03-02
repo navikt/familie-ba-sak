@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -19,7 +19,7 @@ import java.util.*
                      beskrivelse = "Opphør aktiv behandling og vedtak",
                      maxAntallFeil = 3)
 class OpphørVedtakTask(
-        private val behandlingService: BehandlingService,
+        private val vedtakService: VedtakService,
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
 
@@ -27,7 +27,7 @@ class OpphørVedtakTask(
         val opphørVedtakTask = objectMapper.readValue(task.payload, OpphørVedtakTaskDTO::class.java)
 
         LOG.debug("Opphører behandling og tilhørende vedtak med behandlingsId ${opphørVedtakTask.gjeldendeBehandlingsId}")
-        behandlingService.opphørVedtak(opphørVedtakTask.saksbehandlerId,
+        vedtakService.opphørVedtak(opphørVedtakTask.saksbehandlerId,
                                        opphørVedtakTask.gjeldendeBehandlingsId,
                                        BehandlingType.valueOf(opphørVedtakTask.nyBehandlingType),
                                        opphørVedtakTask.opphørsdato,
@@ -38,7 +38,7 @@ class OpphørVedtakTask(
         val nyTask = IverksettMotOppdrag.opprettTask(
                 vedtak.behandling.fagsak.personIdent.ident,
                 vedtak.behandling.id,
-                vedtak.id!!,
+                vedtak.id,
                 vedtak.ansvarligSaksbehandler)
 
         taskRepository.save(nyTask)
@@ -58,7 +58,7 @@ class OpphørVedtakTask(
                                payload = objectMapper.writeValueAsString(OpphørVedtakTaskDTO(
                                        personIdent = gjeldendeBehandling.fagsak.personIdent.ident,
                                        gjeldendeBehandlingsId = gjeldendeBehandling.id,
-                                       gjeldendeVedtaksId = gjeldendeVedtak.id!!,
+                                       gjeldendeVedtaksId = gjeldendeVedtak.id,
                                        saksbehandlerId = saksbehandlerId,
                                        nyBehandlingType = nyBehandlingstype.name,
                                        opphørsdato = opphørsdato

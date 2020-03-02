@@ -10,8 +10,8 @@ import javax.persistence.*
 @Entity(name = "Person")
 @Table(name = "PO_PERSON")
 data class Person(@Id
-                  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_person_seq")
-                  @SequenceGenerator(name = "po_person_seq")
+                  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_person_seq_generator")
+                  @SequenceGenerator(name = "po_person_seq_generator", sequenceName = "po_person_seq", allocationSize = 50)
                   val id: Long = 0,
 
                   //SØKER, BARN, ANNENPART

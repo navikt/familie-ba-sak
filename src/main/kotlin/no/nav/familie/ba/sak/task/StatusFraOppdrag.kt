@@ -32,7 +32,7 @@ class StatusFraOppdrag(
      */
     override fun doTask(task: Task) {
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
-        val behandling = behandlingService.hentBehandling(statusFraOppdragDTO.behandlingsId)
+        val behandling = behandlingService.hent(statusFraOppdragDTO.behandlingsId)
 
         Result.runCatching { økonomiService.hentStatus(statusFraOppdragDTO) }
                 .onFailure { throw it }
@@ -54,7 +54,7 @@ class StatusFraOppdrag(
                                 BehandlingStatus.IVERKSATT
                         )
 
-                        if (behandling?.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+                        if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
                             opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId, task)
                         } else {
                             opprettFerdigstillBehandling(statusFraOppdragDTO)

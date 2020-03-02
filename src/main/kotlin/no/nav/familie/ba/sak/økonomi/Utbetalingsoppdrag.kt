@@ -1,13 +1,14 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.beregnUtbetalingsperioder
-import no.nav.familie.ba.sak.behandling.domene.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakPerson
-import no.nav.familie.ba.sak.behandling.domene.vedtak.VedtakResultat.OPPHØRT
+import no.nav.familie.ba.sak.behandling.beregning.beregnUtbetalingsperioder
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat.OPPHØRT
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.UEND
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode.SatsType.MND
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -58,7 +59,7 @@ fun <T> List<T>.kunSisteHvis(kunSiste: Boolean): List<T> {
 data class UtbetalingsperiodeMal(
         val vedtak: Vedtak,
         val erEndringPåEksisterendePeriode: Boolean = false,
-        val periodeIdStart: Long = vedtak.id!!
+        val periodeIdStart: Long = vedtak.id
 ) {
 
     val MAX_PERIODEID_OFFSET = 1000
