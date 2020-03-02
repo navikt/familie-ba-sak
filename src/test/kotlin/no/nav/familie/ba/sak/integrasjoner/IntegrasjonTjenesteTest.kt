@@ -232,7 +232,6 @@ class IntergrasjonTjenesteTest {
     private fun lagTestOppgave(): OpprettOppgave {
         return OpprettOppgave(ident = OppgaveIdent(ident = "test", type = IdentType.Aktør),
                               saksId = "123",
-                              journalpostId = null,
                               tema = Tema.BAR,
                               oppgavetype =  Oppgavetype.BehandleSak,
                               fristFerdigstillelse = LocalDate.now(),
