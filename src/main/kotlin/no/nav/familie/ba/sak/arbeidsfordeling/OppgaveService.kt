@@ -24,6 +24,7 @@ class OppgaveService(private val integrasjonTjeneste: IntegrasjonTjeneste,
                                             saksId = fagsakId.toString(),
                                             tema = Tema.BAR,
                                             oppgavetype = Oppgavetype.BehandleSak,
+                                            journalpostId = null,
                                             fristFerdigstillelse = LocalDate.now().plusDays(1), //TODO få denne til å funke på helg og eventuellle andre helligdager
                                             beskrivelse = lagOppgaveTekst(fagsakId),
                                             enhetsnummer = enhetsnummer?.enhetId,
