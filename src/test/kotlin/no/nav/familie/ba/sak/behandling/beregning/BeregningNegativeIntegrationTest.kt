@@ -100,6 +100,6 @@ class BeregningNegativeIntegrationTest {
                                                                        ))
 
         Assertions.assertEquals(Ressurs.Status.FEILET, fagsakRes.body?.status)
-        Assertions.assertEquals("Kan ikke lagre beregning på et avslått vedtak", fagsakRes.body?.melding)
+        Assertions.assertEquals("Kan ikke lagre beregning på et avslått/opphørt vedtak", fagsakRes.body?.melding)
     }
 }

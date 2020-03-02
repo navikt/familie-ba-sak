@@ -88,10 +88,11 @@ class VedtakService (private val behandlingRepository: BehandlingRepository,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
                 resultat = nyttVedtak.resultat,
-                begrunnelse = nyttVedtak.begrunnelse
+                begrunnelse = nyttVedtak.begrunnelse,
+                opphørsdato = if (nyttVedtak.resultat == VedtakResultat.OPPHØRT) LocalDate.now() else null
         )
 
-        if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT) {
+        if (nyttVedtak.resultat == VedtakResultat.AVSLÅTT || nyttVedtak.resultat == VedtakResultat.OPPHØRT) {
             vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
                     .fold(
                             onSuccess = { it },
