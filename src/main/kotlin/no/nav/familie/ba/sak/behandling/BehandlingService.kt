@@ -184,14 +184,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
     }
 
-    fun valider2trinnVedIverksetting(behandling: Behandling, ansvarligSaksbehandler: String) {
-        if (behandling.endretAv == ansvarligSaksbehandler) {
-            throw IllegalStateException("Samme saksbehandler kan ikke foreslå og iverksette samme vedtak")
-        }
-
-        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.GODKJENT)
-    }
-
     fun oppdaterStatusPåBehandling(behandlingId: Long, status: BehandlingStatus) {
         when (val behandling = hent(behandlingId)) {
             null -> throw Exception("Feilet ved oppdatering av status på behandling. Fant ikke behandling med id $behandlingId")

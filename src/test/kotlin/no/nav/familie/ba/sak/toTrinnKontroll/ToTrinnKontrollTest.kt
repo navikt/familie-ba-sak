@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.toTrinnKontroll
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
@@ -27,6 +28,9 @@ class ToTrinnKontrollTest {
 
     @Autowired
     lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    lateinit var toTrinnKontrollService: ToTrinnKontrollService
 
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
@@ -57,7 +61,7 @@ class ToTrinnKontrollTest {
         behandlingService.sendBehandlingTilBeslutter(behandling)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hent(behandling.id).status)
 
-        behandlingService.valider2trinnVedIverksetting(behandling, "beslutter")
+        toTrinnKontrollService.valider2trinnVedIverksetting(behandling, "beslutter")
         Assertions.assertEquals(BehandlingStatus.GODKJENT, behandlingService.hent(behandling.id).status)
     }
 
@@ -80,6 +84,6 @@ class ToTrinnKontrollTest {
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, endretBehandling.status)
         Assertions.assertNotNull(endretBehandling.endretAv)
 
-        assertThrows<IllegalStateException> { behandlingService.valider2trinnVedIverksetting (endretBehandling, "VL") }
+        assertThrows<IllegalStateException> { toTrinnKontrollService.valider2trinnVedIverksetting (endretBehandling, "VL") }
     }
 }
