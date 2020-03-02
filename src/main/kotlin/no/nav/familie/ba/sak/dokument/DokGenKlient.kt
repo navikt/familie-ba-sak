@@ -35,7 +35,24 @@ class DokGenKlient(
     private fun mapTilBrevfelter(vedtak: Vedtak): String = when (vedtak.resultat) {
         VedtakResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
         VedtakResultat.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
+        VedtakResultat.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak)
         else -> throw RuntimeException("Invalid/unsupported vedtak.resultat")
+    }
+
+    private fun mapTilOpphørtBrevFelter(vedtak: Vedtak): String {
+        val brevfelter = "{\"fodselsnummer\": \"%s\",\n" +
+                         "\"navn\": \"%s\",\n" +
+                         "\"tdato\": \"%s\",\n" +
+                         "\"hjemmel\": \"%s\",\n" +
+                         "\"fritekst\": \"%s\"}"
+
+        return String.format( //TODO: sett navn, hjemmel og firtekst
+                brevfelter,
+                vedtak.behandling.fagsak.personIdent.ident,
+                "No Name",
+                "01.01.01",
+                "",
+                vedtak.begrunnelse)
     }
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
