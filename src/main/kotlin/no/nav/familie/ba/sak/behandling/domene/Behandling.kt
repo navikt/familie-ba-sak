@@ -52,6 +52,7 @@ fun BehandlingResultat.toDokGenTemplate(): String {
     return when (this) {
         BehandlingResultat.INNVILGET -> "Innvilget"
         BehandlingResultat.AVSLÅTT -> "Avslag"
+        BehandlingResultat.OPPHØRT -> "Opphørt"
         else -> throw RuntimeException("Invalid/Unsupported vedtak result")
     }
 }

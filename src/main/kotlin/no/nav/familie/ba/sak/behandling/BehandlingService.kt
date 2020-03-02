@@ -169,7 +169,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
-    fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling) {
+    fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = hentAktivForFagsak(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
@@ -177,7 +177,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             behandlingRepository.save(aktivBehandling)
         }
 
-        behandlingRepository.save(behandling)
+        return behandlingRepository.save(behandling)
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {

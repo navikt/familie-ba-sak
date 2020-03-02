@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
@@ -7,7 +8,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
@@ -20,10 +20,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class VedtakService(private val behandlingRepository: BehandlingRepository,
+class VedtakService(private val behandlingService: BehandlingService,
+                    private val behandlingRepository: BehandlingRepository,
                     private val vedtakRepository: VedtakRepository,
                     private val vedtakPersonRepository: VedtakPersonRepository,
-                    private val vilkårService: VilkårService,
                     private val dokGenKlient: DokGenKlient,
                     private val personRepository: PersonRepository,
                     private val fagsakService: FagsakService) {
@@ -82,10 +82,12 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag,
                                                    restSamletVilkårResultat: List<RestVilkårResultat>,
                                                    ansvarligSaksbehandler: String): Vedtak {
+        val forrigeVedtak = hentForrigeVedtak(behandling = behandling)
         val vedtak = Vedtak(
                 behandling = behandling,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
+                forrigeVedtakId = forrigeVedtak?.id,
                 opphørsdato = if (behandling.resultat == BehandlingResultat.OPPHØRT) LocalDate.now() else null
         )
 
@@ -149,6 +151,16 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
         lagreOgDeaktiverGammel(vedtak)
 
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
+    }
+
+    fun hentForrigeVedtak(behandling: Behandling): Vedtak? {
+        val behandlinger = behandlingService.hentBehandlinger(behandling.fagsak.id)
+
+
+        return when (val forrigeBehandling = behandlinger.filter { it.id != behandling.id }.maxBy { it.opprettetTidspunkt }) {
+            null -> null
+            else -> hentAktivForBehandling(behandlingId = forrigeBehandling.id)
+        }
     }
 
     fun hent(vedtakId: Long): Vedtak {
