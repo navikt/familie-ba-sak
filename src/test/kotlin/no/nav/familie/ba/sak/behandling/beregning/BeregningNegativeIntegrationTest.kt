@@ -6,23 +6,20 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.vedtak.*
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.behandling.vedtak.NyttVedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -39,9 +36,6 @@ class BeregningNegativeIntegrationTest {
     @Autowired
     private lateinit var beregningController: BeregningController
 
-    @MockBean
-    lateinit var integrasjonTjeneste: IntegrasjonTjeneste
-
     @Autowired
     private lateinit var behandlingService: BehandlingService
 
@@ -54,10 +48,6 @@ class BeregningNegativeIntegrationTest {
     @Autowired
     private lateinit var vedtakService: VedtakService
 
-    @BeforeEach
-    fun setup() {
-        Mockito.`when`(integrasjonTjeneste.hentAktørId(anyString())).thenReturn(AktørId("1"))
-    }
 
     @Test
     @Tag("integration")

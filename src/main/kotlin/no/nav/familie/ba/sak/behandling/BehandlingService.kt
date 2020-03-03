@@ -4,7 +4,8 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.mottak.NyBehandlingHendelse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
                         private val fagsakService: FagsakService,
-                        private val integrasjonTjeneste: IntegrasjonTjeneste,
+                        private val integrasjonClient: IntegrasjonClient,
                         private val featureToggleService: FeatureToggleService,
                         private val taskRepository: TaskRepository) {
 
@@ -104,7 +105,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val søker = Person(personIdent = behandling.fagsak.personIdent,
                            type = PersonType.SØKER,
                            personopplysningGrunnlag = personopplysningGrunnlag,
-                           fødselsdato = integrasjonTjeneste.hentPersoninfoFor(fødselsnummer).fødselsdato,
+                           fødselsdato = integrasjonClient.hentPersoninfoFor(fødselsnummer).fødselsdato,
                            aktørId = behandling.fagsak.aktørId
         )
 
@@ -127,7 +128,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             Person(personIdent = PersonIdent(nyttBarn),
                    type = PersonType.BARN,
                    personopplysningGrunnlag = personopplysningGrunnlag,
-                   fødselsdato = integrasjonTjeneste.hentPersoninfoFor(nyttBarn).fødselsdato,
+                   fødselsdato = integrasjonClient.hentPersoninfoFor(nyttBarn).fødselsdato,
                    aktørId = hentAktørIdOrNull(nyttBarn)
             )
         }
@@ -189,7 +190,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun hentAktørIdOrNull(ident: String): AktørId? {
         return Result.runCatching {
-            return integrasjonTjeneste.hentAktørId(ident)
+            return integrasjonClient.hentAktørId(ident)
         }.fold(
                 onSuccess = { it },
                 onFailure = { null }
