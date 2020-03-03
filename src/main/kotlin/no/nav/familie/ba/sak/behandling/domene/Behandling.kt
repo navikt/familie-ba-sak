@@ -27,11 +27,11 @@ data class Behandling(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "kategori", nullable = false)
-        var kategori: BehandlingKategori,
+        val kategori: BehandlingKategori,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "underkategori", nullable = false)
-        var underkategori: BehandlingUnderkategori,
+        val underkategori: BehandlingUnderkategori,
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
@@ -45,7 +45,7 @@ data class Behandling(
         val resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
 
         @Column(name = "begrunnelse", columnDefinition = "TEXT")
-        var begrunnelse: String = ""
+        val begrunnelse: String = ""
 ) : BaseEntitet()
 
 fun BehandlingResultat.toDokGenTemplate(): String {
@@ -53,7 +53,7 @@ fun BehandlingResultat.toDokGenTemplate(): String {
         BehandlingResultat.INNVILGET -> "Innvilget"
         BehandlingResultat.AVSLÅTT -> "Avslag"
         BehandlingResultat.OPPHØRT -> "Opphørt"
-        else -> throw RuntimeException("Invalid/Unsupported vedtak result")
+        else -> error("Invalid/Unsupported vedtak result")
     }
 }
 

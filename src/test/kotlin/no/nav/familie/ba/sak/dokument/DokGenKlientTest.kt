@@ -55,20 +55,23 @@ class DokGenKlientTest(@Autowired
 
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
-        val markdown = dokGenKlient.hentStønadBrevMarkdown(vedtak)
+        val markdown = dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
+                                                           ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
         val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(), markdown)
         assert(htmlResponse.startsWith("<html>"))
     }
 
     @Test
     fun `Test å generer Markdown for avslag brev`() {
-        val markdown = dokGenKlient.hentStønadBrevMarkdown(avslagVedtak)
+        val markdown = dokGenKlient.hentStønadBrevMarkdown(behandling = avslagVedtak.behandling,
+                                                           ansvarligSaksbehandler = avslagVedtak.ansvarligSaksbehandler)
         assert(markdown.startsWith("<br>Du har ikke rett til barnetrygd fordi ."))
     }
 
     @Test
     fun `Test å generer Markdown for opphørt brev`() {
-        val markdown = dokGenKlient.hentStønadBrevMarkdown(opphørtVedtak)
+        val markdown = dokGenKlient.hentStønadBrevMarkdown(behandling = opphørtVedtak.behandling,
+                                                           ansvarligSaksbehandler = opphørtVedtak.ansvarligSaksbehandler)
         assert(markdown.startsWith("<br>Barnetrygden din stanses fra"))
     }
 }

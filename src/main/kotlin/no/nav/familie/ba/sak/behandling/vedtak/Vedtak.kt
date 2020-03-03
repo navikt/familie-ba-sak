@@ -23,14 +23,14 @@ data class Vedtak(
         val vedtaksdato: LocalDate,
 
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
-        var stønadBrevMarkdown: String = "",
+        val stønadBrevMarkdown: String = "",
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
         @Column(name = "fk_forrige_vedtak_id")
-        var forrigeVedtakId: Long? = null,
+        val forrigeVedtakId: Long? = null,
 
         @Column(name = "opphor_dato")
-        var opphørsdato: LocalDate? = null
+        val opphørsdato: LocalDate? = null
 ) : BaseEntitet()

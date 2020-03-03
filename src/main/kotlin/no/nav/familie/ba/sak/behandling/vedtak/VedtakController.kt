@@ -42,8 +42,8 @@ class VedtakController(
 ) {
 
     @PutMapping(path = ["/{fagsakId}/vedtak"])
-    fun nyttVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
-                   @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
+    fun opprettEllerOppdaterVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
+                                   @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
         FagsakController.logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)

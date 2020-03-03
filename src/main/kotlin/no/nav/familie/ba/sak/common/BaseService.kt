@@ -37,7 +37,7 @@ open class BaseService(clientConfigKey: String, restTemplateBuilder: RestTemplat
 
     private val clientProperties: ClientProperties = Optional.ofNullable(
             clientConfigurationProperties.registration[clientConfigKey])
-            .orElseThrow { RuntimeException("could not find oauth2 client config for key=$clientConfigKey") }
+            .orElseThrow { error("could not find oauth2 client config for key=$clientConfigKey") }
     val restOperations: RestOperations = restTemplateBuilder
             .additionalInterceptors(BearerAuthorizationInterceptor(oAuth2AccessTokenService, clientProperties),
                                     MdcValuesPropagatingClientInterceptor())

@@ -88,18 +88,18 @@ class VedtakService(private val behandlingService: BehandlingService,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = forrigeVedtak?.id,
-                opphørsdato = if (behandling.resultat == BehandlingResultat.OPPHØRT) LocalDate.now() else null
+                opphørsdato = if (behandling.resultat == BehandlingResultat.OPPHØRT) LocalDate.now() else null,
+                stønadBrevMarkdown = if (behandling.resultat != BehandlingResultat.INNVILGET) Result.runCatching {
+                    dokGenKlient.hentStønadBrevMarkdown(behandling,
+                                                        ansvarligSaksbehandler)
+                }
+                        .fold(
+                                onSuccess = { it },
+                                onFailure = { e ->
+                                    error("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.")
+                                }
+                        ) else ""
         )
-
-        if (behandling.resultat != BehandlingResultat.INNVILGET) {
-            vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
-                    .fold(
-                            onSuccess = { it },
-                            onFailure = { e ->
-                                error("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.")
-                            }
-                    )
-        }
 
         return lagreOgDeaktiverGammel(vedtak)
     }
@@ -139,16 +139,19 @@ class VedtakService(private val behandlingService: BehandlingService,
             )
         }
 
-        vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
-                .fold(
-                        onSuccess = { it },
-                        onFailure = { e ->
-                            return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
-                                                   e)
-                        }
-                )
-
-        lagreOgDeaktiverGammel(vedtak)
+        lagreOgDeaktiverGammel(vedtak.copy(
+                stønadBrevMarkdown = Result.runCatching {
+                    dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
+                                                        ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
+                }
+                        .fold(
+                                onSuccess = { it },
+                                onFailure = { e ->
+                                    return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
+                                                           e)
+                                }
+                        )
+        ))
 
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }

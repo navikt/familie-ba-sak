@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.dokument
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.toDokGenTemplate
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
 import no.nav.familie.ba.sak.behandling.restDomene.DokumentRequest
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
@@ -27,27 +27,31 @@ class DokGenKlient(
         private val restTemplate: RestTemplate
 ) {
 
-    fun hentStønadBrevMarkdown(vedtak: Vedtak): String {
-        val fletteFelter = mapTilBrevfelter(vedtak)
-        return hentMarkdownForMal(vedtak.behandling.resultat.toDokGenTemplate(), fletteFelter)
+    fun hentStønadBrevMarkdown(behandling: Behandling,
+                               ansvarligSaksbehandler: String): String {
+        val fletteFelter = mapTilBrevfelter(behandling, ansvarligSaksbehandler)
+        return hentMarkdownForMal(behandling.resultat.toDokGenTemplate(), fletteFelter)
     }
 
-    private fun mapTilBrevfelter(vedtak: Vedtak): String = when (vedtak.behandling.resultat) {
-        BehandlingResultat.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
-        BehandlingResultat.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
-        BehandlingResultat.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak)
-        else -> throw RuntimeException("Invalid/unsupported vedtak.resultat")
+    private fun mapTilBrevfelter(behandling: Behandling,
+                                 ansvarligSaksbehandler: String): String = when (behandling.resultat) {
+        BehandlingResultat.INNVILGET -> mapTilInnvilgetBrevFelter(behandling, ansvarligSaksbehandler)
+        BehandlingResultat.AVSLÅTT -> mapTilAvslagBrevFelter(behandling, ansvarligSaksbehandler)
+        BehandlingResultat.OPPHØRT -> mapTilOpphørtBrevFelter(behandling, ansvarligSaksbehandler)
+        else -> error("Invalid/unsupported vedtak.resultat")
     }
 
-    private fun mapTilOpphørtBrevFelter(vedtak: Vedtak): String {
-        return "{\"fodselsnummer\": \"${vedtak.behandling.fagsak.personIdent.ident}\",\n" +
+    private fun mapTilOpphørtBrevFelter(behandling: Behandling,
+                                        ansvarligSaksbehandler: String): String {
+        return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
                "\"navn\": \"No Name\",\n" +
                "\"tdato\": \"01.01.01\",\n" +
                "\"hjemmel\": \"\",\n" +
-               "\"fritekst\": \"${vedtak.behandling.begrunnelse}\"}"
+               "\"fritekst\": \"${behandling.begrunnelse}\"}"
     }
 
-    private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
+    private fun mapTilInnvilgetBrevFelter(behandling: Behandling,
+                                          ansvarligSaksbehandler: String): String {
         val startDato = "februar 2020" // TODO hent fra beregningen
 
         // TODO hent fra dokgen (/template/{templateName}/schema)
@@ -56,19 +60,20 @@ class DokGenKlient(
                "\"startDato\": \"$startDato\",\n" +
                "\"etterbetaling\": false,\n" +
                "\"enhet\": \"enhet\",\n" +
-               "\"fodselsnummer\": \"${vedtak.behandling.fagsak.personIdent.ident}\",\n" +
+               "\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
                "\"fodselsdato\": \"24.12.19\",\n" +
-               "\"saksbehandler\": \"${vedtak.ansvarligSaksbehandler}\", \n" +
-               "\"fritekst\": \"${vedtak.behandling.begrunnelse}\"}"
+               "\"saksbehandler\": \"${ansvarligSaksbehandler}\", \n" +
+               "\"fritekst\": \"${behandling.begrunnelse}\"}"
     }
 
-    private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
+    private fun mapTilAvslagBrevFelter(behandling: Behandling,
+                                       ansvarligSaksbehandler: String): String {
 
         //TODO: sett navn, hjemmel og firtekst
-        return "{\"fodselsnummer\": \"${vedtak.behandling.fagsak.personIdent.ident}\",\n" +
+        return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
                "\"navn\": \"No Name\",\n" +
                "\"hjemmel\": \"\",\n" +
-               "\"fritekst\": \"${vedtak.behandling.begrunnelse}\"}"
+               "\"fritekst\": \"${behandling.begrunnelse}\"}"
     }
 
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {

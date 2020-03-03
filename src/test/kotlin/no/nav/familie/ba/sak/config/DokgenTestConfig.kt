@@ -23,7 +23,7 @@ class DokgenTestConfig {
         `when`(dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP")).thenReturn("<HTML>HTML_MOCKUP</HTML>")
         `when`(dokgenService.lagHtmlFraMarkdown("Avslag", "TEST_MARKDOWN_MOCKUP")).thenReturn("<HTML>HTML_MOCKUP</HTML>")
         `when`(dokgenService.lagHtmlFraMarkdown("Opphørt", "TEST_MARKDOWN_MOCKUP")).thenReturn("<HTML>HTML_MOCKUP</HTML>")
-        `when`(dokgenService.hentStønadBrevMarkdown(any())).thenReturn("TEST_MARKDOWN_MOCKUP")
+        `when`(dokgenService.hentStønadBrevMarkdown(any(), any())).thenReturn("TEST_MARKDOWN_MOCKUP")
         return dokgenService
     }
 
@@ -35,8 +35,8 @@ class DokgenTestConfig {
         fun <T> any(): T = Mockito.any<T>()
 
         val dokgenService = mock(DokGenKlient::class.java)
-        `when`(dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP")).thenThrow(RuntimeException())
-        `when`(dokgenService.hentStønadBrevMarkdown(any())).thenReturn("TEST_MARKDOWN_MOCKUP")
+        `when`(dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP")).thenThrow(IllegalStateException())
+        `when`(dokgenService.hentStønadBrevMarkdown(any(), any())).thenReturn("TEST_MARKDOWN_MOCKUP")
         return dokgenService
     }
 }
