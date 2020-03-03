@@ -6,15 +6,12 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Personopplysni
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.util.randomFnr
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -34,9 +31,6 @@ class FerdigstillBehandlingTest {
 
     @Autowired
     private lateinit var ferdigstillBehandling: FerdigstillBehandling
-
-    @Autowired
-    private lateinit var taskRepositoryMock: TaskRepository
 
     @Autowired
     private lateinit var vedtakService: VedtakService

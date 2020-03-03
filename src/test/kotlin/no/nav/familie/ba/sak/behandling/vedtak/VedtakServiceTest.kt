@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.opprettNyOrdinærBehandling
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
@@ -49,10 +50,11 @@ class VedtakServiceTest {
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Autowired
-    lateinit var fagsakService: FagsakService
+    @Qualifier("integrasjonClient")
+    lateinit var integrasjonClient: IntegrasjonClient
 
     @Autowired
-    lateinit var integrasjonTjeneste: IntegrasjonTjeneste
+    lateinit var fagsakService: FagsakService
 
     @MockK(relaxed = true)
     lateinit var taskRepository: TaskRepository
@@ -69,28 +71,28 @@ class VedtakServiceTest {
                 behandlingRepository,
                 personopplysningGrunnlagRepository,
                 fagsakService,
-                integrasjonTjeneste,
+                integrasjonClient,
                 featureToggleService,
                 taskRepository)
 
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/aktoer/v1"))
-                                 .willReturn(WireMock.aResponse()
-                                                     .withHeader("Content-Type", "application/json")
-                                                     .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/personopplysning/v1/info"))
-                                 .willReturn(WireMock.aResponse()
-                                                     .withHeader("Content-Type", "application/json")
-                                                     .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
-                                                             LocalDate.of(2019,
-                                                                          1,
-                                                                          1)))))))
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/personopplysning/v1/info/BAR"))
-                                 .willReturn(WireMock.aResponse()
-                                                     .withHeader("Content-Type", "application/json")
-                                                     .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
-                                                             LocalDate.of(2019,
-                                                                          1,
-                                                                          1)))))))
+        stubFor(get(urlEqualTo("/api/aktoer/v1"))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
+        stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
+                                                    LocalDate.of(2019,
+                                                                 1,
+                                                                 1)))))))
+        stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
+                                                    LocalDate.of(2019,
+                                                                 1,
+                                                                 1)))))))
     }
 
     @Test
