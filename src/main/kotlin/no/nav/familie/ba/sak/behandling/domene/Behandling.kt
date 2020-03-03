@@ -46,7 +46,12 @@ data class Behandling(
 
         @Column(name = "begrunnelse", columnDefinition = "TEXT")
         val begrunnelse: String = ""
-) : BaseEntitet()
+) : BaseEntitet() {
+
+    override fun toString(): String {
+        return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori)"
+    }
+}
 
 fun BehandlingResultat.toDokGenTemplate(): String {
     return when (this) {

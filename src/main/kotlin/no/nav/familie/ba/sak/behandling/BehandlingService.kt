@@ -176,6 +176,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             behandlingRepository.saveAndFlush(aktivBehandling)
         }
 
+        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling $behandling")
         return behandlingRepository.save(behandling)
     }
 
