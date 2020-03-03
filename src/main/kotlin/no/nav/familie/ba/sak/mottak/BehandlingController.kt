@@ -14,13 +14,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/behandling")
+@RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BehandlingController(private val behandlingService: BehandlingService,
@@ -28,13 +25,13 @@ class BehandlingController(private val behandlingService: BehandlingService,
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @PostMapping(path = ["/ny-behandling"])
+    @PostMapping(path = ["/behandlinger"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
         logger.info("{} oppretter ny behandling", saksbehandlerId)
 
-        if (nyBehandling.ident.isBlank()) {
+        if (nyBehandling.søkersIdent.isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure("Søkers ident kan ikke være blank"))
         }
 
@@ -49,11 +46,11 @@ class BehandlingController(private val behandlingService: BehandlingService,
                             ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                     .body(Ressurs.failure(it.cause?.message ?: it.message, it))
                         },
-                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.id)) }
+                        onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(fagsakService.hentRestFagsak (fagsakId = it.id)) }
                 )
     }
 
-    @PostMapping(path = ["/opprettfrahendelse"])
+    @PutMapping(path = ["/behandlinger"])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
@@ -76,12 +73,12 @@ class BehandlingController(private val behandlingService: BehandlingService,
 class NyBehandling(
         val kategori: BehandlingKategori,
         val underkategori: BehandlingUnderkategori,
-        val ident: String,
+        val søkersIdent: String,
         val barnasIdenter: List<String>,
         val behandlingType: BehandlingType,
         val journalpostID: String?)
 
 class NyBehandlingHendelse(
-        val fødselsnummer: String,
-        val barnasFødselsnummer: List<String>
+        val søkersIdent: String,
+        val barnasIdenter: List<String>
 )

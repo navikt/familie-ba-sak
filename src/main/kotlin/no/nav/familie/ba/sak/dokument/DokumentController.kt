@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RestController
 
 // TODO: endre til dokument eller flytt til vedtak
 @RestController
-@RequestMapping("/api/behandling")
+@RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class DokumentController(
         private val dokumentService: DokumentService
 ) {
 
-    @GetMapping(path = ["/{behandlingId}/vedtak-html"])
+    @GetMapping(path = ["behandlinger/{behandlingId}/vedtak-html"])
     fun hentHtmlVedtak(@PathVariable @BehandlingstilgangConstraint behandlingId: Long): Ressurs<String> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 

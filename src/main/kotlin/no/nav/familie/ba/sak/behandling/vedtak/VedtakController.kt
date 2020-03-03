@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
 @RestController
-@RequestMapping("/api/fagsak")
+@RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakController(
@@ -35,7 +35,7 @@ class VedtakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PostMapping(path = ["/{fagsakId}/nytt-vedtak"])
+    @PostMapping(path = ["fagsaker/{fagsakId}/vedtak"])
     fun nyttVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
                    @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
@@ -56,14 +56,14 @@ class VedtakController(
                                                        ansvarligSaksbehandler = saksbehandlerId)
         }
                 .fold(
-                        onSuccess = { ResponseEntity.ok(it) },
+                        onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
                         onFailure = { e ->
                             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure(e.cause?.message ?: e.message, e))
                         }
                 )
     }
 
-    @PostMapping(path = ["/{fagsakId}/send-til-beslutter"])
+    @PostMapping(path = ["fagsaker/{fagsakId}/send-til-beslutter"])
     fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
@@ -75,7 +75,7 @@ class VedtakController(
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
 
         return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
-                onSuccess = { ResponseEntity.ok(it) },
+                onSuccess = { ResponseEntity.status(HttpStatus.ACCEPTED).body(it) },
                 onFailure = { e ->
                     ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body(Ressurs.failure(e.cause?.message ?: e.message, e))
@@ -83,7 +83,7 @@ class VedtakController(
         )
     }
 
-    @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
+    @PostMapping(path = ["fagsaker/{fagsakId}/iverksett-vedtak"])
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
@@ -114,7 +114,7 @@ class VedtakController(
                             opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
 
                             return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
-                                    onSuccess = { ResponseEntity.ok(it) },
+                                    onSuccess = { ResponseEntity.status(HttpStatus.ACCEPTED).body(it) },
                                     onFailure = {
                                         ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                                 .body(Ressurs.failure(it.cause?.message ?: it.message, it))
@@ -128,14 +128,14 @@ class VedtakController(
                 )
     }
 
-    @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak"])
+    @PostMapping(path = ["fagsaker/{fagsakId}/opphoer-migrert-vedtak"])
     fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val førsteNesteMåned = LocalDate.now().førsteDagINesteMåned()
         return opphørMigrertVedtak(fagsakId,
                                    Opphørsvedtak(førsteNesteMåned))
     }
 
-    @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
+    @PostMapping(path = ["fagasker/{fagsakId}/opphoer-migrert-vedtak/v2"])
     fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long, @RequestBody
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()

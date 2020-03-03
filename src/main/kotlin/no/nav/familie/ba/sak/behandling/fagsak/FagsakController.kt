@@ -13,13 +13,14 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
 @RestController
-@RequestMapping("/api/fagsak")
+@RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FagsakController(
@@ -27,7 +28,7 @@ class FagsakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PostMapping(path = ["/ny-fagsak"])
+    @PostMapping(path = ["/fagsaker"])
     fun nyFagsak(@RequestBody nyFagsak: NyFagsak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
@@ -41,7 +42,7 @@ class FagsakController(
                 )
     }
 
-    @GetMapping(path = ["/{fagsakId}"])
+    @GetMapping(path = ["/fagsaker/{fagsakId}"])
     fun hentFagsak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
@@ -53,10 +54,10 @@ class FagsakController(
                         onFailure = { e -> Ressurs.failure("Henting av fagsak med fagsakId $fagsakId feilet", e) }
                 )
 
-        return ResponseEntity.ok(ressurs)
+        return ResponseEntity.status(HttpStatus.CREATED).body(ressurs)
     }
 
-    @GetMapping("/avstemming")
+    @GetMapping("/fagsaker/avstemming")
     fun settIGangAvstemming(): ResponseEntity<Ressurs<String>> {
 
         val iDag = LocalDateTime.now().toLocalDate().atStartOfDay()

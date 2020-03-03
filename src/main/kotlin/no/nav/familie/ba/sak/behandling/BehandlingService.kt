@@ -29,7 +29,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Fagsak {
-        val fagsak = fagsakService.hent(personIdent = PersonIdent(nyBehandling.ident))
+        val fagsak = fagsakService.hent(personIdent = PersonIdent(nyBehandling.søkersIdent))
                      ?: error("Kan ikke lage behandling på person uten tilknyttet fagsak")
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
@@ -40,7 +40,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          nyBehandling.behandlingType,
                                                          nyBehandling.kategori,
                                                          nyBehandling.underkategori)
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.ident, nyBehandling.barnasIdenter, behandling)
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.søkersIdent, nyBehandling.barnasIdenter, behandling)
         } else {
             throw IllegalStateException("Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
@@ -50,7 +50,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun opprettEllerOppdaterBehandlingFraHendelse(nyBehandling: NyBehandlingHendelse): Fagsak {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.fødselsnummer)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.søkersIdent)
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
@@ -61,7 +61,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                                          BehandlingKategori.NASJONAL,
                                                          BehandlingUnderkategori.ORDINÆR)
 
-            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.fødselsnummer, nyBehandling.barnasFødselsnummer, behandling)
+            lagreSøkerOgBarnIPersonopplysningsgrunnlaget(nyBehandling.søkersIdent, nyBehandling.barnasIdenter, behandling)
             if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
                 val nyTask = Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
                 taskRepository.save(nyTask)
@@ -70,7 +70,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             }
         } else if (aktivBehandling.status == BehandlingStatus.OPPRETTET || aktivBehandling.status == BehandlingStatus.UNDER_BEHANDLING) {
             val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
-            lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasFødselsnummer, grunnlag!!)
+            lagreBarnPåEksisterendePersonopplysningsgrunnlag(nyBehandling.barnasIdenter, grunnlag!!)
             aktivBehandling.status = BehandlingStatus.OPPRETTET
             behandlingRepository.save(aktivBehandling)
         } else {
