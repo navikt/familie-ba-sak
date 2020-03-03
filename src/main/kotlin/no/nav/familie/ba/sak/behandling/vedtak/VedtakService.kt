@@ -15,7 +15,9 @@ import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -179,11 +181,15 @@ class VedtakService(private val behandlingService: BehandlingService,
         val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
 
         if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
-            aktivVedtak.aktiv = false
-            vedtakRepository.save(aktivVedtak)
+            vedtakRepository.save(aktivVedtak.also { it.aktiv = false })
         }
 
+        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter vedtak $vedtak")
         return vedtakRepository.save(vedtak)
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
 

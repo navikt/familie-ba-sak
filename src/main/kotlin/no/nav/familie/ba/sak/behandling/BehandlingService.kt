@@ -172,10 +172,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         val aktivBehandling = hentAktivForFagsak(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
-            aktivBehandling.aktiv = false
-            behandlingRepository.saveAndFlush(aktivBehandling)
+            behandlingRepository.saveAndFlush(aktivBehandling.also { it.aktiv = false })
         }
 
+        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling $behandling")
         return behandlingRepository.save(behandling)
     }
 

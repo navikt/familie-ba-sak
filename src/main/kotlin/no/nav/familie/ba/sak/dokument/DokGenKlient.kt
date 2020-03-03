@@ -36,13 +36,12 @@ class DokGenKlient(
     private fun mapTilBrevfelter(behandling: Behandling,
                                  ansvarligSaksbehandler: String): String = when (behandling.resultat) {
         BehandlingResultat.INNVILGET -> mapTilInnvilgetBrevFelter(behandling, ansvarligSaksbehandler)
-        BehandlingResultat.AVSLÅTT -> mapTilAvslagBrevFelter(behandling, ansvarligSaksbehandler)
-        BehandlingResultat.OPPHØRT -> mapTilOpphørtBrevFelter(behandling, ansvarligSaksbehandler)
+        BehandlingResultat.AVSLÅTT -> mapTilAvslagBrevFelter(behandling)
+        BehandlingResultat.OPPHØRT -> mapTilOpphørtBrevFelter(behandling)
         else -> error("Invalid/unsupported vedtak.resultat")
     }
 
-    private fun mapTilOpphørtBrevFelter(behandling: Behandling,
-                                        ansvarligSaksbehandler: String): String {
+    private fun mapTilOpphørtBrevFelter(behandling: Behandling): String {
         return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
                "\"navn\": \"No Name\",\n" +
                "\"tdato\": \"01.01.01\",\n" +
@@ -66,8 +65,7 @@ class DokGenKlient(
                "\"fritekst\": \"${behandling.begrunnelse}\"}"
     }
 
-    private fun mapTilAvslagBrevFelter(behandling: Behandling,
-                                       ansvarligSaksbehandler: String): String {
+    private fun mapTilAvslagBrevFelter(behandling: Behandling): String {
 
         //TODO: sett navn, hjemmel og firtekst
         return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
