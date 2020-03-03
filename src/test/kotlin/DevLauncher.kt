@@ -5,7 +5,7 @@ object DevLauncher {
     @JvmStatic
     fun main(args: Array<String>) {
         val app = SpringApplicationBuilder(ApplicationConfig::class.java)
-                .profiles("dev", "mock-dokgen")
+                .profiles("dev", "mock-familie-integrasjoner")
         app.run(*args)
     }
 }

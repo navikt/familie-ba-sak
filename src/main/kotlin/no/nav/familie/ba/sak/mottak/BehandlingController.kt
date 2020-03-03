@@ -17,7 +17,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/behandlinger")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BehandlingController(private val behandlingService: BehandlingService,
@@ -25,7 +25,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @PostMapping(path = ["/behandlinger"])
+    @PostMapping(path = ["/"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
@@ -50,7 +50,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
                 )
     }
 
-    @PutMapping(path = ["/behandlinger"])
+    @PutMapping(path = ["/"])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()

@@ -156,8 +156,8 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
 
-    fun hent(vedtakId: Long): Vedtak {
-        return vedtakRepository.getOne(vedtakId)
+    fun hent(vedtakId: Long): Vedtak? {
+        return vedtakRepository.finnVedtak(vedtakId)
     }
 
     fun hentAktivForBehandling(behandlingId: Long): Vedtak? {
