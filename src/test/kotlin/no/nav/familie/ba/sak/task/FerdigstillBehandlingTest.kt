@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.task
 
-import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
@@ -17,15 +16,11 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -49,20 +44,12 @@ class FerdigstillBehandlingTest {
     @Autowired
     private lateinit var fagsakService: FagsakService
 
-    @MockBean
-    private lateinit var integrasjonTjeneste: IntegrasjonTjeneste
-
     @Autowired
     lateinit var behandlingService: BehandlingService
 
     @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
-    @BeforeEach
-    fun setUp() {
-        taskRepositoryMock = mockk()
-        Mockito.`when`(integrasjonTjeneste.hentAktørId(ArgumentMatchers.anyString())).thenReturn(AktørId("1"))
-    }
 
     fun lagTestTask(behandlingResultat: BehandlingResultat): Task {
         val fnr = randomFnr()
