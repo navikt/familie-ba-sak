@@ -180,8 +180,7 @@ class VedtakService(private val behandlingService: BehandlingService,
         val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
 
         if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
-            aktivVedtak.aktiv = false
-            vedtakRepository.saveAndFlush(aktivVedtak)
+            vedtakRepository.save(aktivVedtak.also { it.aktiv = false })
         }
 
         LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter vedtak $vedtak")
