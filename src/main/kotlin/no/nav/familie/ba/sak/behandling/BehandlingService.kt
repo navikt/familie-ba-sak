@@ -101,8 +101,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                            type = behandlingType,
                            kategori = kategori,
                            underkategori = underkategori)
-        lagreNyOgDeaktiverGammelBehandling(behandling)
-        return behandling
+        return lagreNyOgDeaktiverGammelBehandling(behandling)
     }
 
     private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
@@ -176,6 +175,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             aktivBehandling.aktiv = false
             behandlingRepository.save(aktivBehandling)
         }
+        LOG.info("aktivBehandling: ${aktivBehandling}, nyBehandling: $behandling")
 
         return behandlingRepository.save(behandling)
     }
