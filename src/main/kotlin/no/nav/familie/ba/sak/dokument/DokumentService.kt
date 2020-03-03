@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.toDokGenTemplate
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vedtak.toDokGenTemplate
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.stereotype.Service
 
@@ -17,7 +17,7 @@ class DokumentService(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
                      ?: return Ressurs.failure("Vedtak ikke funnet")
         val html = Result.runCatching {
-            dokGenKlient.lagHtmlFraMarkdown(vedtak.resultat.toDokGenTemplate(),
+            dokGenKlient.lagHtmlFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(),
                                             vedtak.stønadBrevMarkdown)
         }
                 .fold(
@@ -35,7 +35,7 @@ class DokumentService(
             BehandlingService.LOG.debug("henter stønadsbrevMarkdown fra behandlingsVedtak")
             val markdown = vedtak.stønadBrevMarkdown
             BehandlingService.LOG.debug("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
-            dokGenKlient.lagPdfFraMarkdown(vedtak.resultat.toDokGenTemplate(), markdown)
+            dokGenKlient.lagPdfFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(), markdown)
         }
                 .fold(
                         onSuccess = { it },

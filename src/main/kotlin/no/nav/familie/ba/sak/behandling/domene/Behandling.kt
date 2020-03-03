@@ -22,24 +22,45 @@ data class Behandling(
         @Column(name = "behandling_type", nullable = false)
         val type: BehandlingType,
 
+        @Column(name = "oppgaveId")
+        val oppgaveId: String? = null,
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "kategori", nullable = false)
+        val kategori: BehandlingKategori,
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "underkategori", nullable = false)
+        val underkategori: BehandlingUnderkategori,
+
+        @Column(name = "aktiv", nullable = false)
+        var aktiv: Boolean = true,
+
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
         var status: BehandlingStatus = BehandlingStatus.OPPRETTET,
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "kategori", nullable = false)
-        var kategori: BehandlingKategori,
+        @Column(name = "resultat", nullable = false)
+        val resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "underkategori", nullable = false)
-        var underkategori: BehandlingUnderkategori,
+        @Column(name = "begrunnelse", columnDefinition = "TEXT")
+        val begrunnelse: String = ""
+) : BaseEntitet() {
 
-        @Column(name = "aktiv", nullable = false)
-        var aktiv: Boolean = true,
+    override fun toString(): String {
+        return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori)"
+    }
+}
 
-        @Column(name = "oppgaveId")
-        val oppgaveId: String? = null
-) : BaseEntitet()
+fun BehandlingResultat.toDokGenTemplate(): String {
+    return when (this) {
+        BehandlingResultat.INNVILGET -> "Innvilget"
+        BehandlingResultat.AVSLÅTT -> "Avslag"
+        BehandlingResultat.OPPHØRT -> "Opphørt"
+        else -> error("Invalid/Unsupported vedtak result")
+    }
+}
 
 enum class BehandlingType {
     FØRSTEGANGSBEHANDLING,
@@ -47,6 +68,10 @@ enum class BehandlingType {
     MIGRERING_FRA_INFOTRYGD,
     KLAGE,
     MIGRERING_FRA_INFOTRYGD_OPPHØRT
+}
+
+enum class BehandlingResultat {
+    IKKE_VURDERT, INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
 }
 
 enum class BehandlingKategori {
