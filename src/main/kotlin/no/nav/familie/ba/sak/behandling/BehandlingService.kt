@@ -173,9 +173,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         if (aktivBehandling != null) {
             aktivBehandling.aktiv = false
-            behandlingRepository.save(aktivBehandling)
+            behandlingRepository.saveAndFlush(aktivBehandling)
         }
-        LOG.info("aktivBehandling: ${aktivBehandling}, nyBehandling: $behandling")
 
         return behandlingRepository.save(behandling)
     }
