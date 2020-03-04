@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
 @RestController
-@RequestMapping("/api/vedtak")
+@RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakController(
@@ -35,7 +35,7 @@ class VedtakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PostMapping(path = ["/"])
+    @PostMapping(path = ["fagsaker/{fagsakId}/vedtak"])
     fun nyttVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
                    @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
