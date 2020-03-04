@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Tag
@@ -17,7 +15,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
-import java.time.LocalDate
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -62,23 +59,16 @@ class DokGenKlientIntegrationTest {
     @Tag("integration")
     fun `Test generer markdown`() {
         val dokgen = DokGenTestKlient()
-        val markdown = dokgen.hentStønadBrevMarkdown(Vedtak(
+        val markdown = dokgen.hentStønadBrevMarkdown(Behandling(
                 id = 1,
-                behandling = Behandling(
-                        id = 1,
-                        fagsak = Fagsak(personIdent = PersonIdent(""), aktørId = AktørId("1")),
-                        journalpostID = "invalid",
-                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                        aktiv = true,
-                        kategori = BehandlingKategori.NASJONAL,
-                        underkategori = BehandlingUnderkategori.ORDINÆR
-                ),
-                ansvarligSaksbehandler = "whoknows",
-                vedtaksdato = LocalDate.MIN,
-                resultat = VedtakResultat.INNVILGET,
-                begrunnelse = ""
-        ))
-
+                fagsak = Fagsak(personIdent = PersonIdent(""), aktørId = AktørId("1")),
+                journalpostID = "invalid",
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                aktiv = true,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                resultat = BehandlingResultat.INNVILGET
+        ), ansvarligSaksbehandler = "whoknows")
         assert(markdown == "mockup_response")
     }
 
@@ -105,22 +95,16 @@ class DokGenKlientIntegrationTest {
         val html = dokgen.lagHtmlFraMarkdown("Innvilget", "markdown")
         assert(html.isEmpty())
 
-        val markdown = dokgen.hentStønadBrevMarkdown(Vedtak(
+        val markdown = dokgen.hentStønadBrevMarkdown(Behandling(
                 id = 1,
-                behandling = Behandling(
-                        id = 1,
-                        fagsak = Fagsak(personIdent = PersonIdent(""), aktørId = AktørId("1")),
-                        journalpostID = "invalid",
-                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                        aktiv = true,
-                        kategori = BehandlingKategori.NASJONAL,
-                        underkategori = BehandlingUnderkategori.ORDINÆR
-                ),
-                ansvarligSaksbehandler = "whoknows",
-                vedtaksdato = LocalDate.MIN,
-                resultat = VedtakResultat.INNVILGET,
-                begrunnelse = ""
-        ))
+                fagsak = Fagsak(personIdent = PersonIdent(""), aktørId = AktørId("1")),
+                journalpostID = "invalid",
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                aktiv = true,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                resultat = BehandlingResultat.INNVILGET
+        ), ansvarligSaksbehandler = "whoknows")
         assert(markdown.isEmpty())
     }
 }

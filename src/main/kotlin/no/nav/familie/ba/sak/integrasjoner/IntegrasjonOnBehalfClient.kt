@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner
 
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.http.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
@@ -12,7 +13,8 @@ import java.net.URI
 
 @Component
 class IntegrasjonOnBehalfClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
-                                @Qualifier("jwtBearer") restOperations: RestOperations)
+                                @Qualifier("jwtBearer") restOperations: RestOperations,
+                                private val featureToggleService: FeatureToggleService)
     : AbstractPingableRestClient(restOperations, "integrasjon") {
 
     override val pingUri: URI = UriComponentsBuilder.fromUri(integrasjonUri).path(PATH_PING).build().toUri()
@@ -30,4 +32,3 @@ class IntegrasjonOnBehalfClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") priv
         private const val PATH_TILGANGER = "tilgang/personer"
     }
 }
-

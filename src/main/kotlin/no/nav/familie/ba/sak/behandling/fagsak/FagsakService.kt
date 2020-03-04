@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
@@ -9,7 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultatRepo
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -25,7 +26,7 @@ class FagsakService(
         private val samletVilkårResultatRepository: SamletVilkårResultatRepository,
         private val behandlingRepository: BehandlingRepository,
         private val vedtakRepository: VedtakRepository,
-        private val integrasjonTjeneste: IntegrasjonTjeneste) {
+        private val integrasjonClient: IntegrasjonClient) {
 
     @Transactional
     fun nyFagsak(nyFagsak: NyFagsak): Ressurs<RestFagsak> {
@@ -33,7 +34,7 @@ class FagsakService(
                 fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(nyFagsak.personIdent))) {
             null -> {
                 val fagsak = Fagsak(
-                        aktørId = integrasjonTjeneste.hentAktørId(nyFagsak.personIdent),
+                        aktørId = integrasjonClient.hentAktørId(nyFagsak.personIdent),
                         personIdent = PersonIdent(nyFagsak.personIdent)
                 )
                 lagre(fagsak)
@@ -47,6 +48,7 @@ class FagsakService(
 
     @Transactional
     fun lagre(fagsak: Fagsak): Fagsak {
+        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter fagsak $fagsak")
         return fagsakRepository.save(fagsak)
     }
 
@@ -75,7 +77,9 @@ class FagsakService(
                                                    ?.toRestSamletVilkårResultat() ?: emptyList(),
                     opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
-                    underkategori = it.underkategori
+                    underkategori = it.underkategori,
+                    resultat = it.resultat,
+                    begrunnelse = it.begrunnelse
             )
         }
 
@@ -90,7 +94,7 @@ class FagsakService(
     }
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
-        val aktørId = integrasjonTjeneste.hentAktørId(personIdent.ident)
+        val aktørId = integrasjonClient.hentAktørId(personIdent.ident)
         val nyFagsak = Fagsak(aktørId = aktørId, personIdent = personIdent)
         return lagre(nyFagsak)
     }

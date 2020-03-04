@@ -1,27 +1,31 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class VedtakService(private val behandlingRepository: BehandlingRepository,
+class VedtakService(private val behandlingService: BehandlingService,
+                    private val behandlingRepository: BehandlingRepository,
                     private val vedtakRepository: VedtakRepository,
                     private val vedtakPersonRepository: VedtakPersonRepository,
-                    private val vilkårService: VilkårService,
                     private val dokGenKlient: DokGenKlient,
                     private val personRepository: PersonRepository,
                     private val fagsakService: FagsakService) {
@@ -51,7 +55,8 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
                                       journalpostID = null,
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
-                                      underkategori = gjeldendeBehandling.underkategori)
+                                      underkategori = gjeldendeBehandling.underkategori,
+                                      resultat = BehandlingResultat.OPPHØRT)
 
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
         behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
@@ -60,11 +65,9 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
         val nyttVedtak = Vedtak(
                 ansvarligSaksbehandler = saksbehandler,
                 behandling = nyBehandling,
-                resultat = VedtakResultat.OPPHØRT,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = gjeldendeVedtak.id,
-                opphørsdato = opphørsdato,
-                begrunnelse = ""
+                opphørsdato = opphørsdato
         )
 
         // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
@@ -77,35 +80,30 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
     }
 
     @Transactional
-    fun nyttVedtakForAktivBehandling(behandling: Behandling,
-                                     personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                     nyttVedtak: NyttVedtak,
-                                     ansvarligSaksbehandler: String): Ressurs<RestFagsak> {
-        vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, nyttVedtak.samletVilkårResultat, behandling.id)
-
+    fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
+                                                   personopplysningGrunnlag: PersonopplysningGrunnlag,
+                                                   restSamletVilkårResultat: List<RestVilkårResultat>,
+                                                   ansvarligSaksbehandler: String): Vedtak {
+        val forrigeVedtak = hentForrigeVedtak(behandling = behandling)
         val vedtak = Vedtak(
                 behandling = behandling,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
-                resultat = nyttVedtak.resultat,
-                begrunnelse = nyttVedtak.begrunnelse,
-                opphørsdato = if (nyttVedtak.resultat == VedtakResultat.OPPHØRT) LocalDate.now() else null
+                forrigeVedtakId = forrigeVedtak?.id,
+                opphørsdato = if (behandling.resultat == BehandlingResultat.OPPHØRT) LocalDate.now() else null,
+                stønadBrevMarkdown = if (behandling.resultat != BehandlingResultat.INNVILGET) Result.runCatching {
+                    dokGenKlient.hentStønadBrevMarkdown(behandling,
+                                                        ansvarligSaksbehandler)
+                }
+                        .fold(
+                                onSuccess = { it },
+                                onFailure = { e ->
+                                    error("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.")
+                                }
+                        ) else ""
         )
 
-        if (nyttVedtak.resultat != VedtakResultat.INNVILGET) {
-            vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
-                    .fold(
-                            onSuccess = { it },
-                            onFailure = { e ->
-                                return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
-                                                       e)
-                            }
-                    )
-        }
-
-        lagre(vedtak)
-
-        return fagsakService.hentRestFagsak(behandling.fagsak.id)
+        return lagreOgDeaktiverGammel(vedtak)
     }
 
 
@@ -143,18 +141,31 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
             )
         }
 
-        vedtak.stønadBrevMarkdown = Result.runCatching { dokGenKlient.hentStønadBrevMarkdown(vedtak) }
-                .fold(
-                        onSuccess = { it },
-                        onFailure = { e ->
-                            return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
-                                                   e)
-                        }
-                )
-
-        lagre(vedtak)
+        lagreOgDeaktiverGammel(vedtak.copy(
+                stønadBrevMarkdown = Result.runCatching {
+                    dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
+                                                        ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
+                }
+                        .fold(
+                                onSuccess = { it },
+                                onFailure = { e ->
+                                    return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
+                                                           e)
+                                }
+                        )
+        ))
 
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
+    }
+
+    fun hentForrigeVedtak(behandling: Behandling): Vedtak? {
+        val behandlinger = behandlingService.hentBehandlinger(behandling.fagsak.id)
+
+
+        return when (val forrigeBehandling = behandlinger.filter { it.id != behandling.id }.maxBy { it.opprettetTidspunkt }) {
+            null -> null
+            else -> hentAktivForBehandling(behandlingId = forrigeBehandling.id)
+        }
     }
 
     fun hent(vedtakId: Long): Vedtak {
@@ -165,15 +176,19 @@ class VedtakService(private val behandlingRepository: BehandlingRepository,
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun lagre(vedtak: Vedtak) {
+    fun lagreOgDeaktiverGammel(vedtak: Vedtak): Vedtak {
         val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
 
         if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
-            aktivVedtak.aktiv = false
-            vedtakRepository.save(aktivVedtak)
+            vedtakRepository.save(aktivVedtak.also { it.aktiv = false })
         }
 
-        vedtakRepository.save(vedtak)
+        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter vedtak $vedtak")
+        return vedtakRepository.save(vedtak)
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
 
