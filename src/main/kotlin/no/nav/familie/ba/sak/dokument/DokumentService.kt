@@ -13,7 +13,7 @@ class DokumentService(
         private val dokGenKlient: DokGenKlient
 ) {
 
-    fun hentHtmlVedtak(vedtakId: Long): Ressurs<String> {
+    fun hentHtmlForVedtak(vedtakId: Long): Ressurs<String> {
         val vedtak = vedtakService.hent(vedtakId)
                      ?: return Ressurs.failure("Vedtak ikke funnet")
 
