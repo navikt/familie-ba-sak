@@ -21,7 +21,7 @@ import java.time.LocalDate
 
 // TODO: endre til beregning
 @RestController
-@RequestMapping("/api/fagsak")
+@RequestMapping("/api/vedtak")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BeregningController(
@@ -30,7 +30,7 @@ class BeregningController(
         private val vedtakService: VedtakService
 ) {
 
-    @PostMapping(path = ["/{fagsakId}/oppdater-vedtak-beregning"])
+    @PutMapping(path = ["/{vedtakId}/beregning"])
     fun oppdaterVedtakMedBeregning(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
                                    @RequestBody nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()

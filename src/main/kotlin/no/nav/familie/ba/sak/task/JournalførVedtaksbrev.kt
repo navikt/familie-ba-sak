@@ -24,7 +24,7 @@ class JournalførVedtaksbrev(
 
     override fun doTask(task: Task) {
         val vedtakId = task.payload.toLong()
-        val vedtak = vedtakService.hent(vedtakId)
+        val vedtak = vedtakService.hent(vedtakId)!!
 
         val pdf = dokumentService.hentPdfForVedtak(vedtak)
         val fnr = vedtak.behandling.fagsak.personIdent.ident
