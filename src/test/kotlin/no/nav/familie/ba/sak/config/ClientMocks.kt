@@ -2,14 +2,15 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonTjeneste
+import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class ClientMocks {
@@ -24,21 +25,32 @@ class ClientMocks {
         every {
             mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any())
         } returns listOf(Tilgang(true, null))
+
         return mockIntegrasjonOnBehalfClient
     }
 
 
-    @Profile("mock-familie-integrasjoner")
     @Bean
     @Primary
-    fun mockFamilieIntegrasjon(): IntegrasjonTjeneste {
-        val mockIntegrasjon = mockk<IntegrasjonTjeneste>(relaxed = true)
+    fun mockIntegrasjonClient(): IntegrasjonClient {
 
-        every{
-            mockIntegrasjon.hentAktørId(any())
+        val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = true)
+
+        every {
+            mockIntegrasjonClient.hentAktørId(any())
         } returns AktørId("1")
 
-        return mockIntegrasjon
+        every {
+            mockIntegrasjonClient.hentPersoninfoFor(eq("01101800033"))
+        } returns Personinfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = "K", navn = "Barn Barnesen")
+
+        every {
+            mockIntegrasjonClient.hentPersoninfoFor(eq("12345678910"))
+        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = "K", navn = "Mor Moresen")
+
+        return mockIntegrasjonClient
     }
+
+
 }
 

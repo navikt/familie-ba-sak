@@ -1,13 +1,17 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.RessursResponse
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -24,25 +28,27 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/fagsak")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakController(
         private val behandlingService: BehandlingService,
+        private val toTrinnKontrollService: ToTrinnKontrollService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vedtakService: VedtakService,
         private val fagsakService: FagsakService,
+        private val vilkårService: VilkårService,
         private val taskRepository: TaskRepository
 ) {
 
-    @PostMapping(path = ["fagsaker/{fagsakId}/vedtak"])
-    fun nyttVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
-                   @RequestBody nyttVedtak: NyttVedtak): ResponseEntity<Ressurs<RestFagsak>> {
+    @PutMapping(path = ["/{fagsakId}/vedtak"])
+    fun opprettEllerOppdaterVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
+                                   @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
         FagsakController.logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
+        var behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
@@ -50,20 +56,27 @@ class VedtakController(
                                                "Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         return Result.runCatching {
-            vedtakService.nyttVedtakForAktivBehandling(behandling,
-                                                       personopplysningGrunnlag,
-                                                       nyttVedtak,
-                                                       ansvarligSaksbehandler = saksbehandlerId)
+            behandling = behandlingService.settVilkårsvurdering(behandling,
+                                                                restVilkårsvurdering.resultat,
+                                                                restVilkårsvurdering.begrunnelse)
+            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+                                                    restVilkårsvurdering.samletVilkårResultat,
+                                                    behandling.id)
+
+            vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(behandling,
+                                                                     personopplysningGrunnlag,
+                                                                     restVilkårsvurdering.samletVilkårResultat,
+                                                                     ansvarligSaksbehandler = saksbehandlerId)
         }
                 .fold(
-                        onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
+                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
                         onFailure = { e ->
                             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure(e.cause?.message ?: e.message, e))
                         }
                 )
     }
 
-    @PostMapping(path = ["fagsaker/{fagsakId}/send-til-beslutter"])
+    @PostMapping(path = ["/{fagsakId}/send-til-beslutter"])
     fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
@@ -75,7 +88,7 @@ class VedtakController(
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
 
         return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
-                onSuccess = { ResponseEntity.status(HttpStatus.ACCEPTED).body(it) },
+                onSuccess = { ResponseEntity.ok(it) },
                 onFailure = { e ->
                     ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body(Ressurs.failure(e.cause?.message ?: e.message, e))
@@ -83,7 +96,7 @@ class VedtakController(
         )
     }
 
-    @PostMapping(path = ["fagsaker/{fagsakId}/iverksett-vedtak"])
+    @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
@@ -105,7 +118,7 @@ class VedtakController(
                                      saksbehandlerId,
                                      fagsakId)
 
-        return Result.runCatching { behandlingService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
+        return Result.runCatching { toTrinnKontrollService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
                 .fold(
                         onSuccess = {
                             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
@@ -128,14 +141,14 @@ class VedtakController(
                 )
     }
 
-    @PostMapping(path = ["fagsaker/{fagsakId}/opphoer-migrert-vedtak"])
+    @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak"])
     fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val førsteNesteMåned = LocalDate.now().førsteDagINesteMåned()
         return opphørMigrertVedtak(fagsakId,
                                    Opphørsvedtak(førsteNesteMåned))
     }
 
-    @PostMapping(path = ["fagasker/{fagsakId}/opphoer-migrert-vedtak/v2"])
+    @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
     fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long, @RequestBody
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
@@ -174,3 +187,13 @@ class VedtakController(
         taskRepository.save(task)
     }
 }
+
+data class RestVilkårsvurdering(
+        val resultat: BehandlingResultat,
+        val samletVilkårResultat: List<RestVilkårResultat>,
+        val begrunnelse: String
+)
+
+data class Opphørsvedtak(
+        val opphørsdato: LocalDate
+)
