@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Personopplysni
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.dokument.DokGenKlient
@@ -91,7 +92,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = forrigeVedtak?.id,
-                opphørsdato = if (behandling.resultat == BehandlingResultat.OPPHØRT) LocalDate.now().sisteDagIMåned() else null,
+                opphørsdato = if (behandling.resultat == BehandlingResultat.OPPHØRT) LocalDate.now().førsteDagINesteMåned() else null,
                 stønadBrevMarkdown = if (behandling.resultat != BehandlingResultat.INNVILGET) Result.runCatching {
                     dokGenKlient.hentStønadBrevMarkdown(behandling,
                                                         ansvarligSaksbehandler)

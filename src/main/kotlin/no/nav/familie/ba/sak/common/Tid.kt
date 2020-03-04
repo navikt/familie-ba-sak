@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.common
 
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 
@@ -10,10 +11,7 @@ fun LocalDate.sisteDagIForrigeMåned() : LocalDate {
 }
 
 fun LocalDate.sisteDagIMåned() : LocalDate {
-    val kalender = Calendar.getInstance()
-    kalender.time = this.toDate()
-    val sisteDagIMåned = kalender.getActualMaximum(Calendar.DAY_OF_MONTH);
-    return this.withDayOfMonth(sisteDagIMåned)
+    return YearMonth.from(this).atEndOfMonth()
 }
 
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
