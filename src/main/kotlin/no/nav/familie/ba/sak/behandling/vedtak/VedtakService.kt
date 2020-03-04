@@ -169,8 +169,8 @@ class VedtakService(private val behandlingService: BehandlingService,
         }
     }
 
-    fun hent(vedtakId: Long): Vedtak? {
-        return vedtakRepository.finnVedtak(vedtakId)
+    fun hent(vedtakId: Long): Vedtak {
+        return vedtakRepository.getOne(vedtakId)
     }
 
     fun hentAktivForBehandling(behandlingId: Long): Vedtak? {

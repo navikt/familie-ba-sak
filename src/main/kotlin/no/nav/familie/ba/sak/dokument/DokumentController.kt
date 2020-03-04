@@ -27,7 +27,7 @@ class DokumentController(
 
         LOG.info("{} henter vedtaksbrev", saksbehandlerId)
 
-        return dokumentService.hentHtmlVedtak(vedtakId)
+        return dokumentService.hentHtmlForVedtak(vedtakId)
     }
 
     companion object {

@@ -43,8 +43,7 @@ class BehandlingController(private val behandlingService: BehandlingService,
                 .fold(
                         onFailure = {
                             logger.info("Opprettelse av behandling feilet", it)
-                            ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                    .body(Ressurs.failure(it.cause?.message ?: it.message, it))
+                            ResponseEntity.badRequest().body(Ressurs.failure(it.cause?.message ?: it.message, it))
                         },
                         onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(fagsakService.hentRestFagsak (fagsakId = it.id)) }
                 )

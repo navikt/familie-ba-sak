@@ -9,7 +9,4 @@ interface VedtakRepository : JpaRepository<Vedtak, Long> {
 
     @Query("SELECT v FROM Vedtak v JOIN v.behandling b WHERE b.id = :behandlingId AND v.aktiv = true")
     fun findByBehandlingAndAktiv(behandlingId: Long): Vedtak?
-
-    @Query("SELECT v FROM Vedtak v WHERE v.id = :vedtakId")
-    fun finnVedtak(vedtakId: Long): Vedtak?
 }

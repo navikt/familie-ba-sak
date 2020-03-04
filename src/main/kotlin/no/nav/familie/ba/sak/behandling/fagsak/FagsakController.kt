@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
 @RestController
-@RequestMapping("/api/fagsaker")
+@RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FagsakController(
@@ -28,7 +28,7 @@ class FagsakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PostMapping(path = ["/"])
+    @PostMapping(path = ["fagsaker"])
     fun nyFagsak(@RequestBody nyFagsak: NyFagsak): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
@@ -42,7 +42,7 @@ class FagsakController(
                 )
     }
 
-    @GetMapping(path = ["{fagsakId}"])
+    @GetMapping(path = ["fagsaker/{fagsakId}"])
     fun hentFagsak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
@@ -57,7 +57,7 @@ class FagsakController(
         return ResponseEntity.status(HttpStatus.CREATED).body(ressurs)
     }
 
-    @GetMapping("avstemming")
+    @GetMapping("fagsaker/avstemming")
     fun settIGangAvstemming(): ResponseEntity<Ressurs<String>> {
 
         val iDag = LocalDateTime.now().toLocalDate().atStartOfDay()

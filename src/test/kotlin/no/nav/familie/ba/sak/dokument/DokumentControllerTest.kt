@@ -26,7 +26,7 @@ class DokumentControllerTest(
     fun `Test hent html vedtak`() {
         val mockDokumentService: DokumentService = mockk()
         val mockDokumentController = DokumentController(mockDokumentService)
-        every { mockDokumentService.hentHtmlVedtak(any()) } returns Ressurs.success("mock_html")
+        every { mockDokumentService.hentHtmlForVedtak(any()) } returns Ressurs.success("mock_html")
 
         val response = mockDokumentController.hentHtmlVedtak(1)
         assert(response.status == Ressurs.Status.SUKSESS)
@@ -35,7 +35,7 @@ class DokumentControllerTest(
     @Test
     @Tag("integration")
     fun `Hent HTML vedtaksbrev Negative'`() {
-        val failRess = dokumentService.hentHtmlVedtak(100)
+        val failRess = dokumentService.hentHtmlForVedtak(100)
         Assertions.assertEquals(Ressurs.Status.FEILET, failRess.status)
     }
 }

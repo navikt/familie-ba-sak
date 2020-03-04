@@ -19,7 +19,7 @@ class ØkonomiService(
 ) {
 
     fun iverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
-        val vedtak = vedtakService.hent(vedtakId)!!
+        val vedtak = vedtakService.hent(vedtakId)
 
         val personberegninger = if (vedtak.behandling.resultat == BehandlingResultat.OPPHØRT)
             beregningService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)
