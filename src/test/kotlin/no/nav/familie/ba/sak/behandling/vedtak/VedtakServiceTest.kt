@@ -1,29 +1,30 @@
-package no.nav.familie.ba.sak.dokument
+package no.nav.familie.ba.sak.behandling.vedtak
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
+import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.beregning.BarnBeregning
-import no.nav.familie.ba.sak.beregning.NyBeregning
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.opprettNyOrdinærBehandling
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.util.DbContainerInitializer
 import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.util.randomFnr
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
@@ -37,26 +38,42 @@ import java.time.LocalDate
 @ActiveProfiles("postgres", "mock-dokgen", "mock-oauth")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
-class DokumentServiceTest(
-        @Autowired
-        private val fagsakService: FagsakService,
+class VedtakServiceTest {
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
 
-        @Autowired
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired
+    lateinit var vedtakService: VedtakService
 
-        @Autowired
-        private val vedtakService: VedtakService,
+    @Autowired
+    lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
-        @Autowired
-        private val dokumentService: DokumentService
-) {
+    @Autowired
+    @Qualifier("integrasjonClient")
+    lateinit var integrasjonClient: IntegrasjonClient
+
+    @Autowired
+    lateinit var fagsakService: FagsakService
+
+    @MockK(relaxed = true)
+    lateinit var taskRepository: TaskRepository
+
+    @MockK(relaxed = true)
+    lateinit var featureToggleService: FeatureToggleService
+
+    lateinit var behandlingService: BehandlingService
 
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
+        behandlingService = BehandlingService(
+                behandlingRepository,
+                personopplysningGrunnlagRepository,
+                fagsakService,
+                integrasjonClient,
+                featureToggleService,
+                taskRepository)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
                         .willReturn(aResponse()
@@ -79,17 +96,13 @@ class DokumentServiceTest(
     }
 
     @Test
-    @Tag("integration")
-    fun `Hent HTML vedtaksbrev`() {
+    fun `Skal hente forrige behandling`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = opprettNyOrdinærBehandling(fagsak, behandlingService)
-        behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
-
-        Assertions.assertNotNull(behandling.fagsak.id)
-        Assertions.assertNotNull(behandling.id)
+        var behandling = opprettNyOrdinærBehandling(fagsak, behandlingService)
+        behandling = behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -103,25 +116,36 @@ class DokumentServiceTest(
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-        Assertions.assertNotNull(vedtak)
+        val revurderingInnvilgetBehandling =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
+                                                                                journalpostID = null,
+                                                                                type = BehandlingType.REVURDERING,
+                                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                                kategori = BehandlingKategori.NASJONAL,
+                                                                                underkategori = BehandlingUnderkategori.ORDINÆR))
 
-        vedtakService.oppdaterAktivVedtakMedBeregning(
-                vedtak = vedtak!!,
+
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                nyBeregning = NyBeregning(
-                        listOf(BarnBeregning(ident = fnr,
-                                              beløp = 1054,
-                                              stønadFom = LocalDate.of(
-                                                      2020,
-                                                      1,
-                                                      1),
-                                              ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
-                )
+                behandling = revurderingInnvilgetBehandling,
+                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                        fnr,
+                        listOf(barnFnr)),
+                ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
-        val htmlvedtaksbrevRess = dokumentService.hentHtmlVedtakForBehandling(behandling.id)
-        Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
-        assert(htmlvedtaksbrevRess.data!! == "<HTML>HTML_MOCKUP</HTML>")
+
+        val revurderingOpphørBehandling =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
+                                                                                journalpostID = null,
+                                                                                type = BehandlingType.REVURDERING,
+                                                                                resultat = BehandlingResultat.OPPHØRT,
+                                                                                kategori = BehandlingKategori.NASJONAL,
+                                                                                underkategori = BehandlingUnderkategori.ORDINÆR))
+
+        val forrigeVedtak = vedtakService.hentForrigeVedtak(revurderingOpphørBehandling)
+        Assertions.assertNotNull(forrigeVedtak)
+        Assertions.assertEquals(revurderingInnvilgetBehandling.id, forrigeVedtak?.behandling?.id)
     }
+
 }

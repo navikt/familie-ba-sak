@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.mottak.NyBehandling
 import no.nav.familie.ba.sak.mottak.NyBehandlingHendelse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -81,6 +83,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return fagsak
     }
 
+    fun settVilkårsvurdering(behandling: Behandling, resultat: BehandlingResultat, begrunnelse: String): Behandling {
+        return lagre(behandling.copy(
+                begrunnelse = begrunnelse,
+                resultat = resultat
+        ))
+    }
+
     fun opprettNyBehandlingPåFagsak(fagsak: Fagsak,
                                     journalpostID: String?,
                                     behandlingType: BehandlingType,
@@ -92,8 +101,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                            type = behandlingType,
                            kategori = kategori,
                            underkategori = underkategori)
-        lagreNyOgDeaktiverGammelBehandling(behandling)
-        return behandling
+        return lagreNyOgDeaktiverGammelBehandling(behandling)
     }
 
     private fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
@@ -156,15 +164,19 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
-    fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling) {
+    fun lagre(behandling: Behandling): Behandling {
+        return behandlingRepository.save(behandling)
+    }
+
+    fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = hentAktivForFagsak(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
-            aktivBehandling.aktiv = false
-            behandlingRepository.save(aktivBehandling)
+            behandlingRepository.saveAndFlush(aktivBehandling.also { it.aktiv = false })
         }
 
-        behandlingRepository.save(behandling)
+        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling $behandling")
+        return behandlingRepository.save(behandling)
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {
@@ -172,15 +184,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     fun oppdaterStatusPåBehandling(behandlingId: Long, status: BehandlingStatus) {
-        when (val behandling = hent(behandlingId)) {
-            null -> throw Exception("Feilet ved oppdatering av status på behandling. Fant ikke behandling med id $behandlingId")
-            else -> {
-                LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
+        val behandling = hent(behandlingId)
+        LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
-                behandling.status = status
-                behandlingRepository.save(behandling)
-            }
-        }
+        behandling.status = status
+        behandlingRepository.save(behandling)
     }
 
     private fun hentSøker(behandling: Behandling): Person? {

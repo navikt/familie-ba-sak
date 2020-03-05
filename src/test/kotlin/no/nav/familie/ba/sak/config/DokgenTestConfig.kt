@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.dokument.DokGenKlient
-import org.mockito.Mockito
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -16,13 +15,11 @@ class DokgenTestConfig {
     @Profile("mock-dokgen")
     @Primary
     fun mockDokGenService(): DokGenKlient {
-        //eliminate complain from Mockito of null parameter
-        fun <T> any(): T = Mockito.any<T>()
-
-        val dokgenService = mock(DokGenKlient::class.java)
-        `when`(dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP")).thenReturn("<HTML>HTML_MOCKUP</HTML>")
-        `when`(dokgenService.lagHtmlFraMarkdown("Avslag", "TEST_MARKDOWN_MOCKUP")).thenReturn("<HTML>HTML_MOCKUP</HTML>")
-        `when`(dokgenService.hentStønadBrevMarkdown(any())).thenReturn("TEST_MARKDOWN_MOCKUP")
+        val dokgenService : DokGenKlient = mockk()
+        every { dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP") } returns "<HTML>HTML_MOCKUP</HTML>"
+        every { dokgenService.lagHtmlFraMarkdown("Avslag", "TEST_MARKDOWN_MOCKUP") } returns "<HTML>HTML_MOCKUP</HTML>"
+        every { dokgenService.lagHtmlFraMarkdown("Opphørt", "TEST_MARKDOWN_MOCKUP") } returns "<HTML>HTML_MOCKUP</HTML>"
+        every { dokgenService.hentStønadBrevMarkdown(any(), any()) } returns "TEST_MARKDOWN_MOCKUP"
         return dokgenService
     }
 
@@ -30,12 +27,9 @@ class DokgenTestConfig {
     @Profile("mock-dokgen-negative")
     @Primary
     fun mockDokGenNegativeService(): DokGenKlient {
-        //eliminate complain from Mockito of null parameter
-        fun <T> any(): T = Mockito.any<T>()
-
-        val dokgenService = mock(DokGenKlient::class.java)
-        `when`(dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP")).thenThrow(RuntimeException())
-        `when`(dokgenService.hentStønadBrevMarkdown(any())).thenReturn("TEST_MARKDOWN_MOCKUP")
+        val dokgenService : DokGenKlient= mockk()
+        every { dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP")} throws IllegalStateException()
+        every { dokgenService.hentStønadBrevMarkdown(any(), any()) } returns "TEST_MARKDOWN_MOCKUP"
         return dokgenService
     }
 }
