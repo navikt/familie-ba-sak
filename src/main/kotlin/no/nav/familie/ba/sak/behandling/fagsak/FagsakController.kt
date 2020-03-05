@@ -37,7 +37,7 @@ class FagsakController(
 
         return Result.runCatching { fagsakService.nyFagsak(nyFagsak) }
                 .fold(
-                        onSuccess = { ResponseEntity.ok(it) },
+                        onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
                         onFailure = { e -> ResponseEntity.ok(Ressurs.failure("Opprettelse av fagsak feilet", e)) }
                 )
     }
@@ -54,7 +54,7 @@ class FagsakController(
                         onFailure = { e -> Ressurs.failure("Henting av fagsak med fagsakId $fagsakId feilet", e) }
                 )
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(ressurs)
+        return ResponseEntity.ok().body(ressurs)
     }
 
     @GetMapping("fagsaker/avstemming")
