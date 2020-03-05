@@ -51,7 +51,10 @@ class FagsakController(
         val ressurs = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
                         onSuccess = { it },
-                        onFailure = { e -> Ressurs.failure("Henting av fagsak med fagsakId $fagsakId feilet", e) }
+                        onFailure = {
+                            logger.error("Henting av fagsak med fagsakId $fagsakId feilet", it)
+                            Ressurs.failure("Henting av fagsak med fagsakId $fagsakId feilet", it)
+                        }
                 )
 
         return ResponseEntity.ok().body(ressurs)
