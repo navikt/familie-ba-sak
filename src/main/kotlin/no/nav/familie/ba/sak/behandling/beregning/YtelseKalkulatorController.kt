@@ -1,11 +1,10 @@
 package no.nav.familie.ba.sak.behandling.beregning
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
@@ -17,8 +16,20 @@ class YtelseKalkulatorController {
     @PostMapping
     fun oppdaterVedtakMedBeregning(@RequestBody personytelser: List<PersonligYtelseForPeriode>): ResponseEntity<YtelseKalkulatorResponse> {
 
+        val pyfp = PersonligYtelseForPeriode(
+                PersonligYtelse("123123",Ytelsetype.ORDINÆR_BARNETRYGD,true),
+                LocalDate.now(),
+                LocalDate.now()
+        )
+
+        println(pyfp.personligYtelse)
+
+        println(personytelser[0].personligYtelse)
+
         return ResponseEntity.ok(YtelseKalkulatorResponse(
-                totaler = TotalePersonligeYtelser(personligeYtelserMedBeløp =  emptyList(), totalbeløp = 0),
+                totaler = TotalePersonligeYtelser(personligeYtelserMedBeløp =  listOf(
+                        PersonligYtelseMedBeløp(personytelser[0].personligYtelse!!,565)
+                ), totalbeløp = 0),
                 perioder = emptyList()
         ))
     }
@@ -31,20 +42,20 @@ data class PersonligYtelse (
 )
 
 data class PersonligYtelseForPeriode(
-
+        @JsonIgnore private val _personligYtelse: PersonligYtelse?,
         val stønadFraOgMed: LocalDate,
         val stønadTilOgMed: LocalDate
 ) {
-    @JsonUnwrapped
-    lateinit var personligYtelse: PersonligYtelse // Kjipt hack for å unwrappe typen i json'en
+    @field:JsonUnwrapped
+    val personligYtelse: PersonligYtelse? = _personligYtelse
 }
 
 data class PersonligYtelseMedBeløp(
-
+        @JsonIgnore private val _personligYtelse: PersonligYtelse,
         val beløp: Int
 ) {
-    @JsonUnwrapped
-    lateinit var personligYtelse: PersonligYtelse // Kjipt hack for å unwrappe typen i json'en
+    @field:JsonUnwrapped
+    val personligYtelse: PersonligYtelse = _personligYtelse
 }
 
 data class TotalePersonligeYtelser(
@@ -53,10 +64,11 @@ data class TotalePersonligeYtelser(
 )
 
 data class MånedensTotalePersonligeYtelser(
+        @JsonIgnore private val _personligeYtelser: TotalePersonligeYtelser,
         val måned: LocalDate
 ) {
     @JsonUnwrapped
-    lateinit var personligeYtelser: TotalePersonligeYtelser // Kjipt hack for å unwrappe typen i json'en
+    var personligeYtelser: TotalePersonligeYtelser = _personligeYtelser
 }
 
 data class YtelseKalkulatorResponse(
