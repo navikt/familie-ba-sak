@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.common
 
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -31,6 +29,16 @@ internal class TidTest {
     @Test
     fun `skal finne første dag i måneden etter skuddårsdagen`() {
         assertEquals(dato("2020-03-01"), dato("2020-02-29").førsteDagINesteMåned())
+    }
+
+    @Test
+    fun `skal finne siste dag i inneværende måned 2020-03-01`() {
+        assertEquals(dato("2020-03-31"), dato("2020-03-01").sisteDagIMåned())
+    }
+
+    @Test
+    fun `skal finne siste dag i inneværende måned 2020-02-01 skuddår`() {
+        assertEquals(dato("2020-02-29"), dato("2020-02-01").sisteDagIMåned())
     }
 
     private fun dato(s: String): LocalDate {
