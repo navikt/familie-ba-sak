@@ -84,10 +84,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     fun settVilkårsvurdering(behandling: Behandling, resultat: BehandlingResultat, begrunnelse: String): Behandling {
-        return lagre(behandling.copy(
-                begrunnelse = begrunnelse,
-                resultat = resultat
-        ))
+        behandling.begrunnelse = begrunnelse
+        behandling.resultat = resultat
+        return lagre(behandling)
     }
 
     fun opprettNyBehandlingPåFagsak(fagsak: Fagsak,
