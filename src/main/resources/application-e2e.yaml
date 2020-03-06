@@ -45,6 +45,8 @@ spring:
   flyway:
     enabled: true
 
+FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag:8087/api
+FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen:8080
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner:8085/api
 
 #Unleash
