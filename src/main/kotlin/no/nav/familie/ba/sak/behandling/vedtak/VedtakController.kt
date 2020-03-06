@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
 @RestController
-@RequestMapping("/api/fagsak")
+@RequestMapping("/api/fagsaker")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakController(
