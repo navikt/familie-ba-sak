@@ -42,10 +42,10 @@ data class Behandling(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "resultat", nullable = false)
-        val resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
+        var resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
 
         @Column(name = "begrunnelse", columnDefinition = "TEXT")
-        val begrunnelse: String = ""
+        var begrunnelse: String = ""
 ) : BaseEntitet() {
 
     override fun toString(): String {
