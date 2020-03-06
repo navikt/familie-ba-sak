@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.dokument
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.beregning.BarnBeregning
-import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
+import no.nav.familie.ba.sak.beregning.BarnBeregning
+import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService

@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.økonomi
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.beregning.BarnBeregning
-import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
+import no.nav.familie.ba.sak.beregning.BarnBeregning
+import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
