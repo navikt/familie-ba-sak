@@ -35,20 +35,10 @@ class ClientMocks {
     @Primary
     fun mockIntegrasjonClient(): IntegrasjonClient {
 
-        val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
-
-        listOf(søkerFnr, barnFnr).map {
-            every {
-                mockIntegrasjonClient.hentAktørId(it)
-            } returns randomAktørId()
-        }
+        val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = true)
 
         every {
-            mockIntegrasjonClient.hentAktørId(neq(søkerFnr))
-        } returns randomAktørId()
-
-        every {
-            mockIntegrasjonClient.hentAktørId(neq(barnFnr))
+            mockIntegrasjonClient.hentAktørId(any())
         } returns randomAktørId()
 
         every {

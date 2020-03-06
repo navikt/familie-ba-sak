@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.behandling
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.beregning.BarnBeregning
-import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -15,6 +13,8 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.beregning.BarnBeregning
+import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
