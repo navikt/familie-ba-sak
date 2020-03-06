@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultat
 import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -11,6 +12,7 @@ data class RestBehandling(val aktiv: Boolean,
                           val behandlingId: Long,
                           val type: BehandlingType,
                           val status: BehandlingStatus,
+                          val steg: StegType,
                           val kategori: BehandlingKategori,
                           val personer: List<RestPerson>,
                           val opprettetTidspunkt: LocalDateTime,

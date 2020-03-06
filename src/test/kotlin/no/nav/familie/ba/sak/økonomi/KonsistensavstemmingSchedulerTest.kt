@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.økonomi
 
 import io.mockk.*
-import no.nav.familie.ba.sak.util.DbContainerInitializer
+import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions

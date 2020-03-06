@@ -73,6 +73,7 @@ class FagsakService(
                     personer = personopplysningGrunnlag.personer.map { it.toRestPerson() },
                     type = it.type,
                     status = it.status,
+                    steg = it.steg,
                     samletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(it.id)
                                                    ?.toRestSamletVilkårResultat() ?: emptyList(),
                     opprettetTidspunkt = it.opprettetTidspunkt,

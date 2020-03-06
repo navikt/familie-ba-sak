@@ -4,15 +4,19 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.beregning.BarnBeregning
 import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.FagsakStatus
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
-import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.util.randomFnr
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions
@@ -70,15 +74,12 @@ class ØkonomiIntegrasjonTest {
 
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        var behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
+        var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling = behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
@@ -96,12 +97,12 @@ class ØkonomiIntegrasjonTest {
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
                         listOf(BarnBeregning(ident = barnFnr,
-                                              beløp = 1054,
-                                              stønadFom = LocalDate.of(
-                                                      2020,
-                                                      1,
-                                                      1),
-                                              ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
+                                             beløp = 1054,
+                                             stønadFom = LocalDate.of(
+                                                     2020,
+                                                     1,
+                                                     1),
+                                             ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
 
@@ -111,5 +112,33 @@ class ØkonomiIntegrasjonTest {
 
         val oppdatertBehandling = behandlingService.hent(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling.status)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val vedtak = Vedtak(behandling = behandling,
+                            ansvarligSaksbehandler = "ansvarligSaksbehandler",
+                            vedtaksdato = LocalDate.of(2020, 1, 1))
+        vedtakService.lagreOgDeaktiverGammel(vedtak)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        fagsak.status = FagsakStatus.LØPENDE
+        fagsakService.lagre(fagsak)
+
+        val oppdragIdListe = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
+
+        Assertions.assertTrue(oppdragIdListe.contains(OppdragId(fnr, behandling.id)))
     }
 }

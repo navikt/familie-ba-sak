@@ -6,16 +6,16 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.beregning.BarnBeregning
 import no.nav.familie.ba.sak.behandling.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.opprettNyOrdinærBehandling
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.ba.sak.util.DbContainerInitializer
-import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.util.randomFnr
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions
@@ -45,7 +45,7 @@ class DokumentServiceTest(
         private val behandlingService: BehandlingService,
 
         @Autowired
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
         private val vedtakService: VedtakService,
@@ -85,14 +85,15 @@ class DokumentServiceTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = opprettNyOrdinærBehandling(fagsak, behandlingService)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
 
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
@@ -110,13 +111,13 @@ class DokumentServiceTest(
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(
-                        listOf(BarnBeregning(ident = fnr,
-                                              beløp = 1054,
-                                              stønadFom = LocalDate.of(
-                                                      2020,
-                                                      1,
-                                                      1),
-                                              ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
+                        listOf(BarnBeregning(ident = barnFnr,
+                                             beløp = 1054,
+                                             stønadFom = LocalDate.of(
+                                                     2020,
+                                                     1,
+                                                     1),
+                                             ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
                 )
         )
 

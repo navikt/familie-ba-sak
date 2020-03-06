@@ -114,17 +114,17 @@ class VedtakService(private val behandlingService: BehandlingService,
                                         nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
         nyBeregning.barnasBeregning.map {
-            val person =
+            val barn =
                     personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.ident),
                                                                                   personopplysningGrunnlag.id)
                     ?: error("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
-            if (it.stønadFom.isBefore(person.fødselsdato)) {
-                error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
+            if (it.stønadFom.isBefore(barn.fødselsdato)) {
+                error("Ugyldig fra og med dato for barn med fødselsdato ${barn.fødselsdato}")
             }
 
             val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-            val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
+            val sikkerStønadTom = barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
 
             if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
                 error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
@@ -132,7 +132,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
             vedtakPersonRepository.save(
                     VedtakPerson(
-                            person = person,
+                            person = barn,
                             vedtak = vedtak,
                             beløp = it.beløp,
                             stønadFom = sikkerStønadFom,

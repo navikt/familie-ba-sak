@@ -2,29 +2,24 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
-import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.opprettNyOrdinærBehandling
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.ba.sak.util.DbContainerInitializer
-import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.util.randomFnr
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
@@ -47,20 +42,10 @@ class VedtakServiceTest {
     lateinit var vedtakService: VedtakService
 
     @Autowired
-    lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
-
-    @Autowired
-    @Qualifier("integrasjonClient")
-    lateinit var integrasjonClient: IntegrasjonClient
+    lateinit var persongrunnlagService: PersongrunnlagService
 
     @Autowired
     lateinit var fagsakService: FagsakService
-
-    @MockK(relaxed = true)
-    lateinit var taskRepository: TaskRepository
-
-    @MockK(relaxed = true)
-    lateinit var featureToggleService: FeatureToggleService
 
     lateinit var behandlingService: BehandlingService
 
@@ -69,11 +54,8 @@ class VedtakServiceTest {
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
-                personopplysningGrunnlagRepository,
-                fagsakService,
-                integrasjonClient,
-                featureToggleService,
-                taskRepository)
+                persongrunnlagService,
+                fagsakService)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
                         .willReturn(aResponse()
@@ -96,16 +78,80 @@ class VedtakServiceTest {
     }
 
     @Test
+    @Tag("integration")
+    fun `Opprett innvilget behandling med vedtak`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandling = behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
+
+        Assertions.assertNotNull(behandling.fagsak.id)
+        Assertions.assertEquals(BehandlingResultat.INNVILGET, behandling.resultat)
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+                behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                        fnr,
+                        listOf(barnFnr)),
+                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+        )
+
+        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
+        Assertions.assertNotNull(hentetVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
+        Assertions.assertEquals("", hentetVedtak?.stønadBrevMarkdown)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Opprett opphørt behandling med vedtak`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandling = behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.OPPHØRT, "")
+
+        Assertions.assertNotNull(behandling.fagsak.id)
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+                behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
+                        fnr,
+                        listOf(barnFnr)),
+                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+        )
+
+        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
+        Assertions.assertNotNull(hentetVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
+        Assertions.assertNotEquals("", hentetVedtak?.stønadBrevMarkdown)
+    }
+
+    @Test
     fun `Skal hente forrige behandling`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        var behandling = opprettNyOrdinærBehandling(fagsak, behandlingService)
+        var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling = behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, barnFnr)
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
@@ -148,4 +194,28 @@ class VedtakServiceTest {
         Assertions.assertEquals(revurderingInnvilgetBehandling.id, forrigeVedtak?.behandling?.id)
     }
 
+    @Test
+    @Tag("integration")
+    fun `Opprett 2 vedtak og se at det siste vedtaket får aktiv satt til true`() {
+        val fnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler1")
+        opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler2")
+
+        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
+        Assertions.assertNotNull(hentetVedtak)
+        Assertions.assertEquals("ansvarligSaksbehandler2", hentetVedtak?.ansvarligSaksbehandler)
+    }
+
+    private fun opprettNyttInvilgetVedtak(behandling: Behandling, saksbehandler: String = "ansvarligSaksbehandler"): Vedtak {
+        vedtakService.lagreOgDeaktiverGammel(Vedtak(behandling = behandling,
+                                                    ansvarligSaksbehandler = saksbehandler,
+                                                    vedtaksdato = LocalDate.now())
+        )
+
+        return vedtakService.hentAktivForBehandling(behandling.id)!!
+    }
 }
