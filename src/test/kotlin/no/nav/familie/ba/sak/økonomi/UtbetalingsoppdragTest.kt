@@ -68,11 +68,11 @@ internal class UtbetalingsoppdragPeriodiseringTest {
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(vedtak)
 
-        val segment = LocalDateSegment(now(), now().plusDays(1),100)
-        utbetalingsperiodeMal.lagPeriode("A", segment,999) //OK
+        val segment = LocalDateSegment(now(), now().plusDays(1), 100)
+        utbetalingsperiodeMal.lagPeriode("A", segment, 999) //OK
 
         assertThrows<IllegalArgumentException> {
-            utbetalingsperiodeMal.lagPeriode("A", segment,1000)
+            utbetalingsperiodeMal.lagPeriode("A", segment, 1000)
         }
     }
 

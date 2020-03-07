@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.config
 
-import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -13,13 +13,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 @Tag("integration")
-class FeatureToggleServiceTest(@Autowired
-                             private val featureToggleService: FeatureToggleService
+class FeatureToggleServiceTest(
+        @Autowired
+        private val featureToggleService: FeatureToggleService
 ) {
 
     @Test
     fun `skal svare false ved dummy impl`() {
-        assertThat(featureToggleService.isEnabled("sull-bala-tull")).isFalse()
+        Assertions.assertEquals(false, featureToggleService.isEnabled("sull-bala-tull"))
     }
 
 }

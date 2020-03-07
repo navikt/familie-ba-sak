@@ -1,1 +1,2 @@
-ALTER TABLE vedtak RENAME COLUMN status TO resultat;
+ALTER TABLE vedtak
+    RENAME COLUMN status TO resultat;

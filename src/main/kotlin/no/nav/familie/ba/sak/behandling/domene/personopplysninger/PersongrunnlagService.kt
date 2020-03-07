@@ -61,10 +61,10 @@ class PersongrunnlagService(
             personopplysningGrunnlag.barna.none { eksisterendeBarn -> barn == eksisterendeBarn.personIdent.ident }
         }.map { nyttBarn ->
             personRepository.save(Person(personIdent = PersonIdent(nyttBarn),
-                   type = PersonType.BARN,
-                   personopplysningGrunnlag = personopplysningGrunnlag,
-                   fødselsdato = integrasjonClient.hentPersoninfoFor(nyttBarn).fødselsdato,
-                   aktørId = integrasjonClient.hentAktørId(nyttBarn)
+                                         type = PersonType.BARN,
+                                         personopplysningGrunnlag = personopplysningGrunnlag,
+                                         fødselsdato = integrasjonClient.hentPersoninfoFor(nyttBarn).fødselsdato,
+                                         aktørId = integrasjonClient.hentAktørId(nyttBarn)
             ))
         }
     }

@@ -26,7 +26,7 @@ class VilkårResultat(
         @Enumerated(EnumType.STRING)
         @Column(name = "utfall")
         val utfallType: UtfallType
-): BaseEntitet()
+) : BaseEntitet()
 
 enum class UtfallType(val beskrivelse: String) {
     IKKE_OPPFYLT("Ikke oppfylt"),

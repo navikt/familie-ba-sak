@@ -15,8 +15,8 @@ import java.time.LocalDate
 @Component
 class ClientMocks {
 
-    private val søkerFnr = "12345678910";
-    private val barnFnr = "01101800033";
+    private val søkerFnr = "12345678910"
+    private val barnFnr = "01101800033"
 
     @Bean
     @Primary

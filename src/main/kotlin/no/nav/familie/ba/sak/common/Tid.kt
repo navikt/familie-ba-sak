@@ -5,12 +5,12 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 
-fun LocalDate.sisteDagIForrigeMåned() : LocalDate {
+fun LocalDate.sisteDagIForrigeMåned(): LocalDate {
     val sammeDagForrigeMåned = this.minusMonths(1)
     return sammeDagForrigeMåned.sisteDagIMåned()
 }
 
-fun LocalDate.sisteDagIMåned() : LocalDate {
+fun LocalDate.sisteDagIMåned(): LocalDate {
     return YearMonth.from(this).atEndOfMonth()
 }
 

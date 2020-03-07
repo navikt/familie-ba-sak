@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Personopplysni
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.dokument.DokGenKlient
@@ -91,11 +91,12 @@ class VedtakService(private val behandlingService: BehandlingService,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = forrigeVedtak?.id,
-                opphørsdato = if (behandling.resultat == BehandlingResultat.OPPHØRT) LocalDate.now().førsteDagINesteMåned() else null,
+                opphørsdato = if (behandling.resultat == BehandlingResultat.OPPHØRT) LocalDate.now()
+                        .førsteDagINesteMåned() else null,
                 stønadBrevMarkdown = if (behandling.resultat != BehandlingResultat.INNVILGET) Result.runCatching {
-                    dokGenKlient.hentStønadBrevMarkdown(behandling,
-                                                        ansvarligSaksbehandler)
-                }
+                            dokGenKlient.hentStønadBrevMarkdown(behandling,
+                                                                ansvarligSaksbehandler)
+                        }
                         .fold(
                                 onSuccess = { it },
                                 onFailure = { e ->
@@ -144,9 +145,9 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         lagreOgDeaktiverGammel(vedtak.copy(
                 stønadBrevMarkdown = Result.runCatching {
-                    dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
-                                                        ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
-                }
+                            dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
+                                                                ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
+                        }
                         .fold(
                                 onSuccess = { it },
                                 onFailure = { e ->

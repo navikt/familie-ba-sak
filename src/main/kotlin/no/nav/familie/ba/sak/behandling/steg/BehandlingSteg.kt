@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import org.springframework.transaction.annotation.Transactional
 
 interface BehandlingSteg<T> {
     fun utførSteg(behandling: Behandling, data: T): Behandling

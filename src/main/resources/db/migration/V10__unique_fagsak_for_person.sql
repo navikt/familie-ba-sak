@@ -1,1 +1,2 @@
-alter table FAGSAK add unique (person_ident);
+alter table FAGSAK
+    add unique (person_ident);

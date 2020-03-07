@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.validering
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient

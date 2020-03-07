@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultat
 import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class RestBehandling(val aktiv: Boolean,
@@ -26,7 +25,7 @@ fun SamletVilkårResultat.toRestSamletVilkårResultat() = this.samletVilkårResu
     RestVilkårResultat(vilkårType = it.vilkårType, utfallType = it.utfallType, personIdent = it.person.personIdent.ident)
 }
 
-data class RestVilkårResultat (
+data class RestVilkårResultat(
         val personIdent: String,
         val vilkårType: VilkårType,
         val utfallType: UtfallType

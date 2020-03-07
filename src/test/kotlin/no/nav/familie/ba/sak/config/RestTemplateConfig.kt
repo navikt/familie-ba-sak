@@ -37,7 +37,8 @@ class RestTemplateConfig {
     }
 
     @Bean
-    fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestTemplateBuilder {
+    fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                                    mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestTemplateBuilder {
         return RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofSeconds(5))
                 .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
@@ -45,9 +46,9 @@ class RestTemplateConfig {
     }
 
 
-
     @Bean("clientCredentials")
-    fun restTemplateClientCredentials(consumerIdClientInterceptor: ConsumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestOperations {
+    fun restTemplateClientCredentials(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                                      mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestOperations {
         return RestTemplateBuilder()
                 .additionalCustomizers(NaisProxyCustomizer())
                 .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
