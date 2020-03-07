@@ -25,7 +25,6 @@ class Fagsaktilgang(private val behandlingRepository: BehandlingRepository,
         val personer: Set<Person> = behandlingRepository.finnBehandlinger(fagsakId)
                 .mapNotNull { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it.id)?.personer }
                 .flatten()
-                .distinct()
                 .toSet()
 
         integrasjonOnBehalfClient.sjekkTilgangTilPersoner(personer)

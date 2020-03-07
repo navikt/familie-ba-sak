@@ -87,8 +87,9 @@ class StegService(
 
             return behandlingEtterSteg
         } catch (exception: Exception) {
-            LOG.error(exception.message)
-            LOG.info("Håndtering av stegtype '${behandling.steg}' feilet. Opprett oppgave?")
+            LOG.error("Håndtering av stegtype '${behandling.steg}' feilet på behandling ${behandling.id}.")
+            secureLogger.info("Håndtering av stegtype '${behandling.steg}' feilet.",
+                              exception)
             error(exception.message!!)
         }
     }
@@ -99,5 +100,6 @@ class StegService(
 
     companion object {
         val LOG = LoggerFactory.getLogger(this::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

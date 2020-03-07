@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class Vilkårsvurdering(
@@ -17,6 +18,7 @@ class Vilkårsvurdering(
         private val persongrunnlagService: PersongrunnlagService
 ) : BehandlingSteg<RestVilkårsvurdering> {
 
+    @Transactional
     override fun utførSteg(behandling: Behandling, data: RestVilkårsvurdering): Behandling {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")

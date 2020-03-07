@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.task.OpprettBehandleSakOppgaveForNyBehandlingTask
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class RegistrerPersongrunnlag(
@@ -16,6 +17,7 @@ class RegistrerPersongrunnlag(
         private val taskRepository: TaskRepository
 ) : BehandlingSteg<Registreringsdata> {
 
+    @Transactional
     override fun utførSteg(behandling: Behandling, data: Registreringsdata): Behandling {
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident, data.barnasIdenter, behandling)
         if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
