@@ -13,19 +13,15 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
 class StegService(
         private val fagsakService: FagsakService,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val steg: List<BehandlingSteg<*>>
 ) {
-
-    @Autowired
-    final lateinit var steg: List<BehandlingSteg<*>>
-
-    private final val stegSuksessMetrics: Map<StegType, Counter> =
+    private val stegSuksessMetrics: Map<StegType, Counter> =
             steg.map {
                 it.stegType() to Metrics.counter("behandling.steg.utfort",
                                                  "steg",
