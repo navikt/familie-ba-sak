@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.domene
 
+import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
 
@@ -39,6 +41,10 @@ data class Behandling(
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
         var status: BehandlingStatus = BehandlingStatus.OPPRETTET,
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "steg", nullable = false)
+        var steg: StegType = initSteg,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "resultat", nullable = false)

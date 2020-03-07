@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
 import no.nav.familie.ba.sak.behandling.domene.Behandling

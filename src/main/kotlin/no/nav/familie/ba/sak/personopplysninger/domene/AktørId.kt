@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.personopplysninger.domene
 
 import com.fasterxml.jackson.annotation.JsonValue
-import java.io.Serializable
 import javax.persistence.Column
 import javax.persistence.Embeddable
 import javax.validation.constraints.Pattern
@@ -16,7 +15,7 @@ data class AktørId(
         @Column(name = "aktoer_id", updatable = false, length = 50)
         @Pattern(regexp = VALID_REGEXP, flags = [Pattern.Flag.CASE_INSENSITIVE])
         val id: String
-)  {
+) {
 
     init {
         require(VALID.matcher(id).matches()) {
