@@ -17,5 +17,4 @@ create table BEHANDLING_VEDTAK
 CREATE SEQUENCE BEHANDLING_VEDTAK_SEQ INCREMENT BY 50 START WITH 1000000 NO CYCLE;
 create index on BEHANDLING_VEDTAK (fk_behandling_id);
 
-alter table BEHANDLING
-    add column behandling_type VARCHAR(50);
+alter table BEHANDLING add column behandling_type VARCHAR(50);

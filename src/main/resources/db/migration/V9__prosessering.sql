@@ -14,8 +14,7 @@ CREATE TABLE IF NOT EXISTS task (
 CREATE INDEX IF NOT EXISTS henvendelse_status_idx
     ON task (status);
 
-CREATE TABLE IF NOT EXISTS task_logg
-(
+CREATE TABLE IF NOT EXISTS task_logg (
     id            bigint       NOT NULL
         CONSTRAINT henvendelse_logg_pkey PRIMARY KEY,
     task_id       bigint       NOT NULL

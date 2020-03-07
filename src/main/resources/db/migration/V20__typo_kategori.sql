@@ -1,3 +1,1 @@
-update behandling
-set kategori = 'NASJONAL'
-where kategori = 'NATIONAL';
+update behandling set kategori = 'NASJONAL' where kategori = 'NATIONAL';

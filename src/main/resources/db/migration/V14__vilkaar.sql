@@ -26,5 +26,4 @@ create table VILKAR_RESULTAT
 );
 CREATE SEQUENCE VILKAR_RESULTAT_SEQ INCREMENT BY 50 START WITH 1000000 NO CYCLE;
 
-alter table behandling
-    add column samlet_vilkar_resultat_id bigint references SAMLET_VILKAR_RESULTAT (id) default null;
+alter table behandling add column samlet_vilkar_resultat_id bigint references SAMLET_VILKAR_RESULTAT (id) default null;

@@ -1,2 +1,1 @@
-alter table behandling
-    add column steg varchar;
+alter table behandling add column steg varchar;
