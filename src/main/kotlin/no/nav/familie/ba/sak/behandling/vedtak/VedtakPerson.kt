@@ -36,5 +36,7 @@ data class VedtakPerson(
 enum class Ytelsetype(val klassifisering: String) {
         ORDINÆR_BARNETRYGD("BATR"),
         UTVIDET_BARNETRYGD("BATR"),
-        SMÅBARNSTILLEGG("BATRSMA")
+        SMÅBARNSTILLEGG("BATRSMA"),
+        EØS("BATR"),
+        MANUELL_VURDERING("BATR")
 }

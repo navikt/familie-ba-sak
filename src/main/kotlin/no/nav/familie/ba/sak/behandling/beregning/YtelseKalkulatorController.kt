@@ -18,6 +18,7 @@ class YtelseKalkulatorController {
 
         val pyfp = PersonligYtelseForPeriode(
                 PersonligYtelse("123123",Ytelsetype.ORDINÆR_BARNETRYGD,true),
+                null,
                 LocalDate.now(),
                 LocalDate.now()
         )
@@ -43,6 +44,7 @@ data class PersonligYtelse (
 
 data class PersonligYtelseForPeriode(
         @JsonIgnore private val _personligYtelse: PersonligYtelse?,
+        val beløp: Int?,
         val stønadFraOgMed: LocalDate,
         val stønadTilOgMed: LocalDate
 ) {
