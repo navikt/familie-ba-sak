@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository

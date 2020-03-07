@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class StegService(
+        private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService
 ) {
 
@@ -29,6 +31,8 @@ class StegService(
     }
 
     fun håndterNyBehandlingFraHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.søkersIdent)
+
         val behandling = behandlingService.opprettBehandling(NyBehandling(
                 søkersIdent = nyBehandling.søkersIdent,
                 barnasIdenter = nyBehandling.barnasIdenter,

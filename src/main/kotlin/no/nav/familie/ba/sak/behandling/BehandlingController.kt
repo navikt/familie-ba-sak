@@ -27,6 +27,7 @@ class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @PostMapping(path = ["/ny-behandling"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
@@ -38,14 +39,15 @@ class BehandlingController(private val fagsakService: FagsakService,
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure("Søkers ident kan ikke være blank"))
         }
 
-        if (nyBehandling.barnasIdenter.filter { it.isBlank() }.isNotEmpty()) {
+        if (nyBehandling.barnasIdenter.any { it.isBlank() }) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure("Minst et av barna mangler ident"))
         }
 
         return Result.runCatching { stegService.håndterNyBehandling(nyBehandling) }
                 .fold(
                         onFailure = {
-                            logger.info("Opprettelse av behandling feilet", it)
+                            logger.error("Opprettelse av behandling feilet")
+                            secureLogger.info("Opprettelse av behandling feilet", it)
                             ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                     .body(Ressurs.failure(it.cause?.message ?: it.message, it))
                         },
@@ -63,7 +65,8 @@ class BehandlingController(private val fagsakService: FagsakService,
         return Result.runCatching { stegService.håndterNyBehandlingFraHendelse(nyBehandling) }
                 .fold(
                         onFailure = {
-                            logger.info("Opprettelse av behandling fra hendelse feilet", it)
+                            logger.info("Opprettelse av behandling fra hendelse feilet")
+                            secureLogger.info("Opprettelse av behandling fra hendelse feilet", it)
                             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                     .body(Ressurs.failure(it.message, it))
                         },

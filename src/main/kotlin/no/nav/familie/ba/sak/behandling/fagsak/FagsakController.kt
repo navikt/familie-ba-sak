@@ -33,7 +33,6 @@ class FagsakController(
 
         logger.info("{} oppretter ny fagsak", saksbehandlerId)
 
-
         return Result.runCatching { fagsakService.nyFagsak(nyFagsak) }
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },
