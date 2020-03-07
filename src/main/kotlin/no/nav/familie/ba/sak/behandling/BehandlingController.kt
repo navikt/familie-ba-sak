@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
+import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -27,10 +28,21 @@ import org.springframework.web.bind.annotation.RestController
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService) {
 
-    private val antallManuelleBehandlingerOpprettet =
-            Metrics.counter("behandling.opprettet.manuell")
-    private val antallAutomatiskeBehandlingerOpprettet =
-            Metrics.counter("behandling.opprettet.automatisk")
+    private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> =
+            BehandlingType.values().map {
+                it to Metrics.counter("behandling.opprettet.manuell", "type",
+                                      it.name,
+                                      "beskrivelse",
+                                      it.beskrivelse)
+            }.toMap()
+
+    private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> =
+            BehandlingType.values().map {
+                it to Metrics.counter("behandling.opprettet.automatisk", "type",
+                                      it.name,
+                                      "beskrivelse",
+                                      it.beskrivelse)
+            }.toMap()
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
     val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -59,7 +71,7 @@ class BehandlingController(private val fagsakService: FagsakService,
                         },
                         onSuccess = {
                             val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
-                            antallManuelleBehandlingerOpprettet.increment()
+                            antallManuelleBehandlingerOpprettet[nyBehandling.behandlingType]?.increment()
                             return restFagsak
                         }
                 )
@@ -82,7 +94,7 @@ class BehandlingController(private val fagsakService: FagsakService,
                         },
                         onSuccess = {
                             val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
-                            antallAutomatiskeBehandlingerOpprettet.increment()
+                            antallAutomatiskeBehandlingerOpprettet[BehandlingType.FØRSTEGANGSBEHANDLING]?.increment()
                             return restFagsak
                         }
                 )
