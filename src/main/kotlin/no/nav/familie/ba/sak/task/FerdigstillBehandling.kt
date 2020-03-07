@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
@@ -22,6 +23,8 @@ class FerdigstillBehandling(
         val fagsakService: FagsakService,
         val behandlingService: BehandlingService
 ) : AsyncTaskStep {
+    private val antallBehandlingerFerdigstilt =
+            Metrics.counter("behandling.ferdigstilt")
 
     override fun doTask(task: Task) {
         val ferdigstillBehandling = objectMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
@@ -41,6 +44,7 @@ class FerdigstillBehandling(
         }
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+        antallBehandlingerFerdigstilt.increment()
     }
 
     override fun onCompletion(task: Task) {

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
@@ -26,6 +27,11 @@ import org.springframework.web.bind.annotation.RestController
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService) {
 
+    private val antallManuelleBehandlingerOpprettet =
+            Metrics.counter("behandling.opprettet.manuell")
+    private val antallAutomatiskeBehandlingerOpprettet =
+            Metrics.counter("behandling.opprettet.automatisk")
+
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
     val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -51,7 +57,11 @@ class BehandlingController(private val fagsakService: FagsakService,
                             ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                     .body(Ressurs.failure(it.cause?.message ?: it.message, it))
                         },
-                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id)) }
+                        onSuccess = {
+                            val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
+                            antallManuelleBehandlingerOpprettet.increment()
+                            return restFagsak
+                        }
                 )
     }
 
@@ -70,7 +80,11 @@ class BehandlingController(private val fagsakService: FagsakService,
                             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                     .body(Ressurs.failure(it.message, it))
                         },
-                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id)) }
+                        onSuccess = {
+                            val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
+                            antallAutomatiskeBehandlingerOpprettet.increment()
+                            return restFagsak
+                        }
                 )
     }
 

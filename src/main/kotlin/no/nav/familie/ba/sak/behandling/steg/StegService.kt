@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
@@ -21,7 +23,25 @@ class StegService(
 ) {
 
     @Autowired
-    lateinit var steg: List<BehandlingSteg<*>>
+    final lateinit var steg: List<BehandlingSteg<*>>
+
+    private final val stegSuksessMetrics: Map<StegType, Counter> =
+            steg.map {
+                it.stegType() to Metrics.counter("behandling.steg.utfort",
+                                                 "steg",
+                                                 it.stegType().name,
+                                                 "beskrivelse",
+                                                 it.stegType().beskrivelse)
+            }.toMap()
+    private final val stegFeiletMetrics: Map<StegType, Counter> =
+            steg.map {
+                it.stegType() to Metrics.counter("behandling.steg.feil",
+                                                 "steg",
+                                                 it.stegType().name,
+                                                 "beskrivelse",
+                                                 it.stegType().beskrivelse)
+            }.toMap()
+
 
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
@@ -89,8 +109,11 @@ class StegService(
                 behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id, steg = nesteSteg)
             }
 
+            stegSuksessMetrics[behandling.steg]?.increment()
+
             return behandlingEtterSteg
         } catch (exception: Exception) {
+            stegFeiletMetrics[behandling.steg]?.increment()
             LOG.error("Håndtering av stegtype '${behandling.steg}' feilet på behandling ${behandling.id}.")
             secureLogger.info("Håndtering av stegtype '${behandling.steg}' feilet.",
                               exception)
