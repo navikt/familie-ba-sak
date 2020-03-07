@@ -14,7 +14,6 @@ val initSteg = StegType.REGISTRERE_PERSONGRUNNLAG
 val sisteSteg = StegType.GODKJENNE_VEDTAK
 
 enum class StegType(val tillattFor: List<BehandlerRolle>) {
-    REGISTRERE_SØKNADSGRUNNLAG(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
     REGISTRERE_PERSONGRUNNLAG(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
     VILKÅRSVURDERING(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
     VURDER_VEDTAK(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
