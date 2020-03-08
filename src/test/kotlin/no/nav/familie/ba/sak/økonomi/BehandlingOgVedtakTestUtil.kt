@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 private var gjeldendeVedtakId: Long = 1
@@ -84,5 +85,6 @@ fun lagSegmentBeløp(fom: String, tom: String, beløp: Int): LocalDateSegment<In
         LocalDateSegment(dato(fom), dato(tom), beløp)
 
 fun dato(s: String) = LocalDate.parse(s)
+fun årMnd(s: String) = YearMonth.parse(s)
 
 

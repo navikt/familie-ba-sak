@@ -1,16 +1,37 @@
 [
   {
     "personident": "1111111111111",
-    "ytelsetype": "ORDINÆR_BARNETRYGD",
-    "stønadFraOgMed": "2019-1",
-    "stønadTilOgMed": "2037-2",
+    "ytelsetype": "SMÅBARNSTILLEGG",
+    "stønadFraOgMed": "2020-06",
+    "stønadTilOgMed": "2026-05",
+    "fullYtelse": true
+  },
+  {
+    "personident": "1111111111111",
+    "ytelsetype": "UTVIDET_BARNETRYGD",
+    "stønadFraOgMed": "2020-10",
+    "stønadTilOgMed": "2022-03",
     "fullYtelse": true
   },
   {
     "personident": "2222222222222",
-    "ytelsetype": "SMÅBARNSTILLEGG",
-    "stønadFraOgMed": "2019-1",
-    "stønadTilOgMed": "2023-6",
+    "ytelsetype": "ORDINÆR_BARNETRYGD",
+    "stønadFraOgMed": "2020-04",
+    "stønadTilOgMed": "2031-01",
     "fullYtelse": false
+  },
+  {
+    "personident": "333333333333333",
+    "ytelsetype": "ORDINÆR_BARNETRYGD",
+    "stønadFraOgMed": "2020-04",
+    "stønadTilOgMed": "2038-03",
+    "fullYtelse": true
+  },
+  {
+    "personident": "44444444444444",
+    "ytelsetype": "EØS",
+    "stønadFraOgMed": "2021-04",
+    "stønadTilOgMed": "2021-08",
+    "beløp":936
   }
 ]
