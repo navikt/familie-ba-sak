@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.domene
 
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent

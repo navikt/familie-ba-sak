@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.arbeidsfordeling
 
-import no.nav.familie.ba.sak.arbeidsfordeling.Diskresjonskode
-import no.nav.familie.ba.sak.arbeidsfordeling.finnStrengesteDiskresjonskode
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

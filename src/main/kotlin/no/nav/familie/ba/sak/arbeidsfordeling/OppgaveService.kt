@@ -2,8 +2,11 @@ package no.nav.familie.ba.sak.arbeidsfordeling
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.oppgave.IdentType
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdent
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
+import no.nav.familie.kontrakter.felles.oppgave.Tema
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -25,7 +28,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                                             saksId = fagsakId.toString(),
                                             tema = Tema.BAR,
                                             oppgavetype = BehandleSak,
-                                            fristFerdigstillelse = LocalDate.now().plusDays(1), //TODO få denne til å funke på helg og eventuellle andre helligdager
+                                            fristFerdigstillelse = LocalDate.now()
+                                                    .plusDays(1), //TODO få denne til å funke på helg og eventuellle andre helligdager
                                             beskrivelse = lagOppgaveTekst(fagsakId),
                                             enhetsnummer = enhetsnummer?.enhetId,
                                             behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode)

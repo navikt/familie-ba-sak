@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
@@ -11,7 +8,9 @@ import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.util.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -25,7 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
-class VilkårServiceTest() {
+class VilkårServiceTest {
 
     @Autowired
     private lateinit var behandlingService: BehandlingService
@@ -41,35 +40,35 @@ class VilkårServiceTest() {
 
     @Test
     fun `vurder gyldig vilkårsvurdering`() {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent("1")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, "1", "12345678910")
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val samletVilkårResultat =
                 vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
-                                                        vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")),
+                                                        vilkårsvurderingKomplettForBarnOgSøker(fnr, listOf(barnFnr)),
                                                         behandling.id
                 )
         Assertions.assertEquals(samletVilkårResultat.samletVilkårResultat.size,
-                                vilkårsvurderingKomplettForBarnOgSøker("1", listOf("12345678910")).size)
+                                vilkårsvurderingKomplettForBarnOgSøker(fnr, listOf(barnFnr)).size)
     }
 
     @Test
     fun `vurder ugyldig vilkårsvurdering`() {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent("1")
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       "sdf",
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, "1", "12345678910")
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         assertThrows<IllegalStateException> {

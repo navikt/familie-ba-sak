@@ -41,7 +41,6 @@ class AvstemmingService(val økonomiKlient: ØkonomiKlient, val behandlingServic
     }
 
 
-
     companion object {
         val LOG: Logger = LoggerFactory.getLogger(AvstemmingService::class.java)
     }

@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
+import no.nav.familie.ba.sak.økonomi.AvstemmingService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository

@@ -1,5 +1,6 @@
-package no.nav.familie.ba.sak.økonomi
+package no.nav.familie.ba.sak.common
 
+import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
@@ -9,10 +10,13 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.familie.ba.sak.økonomi.sats
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
+
+fun randomFnr(): String = UUID.randomUUID().toString()
+fun randomAktørId(): AktørId = AktørId(UUID.randomUUID().toString())
 
 private var gjeldendeVedtakId: Long = 1
 private var gjeldendeBehandlingId: Long = 1
@@ -29,14 +33,15 @@ fun nesteBehandlingId(): Long {
 }
 
 val defaultFagsak = Fagsak(1, AktørId("1"), PersonIdent("12345"), FagsakStatus.OPPRETTET)
-fun lagBehandling() = Behandling(id = nesteBehandlingId(),
-                                 fagsak = defaultFagsak,
-                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                 kategori = BehandlingKategori.NASJONAL,
-                                 underkategori = BehandlingUnderkategori.ORDINÆR)
+fun lagBehandling(fagsak: Fagsak = defaultFagsak) = Behandling(id = nesteBehandlingId(),
+                                                               fagsak = fagsak,
+                                                               type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                               kategori = BehandlingKategori.NASJONAL,
+                                                               underkategori = BehandlingUnderkategori.ORDINÆR)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
-        personIdent = PersonIdent(UUID.randomUUID().toString().substring(0, 18)),
+        aktørId = randomAktørId(),
+        personIdent = PersonIdent(randomFnr()),
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0)
@@ -72,19 +77,35 @@ fun lagPersonVedtak(fom: String,
     )
 }
 
-fun sats(ytelsetype: Ytelsetype) =
-        when (ytelsetype) {
-            Ytelsetype.ORDINÆR_BARNETRYGD -> 1054
-            Ytelsetype.UTVIDET_BARNETRYGD -> 1054
-            Ytelsetype.SMÅBARNSTILLEGG -> 660
-            Ytelsetype.EØS->0
-            Ytelsetype.MANUELL_VURDERING->0
-        }
+fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
+                                    søkerPersonIdent: String,
+                                    barnasIdenter: List<String>): PersonopplysningGrunnlag {
+    val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
+    val søker = Person(aktørId = randomAktørId(),
+                       personIdent = PersonIdent(søkerPersonIdent),
+                       type = PersonType.SØKER,
+                       personopplysningGrunnlag = personopplysningGrunnlag,
+                       fødselsdato = LocalDate.of(2019, 1, 1))
+    personopplysningGrunnlag.personer.add(søker)
 
-fun lagSegmentBeløp(fom: String, tom: String, beløp: Int): LocalDateSegment<Int> =
-        LocalDateSegment(dato(fom), dato(tom), beløp)
+    barnasIdenter.map {
+        personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
+                                                     personIdent = PersonIdent(it),
+                                                     type = PersonType.BARN,
+                                                     personopplysningGrunnlag = personopplysningGrunnlag,
+                                                     fødselsdato = LocalDate.of(2019, 1, 1)))
+    }
+
+    return personopplysningGrunnlag
+}
 
 fun dato(s: String) = LocalDate.parse(s)
 fun årMnd(s: String) = YearMonth.parse(s)
 
-
+fun nyOrdinærBehandling(søkersIdent: String, barnasIdenter: List<String>): NyBehandling = NyBehandling(
+        søkersIdent = søkersIdent,
+        barnasIdenter = barnasIdenter,
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.ORDINÆR
+)

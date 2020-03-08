@@ -1,15 +1,9 @@
 package no.nav.familie.ba.sak.behandling.beregning
 
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype.*
-import no.nav.familie.ba.sak.økonomi.dato
-import no.nav.familie.ba.sak.økonomi.årMnd
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.*
+import no.nav.familie.ba.sak.common.årMnd
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.format.DateTimeFormatterBuilder
-import java.util.ArrayList
 
 internal class YtelseKalkulatorControllerTest {
 

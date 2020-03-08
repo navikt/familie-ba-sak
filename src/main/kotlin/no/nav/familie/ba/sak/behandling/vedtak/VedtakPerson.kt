@@ -34,9 +34,9 @@ data class VedtakPerson(
 ) : BaseEntitet()
 
 enum class Ytelsetype(val klassifisering: String) {
-        ORDINÆR_BARNETRYGD("BATR"),
-        UTVIDET_BARNETRYGD("BATR"),
-        SMÅBARNSTILLEGG("BATRSMA"),
-        EØS("BATR"),
-        MANUELL_VURDERING("BATR")
+    ORDINÆR_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD("BATR"),
+    SMÅBARNSTILLEGG("BATRSMA"),
+    EØS("BATR"),
+    MANUELL_VURDERING("BATR")
 }
