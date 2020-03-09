@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.notFound
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
+import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -21,7 +21,7 @@ import java.time.LocalDate
 
 // TODO: endre til beregning
 @RestController
-@RequestMapping("/api/fagsak")
+@RequestMapping("/api/vedtak")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BeregningController(
@@ -30,23 +30,20 @@ class BeregningController(
         private val vedtakService: VedtakService
 ) {
 
-    @PostMapping(path = ["/{fagsakId}/oppdater-vedtak-beregning"])
-    fun oppdaterVedtakMedBeregning(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
+    @PutMapping(path = ["/{vedtakId}/beregning"])
+    fun oppdaterVedtakMedBeregning(@PathVariable @VedtaktilgangConstraint vedtakId: Long,
                                    @RequestBody nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
-        FagsakController.logger.info("{} oppdaterer vedtak med beregning for fagsak med id {}", saksbehandlerId, fagsakId)
+        FagsakController.logger.info("{} oppdaterer vedtak med beregning for vedtak med id {}", saksbehandlerId, vedtakId)
 
         if (nyBeregning.barnasBeregning.isEmpty()) {
             return badRequest("Barnas beregning er tom")
         }
 
-        val behandling =
-                behandlingService.hentAktivForFagsak(fagsakId)
-                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+        val vedtak = vedtakService.hent(vedtakId)
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
-                     ?: return notFound("Fant ikke aktiv vedtak på fagsak $fagsakId, behandling ${behandling.id}")
+        val behandling = vedtak.behandling
 
         if (behandling.resultat != BehandlingResultat.INNVILGET) {
             return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget")
