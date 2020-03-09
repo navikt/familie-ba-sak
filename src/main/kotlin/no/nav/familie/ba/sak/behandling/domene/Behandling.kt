@@ -68,12 +68,12 @@ fun BehandlingResultat.toDokGenTemplate(): String {
     }
 }
 
-enum class BehandlingType {
-    FØRSTEGANGSBEHANDLING,
-    REVURDERING,
-    MIGRERING_FRA_INFOTRYGD,
-    KLAGE,
-    MIGRERING_FRA_INFOTRYGD_OPPHØRT
+enum class BehandlingType(val beskrivelse: String) {
+    FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
+    REVURDERING("Revurdering"),
+    MIGRERING_FRA_INFOTRYGD("Migrering fra infotrygd"),
+    KLAGE("Klage"),
+    MIGRERING_FRA_INFOTRYGD_OPPHØRT("Opphør migrering fra infotrygd")
 }
 
 enum class BehandlingResultat {
