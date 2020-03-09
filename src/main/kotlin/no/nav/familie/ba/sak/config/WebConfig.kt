@@ -11,7 +11,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Import(OIDCUtil::class)
 class WebConfig(
         private val oidcUtil: OIDCUtil
-): WebMvcConfigurer {
+) : WebMvcConfigurer {
+
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(InternLoggerInterceptor(oidcUtil))
         super.addInterceptors(registry)

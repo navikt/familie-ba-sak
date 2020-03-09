@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.toTrinnKontroll
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.util.DbContainerInitializer
-import no.nav.familie.ba.sak.util.randomFnr
+import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.randomFnr
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -42,11 +44,7 @@ class ToTrinnKontrollTest {
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       null,
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hent(behandling.id).status)
@@ -61,11 +59,7 @@ class ToTrinnKontrollTest {
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettNyBehandlingPåFagsak(fagsak,
-                                                                       null,
-                                                                       BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                       BehandlingKategori.NASJONAL,
-                                                                       BehandlingUnderkategori.ORDINÆR)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
         behandlingRepository.saveAndFlush(behandling)
@@ -74,6 +68,6 @@ class ToTrinnKontrollTest {
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, endretBehandling.status)
         Assertions.assertNotNull(endretBehandling.endretAv)
 
-        assertThrows<IllegalStateException> { toTrinnKontrollService.valider2trinnVedIverksetting (endretBehandling, "VL") }
+        assertThrows<IllegalStateException> { toTrinnKontrollService.valider2trinnVedIverksetting(endretBehandling, "VL") }
     }
 }

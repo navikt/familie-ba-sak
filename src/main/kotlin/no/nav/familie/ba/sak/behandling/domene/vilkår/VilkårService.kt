@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.domene.vilkår
 
-import javassist.NotFoundException
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import org.springframework.stereotype.Service

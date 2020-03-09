@@ -4,13 +4,14 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultat
 import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
-import java.time.LocalDate
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import java.time.LocalDateTime
 
 data class RestBehandling(val aktiv: Boolean,
                           val behandlingId: Long,
                           val type: BehandlingType,
                           val status: BehandlingStatus,
+                          val steg: StegType,
                           val kategori: BehandlingKategori,
                           val personer: List<RestPerson>,
                           val opprettetTidspunkt: LocalDateTime,
@@ -24,7 +25,7 @@ fun SamletVilkårResultat.toRestSamletVilkårResultat() = this.samletVilkårResu
     RestVilkårResultat(vilkårType = it.vilkårType, utfallType = it.utfallType, personIdent = it.person.personIdent.ident)
 }
 
-data class RestVilkårResultat (
+data class RestVilkårResultat(
         val personIdent: String,
         val vilkårType: VilkårType,
         val utfallType: UtfallType

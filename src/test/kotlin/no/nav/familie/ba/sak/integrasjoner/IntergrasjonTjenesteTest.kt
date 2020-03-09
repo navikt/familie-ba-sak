@@ -282,7 +282,7 @@ class IntergrasjonTjenesteTest {
         return OpprettOppgave(ident = OppgaveIdent(ident = "test", type = IdentType.Aktør),
                               saksId = "123",
                               tema = Tema.BAR,
-                              oppgavetype =  Oppgavetype.BehandleSak,
+                              oppgavetype = Oppgavetype.BehandleSak,
                               fristFerdigstillelse = LocalDate.now(),
                               beskrivelse = "test",
                               enhetsnummer = "1234",

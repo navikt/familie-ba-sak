@@ -17,6 +17,7 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class ArbeidsfordelingServiceTest {
+
     @MockK
     lateinit var behandlingRepository: BehandlingRepository
 
@@ -42,7 +43,7 @@ class ArbeidsfordelingServiceTest {
                 underkategori = BehandlingUnderkategori.ORDINÆR
         )
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) }
-                .returns (PersonopplysningGrunnlag(behandlingId = 0))
+                .returns(PersonopplysningGrunnlag(behandlingId = 0))
 
         arbeidsfordelingService.hentBehandlendeEnhet(fagsak)
     }
