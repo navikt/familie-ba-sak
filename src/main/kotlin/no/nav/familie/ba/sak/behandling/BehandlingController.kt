@@ -28,21 +28,9 @@ import org.springframework.web.bind.annotation.RestController
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService) {
 
-    private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> =
-            BehandlingType.values().map {
-                it to Metrics.counter("behandling.opprettet.manuell", "type",
-                                      it.name,
-                                      "beskrivelse",
-                                      it.beskrivelse)
-            }.toMap()
+    private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("manuell")
 
-    private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> =
-            BehandlingType.values().map {
-                it to Metrics.counter("behandling.opprettet.automatisk", "type",
-                                      it.name,
-                                      "beskrivelse",
-                                      it.beskrivelse)
-            }.toMap()
+    private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("automatisk")
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
     val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -100,6 +88,14 @@ class BehandlingController(private val fagsakService: FagsakService,
                 )
     }
 
+    private fun initBehandlingMetrikker(type: String): Map<BehandlingType, Counter> {
+        return BehandlingType.values().map {
+            it to Metrics.counter("behandling.opprettet.$type", "type",
+                                  it.name,
+                                  "beskrivelse",
+                                  it.beskrivelse)
+        }.toMap()
+    }
 }
 
 class NyBehandling(

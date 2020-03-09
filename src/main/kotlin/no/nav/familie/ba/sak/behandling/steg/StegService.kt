@@ -21,23 +21,10 @@ class StegService(
         private val behandlingService: BehandlingService,
         private val steg: List<BehandlingSteg<*>>
 ) {
-    private val stegSuksessMetrics: Map<StegType, Counter> =
-            steg.map {
-                it.stegType() to Metrics.counter("behandling.steg.utfort",
-                                                 "steg",
-                                                 it.stegType().name,
-                                                 "beskrivelse",
-                                                 it.stegType().beskrivelse)
-            }.toMap()
-    private final val stegFeiletMetrics: Map<StegType, Counter> =
-            steg.map {
-                it.stegType() to Metrics.counter("behandling.steg.feil",
-                                                 "steg",
-                                                 it.stegType().name,
-                                                 "beskrivelse",
-                                                 it.stegType().beskrivelse)
-            }.toMap()
 
+    private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
+
+    private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
 
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
@@ -117,8 +104,18 @@ class StegService(
         }
     }
 
-    fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
+    private fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
         return steg.firstOrNull { it.stegType() == stegType }
+    }
+
+    private fun initStegMetrikker(type: String): Map<StegType, Counter> {
+        return steg.map {
+            it.stegType() to Metrics.counter("behandling.steg.$type",
+                                             "steg",
+                                             it.stegType().name,
+                                             "beskrivelse",
+                                             it.stegType().beskrivelse)
+        }.toMap()
     }
 
     companion object {
