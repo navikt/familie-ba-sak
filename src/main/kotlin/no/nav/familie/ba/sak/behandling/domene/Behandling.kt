@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.domene
 
+import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
 
@@ -41,11 +43,15 @@ data class Behandling(
         var status: BehandlingStatus = BehandlingStatus.OPPRETTET,
 
         @Enumerated(EnumType.STRING)
+        @Column(name = "steg", nullable = false)
+        var steg: StegType = initSteg,
+
+        @Enumerated(EnumType.STRING)
         @Column(name = "resultat", nullable = false)
-        val resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
+        var resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
 
         @Column(name = "begrunnelse", columnDefinition = "TEXT")
-        val begrunnelse: String = ""
+        var begrunnelse: String = ""
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -62,12 +68,12 @@ fun BehandlingResultat.toDokGenTemplate(): String {
     }
 }
 
-enum class BehandlingType {
-    FØRSTEGANGSBEHANDLING,
-    REVURDERING,
-    MIGRERING_FRA_INFOTRYGD,
-    KLAGE,
-    MIGRERING_FRA_INFOTRYGD_OPPHØRT
+enum class BehandlingType(val beskrivelse: String) {
+    FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
+    REVURDERING("Revurdering"),
+    MIGRERING_FRA_INFOTRYGD("Migrering fra infotrygd"),
+    KLAGE("Klage"),
+    MIGRERING_FRA_INFOTRYGD_OPPHØRT("Opphør migrering fra infotrygd")
 }
 
 enum class BehandlingResultat {

@@ -1,0 +1,114 @@
+package no.nav.familie.ba.sak.behandling.steg
+
+import io.mockk.every
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
+
+@SpringBootTest
+@ActiveProfiles("dev")
+class RegistrerPersongrunnlagTest(
+        @Autowired
+        private val stegService: StegService,
+
+        @Autowired
+        private val fagsakService: FagsakService,
+
+        @Autowired
+        private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+
+        @Autowired
+        private val integrasjonClient: IntegrasjonClient
+) {
+
+    @Test
+    @Tag("integration")
+    fun `Legg til personer på behandling`() {
+        val morId = randomFnr()
+        val barn1Id = randomFnr()
+        val barn2Id = randomFnr()
+
+        listOf(morId, barn1Id, barn2Id).map {
+            every {
+                integrasjonClient.hentAktørId(it)
+            } returns randomAktørId()
+        }
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
+        val behandling1 =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        stegService.håndterPersongrunnlag(behandling = behandling1,
+                                          registreringsdata = Registreringsdata(ident = morId,
+                                                                                barnasIdenter = listOf(barn1Id, barn2Id)))
+
+        val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
+
+        Assertions.assertTrue(grunnlag1!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
+        Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn2Id })
+        Assertions.assertEquals(3, grunnlag1.personer.size)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Legg til barn på eksisterende behandling`() {
+        val morId = randomFnr()
+        val barn1Id = randomFnr()
+        val barn2Id = randomFnr()
+
+        listOf(morId, barn1Id, barn2Id).map {
+            every {
+                integrasjonClient.hentAktørId(it)
+            } returns randomAktørId()
+        }
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
+        val behandling1 =
+                behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        stegService.håndterPersongrunnlag(behandling = behandling1,
+                                          registreringsdata = Registreringsdata(ident = morId,
+                                                                                barnasIdenter = listOf(barn1Id)))
+
+        val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
+
+        Assertions.assertTrue(grunnlag1!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
+        Assertions.assertEquals(2, grunnlag1.personer.size)
+
+        stegService.håndterPersongrunnlag(behandling = behandling1,
+                                          registreringsdata = Registreringsdata(ident = morId,
+                                                                                barnasIdenter = listOf(barn1Id, barn2Id)))
+
+        val grunnlag2 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
+
+        Assertions.assertTrue(grunnlag2!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertTrue(grunnlag2.personer.any { it.personIdent.ident == barn1Id })
+        Assertions.assertTrue(grunnlag2.personer.any { it.personIdent.ident == barn2Id })
+        Assertions.assertEquals(3, grunnlag2.personer.size)
+
+        // Skal ikke føre til flere personer på persongrunnlaget
+        stegService.håndterPersongrunnlag(behandling = behandling1,
+                                          registreringsdata = Registreringsdata(ident = morId,
+                                                                                barnasIdenter = listOf(barn1Id, barn2Id)))
+
+        val grunnlag3 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
+
+        Assertions.assertTrue(grunnlag3!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == barn1Id })
+        Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == barn2Id })
+        Assertions.assertEquals(3, grunnlag3.personer.size)
+    }
+}

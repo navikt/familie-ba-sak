@@ -21,10 +21,9 @@ class IntegrasjonOnBehalfClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") priv
 
     val tilgangUri = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()
 
-    fun sjekkTilgangTilPersoner(personer: List<Person>): List<Tilgang> {
+    fun sjekkTilgangTilPersoner(personer: Set<Person>): List<Tilgang> {
         val identer = personer.map { it.personIdent.ident }
         return postForEntity(tilgangUri, identer)!!
-
     }
 
     companion object {

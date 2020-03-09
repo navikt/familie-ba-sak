@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Fagsak
 import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
@@ -73,6 +72,7 @@ class FagsakService(
                     personer = personopplysningGrunnlag.personer.map { it.toRestPerson() },
                     type = it.type,
                     status = it.status,
+                    steg = it.steg,
                     samletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(it.id)
                                                    ?.toRestSamletVilkårResultat() ?: emptyList(),
                     opprettetTidspunkt = it.opprettetTidspunkt,
