@@ -14,6 +14,10 @@ data class Personinfo(
 )
 
 data class Familierelasjoner(
-        val personIdent: String,
+        val personIdent: Personident,
         val relasjonsrolle: String
+)
+
+data class Personident(
+        val id: String
 )
