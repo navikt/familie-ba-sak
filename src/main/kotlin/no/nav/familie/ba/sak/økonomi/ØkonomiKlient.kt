@@ -71,7 +71,8 @@ class ØkonomiKlient(
                 HttpEntity<String>(headers))
     }
 
-    fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime, oppdragTilAvstemming: List<OppdragId>): ResponseEntity<Ressurs<String>> {
+    fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime,
+                                oppdragTilAvstemming: List<OppdragId>): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders().medContentTypeJsonUTF8()
 
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))

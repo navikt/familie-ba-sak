@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.validering
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import org.slf4j.LoggerFactory
@@ -21,10 +21,10 @@ class Fagsaktilgang(private val behandlingRepository: BehandlingRepository,
     @Transactional
     override fun isValid(fagsakId: Long, ctx: ConstraintValidatorContext): Boolean {
 
-        val personer = behandlingRepository.finnBehandlinger(fagsakId)
+        val personer: Set<Person> = behandlingRepository.finnBehandlinger(fagsakId)
                 .mapNotNull { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it.id)?.personer }
                 .flatten()
-                .distinct()
+                .toSet()
 
         integrasjonOnBehalfClient.sjekkTilgangTilPersoner(personer)
                 .filterNot { it.harTilgang }

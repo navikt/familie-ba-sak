@@ -1,11 +1,11 @@
-package no.nav.familie.ba.sak.mottak
+package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -20,10 +20,11 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BehandlingController(private val behandlingService: BehandlingService,
-                           private val fagsakService: FagsakService) {
+class BehandlingController(private val fagsakService: FagsakService,
+                           private val stegService: StegService) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @PostMapping(path = ["behandlinger"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
@@ -35,15 +36,17 @@ class BehandlingController(private val behandlingService: BehandlingService,
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure("Søkers ident kan ikke være blank"))
         }
 
-        if (nyBehandling.barnasIdenter.filter { it.isBlank() }.isNotEmpty()) {
+        if (nyBehandling.barnasIdenter.any { it.isBlank() }) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure("Minst et av barna mangler ident"))
         }
 
-        return Result.runCatching { behandlingService.opprettBehandling(nyBehandling) }
+        return Result.runCatching { stegService.håndterNyBehandling(nyBehandling) }
                 .fold(
                         onFailure = {
-                            logger.info("Opprettelse av behandling feilet", it)
-                            ResponseEntity.badRequest().body(Ressurs.failure(it.cause?.message ?: it.message, it))
+                            logger.error("Opprettelse av behandling feilet")
+                            secureLogger.info("Opprettelse av behandling feilet", it)
+                            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body(Ressurs.failure(it.cause?.message ?: it.message, it))
                         },
                         onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(fagsakService.hentRestFagsak (fagsakId = it.id)) }
                 )
@@ -56,14 +59,15 @@ class BehandlingController(private val behandlingService: BehandlingService,
 
         logger.info("{} oppretter ny behandling fra hendelse", saksbehandlerId)
 
-        return Result.runCatching { behandlingService.opprettEllerOppdaterBehandlingFraHendelse(nyBehandling) }
+        return Result.runCatching { stegService.håndterNyBehandlingFraHendelse(nyBehandling) }
                 .fold(
                         onFailure = {
-                            logger.info("Opprettelse av behandling fra hendelse feilet", it)
+                            logger.info("Opprettelse av behandling fra hendelse feilet")
+                            secureLogger.info("Opprettelse av behandling fra hendelse feilet", it)
                             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                     .body(Ressurs.failure(it.message, it))
                         },
-                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.id)) }
+                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id)) }
                 )
     }
 
@@ -75,7 +79,7 @@ class NyBehandling(
         val søkersIdent: String,
         val barnasIdenter: List<String>,
         val behandlingType: BehandlingType,
-        val journalpostID: String?)
+        val journalpostID: String? = null)
 
 class NyBehandlingHendelse(
         val søkersIdent: String,

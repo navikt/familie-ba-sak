@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
+import no.nav.familie.ba.sak.økonomi.AvstemmingService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -42,7 +42,7 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
     fun nesteAvstemmingDTO(nesteDag: LocalDate, antallDager: Int): GrensesnittavstemmingTaskDTO {
         return if (erHelgEllerHelligdag(nesteDag)) nesteAvstemmingDTO(nesteDag.plusDays(1), antallDager + 1)
         else GrensesnittavstemmingTaskDTO(nesteDag.minusDays(antallDager.toLong()).atStartOfDay(),
-                                                                                            nesteDag.atStartOfDay())
+                                          nesteDag.atStartOfDay())
     }
 
     private fun erHelgEllerHelligdag(dato: LocalDate): Boolean {

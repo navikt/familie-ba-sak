@@ -9,7 +9,7 @@ import java.util.*
 import javax.persistence.LockModeType
 
 @Repository
-interface BatchRepository: JpaRepository<Batch, Long> {
+interface BatchRepository : JpaRepository<Batch, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
     fun save(batch: Batch): Batch

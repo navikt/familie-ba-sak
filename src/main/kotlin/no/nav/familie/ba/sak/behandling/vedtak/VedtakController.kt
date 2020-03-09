@@ -6,12 +6,10 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.RessursResponse
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -21,6 +19,7 @@ import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -34,10 +33,9 @@ import java.time.LocalDate
 class VedtakController(
         private val behandlingService: BehandlingService,
         private val toTrinnKontrollService: ToTrinnKontrollService,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vedtakService: VedtakService,
         private val fagsakService: FagsakService,
-        private val vilkårService: VilkårService,
+        private val stegService: StegService,
         private val taskRepository: TaskRepository
 ) {
 
@@ -46,32 +44,19 @@ class VedtakController(
                                    @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
-        FagsakController.logger.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
+        LOG.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
-        var behandling = behandlingService.hentAktivForFagsak(fagsakId)
+        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
 
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                                       ?: return RessursResponse.notFound(
-                                               "Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
-
         return Result.runCatching {
-            behandling = behandlingService.settVilkårsvurdering(behandling,
-                                                                restVilkårsvurdering.resultat,
-                                                                restVilkårsvurdering.begrunnelse)
-            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
-                                                    restVilkårsvurdering.samletVilkårResultat,
-                                                    behandling.id)
-
-            vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(behandling,
-                                                                     personopplysningGrunnlag,
-                                                                     restVilkårsvurdering.samletVilkårResultat,
-                                                                     ansvarligSaksbehandler = saksbehandlerId)
-        }
+                    stegService.håndterVilkårsvurdering(behandling, restVilkårsvurdering)
+                }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
                         onFailure = { e ->
-                            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure(e.cause?.message ?: e.message, e))
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                    .body(Ressurs.failure(e.cause?.message ?: e.message, e))
                         }
                 )
     }
@@ -80,7 +65,7 @@ class VedtakController(
     fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
-        FagsakController.logger.info("{} sender behandling til beslutter for fagsak med id {}", saksbehandlerId, fagsakId)
+        LOG.info("{} sender behandling til beslutter for fagsak med id {}", saksbehandlerId, fagsakId)
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
@@ -114,9 +99,9 @@ class VedtakController(
             return RessursResponse.badRequest("Behandlingen er allerede iverksatt/ferdigstilt")
         }
 
-        FagsakController.logger.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}",
-                                     saksbehandlerId,
-                                     fagsakId)
+        LOG.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}",
+                 saksbehandlerId,
+                 fagsakId)
 
         return Result.runCatching { toTrinnKontrollService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
                 .fold(
@@ -153,9 +138,9 @@ class VedtakController(
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
-        FagsakController.logger.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}",
-                                     saksbehandlerId,
-                                     fagsakId)
+        LOG.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}",
+                 saksbehandlerId,
+                 fagsakId)
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
@@ -185,6 +170,10 @@ class VedtakController(
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
         val task = IverksettMotOppdrag.opprettTask(behandling, vedtak, saksbehandlerId)
         taskRepository.save(task)
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
 

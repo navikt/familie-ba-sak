@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype.*
-import no.nav.familie.ba.sak.økonomi.lagPersonVedtak
+import no.nav.familie.ba.sak.common.lagPersonVedtak
 import no.nav.familie.ba.sak.økonomi.lagSegmentBeløp
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -97,7 +97,6 @@ class BeregningTest {
             Assertions.assertEquals(forventedeSegmenter[index].tom, localDateSegment.tom, "Forskjell i til og med")
         }
     }
-
 }
 
 
