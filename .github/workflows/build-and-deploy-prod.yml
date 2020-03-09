@@ -1,11 +1,11 @@
-name: Deploy-Prod
+name: Build-Deploy-Prod
 on:
   push:
     tags:
       - 'v*'
 env:
   REF: ${{ github.ref }} # refs/tags/<tag>
-  IMAGE_UTEN_TAG: docker.pkg.github.com/navikt/${{ github.repository }}/${{ github.repository }}
+  IMAGE_UTEN_TAG: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak
 jobs:
   deploy-to-prod:
     name: Bygg app/image, push til github, deploy til prod-fss og dev-fss
