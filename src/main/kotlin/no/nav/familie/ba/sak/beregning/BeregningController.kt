@@ -31,7 +31,7 @@ class BeregningController(
 ) {
 
     @PutMapping(path = ["/{vedtakId}/beregning"])
-    fun oppdaterVedtakMedBeregning(@PathVariable @FagsaktilgangConstraint vedtakId: Long,
+    fun oppdaterVedtakMedBeregning(@PathVariable @VedtaktilgangConstraint vedtakId: Long,
                                    @RequestBody nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
