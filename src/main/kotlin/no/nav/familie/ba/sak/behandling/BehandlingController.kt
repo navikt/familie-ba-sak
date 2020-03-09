@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
@@ -26,6 +28,10 @@ import org.springframework.web.bind.annotation.RestController
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService) {
 
+    private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("manuell")
+
+    private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("automatisk")
+
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
     val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -51,7 +57,11 @@ class BehandlingController(private val fagsakService: FagsakService,
                             ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                     .body(Ressurs.failure(it.cause?.message ?: it.message, it))
                         },
-                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id)) }
+                        onSuccess = {
+                            val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
+                            antallManuelleBehandlingerOpprettet[nyBehandling.behandlingType]?.increment()
+                            return restFagsak
+                        }
                 )
     }
 
@@ -70,10 +80,22 @@ class BehandlingController(private val fagsakService: FagsakService,
                             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                     .body(Ressurs.failure(it.message, it))
                         },
-                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id)) }
+                        onSuccess = {
+                            val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
+                            antallAutomatiskeBehandlingerOpprettet[BehandlingType.FØRSTEGANGSBEHANDLING]?.increment()
+                            return restFagsak
+                        }
                 )
     }
 
+    private fun initBehandlingMetrikker(type: String): Map<BehandlingType, Counter> {
+        return BehandlingType.values().map {
+            it to Metrics.counter("behandling.opprettet.$type", "type",
+                                  it.name,
+                                  "beskrivelse",
+                                  it.beskrivelse)
+        }.toMap()
+    }
 }
 
 class NyBehandling(
