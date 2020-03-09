@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.logg
 
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
-import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity(name = "Logg")
@@ -11,6 +12,12 @@ data class Logg(
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "logg_seq_generator")
         @SequenceGenerator(name = "logg_seq_generator", sequenceName = "logg_seq", allocationSize = 50)
         val id: Long = 0,
+
+        @Column(name = "opprettet_av", nullable = false, updatable = false)
+        val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
+
+        @Column(name = "opprettet_tid", nullable = false, updatable = false)
+        val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
 
         @Column(name = "fk_behandling_id")
         val behandlingId: Long,
@@ -22,7 +29,8 @@ data class Logg(
         @Column(name = "tittel")
         val tittel: String,
 
-        @Enumerated(EnumType.STRING) @Column(name = "rolle")
+        @Enumerated(EnumType.STRING)
+        @Column(name = "rolle")
         val rolle: BehandlerRolle,
 
         /**
@@ -30,7 +38,7 @@ data class Logg(
          */
         @Column(name = "tekst")
         val tekst: String
-) : BaseEntitet()
+)
 
 enum class LoggType {
     BEHANDLING_OPPRETTET

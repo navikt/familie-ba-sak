@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-// TODO: endre til dokument eller flytt til vedtak
 @RestController
 @RequestMapping("/api/dokument")
 @ProtectedWithClaims(issuer = "azuread")
