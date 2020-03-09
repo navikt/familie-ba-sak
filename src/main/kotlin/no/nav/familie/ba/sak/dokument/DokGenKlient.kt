@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.DokumentRequest
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -76,6 +77,7 @@ class DokGenKlient(
 
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
         val url = URI.create("$dokgenServiceUri/template/$malNavn/create-markdown")
+        LOG.info("hent markdown fra: "+ url)
         val response = utførRequest(lagPostRequest(url, fletteFelter), String::class.java)
         return response.body.orEmpty()
     }
@@ -115,5 +117,9 @@ class DokGenKlient(
 
     protected fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
         return restTemplate.exchange(request, responseType)
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

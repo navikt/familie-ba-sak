@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
 @RestController
-@RequestMapping("/api/fagsak")
+@RequestMapping("/api/fagsaker")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtakController(
@@ -112,7 +112,7 @@ class VedtakController(
                             opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
 
                             return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
-                                    onSuccess = { ResponseEntity.ok(it) },
+                                    onSuccess = { ResponseEntity.status(HttpStatus.ACCEPTED).body(it) },
                                     onFailure = {
                                         ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                                 .body(Ressurs.failure(it.cause?.message ?: it.message, it))
