@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
@@ -19,13 +18,11 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 
-// TODO: endre til beregning
 @RestController
 @RequestMapping("/api/vedtak")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BeregningController(
-        private val behandlingService: BehandlingService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vedtakService: VedtakService
 ) {
