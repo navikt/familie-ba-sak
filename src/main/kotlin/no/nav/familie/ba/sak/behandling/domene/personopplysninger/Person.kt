@@ -23,6 +23,12 @@ data class Person(
         @Column(name = "foedselsdato", nullable = false)
         val fødselsdato: LocalDate,
 
+        @Column(name = "navn", nullable = false)
+        val navn: String = "",
+
+        @Enumerated(EnumType.STRING) @Column(name = "kjoenn", nullable = false)
+        val kjønn: Kjønn = Kjønn.UKJENT,
+
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident",
                                               column = Column(name = "person_ident", updatable = false)))
@@ -54,4 +60,8 @@ data class Person(
     override fun hashCode(): Int {
         return Objects.hash(aktørId, fødselsdato)
     }
+}
+
+enum class Kjønn {
+    MANN, KVINNE, UKJENT
 }
