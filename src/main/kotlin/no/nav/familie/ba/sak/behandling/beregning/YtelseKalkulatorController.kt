@@ -31,15 +31,15 @@ class YtelseKalkulatorController {
     }
 
     private fun kalkulerYtelser(personligeYtelser: List<PersonligYtelseForPeriode>): YtelseKalkulatorResponse {
-        var gjeldendeMåned = personligeYtelser.map { it.stønadFraOgMed }.min()!!
-        val størsteTomMåned = personligeYtelser.map { it.stønadTilOgMed }.max()!!
+        var gjeldendeMåned = personligeYtelser.map { it.stønadFom }.min()!!
+        val størsteTomMåned = personligeYtelser.map { it.stønadTom }.max()!!
 
         val alleMånedersTotalePersonligeYtelser: MutableList<MånedensTotalePersonligeYtelser> = ArrayList()
 
         while (gjeldendeMåned < størsteTomMåned) {
 
             val personligeYtelserMedBeløpDenneMåned = personligeYtelser
-                    .filter { it.stønadFraOgMed <= gjeldendeMåned && it.stønadTilOgMed >= gjeldendeMåned }
+                    .filter { it.stønadFom <= gjeldendeMåned && it.stønadTom >= gjeldendeMåned }
                     .map { PersonligYtelseMedBeløp(it.personligYtelse!!, dummySatsService(it.personligYtelse!!, it.beløp)) }
 
             val sumYtelserDenneMåned = personligeYtelserMedBeløpDenneMåned.map { it.beløp }.sum()
@@ -68,11 +68,12 @@ class YtelseKalkulatorController {
         return response
     }
 
+    @Deprecated("Må ersttates av den VIRKELIGE tjenesten")
     fun dummySatsService(personligeYtelse: PersonligYtelse, fastsattBeløp: Int?): Int {
         return when (personligeYtelse.ytelsetype) {
-            Ytelsetype.UTVIDET_BARNETRYGD -> if(personligeYtelse.fullYtelse) 1054 else 527
-            Ytelsetype.ORDINÆR_BARNETRYGD -> if(personligeYtelse.fullYtelse) 1054 else 527
-            Ytelsetype.SMÅBARNSTILLEGG -> if(personligeYtelse.fullYtelse) 660 else 330
+            Ytelsetype.UTVIDET_BARNETRYGD -> if(personligeYtelse.halvYtelse) 527 else 1054
+            Ytelsetype.ORDINÆR_BARNETRYGD -> if(personligeYtelse.halvYtelse) 527 else 1054
+            Ytelsetype.SMÅBARNSTILLEGG -> if(personligeYtelse.halvYtelse) 330 else 660
             else -> fastsattBeløp ?: 0
         }
     }
@@ -81,14 +82,14 @@ class YtelseKalkulatorController {
 data class PersonligYtelse (
         val personident: String,
         val ytelsetype: Ytelsetype,
-        val fullYtelse: Boolean = true
+        val halvYtelse: Boolean = false
 )
 
 data class PersonligYtelseForPeriode(
         @JsonIgnore private val _personligYtelse: PersonligYtelse?,
         val beløp: Int?,
-        val stønadFraOgMed: YearMonth,
-        val stønadTilOgMed: YearMonth
+        val stønadFom: YearMonth,
+        val stønadTom: YearMonth
 ) {
     @field:JsonUnwrapped
     val personligYtelse: PersonligYtelse? = _personligYtelse
@@ -136,7 +137,7 @@ private class HtmlTabell {
 
             builder.append("<table>")
             builder.append(header
-                                   .map { "${it.personident} ${it.ytelsetype} ${tilProsent(it.fullYtelse)}" }
+                                   .map { "${it.personident} ${it.ytelsetype} ${tilProsent(!it.halvYtelse)}" }
                                    .joinToString("</th><th>", "<tr><th>Periode</th><th>Total</th><th>", "</th></tr>"))
             builder.append(personYtelseSum.joinToString("</td><td>", "<tr><td>Alle</td><td>$totalbeløp</td><td>", "</td></tr>"))
 
