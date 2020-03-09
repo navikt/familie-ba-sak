@@ -79,7 +79,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         if (personinfo.familierelasjoner.equals(personinfoForSammenlign?.familierelasjoner)) {
             logger.info("Familierelasjoner fra PDL og TPS var identiske.")
         } else {
-            logger.warn("Familierelasjoner fra PDL og TPS var ulike")
+            logger.warn("Familierelasjoner fra PDL og TPS var ulike. Hoved: {} Sammenligning: {} ",
+                        personinfo.familierelasjoner.map { relasjon -> relasjon.relasjonsrolle },
+                        personinfoForSammenlign?.familierelasjoner?.map { relasjon -> relasjon.relasjonsrolle })
         }
     }
 
