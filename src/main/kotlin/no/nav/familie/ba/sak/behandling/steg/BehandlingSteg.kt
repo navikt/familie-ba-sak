@@ -17,7 +17,7 @@ enum class StegType(val tillattFor: List<BehandlerRolle>, val beskrivelse: Strin
     REGISTRERE_PERSONGRUNNLAG(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
                               beskrivelse = "Registrere persongrunnlag"),
     VILKÅRSVURDERING(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER), beskrivelse = "Vilkårsvurdering"),
-    FATTE_VEDTAK(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER), beskrivelse = "Fatte vedtak"),
+    FORESLÅ_VEDTAK(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER), beskrivelse = "Foreslå vedtak"),
     GODKJENNE_VEDTAK(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER), beskrivelse = "Godkjenne vedtak"),
 }
 
