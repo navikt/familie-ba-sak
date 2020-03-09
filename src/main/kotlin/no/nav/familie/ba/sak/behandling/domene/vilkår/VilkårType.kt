@@ -8,9 +8,9 @@ enum class VilkårType(val beskrivelse: String,
                       val lovreferanse: String) {
 
     UNDER_18_ÅR_OG_BOR_MED_SØKER(beskrivelse = "Er under 18 år og bor med søker",
-                parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
-                sakstyperDetteGjelderFor = emptyList(),
-                lovreferanse = "§2"),
+                                 parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+                                 sakstyperDetteGjelderFor = emptyList(),
+                                 lovreferanse = "§2"),
     BOSATT_I_RIKET(beskrivelse = "Bosatt i riket",
                    parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN, PersonType.SØKER),
                    sakstyperDetteGjelderFor = emptyList(),
