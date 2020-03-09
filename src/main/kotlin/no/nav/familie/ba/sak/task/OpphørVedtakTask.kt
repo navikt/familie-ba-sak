@@ -28,10 +28,10 @@ class OpphørVedtakTask(
 
         LOG.debug("Opphører behandling og tilhørende vedtak med behandlingsId ${opphørVedtakTask.gjeldendeBehandlingsId}")
         vedtakService.opphørVedtak(opphørVedtakTask.saksbehandlerId,
-                                       opphørVedtakTask.gjeldendeBehandlingsId,
-                                       BehandlingType.valueOf(opphørVedtakTask.nyBehandlingType),
-                                       opphørVedtakTask.opphørsdato,
-                                       ::opprettIverksettMotOppdragTask)
+                                   opphørVedtakTask.gjeldendeBehandlingsId,
+                                   BehandlingType.valueOf(opphørVedtakTask.nyBehandlingType),
+                                   opphørVedtakTask.opphørsdato,
+                                   ::opprettIverksettMotOppdragTask)
     }
 
     fun opprettIverksettMotOppdragTask(vedtak: Vedtak) {
@@ -52,7 +52,7 @@ class OpphørVedtakTask(
                                     gjeldendeVedtak: Vedtak,
                                     saksbehandlerId: String,
                                     nyBehandlingstype: BehandlingType,
-                                    opphørsdato: LocalDate) : Task {
+                                    opphørsdato: LocalDate): Task {
 
             return Task.nyTask(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(OpphørVedtakTaskDTO(
@@ -77,7 +77,7 @@ data class OpphørVedtakTaskDTO(
         val personIdent: String,
         val gjeldendeBehandlingsId: Long,
         val gjeldendeVedtaksId: Long,
-        val saksbehandlerId : String,
-        val nyBehandlingType : String,
+        val saksbehandlerId: String,
+        val nyBehandlingType: String,
         val opphørsdato: LocalDate
 )

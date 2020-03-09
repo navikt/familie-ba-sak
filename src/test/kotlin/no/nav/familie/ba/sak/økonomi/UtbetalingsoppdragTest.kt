@@ -2,6 +2,9 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype.*
+import no.nav.familie.ba.sak.common.dato
+import no.nav.familie.ba.sak.common.lagPersonVedtak
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -65,11 +68,11 @@ internal class UtbetalingsoppdragPeriodiseringTest {
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(vedtak)
 
-        val segment = LocalDateSegment(now(), now().plusDays(1),100)
-        utbetalingsperiodeMal.lagPeriode("A", segment,999) //OK
+        val segment = LocalDateSegment(now(), now().plusDays(1), 100)
+        utbetalingsperiodeMal.lagPeriode("A", segment, 999) //OK
 
         assertThrows<IllegalArgumentException> {
-            utbetalingsperiodeMal.lagPeriode("A", segment,1000)
+            utbetalingsperiodeMal.lagPeriode("A", segment, 1000)
         }
     }
 

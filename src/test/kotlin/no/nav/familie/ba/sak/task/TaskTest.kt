@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.util.DbContainerInitializer
+import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import org.junit.jupiter.api.Assertions

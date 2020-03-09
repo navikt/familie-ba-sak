@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -68,11 +69,11 @@ internal class FagsaktilgangTest {
     private val personopplysningsgrunnlag =
             PersonopplysningGrunnlag(1,
                                      1,
-                                     mutableListOf(Person(1,
-                                                          PersonType.SØKER,
-                                                          LocalDate.of(1984, 12, 16),
-                                                          PersonIdent("1984121632121"),
-                                                          PersonopplysningGrunnlag(1, 1))),
+                                     mutableSetOf(Person(1,
+                                                         PersonType.SØKER,
+                                                         LocalDate.of(1984, 12, 16),
+                                                         PersonIdent(randomFnr()),
+                                                         PersonopplysningGrunnlag(1, 1))),
                                      true)
 
     private val behandlinger = listOf(Behandling(id = 1,

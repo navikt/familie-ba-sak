@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.util
+package no.nav.familie.ba.sak.common
 
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer

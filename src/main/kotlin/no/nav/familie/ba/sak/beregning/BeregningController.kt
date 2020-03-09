@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
@@ -56,10 +56,10 @@ class BeregningController(
                                        ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         return Result.runCatching {
-            vedtakService.oppdaterAktivVedtakMedBeregning(vedtak,
-                                                          personopplysningGrunnlag,
-                                                          nyBeregning)
-        }
+                    vedtakService.oppdaterAktivVedtakMedBeregning(vedtak,
+                                                                  personopplysningGrunnlag,
+                                                                  nyBeregning)
+                }
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },
                         onFailure = { e ->
@@ -79,5 +79,5 @@ data class BarnBeregning(
         val ident: String,
         val beløp: Int,
         val stønadFom: LocalDate,
-        val ytelsetype : Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
+        val ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
 )
