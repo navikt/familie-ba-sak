@@ -48,7 +48,7 @@ class BehandlingController(private val fagsakService: FagsakService,
                             ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                     .body(Ressurs.failure(it.cause?.message ?: it.message, it))
                         },
-                        onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(fagsakService.hentRestFagsak (fagsakId = it.id)) }
+                        onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(fagsakService.hentRestFagsak (fagsakId = it.fagsak.id)) }
                 )
     }
 
