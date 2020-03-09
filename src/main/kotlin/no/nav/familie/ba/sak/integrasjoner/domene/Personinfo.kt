@@ -10,7 +10,7 @@ data class Personinfo(
         val diskresjonskode: String? = null,
         val navn: String? = null,
         val kjønn: String? = null,
-        val familierelasjoner: Set<Familierelasjoner>? = emptySet()
+        val familierelasjoner: Set<Familierelasjoner> = emptySet()
 )
 
 data class Familierelasjoner(
