@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.validering
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
@@ -22,10 +21,10 @@ class Vedtaktilgang(private val vedtakRepository: VedtakRepository,
     override fun isValid(vedtakId: Long, ctx: ConstraintValidatorContext): Boolean {
 
         val personer = vedtakRepository.findById(vedtakId)
-                .map{ personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it.behandling.id)?.personer }
+                .map { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it.behandling.id)?.personer }
 
-        if(personer.isEmpty){
-            return false;
+        if (personer.isEmpty) {
+            return false
         }
 
         integrasjonOnBehalfClient.sjekkTilgangTilPersoner(personer.get())
