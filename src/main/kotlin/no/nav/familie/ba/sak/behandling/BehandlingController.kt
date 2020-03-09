@@ -16,13 +16,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/behandling")
+@RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BehandlingController(private val fagsakService: FagsakService,
@@ -35,7 +32,7 @@ class BehandlingController(private val fagsakService: FagsakService,
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
     val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    @PostMapping(path = ["/ny-behandling"])
+    @PostMapping(path = ["behandlinger"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
@@ -65,7 +62,7 @@ class BehandlingController(private val fagsakService: FagsakService,
                 )
     }
 
-    @PostMapping(path = ["/opprettfrahendelse"])
+    @PutMapping(path = ["behandlinger"])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
