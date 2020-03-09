@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.steg
 
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
