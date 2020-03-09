@@ -9,5 +9,11 @@ data class Personinfo(
         val geografiskTilknytning: String? = null,
         val diskresjonskode: String? = null,
         val navn: String? = null,
-        val kjønn: String? = null
+        val kjønn: String? = null,
+        val familierelasjoner: Set<Familierelasjoner>? = emptySet()
+)
+
+data class Familierelasjoner(
+        val personIdent: String,
+        val relasjonsrolle: String
 )
