@@ -17,7 +17,7 @@ import org.springframework.retry.annotation.EnableRetry
 @EnableJpaAuditing
 @EnableJpaRepositories("no.nav.familie.prosessering", ApplicationConfig.pakkenavn)
 @EntityScan("no.nav.familie.prosessering", ApplicationConfig.pakkenavn)
-@ComponentScan(ApplicationConfig.pakkenavn)
+@ComponentScan("no.nav.familie.prosessering", ApplicationConfig.pakkenavn)
 @EnableRetry
 @EnableJwtTokenValidation
 @EnableOAuth2Client(cacheEnabled = true)
