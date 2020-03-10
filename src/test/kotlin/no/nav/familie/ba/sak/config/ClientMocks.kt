@@ -62,3 +62,12 @@ class ClientMocks {
     }
 }
 
+fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, søkerFnr: String, barnFnr: String) {
+    every {
+        mockIntegrasjonClient.hentPersoninfoFor(eq(barnFnr))
+    } returns Personinfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "Barn Barnesen")
+
+    every {
+        mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr))
+    } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+}

@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -25,13 +27,18 @@ class StegServiceTest(
         private val behandlingService: BehandlingService,
 
         @Autowired
-        private val fagsakService: FagsakService
+        private val fagsakService: FagsakService,
+
+        @Autowired
+        private val mockIntegrasjonClient: IntegrasjonClient
 ) {
 
     @Test
     fun `Skal håndtere steg for ordinær behandling`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
+
+        mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))

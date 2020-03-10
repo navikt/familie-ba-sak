@@ -9,8 +9,8 @@ data class Personinfo(
         var fødselsdato: LocalDate,
         val geografiskTilknytning: String? = null,
         val diskresjonskode: String? = null,
-        val navn: String = "",
-        val kjønn: Kjønn = Kjønn.UKJENT,
+        val navn: String? = null,
+        val kjønn: Kjønn? = null,
         val familierelasjoner: Set<Familierelasjoner> = emptySet()
 )
 

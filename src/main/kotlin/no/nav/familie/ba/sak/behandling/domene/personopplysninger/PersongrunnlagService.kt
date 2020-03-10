@@ -47,8 +47,8 @@ class PersongrunnlagService(
                                personopplysningGrunnlag = personopplysningGrunnlag,
                                fødselsdato = personinfo.fødselsdato,
                                aktørId = behandling.fagsak.aktørId,
-                               navn = personinfo.navn,
-                               kjønn = personinfo.kjønn
+                               navn = personinfo.navn ?: "",
+                               kjønn = personinfo.kjønn ?: Kjønn.UKJENT
             )
 
             personopplysningGrunnlag.personer.add(søker)
@@ -69,8 +69,8 @@ class PersongrunnlagService(
                                          personopplysningGrunnlag = personopplysningGrunnlag,
                                          fødselsdato = personinfo.fødselsdato,
                                          aktørId = integrasjonClient.hentAktørId(nyttBarn),
-                                         navn = personinfo.navn,
-                                         kjønn = personinfo.kjønn
+                                         navn = personinfo.navn ?: "",
+                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT
             ))
         }
     }

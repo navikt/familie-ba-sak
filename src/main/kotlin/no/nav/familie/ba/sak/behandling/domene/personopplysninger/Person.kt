@@ -27,7 +27,7 @@ data class Person(
         val navn: String = "",
 
         @Enumerated(EnumType.STRING) @Column(name = "kjoenn", nullable = false)
-        val kjønn: Kjønn = Kjønn.UKJENT,
+        val kjønn: Kjønn,
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident",
