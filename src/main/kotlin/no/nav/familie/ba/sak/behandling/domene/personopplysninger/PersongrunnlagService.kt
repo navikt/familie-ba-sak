@@ -41,11 +41,14 @@ class PersongrunnlagService(
                                        ?: personopplysningGrunnlagRepository.save(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         if (personopplysningGrunnlag.personer.none { it.personIdent == behandling.fagsak.personIdent }) {
+            val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
             val søker = Person(personIdent = behandling.fagsak.personIdent,
                                type = PersonType.SØKER,
                                personopplysningGrunnlag = personopplysningGrunnlag,
-                               fødselsdato = integrasjonClient.hentPersoninfoFor(fødselsnummer).fødselsdato,
-                               aktørId = behandling.fagsak.aktørId
+                               fødselsdato = personinfo.fødselsdato,
+                               aktørId = behandling.fagsak.aktørId,
+                               navn = personinfo.navn ?: "",
+                               kjønn = personinfo.kjønn ?: Kjønn.UKJENT
             )
 
             personopplysningGrunnlag.personer.add(søker)
@@ -60,11 +63,14 @@ class PersongrunnlagService(
         return barnasFødselsnummer.filter { barn ->
             personopplysningGrunnlag.barna.none { eksisterendeBarn -> barn == eksisterendeBarn.personIdent.ident }
         }.map { nyttBarn ->
+            val personinfo = integrasjonClient.hentPersoninfoFor(nyttBarn)
             personRepository.save(Person(personIdent = PersonIdent(nyttBarn),
                                          type = PersonType.BARN,
                                          personopplysningGrunnlag = personopplysningGrunnlag,
-                                         fødselsdato = integrasjonClient.hentPersoninfoFor(nyttBarn).fødselsdato,
-                                         aktørId = integrasjonClient.hentAktørId(nyttBarn)
+                                         fødselsdato = personinfo.fødselsdato,
+                                         aktørId = integrasjonClient.hentAktørId(nyttBarn),
+                                         navn = personinfo.navn ?: "",
+                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT
             ))
         }
     }
