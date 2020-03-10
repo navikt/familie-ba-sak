@@ -84,6 +84,8 @@ class StegService(
             val behandlingEtterSteg = uførendeSteg()
             LOG.info("${SikkerhetContext.hentSaksbehandler()} har håndtert ${behandling.steg} på behandling ${behandling.id}")
 
+            stegSuksessMetrics[behandling.steg]?.increment()
+
             if (behandling.steg == sisteSteg) {
                 LOG.info("${SikkerhetContext.hentSaksbehandler()} er ferdig med stegprosess på behandling ${behandling.id}")
             } else {
@@ -91,8 +93,6 @@ class StegService(
 
                 behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id, steg = nesteSteg)
             }
-
-            stegSuksessMetrics[behandling.steg]?.increment()
 
             return behandlingEtterSteg
         } catch (exception: Exception) {

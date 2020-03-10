@@ -5,7 +5,7 @@ no.nav.security.jwt:
     cookie_name: azure_token
   client:
     registration:
-      ks-oppslag-onbehalfof:
+      familie-integrasjoner-onbehalfof:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
         token-endpoint-url: http://vtp:8060/rest/isso/oauth2/access_token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
@@ -14,8 +14,17 @@ no.nav.security.jwt:
           client-id: dummy
           client-secret: dummy
           client-auth-method: client_secret_basic
-      ks-oppslag-clientcredentials:
+      familie-integrasjoner-clientcredentials:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
+        token-endpoint-url: http://vtp:8060/rest/isso/oauth2/access_token
+        grant-type: client_credentials
+        scope: dummy
+        authentication:
+          client-id: dummy
+          client-secret: dummy
+          client-auth-method: client_secret_basic
+      familie-oppdrag-clientcredentials:
+        resource-url: ${FAMILIE_OPPDRAG_API_URL}
         token-endpoint-url: http://vtp:8060/rest/isso/oauth2/access_token
         grant-type: client_credentials
         scope: dummy
