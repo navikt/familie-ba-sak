@@ -99,7 +99,8 @@ class VedtakService(private val behandlingService: BehandlingService,
                         }
                         .fold(
                                 onSuccess = { it },
-                                onFailure = { e ->
+                                onFailure = {
+                                    LOG.error("dokgen feil: ", it as Exception)
                                     error("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.")
                                 }
                         ) else ""

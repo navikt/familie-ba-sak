@@ -13,13 +13,13 @@ class DokumentService(
         private val dokGenKlient: DokGenKlient
 ) {
 
-    fun hentHtmlVedtakForBehandling(behandlingId: Long): Ressurs<String> {
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
-                     ?: return Ressurs.failure("Vedtak ikke funnet")
+    fun hentHtmlForVedtak(vedtakId: Long): Ressurs<String> {
+
         val html = Result.runCatching {
-                    dokGenKlient.lagHtmlFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(),
-                                                    vedtak.stønadBrevMarkdown)
-                }
+            val vedtak = vedtakService.hent(vedtakId)
+            dokGenKlient.lagHtmlFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(),
+                                            vedtak.stønadBrevMarkdown)
+        }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
@@ -32,11 +32,11 @@ class DokumentService(
 
     internal fun hentPdfForVedtak(vedtak: Vedtak): ByteArray {
         return Result.runCatching {
-                    BehandlingService.LOG.debug("henter stønadsbrevMarkdown fra behandlingsVedtak")
-                    val markdown = vedtak.stønadBrevMarkdown
-                    BehandlingService.LOG.debug("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
-                    dokGenKlient.lagPdfFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(), markdown)
-                }
+            BehandlingService.LOG.debug("henter stønadsbrevMarkdown fra behandlingsVedtak")
+            val markdown = vedtak.stønadBrevMarkdown
+            BehandlingService.LOG.debug("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
+            dokGenKlient.lagPdfFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(), markdown)
+        }
                 .fold(
                         onSuccess = { it },
                         onFailure = {

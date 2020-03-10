@@ -29,7 +29,7 @@ import java.net.URI
 
 @Component
 class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
-                        @Qualifier("clientCredentials") restOperations: RestOperations,
+                        @Qualifier("jwtBearer") restOperations: RestOperations,
                         private val featureToggleService: FeatureToggleService)
     : AbstractRestClient(restOperations, "integrasjon") {
 
@@ -72,10 +72,16 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     private fun sammenlignPersoninfo(personinfo: Personinfo, personinfoForSammenlign: Personinfo?) {
         if (personinfo.fødselsdato.isEqual(personinfoForSammenlign?.fødselsdato)) {
-
             logger.info("Fødselsdato fra PDL og TPS var identisk.")
         } else {
             logger.warn("Fødselsdato fra PDL og TPS var ulik!")
+        }
+        if (personinfo.familierelasjoner.equals(personinfoForSammenlign?.familierelasjoner)) {
+            logger.info("Familierelasjoner fra PDL og TPS var identiske.")
+        } else {
+            logger.warn("Familierelasjoner fra PDL og TPS var ulike. Hoved: {} Sammenligning: {} ",
+                        personinfo.familierelasjoner.map { relasjon -> relasjon.relasjonsrolle },
+                        personinfoForSammenlign?.familierelasjoner?.map { relasjon -> relasjon.relasjonsrolle })
         }
     }
 
