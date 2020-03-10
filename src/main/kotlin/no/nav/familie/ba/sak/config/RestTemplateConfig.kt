@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.config
 
-import no.nav.familie.http.interceptor.ClientCredentialsInterceptor
-import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
-import no.nav.familie.http.interceptor.JwtBearerInterceptor
-import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
+import no.nav.familie.http.interceptor.*
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
@@ -19,30 +16,18 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 @Configuration
-@Import(ConsumerIdClientInterceptor::class, ClientCredentialsInterceptor::class, JwtBearerInterceptor::class)
+@Import(ConsumerIdClientInterceptor::class, BearerTokenClientInterceptor::class)
 @Profile("!dev")
 class RestTemplateConfig {
 
     @Bean("jwtBearer")
     fun restTemplateJwtBearer(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                              jwtBearerInterceptor: JwtBearerInterceptor): RestOperations {
+                              bearerTokenClientInterceptor: BearerTokenClientInterceptor): RestOperations {
 
         return RestTemplateBuilder()
                 .additionalCustomizers(NaisProxyCustomizer())
                 .interceptors(consumerIdClientInterceptor,
-                              jwtBearerInterceptor,
-                              MdcValuesPropagatingClientInterceptor())
-                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
-                .build()
-    }
-
-    @Bean("clientCredentials")
-    fun restTemplateClientCredentials(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                                      clientCredentialsInterceptor: ClientCredentialsInterceptor): RestOperations {
-        return RestTemplateBuilder()
-                .additionalCustomizers(NaisProxyCustomizer())
-                .interceptors(consumerIdClientInterceptor,
-                              clientCredentialsInterceptor,
+                              bearerTokenClientInterceptor,
                               MdcValuesPropagatingClientInterceptor())
                 .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
                 .build()

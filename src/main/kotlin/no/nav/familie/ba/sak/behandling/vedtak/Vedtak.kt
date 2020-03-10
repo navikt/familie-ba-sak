@@ -33,4 +33,9 @@ data class Vedtak(
 
         @Column(name = "opphor_dato")
         val opphørsdato: LocalDate? = null
-) : BaseEntitet()
+) : BaseEntitet() {
+
+        override fun toString(): String {
+                return "Vedtak(id=$id, behandling=$behandling, ansvarligSaksbehandler='$ansvarligSaksbehandler', vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
+        }
+}
