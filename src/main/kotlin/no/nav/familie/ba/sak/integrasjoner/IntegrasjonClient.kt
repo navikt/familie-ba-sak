@@ -29,7 +29,7 @@ import java.net.URI
 
 @Component
 class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
-                        @Qualifier("jwtBearer") restOperations: RestOperations,
+                        @Qualifier("clientCredentials") restOperations: RestOperations,
                         private val featureToggleService: FeatureToggleService)
     : AbstractRestClient(restOperations, "integrasjon") {
 
