@@ -23,7 +23,7 @@ data class Vedtak(
         val vedtaksdato: LocalDate,
 
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
-        val stønadBrevMarkdown: String = "",
+        var stønadBrevMarkdown: String = "",
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
