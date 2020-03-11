@@ -18,6 +18,9 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
+import no.nav.familie.ba.sak.behandling.restDomene.RestSøkeresultat
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
 
 @RestController
 @RequestMapping("/api")
@@ -71,6 +74,15 @@ class FagsakController(
                                                               LocalDateTime.now())
         taskRepository.save(initiellAvstemmingTask)
         return ResponseEntity.ok(Ressurs.success("Laget task for avstemming"))
+    }
+
+    @PostMapping(path = ["fagsaker/søke"])
+    fun søkeFagsak(@RequestParam personIdent: String): ResponseEntity<Ressurs<RestSøkeresultat>> {
+        val saksbehandlerId = hentSaksbehandler()
+
+        logger.info("{} oppretter ny fagsak", saksbehandlerId)
+
+        return ResponseEntity.ok().body(Ressurs.success(RestSøkeresultat(PersonIdent("") , "" , Kjønn.UKJENT, emptyList()) ))
     }
 
     companion object {
