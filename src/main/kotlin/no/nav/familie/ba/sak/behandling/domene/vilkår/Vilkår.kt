@@ -11,8 +11,8 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     UNDER_18_ÅR_OG_BOR_MED_SØKER(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
                                  sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
                                  spesifikasjon = Spesifikasjon(
-                                         beskrivelse = "Er under 18 år og bor med søker",
-                                         identifikator = "§2",
+                                         beskrivelse = "§2 - Er under 18 år og bor med søker",
+                                         identifikator = "UNDER_18_ÅR_OG_BOR_MED_SØKER",
                                          implementasjon = {
                                              when {
                                                  this.barn.isNotEmpty() -> Evaluering.ja(
@@ -26,7 +26,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                    sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
                    spesifikasjon = Spesifikasjon(
                            beskrivelse = "§4 - Bosatt i riket",
-                           identifikator = BOSATT_I_RIKET.name,
+                           identifikator = "BOSATT_I_RIKET",
                            implementasjon = {
                                when {
                                    this.barn.isNotEmpty() -> Evaluering.ja(
@@ -39,8 +39,8 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     STØNADSPERIODE(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN, PersonType.SØKER),
                    sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
                    spesifikasjon = Spesifikasjon(
-                           beskrivelse = "Barnetrygd gis fra og med kalendermåneden etter at retten til barnetrygd inntrer",
-                           identifikator = "§22",
+                           beskrivelse = "§22 - Barnetrygd gis fra og med kalendermåneden etter at retten til barnetrygd inntrer",
+                           identifikator = "STØNADSPERIODE",
                            implementasjon = {
                                when {
                                    this.barn.isNotEmpty() -> Evaluering.ja(
