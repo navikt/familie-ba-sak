@@ -80,9 +80,18 @@ class FagsakController(
     fun søkeFagsak(@RequestParam personIdent: String): ResponseEntity<Ressurs<RestSøkeresultat>> {
         val saksbehandlerId = hentSaksbehandler()
 
-        logger.info("{} oppretter ny fagsak", saksbehandlerId)
+        logger.info("{} søker fagsak", saksbehandlerId)
 
-        return ResponseEntity.ok().body(Ressurs.success(RestSøkeresultat(PersonIdent("") , "" , Kjønn.UKJENT, emptyList()) ))
+        val ressurs = Result.runCatching { fagsakService.søkeFagsak(PersonIdent(personIdent)) }
+                .fold(
+                        onSuccess = { Ressurs.success(it) },
+                        onFailure = {
+                            logger.error("Søke fagsak med personIdent $personIdent feilet", it)
+                            Ressurs.failure("Søke fagsak med personIdent $personIdent feilet", it)
+                        }
+                )
+
+        return ResponseEntity.ok().body(ressurs)
     }
 
     companion object {
