@@ -10,15 +10,19 @@ data class Personinfo(
         val geografiskTilknytning: String? = null,
         val diskresjonskode: String? = null,
         val navn: String? = null,
-        val kjønn: Kjønn? = null,
+        val kjønn: KJØNN? = null,
         val familierelasjoner: Set<Familierelasjoner> = emptySet()
 )
 
 data class Familierelasjoner(
         val personIdent: Personident,
-        val relasjonsrolle: String
+        val relasjonsrolle: FAMILIERELASJONSROLLE
 )
 
 data class Personident(
         val id: String
 )
+
+enum class KJØNN {MANN, KVINNE, UKJENT}
+
+enum class FAMILIERELASJONSROLLE { BARN, FAR, MEDMOR, MOR}
