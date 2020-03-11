@@ -3,9 +3,8 @@ package no.nav.familie.ba.sak
 import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
+import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårAlternativ
 import no.nav.familie.ba.sak.behandling.vilkårsvurdering.Fakta
-import no.nav.familie.ba.sak.behandling.vilkårsvurdering.hentVilkårFor
 import no.nav.familie.ba.sak.behandling.vilkårsvurdering.under18årOgBorMedSøker
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
@@ -43,11 +42,24 @@ class NareTest {
     }
 
     @Test
-    fun `Hent relevante vilkår for persontype`() {
-        val relevanteVilkår = hentVilkårFor(PersonType.BARN, "TESTSAKSTYPE")
-        val vilkårForBarn = setOf(VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER, VilkårType.BOSATT_I_RIKET, VilkårType.STØNADSPERIODE)
+    fun `Hent relevante vilkår for persontype med alt i en klasse`() {
+        val relevanteVilkår = VilkårAlternativ.hentVilkårFor(PersonType.BARN, "TESTSAKSTYPE")
+        val vilkårForBarn = setOf(VilkårAlternativ.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                                  VilkårAlternativ.STØNADSPERIODE,
+                                  VilkårAlternativ.BOSATT_I_RIKET)
         assertEquals(vilkårForBarn, relevanteVilkår)
     }
+
+
+    @Test
+    fun `Hent og evaluer vilkår for persontype`() {
+        val relevanteVilkårForBarn = VilkårAlternativ.hentVilkårFor(PersonType.BARN, "TESTSAKSTYPE")
+        val samletSpesifikasjon = relevanteVilkårForBarn
+                .map { vilkår -> vilkår.spesifikasjon }
+                .reduce { samledeVilkår, vilkår -> samledeVilkår og vilkår }
+        assertEquals(samletSpesifikasjon.evaluer(fakta).resultat, Resultat.JA)
+    }
+
 }
 
 
