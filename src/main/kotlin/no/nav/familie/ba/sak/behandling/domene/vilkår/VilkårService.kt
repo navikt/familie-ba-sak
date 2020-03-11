@@ -28,14 +28,14 @@ class VilkårService(
 
         personopplysningGrunnlag.personer.map { person ->
             val vilkårForPerson = restSamletVilkårResultat.filter { vilkår -> vilkår.personIdent == person.personIdent.ident }
-            val vilkårForPart = VilkårType.hentVilkårTyperForPart(person.type)
+            val vilkårForPart = Vilkår.hentVilkårTyperForPart(person.type)
 
             vilkårForPerson.forEach {
                 vilkårForPart.find { vilkårType -> vilkårType == it.vilkårType }
                 ?: error("Vilkåret $it finnes ikke i grunnlaget for parten $vilkårForPart")
 
                 listeAvVilkårResultat.add(VilkårResultat(vilkårType = it.vilkårType,
-                                                         utfallType = it.utfallType,
+                                                         resultat = it.resultat,
                                                          person = person))
             }
 

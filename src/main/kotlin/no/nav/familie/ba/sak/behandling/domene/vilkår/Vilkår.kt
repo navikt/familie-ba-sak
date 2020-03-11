@@ -25,8 +25,8 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     BOSATT_I_RIKET(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN, PersonType.SØKER),
                    sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
                    spesifikasjon = Spesifikasjon(
-                           beskrivelse = "Bosatt i riket",
-                           identifikator = "§4",
+                           beskrivelse = "§4 - Bosatt i riket",
+                           identifikator = BOSATT_I_RIKET.name,
                            implementasjon = {
                                when {
                                    this.barn.isNotEmpty() -> Evaluering.ja(
