@@ -26,10 +26,19 @@ class RestTemplateConfig {
         return RestTemplate(listOf(StringHttpMessageConverter(StandardCharsets.UTF_8), ByteArrayHttpMessageConverter()))
     }
 
+    @Bean("jwtBearer")
+    fun restTemplateJwtBearer(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                              mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestOperations {
+
+        return RestTemplateBuilder()
+                .additionalCustomizers(NaisProxyCustomizer())
+                .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
+                .build()
+    }
+
     @Bean
     fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                                    mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor)
-            : RestTemplateBuilder {
+                                    mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestTemplateBuilder {
         return RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofSeconds(5))
                 .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
@@ -37,10 +46,9 @@ class RestTemplateConfig {
     }
 
 
-    @Bean("jwtBearer")
+    @Bean("clientCredentials")
     fun restTemplateClientCredentials(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                                      mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor)
-            : RestOperations {
+                                      mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestOperations {
         return RestTemplateBuilder()
                 .additionalCustomizers(NaisProxyCustomizer())
                 .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)

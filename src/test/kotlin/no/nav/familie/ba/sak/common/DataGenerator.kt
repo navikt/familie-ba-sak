@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
@@ -44,7 +45,9 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: Perso
         personIdent = PersonIdent(randomFnr()),
         fødselsdato = fødselsdato,
         type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0)
+        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+        navn = "",
+        kjønn = Kjønn.MANN
 )
 
 fun lagVedtak(behandling: Behandling = lagBehandling(),
@@ -85,7 +88,9 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                        personIdent = PersonIdent(søkerPersonIdent),
                        type = PersonType.SØKER,
                        personopplysningGrunnlag = personopplysningGrunnlag,
-                       fødselsdato = LocalDate.of(2019, 1, 1))
+                       fødselsdato = LocalDate.of(2019, 1, 1),
+                       navn = "",
+                       kjønn = Kjønn.KVINNE)
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
@@ -93,7 +98,9 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      personIdent = PersonIdent(it),
                                                      type = PersonType.BARN,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
-                                                     fødselsdato = LocalDate.of(2019, 1, 1)))
+                                                     fødselsdato = LocalDate.of(2019, 1, 1),
+                                                     navn = "",
+                                                     kjønn = Kjønn.MANN))
     }
 
     return personopplysningGrunnlag
