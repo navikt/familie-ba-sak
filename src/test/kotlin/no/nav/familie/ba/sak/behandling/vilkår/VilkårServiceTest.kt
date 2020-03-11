@@ -92,12 +92,12 @@ class VilkårServiceTest {
                 VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                 VilkårType.BOSATT_I_RIKET,
                 VilkårType.STØNADSPERIODE
-        ), VilkårType.hentVilkårForPart(PersonType.BARN))
+        ), VilkårType.hentVilkårTyperForPart(PersonType.BARN))
 
         Assertions.assertEquals(listOf(
                 VilkårType.BOSATT_I_RIKET,
                 VilkårType.STØNADSPERIODE
-        ), VilkårType.hentVilkårForPart(PersonType.SØKER))
+        ), VilkårType.hentVilkårTyperForPart(PersonType.SØKER))
     }
 }
 

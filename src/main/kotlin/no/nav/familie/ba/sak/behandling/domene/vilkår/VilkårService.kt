@@ -28,7 +28,7 @@ class VilkårService(
 
         personopplysningGrunnlag.personer.map { person ->
             val vilkårForPerson = restSamletVilkårResultat.filter { vilkår -> vilkår.personIdent == person.personIdent.ident }
-            val vilkårForPart = VilkårType.hentVilkårForPart(person.type)
+            val vilkårForPart = VilkårType.hentVilkårTyperForPart(person.type)
 
             vilkårForPerson.forEach {
                 vilkårForPart.find { vilkårType -> vilkårType == it.vilkårType }

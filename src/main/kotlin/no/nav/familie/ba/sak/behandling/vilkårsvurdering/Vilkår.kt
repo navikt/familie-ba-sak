@@ -1,7 +1,6 @@
-package no.nav.familie.ba.sak.fakta.vilkårsvurdering
+package no.nav.familie.ba.sak.behandling.vilkårsvurdering
 
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
-import no.nav.familie.ba.sak.behandling.vilkårsvurdering.Fakta
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.specifications.Spesifikasjon
 
@@ -14,5 +13,9 @@ class Vilkår(vilkårType: VilkårType, implementasjon: Fakta.() -> Evaluering) 
 
     fun evaluer(fakta: Fakta): Evaluering {
         return spesifikasjon.evaluer(fakta)
+    }
+
+    override fun toString(): String {
+        return vilkårType.name
     }
 }
