@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandler
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
@@ -47,16 +48,13 @@ class FagsakController(
 
         logger.info("{} henter fagsak med id {}", saksbehandlerId, fagsakId)
 
-        val ressurs = Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
+        return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
-                        onSuccess = { it },
+                        onSuccess = { ResponseEntity.ok().body(it) },
                         onFailure = {
-                            logger.error("Henting av fagsak med fagsakId $fagsakId feilet", it)
-                            Ressurs.failure("Henting av fagsak med fagsakId $fagsakId feilet", it)
+                            badRequest("Henting av fagsak med fagsakId $fagsakId feilet")
                         }
                 )
-
-        return ResponseEntity.ok().body(ressurs)
     }
 
     @GetMapping("fagsaker/avstemming")
