@@ -1,13 +1,12 @@
 package no.nav.familie.ba.sak.behandling.domene.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.vilkårsvurdering.Fakta
 import no.nav.nare.core.specifications.Spesifikasjon
 import no.nav.nare.core.evaluations.Evaluering
 
-enum class VilkårAlternativ(val parterDetteGjelderFor: List<PersonType>,
-                            val sakstyperDetteGjelderFor: List<Any>,
-                            val spesifikasjon: Spesifikasjon<Fakta>) {
+enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
+                  val sakstyperDetteGjelderFor: List<Any>,
+                  val spesifikasjon: Spesifikasjon<Fakta>) {
 
     UNDER_18_ÅR_OG_BOR_MED_SØKER(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
                                  sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
@@ -50,15 +49,13 @@ enum class VilkårAlternativ(val parterDetteGjelderFor: List<PersonType>,
                                    else -> Evaluering.nei("Nei, dette er grunnen")
                                }
                            }
-                   ));
-    /*
+                   )),
     BARN_HAR_RETT_TIL(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
                       sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
                       spesifikasjon = (UNDER_18_ÅR_OG_BOR_MED_SØKER.spesifikasjon
                               og BOSATT_I_RIKET.spesifikasjon
                               og STØNADSPERIODE.spesifikasjon
                                       ));
-     */
 
     companion object {
         fun hentVilkårTyperForPart(personType: PersonType) = values()
@@ -67,7 +64,7 @@ enum class VilkårAlternativ(val parterDetteGjelderFor: List<PersonType>,
         fun hentVilkårTyperForSakstype(sakstype: Any) = values()
                 .filter { sakstype in it.sakstyperDetteGjelderFor }.toSet()
 
-        fun hentVilkårFor(personType: PersonType, sakstype: Any): Set<VilkårAlternativ> {
+        fun hentVilkårFor(personType: PersonType, sakstype: Any): Set<Vilkår> {
             return values().filter {
                 personType in it.parterDetteGjelderFor
                 && sakstype in it.sakstyperDetteGjelderFor

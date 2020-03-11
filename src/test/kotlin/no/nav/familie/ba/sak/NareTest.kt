@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak
 import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårAlternativ
-import no.nav.familie.ba.sak.behandling.vilkårsvurdering.Fakta
-import no.nav.familie.ba.sak.behandling.vilkårsvurdering.under18årOgBorMedSøker
+import no.nav.familie.ba.sak.behandling.domene.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.domene.vilkår.Fakta
+import no.nav.familie.ba.sak.behandling.domene.vilkår.under18årOgBorMedSøker
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
 import no.nav.familie.ba.sak.integrasjoner.domene.Personident
@@ -43,17 +43,18 @@ class NareTest {
 
     @Test
     fun `Hent relevante vilkår for persontype med alt i en klasse`() {
-        val relevanteVilkår = VilkårAlternativ.hentVilkårFor(PersonType.BARN, "TESTSAKSTYPE")
-        val vilkårForBarn = setOf(VilkårAlternativ.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                  VilkårAlternativ.STØNADSPERIODE,
-                                  VilkårAlternativ.BOSATT_I_RIKET)
+        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN, "TESTSAKSTYPE")
+        val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                                  Vilkår.STØNADSPERIODE,
+                                  Vilkår.BOSATT_I_RIKET,
+                                  Vilkår.BARN_HAR_RETT_TIL)
         assertEquals(vilkårForBarn, relevanteVilkår)
     }
 
 
     @Test
     fun `Hent og evaluer vilkår for persontype`() {
-        val relevanteVilkårForBarn = VilkårAlternativ.hentVilkårFor(PersonType.BARN, "TESTSAKSTYPE")
+        val relevanteVilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN, "TESTSAKSTYPE")
         val samletSpesifikasjon = relevanteVilkårForBarn
                 .map { vilkår -> vilkår.spesifikasjon }
                 .reduce { samledeVilkår, vilkår -> samledeVilkår og vilkår }

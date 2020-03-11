@@ -1,17 +1,16 @@
-package no.nav.familie.ba.sak.behandling.vilkårsvurdering
+package no.nav.familie.ba.sak.behandling.domene.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
 import no.nav.nare.core.evaluations.Evaluering
 
-fun hentVilkårFor(personType: PersonType, sakstype: Any): Set<Vilkår> {
+fun hentVilkårFor(personType: PersonType, sakstype: Any): Set<VilkårForslag2> {
     return alleVilkår.filter { vilkår ->
         personType in vilkår.vilkårType.parterDetteGjelderFor
         && sakstype in vilkår.vilkårType.sakstyperDetteGjelderFor
     }.toSet()
 }
 
-internal val under18årOgBorMedSøker = Vilkår(
+internal val under18årOgBorMedSøker = VilkårForslag2(
         vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
         implementasjon = {
             when {
@@ -22,7 +21,7 @@ internal val under18årOgBorMedSøker = Vilkår(
             }
         })
 
-internal val bosattIRiket = Vilkår(
+internal val bosattIRiket = VilkårForslag2(
         vilkårType = VilkårType.BOSATT_I_RIKET,
         implementasjon = {
             when {
@@ -33,7 +32,7 @@ internal val bosattIRiket = Vilkår(
             }
         })
 
-internal val stønadsperiode = Vilkår(
+internal val stønadsperiode = VilkårForslag2(
         vilkårType = VilkårType.STØNADSPERIODE,
         implementasjon = {
             when {
@@ -44,4 +43,6 @@ internal val stønadsperiode = Vilkår(
             }
         })
 
-internal val alleVilkår = setOf(under18årOgBorMedSøker, stønadsperiode, bosattIRiket)
+internal val alleVilkår = setOf(under18årOgBorMedSøker,
+                                stønadsperiode,
+                                bosattIRiket)

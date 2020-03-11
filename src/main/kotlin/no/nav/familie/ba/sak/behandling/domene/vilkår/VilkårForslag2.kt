@@ -1,10 +1,9 @@
-package no.nav.familie.ba.sak.behandling.vilkårsvurdering
+package no.nav.familie.ba.sak.behandling.domene.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.specifications.Spesifikasjon
 
-class Vilkår(vilkårType: VilkårType, implementasjon: Fakta.() -> Evaluering) {
+class VilkårForslag2(vilkårType: VilkårType, implementasjon: Fakta.() -> Evaluering) {
     val vilkårType = vilkårType
     val spesifikasjon = Spesifikasjon(
             beskrivelse = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER.beskrivelse,
