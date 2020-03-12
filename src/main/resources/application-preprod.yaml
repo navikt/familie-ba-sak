@@ -44,6 +44,10 @@ FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
 FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.dev-adeo.no
 
+VEILEDER_ROLLE: ""
+SAKSBEHANDLER_ROLLE: ""
+BESLUTTER_ROLLE: ""
+
 #Unleash
 UNLEASH_API_URL: https://unleash.nais.adeo.no/api/
 ENVIRONMENT_NAME: q2

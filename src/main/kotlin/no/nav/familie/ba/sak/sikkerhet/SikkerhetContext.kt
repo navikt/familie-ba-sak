@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
+import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 
 object SikkerhetContext {
@@ -12,8 +13,48 @@ object SikkerhetContext {
                 )
     }
 
-    // TODO må hente rolle fra token hvis vi ikke er i systemcontext
-    fun hentBehandlerRolle(): BehandlerRolle {
-        return if (hentSaksbehandler() == "VL") BehandlerRolle.SYSTEM else BehandlerRolle.SAKSBEHANDLER
+    fun hentSaksbehandlerNavn(): String {
+        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+                .fold(
+                        onSuccess = { it.getClaims("azuread")?.get("name")?.toString() ?: "VL" },
+                        onFailure = { "VL" }
+                )
+    }
+
+    fun hentGrupper(): List<String> {
+        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+                .fold(
+                        onSuccess = {
+                            @Suppress("UNCHECKED_CAST")
+                            it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
+                        },
+                        onFailure = { emptyList() }
+                )
+    }
+
+    fun hentBehandlerRolleForSteg(rolleConfig: RolleConfig, lavesteSikkerhetsnivå: BehandlerRolle?): BehandlerRolle {
+        if (hentSaksbehandler() == "VL") return BehandlerRolle.SYSTEM
+
+
+        val grupper = hentGrupper()
+        val høyesteSikkerhetsnivåForInnloggetBruker: BehandlerRolle =
+                if (rolleConfig.ENVIRONMENT_NAME == "local") BehandlerRolle.BESLUTTER else when {
+                    grupper.contains(rolleConfig.BESLUTTER_ROLLE) -> BehandlerRolle.BESLUTTER
+                    grupper.contains(rolleConfig.SAKSBEHANDLER_ROLLE) -> BehandlerRolle.SAKSBEHANDLER
+                    grupper.contains(rolleConfig.VEILEDER_ROLLE) -> BehandlerRolle.VEILEDER
+                    else -> BehandlerRolle.UKJENT
+                }
+
+        return when {
+            lavesteSikkerhetsnivå == null -> {
+                BehandlerRolle.UKJENT
+            }
+            høyesteSikkerhetsnivåForInnloggetBruker.nivå >= lavesteSikkerhetsnivå.nivå -> {
+                lavesteSikkerhetsnivå
+            }
+            else -> {
+                BehandlerRolle.UKJENT
+            }
+        }
     }
 }

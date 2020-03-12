@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -10,10 +8,12 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.common.RessursResponse
+import no.nav.familie.ba.sak.common.RessursResponse.badRequest
+import no.nav.familie.ba.sak.common.RessursResponse.forbidden
+import no.nav.familie.ba.sak.common.RessursResponse.illegalState
+import no.nav.familie.ba.sak.common.RessursResponse.notFound
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.IverksettMotOppdrag
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -32,7 +32,6 @@ import java.time.LocalDate
 @Validated
 class VedtakController(
         private val behandlingService: BehandlingService,
-        private val toTrinnKontrollService: ToTrinnKontrollService,
         private val vedtakService: VedtakService,
         private val fagsakService: FagsakService,
         private val stegService: StegService,
@@ -47,16 +46,15 @@ class VedtakController(
         LOG.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         return Result.runCatching {
                     stegService.håndterVilkårsvurdering(behandling, restVilkårsvurdering)
                 }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
-                        onFailure = { e ->
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                    .body(Ressurs.failure(e.cause?.message ?: e.message, e))
+                        onFailure = {
+                            return badRequest((it.cause?.message ?: it.message).toString())
                         }
                 )
     }
@@ -68,60 +66,33 @@ class VedtakController(
         LOG.info("{} sender behandling til beslutter for fagsak med id {}", saksbehandlerId, fagsakId)
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
-
-        return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
-                onSuccess = { ResponseEntity.ok(it) },
-                onFailure = { e ->
-                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(Ressurs.failure(e.cause?.message ?: e.message, e))
+        return Result.runCatching { stegService.håndterSendTilBeslutter(behandling) }.fold(
+                onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
+                onFailure = {
+                    illegalState((it.cause?.message ?: it.message).toString())
                 }
         )
     }
 
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
     fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
-        if (behandling.status != BehandlingStatus.SENDT_TIL_BESLUTTER) {
-            return RessursResponse.forbidden("Kan ikke iverksette et vedtak som ikke er foreslått av en saksbehandler")
-        }
-
-        if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG
-            || behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
-            return RessursResponse.badRequest("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
-        } else if (behandling.status == BehandlingStatus.IVERKSATT || behandling.status == BehandlingStatus.FERDIGSTILT) {
-            return RessursResponse.badRequest("Behandlingen er allerede iverksatt/ferdigstilt")
-        }
-
-        LOG.info("{} oppretter task for iverksetting av vedtak for fagsak med id {}",
-                 saksbehandlerId,
-                 fagsakId)
-
-        return Result.runCatching { toTrinnKontrollService.valider2trinnVedIverksetting(behandling, saksbehandlerId) }
+        return Result.runCatching { stegService.håndterGodkjenneVedtak(behandling) }
                 .fold(
                         onSuccess = {
-                            val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                                         ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-
-                            opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
-
                             return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
                                     onSuccess = { ResponseEntity.status(HttpStatus.ACCEPTED).body(it) },
                                     onFailure = {
-                                        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                                .body(Ressurs.failure(it.cause?.message ?: it.message, it))
+                                        illegalState((it.cause?.message ?: it.message).toString())
                                     }
                             )
                         },
                         onFailure = {
-                            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                    .body(Ressurs.failure(it.cause?.message ?: it.message, it))
+                            illegalState((it.cause?.message ?: it.message).toString())
                         }
                 )
     }
@@ -143,18 +114,17 @@ class VedtakController(
                  fagsakId)
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return RessursResponse.notFound("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                     ?: return RessursResponse.notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+                     ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
         if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
-            return RessursResponse.forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er migrering")
+            return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er migrering")
         }
 
         if (behandling.status != BehandlingStatus.IVERKSATT && behandling.status != BehandlingStatus.FERDIGSTILT) {
-            return RessursResponse.forbidden(
-                    "Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt/ferdigstilt")
+            return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt/ferdigstilt")
         }
 
         val task = OpphørVedtakTask.opprettOpphørVedtakTask(behandling,
@@ -165,11 +135,6 @@ class VedtakController(
         taskRepository.save(task)
 
         return ResponseEntity.ok(Ressurs.success("Task for opphør av migrert behandling og vedtak på fagsak $fagsakId opprettet"))
-    }
-
-    private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
-        val task = IverksettMotOppdrag.opprettTask(behandling, vedtak, saksbehandlerId)
-        taskRepository.save(task)
     }
 
     companion object {

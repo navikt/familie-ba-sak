@@ -150,6 +150,30 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
+    fun `Bruk samme behandling hvis nytt barn kommer på fagsak med aktiv behandling`() {
+        val morId = randomFnr()
+        val barnId = randomFnr()
+        val barn2Id = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
+        behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
+
+        Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsakId = fagsak.id).size)
+
+        behandlingService.opprettBehandling(NyBehandling(
+                BehandlingKategori.NASJONAL,
+                BehandlingUnderkategori.ORDINÆR,
+                morId,
+                listOf(barn2Id),
+                BehandlingType.REVURDERING,
+                null))
+
+        val behandlinger = behandlingService.hentBehandlinger(fagsakId = fagsak.id)
+        Assertions.assertEquals(1, behandlinger.size)
+    }
+
+    @Test
+    @Tag("integration")
     fun `Opphør migrert vedtak via task`() {
 
         val søkerFnr = randomFnr()

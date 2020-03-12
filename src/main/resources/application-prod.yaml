@@ -36,6 +36,10 @@ no.nav.security.jwt:
 
 ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILIE_PROSESSERING_CLIENT_ID}
 
+VEILEDER_ROLLE: ""
+SAKSBEHANDLER_ROLLE: ""
+BESLUTTER_ROLLE: ""
+
 spring:
   datasource:
     url: jdbc:postgresql://A01DBVL010.adeo.no:5432/familie-ba-sak
