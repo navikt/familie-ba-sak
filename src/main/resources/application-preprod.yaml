@@ -44,9 +44,9 @@ FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
 FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.dev-adeo.no
 
-VEILEDER_ROLLE: ""
-SAKSBEHANDLER_ROLLE: ""
-BESLUTTER_ROLLE: ""
+VEILEDER_ROLLE: "93a26831-9866-4410-927b-74ff51a9107c"
+SAKSBEHANDLER_ROLLE: "d21e00a4-969d-4b28-8782-dc818abfae65"
+BESLUTTER_ROLLE: "9449c153-5a1e-44a7-84c6-7cc7a8867233"
 
 #Unleash
 UNLEASH_API_URL: https://unleash.nais.adeo.no/api/
