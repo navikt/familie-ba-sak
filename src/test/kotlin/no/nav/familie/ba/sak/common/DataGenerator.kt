@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 fun randomFnr(): String = UUID.randomUUID().toString()
@@ -106,6 +107,7 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
 }
 
 fun dato(s: String) = LocalDate.parse(s)
+fun årMnd(s: String) = YearMonth.parse(s)
 
 fun nyOrdinærBehandling(søkersIdent: String, barnasIdenter: List<String>): NyBehandling = NyBehandling(
         søkersIdent = søkersIdent,
