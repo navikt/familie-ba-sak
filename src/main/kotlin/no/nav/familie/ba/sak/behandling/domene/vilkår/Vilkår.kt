@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.nare.core.specifications.Spesifikasjon
 import no.nav.nare.core.evaluations.Evaluering
 
+
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val sakstyperDetteGjelderFor: List<Any>,
                   val spesifikasjon: Spesifikasjon<Fakta>) {
@@ -22,20 +23,27 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                                              }
                                          }
                                  )),
-    BOSATT_I_RIKET(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN, PersonType.SØKER),
-                   sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
-                   spesifikasjon = Spesifikasjon(
-                           beskrivelse = "§4 - Bosatt i riket",
-                           identifikator = "BOSATT_I_RIKET",
-                           implementasjon = {
-                               when {
-                                   this.barn.isNotEmpty() -> Evaluering.ja(
-                                           "Ja, dette er grunnen"
-                                   )
-                                   else -> Evaluering.nei("Nei, dette er grunnen")
-                               }
-                           }
-                   )),
+    BOSATT_I_RIKET_SØKER(parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER),
+                         sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
+                         spesifikasjon = Spesifikasjon(
+                                 beskrivelse = "§4 - Bosatt i riket",
+                                 identifikator = "BOSATT_I_RIKET_SØKER",
+                                 implementasjon = {
+                                     sjekkOmBosattINorge(this.personopplysningGrunnlag.personer
+                                                                 .filter { person -> person.type == PersonType.SØKER }
+                                                                 .first())
+                                 })),
+    BOSATT_I_RIKET_BARN(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+                        sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
+                        spesifikasjon = Spesifikasjon(
+                                beskrivelse = "§4 - Bosatt i riket",
+                                identifikator = "BOSATT_I_RIKET_BARN",
+                                implementasjon = { sjekkOmBosattINorge(this.barn[0]) }
+                                //Hvordan håndtere kjøring av samme regel på flere barn?
+                                //Forslag: Faktagrunnlag inneholder en "hoved"-Person for vurderingen i tillegg til andre fakta.
+                                //Denne kan settes f.eks. når vilkår for type hentes?
+                                //Da vil man også slippe en egen regel for søker og barn på f.eks. bosatt i riket
+                        )),
     STØNADSPERIODE(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN, PersonType.SØKER),
                    sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
                    spesifikasjon = Spesifikasjon(
@@ -50,14 +58,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                                }
                            }
                    ));
-    /*
-    BARN_HAR_RETT_TIL(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
-                      sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
-                      spesifikasjon = (UNDER_18_ÅR_OG_BOR_MED_SØKER.spesifikasjon
-                              og BOSATT_I_RIKET.spesifikasjon
-                              og STØNADSPERIODE.spesifikasjon
-                                      ));
-    */
 
     companion object {
         fun hentVilkårTyperForPart(personType: PersonType) = values()

@@ -36,8 +36,8 @@ class VilkårService(
                 resultatForPerson.add(VilkårResultat(person = person,
                                                      resultat = child.resultat,
                                                      vilkårType = Vilkår.valueOf(child.identifikator)))
+                resultatForSak.addAll(resultatForPerson)
             }
-            resultatForSak.addAll(resultatForPerson)
         }
         val samletVilkårResultat = SamletVilkårResultat(samletVilkårResultat = resultatForSak, behandlingId = behandlingId)
         resultatForSak.map { it.samletVilkårResultat = samletVilkårResultat }
