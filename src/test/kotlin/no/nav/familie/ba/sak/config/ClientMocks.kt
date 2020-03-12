@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
@@ -28,6 +29,10 @@ class ClientMocks {
             mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any())
         } returns listOf(Tilgang(true, null))
 
+        every {
+            mockIntegrasjonOnBehalfClient.hentPersoninfo(any())
+        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+
         return mockIntegrasjonOnBehalfClient
     }
 
@@ -47,13 +52,22 @@ class ClientMocks {
 
         every {
             mockIntegrasjonClient.hentPersoninfoFor(eq(barnFnr))
-        } returns Personinfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = "K", navn = "Barn Barnesen")
+        } returns Personinfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "Barn Barnesen")
 
         every {
             mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr))
-        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = "K", navn = "Mor Moresen")
+        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
         return mockIntegrasjonClient
     }
 }
 
+fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, søkerFnr: String, barnFnr: String) {
+    every {
+        mockIntegrasjonClient.hentPersoninfoFor(eq(barnFnr))
+    } returns Personinfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "Barn Barnesen")
+
+    every {
+        mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr))
+    } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+}

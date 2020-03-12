@@ -2,18 +2,21 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import io.mockk.every
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -47,6 +50,7 @@ class RegistrerPersongrunnlagTest(
             } returns randomAktørId()
         }
 
+
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -74,6 +78,11 @@ class RegistrerPersongrunnlagTest(
                 integrasjonClient.hentAktørId(it)
             } returns randomAktørId()
         }
+
+        every {
+            integrasjonClient.hentPersoninfoFor(any())
+        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
