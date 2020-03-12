@@ -51,7 +51,7 @@ class VilkårServiceTest {
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val samletVilkårResultat =
-                vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+                vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
                                                         vilkårsvurderingKomplettForBarnOgSøker(fnr, listOf(barnFnr)),
                                                         behandling.id
                 )
@@ -72,14 +72,14 @@ class VilkårServiceTest {
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         assertThrows<IllegalStateException> {
-            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
                                                     vilkårsvurderingUtenKomplettBarnVurdering,
                                                     behandling.id
             )
         }
 
         assertThrows<IllegalStateException> {
-            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
                                                     vilkårsvurderingUtenKomplettSøkerVurdering,
                                                     behandling.id
             )
@@ -92,12 +92,12 @@ class VilkårServiceTest {
                 Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                 Vilkår.BOSATT_I_RIKET_BARN,
                 Vilkår.STØNADSPERIODE
-        ), Vilkår.hentVilkårTyperForPart(PersonType.BARN))
+        ), Vilkår.hentVilkårForPart(PersonType.BARN))
 
         Assertions.assertEquals(setOf(
                 Vilkår.BOSATT_I_RIKET_SØKER,
                 Vilkår.STØNADSPERIODE
-        ), Vilkår.hentVilkårTyperForPart(PersonType.SØKER))
+        ), Vilkår.hentVilkårForPart(PersonType.SØKER))
     }
 }
 

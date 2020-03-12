@@ -60,7 +60,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                    ));
 
     companion object {
-        fun hentVilkårTyperForPart(personType: PersonType) = values()
+        fun hentVilkårForPart(personType: PersonType) = values()
                 .filter { personType in it.parterDetteGjelderFor }.toSet()
 
         fun hentVilkårTyperForSakstype(sakstype: Any) = values()

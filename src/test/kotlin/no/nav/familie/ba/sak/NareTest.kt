@@ -25,17 +25,19 @@ class NareTest {
     private lateinit var fagsakService: FagsakService
 
     @Autowired
+    private lateinit var vilkårService: VilkårService
+
+    @Autowired
     private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Test
-    fun `Hent relevante vilkår for persontype med alt i en klasse`() {
+    fun `Hent relevante vilkår for persontype`() {
         val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN, "TESTSAKSTYPE")
         val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                                   Vilkår.STØNADSPERIODE,
                                   Vilkår.BOSATT_I_RIKET_BARN)
         assertEquals(vilkårForBarn, relevanteVilkår)
     }
-
 
     @Test
     fun `Hent og evaluer vilkår for persontype`() {
@@ -50,19 +52,8 @@ class NareTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val samletVilkårResultat = SamletVilkårResultat(behandlingId = behandling.id, samletVilkårResultat = mutableSetOf())
-        personopplysningGrunnlag.personer.map { person ->
-            val relevanteVilkårForBarn = Vilkår.hentVilkårFor(person.type, "TESTSAKSTYPE")
-            val samletSpesifikasjon = relevanteVilkårForBarn
-                    .map { vilkår -> vilkår.spesifikasjon }
-                    .reduce { samledeVilkår, vilkår -> samledeVilkår og vilkår }
-            val evaluering = samletSpesifikasjon.evaluer(Fakta(personopplysningGrunnlag))
-            evaluering.children.map { child ->
-                samletVilkårResultat.samletVilkårResultat.add(VilkårResultat(person = person,
-                                                                             resultat = child.resultat,
-                                                                             vilkårType = Vilkår.valueOf(child.identifikator)))
-            }
-        }
+        val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                           behandlingId = behandling.id)
 
         assertEquals(samletVilkårResultat.hentSamletVilkårResultat(), Resultat.JA)
 

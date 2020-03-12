@@ -24,7 +24,6 @@ class VilkårService(
     }
 
     fun vurderVilkårOgLagResultat(personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                  restSamletVilkårResultat: List<RestVilkårResultat>,
                                   behandlingId: Long): SamletVilkårResultat {
         val tmpFakta = Fakta(personopplysningGrunnlag = personopplysningGrunnlag)//Bør være pakket inn i fakta tidligere
         val resultatForSak = mutableSetOf<VilkårResultat>()
@@ -41,10 +40,35 @@ class VilkårService(
         }
         val samletVilkårResultat = SamletVilkårResultat(samletVilkårResultat = resultatForSak, behandlingId = behandlingId)
         resultatForSak.map { it.samletVilkårResultat = samletVilkårResultat }
-
         lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat)
         return samletVilkårResultat
     }
+
+    fun kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag: PersonopplysningGrunnlag,
+                                  restSamletVilkårResultat: List<RestVilkårResultat>,
+                                  behandlingId: Long): SamletVilkårResultat {
+        val listeAvVilkårResultat = mutableSetOf<VilkårResultat>()
+        personopplysningGrunnlag.personer.map { person ->
+            val vilkårForPerson = restSamletVilkårResultat.filter { vilkår -> vilkår.personIdent == person.personIdent.ident }
+            val vilkårForPart = Vilkår.hentVilkårForPart(person.type)
+            vilkårForPerson.forEach {
+                vilkårForPart.find { vilkårType -> vilkårType == it.vilkårType }
+                ?: error("Vilkåret $it finnes ikke i grunnlaget for parten $vilkårForPart")
+
+                listeAvVilkårResultat.add(VilkårResultat(vilkårType = it.vilkårType,
+                                                         resultat = it.resultat,
+                                                         person = person))
+            }
+            if (listeAvVilkårResultat.filter { it.person.personIdent.ident == person.personIdent.ident }.size != vilkårForPart.size) {
+                throw IllegalStateException("Vilkårene for ${person.type} er ${vilkårForPerson.map { v -> v.vilkårType }}, men vi forventer $vilkårForPart")
+            }
+        }
+        val samletVilkårResultat = SamletVilkårResultat(samletVilkårResultat = listeAvVilkårResultat, behandlingId = behandlingId)
+        listeAvVilkårResultat.map { it.samletVilkårResultat = samletVilkårResultat }
+        lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat)
+        return samletVilkårResultat
+
+}
 
     fun spesifikasjonerForPerson(person: Person, behandlingId: Long): Spesifikasjon<Fakta> {
         val relevanteVilkår = Vilkår.hentVilkårFor(person.type, "TESTSAKSTYPE")
