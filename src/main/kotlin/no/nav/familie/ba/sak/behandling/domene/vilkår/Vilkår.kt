@@ -9,44 +9,27 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val sakstyperDetteGjelderFor: List<Any>,
                   val spesifikasjon: Spesifikasjon<Fakta>) {
 
-    UNDER_18_ÅR_OG_BOR_MED_SØKER(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
-                                 sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
-                                 spesifikasjon = Spesifikasjon(
-                                         beskrivelse = "§2 - Er under 18 år og bor med søker",
-                                         identifikator = "UNDER_18_ÅR_OG_BOR_MED_SØKER",
-                                         implementasjon = {
-                                             when {
-                                                 this.barn.isNotEmpty() -> Evaluering.ja(
-                                                         "Barn er under 18 år og bor med søker"
-                                                 )
-                                                 else -> Evaluering.nei("Barn er ikke under 18 år eller bor ikke med søker")
-                                             }
-                                         }
-                                 )),
-    BOSATT_I_RIKET(parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
-                         sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
-                         spesifikasjon = Spesifikasjon(
-                                 beskrivelse = "§4 - Bosatt i riket",
-                                 identifikator = "BOSATT_I_RIKET",
-                                 implementasjon = {
-                                     sjekkOmBosattINorge(this.personopplysningGrunnlag.personer
-                                                                 .filter { person -> person.type == PersonType.SØKER }
-                                                                 .first())
-                                 })),
-    STØNADSPERIODE(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN, PersonType.SØKER),
-                   sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
-                   spesifikasjon = Spesifikasjon(
-                           beskrivelse = "§22 - Barnetrygd gis fra og med kalendermåneden etter at retten til barnetrygd inntrer",
-                           identifikator = "STØNADSPERIODE",
-                           implementasjon = {
-                               when {
-                                   this.barn.isNotEmpty() -> Evaluering.ja(
-                                           "Ja, dette er grunnen"
-                                   )
-                                   else -> Evaluering.nei("Nei, dette er grunnen")
-                               }
-                           }
-                   ));
+    UNDER_18_ÅR_OG_BOR_MED_SØKER(
+            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+            sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
+            spesifikasjon = Spesifikasjon(
+                    beskrivelse = "§2 - Er under 18 år og bor med søker",
+                    identifikator = "UNDER_18_ÅR_OG_BOR_MED_SØKER",
+                    implementasjon = { barnUnder18ÅrOgBorMedSøker(this) })),
+    BOSATT_I_RIKET(
+            parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
+            sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
+            spesifikasjon = Spesifikasjon(
+                    beskrivelse = "§4 - Bosatt i riket",
+                    identifikator = "BOSATT_I_RIKET",
+                    implementasjon = { bosattINorge(this) })),
+    STØNADSPERIODE(
+            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN, PersonType.SØKER),
+            sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
+            spesifikasjon = Spesifikasjon(
+                    beskrivelse = "§22 - Barnetrygd gis fra og med kalendermåneden etter at retten til barnetrygd inntrer",
+                    identifikator = "STØNADSPERIODE",
+                    implementasjon = { Evaluering.ja("Dette er grunnen") }));
 
     companion object {
         fun hentVilkårForPart(personType: PersonType) = values()
@@ -55,11 +38,12 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
         fun hentVilkårTyperForSakstype(sakstype: Any) = values()
                 .filter { sakstype in it.sakstyperDetteGjelderFor }.toSet()
 
-        fun hentVilkårFor(personType: PersonType, sakstype: Any): Set<Vilkår> {
-            return values().filter {
-                personType in it.parterDetteGjelderFor
-                && sakstype in it.sakstyperDetteGjelderFor
-            }.toSet()
+        fun hentVilkårFor(personType: PersonType, sakstype: Any) {
+            values()
+                    .filter {
+                        personType in it.parterDetteGjelderFor
+                        && sakstype in it.sakstyperDetteGjelderFor
+                    }.toSet()
         }
     }
 }
