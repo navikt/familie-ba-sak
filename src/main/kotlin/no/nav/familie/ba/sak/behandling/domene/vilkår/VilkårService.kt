@@ -71,7 +71,7 @@ class VilkårService(
 }
 
     fun spesifikasjonerForPerson(person: Person, behandlingId: Long): Spesifikasjon<Fakta> {
-        val relevanteVilkår = Vilkår.hentVilkårFor(person.type, "TESTSAKSTYPE")
+        val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.VILKÅRGJELDERFOR)
         val samletSpesifikasjon = relevanteVilkår
                 .map { vilkår -> vilkår.spesifikasjon }
                 .reduce { samledeVilkår, vilkår -> samledeVilkår og vilkår }
