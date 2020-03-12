@@ -49,13 +49,15 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                                    else -> Evaluering.nei("Nei, dette er grunnen")
                                }
                            }
-                   )),
+                   ));
+    /*
     BARN_HAR_RETT_TIL(parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
                       sakstyperDetteGjelderFor = listOf<Any>("TESTSAKSTYPE"),
                       spesifikasjon = (UNDER_18_ÅR_OG_BOR_MED_SØKER.spesifikasjon
                               og BOSATT_I_RIKET.spesifikasjon
                               og STØNADSPERIODE.spesifikasjon
                                       ));
+    */
 
     companion object {
         fun hentVilkårTyperForPart(personType: PersonType) = values()

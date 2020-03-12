@@ -1,10 +1,9 @@
 package no.nav.familie.ba.sak.behandling.domene.vilkår
 
-import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 
 data class Fakta(
-        val personinfo: Personinfo
+        val personopplysningGrunnlag: PersonopplysningGrunnlag
 ) {
-    val barn = personinfo.familierelasjoner.filter { relasjon -> relasjon.relasjonsrolle == FAMILIERELASJONSROLLE.BARN }
+    val barn = personopplysningGrunnlag.barna
 }

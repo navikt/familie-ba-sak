@@ -88,13 +88,13 @@ class VilkårServiceTest {
 
     @Test
     fun `Valider gyldige vilkårspermutasjoner for barn og søker`() {
-        Assertions.assertEquals(listOf(
+        Assertions.assertEquals(setOf(
                 Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.STØNADSPERIODE
         ), Vilkår.hentVilkårTyperForPart(PersonType.BARN))
 
-        Assertions.assertEquals(listOf(
+        Assertions.assertEquals(setOf(
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.STØNADSPERIODE
         ), Vilkår.hentVilkårTyperForPart(PersonType.SØKER))
