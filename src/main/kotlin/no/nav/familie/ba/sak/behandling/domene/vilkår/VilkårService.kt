@@ -25,9 +25,9 @@ class VilkårService(
 
     fun vurderVilkårOgLagResultat(personopplysningGrunnlag: PersonopplysningGrunnlag,
                                   behandlingId: Long): SamletVilkårResultat {
-        val tmpFakta = Fakta(personopplysningGrunnlag = personopplysningGrunnlag)//Bør være pakket inn i fakta tidligere
         val resultatForSak = mutableSetOf<VilkårResultat>()
         personopplysningGrunnlag.personer.map { person ->
+            val tmpFakta = Fakta(personForVurdering = person)
             val spesifikasjonerForPerson = spesifikasjonerForPerson(person, behandlingId)
             val evaluering = spesifikasjonerForPerson.evaluer(tmpFakta)
             val resultatForPerson = mutableSetOf<VilkårResultat>()
