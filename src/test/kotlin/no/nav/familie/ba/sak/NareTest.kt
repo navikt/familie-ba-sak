@@ -35,7 +35,7 @@ class NareTest {
         val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN, "TESTSAKSTYPE")
         val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                                   Vilkår.STØNADSPERIODE,
-                                  Vilkår.BOSATT_I_RIKET_BARN)
+                                  Vilkår.BOSATT_I_RIKET)
         assertEquals(vilkårForBarn, relevanteVilkår)
     }
 

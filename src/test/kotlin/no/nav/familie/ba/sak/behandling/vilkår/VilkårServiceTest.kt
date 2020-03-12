@@ -90,12 +90,12 @@ class VilkårServiceTest {
     fun `Valider gyldige vilkårspermutasjoner for barn og søker`() {
         Assertions.assertEquals(setOf(
                 Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                Vilkår.BOSATT_I_RIKET_BARN,
+                Vilkår.BOSATT_I_RIKET,
                 Vilkår.STØNADSPERIODE
         ), Vilkår.hentVilkårForPart(PersonType.BARN))
 
         Assertions.assertEquals(setOf(
-                Vilkår.BOSATT_I_RIKET_SØKER,
+                Vilkår.BOSATT_I_RIKET,
                 Vilkår.STØNADSPERIODE
         ), Vilkår.hentVilkårForPart(PersonType.SØKER))
     }
@@ -107,7 +107,7 @@ fun vilkårsvurderingKomplettForBarnOgSøker(søkerPersonIdent: String, barnPers
                                   vilkårType = Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                                   resultat = Resultat.JA),
                RestVilkårResultat(personIdent = it,
-                                  vilkårType = Vilkår.BOSATT_I_RIKET_BARN,
+                                  vilkårType = Vilkår.BOSATT_I_RIKET,
                                   resultat = Resultat.JA),
                RestVilkårResultat(personIdent = it,
                                   vilkårType = Vilkår.STØNADSPERIODE,
@@ -116,7 +116,7 @@ fun vilkårsvurderingKomplettForBarnOgSøker(søkerPersonIdent: String, barnPers
 
     val vilkår = arrayListOf(
             RestVilkårResultat(personIdent = søkerPersonIdent,
-                               vilkårType = Vilkår.BOSATT_I_RIKET_SØKER,
+                               vilkårType = Vilkår.BOSATT_I_RIKET,
                                resultat = Resultat.JA),
             RestVilkårResultat(personIdent = søkerPersonIdent,
                                vilkårType = Vilkår.STØNADSPERIODE,
@@ -127,7 +127,7 @@ fun vilkårsvurderingKomplettForBarnOgSøker(søkerPersonIdent: String, barnPers
 }
 
 val vilkårsvurderingUtenKomplettBarnVurdering = listOf(RestVilkårResultat(personIdent = "1",
-                                                                          vilkårType = Vilkår.BOSATT_I_RIKET_BARN,
+                                                                          vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                           resultat = Resultat.JA),
                                                        RestVilkårResultat(personIdent = "1",
                                                                           vilkårType = Vilkår.STØNADSPERIODE,
@@ -137,13 +137,13 @@ val vilkårsvurderingUtenKomplettBarnVurdering = listOf(RestVilkårResultat(pers
                                                                           resultat = Resultat.JA))
 
 val vilkårsvurderingUtenKomplettSøkerVurdering = listOf(RestVilkårResultat(personIdent = "1",
-                                                                           vilkårType = Vilkår.BOSATT_I_RIKET_BARN,
+                                                                           vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                            resultat = Resultat.JA),
                                                         RestVilkårResultat(personIdent = "12345678910",
                                                                            vilkårType = Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                                                                            resultat = Resultat.JA),
                                                         RestVilkårResultat(personIdent = "12345678910",
-                                                                           vilkårType = Vilkår.BOSATT_I_RIKET_SØKER,
+                                                                           vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                            resultat = Resultat.JA),
                                                         RestVilkårResultat(personIdent = "12345678910",
                                                                            vilkårType = Vilkår.STØNADSPERIODE,
