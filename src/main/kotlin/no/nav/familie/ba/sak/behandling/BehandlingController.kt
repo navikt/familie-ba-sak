@@ -90,7 +90,7 @@ class BehandlingController(private val fagsakService: FagsakService,
             it to Metrics.counter("behandling.opprettet.$type", "type",
                                   it.name,
                                   "beskrivelse",
-                                  it.beskrivelse)
+                                  it.visningsnavn)
         }.toMap()
     }
 }

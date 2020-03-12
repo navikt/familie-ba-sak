@@ -3,10 +3,7 @@ package no.nav.familie.ba.sak.validering
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
@@ -72,6 +69,8 @@ internal class FagsaktilgangTest {
                                      mutableSetOf(Person(1,
                                                          PersonType.SØKER,
                                                          LocalDate.of(1984, 12, 16),
+                                                         "Mock Mockson",
+                                                         Kjønn.MANN,
                                                          PersonIdent(randomFnr()),
                                                          PersonopplysningGrunnlag(1, 1))),
                                      true)

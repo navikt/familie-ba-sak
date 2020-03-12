@@ -132,8 +132,12 @@ class VedtakService(private val behandlingService: BehandlingService,
                 error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
             }
 
+
+            val eksisterendeBarnPåVedtak =
+                    vedtakPersonRepository.finnPersonBeregning(vedtakId = vedtak.id, personIdent = barn.personIdent.ident)
             vedtakPersonRepository.save(
                     VedtakPerson(
+                            id = eksisterendeBarnPåVedtak?.id ?: 0,
                             person = barn,
                             vedtak = vedtak,
                             beløp = it.beløp,
@@ -144,19 +148,19 @@ class VedtakService(private val behandlingService: BehandlingService,
             )
         }
 
-        lagreOgDeaktiverGammel(vedtak.copy(
-                stønadBrevMarkdown = Result.runCatching {
-                            dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
-                                                                ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
+        vedtak.stønadBrevMarkdown = Result.runCatching {
+                    dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
+                                                        ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
+                }
+                .fold(
+                        onSuccess = { it },
+                        onFailure = { e ->
+                            return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
+                                                   e)
                         }
-                        .fold(
-                                onSuccess = { it },
-                                onFailure = { e ->
-                                    return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
-                                                           e)
-                                }
-                        )
-        ))
+                )
+
+        lagreOgDeaktiverGammel(vedtak)
 
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
@@ -183,7 +187,7 @@ class VedtakService(private val behandlingService: BehandlingService,
         val aktivVedtak = hentAktivForBehandling(vedtak.behandling.id)
 
         if (aktivVedtak != null && aktivVedtak.id != vedtak.id) {
-            vedtakRepository.save(aktivVedtak.also { it.aktiv = false })
+            vedtakRepository.saveAndFlush(aktivVedtak.also { it.aktiv = false })
         }
 
         LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter vedtak $vedtak")

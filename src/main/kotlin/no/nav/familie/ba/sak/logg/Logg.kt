@@ -40,6 +40,6 @@ data class Logg(
         val tekst: String
 )
 
-enum class LoggType {
-    BEHANDLING_OPPRETTET
+enum class LoggType(val visningsnavn: String) {
+    BEHANDLING_OPPRETTET("Behandling opprettet")
 }
