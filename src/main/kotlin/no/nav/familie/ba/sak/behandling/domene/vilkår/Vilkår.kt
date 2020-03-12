@@ -38,12 +38,11 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
         fun hentVilkårTyperForSakstype(sakstype: Any) = values()
                 .filter { sakstype in it.sakstyperDetteGjelderFor }.toSet()
 
-        fun hentVilkårFor(personType: PersonType, sakstype: Any) {
-            values()
-                    .filter {
-                        personType in it.parterDetteGjelderFor
-                        && sakstype in it.sakstyperDetteGjelderFor
-                    }.toSet()
+        fun hentVilkårFor(personType: PersonType, sakstype: Any): Set<Vilkår> {
+            return values().filter {
+                personType in it.parterDetteGjelderFor
+                && sakstype in it.sakstyperDetteGjelderFor
+            }.toSet()
         }
     }
 }
