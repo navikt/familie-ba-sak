@@ -39,6 +39,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     val personinfoUlikCounter: Counter = Metrics.counter("personinfo.sammenlignet.pdl-mot-tps.ulik")
     val familierelasjonerIdentiskCounter: Counter = Metrics.counter("familierelasjoner.sammenlignet.pdl-mot-tps.identisk")
     val familierelasjonerUlikCounter: Counter = Metrics.counter("familierelasjoner.sammenlignet.pdl-mot-tps.ulik")
+    val kallMotAlternativPersondatakildeFeilerCounter: Counter = Metrics.counter("personinfo.sammenlignet.pdl-mot-tps.error")
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentAktørId(personident: String): AktørId {
@@ -117,6 +118,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         } catch (e: Exception) {
             val kildeForSammenligning = if (pdlEnabled) "TPS" else "PDL"
             logger.warn("Feil ved oppslag på personinfo mot $kildeForSammenligning for sammenligning av data: ${e.message}")
+            kallMotAlternativPersondatakildeFeilerCounter.increment()
             null
         }
     }
