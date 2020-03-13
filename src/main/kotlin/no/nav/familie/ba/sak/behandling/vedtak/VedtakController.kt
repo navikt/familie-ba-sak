@@ -43,7 +43,7 @@ class VedtakController(
                                    @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
-        LOG.info("{} lager nytt vedtak for fagsak med id {}", saksbehandlerId, fagsakId)
+        LOG.info("$saksbehandlerId lager nytt vedtak for fagsak med id $fagsakId")
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
@@ -63,7 +63,7 @@ class VedtakController(
     fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
-        LOG.info("{} sender behandling til beslutter for fagsak med id {}", saksbehandlerId, fagsakId)
+        LOG.info("$saksbehandlerId sender behandling til beslutter for fagsak med id $fagsakId")
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
@@ -85,7 +85,7 @@ class VedtakController(
                 .fold(
                         onSuccess = {
                             return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
-                                    onSuccess = { ResponseEntity.status(HttpStatus.ACCEPTED).body(it) },
+                                    onSuccess = { ResponseEntity.accepted().body(it) },
                                     onFailure = {
                                         illegalState((it.cause?.message ?: it.message).toString())
                                     }
@@ -109,9 +109,7 @@ class VedtakController(
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
-        LOG.info("{} oppretter task for opphør av migrert vedtak for fagsak med id {}",
-                 saksbehandlerId,
-                 fagsakId)
+        LOG.info("$saksbehandlerId oppretter task for opphør av migrert vedtak for fagsak med id $fagsakId")
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return notFound("Fant ikke behandling på fagsak $fagsakId")

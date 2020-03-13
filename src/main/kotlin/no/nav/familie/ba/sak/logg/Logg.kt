@@ -14,7 +14,7 @@ data class Logg(
         val id: Long = 0,
 
         @Column(name = "opprettet_av", nullable = false, updatable = false)
-        val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
+        val opprettetAv: String = SikkerhetContext.hentSaksbehandlerNavn(),
 
         @Column(name = "opprettet_tid", nullable = false, updatable = false)
         val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),

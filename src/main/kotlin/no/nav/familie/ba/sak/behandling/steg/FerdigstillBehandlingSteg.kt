@@ -25,7 +25,7 @@ class FerdigstillBehandlingSteg(
         val fagsak = behandling.fagsak
 
         if (behandling.status !== BehandlingStatus.IVERKSATT) {
-            throw IllegalStateException("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
+            error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 
         if (behandling.resultat == BehandlingResultat.INNVILGET && fagsak.status != FagsakStatus.LØPENDE) {

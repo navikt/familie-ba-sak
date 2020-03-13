@@ -16,8 +16,8 @@ object SikkerhetContext {
     fun hentSaksbehandlerNavn(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
                 .fold(
-                        onSuccess = { it.getClaims("azuread")?.get("name")?.toString() ?: "VL" },
-                        onFailure = { "VL" }
+                        onSuccess = { it.getClaims("azuread")?.get("name")?.toString() ?: "System" },
+                        onFailure = { "System" }
                 )
     }
 
@@ -46,15 +46,9 @@ object SikkerhetContext {
                 }
 
         return when {
-            lavesteSikkerhetsnivå == null -> {
-                BehandlerRolle.UKJENT
-            }
-            høyesteSikkerhetsnivåForInnloggetBruker.nivå >= lavesteSikkerhetsnivå.nivå -> {
-                lavesteSikkerhetsnivå
-            }
-            else -> {
-                BehandlerRolle.UKJENT
-            }
+            lavesteSikkerhetsnivå == null -> BehandlerRolle.UKJENT
+            høyesteSikkerhetsnivåForInnloggetBruker.nivå >= lavesteSikkerhetsnivå.nivå -> lavesteSikkerhetsnivå
+            else -> BehandlerRolle.UKJENT
         }
     }
 }
