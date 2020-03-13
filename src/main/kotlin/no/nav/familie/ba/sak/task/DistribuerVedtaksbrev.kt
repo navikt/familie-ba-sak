@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrev.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Service
 class DistribuerVedtaksbrev(
         private val integrasjonClient: IntegrasjonClient,
         private val featureToggleService: FeatureToggleService,
-        private val taskRepository: TaskRepository
+        private val taskRepository: TaskRepository,
+        private val loggService: LoggService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -26,6 +28,9 @@ class DistribuerVedtaksbrev(
         if (featureToggleService.isEnabled("familie-ba-sak.distribuer-vedtaksbrev")) {
             LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${distribuerVedtaksbrevDTO.journalpostId}")
             integrasjonClient.distribuerVedtaksbrev(distribuerVedtaksbrevDTO.journalpostId)
+
+            loggService.opprettDistribuertBrevLogg(behandlingId = distribuerVedtaksbrevDTO.behandlingId,
+                                                   tekst = "Vedtaksbrev er sendt til bruker")
         } else {
             LOG.info("Hopper over distribusjon av vedtaksbrev. Funksjonen er skrudd av")
         }

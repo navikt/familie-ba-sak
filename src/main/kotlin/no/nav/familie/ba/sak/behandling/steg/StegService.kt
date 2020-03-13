@@ -11,9 +11,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
-import no.nav.familie.ba.sak.logg.Logg
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.logg.LoggType
+import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -24,7 +23,8 @@ class StegService(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val steg: List<BehandlingSteg<*>>,
-        private val loggService: LoggService
+        private val loggService: LoggService,
+        private val rolleConfig: RolleConfig
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -34,7 +34,7 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
-        opprettBehandlingLogg(behandling)
+        loggService.opprettBehandlingLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
                                      Registreringsdata(ident = nyBehandling.søkersIdent,
@@ -52,21 +52,13 @@ class StegService(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR
         ))
-        opprettBehandlingLogg(behandling)
+
+        loggService.opprettFødselshendelseLogg(behandling)
+        loggService.opprettBehandlingLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
                                      Registreringsdata(ident = nyBehandling.søkersIdent,
                                                        barnasIdenter = nyBehandling.barnasIdenter))
-    }
-
-    private fun opprettBehandlingLogg(behandling: Behandling) {
-        loggService.lagre(Logg(
-                behandlingId = behandling.id,
-                type = LoggType.BEHANDLING_OPPRETTET,
-                tittel = "${behandling.type.visningsnavn} opprettet",
-                rolle = SikkerhetContext.hentBehandlerRolle(),
-                tekst = ""
-        ))
     }
 
     fun håndterPersongrunnlag(behandling: Behandling, registreringsdata: Registreringsdata): Behandling {
@@ -87,15 +79,44 @@ class StegService(
         }
     }
 
+    fun håndterSendTilBeslutter(behandling: Behandling): Behandling {
+        val behandlingSteg: SendTilBeslutter = hentBehandlingSteg(StegType.SEND_TIL_BESLUTTER) as SendTilBeslutter
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførSteg(behandling, "")
+        }
+    }
+
+    fun håndterGodkjenneVedtak(behandling: Behandling): Behandling {
+        val behandlingSteg: GodkjenneVedtakOgStartIverksetting =
+                hentBehandlingSteg(StegType.GODKJENNE_VEDTAK) as GodkjenneVedtakOgStartIverksetting
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførSteg(behandling, "")
+        }
+    }
+
+    fun håndterFerdigstillBehandling(behandling: Behandling): Behandling {
+        val behandlingStegSteg: FerdigstillBehandlingSteg = hentBehandlingSteg(StegType.FERDIGSTILLE_BEHANDLING) as FerdigstillBehandlingSteg
+
+        return håndterSteg(behandling, behandlingStegSteg) {
+            behandlingStegSteg.utførSteg(behandling, "")
+        }
+    }
+
     // Generelle stegmetoder
     fun håndterSteg(behandling: Behandling, behandlingSteg: BehandlingSteg<*>, uførendeSteg: () -> Behandling): Behandling {
         try {
+            if (behandling.steg == sisteSteg) {
+                error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
+            }
+
             if (behandling.steg != behandlingSteg.stegType()) {
                 error("${SikkerhetContext.hentSaksbehandler()} prøver å utføre steg ${behandlingSteg.stegType()}," +
                       " men behandlingen er på steg ${behandling.steg}")
             }
 
-            val behandlerRolle = SikkerhetContext.hentBehandlerRolle()
+            val behandlerRolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minBy { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandler()} håndterer ${behandling.steg} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
@@ -107,12 +128,11 @@ class StegService(
 
             stegSuksessMetrics[behandling.steg]?.increment()
 
-            if (behandling.steg == sisteSteg) {
-                LOG.info("${SikkerhetContext.hentSaksbehandler()} er ferdig med stegprosess på behandling ${behandling.id}")
-            } else {
-                val nesteSteg = behandlingSteg.nesteSteg(behandlingEtterSteg)
+            val nesteSteg = behandlingSteg.nesteSteg(behandlingEtterSteg)
+            behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id, steg = nesteSteg)
 
-                behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id, steg = nesteSteg)
+            if (nesteSteg == sisteSteg) {
+                LOG.info("${SikkerhetContext.hentSaksbehandler()} er ferdig med stegprosess på behandling ${behandling.id}")
             }
 
             return behandlingEtterSteg
