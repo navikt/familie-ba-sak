@@ -28,15 +28,18 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
-        if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
-            val behandling =
+        return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
+            lagreNyOgDeaktiverGammelBehandling(
                     Behandling(fagsak = fagsak,
                                journalpostID = nyBehandling.journalpostID,
                                type = nyBehandling.behandlingType,
                                kategori = nyBehandling.kategori,
                                underkategori = nyBehandling.underkategori,
-                               steg = initSteg)
-            return lagreNyOgDeaktiverGammelBehandling(behandling)
+                               steg = initSteg))
+        } else if (aktivBehandling.steg < StegType.GODKJENNE_VEDTAK) {
+            aktivBehandling.steg = initSteg
+            aktivBehandling.status = BehandlingStatus.OPPRETTET
+            behandlingRepository.save(aktivBehandling)
         } else {
             error("Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
@@ -89,12 +92,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
     }
 
-    fun oppdaterStatusPåBehandling(behandlingId: Long, status: BehandlingStatus) {
+    fun oppdaterStatusPåBehandling(behandlingId: Long, status: BehandlingStatus): Behandling {
         val behandling = hent(behandlingId)
         LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
         behandling.status = status
-        behandlingRepository.save(behandling)
+        return behandlingRepository.save(behandling)
     }
 
     fun oppdaterStegPåBehandling(behandlingId: Long, steg: StegType) {

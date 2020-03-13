@@ -49,6 +49,6 @@ class Vilkårsvurdering(
     }
 
     override fun nesteSteg(behandling: Behandling): StegType {
-        return StegType.FORESLÅ_VEDTAK
+        return StegType.SEND_TIL_BESLUTTER
     }
 }

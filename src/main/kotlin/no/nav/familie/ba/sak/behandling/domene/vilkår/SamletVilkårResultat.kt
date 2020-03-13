@@ -24,7 +24,7 @@ class SamletVilkårResultat(
         var samletVilkårResultat: MutableSet<VilkårResultat>
 ) : BaseEntitet() {
 
-        fun hentSamletVilkårResultat () : Resultat {
+        fun hentSamletResultat () : Resultat {
                 return if (samletVilkårResultat.any { it.resultat == Resultat.NEI }) Resultat.NEI else Resultat.JA
         }
 }

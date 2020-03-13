@@ -87,7 +87,7 @@ class VilkårVurderingTest {
         val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
                                                                            behandlingId = behandling.id)
 
-        assertEquals(samletVilkårResultat.hentSamletVilkårResultat(), Resultat.JA)
+        assertEquals(samletVilkårResultat.hentSamletResultat(), Resultat.JA)
     }
 
     @Test
@@ -116,7 +116,7 @@ class VilkårVurderingTest {
         val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
                                                                            behandlingId = behandling.id)
 
-        assertEquals(samletVilkårResultat.hentSamletVilkårResultat(), Resultat.NEI)
+        assertEquals(samletVilkårResultat.hentSamletResultat(), Resultat.NEI)
     }
 
 }

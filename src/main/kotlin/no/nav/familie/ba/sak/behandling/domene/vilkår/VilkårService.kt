@@ -4,11 +4,15 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.nare.core.specifications.Spesifikasjon
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
 
 @Service
 class VilkårService(
-        private val samletVilkårResultatRepository: SamletVilkårResultatRepository
+        private val behandlingService: BehandlingService,
+        private val samletVilkårResultatRepository: SamletVilkårResultatRepository,
+        private val loggService: LoggService
 ) {
 
     fun lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat: SamletVilkårResultat) {
@@ -19,6 +23,9 @@ class VilkårService(
             aktivSamletVilkårResultat.aktiv = false
             samletVilkårResultatRepository.save(aktivSamletVilkårResultat)
         }
+
+        val behandling = behandlingService.hent(samletVilkårResultat.behandlingId)
+        loggService.opprettVilkårsvurderingLogg(behandling, aktivSamletVilkårResultat, samletVilkårResultat)
 
         samletVilkårResultatRepository.save(samletVilkårResultat)
     }
