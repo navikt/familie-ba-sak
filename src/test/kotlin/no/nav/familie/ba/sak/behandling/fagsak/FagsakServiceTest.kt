@@ -47,6 +47,9 @@ class FagsakServiceTest {
     lateinit var fagsakService: FagsakService
 
     @Autowired
+    lateinit var behandlingService: BehandlingService
+
+    @Autowired
     lateinit var stegService: StegService
 
     @Test
@@ -63,13 +66,24 @@ class FagsakServiceTest {
                 søker2Fnr
         ))
 
+        val førsteBehandling = stegService.håndterNyBehandling(NyBehandling(
+                BehandlingKategori.NASJONAL,
+                BehandlingUnderkategori.ORDINÆR,
+                søker1Fnr,
+                listOf(barn1Fnr),
+                BehandlingType.FØRSTEGANGSBEHANDLING
+        ))
+
+        behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.FERDIGSTILT)
+
         stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
-                listOf(barn1Fnr, barn2fnr),
+                listOf(barn2fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
+
 
         stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -79,14 +93,14 @@ class FagsakServiceTest {
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 
-        val søkeresultat1 = fagsakService.søkeFagsak(PersonIdent(søker1Fnr))
-        Assertions.assertEquals(søker1Fnr, søkeresultat1.personIdent.ident)
+        val søkeresultat1 = fagsakService.hentFagsaker(søker1Fnr)
+        Assertions.assertEquals(søker1Fnr, søkeresultat1.personIdent)
         Assertions.assertEquals(1, søkeresultat1.fagsaker.size)
         Assertions.assertEquals(Kjønn.KVINNE, søkeresultat1.kjønn)
         Assertions.assertEquals(fagsak0.data!!.id, søkeresultat1.fagsaker[0].fagsakId)
 
-        val søkeresultat2 = fagsakService.søkeFagsak(PersonIdent(barn1Fnr))
-        Assertions.assertEquals(barn1Fnr, søkeresultat2.personIdent.ident)
+        val søkeresultat2 = fagsakService.hentFagsaker(barn1Fnr)
+        Assertions.assertEquals(barn1Fnr, søkeresultat2.personIdent)
         Assertions.assertEquals(2, søkeresultat2.fagsaker.size)
         var matching = 0
         søkeresultat2.fagsaker.forEach {
@@ -95,8 +109,8 @@ class FagsakServiceTest {
         Assertions.assertEquals(11, matching)
         Assertions.assertEquals(Kjønn.KVINNE, søkeresultat2.kjønn)
 
-        val søkeresultat3 = fagsakService.søkeFagsak(PersonIdent(barn2fnr))
-        Assertions.assertEquals(barn2fnr, søkeresultat3.personIdent.ident)
+        val søkeresultat3 = fagsakService.hentFagsaker(barn2fnr)
+        Assertions.assertEquals(barn2fnr, søkeresultat3.personIdent)
         Assertions.assertEquals(1, søkeresultat3.fagsaker.size)
         Assertions.assertEquals(fagsak0.data!!.id, søkeresultat3.fagsaker[0].fagsakId)
         Assertions.assertEquals(Kjønn.MANN, søkeresultat3.kjønn)

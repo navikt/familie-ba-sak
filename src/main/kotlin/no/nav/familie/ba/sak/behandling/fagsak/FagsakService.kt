@@ -116,24 +116,21 @@ class FagsakService(
         return fagsakRepository.finnLøpendeFagsaker()
     }
 
-    fun hentFagsaker(personIdent: PersonIdent): RestFagsakSøk {
-        val personer = personRepository.findByPersonIdent(personIdent)
+    fun hentFagsaker(personIdent: String): RestFagsakSøk {
+        val personer = personRepository.findByPersonIdent(PersonIdent(personIdent))
+        val personInfo= integrasjonClient.hentPersoninfoFor(personIdent)
 
-        val assosierteFagsaker = mutableListOf<RestFunnetFagsak>()
-
-        if(personer.isEmpty()){
-            return RestSøkeresultat(personIdent, "", Kjønn.UKJENT, funnetFagsak)
-        }
+        val assosierteFagsaker = mutableMapOf<Long, RestFunnetFagsak>()
 
         personer.map {
             val behandling = behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId)
-            funnetFagsak.add(RestFunnetFagsak(
+            assosierteFagsaker[behandling.fagsak.id]= RestFunnetFagsak(
                     behandling.fagsak.id,
                     it.type
-            ))
+            )
         }
 
-        return RestSøkeresultat(personIdent, person.navn, person.kjønn, assosierteFagsaker)
+        return RestFagsakSøk(personIdent, personInfo.navn?:"", personInfo.kjønn?:Kjønn.UKJENT, assosierteFagsaker.values.toList())
     }
 
     companion object {

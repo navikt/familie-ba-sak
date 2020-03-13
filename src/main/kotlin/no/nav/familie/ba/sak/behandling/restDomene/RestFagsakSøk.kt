@@ -10,8 +10,8 @@ data class RestFunnetFagsak(
     val personType: PersonType
 )
 
-data class RestSøkeresultat(
-        val personIdent: PersonIdent,
+data class RestFagsakSøk(
+        val personIdent: String,
         val navn: String,
         val kjønn: Kjønn,
         val fagsaker: List<RestFunnetFagsak>

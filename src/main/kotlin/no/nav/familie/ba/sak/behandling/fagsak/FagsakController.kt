@@ -19,9 +19,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
-import no.nav.familie.ba.sak.behandling.restDomene.RestSøkeresultat
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakSøk
 
 @RestController
 @RequestMapping("/api")
@@ -75,12 +73,12 @@ class FagsakController(
     }
 
     @PostMapping(path = ["fagsaker/søke"])
-    fun søkeFagsak(@RequestParam personIdent: String): ResponseEntity<Ressurs<RestSøkeresultat>> {
+    fun søkeFagsak(@RequestParam personIdent: String): ResponseEntity<Ressurs<RestFagsakSøk>> {
         val saksbehandlerId = hentSaksbehandler()
 
         logger.info("{} søker fagsak", saksbehandlerId)
 
-        val ressurs = Result.runCatching { fagsakService.søkeFagsak(PersonIdent(personIdent)) }
+        val ressurs = Result.runCatching { fagsakService.hentFagsaker(personIdent) }
                 .fold(
                         onSuccess = { Ressurs.success(it) },
                         onFailure = {
