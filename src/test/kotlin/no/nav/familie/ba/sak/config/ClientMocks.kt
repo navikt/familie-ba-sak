@@ -16,9 +16,6 @@ import java.time.LocalDate
 @Component
 class ClientMocks {
 
-    private val søkerFnr = "12345678910"
-    private val barnFnr = "01101800033"
-
     @Bean
     @Primary
     fun mockIntegrasjonOnBehalfClient(): IntegrasjonOnBehalfClient {
@@ -47,18 +44,31 @@ class ClientMocks {
         } returns randomAktørId()
 
         every {
-            mockIntegrasjonClient.journalFørVedtaksbrev(eq(søkerFnr), any(), any())
+            mockIntegrasjonClient.journalFørVedtaksbrev(eq(søkerFnr[0]), any(), any())
         } returns "Testrespons"
 
         every {
-            mockIntegrasjonClient.hentPersoninfoFor(eq(barnFnr))
-        } returns Personinfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "Barn Barnesen")
+            mockIntegrasjonClient.hentPersoninfoFor(eq(barnFnr[0]))
+        } returns Personinfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "Jenta Barnesen")
 
         every {
-            mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr))
+            mockIntegrasjonClient.hentPersoninfoFor(eq(barnFnr[1]))
+        } returns Personinfo(fødselsdato = LocalDate.of(2019, 5, 1), kjønn = Kjønn.MANN, navn = "Gutten Barnesen")
+
+        every {
+            mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr[0]))
         } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
+        every {
+            mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr[1]))
+        } returns Personinfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "Far Faresen")
+
         return mockIntegrasjonClient
+    }
+
+    companion object {
+        val søkerFnr = arrayOf("12345678910", "11223344556")
+        val barnFnr = arrayOf("01101800033", "01101900033")
     }
 }
 

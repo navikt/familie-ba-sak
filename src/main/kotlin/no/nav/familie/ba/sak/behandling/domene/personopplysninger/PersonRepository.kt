@@ -11,6 +11,6 @@ interface PersonRepository : JpaRepository<Person, Long> {
     fun findByPersonIdentAndPersonopplysningGrunnlag(personIdent: PersonIdent, personopplysningGrunnlagId: Long): Person?
 
     @Query("SELECT p FROM Person p" +
-            "WHERE p.personIdent = :personIdent")
+            " WHERE p.personIdent = :personIdent")
     fun findByPersonIdent(personIdent: PersonIdent): List<Person>
 }
