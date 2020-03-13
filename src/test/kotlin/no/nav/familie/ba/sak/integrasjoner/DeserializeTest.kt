@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class DeserializeTest {
     private val mapper = ObjectMapper()
