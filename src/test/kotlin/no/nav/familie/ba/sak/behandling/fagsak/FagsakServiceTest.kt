@@ -38,59 +38,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import java.util.*
 
-@SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
+@SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 @Tag("integration")
-@AutoConfigureWireMock(port = 28085)
 class FagsakServiceTest {
-    @Autowired
-    lateinit var vedtakRepository: VedtakRepository
-
-    @Autowired
-    lateinit var vedtakPersonRepository: VedtakPersonRepository
-
-    @Autowired
-    lateinit var fagsakRepository: FagsakRepository
-
-    @Autowired
-    lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
-
-    @Autowired
-    lateinit var personRepository: PersonRepository
-
-    @Autowired
-    lateinit var samletVilkårResultatRepository: SamletVilkårResultatRepository
-
-    @Autowired
-    lateinit var behandlingRepository: BehandlingRepository
-
-    @MockK
-    lateinit var mockIntegrasjonClient: IntegrasjonClient
-
     @Autowired
     lateinit var fagsakService: FagsakService
 
     @Autowired
     lateinit var stegService: StegService
-
-    @BeforeEach
-    fun setUp(){
-        stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
-                                LocalDate.of(2019,
-                                        1,
-                                        1)))))))
-        stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
-                                LocalDate.of(2019,
-                                        1,
-                                        1)))))))
-    }
 
     @Test
     fun `test å søke fagsak med fnr`() {
