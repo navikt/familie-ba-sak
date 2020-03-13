@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -32,6 +34,12 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                         @Qualifier("clientCredentials") restOperations: RestOperations,
                         private val featureToggleService: FeatureToggleService)
     : AbstractRestClient(restOperations, "integrasjon") {
+
+    val personinfoIdentiskCounter: Counter = Metrics.counter("personinfo.sammenlignet.pdl-mot-tps.identisk")
+    val personinfoUlikCounter: Counter = Metrics.counter("personinfo.sammenlignet.pdl-mot-tps.ulik")
+    val familierelasjonerIdentiskCounter: Counter = Metrics.counter("familierelasjoner.sammenlignet.pdl-mot-tps.identisk")
+    val familierelasjonerUlikCounter: Counter = Metrics.counter("familierelasjoner.sammenlignet.pdl-mot-tps.ulik")
+    val kallMotAlternativPersondatakildeFeilerCounter: Counter = Metrics.counter("personinfo.sammenlignet.pdl-mot-tps.error")
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentAktørId(personident: String): AktørId {
@@ -66,22 +74,29 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uriForSammenligning = if (pdlEnabled) tpsUri else pdlUri
 
         val personinfo = hentPersoninfo(personIdent, uri)
-        sammenlignPersoninfo(personinfo, hentPersonInfoForSammenligning(personIdent, uriForSammenligning))
+        val personinfoForSammenlign = hentPersonInfoForSammenligning(personIdent, uriForSammenligning, pdlEnabled)
+        if (personinfoForSammenlign != null) {
+            sammenlignPersoninfo(personinfo, personinfoForSammenlign)
+        }
         return personinfo
     }
 
-    private fun sammenlignPersoninfo(personinfo: Personinfo, personinfoForSammenlign: Personinfo?) {
-        if (personinfo.fødselsdato.isEqual(personinfoForSammenlign?.fødselsdato)) {
+    private fun sammenlignPersoninfo(personinfo: Personinfo, personinfoForSammenlign: Personinfo) {
+        if (personinfo.fødselsdato.isEqual(personinfoForSammenlign.fødselsdato)) {
             logger.info("Fødselsdato fra PDL og TPS var identisk.")
+            personinfoIdentiskCounter.increment()
         } else {
             logger.warn("Fødselsdato fra PDL og TPS var ulik!")
+            personinfoUlikCounter.increment()
         }
-        if (personinfo.familierelasjoner.equals(personinfoForSammenlign?.familierelasjoner)) {
+        if (personinfo.familierelasjoner.equals(personinfoForSammenlign.familierelasjoner)) {
             logger.info("Familierelasjoner fra PDL og TPS var identiske.")
+            familierelasjonerIdentiskCounter.increment()
         } else {
             logger.warn("Familierelasjoner fra PDL og TPS var ulike. Hoved: {} Sammenligning: {} ",
                         personinfo.familierelasjoner.map { relasjon -> relasjon.relasjonsrolle },
-                        personinfoForSammenlign?.familierelasjoner?.map { relasjon -> relasjon.relasjonsrolle })
+                        personinfoForSammenlign.familierelasjoner?.map { relasjon -> relasjon.relasjonsrolle })
+            familierelasjonerUlikCounter.increment()
         }
     }
 
@@ -95,13 +110,15 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    private fun hentPersonInfoForSammenligning(personIdent: String, uri: URI): Personinfo? {
+    private fun hentPersonInfoForSammenligning(personIdent: String, uri: URI, pdlEnabled: Boolean): Personinfo? {
         return try {
             val response = getForEntity<Ressurs<Personinfo>>(uri, HttpHeaders().medPersonident(personIdent))
             secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.data)
             response.data
         } catch (e: Exception) {
-            logger.warn("Feil ved oppslag på personinfo for sammenligning av data: ${e.message}")
+            val kildeForSammenligning = if (pdlEnabled) "TPS" else "PDL"
+            logger.warn("Feil ved oppslag på personinfo mot $kildeForSammenligning for sammenligning av data: ${e.message}")
+            kallMotAlternativPersondatakildeFeilerCounter.increment()
             null
         }
     }
@@ -132,7 +149,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
         Result.runCatching {
             val journalpostRequest = DistribuerJournalpostRequest(
-                    journalpostId, "BA", "familie-ba-sak")
+                    journalpostId, "BA", "familie_ba_sak")
             postForEntity<Ressurs<String>>(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8())
         }.fold(
                 onSuccess = {

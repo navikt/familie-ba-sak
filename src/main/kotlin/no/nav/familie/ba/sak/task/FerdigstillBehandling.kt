@@ -30,7 +30,7 @@ class FerdigstillBehandling(
         it to Metrics.counter("behandling.ferdigstilt", "type",
                               it.name,
                               "beskrivelse",
-                              it.beskrivelse)
+                              it.visningsnavn)
     }.toMap()
 
     override fun doTask(task: Task) {

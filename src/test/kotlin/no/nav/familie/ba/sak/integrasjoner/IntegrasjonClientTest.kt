@@ -125,7 +125,7 @@ class IntergrasjonTjenesteTest {
         verify(postRequestedFor(anyUrl())
                        .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
-                       .withRequestBody(equalToJson("{\"journalpostId\":\"123456789\",\"bestillendeFagsystem\":\"BA\",\"dokumentProdApp\":\"familie-ba-sak\"}")))
+                       .withRequestBody(equalToJson("{\"journalpostId\":\"123456789\",\"bestillendeFagsystem\":\"BA\",\"dokumentProdApp\":\"familie_ba_sak\"}")))
     }
 
     @Test
