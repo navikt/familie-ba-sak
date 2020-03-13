@@ -125,6 +125,7 @@ class FagsakServiceTest {
         val søkeresultat1 = fagsakService.søkeFagsak(PersonIdent(søker1Fnr))
         Assertions.assertEquals(søker1Fnr, søkeresultat1.personIdent.ident)
         Assertions.assertEquals(1, søkeresultat1.fagsaker.size)
+        Assertions.assertEquals(Kjønn.KVINNE, søkeresultat1.kjønn)
         Assertions.assertEquals(fagsak0.data!!.id, søkeresultat1.fagsaker[0].fagsakId)
 
         val søkeresultat2 = fagsakService.søkeFagsak(PersonIdent(barn1Fnr))
@@ -135,10 +136,12 @@ class FagsakServiceTest {
             matching += if (it.fagsakId == fagsak0.data!!.id) 1 else if (it.fagsakId == fagsak1.data!!.id) 10 else 0
         }
         Assertions.assertEquals(11, matching)
+        Assertions.assertEquals(Kjønn.KVINNE, søkeresultat2.kjønn)
 
         val søkeresultat3 = fagsakService.søkeFagsak(PersonIdent(barn2fnr))
         Assertions.assertEquals(barn2fnr, søkeresultat3.personIdent.ident)
         Assertions.assertEquals(1, søkeresultat3.fagsaker.size)
         Assertions.assertEquals(fagsak0.data!!.id, søkeresultat3.fagsaker[0].fagsakId)
+        Assertions.assertEquals(Kjønn.MANN, søkeresultat3.kjønn)
     }
 }
