@@ -8,14 +8,14 @@ data class RestVedtak(
         val aktiv: Boolean,
         val ansvarligSaksbehandler: String,
         val vedtaksdato: LocalDate,
-        val barnasBeregning: List<RestVedtakBarn>,
+        val personBeregninger: List<RestVedtakBarn>,
         val id: Long
 )
 
 fun Vedtak.toRestVedtak(personBeregning: List<VedtakPerson>) = RestVedtak(
         aktiv = this.aktiv,
         ansvarligSaksbehandler = this.ansvarligSaksbehandler,
-        barnasBeregning = personBeregning.map { it.toRestVedtakBarn() },
+        personBeregninger = personBeregning.map { it.toRestVedtakBarn() },
         vedtaksdato = this.vedtaksdato,
         id= this.id
 )
