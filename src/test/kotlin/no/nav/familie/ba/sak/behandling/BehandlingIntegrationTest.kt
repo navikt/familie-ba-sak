@@ -165,7 +165,7 @@ class BehandlingIntegrationTest {
 
         Assertions.assertNotNull(personopplysningGrunnlag)
 
-        val barnasBeregning = listOf(
+        val personBeregninger = listOf(
                 PersonBeregning(barn1Fnr,
                               1054,
                               LocalDate.of(2020, 1, 1),
@@ -175,7 +175,7 @@ class BehandlingIntegrationTest {
                               LocalDate.of(2020, 1, 1),
                               Ytelsetype.ORDINÆR_BARNETRYGD)
         )
-        val nyBeregning = NyBeregning(barnasBeregning)
+        val nyBeregning = NyBeregning(personBeregninger)
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
