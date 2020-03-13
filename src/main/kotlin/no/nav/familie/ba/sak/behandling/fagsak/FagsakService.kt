@@ -116,10 +116,10 @@ class FagsakService(
         return fagsakRepository.finnLøpendeFagsaker()
     }
 
-    fun søkeFagsak(personIdent: PersonIdent): RestSøkeresultat {
+    fun hentFagsaker(personIdent: PersonIdent): RestFagsakSøk {
         val personer = personRepository.findByPersonIdent(personIdent)
 
-        val funnetFagsak = mutableListOf<RestFunnetFagsak>()
+        val assosierteFagsaker = mutableListOf<RestFunnetFagsak>()
 
         if(personer.isEmpty()){
             return RestSøkeresultat(personIdent, "", Kjønn.UKJENT, funnetFagsak)
@@ -133,7 +133,7 @@ class FagsakService(
             ))
         }
 
-        return RestSøkeresultat(personIdent, personer[0].navn, personer[0].kjønn, funnetFagsak)
+        return RestSøkeresultat(personIdent, person.navn, person.kjønn, assosierteFagsaker)
     }
 
     companion object {
