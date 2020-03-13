@@ -149,7 +149,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
         Result.runCatching {
             val journalpostRequest = DistribuerJournalpostRequest(
-                    journalpostId, "BA", "familie-ba-sak")
+                    journalpostId, "BA", "familie_ba_sak")
             postForEntity<Ressurs<String>>(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8())
         }.fold(
                 onSuccess = {
