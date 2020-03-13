@@ -34,7 +34,7 @@ class BeregningController(
 
         FagsakController.logger.info("{} oppdaterer vedtak med beregning for vedtak med id {}", saksbehandlerId, vedtakId)
 
-        if (nyBeregning.barnasBeregning.isEmpty()) {
+        if (nyBeregning.personBeregninger.isEmpty()) {
             return badRequest("Barnas beregning er tom")
         }
 
@@ -66,10 +66,10 @@ class BeregningController(
 }
 
 data class NyBeregning(
-        val barnasBeregning: List<BarnBeregning>
+        val personBeregninger: List<PersonBeregning>
 )
 
-data class BarnBeregning(
+data class PersonBeregning(
         val ident: String,
         val beløp: Int,
         val stønadFom: LocalDate,
