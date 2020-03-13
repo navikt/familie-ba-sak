@@ -11,28 +11,37 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
+import no.nav.familie.ba.sak.logg.Logg
+import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.logg.LoggType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class StegService(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
-        private val steg: List<BehandlingSteg<*>>
+        private val steg: List<BehandlingSteg<*>>,
+        private val loggService: LoggService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
 
+    @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
+        opprettBehandlingLogg(behandling)
+
         return håndterPersongrunnlag(behandling,
                                      Registreringsdata(ident = nyBehandling.søkersIdent,
                                                        barnasIdenter = nyBehandling.barnasIdenter))
     }
 
+    @Transactional
     fun håndterNyBehandlingFraHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
         fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.søkersIdent)
 
@@ -43,9 +52,21 @@ class StegService(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR
         ))
+        opprettBehandlingLogg(behandling)
+
         return håndterPersongrunnlag(behandling,
                                      Registreringsdata(ident = nyBehandling.søkersIdent,
                                                        barnasIdenter = nyBehandling.barnasIdenter))
+    }
+
+    private fun opprettBehandlingLogg(behandling: Behandling) {
+        loggService.lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "${behandling.type.visningsnavn} opprettet",
+                rolle = SikkerhetContext.hentBehandlerRolle(),
+                tekst = ""
+        ))
     }
 
     fun håndterPersongrunnlag(behandling: Behandling, registreringsdata: Registreringsdata): Behandling {
