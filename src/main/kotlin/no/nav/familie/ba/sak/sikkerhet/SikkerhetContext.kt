@@ -38,7 +38,7 @@ object SikkerhetContext {
 
         val grupper = hentGrupper()
         val høyesteSikkerhetsnivåForInnloggetBruker: BehandlerRolle =
-                if (rolleConfig.ENVIRONMENT_NAME == "local") BehandlerRolle.BESLUTTER else when {
+                if (rolleConfig.ENVIRONMENT_NAME == "local" || rolleConfig.ENVIRONMENT_NAME == "q2") BehandlerRolle.BESLUTTER else when {
                     grupper.contains(rolleConfig.BESLUTTER_ROLLE) -> BehandlerRolle.BESLUTTER
                     grupper.contains(rolleConfig.SAKSBEHANDLER_ROLLE) -> BehandlerRolle.SAKSBEHANDLER
                     grupper.contains(rolleConfig.VEILEDER_ROLLE) -> BehandlerRolle.VEILEDER

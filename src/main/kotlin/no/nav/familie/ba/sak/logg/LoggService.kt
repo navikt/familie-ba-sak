@@ -32,7 +32,7 @@ class LoggService(
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Endring på vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat gikk fra resultat til resultat"
+                    tekst = "Resultat gikk fra ${aktivSamletVilkårResultat.hentSamletResultat()} til ${samletVilkårResultat.hentSamletResultat()}"
             ))
         } else {
             lagre(Logg(
@@ -40,7 +40,7 @@ class LoggService(
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Opprettet vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat ble resultat"
+                    tekst = "Resultat ble ${samletVilkårResultat.hentSamletResultat()}"
             ))
         }
     }
@@ -89,7 +89,7 @@ class LoggService(
         lagre(Logg(
                 behandlingId = behandlingId,
                 type = LoggType.DISTRIBUERE_BREV,
-                tittel = "Distribuer brev",
+                tittel = "Dokument er sendt",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SYSTEM),
                 tekst = tekst
         ))
