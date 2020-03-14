@@ -42,8 +42,4 @@ class FerdigstillBehandlingSteg(
     override fun stegType(): StegType {
         return StegType.FERDIGSTILLE_BEHANDLING
     }
-
-    override fun nesteSteg(behandling: Behandling): StegType {
-        return StegType.BEHANDLING_AVSLUTTET
-    }
 }

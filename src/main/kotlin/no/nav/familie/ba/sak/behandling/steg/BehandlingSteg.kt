@@ -6,8 +6,6 @@ interface BehandlingSteg<T> {
     fun utførSteg(behandling: Behandling, data: T): Behandling
 
     fun stegType(): StegType
-
-    fun nesteSteg(behandling: Behandling): StegType
 }
 
 val initSteg = StegType.REGISTRERE_PERSONGRUNNLAG
@@ -21,7 +19,18 @@ enum class StegType(val tillattFor: List<BehandlerRolle>, val beskrivelse: Strin
                        beskrivelse = "Send til beslutter"),
     GODKJENNE_VEDTAK(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER), beskrivelse = "Godkjenne vedtak"),
     FERDIGSTILLE_BEHANDLING(tillattFor = listOf(BehandlerRolle.SYSTEM), beskrivelse = "Ferdigstille behandling"),
-    BEHANDLING_AVSLUTTET(tillattFor = emptyList(), beskrivelse = "Behandlingen er avsluttet og kan ikke gjenåpnes")
+    BEHANDLING_AVSLUTTET(tillattFor = emptyList(), beskrivelse = "Behandlingen er avsluttet og kan ikke gjenåpnes");
+
+    fun hentNesteSteg(): StegType {
+        return when (this) {
+            REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+            VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+            SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK
+            GODKJENNE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+            FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+            BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+        }
+    }
 }
 
 enum class BehandlerRolle(val nivå: Int) {

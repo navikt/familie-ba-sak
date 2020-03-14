@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.config.RolleConfig
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -97,7 +97,8 @@ class StegService(
     }
 
     fun håndterFerdigstillBehandling(behandling: Behandling): Behandling {
-        val behandlingStegSteg: FerdigstillBehandlingSteg = hentBehandlingSteg(StegType.FERDIGSTILLE_BEHANDLING) as FerdigstillBehandlingSteg
+        val behandlingStegSteg: FerdigstillBehandlingSteg =
+                hentBehandlingSteg(StegType.FERDIGSTILLE_BEHANDLING) as FerdigstillBehandlingSteg
 
         return håndterSteg(behandling, behandlingStegSteg) {
             behandlingStegSteg.utførSteg(behandling, "")
@@ -116,7 +117,8 @@ class StegService(
                       " men behandlingen er på steg ${behandling.steg}")
             }
 
-            val behandlerRolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minBy { it.nivå })
+            val behandlerRolle =
+                    SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minBy { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandler()} håndterer ${behandling.steg} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
@@ -128,8 +130,9 @@ class StegService(
 
             stegSuksessMetrics[behandling.steg]?.increment()
 
-            val nesteSteg = behandlingSteg.nesteSteg(behandlingEtterSteg)
-            behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id, steg = nesteSteg)
+            val nesteSteg = behandling.steg.hentNesteSteg()
+            behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id,
+                                                       steg = nesteSteg)
 
             if (nesteSteg == sisteSteg) {
                 LOG.info("${SikkerhetContext.hentSaksbehandler()} er ferdig med stegprosess på behandling ${behandling.id}")
