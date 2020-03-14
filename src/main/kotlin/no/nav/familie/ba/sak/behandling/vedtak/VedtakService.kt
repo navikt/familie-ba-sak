@@ -115,7 +115,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                                         personopplysningGrunnlag: PersonopplysningGrunnlag,
                                         nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
-        nyBeregning.barnasBeregning.map {
+        nyBeregning.personBeregninger.map {
             val barn =
                     personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.ident),
                                                                                   personopplysningGrunnlag.id)

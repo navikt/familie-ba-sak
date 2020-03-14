@@ -2,18 +2,16 @@ package no.nav.familie.ba.sak.behandling
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.NyFagsak
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
-import no.nav.familie.ba.sak.beregning.BarnBeregning
+import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -130,12 +128,14 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
-    fun `Ikke opprett ny behandling hvis fagsaken har en behandling som ikke er iverksatt`() {
+    fun `Kast feil om man lager ny behandling på fagsak som har behandling som skal godkjennes`() {
         val morId = randomFnr()
         val barnId = randomFnr()
 
         fagsakService.nyFagsak(NyFagsak(personIdent = morId))
-        behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
+        behandling.steg = StegType.GODKJENNE_VEDTAK
+        behandlingRepository.saveAndFlush(behandling)
 
         Assertions.assertThrows(Exception::class.java) {
             behandlingService.opprettBehandling(NyBehandling(
@@ -146,6 +146,30 @@ class BehandlingIntegrationTest {
                     BehandlingType.REVURDERING,
                     null))
         }
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Bruk samme behandling hvis nytt barn kommer på fagsak med aktiv behandling`() {
+        val morId = randomFnr()
+        val barnId = randomFnr()
+        val barn2Id = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
+        behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
+
+        Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsakId = fagsak.id).size)
+
+        behandlingService.opprettBehandling(NyBehandling(
+                BehandlingKategori.NASJONAL,
+                BehandlingUnderkategori.ORDINÆR,
+                morId,
+                listOf(barn2Id),
+                BehandlingType.REVURDERING,
+                null))
+
+        val behandlinger = behandlingService.hentBehandlinger(fagsakId = fagsak.id)
+        Assertions.assertEquals(1, behandlinger.size)
     }
 
     @Test
@@ -165,17 +189,17 @@ class BehandlingIntegrationTest {
 
         Assertions.assertNotNull(personopplysningGrunnlag)
 
-        val barnasBeregning = listOf(
-                BarnBeregning(barn1Fnr,
+        val personBeregninger = listOf(
+                PersonBeregning(barn1Fnr,
                               1054,
                               LocalDate.of(2020, 1, 1),
                               Ytelsetype.ORDINÆR_BARNETRYGD),
-                BarnBeregning(barn2Fnr,
+                PersonBeregning(barn2Fnr,
                               1054,
                               LocalDate.of(2020, 1, 1),
                               Ytelsetype.ORDINÆR_BARNETRYGD)
         )
-        val nyBeregning = NyBeregning(barnasBeregning)
+        val nyBeregning = NyBeregning(personBeregninger)
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,

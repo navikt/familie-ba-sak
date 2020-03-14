@@ -14,7 +14,7 @@ data class Logg(
         val id: Long = 0,
 
         @Column(name = "opprettet_av", nullable = false, updatable = false)
-        val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
+        val opprettetAv: String = SikkerhetContext.hentSaksbehandlerNavn(),
 
         @Column(name = "opprettet_tid", nullable = false, updatable = false)
         val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
@@ -41,5 +41,11 @@ data class Logg(
 )
 
 enum class LoggType(val visningsnavn: String) {
-    BEHANDLING_OPPRETTET("Behandling opprettet")
+    FØDSELSHENDELSE("Fødselshendelse"),
+    BEHANDLING_OPPRETTET("Behandling opprettet"),
+    VILKÅRSVURDERING("Vilkårsvurdering"),
+    SEND_TIL_BESLUTTER("Send til beslutter"),
+    GODKJENNE_VEDTAK("Godkjenne vedtak"),
+    DISTRIBUERE_BREV("Distribuere brev"),
+    FERDIGSTILLE_BEHANDLING("Ferdigstille behandling")
 }

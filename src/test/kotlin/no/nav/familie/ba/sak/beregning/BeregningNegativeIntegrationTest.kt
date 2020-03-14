@@ -76,7 +76,7 @@ class BeregningNegativeIntegrationTest {
         val fagsakRes = beregningController.oppdaterVedtakMedBeregning(vedtak!!.id,
                                                                        NyBeregning(
                                                                                listOf(
-                                                                                       BarnBeregning(
+                                                                                       PersonBeregning(
                                                                                                ident = barnFnr,
                                                                                                beløp = 1054,
                                                                                                stønadFom = LocalDate.of(2020,

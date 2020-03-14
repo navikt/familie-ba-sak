@@ -21,4 +21,8 @@ class SamletVilkårResultat(
 
         @OneToMany(mappedBy = "samletVilkårResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
         val samletVilkårResultat: Set<VilkårResultat>
-) : BaseEntitet()
+) : BaseEntitet() {
+        fun hentSamletResultat(): UtfallType {
+                return if (samletVilkårResultat.any { it.utfallType == UtfallType.IKKE_OPPFYLT }) UtfallType.IKKE_OPPFYLT else UtfallType.OPPFYLT
+        }
+}
