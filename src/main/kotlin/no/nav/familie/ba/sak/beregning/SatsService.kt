@@ -39,33 +39,40 @@ class SatsService(private val satsRepository: SatsRepository) {
         return hentGyldigSatsFor(SatsPeriode(satstype, fom, tom), ignorerFra)
     }
 
+    private fun hentGyldigSatsFor(satsPeriode: SatsPeriode, ignorerFra: YearMonth): List<BeløpPeriode> {
+        val finnAlleSatserFor = satsRepository.finnAlleSatserFor(satsPeriode.satstype)
 
-    private fun hentGyldigSatsFor(satsPeriode: SatsPeriode, ignorerFra: YearMonth): List<BeløpPeriode> =
-            satsRepository.finnAlleSatserFor(satsPeriode.satstype)
-                    // Gir alle fra- og til-datoer verdi
-                    .map { it.copy(gyldigFom = it.gyldigFom ?: LocalDate.MIN, gyldigTom = it.gyldigTom ?: LocalDate.MAX) }
-                    // Utelukk perioder som starter i måneden etter cut-off
-                    .filter { YearMonth.from(it.gyldigFom) < ignorerFra.plusMonths(1) }
-                    .map { finnBeløpsperiode(it, satsPeriode) }
-                    // Utelukk "negative" (ugyldige) perioder
-                    .filter { it.fraOgMed<=it.tilOgMed }
+        return finnAlleSatserFor
+                .map(lagSatsDerDatoerHarVerdi())
+                .filter(barePerioderMedStartFørCutOff(ignorerFra))
+                .map(finnBeløpsperiode(satsPeriode))
+                .filter(bareGyldigePerioder())
+    }
 
+    private fun lagSatsDerDatoerHarVerdi(): (Sats) -> Sats =
+            { it.copy(gyldigFom = it.gyldigFom ?: LocalDate.MIN, gyldigTom = it.gyldigTom ?: LocalDate.MAX) }
 
-    private fun finnBeløpsperiode(sats: Sats, satsPeriode: SatsPeriode): BeløpPeriode {
+    private fun barePerioderMedStartFørCutOff(ignorerFra: YearMonth): (Sats) -> Boolean =
+            { YearMonth.from(it.gyldigFom) < ignorerFra.plusMonths(1) }
+
+    private fun bareGyldigePerioder(): (BeløpPeriode) -> Boolean =
+            { it.fraOgMed <= it.tilOgMed }
+
+    private fun finnBeløpsperiode(satsPeriode: SatsPeriode): (Sats)-> BeløpPeriode = {
 
         val fraOgMed = when {
-            sats.gyldigFom == null -> satsPeriode.fraOgMed
-            YearMonth.from(sats.gyldigFom) < satsPeriode.fraOgMed -> satsPeriode.fraOgMed
-            else -> YearMonth.from(sats.gyldigFom)
+            it.gyldigFom == null -> satsPeriode.fraOgMed
+            YearMonth.from(it.gyldigFom) < satsPeriode.fraOgMed -> satsPeriode.fraOgMed
+            else -> YearMonth.from(it.gyldigFom)
         }
 
         val tilOgMed = when {
-            sats.gyldigTom == null -> satsPeriode.tilOgMed
-            YearMonth.from(sats.gyldigTom) > satsPeriode.tilOgMed -> satsPeriode.tilOgMed
-            else -> YearMonth.from(sats.gyldigTom)
+            it.gyldigTom == null -> satsPeriode.tilOgMed
+            YearMonth.from(it.gyldigTom) > satsPeriode.tilOgMed -> satsPeriode.tilOgMed
+            else -> YearMonth.from(it.gyldigTom)
         }
 
-        return BeløpPeriode(sats.beløp, fraOgMed, tilOgMed)
+        BeløpPeriode(it.beløp, fraOgMed, tilOgMed)
     }
 
     private data class SatsPeriode(

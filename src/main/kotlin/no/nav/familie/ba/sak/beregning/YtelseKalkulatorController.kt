@@ -1,10 +1,8 @@
-package no.nav.familie.ba.sak.behandling.beregning
+package no.nav.familie.ba.sak.beregning
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.beregning.YtelseSatsMapper
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -13,11 +11,10 @@ import java.util.ArrayList
 
 @RestController
 @RequestMapping("/api/kalkulator")
-@Unprotected // Skal IKKE kreve autentisering
+@Unprotected // Ikke nødvendig med autentisering. Opererer kun på input-data
 class YtelseKalkulatorController(
         val satsService: SatsService
 ) {
-
     @PutMapping(produces = ["application/json"])
     fun kalkulerYtelserJson(@RequestBody
                             personligeYtelser: List<PersonligYtelseForPeriode>): ResponseEntity<YtelseKalkulatorResponse> {
@@ -83,17 +80,13 @@ class YtelseKalkulatorController(
         val divisor = if (personligeYtelse.halvYtelse) 2 else 1
         val satsType = YtelseSatsMapper.map(personligeYtelse.ytelsetype)
 
-        val beløpsperioder : List<SatsService.BeløpPeriode>? = satsType?.let {
-            satsService.hentGyldigSatsFor(it,
-                                          periodeYtelse.stønadFom,
-                                          periodeYtelse.stønadTom,
-                                          YearMonth.now())
+        val beløpsperioder: List<SatsService.BeløpPeriode>? = satsType?.let {
+            satsService.hentGyldigSatsFor(it, periodeYtelse.stønadFom, periodeYtelse.stønadTom, YearMonth.now())
         }
-        return beløpsperioder?.map { PersonligYtelseForPeriode(personligeYtelse, it.beløp / divisor, it.fraOgMed, it.tilOgMed) }
-               ?: listOf(PersonligYtelseForPeriode(personligeYtelse, periodeYtelse.beløp,periodeYtelse.stønadFom,periodeYtelse.stønadTom))
-
+        return beløpsperioder
+                       ?.map { PersonligYtelseForPeriode(personligeYtelse, it.beløp / divisor, it.fraOgMed, it.tilOgMed) }
+               ?: listOf(PersonligYtelseForPeriode(personligeYtelse, periodeYtelse.beløp, periodeYtelse.stønadFom, periodeYtelse.stønadTom))
     }
-
 }
 
 data class PersonligYtelse(
@@ -160,8 +153,7 @@ private class HtmlTabell {
             val builder = StringBuilder()
 
             builder.append("<table>")
-            builder.append(header
-                                   .map { "${it.personident} ${it.ytelsetype} ${tilProsent(!it.halvYtelse)}" }
+            builder.append(header.map { "${it.personident} ${it.ytelsetype} ${tilProsent(!it.halvYtelse)}" }
                                    .joinToString("</th><th>", "<tr><th>Periode</th><th>Total</th><th>", "</th></tr>"))
             builder.append(personYtelseSum.joinToString("</td><td>", "<tr><td>Alle</td><td>$totalbeløp</td><td>", "</td></tr>"))
 
