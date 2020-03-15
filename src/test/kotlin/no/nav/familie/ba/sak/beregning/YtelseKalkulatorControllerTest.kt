@@ -24,7 +24,11 @@ internal class YtelseKalkulatorControllerTest {
     @BeforeEach
     fun init() {
         every { satsRepository.finnAlleSatserFor(SatsType.SMA) } returns listOf(Sats(0, SatsType.SMA, 660, LocalDate.now(), null))
-        every { satsRepository.finnAlleSatserFor(SatsType.ORBA) } returns listOf(Sats(0, SatsType.ORBA, 1054, LocalDate.now(), null))
+        every { satsRepository.finnAlleSatserFor(SatsType.ORBA) } returns listOf(Sats(0,
+                                                                                      SatsType.ORBA,
+                                                                                      1054,
+                                                                                      LocalDate.now(),
+                                                                                      null))
     }
 
     @Test
@@ -32,25 +36,25 @@ internal class YtelseKalkulatorControllerTest {
 
         val personligeYtelser = listOf(
                 PersonligYtelseForPeriode("1",
-                                                                                             SMÅBARNSTILLEGG,
-                                                                                             true,
-                                                                                             årMnd("2020-06"),
-                                                                                             årMnd("2026-05")),
+                                          SMÅBARNSTILLEGG,
+                                          true,
+                                          årMnd("2020-06"),
+                                          årMnd("2026-05")),
                 PersonligYtelseForPeriode("1",
-                                                                                             UTVIDET_BARNETRYGD,
-                                                                                             true,
-                                                                                             årMnd("2020-10"),
-                                                                                             årMnd("2022-03")),
+                                          UTVIDET_BARNETRYGD,
+                                          true,
+                                          årMnd("2020-10"),
+                                          årMnd("2022-03")),
                 PersonligYtelseForPeriode("2",
-                                                                                             ORDINÆR_BARNETRYGD,
-                                                                                             true,
-                                                                                             årMnd("2020-04"),
-                                                                                             årMnd("2031-01")),
+                                          ORDINÆR_BARNETRYGD,
+                                          true,
+                                          årMnd("2020-04"),
+                                          årMnd("2031-01")),
                 PersonligYtelseForPeriode("3",
-                                                                                             ORDINÆR_BARNETRYGD,
-                                                                                             false,
-                                                                                             årMnd("2020-04"),
-                                                                                             årMnd("2038-03"))
+                                          ORDINÆR_BARNETRYGD,
+                                          false,
+                                          årMnd("2020-04"),
+                                          årMnd("2038-03"))
         )
 
         val controller = YtelseKalkulatorController(satsService)
@@ -58,6 +62,6 @@ internal class YtelseKalkulatorControllerTest {
         val ytelseKalkulatorResponse = controller.kalkulerYtelserJson(personligeYtelser).body!!
 
         assertEquals(215, ytelseKalkulatorResponse.perioder.size)
-     }
+    }
 
 }
