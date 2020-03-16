@@ -27,9 +27,14 @@ class Vilkårsvurdering(
         val vilkårsvurdertBehandling = behandlingService.settVilkårsvurdering(testBehandling,
                                                                               data.resultat,
                                                                               data.begrunnelse)
-        vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
-                                                data.samletVilkårResultat,
-                                                vilkårsvurdertBehandling.id)
+
+        if (data.samletVilkårResultat.isNotEmpty()) {
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
+                                                                data.samletVilkårResultat,
+                                                                vilkårsvurdertBehandling.id)
+        } else {
+            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, vilkårsvurdertBehandling.id)
+        }
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(vilkårsvurdertBehandling,
                                                                  personopplysningGrunnlag,
@@ -41,9 +46,5 @@ class Vilkårsvurdering(
 
     override fun stegType(): StegType {
         return StegType.VILKÅRSVURDERING
-    }
-
-    override fun nesteSteg(behandling: Behandling): StegType {
-        return StegType.FORESLÅ_VEDTAK
     }
 }

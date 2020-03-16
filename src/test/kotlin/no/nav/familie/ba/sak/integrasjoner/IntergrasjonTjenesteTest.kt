@@ -127,7 +127,7 @@ class IntergrasjonTjenesteTest {
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
                        .withRequestBody(equalToJson("{\"journalpostId\":\"123456789\"," +
                                                     "\"bestillendeFagsystem\":\"BA\"," +
-                                                    "\"dokumentProdApp\":\"familie-ba-sak\"}")))
+                                                    "\"dokumentProdApp\":\"FAMILIE_BA_SAK\"}")))
     }
 
     @Test

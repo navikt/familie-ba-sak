@@ -181,6 +181,11 @@
             <artifactId>fpsak-tidsserie</artifactId>
             <version>2.0_20191220142239_d22df82</version>
         </dependency>
+        <dependency>
+            <groupId>no.nav</groupId>
+            <artifactId>nare</artifactId>
+            <version>012820b</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

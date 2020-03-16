@@ -34,8 +34,8 @@ class BeregningController(
 
         FagsakController.logger.info("{} oppdaterer vedtak med beregning for vedtak med id {}", saksbehandlerId, vedtakId)
 
-        if (nyBeregning.barnasBeregning.isEmpty()) {
-            return badRequest("Barnas beregning er tom")
+        if (nyBeregning.personBeregninger.isEmpty()) {
+            return badRequest("Barnas beregning er tom", null)
         }
 
         val vedtak = vedtakService.hent(vedtakId)
@@ -43,7 +43,7 @@ class BeregningController(
         val behandling = vedtak.behandling
 
         if (behandling.resultat != BehandlingResultat.INNVILGET) {
-            return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget")
+            return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget", null)
         }
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
@@ -66,10 +66,10 @@ class BeregningController(
 }
 
 data class NyBeregning(
-        val barnasBeregning: List<BarnBeregning>
+        val personBeregninger: List<PersonBeregning>
 )
 
-data class BarnBeregning(
+data class PersonBeregning(
         val ident: String,
         val beløp: Int,
         val stønadFom: LocalDate,

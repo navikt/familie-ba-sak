@@ -2,15 +2,26 @@ package no.nav.familie.ba.sak.logg
 
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultat
+import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.domene.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -69,8 +80,75 @@ class LoggServiceTest(
         ))
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
-        Assertions.assertEquals(1, loggForBehandling.size)
+        Assertions.assertEquals(2, loggForBehandling.size)
+        Assertions.assertTrue(loggForBehandling.any { it.type == LoggType.FØDSELSHENDELSE })
         Assertions.assertTrue(loggForBehandling.any { it.type == LoggType.BEHANDLING_OPPRETTET })
         Assertions.assertTrue(loggForBehandling.none { it.rolle != BehandlerRolle.SYSTEM })
+    }
+
+    @Test
+    fun `Skal lage nye vilkårslogger og endringer`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0L)
+        val søker = Person(aktørId = randomAktørId(),
+                           personIdent = PersonIdent(søkerFnr),
+                           type = PersonType.SØKER,
+                           personopplysningGrunnlag = personopplysningGrunnlag,
+                           fødselsdato = LocalDate.of(2019, 1, 1),
+                           navn = "",
+                           kjønn = Kjønn.KVINNE)
+
+        val barn = Person(aktørId = randomAktørId(),
+                          personIdent = PersonIdent(barnFnr),
+                          type = PersonType.BARN,
+                          personopplysningGrunnlag = personopplysningGrunnlag,
+                          fødselsdato = LocalDate.of(2019, 1, 1),
+                          navn = "",
+                          kjønn = Kjønn.MANN)
+
+        val behandling = lagBehandling()
+        val vilkårsvurdering =
+                SamletVilkårResultat(behandlingId = behandling.id,
+                                     samletVilkårResultat = mutableSetOf(VilkårResultat(person = søker,
+                                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                                 resultat = Resultat.NEI),
+                                                                  VilkårResultat(person = søker,
+                                                                                 vilkårType = Vilkår.STØNADSPERIODE,
+                                                                                 resultat = Resultat.JA),
+                                                                  VilkårResultat(person = barn,
+                                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                                 resultat = Resultat.NEI),
+                                                                  VilkårResultat(person = barn,
+                                                                                 vilkårType = Vilkår.STØNADSPERIODE,
+                                                                                 resultat = Resultat.NEI)))
+        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, null, vilkårsvurdering)
+
+        Assertions.assertNotNull(vilkårsvurderingLogg)
+        Assertions.assertEquals("Opprettet vilkårsvurdering", vilkårsvurderingLogg.tittel)
+
+
+        val nyVilkårsvurdering =
+                SamletVilkårResultat(behandlingId = behandling.id,
+                                     samletVilkårResultat = mutableSetOf(VilkårResultat(person = søker,
+                                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                                 resultat = Resultat.JA),
+                                                                  VilkårResultat(person = søker,
+                                                                                 vilkårType = Vilkår.STØNADSPERIODE,
+                                                                                 resultat = Resultat.JA),
+                                                                  VilkårResultat(person = barn,
+                                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                                 resultat = Resultat.JA),
+                                                                  VilkårResultat(person = barn,
+                                                                                 vilkårType = Vilkår.STØNADSPERIODE,
+                                                                                 resultat = Resultat.JA)))
+        val nyVilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, vilkårsvurdering, nyVilkårsvurdering)
+
+        Assertions.assertNotNull(nyVilkårsvurderingLogg)
+        Assertions.assertEquals("Endring på vilkårsvurdering", nyVilkårsvurderingLogg.tittel)
+
+        val logger = loggService.hentLoggForBehandling(behandlingId = behandling.id)
+        Assertions.assertEquals(2, logger.size)
     }
 }
