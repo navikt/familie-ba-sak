@@ -35,7 +35,6 @@ object SikkerhetContext {
     fun hentBehandlerRolleForSteg(rolleConfig: RolleConfig, lavesteSikkerhetsnivå: BehandlerRolle?): BehandlerRolle {
         if (hentSaksbehandler() == "VL") return BehandlerRolle.SYSTEM
 
-
         val grupper = hentGrupper()
         val høyesteSikkerhetsnivåForInnloggetBruker: BehandlerRolle =
                 if (rolleConfig.ENVIRONMENT_NAME == "local") BehandlerRolle.BESLUTTER else when {
