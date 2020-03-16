@@ -37,12 +37,10 @@ class VilkårService(
             val tmpFakta = Fakta(personForVurdering = person)
             val spesifikasjonerForPerson = spesifikasjonerForPerson(person, behandlingId)
             val evaluering = spesifikasjonerForPerson.evaluer(tmpFakta)
-            val resultatForPerson = mutableSetOf<VilkårResultat>()
             evaluering.children.map { child ->
-                resultatForPerson.add(VilkårResultat(person = person,
+                resultatForSak.add(VilkårResultat(person = person,
                                                      resultat = child.resultat,
                                                      vilkårType = Vilkår.valueOf(child.identifikator)))
-                resultatForSak.addAll(resultatForPerson)
             }
         }
         val samletVilkårResultat = SamletVilkårResultat(samletVilkårResultat = resultatForSak, behandlingId = behandlingId)
