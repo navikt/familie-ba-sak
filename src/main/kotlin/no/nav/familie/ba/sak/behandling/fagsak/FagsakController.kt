@@ -40,7 +40,7 @@ class FagsakController(
         return Result.runCatching { fagsakService.nyFagsak(nyFagsak) }
                 .fold(
                         onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
-                        onFailure = { e -> ResponseEntity.ok(Ressurs.failure("Opprettelse av fagsak feilet", e)) }
+                        onFailure = { ResponseEntity.ok(Ressurs.failure("Opprettelse av fagsak feilet", it)) }
                 )
     }
 
@@ -54,7 +54,7 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok().body(it) },
                         onFailure = {
-                            badRequest("Henting av fagsak med fagsakId $fagsakId feilet: ${it.message}")
+                            badRequest("Henting av fagsak med fagsakId $fagsakId feilet", it)
                         }
                 )
     }
