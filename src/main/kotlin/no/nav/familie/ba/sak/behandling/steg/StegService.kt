@@ -112,7 +112,7 @@ class StegService(
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (behandling.steg != behandlingSteg.stegType()) {
+            if (behandlingSteg.stegType() > behandling.steg) {
                 error("${SikkerhetContext.hentSaksbehandler()} prøver å utføre steg ${behandlingSteg.stegType()}," +
                       " men behandlingen er på steg ${behandling.steg}")
             }
