@@ -72,13 +72,13 @@ class FagsakController(
         return ResponseEntity.ok(Ressurs.success("Laget task for avstemming"))
     }
 
-    @PostMapping(path = ["fagsaker/søke"])
-    fun søkeFagsak(@RequestParam personIdent: String): ResponseEntity<Ressurs<RestFagsakSøk>> {
+    @PostMapping(path = ["fagsaker/søk"])
+    fun søkFagsak(@RequestParam personIdent: String): ResponseEntity<Ressurs<RestFagsakSøk>> {
         val saksbehandlerId = hentSaksbehandler()
 
         logger.info("{} søker fagsak", saksbehandlerId)
 
-        val ressurs = Result.runCatching { fagsakService.hentFagsaker(personIdent) }
+        return Result.runCatching { fagsakService.hentFagsaker(personIdent) }
                 .fold(
                         onSuccess = { Ressurs.success(it) },
                         onFailure = {
