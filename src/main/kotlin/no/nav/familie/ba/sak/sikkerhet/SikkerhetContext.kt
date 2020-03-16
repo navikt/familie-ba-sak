@@ -45,8 +45,6 @@ object SikkerhetContext {
                     else -> BehandlerRolle.UKJENT
                 }
 
-        LoggerFactory.getLogger(this::class.java).info("Grupper: $grupper. høyesteSikkerhetsnivåForInnloggetBruker: $høyesteSikkerhetsnivåForInnloggetBruker")
-
         return when {
             lavesteSikkerhetsnivå == null -> BehandlerRolle.UKJENT
             høyesteSikkerhetsnivåForInnloggetBruker.nivå >= lavesteSikkerhetsnivå.nivå -> lavesteSikkerhetsnivå
