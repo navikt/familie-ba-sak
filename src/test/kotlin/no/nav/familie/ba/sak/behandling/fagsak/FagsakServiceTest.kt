@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
+import io.mockk.every
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -14,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.time.LocalDate
+import java.util.*
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -29,12 +34,33 @@ class FagsakServiceTest {
     @Autowired
     lateinit var stegService: StegService
 
+    @Autowired
+    lateinit var integrasjonClient: IntegrasjonClient
+
     @Test
     fun `test å søke fagsak med fnr`() {
-        val søker1Fnr = ClientMocks.søkerFnr[0]
-        val søker2Fnr = ClientMocks.søkerFnr[1]
-        val barn1Fnr = ClientMocks.barnFnr[0]
-        val barn2Fnr = ClientMocks.barnFnr[1]
+
+        val søker1Fnr = UUID.randomUUID().toString()
+        val søker2Fnr = UUID.randomUUID().toString()
+        val barn1Fnr = UUID.randomUUID().toString()
+        val barn2Fnr = UUID.randomUUID().toString()
+
+        every {
+            integrasjonClient.hentPersoninfoFor(eq(barn1Fnr))
+        } returns Personinfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "Jenta Barnesen")
+
+        every {
+            integrasjonClient.hentPersoninfoFor(eq(barn2Fnr))
+        } returns Personinfo(fødselsdato = LocalDate.of(2019, 5, 1), kjønn = Kjønn.MANN, navn = "Gutten Barnesen")
+
+        every {
+            integrasjonClient.hentPersoninfoFor(eq(søker1Fnr))
+        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+
+        every {
+            integrasjonClient.hentPersoninfoFor(eq(søker2Fnr))
+        } returns Personinfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "Far Faresen")
+
         val fagsak0 = fagsakService.nyFagsak(NyFagsak(
                 søker1Fnr
         ))

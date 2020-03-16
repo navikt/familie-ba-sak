@@ -83,7 +83,7 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok().body(Ressurs.success(it)) },
                         onFailure = {
-                            illegalState((it.cause?.message ?: it.message).toString())
+                            illegalState("Søker fagsak feilet: ${it.message}", it)
                         }
                 )
     }
