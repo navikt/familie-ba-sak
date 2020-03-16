@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.logg
 
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
@@ -8,15 +7,15 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultat
-import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
+import no.nav.familie.ba.sak.behandling.domene.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -112,18 +111,18 @@ class LoggServiceTest(
         val behandling = lagBehandling()
         val vilkårsvurdering =
                 SamletVilkårResultat(behandlingId = behandling.id,
-                                     samletVilkårResultat = setOf(VilkårResultat(person = søker,
-                                                                                 vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                                                 utfallType = UtfallType.IKKE_OPPFYLT),
+                                     samletVilkårResultat = mutableSetOf(VilkårResultat(person = søker,
+                                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                                 resultat = Resultat.NEI),
                                                                   VilkårResultat(person = søker,
-                                                                                 vilkårType = VilkårType.STØNADSPERIODE,
-                                                                                 utfallType = UtfallType.OPPFYLT),
+                                                                                 vilkårType = Vilkår.STØNADSPERIODE,
+                                                                                 resultat = Resultat.JA),
                                                                   VilkårResultat(person = barn,
-                                                                                 vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                                                 utfallType = UtfallType.IKKE_OPPFYLT),
+                                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                                 resultat = Resultat.NEI),
                                                                   VilkårResultat(person = barn,
-                                                                                 vilkårType = VilkårType.STØNADSPERIODE,
-                                                                                 utfallType = UtfallType.IKKE_OPPFYLT)))
+                                                                                 vilkårType = Vilkår.STØNADSPERIODE,
+                                                                                 resultat = Resultat.NEI)))
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, null, vilkårsvurdering)
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
@@ -132,18 +131,18 @@ class LoggServiceTest(
 
         val nyVilkårsvurdering =
                 SamletVilkårResultat(behandlingId = behandling.id,
-                                     samletVilkårResultat = setOf(VilkårResultat(person = søker,
-                                                                                 vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                                                 utfallType = UtfallType.OPPFYLT),
+                                     samletVilkårResultat = mutableSetOf(VilkårResultat(person = søker,
+                                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                                 resultat = Resultat.JA),
                                                                   VilkårResultat(person = søker,
-                                                                                 vilkårType = VilkårType.STØNADSPERIODE,
-                                                                                 utfallType = UtfallType.OPPFYLT),
+                                                                                 vilkårType = Vilkår.STØNADSPERIODE,
+                                                                                 resultat = Resultat.JA),
                                                                   VilkårResultat(person = barn,
-                                                                                 vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                                                 utfallType = UtfallType.OPPFYLT),
+                                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                                 resultat = Resultat.JA),
                                                                   VilkårResultat(person = barn,
-                                                                                 vilkårType = VilkårType.STØNADSPERIODE,
-                                                                                 utfallType = UtfallType.OPPFYLT)))
+                                                                                 vilkårType = Vilkår.STØNADSPERIODE,
+                                                                                 resultat = Resultat.JA)))
         val nyVilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, vilkårsvurdering, nyVilkårsvurdering)
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.domene.vilkår
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.nare.core.evaluations.Resultat
 import javax.persistence.*
 
 @Entity
@@ -20,9 +21,10 @@ class SamletVilkårResultat(
         var aktiv: Boolean = true,
 
         @OneToMany(mappedBy = "samletVilkårResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
-        val samletVilkårResultat: Set<VilkårResultat>
+        var samletVilkårResultat: MutableSet<VilkårResultat>
 ) : BaseEntitet() {
-        fun hentSamletResultat(): UtfallType {
-                return if (samletVilkårResultat.any { it.utfallType == UtfallType.IKKE_OPPFYLT }) UtfallType.IKKE_OPPFYLT else UtfallType.OPPFYLT
+
+        fun hentSamletResultat () : Resultat {
+                return if (samletVilkårResultat.any { it.resultat == Resultat.NEI }) Resultat.NEI else Resultat.JA
         }
 }
