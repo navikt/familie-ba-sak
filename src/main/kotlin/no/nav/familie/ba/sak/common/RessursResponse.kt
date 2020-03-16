@@ -23,9 +23,9 @@ object RessursResponse {
 
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
 
-    private fun <T> errorResponse(notFound: HttpStatus, errorMessage: String, throwable: Throwable?): ResponseEntity<Ressurs<T>> {
-        secureLogger.info("$errorMessage\n ${throwable.toString()}")
+    private fun <T> errorResponse(httpStatus: HttpStatus, errorMessage: String, throwable: Throwable?): ResponseEntity<Ressurs<T>> {
+        secureLogger.info(errorMessage, throwable)
         LOG.error(errorMessage)
-        return ResponseEntity.status(notFound).body(Ressurs.failure(errorMessage))
+        return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
     }
 }
