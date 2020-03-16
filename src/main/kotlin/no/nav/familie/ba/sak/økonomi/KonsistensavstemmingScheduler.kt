@@ -19,6 +19,8 @@ class KonsistensavstemmingScheduler(val batchService: BatchService, val taskRepo
         val dagensDato = LocalDate.now()
         val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dagensDato) ?: return
 
+        // TODO: Oppdater gjeldende behandling her
+
         LOG.info("Kjører konsistensavstemming for $dagensDato")
 
         val konsistensavstemmingTask = Task.nyTask(

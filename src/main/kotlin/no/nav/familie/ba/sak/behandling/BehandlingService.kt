@@ -59,9 +59,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandling(behandlingId)
     }
 
-    fun hentAktiveBehandlingerForLøpendeFagsaker(): List<OppdragId> {
+    fun hentGjeldendeBehandlingerForLøpendeFagsaker(): List<OppdragId> {
         return fagsakService.hentLøpendeFagsaker()
-                .mapNotNull { fagsak -> hentAktivForFagsak(fagsak.id) }
+                .mapNotNull { fagsak -> hentGjeldendeForFagsak(fagsak.id) }
                 .map { behandling ->
                     OppdragId(
                             persongrunnlagService.hentSøker(behandling)!!.personIdent.ident,
@@ -106,6 +106,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         behandling.steg = steg
         behandlingRepository.save(behandling)
+    }
+
+    private fun hentGjeldendeForFagsak(fagsakId: Long): Behandling? {
+        return behandlingRepository.findByFagsakAndGjeldendeForNesteUtbetaling(fagsakId)
     }
 
     companion object {

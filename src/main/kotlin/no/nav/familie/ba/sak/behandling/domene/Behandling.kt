@@ -38,6 +38,9 @@ data class Behandling(
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
+        @Column(name = "gjeldendeForNesteUtbetaling", nullable = false)
+        var gjeldendeForNesteUtbetaling: Boolean = false,
+
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
         var status: BehandlingStatus = BehandlingStatus.OPPRETTET,
