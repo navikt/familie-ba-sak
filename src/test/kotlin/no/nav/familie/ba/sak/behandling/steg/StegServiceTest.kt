@@ -59,7 +59,7 @@ class StegServiceTest(
         ))
 
         val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.FORESLÅ_VEDTAK, behandlingEtterVilkårsvurderingSteg.steg)
+        Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
     }
 
     @Test

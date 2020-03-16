@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.domene.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.nare.core.evaluations.Resultat
 import javax.persistence.*
 
 @Entity
@@ -21,14 +22,9 @@ class VilkårResultat(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "vilkar")
-        val vilkårType: VilkårType,
+        val vilkårType: Vilkår,
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "utfall")
-        val utfallType: UtfallType
+        @Column(name = "resultat")
+        val resultat: Resultat
 ) : BaseEntitet()
-
-enum class UtfallType(val beskrivelse: String) {
-    IKKE_OPPFYLT("Ikke oppfylt"),
-    OPPFYLT("Oppfylt")
-}
