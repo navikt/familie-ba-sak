@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -36,10 +38,12 @@ class VilkårVurderingTest {
     @Test
     fun `Hent relevante vilkår for persontype BARN`() {
         val relevanteVilkår = Vilkår.hentVilkårForPart(PersonType.BARN)
+        val relevanteVilkårForDato = Vilkår.hentVilkårForPart(PersonType.BARN, LocalDate.now())
         val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                                   Vilkår.STØNADSPERIODE,
                                   Vilkår.BOSATT_I_RIKET)
         assertEquals(vilkårForBarn, relevanteVilkår)
+        assertEquals(vilkårForBarn, relevanteVilkårForDato)
     }
 
     @Test
@@ -134,9 +138,24 @@ class VilkårVurderingTest {
         val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
                                                                            behandlingId = behandling.id)
 
-        val forventetAntallVurderteVilkår = Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
-
+        val forventetAntallVurderteVilkår =
+                Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
         assertEquals(forventetAntallVurderteVilkår, samletVilkårResultat.samletVilkårResultat.size)
+    }
+
+    @Test
+    fun `Sjekk gyldig vilkårsperiode`() {
+        val ubegrensetGyldigVilkårsperiode = GyldigVilkårsperiode()
+        assertTrue(ubegrensetGyldigVilkårsperiode.gyldigFor(LocalDate.now()))
+
+        val begrensetGyldigVilkårsperiode = GyldigVilkårsperiode(
+                gyldigFom = LocalDate.now().minusDays(5),
+                gyldigTom = LocalDate.now().plusDays(5))
+        assertTrue(begrensetGyldigVilkårsperiode.gyldigFor(LocalDate.now()))
+        assertTrue(begrensetGyldigVilkårsperiode.gyldigFor(LocalDate.now().minusDays(5)))
+        assertFalse(begrensetGyldigVilkårsperiode.gyldigFor(LocalDate.now().minusDays(6)))
+        assertTrue(begrensetGyldigVilkårsperiode.gyldigFor(LocalDate.now().plusDays(5)))
+        assertFalse(begrensetGyldigVilkårsperiode.gyldigFor(LocalDate.now().plusDays(6)))
     }
 }
 
