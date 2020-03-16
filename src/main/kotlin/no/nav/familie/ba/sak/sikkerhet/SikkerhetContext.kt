@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.sikkerhet
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import org.slf4j.LoggerFactory
 
 object SikkerhetContext {
     fun hentSaksbehandler(): String {
@@ -43,6 +44,8 @@ object SikkerhetContext {
                     grupper.contains(rolleConfig.VEILEDER_ROLLE) -> BehandlerRolle.VEILEDER
                     else -> BehandlerRolle.UKJENT
                 }
+
+        LoggerFactory.getLogger(this::class.java).info("Grupper: $grupper. høyesteSikkerhetsnivåForInnloggetBruker: $høyesteSikkerhetsnivåForInnloggetBruker")
 
         return when {
             lavesteSikkerhetsnivå == null -> BehandlerRolle.UKJENT
