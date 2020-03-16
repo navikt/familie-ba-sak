@@ -21,8 +21,4 @@ class SendTilBeslutter(
     override fun stegType(): StegType {
         return StegType.SEND_TIL_BESLUTTER
     }
-
-    override fun nesteSteg(behandling: Behandling): StegType {
-        return StegType.GODKJENNE_VEDTAK
-    }
 }

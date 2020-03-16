@@ -30,10 +30,6 @@ class RegistrerPersongrunnlag(
         return behandling
     }
 
-    override fun nesteSteg(behandling: Behandling): StegType {
-        return StegType.VILKÅRSVURDERING
-    }
-
     override fun stegType(): StegType {
         return StegType.REGISTRERE_PERSONGRUNNLAG
     }

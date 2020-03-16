@@ -48,10 +48,6 @@ class GodkjenneVedtakOgStartIverksetting(
         return StegType.GODKJENNE_VEDTAK
     }
 
-    override fun nesteSteg(behandling: Behandling): StegType {
-        return StegType.FERDIGSTILLE_BEHANDLING
-    }
-
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
         val task = IverksettMotOppdrag.opprettTask(behandling, vedtak, saksbehandlerId)
         taskRepository.save(task)
