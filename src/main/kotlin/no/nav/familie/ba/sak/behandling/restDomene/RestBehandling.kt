@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultat
-import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
+import no.nav.familie.ba.sak.behandling.domene.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDateTime
 
 data class RestBehandling(val aktiv: Boolean,
@@ -22,11 +22,11 @@ data class RestBehandling(val aktiv: Boolean,
                           val begrunnelse: String)
 
 fun SamletVilkårResultat.toRestSamletVilkårResultat() = this.samletVilkårResultat.map {
-    RestVilkårResultat(vilkårType = it.vilkårType, utfallType = it.utfallType, personIdent = it.person.personIdent.ident)
+    RestVilkårResultat(vilkårType = it.vilkårType, resultat = it.resultat, personIdent = it.person.personIdent.ident)
 }
 
 data class RestVilkårResultat(
         val personIdent: String,
-        val vilkårType: VilkårType,
-        val utfallType: UtfallType
+        val vilkårType: Vilkår,
+        val resultat: Resultat
 )
