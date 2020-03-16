@@ -41,8 +41,10 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                 .filter { personType in it.parterDetteGjelderFor }.toSet()
 
         fun hentVilkårForPart(personType: PersonType, vurderingsDato: LocalDate) = values()
-                .filter { personType in it.parterDetteGjelderFor && it.gyldigVilkårsperiode.gyldigFor(vurderingsDato) }.
-                toSet()
+                .filter {
+                    personType in it.parterDetteGjelderFor
+                    && it.gyldigVilkårsperiode.gyldigFor(vurderingsDato)
+                }.toSet()
 
         fun hentVilkårForSakstype(sakstype: SakType) = values()
                 .filter { sakstype in it.sakstyperDetteGjelderFor }.toSet()
