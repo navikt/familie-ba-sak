@@ -20,6 +20,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakSøk
+import no.nav.familie.ba.sak.common.RessursResponse.illegalState
 
 @RestController
 @RequestMapping("/api")
@@ -53,7 +54,7 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok().body(it) },
                         onFailure = {
-                            badRequest("Henting av fagsak med fagsakId $fagsakId feilet")
+                            badRequest("Henting av fagsak med fagsakId $fagsakId feilet: ${it.message}")
                         }
                 )
     }
@@ -80,14 +81,11 @@ class FagsakController(
 
         return Result.runCatching { fagsakService.hentFagsaker(personIdent) }
                 .fold(
-                        onSuccess = { Ressurs.success(it) },
+                        onSuccess = { ResponseEntity.ok().body(Ressurs.success(it)) },
                         onFailure = {
-                            logger.error("Søke fagsak med personIdent $personIdent feilet", it)
-                            Ressurs.failure("Søke fagsak med personIdent $personIdent feilet", it)
+                            illegalState((it.cause?.message ?: it.message).toString())
                         }
                 )
-
-        return ResponseEntity.ok().body(ressurs)
     }
 
     companion object {

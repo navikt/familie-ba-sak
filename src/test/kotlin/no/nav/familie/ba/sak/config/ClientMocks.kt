@@ -37,7 +37,7 @@ class ClientMocks {
     @Primary
     fun mockIntegrasjonClient(): IntegrasjonClient {
 
-        val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = true)
+        val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
 
         every {
             mockIntegrasjonClient.hentAktørId(any())

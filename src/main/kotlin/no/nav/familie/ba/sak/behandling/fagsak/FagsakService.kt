@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
+import no.nav.familie.ba.sak.common.RessursResponse
+import org.springframework.http.ResponseEntity
+import java.lang.IllegalStateException
 
 @Service
 class FagsakService(
@@ -118,7 +121,15 @@ class FagsakService(
 
     fun hentFagsaker(personIdent: String): RestFagsakSøk {
         val personer = personRepository.findByPersonIdent(PersonIdent(personIdent))
-        val personInfo= integrasjonClient.hentPersoninfoFor(personIdent)
+        val personInfo= runCatching {
+            integrasjonClient.hentPersoninfoFor(personIdent)
+        }.fold(
+                onSuccess = { it },
+                onFailure = {
+                    throw IllegalStateException("Feil ved henting av person fra TPS/PDL", it)
+                }
+
+        )
 
         val assosierteFagsaker = mutableMapOf<Long, RestFunnetFagsak>()
 
