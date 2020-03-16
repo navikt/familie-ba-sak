@@ -3,25 +3,31 @@ package no.nav.familie.ba.sak.beregning
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.security.token.support.core.api.Unprotected
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.time.YearMonth
-import java.util.ArrayList
+import java.util.*
 
 @RestController
 @RequestMapping("/api/kalkulator")
-@Unprotected // Ikke nødvendig med autentisering. Opererer kun på input-data
+@ProtectedWithClaims(issuer = "azuread")
+@Validated
 class YtelseKalkulatorController(
         val satsService: SatsService
 ) {
     @PutMapping(produces = ["application/json"])
     fun kalkulerYtelserJson(@RequestBody
-                            personligeYtelser: List<PersonligYtelseForPeriode>): ResponseEntity<YtelseKalkulatorResponse> {
+                            personligeYtelser: List<PersonligYtelseForPeriode>): ResponseEntity<Ressurs<YtelseKalkulatorResponse>> {
 
         val response = kalkulerYtelser(personligeYtelser)
 
-        return ResponseEntity.ok(response)
+        return ResponseEntity.ok(Ressurs.success(response))
     }
 
     @PutMapping(produces = ["text/html"])
@@ -78,7 +84,7 @@ class YtelseKalkulatorController(
         val personligeYtelse = periodeYtelse.personligYtelse!!
 
         val divisor = if (personligeYtelse.halvYtelse) 2 else 1
-        val satsType = YtelseSatsMapper.map(personligeYtelse.ytelsetype)
+        val satsType = YtelseSatsMapper.map(personligeYtelse.ytelsetype, personligeYtelse.alder)
 
         val beløpsperioder: List<SatsService.BeløpPeriode>? = satsType?.let {
             satsService.hentGyldigSatsFor(it, periodeYtelse.stønadFom, periodeYtelse.stønadTom, YearMonth.now())
@@ -92,6 +98,7 @@ class YtelseKalkulatorController(
 data class PersonligYtelse(
         val personident: String,
         val ytelsetype: Ytelsetype,
+        val alder: Int? = null,
         val halvYtelse: Boolean = false
 )
 
@@ -109,8 +116,9 @@ data class PersonligYtelseForPeriode(
                 ytelsetype: Ytelsetype,
                 fullYtelse: Boolean,
                 stønadFraOgMed: YearMonth,
-                stønadTilOgMed: YearMonth) :
-            this(PersonligYtelse(personident, ytelsetype, fullYtelse), null, stønadFraOgMed, stønadTilOgMed)
+                stønadTilOgMed: YearMonth,
+                alder: Int?=null) :
+            this(PersonligYtelse(personident, ytelsetype, alder, fullYtelse), null, stønadFraOgMed, stønadTilOgMed)
 }
 
 data class PersonligYtelseMedBeløp(

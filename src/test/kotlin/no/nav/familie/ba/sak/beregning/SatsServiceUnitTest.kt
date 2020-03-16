@@ -51,7 +51,7 @@ class SatsServiceUnitTest {
     fun `Skal bruke gjeldende, ikke avlsuttet sats selv om annen sats finnes for perioden`() {
         stubSatsRepo(SatsType.ORBA,
                      TestKrPeriode(1054, "2018-04-01", null),
-                     TestKrPeriode(1054, "2020-07-01", null)
+                     TestKrPeriode(1354, "2020-07-01", null)
         )
 
         val beløpperioder =
