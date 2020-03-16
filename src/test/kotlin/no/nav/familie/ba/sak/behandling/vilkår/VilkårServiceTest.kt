@@ -3,14 +3,14 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vilkår.UtfallType
 import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårType
+import no.nav.familie.ba.sak.behandling.domene.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -51,7 +51,7 @@ class VilkårServiceTest {
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val samletVilkårResultat =
-                vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+                vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
                                                         vilkårsvurderingKomplettForBarnOgSøker(fnr, listOf(barnFnr)),
                                                         behandling.id
                 )
@@ -72,14 +72,14 @@ class VilkårServiceTest {
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         assertThrows<IllegalStateException> {
-            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
                                                     vilkårsvurderingUtenKomplettBarnVurdering,
                                                     behandling.id
             )
         }
 
         assertThrows<IllegalStateException> {
-            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag,
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
                                                     vilkårsvurderingUtenKomplettSøkerVurdering,
                                                     behandling.id
             )
@@ -88,63 +88,63 @@ class VilkårServiceTest {
 
     @Test
     fun `Valider gyldige vilkårspermutasjoner for barn og søker`() {
-        Assertions.assertEquals(listOf(
-                VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                VilkårType.BOSATT_I_RIKET,
-                VilkårType.STØNADSPERIODE
-        ), VilkårType.hentVilkårForPart(PersonType.BARN))
+        Assertions.assertEquals(setOf(
+                Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                Vilkår.BOSATT_I_RIKET,
+                Vilkår.STØNADSPERIODE
+        ), Vilkår.hentVilkårForPart(PersonType.BARN))
 
-        Assertions.assertEquals(listOf(
-                VilkårType.BOSATT_I_RIKET,
-                VilkårType.STØNADSPERIODE
-        ), VilkårType.hentVilkårForPart(PersonType.SØKER))
+        Assertions.assertEquals(setOf(
+                Vilkår.BOSATT_I_RIKET,
+                Vilkår.STØNADSPERIODE
+        ), Vilkår.hentVilkårForPart(PersonType.SØKER))
     }
 }
 
 fun vilkårsvurderingKomplettForBarnOgSøker(søkerPersonIdent: String, barnPersonIdenter: List<String>): List<RestVilkårResultat> {
     val barnasVilkår = barnPersonIdenter.map {
         listOf(RestVilkårResultat(personIdent = it,
-                                  vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                  utfallType = UtfallType.OPPFYLT),
+                                  vilkårType = Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                                  resultat = Resultat.JA),
                RestVilkårResultat(personIdent = it,
-                                  vilkårType = VilkårType.BOSATT_I_RIKET,
-                                  utfallType = UtfallType.OPPFYLT),
+                                  vilkårType = Vilkår.BOSATT_I_RIKET,
+                                  resultat = Resultat.JA),
                RestVilkårResultat(personIdent = it,
-                                  vilkårType = VilkårType.STØNADSPERIODE,
-                                  utfallType = UtfallType.OPPFYLT))
+                                  vilkårType = Vilkår.STØNADSPERIODE,
+                                  resultat = Resultat.JA))
     }.flatten()
 
     val vilkår = arrayListOf(
             RestVilkårResultat(personIdent = søkerPersonIdent,
-                               vilkårType = VilkårType.BOSATT_I_RIKET,
-                               utfallType = UtfallType.OPPFYLT),
+                               vilkårType = Vilkår.BOSATT_I_RIKET,
+                               resultat = Resultat.JA),
             RestVilkårResultat(personIdent = søkerPersonIdent,
-                               vilkårType = VilkårType.STØNADSPERIODE,
-                               utfallType = UtfallType.OPPFYLT))
+                               vilkårType = Vilkår.STØNADSPERIODE,
+                               resultat = Resultat.JA))
 
     vilkår.addAll(barnasVilkår)
     return vilkår
 }
 
 val vilkårsvurderingUtenKomplettBarnVurdering = listOf(RestVilkårResultat(personIdent = "1",
-                                                                          vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                                          utfallType = UtfallType.OPPFYLT),
+                                                                          vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                          resultat = Resultat.JA),
                                                        RestVilkårResultat(personIdent = "1",
-                                                                          vilkårType = VilkårType.STØNADSPERIODE,
-                                                                          utfallType = UtfallType.OPPFYLT),
+                                                                          vilkårType = Vilkår.STØNADSPERIODE,
+                                                                          resultat = Resultat.JA),
                                                        RestVilkårResultat(personIdent = "12345678910",
-                                                                          vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                                                          utfallType = UtfallType.OPPFYLT))
+                                                                          vilkårType = Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                                                                          resultat = Resultat.JA))
 
 val vilkårsvurderingUtenKomplettSøkerVurdering = listOf(RestVilkårResultat(personIdent = "1",
-                                                                           vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                                           utfallType = UtfallType.OPPFYLT),
+                                                                           vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                           resultat = Resultat.JA),
                                                         RestVilkårResultat(personIdent = "12345678910",
-                                                                           vilkårType = VilkårType.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                                                           utfallType = UtfallType.OPPFYLT),
+                                                                           vilkårType = Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                                                                           resultat = Resultat.JA),
                                                         RestVilkårResultat(personIdent = "12345678910",
-                                                                           vilkårType = VilkårType.BOSATT_I_RIKET,
-                                                                           utfallType = UtfallType.OPPFYLT),
+                                                                           vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                           resultat = Resultat.JA),
                                                         RestVilkårResultat(personIdent = "12345678910",
-                                                                           vilkårType = VilkårType.STØNADSPERIODE,
-                                                                           utfallType = UtfallType.OPPFYLT))
+                                                                           vilkårType = Vilkår.STØNADSPERIODE,
+                                                                           resultat = Resultat.JA))
