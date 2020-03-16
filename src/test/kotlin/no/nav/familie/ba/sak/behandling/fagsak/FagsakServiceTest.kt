@@ -90,6 +90,6 @@ class FagsakServiceTest {
         Assertions.assertEquals(barn2Fnr, søkeresultat3.personIdent)
         Assertions.assertEquals(1, søkeresultat3.fagsaker.size)
         Assertions.assertEquals(fagsak0.data!!.id, søkeresultat3.fagsaker[0].fagsakId)
-        Assertions.assertEquals(Kjønn.KVINNE, søkeresultat3.kjønn)
+        Assertions.assertEquals(Kjønn.MANN, søkeresultat3.kjønn)
     }
 }
