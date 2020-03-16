@@ -26,7 +26,7 @@ class LoggController(
                 .fold(
                         onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                         onFailure = {
-                            badRequest("Henting av logg feilet", null) }
+                            badRequest("Henting av logg feilet", it) }
                 )
     }
 }
