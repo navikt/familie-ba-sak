@@ -52,7 +52,7 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok().body(it) },
                         onFailure = {
-                            badRequest("Henting av fagsak med fagsakId $fagsakId feilet")
+                            badRequest("Henting av fagsak med fagsakId $fagsakId feilet", null)
                         }
                 )
     }
