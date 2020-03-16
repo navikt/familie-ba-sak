@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.beregning
+package no.nav.familie.ba.sak.beregning
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonUnwrapped
@@ -11,11 +11,13 @@ import java.util.ArrayList
 
 @RestController
 @RequestMapping("/api/kalkulator")
-@Unprotected // Skal IKKE kreve autentisering
-class YtelseKalkulatorController {
-
+@Unprotected // Ikke nødvendig med autentisering. Opererer kun på input-data
+class YtelseKalkulatorController(
+        val satsService: SatsService
+) {
     @PutMapping(produces = ["application/json"])
-    fun kalkulerYtelserJson(@RequestBody personligeYtelser: List<PersonligYtelseForPeriode>): ResponseEntity<YtelseKalkulatorResponse> {
+    fun kalkulerYtelserJson(@RequestBody
+                            personligeYtelser: List<PersonligYtelseForPeriode>): ResponseEntity<YtelseKalkulatorResponse> {
 
         val response = kalkulerYtelser(personligeYtelser)
 
@@ -34,13 +36,16 @@ class YtelseKalkulatorController {
         var gjeldendeMåned = personligeYtelser.map { it.stønadFom }.min()!!
         val størsteTomMåned = personligeYtelser.map { it.stønadTom }.max()!!
 
+        val persoligeYtelserMedSats = personligeYtelser
+                .flatMap { lagPersonligeYtelserMedSatsForPerioder(it) }
+
         val alleMånedersTotalePersonligeYtelser: MutableList<MånedensTotalePersonligeYtelser> = ArrayList()
 
         while (gjeldendeMåned < størsteTomMåned) {
 
-            val personligeYtelserMedBeløpDenneMåned = personligeYtelser
+            val personligeYtelserMedBeløpDenneMåned = persoligeYtelserMedSats
                     .filter { it.stønadFom <= gjeldendeMåned && it.stønadTom >= gjeldendeMåned }
-                    .map { PersonligYtelseMedBeløp(it.personligYtelse!!, dummySatsService(it.personligYtelse!!, it.beløp)) }
+                    .map { PersonligYtelseMedBeløp(it.personligYtelse!!, it.beløp!!) }
 
             val sumYtelserDenneMåned = personligeYtelserMedBeløpDenneMåned.map { it.beløp }.sum()
 
@@ -68,18 +73,23 @@ class YtelseKalkulatorController {
         return response
     }
 
-    @Deprecated("Må ersttates av den VIRKELIGE tjenesten")
-    fun dummySatsService(personligeYtelse: PersonligYtelse, fastsattBeløp: Int?): Int {
-        return when (personligeYtelse.ytelsetype) {
-            Ytelsetype.UTVIDET_BARNETRYGD -> if(personligeYtelse.halvYtelse) 527 else 1054
-            Ytelsetype.ORDINÆR_BARNETRYGD -> if(personligeYtelse.halvYtelse) 527 else 1054
-            Ytelsetype.SMÅBARNSTILLEGG -> if(personligeYtelse.halvYtelse) 330 else 660
-            else -> fastsattBeløp ?: 0
+    private fun lagPersonligeYtelserMedSatsForPerioder(periodeYtelse: PersonligYtelseForPeriode): List<PersonligYtelseForPeriode> {
+
+        val personligeYtelse = periodeYtelse.personligYtelse!!
+
+        val divisor = if (personligeYtelse.halvYtelse) 2 else 1
+        val satsType = YtelseSatsMapper.map(personligeYtelse.ytelsetype)
+
+        val beløpsperioder: List<SatsService.BeløpPeriode>? = satsType?.let {
+            satsService.hentGyldigSatsFor(it, periodeYtelse.stønadFom, periodeYtelse.stønadTom, YearMonth.now())
         }
+        return beløpsperioder
+                       ?.map { PersonligYtelseForPeriode(personligeYtelse, it.beløp / divisor, it.fraOgMed, it.tilOgMed) }
+               ?: listOf(PersonligYtelseForPeriode(personligeYtelse, periodeYtelse.beløp, periodeYtelse.stønadFom, periodeYtelse.stønadTom))
     }
 }
 
-data class PersonligYtelse (
+data class PersonligYtelse(
         val personident: String,
         val ytelsetype: Ytelsetype,
         val halvYtelse: Boolean = false
@@ -91,17 +101,23 @@ data class PersonligYtelseForPeriode(
         val stønadFom: YearMonth,
         val stønadTom: YearMonth
 ) {
+
     @field:JsonUnwrapped
     val personligYtelse: PersonligYtelse? = _personligYtelse
 
-    constructor(personident: String, ytelsetype: Ytelsetype,fullYtelse: Boolean,stønadFraOgMed: YearMonth,stønadTilOgMed: YearMonth) :
-            this(PersonligYtelse(personident,ytelsetype,fullYtelse), null, stønadFraOgMed, stønadTilOgMed)
+    constructor(personident: String,
+                ytelsetype: Ytelsetype,
+                fullYtelse: Boolean,
+                stønadFraOgMed: YearMonth,
+                stønadTilOgMed: YearMonth) :
+            this(PersonligYtelse(personident, ytelsetype, fullYtelse), null, stønadFraOgMed, stønadTilOgMed)
 }
 
 data class PersonligYtelseMedBeløp(
         @JsonIgnore private val _personligYtelse: PersonligYtelse,
         val beløp: Int
 ) {
+
     @field:JsonUnwrapped
     val personligYtelse: PersonligYtelse = _personligYtelse
 }
@@ -115,6 +131,7 @@ data class MånedensTotalePersonligeYtelser(
         @JsonIgnore private val _personligeYtelser: TotalePersonligeYtelser,
         val måned: YearMonth
 ) {
+
     @JsonUnwrapped
     var personligeYtelser: TotalePersonligeYtelser = _personligeYtelser
 }
@@ -136,8 +153,7 @@ private class HtmlTabell {
             val builder = StringBuilder()
 
             builder.append("<table>")
-            builder.append(header
-                                   .map { "${it.personident} ${it.ytelsetype} ${tilProsent(!it.halvYtelse)}" }
+            builder.append(header.map { "${it.personident} ${it.ytelsetype} ${tilProsent(!it.halvYtelse)}" }
                                    .joinToString("</th><th>", "<tr><th>Periode</th><th>Total</th><th>", "</th></tr>"))
             builder.append(personYtelseSum.joinToString("</td><td>", "<tr><td>Alle</td><td>$totalbeløp</td><td>", "</td></tr>"))
 
@@ -149,18 +165,21 @@ private class HtmlTabell {
             return builder.toString()
         }
 
-        private fun tilProsent(fullYtelse: Boolean) = if(fullYtelse) "100%" else "50%"
+        private fun tilProsent(fullYtelse: Boolean) = if (fullYtelse) "100%" else "50%"
 
-        private fun lagPeriodeRad(måned: YearMonth, personligeYtelser: TotalePersonligeYtelser, header: List<PersonligYtelse>): String {
+        private fun lagPeriodeRad(måned: YearMonth,
+                                  personligeYtelser: TotalePersonligeYtelser,
+                                  header: List<PersonligYtelse>): String {
             val builder = StringBuilder()
 
-            val personligYtelseTilBeløpMap = personligeYtelser.personligeYtelserMedBeløp.map { it.personligYtelse to it.beløp }.toMap()
+            val personligYtelseTilBeløpMap =
+                    personligeYtelser.personligeYtelserMedBeløp.map { it.personligYtelse to it.beløp }.toMap()
 
             builder.append("<tr>")
             builder.append("<td>${måned}</td>")
             builder.append("<td>${personligeYtelser.totalbeløp}</td>")
 
-            header.map { personligYtelseTilBeløpMap.getOrDefault(it,0) }
+            header.map { personligYtelseTilBeløpMap.getOrDefault(it, 0) }
                     .forEach { builder.append("<td>${it}</td>") }
 
             builder.append("</tr>")
