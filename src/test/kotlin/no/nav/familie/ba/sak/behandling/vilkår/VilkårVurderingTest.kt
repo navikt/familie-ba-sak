@@ -72,7 +72,7 @@ class VilkårVurderingTest {
     }
 
     @Test
-    fun `Hent og evaluer oppfylte vilkår`() {
+    fun `Henting og evaluering av oppfylte vilkår gir samlet resultat JA`() {
 
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -86,12 +86,11 @@ class VilkårVurderingTest {
 
         val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
                                                                            behandlingId = behandling.id)
-
-        assertEquals(samletVilkårResultat.hentSamletResultat(), Resultat.JA)
+        assertEquals(Resultat.JA, samletVilkårResultat.hentSamletResultat())
     }
 
     @Test
-    fun `Hent og evaluer ikke-oppfylte vilkår`() {
+    fun `Henting og evaluering ikke-oppfylte vilkår gir samlet resultat NEI`() {
 
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -116,9 +115,29 @@ class VilkårVurderingTest {
         val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
                                                                            behandlingId = behandling.id)
 
-        assertEquals(samletVilkårResultat.hentSamletResultat(), Resultat.NEI)
+        assertEquals(Resultat.NEI, samletVilkårResultat.hentSamletResultat())
     }
 
+    @Test
+    fun `Henting og evaluering av oppfylte vilkår gir rett antall samlede resultater`() {
+
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                           behandlingId = behandling.id)
+
+        val forventetAntallVurderteVilkår = Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
+
+        assertEquals(forventetAntallVurderteVilkår, samletVilkårResultat.samletVilkårResultat.size)
+    }
 }
 
 
