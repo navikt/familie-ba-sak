@@ -1,42 +1,19 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.*
-import io.mockk.MockKAnnotations
-import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultatRepository
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.context.annotation.Bean
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.LocalDate
-import java.util.*
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -57,7 +34,7 @@ class FagsakServiceTest {
         val søker1Fnr = ClientMocks.søkerFnr[0]
         val søker2Fnr = ClientMocks.søkerFnr[1]
         val barn1Fnr = ClientMocks.barnFnr[0]
-        val barn2fnr = ClientMocks.barnFnr[1]
+        val barn2Fnr = ClientMocks.barnFnr[1]
         val fagsak0 = fagsakService.nyFagsak(NyFagsak(
                 søker1Fnr
         ))
@@ -80,7 +57,7 @@ class FagsakServiceTest {
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
-                listOf(barn2fnr),
+                listOf(barn2Fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 
@@ -109,10 +86,10 @@ class FagsakServiceTest {
         Assertions.assertEquals(11, matching)
         Assertions.assertEquals(Kjønn.KVINNE, søkeresultat2.kjønn)
 
-        val søkeresultat3 = fagsakService.hentFagsaker(barn2fnr)
-        Assertions.assertEquals(barn2fnr, søkeresultat3.personIdent)
+        val søkeresultat3 = fagsakService.hentFagsaker(barn2Fnr)
+        Assertions.assertEquals(barn2Fnr, søkeresultat3.personIdent)
         Assertions.assertEquals(1, søkeresultat3.fagsaker.size)
         Assertions.assertEquals(fagsak0.data!!.id, søkeresultat3.fagsaker[0].fagsakId)
-        Assertions.assertEquals(Kjønn.MANN, søkeresultat3.kjønn)
+        Assertions.assertEquals(Kjønn.KVINNE, søkeresultat3.kjønn)
     }
 }
