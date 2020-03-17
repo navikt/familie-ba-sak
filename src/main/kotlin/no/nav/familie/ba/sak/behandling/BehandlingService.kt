@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Persongrunnlag
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragId
@@ -15,10 +16,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val persongrunnlagService: PersongrunnlagService,
+                        private val beregningService: BeregningService,
                         private val fagsakService: FagsakService) {
 
     @Transactional
@@ -106,6 +109,30 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         behandling.steg = steg
         behandlingRepository.save(behandling)
+    }
+
+    fun oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsakId: Long, utbetalingsMåned: LocalDate): Behandling? {
+        val ferdigstilteBehandlinger = behandlingRepository.findByFagsakAndFerdigstiltOrIverksatt(fagsakId)
+
+        val beregningResultater = ferdigstilteBehandlinger
+                .sortedBy { it.opprettetTidspunkt }
+                .map { beregningService.hentBeregningsresultatForBehandling(it.id) }
+
+        var gjeldendeBehandling : Behandling? = null
+        beregningResultater.forEach { beregningResultat ->
+            if (beregningResultat.erOpphør) {
+                if (beregningResultat.stønadFom <= utbetalingsMåned) gjeldendeBehandling = null
+            } else {
+                if (beregningResultat.stønadFom <= utbetalingsMåned && beregningResultat.stønadTom >= utbetalingsMåned) {
+                    gjeldendeBehandling = beregningResultat.behandling
+                }
+            }
+        }
+
+        if (gjeldendeBehandling != null) {
+            behandlingRepository.save(gjeldendeBehandling!!.apply { gjeldendeForNesteUtbetaling = true })
+        }
+        return gjeldendeBehandling
     }
 
     private fun hentGjeldendeForFagsak(fagsakId: Long): Behandling? {

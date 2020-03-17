@@ -19,6 +19,10 @@ class BeregningService(
         return vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId)
     }
 
+    fun hentBeregningsresultatForBehandling(behandlingId: Long): BeregningResultat {
+        return beregningResultatRepository.findByBehandling(behandlingId)
+    }
+
     fun lagreBeregningsresultat(behandling: Behandling, utbetalingsoppdrag: Utbetalingsoppdrag) {
 
         var erOpphør = false

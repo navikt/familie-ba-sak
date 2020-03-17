@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.Query
 interface BeregningResultatRepository: JpaRepository<BeregningResultat, Long> {
 
     @Query("SELECT br FROM BehandlingResultat br JOIN br.behanding b WHERE b.id = :behandlingId")
-    fun findByBehandling(behandlingId: Long)
+    fun findByBehandling(behandlingId: Long): BeregningResultat
 }
