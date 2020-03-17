@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 
 interface BehandlingSteg<T> {
     fun utførSteg(behandling: Behandling, data: T): Behandling
@@ -8,10 +9,19 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 }
 
-val initSteg = StegType.REGISTRERE_PERSONGRUNNLAG
+fun initSteg(behandlingType: BehandlingType?): StegType {
+    return if (behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+        StegType.REGISTRERE_PERSONGRUNNLAG
+    } else {
+        StegType.REGISTRERE_SØKNAD
+    }
+}
+
 val sisteSteg = StegType.BEHANDLING_AVSLUTTET
 
 enum class StegType(val tillattFor: List<BehandlerRolle>, val beskrivelse: String) {
+    REGISTRERE_SØKNAD(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+                              beskrivelse = "Registrere søknad"),
     REGISTRERE_PERSONGRUNNLAG(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
                               beskrivelse = "Registrere persongrunnlag"),
     VILKÅRSVURDERING(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER), beskrivelse = "Vilkårsvurdering"),
@@ -23,6 +33,7 @@ enum class StegType(val tillattFor: List<BehandlerRolle>, val beskrivelse: Strin
 
     fun hentNesteSteg(): StegType {
         return when (this) {
+            REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
             REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
             VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
             SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
-import no.nav.familie.ba.sak.behandling.domene.FagsakStatus
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import java.time.LocalDateTime
 
 data class RestFagsak(

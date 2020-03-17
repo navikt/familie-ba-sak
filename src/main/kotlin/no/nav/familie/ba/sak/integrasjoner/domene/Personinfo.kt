@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import java.time.LocalDate
 
 @JsonIgnoreProperties
@@ -15,7 +15,8 @@ data class Personinfo(
         val geografiskTilknytning: String? = null,
         val diskresjonskode: String? = null,
         val navn: String? = null,
-        @JsonDeserialize(using = KjonnDeserializer::class) val kjønn: Kjønn? = null,
+        @JsonDeserialize(using = KjonnDeserializer::class)
+        val kjønn: Kjønn? = null,
         val familierelasjoner: Set<Familierelasjoner> = emptySet()
 )
 
@@ -27,16 +28,16 @@ data class Familierelasjoner(
 data class Personident(
         val id: String
 )
-enum class FAMILIERELASJONSROLLE { BARN, FAR, MEDMOR, MOR}
 
-class KjonnDeserializer: StdDeserializer<Kjønn>(Kjønn::class.java) {
+enum class FAMILIERELASJONSROLLE { BARN, FAR, MEDMOR, MOR }
+
+class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
     override fun deserialize(jp: JsonParser?, p1: DeserializationContext?): Kjønn {
-        val node : JsonNode = jp!!.getCodec().readTree(jp)
-        val kjoenn = node.asText()
-        return when(kjoenn) {
+        val node: JsonNode = jp!!.codec.readTree(jp)
+        return when (val kjønn = node.asText()) {
             "M" -> Kjønn.MANN
             "K" -> Kjønn.KVINNE
-            else -> Kjønn.valueOf(kjoenn)
+            else -> Kjønn.valueOf(kjønn)
         }
     }
 

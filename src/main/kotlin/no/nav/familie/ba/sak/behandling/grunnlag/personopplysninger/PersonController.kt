@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.domene.personopplysninger
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -22,11 +22,10 @@ class PersonController(private val integrasjonOnBehalfClient: IntegrasjonOnBehal
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @GetMapping()
+    @GetMapping
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<Personinfo>> {
         return Result.runCatching {
             integrasjonOnBehalfClient.hentPersoninfo(personIdent)
-
         }
                 .fold(
                         onFailure = {

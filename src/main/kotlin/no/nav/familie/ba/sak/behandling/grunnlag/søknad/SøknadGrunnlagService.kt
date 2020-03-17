@@ -1,4 +1,31 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.søknad
 
-class SøknadGrunnlagService {
+import org.springframework.stereotype.Service
+
+@Service
+class SøknadGrunnlagService(
+        private val søknadGrunnlagRepository: SøknadGrunnlagRepository
+) {
+
+    fun lagreOgDeaktiverGammel(søknadGrunnlag: SøknadGrunnlag): SøknadGrunnlag {
+        val aktivSøknadGrunnlag = søknadGrunnlagRepository.hentAktiv(søknadGrunnlag.behandlingId)
+
+        if (aktivSøknadGrunnlag != null) {
+            søknadGrunnlagRepository.saveAndFlush(aktivSøknadGrunnlag.also { it.aktiv = false })
+        }
+
+        return søknadGrunnlagRepository.save(søknadGrunnlag)
+    }
+
+    fun hent(behandlingId: Long): SøknadGrunnlag {
+        return søknadGrunnlagRepository.hent(behandlingId)
+    }
+
+    fun hentAlle(behandlingId: Long): List<SøknadGrunnlag> {
+        return søknadGrunnlagRepository.hentAlle(behandlingId)
+    }
+
+    fun hentAktiv(behandlingId: Long): SøknadGrunnlag? {
+        return søknadGrunnlagRepository.hentAktiv(behandlingId)
+    }
 }

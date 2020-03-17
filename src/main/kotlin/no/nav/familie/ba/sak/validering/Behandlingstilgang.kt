@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.validering
 
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component

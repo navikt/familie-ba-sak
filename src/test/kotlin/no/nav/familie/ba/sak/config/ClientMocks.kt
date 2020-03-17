@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient

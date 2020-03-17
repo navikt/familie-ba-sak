@@ -2,13 +2,13 @@ package no.nav.familie.ba.sak.logg
 
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultat
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.behandling.domene.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.lagBehandling

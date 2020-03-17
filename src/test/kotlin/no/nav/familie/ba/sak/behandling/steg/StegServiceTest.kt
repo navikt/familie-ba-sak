@@ -44,7 +44,7 @@ class StegServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         Assertions.assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG, behandling.steg)
 
-        stegService.håndterPersongrunnlag(behandling, Registreringsdata(
+        stegService.håndterPersongrunnlag(behandling, RegistrerPersongrunnlagDTO(
                 ident = søkerFnr,
                 barnasIdenter = listOf(barnFnr)
         ))

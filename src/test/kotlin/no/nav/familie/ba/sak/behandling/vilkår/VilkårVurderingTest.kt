@@ -1,19 +1,21 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
-import no.nav.familie.ba.sak.behandling.domene.vilkår.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.nare.core.evaluations.Resultat
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -42,28 +44,28 @@ class VilkårVurderingTest {
         val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                                   Vilkår.STØNADSPERIODE,
                                   Vilkår.BOSATT_I_RIKET)
-        assertEquals(vilkårForBarn, relevanteVilkår)
-        assertEquals(vilkårForBarn, relevanteVilkårForDato)
+        Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
+        Assertions.assertEquals(vilkårForBarn, relevanteVilkårForDato)
     }
 
     @Test
     fun `Hent relevante vilkår for persontype SØKER`() {
         val relevanteVilkår = Vilkår.hentVilkårForPart(PersonType.SØKER)
         val vilkårForSøker = setOf(Vilkår.STØNADSPERIODE,
-                                  Vilkår.BOSATT_I_RIKET)
-        assertEquals(vilkårForSøker, relevanteVilkår)
+                                   Vilkår.BOSATT_I_RIKET)
+        Assertions.assertEquals(vilkårForSøker, relevanteVilkår)
     }
 
     @Test
     fun `Hent relevante vilkår for saktype`() { //Banal test, legg til saktyper
         val relevanteVilkårSaktypeFinnes = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERFOR)
         val relevanteVilkårSaktypeFinnesIkke = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERIKKEFOR)
-        val vilkårForSaktypeFinnes  = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                            Vilkår.STØNADSPERIODE,
-                                            Vilkår.BOSATT_I_RIKET)
-        val vilkårForSaktypFinnesIkke : Set<Vilkår> = emptySet()
-        assertEquals(vilkårForSaktypeFinnes, relevanteVilkårSaktypeFinnes)
-        assertEquals(vilkårForSaktypFinnesIkke, relevanteVilkårSaktypeFinnesIkke)
+        val vilkårForSaktypeFinnes = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                                           Vilkår.STØNADSPERIODE,
+                                           Vilkår.BOSATT_I_RIKET)
+        val vilkårForSaktypFinnesIkke: Set<Vilkår> = emptySet()
+        Assertions.assertEquals(vilkårForSaktypeFinnes, relevanteVilkårSaktypeFinnes)
+        Assertions.assertEquals(vilkårForSaktypFinnesIkke, relevanteVilkårSaktypeFinnesIkke)
     }
 
     @Test
@@ -72,7 +74,7 @@ class VilkårVurderingTest {
         val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                                   Vilkår.STØNADSPERIODE,
                                   Vilkår.BOSATT_I_RIKET)
-        assertEquals(vilkårForBarn, relevanteVilkår)
+        Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
     }
 
     @Test
@@ -90,7 +92,7 @@ class VilkårVurderingTest {
 
         val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
                                                                            behandlingId = behandling.id)
-        assertEquals(Resultat.JA, samletVilkårResultat.hentSamletResultat())
+        Assertions.assertEquals(Resultat.JA, samletVilkårResultat.hentSamletResultat())
     }
 
     @Test
@@ -119,7 +121,7 @@ class VilkårVurderingTest {
         val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
                                                                            behandlingId = behandling.id)
 
-        assertEquals(Resultat.NEI, samletVilkårResultat.hentSamletResultat())
+        Assertions.assertEquals(Resultat.NEI, samletVilkårResultat.hentSamletResultat())
     }
 
     @Test
@@ -140,7 +142,7 @@ class VilkårVurderingTest {
 
         val forventetAntallVurderteVilkår =
                 Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
-        assertEquals(forventetAntallVurderteVilkår, samletVilkårResultat.samletVilkårResultat.size)
+        Assertions.assertEquals(forventetAntallVurderteVilkår, samletVilkårResultat.samletVilkårResultat.size)
     }
 
     @Test

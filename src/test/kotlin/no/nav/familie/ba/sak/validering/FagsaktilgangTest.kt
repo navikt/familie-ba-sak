@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.validering
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang

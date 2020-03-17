@@ -1,6 +1,6 @@
-package no.nav.familie.ba.sak.behandling.domene.vilkår
+package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import java.time.LocalDate
 import java.time.Period
 

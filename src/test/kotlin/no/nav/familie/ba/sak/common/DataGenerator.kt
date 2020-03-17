@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
@@ -33,12 +35,15 @@ fun nesteBehandlingId(): Long {
     return gjeldendeBehandlingId
 }
 
-val defaultFagsak = Fagsak(1, AktørId("1"), PersonIdent("12345"), FagsakStatus.OPPRETTET)
+val defaultFagsak = Fagsak(1,
+                                                                                      AktørId("1"),
+                                                                                      PersonIdent("12345"),
+                                                                                      FagsakStatus.OPPRETTET)
 fun lagBehandling(fagsak: Fagsak = defaultFagsak) = Behandling(id = nesteBehandlingId(),
-                                                               fagsak = fagsak,
-                                                               type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                               kategori = BehandlingKategori.NASJONAL,
-                                                               underkategori = BehandlingUnderkategori.ORDINÆR)
+                                                                                                                          fagsak = fagsak,
+                                                                                                                          type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                                                                          kategori = BehandlingKategori.NASJONAL,
+                                                                                                                          underkategori = BehandlingUnderkategori.ORDINÆR)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
         aktørId = randomAktørId(),

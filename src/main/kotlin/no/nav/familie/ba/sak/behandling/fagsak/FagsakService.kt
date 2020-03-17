@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
-import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
-import no.nav.familie.ba.sak.behandling.domene.FagsakStatus
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultatRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultatRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
@@ -95,7 +92,8 @@ class FagsakService(
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
         val aktørId = integrasjonClient.hentAktørId(personIdent.ident)
-        val nyFagsak = Fagsak(aktørId = aktørId, personIdent = personIdent)
+        val nyFagsak =
+                Fagsak(aktørId = aktørId, personIdent = personIdent)
         return lagre(nyFagsak)
     }
 

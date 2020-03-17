@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -21,7 +22,8 @@ class DokGenKlientTest(@Autowired
                        private val dokGenKlient: DokGenKlient) {
 
     private val vedtak = Vedtak(
-            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910"), aktørId = AktørId("1")),
+            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
+                    "12345678910"), aktørId = AktørId("1")),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
@@ -32,7 +34,8 @@ class DokGenKlientTest(@Autowired
     )
 
     private val avslagVedtak = Vedtak(
-            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910"), aktørId = AktørId("1")),
+            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
+                    "12345678910"), aktørId = AktørId("1")),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
@@ -43,7 +46,8 @@ class DokGenKlientTest(@Autowired
     )
 
     private val opphørtVedtak = Vedtak(
-            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent("12345678910"), aktørId = AktørId("1")),
+            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
+                    "12345678910"), aktørId = AktørId("1")),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,

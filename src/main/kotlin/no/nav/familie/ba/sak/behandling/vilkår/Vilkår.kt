@@ -1,6 +1,6 @@
-package no.nav.familie.ba.sak.behandling.domene.vilkår
+package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.nare.core.specifications.Spesifikasjon
 import no.nav.nare.core.evaluations.Evaluering
 import java.time.LocalDate

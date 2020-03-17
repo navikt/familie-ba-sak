@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner
 
 import medPersonident
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.domene
 
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -44,7 +45,7 @@ data class Behandling(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "steg", nullable = false)
-        var steg: StegType = initSteg,
+        var steg: StegType = initSteg(null),
 
         @Enumerated(EnumType.STRING)
         @Column(name = "resultat", nullable = false)
