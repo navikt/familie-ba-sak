@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.PartMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
+import no.nav.familie.ba.sak.behandling.vedtak.YtelsePeriode
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -81,11 +82,8 @@ fun lagPersonVedtak(fom: String,
                     vedtak: Vedtak = lagVedtak()): VedtakPerson {
     return VedtakPerson(
             person = tilfeldigPerson(),
-            stønadFom = dato(fom),
-            stønadTom = dato(tom),
-            beløp = beløp,
             vedtak = vedtak,
-            type = ytelsetype
+            ytelsePerioder = mutableListOf(YtelsePeriode(person = tilfeldigPerson(), beløp = beløp, stønadFom = dato(fom), stønadTom = dato(tom), type = ytelsetype))
     )
 }
 

@@ -134,6 +134,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
                 }
 
+            val ytelsePeriode = YtelsePeriode(person = person, beløp = it.beløp, stønadFom = sikkerStønadFom, stønadTom = sikkerStønadTom, type = it.ytelsetype)
 
                 val eksisterendeBarnPåVedtak =
                         vedtakPersonRepository.finnPersonBeregning(vedtakId = vedtak.id, personIdent = person.personIdent.ident)
@@ -142,10 +143,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                                 id = eksisterendeBarnPåVedtak?.id ?: 0,
                                 person = person,
                                 vedtak = vedtak,
-                                beløp = it.beløp,
-                                stønadFom = sikkerStønadFom,
-                                stønadTom = sikkerStønadTom,
-                                type = it.ytelsetype
+                                ytelsePerioder = mutableListOf(ytelsePeriode)
                         )
                 )
             }
