@@ -119,7 +119,7 @@ class StegService(
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (behandlingSteg.stegType() > behandling.steg) {
+            if (behandlingSteg.stegType().rekkefølge > behandling.steg.rekkefølge) {
                 error("${SikkerhetContext.hentSaksbehandler()} prøver å utføre steg ${behandlingSteg.stegType()}," +
                       " men behandlingen er på steg ${behandling.steg}")
             }
@@ -137,7 +137,7 @@ class StegService(
 
             stegSuksessMetrics[behandling.steg]?.increment()
 
-            val nesteSteg = behandling.steg.hentNesteSteg()
+            val nesteSteg = behandling.steg.hentNesteSteg(behandlingType = behandling.type)
             behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id,
                                                        steg = nesteSteg)
 

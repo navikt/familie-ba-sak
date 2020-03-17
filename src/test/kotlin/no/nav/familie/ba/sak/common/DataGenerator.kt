@@ -8,6 +8,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.Opphold
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.PartMedOpplysninger
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
@@ -36,14 +39,15 @@ fun nesteBehandlingId(): Long {
 }
 
 val defaultFagsak = Fagsak(1,
-                                                                                      AktørId("1"),
-                                                                                      PersonIdent("12345"),
-                                                                                      FagsakStatus.OPPRETTET)
+                           AktørId("1"),
+                           PersonIdent("12345"),
+                           FagsakStatus.OPPRETTET)
+
 fun lagBehandling(fagsak: Fagsak = defaultFagsak) = Behandling(id = nesteBehandlingId(),
-                                                                                                                          fagsak = fagsak,
-                                                                                                                          type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                                                                          kategori = BehandlingKategori.NASJONAL,
-                                                                                                                          underkategori = BehandlingUnderkategori.ORDINÆR)
+                                                               fagsak = fagsak,
+                                                               type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                               kategori = BehandlingKategori.NASJONAL,
+                                                               underkategori = BehandlingUnderkategori.ORDINÆR)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
         aktørId = randomAktørId(),
@@ -121,3 +125,23 @@ fun nyOrdinærBehandling(søkersIdent: String, barnasIdenter: List<String>): NyB
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
+
+fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: List<String>): SøknadDTO {
+    return SøknadDTO(
+            kategori = BehandlingKategori.NASJONAL,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            annenPartIdent = annenPartIdent,
+            søkerMedOpplysninger = PartMedOpplysninger(
+                    ident = søkerIdent,
+                    personType = PersonType.SØKER,
+                    opphold = Opphold()
+            ),
+            barnaMedOpplysninger = barnasIdenter.map {
+                PartMedOpplysninger(
+                        ident = it,
+                        personType = PersonType.BARN,
+                        opphold = Opphold()
+                )
+            }
+    )
+}

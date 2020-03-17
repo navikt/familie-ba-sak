@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.behandling.søknad
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.*
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.writeValueAsString
+import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -18,33 +18,13 @@ class SøknadGrunnlagTest(
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
-    fun lagSøknadDTO(behandlingId: Long, annenPartIdent: String): SøknadDTO {
-        val søkerIdent = randomFnr()
-        val barnIdent = randomFnr()
-
-        return SøknadDTO(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                annenPartIdent = annenPartIdent,
-                søkerMedOpplysninger = PartMedOpplysninger(
-                        ident = søkerIdent,
-                        personType = PersonType.SØKER,
-                        opphold = Opphold()
-                ),
-                barnaMedOpplysninger = listOf(PartMedOpplysninger(
-                        ident = barnIdent,
-                        personType = PersonType.BARN,
-                        opphold = Opphold()
-                ))
-        )
-    }
-
-
     @Test
     fun `Skal lagre ned og hente søknadsgrunnlag`() {
         val behandlingId = 1L
+        val søkerIdent = randomFnr()
         val annenPartIdent = randomFnr()
-        val søknadDTO = lagSøknadDTO(behandlingId, annenPartIdent)
+        val barnIdent = randomFnr()
+        val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, annenPartIdent = annenPartIdent, barnasIdenter = listOf(barnIdent))
         søknadGrunnlagService.lagreOgDeaktiverGammel(SøknadGrunnlag(
                 behandlingId = behandlingId,
                 søknad = søknadDTO.writeValueAsString()
@@ -61,10 +41,15 @@ class SøknadGrunnlagTest(
     @Test
     fun `Skal sjekke at det kun kan være et aktivt grunnlag for en behandling`() {
         val behandlingId = 2L
+        val søkerIdent = randomFnr()
         val annenPartIdent = randomFnr()
-        val søknadDTO = lagSøknadDTO(behandlingId, annenPartIdent)
+        val barnIdent = randomFnr()
+        val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, annenPartIdent = annenPartIdent, barnasIdenter = listOf(barnIdent))
+
+        val søkerIdent2 = randomFnr()
         val annenPartIdent2 = randomFnr()
-        val søknadDTO2 = lagSøknadDTO(behandlingId, annenPartIdent2)
+        val barnIdent2 = randomFnr()
+        val søknadDTO2 = lagSøknadDTO(søkerIdent = søkerIdent2, annenPartIdent = annenPartIdent2, barnasIdenter = listOf(barnIdent2))
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(SøknadGrunnlag(
                 behandlingId = behandlingId,

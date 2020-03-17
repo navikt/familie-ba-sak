@@ -8,6 +8,7 @@ class BehandlingStegTest {
     @Test
     fun `Tester rekkefølgen på steg`() {
         val riktigRekkefølge = listOf(
+                StegType.REGISTRERE_SØKNAD,
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
                 StegType.SEND_TIL_BESLUTTER,
@@ -18,7 +19,7 @@ class BehandlingStegTest {
         var steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
         riktigRekkefølge.forEach {
             Assertions.assertEquals(steg, it)
-            steg = it.hentNesteSteg()
+            steg = it.hentNesteSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
         }
     }
 }
