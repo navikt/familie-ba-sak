@@ -16,7 +16,7 @@ class SatsServiceUnitTest {
     val satsRepository = mockk<SatsRepository>()
     val satsService = SatsService(satsRepository)
 
-    val ignorerFra_2020_05 = årMnd("2020-05")
+    val MAX_GYLDIG_FRA_OG_MED = årMnd("2020-05")
 
     @Test
     fun `Skal bruke sats for satstype som er løpende`() {
@@ -25,7 +25,7 @@ class SatsServiceUnitTest {
         )
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2020-04-01"), dato("2038-03-31"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2020-04"), årMnd("2038-03"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(1, beløpperioder.size)
 
@@ -39,7 +39,7 @@ class SatsServiceUnitTest {
         )
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2020-04-01"), dato("2038-03-31"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2020-04"), årMnd("2038-03"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(1, beløpperioder.size)
 
@@ -51,11 +51,11 @@ class SatsServiceUnitTest {
     fun `Skal bruke gjeldende, ikke avlsuttet sats selv om annen sats finnes for perioden`() {
         stubSatsRepo(SatsType.ORBA,
                      TestKrPeriode(1054, "2018-04-01", null),
-                     TestKrPeriode(1054, "2020-07-01", null)
+                     TestKrPeriode(1354, "2020-07-01", null)
         )
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2020-04-01"), dato("2038-03-31"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2020-04"), årMnd("2038-03"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(1, beløpperioder.size)
         assertSatsperioder(TestKrPeriode(1054, "2020-04", "2038-03"), beløpperioder[0])
@@ -68,7 +68,7 @@ class SatsServiceUnitTest {
         )
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2020-04-01"), dato("2038-03-31"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2020-04"), årMnd("2038-03"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(1, beløpperioder.size)
         assertSatsperioder(TestKrPeriode(1054, "2020-04", "2023-06"), beløpperioder[0])
@@ -82,7 +82,7 @@ class SatsServiceUnitTest {
         )
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2020-04-01"), dato("2038-03-31"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2020-04"), årMnd("2038-03"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(1, beløpperioder.size)
         assertSatsperioder(TestKrPeriode(1054, "2020-04", "2020-08"), beløpperioder[0])
@@ -96,7 +96,7 @@ class SatsServiceUnitTest {
         )
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2017-04-01"), dato("2035-03-31"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2017-04"), årMnd("2035-03"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(2, beløpperioder.size)
         assertSatsperioder(TestKrPeriode(970, "2017-04", "2019-02"), beløpperioder[0])
@@ -113,7 +113,7 @@ class SatsServiceUnitTest {
         )
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2017-04-01"), dato("2035-03-31"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2017-04"), årMnd("2035-03"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(2, beløpperioder.size)
         assertSatsperioder(TestKrPeriode(970, "2017-04", "2019-02"), beløpperioder[0])
@@ -127,7 +127,7 @@ class SatsServiceUnitTest {
         )
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2019-03-01"), dato("2035-03-31"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2019-03"), årMnd("2035-03"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(0, beløpperioder.size)
     }
@@ -139,7 +139,7 @@ class SatsServiceUnitTest {
         )
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2019-03-01"), dato("2035-03-31"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2019-03"), årMnd("2035-03"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(0, beløpperioder.size)
     }
@@ -151,7 +151,7 @@ class SatsServiceUnitTest {
         )
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2023-03-01"), dato("2020-03-31"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2023-03"), årMnd("2020-03"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(0, beløpperioder.size)
     }
@@ -161,7 +161,7 @@ class SatsServiceUnitTest {
         stubSatsRepo(SatsType.ORBA)
 
         val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, dato("2020-03-01"), dato("2038-02-28"), ignorerFra_2020_05)
+                satsService.hentGyldigSatsFor(SatsType.ORBA, årMnd("2020-03"), årMnd("2038-02"), MAX_GYLDIG_FRA_OG_MED)
 
         Assertions.assertEquals(0, beløpperioder.size)
     }
