@@ -20,7 +20,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -54,7 +53,7 @@ class VedtakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
                         onFailure = {
-                            return badRequest((it.cause?.message ?: it.message).toString())
+                            badRequest((it.cause?.message ?: it.message).toString(), null)
                         }
                 )
     }
@@ -71,7 +70,7 @@ class VedtakController(
         return Result.runCatching { stegService.håndterSendTilBeslutter(behandling) }.fold(
                 onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
                 onFailure = {
-                    illegalState((it.cause?.message ?: it.message).toString())
+                    illegalState((it.cause?.message ?: it.message).toString(), it)
                 }
         )
     }
@@ -87,12 +86,12 @@ class VedtakController(
                             return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
                                     onSuccess = { ResponseEntity.accepted().body(it) },
                                     onFailure = {
-                                        illegalState((it.cause?.message ?: it.message).toString())
+                                        illegalState((it.cause?.message ?: it.message).toString(), it)
                                     }
                             )
                         },
                         onFailure = {
-                            illegalState((it.cause?.message ?: it.message).toString())
+                            illegalState((it.cause?.message ?: it.message).toString(), it)
                         }
                 )
     }

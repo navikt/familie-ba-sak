@@ -8,12 +8,13 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.RessursResponse.badRequest
+import no.nav.familie.ba.sak.common.RessursResponse.illegalState
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -30,7 +31,6 @@ class BehandlingController(private val fagsakService: FagsakService,
     private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("automatisk")
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
-    val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @PostMapping(path = ["behandlinger"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
@@ -39,20 +39,17 @@ class BehandlingController(private val fagsakService: FagsakService,
         logger.info("{} oppretter ny behandling", saksbehandlerId)
 
         if (nyBehandling.søkersIdent.isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure("Søkers ident kan ikke være blank"))
+            return badRequest("Søkers ident kan ikke være blank", null)
         }
 
         if (nyBehandling.barnasIdenter.any { it.isBlank() }) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Ressurs.failure("Minst et av barna mangler ident"))
+            return badRequest("Minst et av barna mangler ident", null)
         }
 
         return Result.runCatching { stegService.håndterNyBehandling(nyBehandling) }
                 .fold(
                         onFailure = {
-                            logger.error("Opprettelse av behandling feilet")
-                            secureLogger.info("Opprettelse av behandling feilet", it)
-                            ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                    .body(Ressurs.failure(it.cause?.message ?: it.message, it))
+                            badRequest("Opprettelse av behandling feilet: ${it.cause?.message ?: it.message}", it)
                         },
                         onSuccess = {
                             val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
@@ -72,10 +69,7 @@ class BehandlingController(private val fagsakService: FagsakService,
         return Result.runCatching { stegService.håndterNyBehandlingFraHendelse(nyBehandling) }
                 .fold(
                         onFailure = {
-                            logger.info("Opprettelse av behandling fra hendelse feilet")
-                            secureLogger.info("Opprettelse av behandling fra hendelse feilet", it)
-                            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                    .body(Ressurs.failure(it.message, it))
+                            illegalState("Opprettelse av behandling fra hendelse feilet: ${it.message}", it)
                         },
                         onSuccess = {
                             val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))

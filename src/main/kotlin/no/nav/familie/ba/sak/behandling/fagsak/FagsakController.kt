@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakSøk
+import no.nav.familie.ba.sak.common.RessursResponse.illegalState
 
 @RestController
 @RequestMapping("/api")
@@ -38,7 +40,7 @@ class FagsakController(
         return Result.runCatching { fagsakService.nyFagsak(nyFagsak) }
                 .fold(
                         onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
-                        onFailure = { e -> ResponseEntity.ok(Ressurs.failure("Opprettelse av fagsak feilet", e)) }
+                        onFailure = { ResponseEntity.ok(Ressurs.failure("Opprettelse av fagsak feilet", it)) }
                 )
     }
 
@@ -52,7 +54,7 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok().body(it) },
                         onFailure = {
-                            badRequest("Henting av fagsak med fagsakId $fagsakId feilet")
+                            badRequest("Henting av fagsak med fagsakId $fagsakId feilet", it)
                         }
                 )
     }
@@ -69,6 +71,21 @@ class FagsakController(
                                                               LocalDateTime.now())
         taskRepository.save(initiellAvstemmingTask)
         return ResponseEntity.ok(Ressurs.success("Laget task for avstemming"))
+    }
+
+    @PostMapping(path = ["fagsaker/søk"])
+    fun søkFagsak(@RequestParam personIdent: String): ResponseEntity<Ressurs<RestFagsakSøk>> {
+        val saksbehandlerId = hentSaksbehandler()
+
+        logger.info("{} søker fagsak", saksbehandlerId)
+
+        return Result.runCatching { fagsakService.hentFagsaker(personIdent) }
+                .fold(
+                        onSuccess = { ResponseEntity.ok().body(Ressurs.success(it)) },
+                        onFailure = {
+                            illegalState("Søker fagsak feilet: ${it.message}", it)
+                        }
+                )
     }
 
     companion object {
