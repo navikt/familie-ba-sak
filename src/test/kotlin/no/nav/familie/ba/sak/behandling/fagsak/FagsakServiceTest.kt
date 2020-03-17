@@ -3,39 +3,40 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import io.mockk.every
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandling
-import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import java.util.*
 
 @SpringBootTest
-@ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 @Tag("integration")
-class FagsakServiceTest {
-    @Autowired
-    lateinit var fagsakService: FagsakService
+class FagsakServiceTest(
+        @Autowired
+        private val fagsakService: FagsakService,
 
-    @Autowired
-    lateinit var behandlingService: BehandlingService
+        @Autowired
+        private val behandlingService: BehandlingService,
 
-    @Autowired
-    lateinit var stegService: StegService
+        @Autowired
+        private val stegService: StegService,
 
-    @Autowired
-    lateinit var integrasjonClient: IntegrasjonClient
+        @Autowired
+        private val integrasjonClient: IntegrasjonClient
+) {
 
     @Test
     fun `test å søke fagsak med fnr`() {
@@ -76,25 +77,32 @@ class FagsakServiceTest {
                 listOf(barn1Fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
+        stegService.håndterPersongrunnlag(førsteBehandling,
+                                          RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr)))
 
         behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.FERDIGSTILT)
 
-        stegService.håndterNyBehandling(NyBehandling(
+        val andreBehandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
                 listOf(barn2Fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
+        stegService.håndterPersongrunnlag(andreBehandling,
+                                          RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn2Fnr)))
 
 
-        stegService.håndterNyBehandling(NyBehandling(
+
+        val tredjeBehandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker2Fnr,
                 listOf(barn1Fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
+        stegService.håndterPersongrunnlag(tredjeBehandling,
+                                          RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr)))
 
         val søkeresultat1 = fagsakService.hentFagsaker(søker1Fnr)
         Assertions.assertEquals(søker1Fnr, søkeresultat1.personIdent)

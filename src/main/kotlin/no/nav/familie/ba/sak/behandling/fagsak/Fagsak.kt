@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.domene
+package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId

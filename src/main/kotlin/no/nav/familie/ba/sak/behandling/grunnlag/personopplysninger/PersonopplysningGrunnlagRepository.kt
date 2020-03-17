@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.domene.personopplysninger
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.task.OpprettBehandleSakOppgaveForNyBehandlingTask
 import no.nav.familie.prosessering.domene.Task
@@ -15,10 +15,10 @@ class RegistrerPersongrunnlag(
         private val persongrunnlagService: PersongrunnlagService,
         private val featureToggleService: FeatureToggleService,
         private val taskRepository: TaskRepository
-) : BehandlingSteg<Registreringsdata> {
+) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
 
     @Transactional
-    override fun utførSteg(behandling: Behandling, data: Registreringsdata): Behandling {
+    override fun utførSteg(behandling: Behandling, data: RegistrerPersongrunnlagDTO): Behandling {
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident, data.barnasIdenter, behandling)
         if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
             val nyTask = Task.nyTask(OpprettBehandleSakOppgaveForNyBehandlingTask.TASK_STEP_TYPE, behandling.id.toString())
@@ -35,6 +35,6 @@ class RegistrerPersongrunnlag(
     }
 }
 
-data class Registreringsdata(
+data class RegistrerPersongrunnlagDTO(
         val ident: String,
         val barnasIdenter: List<String>)

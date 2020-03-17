@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.domene.personopplysninger
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*

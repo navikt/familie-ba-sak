@@ -1,7 +1,7 @@
-package no.nav.familie.ba.sak.behandling.domene.vilkår
+package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import no.nav.familie.ba.sak.behandling.BehandlingService

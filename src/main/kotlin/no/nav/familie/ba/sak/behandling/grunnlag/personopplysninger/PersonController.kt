@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.domene.personopplysninger
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.RessursResponse.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
@@ -26,7 +26,6 @@ class PersonController(private val integrasjonOnBehalfClient: IntegrasjonOnBehal
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<Personinfo>> {
         return Result.runCatching {
                     integrasjonOnBehalfClient.hentPersoninfo(personIdent)
-
                 }
                 .fold(
                         onFailure = {

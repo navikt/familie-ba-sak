@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -36,15 +38,23 @@ class StegServiceTest(
     @Test
     fun `Skal håndtere steg for ordinær behandling`() {
         val søkerFnr = randomFnr()
+        val annenPartIdent = randomFnr()
         val barnFnr = randomFnr()
 
         mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        Assertions.assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG, behandling.steg)
+        Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
 
-        stegService.håndterPersongrunnlag(behandling, Registreringsdata(
+        stegService.håndterSøknad(behandling,
+                                  lagSøknadDTO(annenPartIdent = annenPartIdent,
+                                               søkerIdent = søkerFnr,
+                                               barnasIdenter = listOf(barnFnr)))
+        val behandlingEtterSøknadGrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
+        Assertions.assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG, behandlingEtterSøknadGrunnlagSteg.steg)
+
+        stegService.håndterPersongrunnlag(behandlingEtterSøknadGrunnlagSteg, RegistrerPersongrunnlagDTO(
                 ident = søkerFnr,
                 barnasIdenter = listOf(barnFnr)
         ))
@@ -69,7 +79,7 @@ class StegServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        Assertions.assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG, behandling.steg)
+        Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
 
         assertThrows<IllegalStateException> {
             stegService.håndterVilkårsvurdering(behandling, RestVilkårsvurdering(

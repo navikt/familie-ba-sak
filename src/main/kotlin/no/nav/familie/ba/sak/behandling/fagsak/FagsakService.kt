@@ -1,15 +1,13 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
-import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
-import no.nav.familie.ba.sak.behandling.domene.FagsakStatus
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultatRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultatRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -17,11 +15,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonType
-import no.nav.familie.ba.sak.common.RessursResponse
-import org.springframework.http.ResponseEntity
-import java.lang.IllegalStateException
 
 @Service
 class FagsakService(
@@ -65,7 +58,7 @@ class FagsakService(
 
         val restBehandlinger: List<RestBehandling> = behandlinger.map { it ->
             val personopplysningGrunnlag = it.id.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
-                    ?: return Ressurs.failure("Fant ikke personopplysningsgrunnlag på behandling")
+                                           ?: return Ressurs.failure("Fant ikke personopplysningsgrunnlag på behandling")
 
             val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
                 val personBeregning = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
@@ -81,7 +74,7 @@ class FagsakService(
                     status = it.status,
                     steg = it.steg,
                     samletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(it.id)
-                            ?.toRestSamletVilkårResultat() ?: emptyList(),
+                                                   ?.toRestSamletVilkårResultat() ?: emptyList(),
                     opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori,
@@ -96,12 +89,14 @@ class FagsakService(
     fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
         LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
         fagsak.status = nyStatus
+
         lagre(fagsak)
     }
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
         val aktørId = integrasjonClient.hentAktørId(personIdent.ident)
-        val nyFagsak = Fagsak(aktørId = aktørId, personIdent = personIdent)
+        val nyFagsak =
+                Fagsak(aktørId = aktørId, personIdent = personIdent)
         return lagre(nyFagsak)
     }
 
@@ -121,7 +116,7 @@ class FagsakService(
 
     fun hentFagsaker(personIdent: String): RestFagsakSøk {
         val personer = personRepository.findByPersonIdent(PersonIdent(personIdent))
-        val personInfo= runCatching {
+        val personInfo = runCatching {
             integrasjonClient.hentPersoninfoFor(personIdent)
         }.fold(
                 onSuccess = { it },
@@ -135,13 +130,16 @@ class FagsakService(
 
         personer.map {
             val behandling = behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId)
-            assosierteFagsaker[behandling.fagsak.id]= RestFunnetFagsak(
+            assosierteFagsaker[behandling.fagsak.id] = RestFunnetFagsak(
                     behandling.fagsak.id,
                     it.type
             )
         }
 
-        return RestFagsakSøk(personIdent, personInfo.navn?:"", personInfo.kjønn?:Kjønn.UKJENT, assosierteFagsaker.values.toList())
+        return RestFagsakSøk(personIdent,
+                             personInfo.navn ?: "",
+                             personInfo.kjønn ?: Kjønn.UKJENT,
+                             assosierteFagsaker.values.toList())
     }
 
     companion object {

@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.NyFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType

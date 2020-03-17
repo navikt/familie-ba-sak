@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.illegalState
@@ -46,7 +47,13 @@ class BehandlingController(private val fagsakService: FagsakService,
             return badRequest("Minst et av barna mangler ident", null)
         }
 
-        return Result.runCatching { stegService.håndterNyBehandling(nyBehandling) }
+        return Result.runCatching {
+                    val behandling = stegService.håndterNyBehandling(nyBehandling)
+                    stegService.håndterPersongrunnlag(behandling = behandling,
+                                                      registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+                                                              ident = nyBehandling.søkersIdent,
+                                                              barnasIdenter = nyBehandling.barnasIdenter))
+                }
                 .fold(
                         onFailure = {
                             badRequest("Opprettelse av behandling feilet: ${it.cause?.message ?: it.message}", it)
