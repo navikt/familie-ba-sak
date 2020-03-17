@@ -30,12 +30,13 @@ class SøknadGrunnlagTest(
                 søknad = søknadDTO.writeValueAsString()
         ))
 
-        val søknadGrunnlag = søknadGrunnlagService.hent(behandlingId)
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId)
         Assertions.assertNotNull(søknadGrunnlag)
-        Assertions.assertEquals(behandlingId, søknadGrunnlag.behandlingId)
-        Assertions.assertEquals(true, søknadGrunnlag.aktiv)
-
-        Assertions.assertEquals(annenPartIdent, søknadGrunnlag.hentSøknadDto().annenPartIdent)
+        Assertions.assertEquals(behandlingId, søknadGrunnlag?.behandlingId)
+        Assertions.assertEquals(true, søknadGrunnlag?.aktiv)
+        Assertions.assertEquals(annenPartIdent, søknadGrunnlag?.hentSøknadDto()?.annenPartIdent)
+        Assertions.assertEquals(søkerIdent, søknadGrunnlag?.hentSøknadDto()?.søkerMedOpplysninger?.ident)
+        Assertions.assertTrue(søknadGrunnlag?.hentSøknadDto()?.søkerMedOpplysninger?.opphold?.oppholderSegINorge!!)
     }
 
     @Test
