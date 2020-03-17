@@ -9,7 +9,7 @@ import java.time.LocalDate
 data class SøknadDTO(
         val kategori: BehandlingKategori,
         val underkategori: BehandlingUnderkategori,
-        val typeSøker: TypeSøker? = null,
+        val typeSøker: TypeSøker = TypeSøker.ORDINÆR,
         val søkerMedOpplysninger: PartMedOpplysninger,
         val barnaMedOpplysninger: List<PartMedOpplysninger>,
         val annenPartIdent: String
@@ -32,5 +32,5 @@ data class Opphold(
 )
 
 enum class TypeSøker {
-    INSTITUSJON, TREDJELANDSBORGER, EØS_BORGER
+    ORDINÆR, INSTITUSJON, TREDJELANDSBORGER, EØS_BORGER
 }

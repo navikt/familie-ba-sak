@@ -117,13 +117,15 @@ class OppgaveServiceTest {
     }
 
     private fun lagTestBehandling(): Behandling {
-        return Behandling(fagsak = Fagsak(id = FAGSAK_ID,
-                                                                                                     personIdent = PersonIdent(
-                                                                                                             ident = FNR),
-                                                                                                     aktørId = AktørId(id = AKTØR_ID_FAGSAK)),
-                          type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                          kategori = BehandlingKategori.NASJONAL,
-                          underkategori = BehandlingUnderkategori.ORDINÆR)
+        return Behandling(
+                fagsak = Fagsak(
+                        id = FAGSAK_ID,
+                        personIdent = PersonIdent(ident = FNR),
+                        aktørId = AktørId(id = AKTØR_ID_FAGSAK)
+                ),
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR)
     }
 
     companion object {
