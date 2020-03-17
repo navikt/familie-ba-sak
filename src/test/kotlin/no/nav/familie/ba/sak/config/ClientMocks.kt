@@ -6,8 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
+import no.nav.familie.ba.sak.integrasjoner.domene.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
@@ -28,7 +27,12 @@ class ClientMocks {
 
         every {
             mockIntegrasjonOnBehalfClient.hentPersoninfo(any())
-        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19),
+                             kjønn = Kjønn.KVINNE,
+                             navn = "Mor Moresen",
+                             familierelasjoner = setOf(
+                                     Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN)))
 
         return mockIntegrasjonOnBehalfClient
     }
