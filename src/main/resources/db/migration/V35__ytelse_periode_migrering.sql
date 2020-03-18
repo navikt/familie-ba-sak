@@ -1,2 +1,2 @@
-INSERT INTO YTELSE_PERIODE (fk_vedtak_person_id, belop, stonad_fom, stonad_tom, type)
-SELECT id, belop, stonad_fom, stonad_tom, type FROM VEDTAK_PERSON;
+INSERT INTO YTELSE_PERIODE (id, fk_vedtak_person_id, belop, stonad_fom, stonad_tom, type, endret_av, endret_tid)
+SELECT id, id, belop, stonad_fom, stonad_tom, type, endret_av, endret_tid FROM VEDTAK_PERSON;
