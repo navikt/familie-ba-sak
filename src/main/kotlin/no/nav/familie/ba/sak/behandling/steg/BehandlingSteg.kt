@@ -60,7 +60,7 @@ enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, 
                 else -> error("Ikke godkjent steg for behandlingstype")
             }
             else -> when (this) {
-                REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
+                REGISTRERE_SØKNAD -> VILKÅRSVURDERING
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK
