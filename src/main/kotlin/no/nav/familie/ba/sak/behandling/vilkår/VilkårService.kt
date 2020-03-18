@@ -7,6 +7,7 @@ import no.nav.nare.core.specifications.Spesifikasjon
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class VilkårService(
@@ -43,7 +44,7 @@ class VilkårService(
                                                      vilkårType = Vilkår.valueOf(child.identifikator)))
             }
         }
-        val periodeResultat = PeriodeResultat(periodeResultat = resultatForSak, behandlingId = behandlingId)
+        val periodeResultat = PeriodeResultat(periodeResultat = resultatForSak, behandlingId = behandlingId, periodeFom = LocalDate.now(), periodeTom = LocalDate.now()) //TODO: Oppdater med periode
         resultatForSak.map { it.periodeResultat = periodeResultat }
         lagreNyOgDeaktiverGammelPeriodeResultat(periodeResultat)
         return periodeResultat
@@ -68,7 +69,7 @@ class VilkårService(
                 throw IllegalStateException("Vilkårene for ${person.type} er ${vilkårForPerson.map { v -> v.vilkårType }}, men vi forventer $vilkårForPart")
             }
         }
-        val periodeResultat = PeriodeResultat(periodeResultat = listeAvVilkårResultat, behandlingId = behandlingId)
+        val periodeResultat = PeriodeResultat(periodeResultat = listeAvVilkårResultat, behandlingId = behandlingId, periodeFom = LocalDate.now(), periodeTom = LocalDate.now()) //TODO: Oppdater med periode
         listeAvVilkårResultat.map { it.periodeResultat = periodeResultat }
         lagreNyOgDeaktiverGammelPeriodeResultat(periodeResultat)
         return periodeResultat
