@@ -1,28 +1,30 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.nare.core.evaluations.Resultat
 import javax.persistence.*
 
 @Entity
-@Table(name = "samlet_vilkar_resultat")
+@Table(name = "periode_resultat")
 class PeriodeResultat(
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "samlet_vilkar_resultat_seq_generator")
-        @SequenceGenerator(name = "samlet_vilkar_resultat_seq_generator",
-                           sequenceName = "samlet_vilkar_resultat_seq",
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "periode_resultat_seq_generator")
+        @SequenceGenerator(name = "periode_resultat_seq_generator",
+                           sequenceName = "periode_resultat_seq",
                            allocationSize = 50)
         private val id: Long = 0,
 
-        @Column(name = "fk_behandling_id", nullable = false, updatable = false)
+        @Column(name = "fk_behandling_id", nullable = false, updatable = false) //TODO: FJERNE?
         val behandlingId: Long,
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
-        @OneToMany(mappedBy = "samletVilkårResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
+        @ManyToOne @JoinColumn(name = "behandling_resultat_id")
+        var behandlingResultat: BehandlingResultat? = null,
+
+        @OneToMany(mappedBy = "periodeResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
         var periodeResultat: MutableSet<VilkårResultat>
 
 ) : BaseEntitet() {

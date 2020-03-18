@@ -2,14 +2,13 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
-import no.nav.familie.ba.sak.behandling.domene.BrevType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultatRepository
+import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultatRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -24,7 +23,7 @@ class FagsakService(
         private val fagsakRepository: FagsakRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
-        private val samletVilkårResultatRepository: SamletVilkårResultatRepository,
+        private val periodeResultatRepository: PeriodeResultatRepository,
         private val behandlingRepository: BehandlingRepository,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val vedtakRepository: VedtakRepository,
@@ -75,12 +74,12 @@ class FagsakService(
                     type = it.type,
                     status = it.status,
                     steg = it.steg,
-                    samletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(it.id)
-                                                   ?.toRestSamletVilkårResultat() ?: emptyList(),
+                    periodeResultat = periodeResultatRepository.finnPeriodeResultatPåBehandlingOgAktiv(it.id)
+                                                   ?.toRestPeriodeResultat() ?: emptyList(),
                     opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori,
-                    resultat = it.brev,
+                    resultat = it.brev, //TODO: Hva er det egentlig restbehandlingen har behov for her?
                     begrunnelse = it.begrunnelse
             )
         }

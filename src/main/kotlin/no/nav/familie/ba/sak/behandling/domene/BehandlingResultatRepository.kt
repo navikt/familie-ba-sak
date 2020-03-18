@@ -5,10 +5,10 @@ import org.springframework.data.jpa.repository.Query
 
 interface BehandlingResultatRepository : JpaRepository<BehandlingResultat, Long> {
     @Query(value = "SELECT r FROM BehandlingResultat r WHERE r.id = :behandlingResultatId")
-    fun finnBehandlingResultat(behandlingId: Long): BehandlingResultat
+    fun finnBehandlingResutat(behandlingResultatId: Long): BehandlingResultat
 
     @Query(value = "SELECT r FROM BehandlingResultat r JOIN r.behandling b WHERE b.id = :behandlingId")
-    fun finnBehandlingResultater(fagsakId: Long): List<BehandlingResultat>
+    fun finnBehandlingResultater(behandlingId: Long): List<Behandling>
 
     @Query("SELECT r FROM BehandlingResultat r JOIN r.behandling b WHERE b.id = :behandlingId AND r.aktiv = true")
     fun findByBehandlingAndAktiv(behandlingId: Long): BehandlingResultat?

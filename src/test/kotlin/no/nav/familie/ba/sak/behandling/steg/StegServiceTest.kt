@@ -64,7 +64,7 @@ class StegServiceTest(
 
         stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg, RestVilkårsvurdering(
                 resultat = BrevType.INNVILGET,
-                samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr, listOf(barnFnr)),
+                periodeResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr, listOf(barnFnr)),
                 begrunnelse = ""
         ))
 
@@ -84,7 +84,7 @@ class StegServiceTest(
         assertThrows<IllegalStateException> {
             stegService.håndterVilkårsvurdering(behandling, RestVilkårsvurdering(
                     resultat = BrevType.INNVILGET,
-                    samletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr, listOf(barnFnr)),
+                    periodeResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr, listOf(barnFnr)),
                     begrunnelse = ""
             ))
         }

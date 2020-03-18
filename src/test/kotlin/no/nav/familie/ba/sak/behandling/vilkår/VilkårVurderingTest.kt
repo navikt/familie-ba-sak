@@ -90,9 +90,9 @@ class VilkårVurderingTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                           behandlingId = behandling.id)
-        Assertions.assertEquals(Resultat.JA, samletVilkårResultat.hentSamletResultat())
+        val periodeResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      behandlingId = behandling.id)
+        Assertions.assertEquals(Resultat.JA, periodeResultat.hentSamletResultat())
     }
 
     @Test
@@ -118,10 +118,10 @@ class VilkårVurderingTest {
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                           behandlingId = behandling.id)
+        val periodeResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      behandlingId = behandling.id)
 
-        Assertions.assertEquals(Resultat.NEI, samletVilkårResultat.hentSamletResultat())
+        Assertions.assertEquals(Resultat.NEI, periodeResultat.hentSamletResultat())
     }
 
     @Test
@@ -137,12 +137,12 @@ class VilkårVurderingTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
+        val periodeResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
                                                                            behandlingId = behandling.id)
 
         val forventetAntallVurderteVilkår =
                 Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
-        Assertions.assertEquals(forventetAntallVurderteVilkår, samletVilkårResultat.periodeResultat.size)
+        Assertions.assertEquals(forventetAntallVurderteVilkår, periodeResultat.periodeResultat.size)
     }
 
     @Test

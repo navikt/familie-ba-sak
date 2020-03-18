@@ -141,7 +141,7 @@ class VedtakController(
 
 data class RestVilkårsvurdering(
         val resultat: BrevType,
-        val samletVilkårResultat: List<RestVilkårResultat>,
+        val periodeResultat: List<RestVilkårResultat>,
         val begrunnelse: String
 )
 

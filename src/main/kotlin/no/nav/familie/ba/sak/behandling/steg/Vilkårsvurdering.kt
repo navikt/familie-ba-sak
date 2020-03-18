@@ -28,9 +28,9 @@ class Vilkårsvurdering(
                                                                               data.resultat,
                                                                               data.begrunnelse)
 
-        if (data.samletVilkårResultat.isNotEmpty()) {
+        if (data.periodeResultat.isNotEmpty()) {
             vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
-                                                                data.samletVilkårResultat,
+                                                                data.periodeResultat,
                                                                 vilkårsvurdertBehandling.id)
         } else {
             vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, vilkårsvurdertBehandling.id)

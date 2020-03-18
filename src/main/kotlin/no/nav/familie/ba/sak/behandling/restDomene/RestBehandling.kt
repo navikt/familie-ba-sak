@@ -16,12 +16,12 @@ data class RestBehandling(val aktiv: Boolean,
                           val personer: List<RestPerson>,
                           val opprettetTidspunkt: LocalDateTime,
                           val underkategori: BehandlingUnderkategori,
-                          val samletVilkårResultat: List<RestVilkårResultat>,
+                          val periodeResultat: List<RestVilkårResultat>,
                           val vedtakForBehandling: List<RestVedtak?>,
                           val resultat: BrevType,
                           val begrunnelse: String)
 
-fun PeriodeResultat.toRestSamletVilkårResultat() = this.periodeResultat.map {
+fun PeriodeResultat.toRestPeriodeResultat() = this.periodeResultat.map {
     RestVilkårResultat(vilkårType = it.vilkårType, resultat = it.resultat, personIdent = it.person.personIdent.ident)
 }
 

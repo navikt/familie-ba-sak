@@ -19,8 +19,8 @@ data class BehandlingResultat(
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
-        @OneToMany(mappedBy = "samletVilkårResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
-        var periodeResultat: MutableSet<PeriodeResultat>
+        @OneToMany(mappedBy = "behandlingResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
+        var behandlingResultat: MutableSet<PeriodeResultat>
 
 
 ) : BaseEntitet() {
