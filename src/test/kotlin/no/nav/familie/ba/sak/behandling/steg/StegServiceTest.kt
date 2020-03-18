@@ -47,17 +47,14 @@ class StegServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
 
-        /*
-        Kommenterer ut denne til søknadssteget er på plass
         stegService.håndterSøknad(behandling,
                                   lagSøknadDTO(annenPartIdent = annenPartIdent,
                                                søkerIdent = søkerFnr,
                                                barnasIdenter = listOf(barnFnr)))
         val behandlingEtterSøknadGrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG, behandlingEtterSøknadGrunnlagSteg.steg)
-        */
 
-        stegService.håndterPersongrunnlag(behandling, RegistrerPersongrunnlagDTO(
+        stegService.håndterPersongrunnlag(behandlingEtterSøknadGrunnlagSteg, RegistrerPersongrunnlagDTO(
                 ident = søkerFnr,
                 barnasIdenter = listOf(barnFnr)
         ))

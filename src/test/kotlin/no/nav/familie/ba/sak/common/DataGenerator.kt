@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.Opphold
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.PartMedOpplysninger
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.BarnMedOpplysninger
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
@@ -130,16 +130,12 @@ fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: Li
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             annenPartIdent = annenPartIdent,
-            søkerMedOpplysninger = PartMedOpplysninger(
-                    ident = søkerIdent,
-                    personType = PersonType.SØKER,
-                    opphold = Opphold()
+            søkerMedOpplysninger = SøkerMedOpplysninger(
+                    ident = søkerIdent
             ),
             barnaMedOpplysninger = barnasIdenter.map {
-                PartMedOpplysninger(
-                        ident = it,
-                        personType = PersonType.BARN,
-                        opphold = Opphold()
+                BarnMedOpplysninger(
+                        ident = it
                 )
             }
     )

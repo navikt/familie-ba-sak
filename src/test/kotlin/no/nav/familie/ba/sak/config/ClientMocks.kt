@@ -19,7 +19,7 @@ class ClientMocks {
     @Primary
     fun mockIntegrasjonOnBehalfClient(): IntegrasjonOnBehalfClient {
 
-        val mockIntegrasjonOnBehalfClient = mockk<IntegrasjonOnBehalfClient>(relaxed = true)
+        val mockIntegrasjonOnBehalfClient = mockk<IntegrasjonOnBehalfClient>(relaxed = false)
 
         every {
             mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any())
