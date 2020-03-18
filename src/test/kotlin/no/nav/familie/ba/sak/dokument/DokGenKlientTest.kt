@@ -28,7 +28,7 @@ class DokGenKlientTest(@Autowired
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    resultat = BehandlingResultat.INNVILGET),
+                                    resultat = BrevType.INNVILGET),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )
@@ -40,7 +40,7 @@ class DokGenKlientTest(@Autowired
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    resultat = BehandlingResultat.AVSLÅTT),
+                                    resultat = BrevType.AVSLÅTT),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )
@@ -52,7 +52,7 @@ class DokGenKlientTest(@Autowired
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    resultat = BehandlingResultat.OPPHØRT),
+                                    resultat = BrevType.OPPHØRT),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )

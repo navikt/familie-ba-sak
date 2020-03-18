@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BrevType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -52,13 +52,13 @@ class FerdigstillBehandlingTest {
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
 
-    fun lagTestTask(behandlingResultat: BehandlingResultat): Task {
+    fun lagTestTask(brevType: BrevType): Task {
         val fnr = randomFnr()
         val fnrBarn = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandlingService.settVilkårsvurdering(behandling, behandlingResultat, "")
+        behandlingService.settVilkårsvurdering(behandling, brevType, "")
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag =
@@ -79,7 +79,7 @@ class FerdigstillBehandlingTest {
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til løpende`() {
-        val testTask = lagTestTask(BehandlingResultat.INNVILGET)
+        val testTask = lagTestTask(BrevType.INNVILGET)
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
         ferdigstillBehandling.doTask(testTask)
@@ -94,7 +94,7 @@ class FerdigstillBehandlingTest {
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
-        val testTask = lagTestTask(BehandlingResultat.AVSLÅTT)
+        val testTask = lagTestTask(BrevType.AVSLÅTT)
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
         ferdigstillBehandling.doTask(testTask)

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BrevType.OPPHØRT
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype.*
 import no.nav.familie.ba.sak.common.dato
 import no.nav.familie.ba.sak.common.lagPersonVedtak

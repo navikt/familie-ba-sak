@@ -111,16 +111,16 @@ class LoggServiceTest(
         val behandling = lagBehandling()
         val vilkårsvurdering =
                 SamletVilkårResultat(behandlingId = behandling.id,
-                                     samletVilkårResultat = mutableSetOf(VilkårResultat(person = søker,
-                                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                                 resultat = Resultat.NEI),
-                                                                  VilkårResultat(person = søker,
+                                     periodeResultat = mutableSetOf(VilkårResultat(person = søker,
+                                                                                   vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                                   resultat = Resultat.NEI),
+                                                                    VilkårResultat(person = søker,
                                                                                  vilkårType = Vilkår.STØNADSPERIODE,
                                                                                  resultat = Resultat.JA),
-                                                                  VilkårResultat(person = barn,
+                                                                    VilkårResultat(person = barn,
                                                                                  vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                  resultat = Resultat.NEI),
-                                                                  VilkårResultat(person = barn,
+                                                                    VilkårResultat(person = barn,
                                                                                  vilkårType = Vilkår.STØNADSPERIODE,
                                                                                  resultat = Resultat.NEI)))
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, null, vilkårsvurdering)
@@ -131,16 +131,16 @@ class LoggServiceTest(
 
         val nyVilkårsvurdering =
                 SamletVilkårResultat(behandlingId = behandling.id,
-                                     samletVilkårResultat = mutableSetOf(VilkårResultat(person = søker,
-                                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                                 resultat = Resultat.JA),
-                                                                  VilkårResultat(person = søker,
+                                     periodeResultat = mutableSetOf(VilkårResultat(person = søker,
+                                                                                   vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                                   resultat = Resultat.JA),
+                                                                    VilkårResultat(person = søker,
                                                                                  vilkårType = Vilkår.STØNADSPERIODE,
                                                                                  resultat = Resultat.JA),
-                                                                  VilkårResultat(person = barn,
+                                                                    VilkårResultat(person = barn,
                                                                                  vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                  resultat = Resultat.JA),
-                                                                  VilkårResultat(person = barn,
+                                                                    VilkårResultat(person = barn,
                                                                                  vilkårType = Vilkår.STØNADSPERIODE,
                                                                                  resultat = Resultat.JA)))
         val nyVilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, vilkårsvurdering, nyVilkårsvurdering)

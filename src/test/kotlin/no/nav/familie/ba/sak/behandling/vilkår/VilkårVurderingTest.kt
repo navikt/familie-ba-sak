@@ -142,7 +142,7 @@ class VilkårVurderingTest {
 
         val forventetAntallVurderteVilkår =
                 Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
-        Assertions.assertEquals(forventetAntallVurderteVilkår, samletVilkårResultat.samletVilkårResultat.size)
+        Assertions.assertEquals(forventetAntallVurderteVilkår, samletVilkårResultat.periodeResultat.size)
     }
 
     @Test

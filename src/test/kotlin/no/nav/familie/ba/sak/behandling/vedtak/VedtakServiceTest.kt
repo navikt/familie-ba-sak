@@ -84,10 +84,10 @@ class VedtakServiceTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandling = behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
+        behandling = behandlingService.settVilkårsvurdering(behandling, BrevType.INNVILGET, "")
 
         Assertions.assertNotNull(behandling.fagsak.id)
-        Assertions.assertEquals(BehandlingResultat.INNVILGET, behandling.resultat)
+        Assertions.assertEquals(BrevType.INNVILGET, behandling.resultat)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
@@ -113,7 +113,7 @@ class VedtakServiceTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandling = behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.OPPHØRT, "")
+        behandling = behandlingService.settVilkårsvurdering(behandling, BrevType.OPPHØRT, "")
 
         Assertions.assertNotNull(behandling.fagsak.id)
 
@@ -140,7 +140,7 @@ class VedtakServiceTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandling = behandlingService.settVilkårsvurdering(behandling, BehandlingResultat.INNVILGET, "")
+        behandling = behandlingService.settVilkårsvurdering(behandling, BrevType.INNVILGET, "")
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
@@ -156,7 +156,7 @@ class VedtakServiceTest {
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
                                                                                 journalpostID = null,
                                                                                 type = BehandlingType.REVURDERING,
-                                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                                resultat = BrevType.INNVILGET,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR))
 
@@ -172,7 +172,7 @@ class VedtakServiceTest {
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
                                                                                 journalpostID = null,
                                                                                 type = BehandlingType.REVURDERING,
-                                                                                resultat = BehandlingResultat.OPPHØRT,
+                                                                                resultat = BrevType.OPPHØRT,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR))
 

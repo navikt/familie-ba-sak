@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BrevType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -45,7 +45,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    fun settVilkårsvurdering(behandling: Behandling, resultat: BehandlingResultat, begrunnelse: String): Behandling {
+    fun settVilkårsvurdering(behandling: Behandling, resultat: BrevType, begrunnelse: String): Behandling {
         behandling.begrunnelse = begrunnelse
         behandling.resultat = resultat
         return lagre(behandling)

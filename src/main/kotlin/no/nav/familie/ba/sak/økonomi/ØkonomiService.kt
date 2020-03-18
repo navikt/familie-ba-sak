@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BrevType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -21,7 +21,7 @@ class ØkonomiService(
     fun iverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
         val vedtak = vedtakService.hent(vedtakId)
 
-        val personberegninger = if (vedtak.behandling.resultat == BehandlingResultat.OPPHØRT)
+        val personberegninger = if (vedtak.behandling.resultat == BrevType.OPPHØRT)
             beregningService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)
         else beregningService.hentPersonerForVedtak(vedtak.id)
 

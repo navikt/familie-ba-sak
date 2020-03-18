@@ -69,7 +69,7 @@ class DokGenKlientIntegrationTest {
                 aktiv = true,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                resultat = BehandlingResultat.INNVILGET
+                resultat = BrevType.INNVILGET
         ), ansvarligSaksbehandler = "whoknows")
         assert(markdown == "mockup_response")
     }
@@ -106,7 +106,7 @@ class DokGenKlientIntegrationTest {
                 aktiv = true,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                resultat = BehandlingResultat.INNVILGET
+                resultat = BrevType.INNVILGET
         ), ansvarligSaksbehandler = "whoknows")
         assert(markdown.isEmpty())
     }

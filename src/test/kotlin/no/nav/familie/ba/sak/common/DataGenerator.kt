@@ -60,7 +60,7 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: Perso
 )
 
 fun lagVedtak(behandling: Behandling = lagBehandling(),
-              resultat: BehandlingResultat = BehandlingResultat.INNVILGET,
+              resultat: BrevType = BrevType.INNVILGET,
               forrigeVedtak: Vedtak? = null,
               opphørsdato: LocalDate? = null) =
         Vedtak(id = nesteVedtakId(),

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BrevType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
@@ -42,7 +42,7 @@ class BeregningController(
 
         val behandling = vedtak.behandling
 
-        if (behandling.resultat != BehandlingResultat.INNVILGET) {
+        if (behandling.resultat != BrevType.INNVILGET) {
             return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget", null)
         }
 

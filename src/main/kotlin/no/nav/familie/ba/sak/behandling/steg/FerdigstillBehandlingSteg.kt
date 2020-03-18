@@ -29,7 +29,7 @@ class FerdigstillBehandlingSteg(
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 
-        if (behandling.resultat == BehandlingResultat.INNVILGET && fagsak.status != FagsakStatus.LØPENDE) {
+        if (behandling.resultat == BrevType.INNVILGET && fagsak.status != FagsakStatus.LØPENDE) {
             fagsakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
         } else {
             fagsakService.oppdaterStatus(fagsak, FagsakStatus.STANSET)

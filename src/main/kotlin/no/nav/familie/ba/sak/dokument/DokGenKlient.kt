@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.toDokGenTemplate
+import no.nav.familie.ba.sak.behandling.domene.BrevType
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
@@ -36,9 +35,9 @@ class DokGenKlient(
 
     private fun mapTilBrevfelter(behandling: Behandling,
                                  ansvarligSaksbehandler: String): String = when (behandling.resultat) {
-        BehandlingResultat.INNVILGET -> mapTilInnvilgetBrevFelter(behandling, ansvarligSaksbehandler)
-        BehandlingResultat.AVSLÅTT -> mapTilAvslagBrevFelter(behandling)
-        BehandlingResultat.OPPHØRT -> mapTilOpphørtBrevFelter(behandling)
+        BrevType.INNVILGET -> mapTilInnvilgetBrevFelter(behandling, ansvarligSaksbehandler)
+        BrevType.AVSLÅTT -> mapTilAvslagBrevFelter(behandling)
+        BrevType.OPPHØRT -> mapTilOpphørtBrevFelter(behandling)
         else -> error("Invalid/unsupported vedtak.resultat")
     }
 

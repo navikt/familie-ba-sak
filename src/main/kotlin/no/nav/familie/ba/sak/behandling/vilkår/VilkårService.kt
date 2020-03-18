@@ -43,7 +43,7 @@ class VilkårService(
                                                      vilkårType = Vilkår.valueOf(child.identifikator)))
             }
         }
-        val samletVilkårResultat = SamletVilkårResultat(samletVilkårResultat = resultatForSak, behandlingId = behandlingId)
+        val samletVilkårResultat = SamletVilkårResultat(periodeResultat = resultatForSak, behandlingId = behandlingId)
         resultatForSak.map { it.samletVilkårResultat = samletVilkårResultat }
         lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat)
         return samletVilkårResultat
@@ -68,7 +68,7 @@ class VilkårService(
                 throw IllegalStateException("Vilkårene for ${person.type} er ${vilkårForPerson.map { v -> v.vilkårType }}, men vi forventer $vilkårForPart")
             }
         }
-        val samletVilkårResultat = SamletVilkårResultat(samletVilkårResultat = listeAvVilkårResultat, behandlingId = behandlingId)
+        val samletVilkårResultat = SamletVilkårResultat(periodeResultat = listeAvVilkårResultat, behandlingId = behandlingId)
         listeAvVilkårResultat.map { it.samletVilkårResultat = samletVilkårResultat }
         lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat)
         return samletVilkårResultat

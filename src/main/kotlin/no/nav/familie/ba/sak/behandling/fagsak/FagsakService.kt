@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.domene.BrevType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -24,6 +26,7 @@ class FagsakService(
         private val personRepository: PersonRepository,
         private val samletVilkårResultatRepository: SamletVilkårResultatRepository,
         private val behandlingRepository: BehandlingRepository,
+        private val behandlingResultatRepository: BehandlingResultatRepository,
         private val vedtakRepository: VedtakRepository,
         private val integrasjonClient: IntegrasjonClient) {
 
@@ -60,6 +63,8 @@ class FagsakService(
             val personopplysningGrunnlag = it.id.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
                                            ?: return Ressurs.failure("Fant ikke personopplysningsgrunnlag på behandling")
 
+            val brevType = behandlingResultatRepository.findByBehandlingAndAktiv(it.id)?.brev ?: BrevType.IKKE_VURDERT //TODO: Tilpass restbehandling
+
             val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
                 val personBeregning = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
                 vedtak.toRestVedtak(personBeregning)
@@ -78,7 +83,7 @@ class FagsakService(
                     opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori,
-                    resultat = it.resultat,
+                    resultat = brevType,
                     begrunnelse = it.begrunnelse
             )
         }
