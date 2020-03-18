@@ -13,7 +13,7 @@ fun initSteg(behandlingType: BehandlingType?): StegType {
     return if (behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
         StegType.REGISTRERE_PERSONGRUNNLAG
     } else {
-        StegType.REGISTRERE_SØKNAD
+        StegType.REGISTRERE_PERSONGRUNNLAG
     }
 }
 
@@ -60,7 +60,7 @@ enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, 
                 else -> error("Ikke godkjent steg for behandlingstype")
             }
             else -> when (this) {
-                REGISTRERE_SØKNAD -> VILKÅRSVURDERING
+                REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK

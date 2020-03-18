@@ -8,7 +8,7 @@ class BehandlingStegTest {
     @Test
     fun `Tester rekkefølgen på steg`() {
         val riktigRekkefølge = listOf(
-                StegType.REGISTRERE_SØKNAD,
+                StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.GODKJENNE_VEDTAK,
