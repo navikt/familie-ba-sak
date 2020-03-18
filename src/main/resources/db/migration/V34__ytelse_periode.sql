@@ -6,9 +6,9 @@ create table YTELSE_PERIODE
     stonad_fom              TIMESTAMP(3)                                            not null,
     stonad_tom              TIMESTAMP(3)                                            not null,
     type                   VARCHAR(50),
-    opprettet_av            VARCHAR(20)  default 'VL'                               not null,
+    opprettet_av            VARCHAR(512)  default 'VL'                               not null,
     opprettet_tid           TIMESTAMP(3) default localtimestamp                     not null,
-    endret_av               VARCHAR(20),
+    endret_av               VARCHAR(512),
     endret_tid              TIMESTAMP(3),
     versjon                 bigint       default 0                                  not null
 );
