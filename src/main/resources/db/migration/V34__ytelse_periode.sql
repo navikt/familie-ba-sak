@@ -5,7 +5,7 @@ create table YTELSE_PERIODE
     belop                   numeric,
     stonad_fom              TIMESTAMP(3)                                            not null,
     stonad_tom              TIMESTAMP(3)                                            not null,
-    type                   VARCHAR(50),
+    type                    VARCHAR(50),
     opprettet_av            VARCHAR(512)  default 'VL'                               not null,
     opprettet_tid           TIMESTAMP(3) default localtimestamp                     not null,
     endret_av               VARCHAR(512),
