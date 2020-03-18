@@ -204,10 +204,6 @@ class BehandlingIntegrationTest {
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                        søkerFnr,
-                        listOf(barn1Fnr,
-                               barn2Fnr)),
                 ansvarligSaksbehandler = "saksbehandler1")
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)

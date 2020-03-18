@@ -69,9 +69,6 @@ class FerdigstillBehandlingTest {
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                        fnr,
-                        listOf(fnrBarn)),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 

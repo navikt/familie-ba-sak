@@ -98,9 +98,6 @@ class DokumentServiceTest(
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
-                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                        fnr,
-                        listOf(barnFnr)),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 

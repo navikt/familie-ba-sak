@@ -85,7 +85,6 @@ class ØkonomiIntegrasjonTest {
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(fnr, listOf(barnFnr)),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
