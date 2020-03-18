@@ -132,15 +132,15 @@ class StegService(
             val behandlerRolle =
                     SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minBy { it.nivå })
 
-            LOG.info("${SikkerhetContext.hentSaksbehandler()} håndterer ${behandling.steg} på behandling ${behandling.id}")
+            LOG.info("${SikkerhetContext.hentSaksbehandler()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
-                error("${SikkerhetContext.hentSaksbehandler()} kan ikke utføre steg '${behandling.steg}")
+                error("${SikkerhetContext.hentSaksbehandler()} kan ikke utføre steg '${behandlingSteg.stegType()}")
             }
 
             val behandlingEtterSteg = uførendeSteg()
-            LOG.info("${SikkerhetContext.hentSaksbehandler()} har håndtert ${behandling.steg} på behandling ${behandling.id}")
+            LOG.info("${SikkerhetContext.hentSaksbehandler()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
 
-            stegSuksessMetrics[behandling.steg]?.increment()
+            stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
             val nesteSteg = behandling.steg.hentNesteSteg(behandlingType = behandling.type)
             behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id,
@@ -152,9 +152,9 @@ class StegService(
 
             return behandlingEtterSteg
         } catch (exception: Exception) {
-            stegFeiletMetrics[behandling.steg]?.increment()
-            LOG.error("Håndtering av stegtype '${behandling.steg}' feilet på behandling ${behandling.id}.")
-            secureLogger.info("Håndtering av stegtype '${behandling.steg}' feilet.",
+            stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
+            LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
+            secureLogger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.",
                               exception)
             error(exception.message!!)
         }
