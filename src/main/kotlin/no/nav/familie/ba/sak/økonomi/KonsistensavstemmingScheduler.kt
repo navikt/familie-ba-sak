@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.økonomi
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.FagsakStatus
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -12,14 +15,20 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Component
-class KonsistensavstemmingScheduler(val batchService: BatchService, val taskRepository: TaskRepository) {
+class KonsistensavstemmingScheduler(val batchService: BatchService,
+                                    val behandlingService: BehandlingService,
+                                    val fagsakService: FagsakService,
+                                    val taskRepository: TaskRepository) {
 
     @Scheduled(cron = "0 0 8 * * *")
     fun utførKonsistensavstemming() {
         val dagensDato = LocalDate.now()
         val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dagensDato) ?: return
 
-        // TODO: Oppdater gjeldende behandling her
+        fagsakService.hentLøpendeFagsaker().forEach {
+            val gjeldendeBehandling = behandlingService.oppdaterGjeldendeBehandlingForNesteUtbetaling(it.id, dagensDato)
+            if (gjeldendeBehandling == null) fagsakService.oppdaterStatus(it, FagsakStatus.STANSET)
+        }
 
         LOG.info("Kjører konsistensavstemming for $dagensDato")
 
