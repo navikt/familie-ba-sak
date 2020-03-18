@@ -57,7 +57,7 @@ class VilkårVurderingTest {
     }
 
     @Test
-    fun `Hent relevante vilkår for saktype`() { //Banal test, legg til saktyper
+    fun`Hent relevante vilkår for saktype`() { //Banal test, legg til saktyper
         val relevanteVilkårSaktypeFinnes = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERFOR)
         val relevanteVilkårSaktypeFinnesIkke = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERIKKEFOR)
         val vilkårForSaktypeFinnes = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,

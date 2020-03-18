@@ -35,10 +35,8 @@ class Vilkårsvurdering(
         } else {
             vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, vilkårsvurdertBehandling.id)
         }
-
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(vilkårsvurdertBehandling,
                                                                  personopplysningGrunnlag,
-                                                                 data.samletVilkårResultat,
                                                                  ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandler())
 
         return vilkårsvurdertBehandling
