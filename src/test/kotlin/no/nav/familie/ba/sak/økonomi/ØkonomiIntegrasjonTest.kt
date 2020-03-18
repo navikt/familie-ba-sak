@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.common.lagBehandling
