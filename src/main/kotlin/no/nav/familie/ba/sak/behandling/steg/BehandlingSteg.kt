@@ -13,7 +13,7 @@ fun initSteg(behandlingType: BehandlingType?): StegType {
     return if (behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
         StegType.REGISTRERE_PERSONGRUNNLAG
     } else {
-        StegType.REGISTRERE_SØKNAD
+        StegType.REGISTRERE_PERSONGRUNNLAG
     }
 }
 

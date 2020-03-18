@@ -84,7 +84,6 @@ class VedtakService(private val behandlingService: BehandlingService,
     @Transactional
     fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                                   restSamletVilkårResultat: List<RestVilkårResultat>,
                                                    ansvarligSaksbehandler: String): Vedtak {
         val forrigeVedtak = hentForrigeVedtak(behandling = behandling)
         val vedtak = Vedtak(

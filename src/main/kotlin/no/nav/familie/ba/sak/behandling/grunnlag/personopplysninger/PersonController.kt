@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.RessursResponse.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -23,7 +22,7 @@ class PersonController(private val integrasjonOnBehalfClient: IntegrasjonOnBehal
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @GetMapping
-    fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<Personinfo>> {
+    fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         return Result.runCatching {
                     integrasjonOnBehalfClient.hentPersoninfo(personIdent)
                 }
@@ -31,7 +30,7 @@ class PersonController(private val integrasjonOnBehalfClient: IntegrasjonOnBehal
                         onFailure = {
                             illegalState("Hent person feilet: ${it.message}", it)
                         },
-                        onSuccess = { ResponseEntity.ok(Ressurs.success(it)) }
+                        onSuccess = { ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent))) }
                 )
     }
 }
