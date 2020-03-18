@@ -65,7 +65,7 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
               opphørsdato: LocalDate? = null) =
         Vedtak(id = nesteVedtakId(),
                behandling = behandling.copy(
-                       resultat = resultat
+                       brev = resultat
                ),
                ansvarligSaksbehandler = "ansvarligSaksbehandler",
                vedtaksdato = LocalDate.now(),

@@ -87,7 +87,7 @@ class VedtakServiceTest {
         behandling = behandlingService.settVilkårsvurdering(behandling, BrevType.INNVILGET, "")
 
         Assertions.assertNotNull(behandling.fagsak.id)
-        Assertions.assertEquals(BrevType.INNVILGET, behandling.resultat)
+        Assertions.assertEquals(BrevType.INNVILGET, behandling.brev)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
@@ -156,7 +156,7 @@ class VedtakServiceTest {
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
                                                                                 journalpostID = null,
                                                                                 type = BehandlingType.REVURDERING,
-                                                                                resultat = BrevType.INNVILGET,
+                                                                                brev = BrevType.INNVILGET,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR))
 
@@ -172,7 +172,7 @@ class VedtakServiceTest {
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
                                                                                 journalpostID = null,
                                                                                 type = BehandlingType.REVURDERING,
-                                                                                resultat = BrevType.OPPHØRT,
+                                                                                brev = BrevType.OPPHØRT,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR))
 

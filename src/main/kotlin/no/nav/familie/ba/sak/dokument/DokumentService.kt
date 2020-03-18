@@ -17,7 +17,7 @@ class DokumentService(
 
         val html = Result.runCatching {
             val vedtak = vedtakService.hent(vedtakId)
-            dokGenKlient.lagHtmlFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(),
+            dokGenKlient.lagHtmlFraMarkdown(vedtak.behandling.brev.toDokGenTemplate(),
                                             vedtak.stønadBrevMarkdown)
         }
                 .fold(
@@ -35,7 +35,7 @@ class DokumentService(
             BehandlingService.LOG.debug("henter stønadsbrevMarkdown fra behandlingsVedtak")
             val markdown = vedtak.stønadBrevMarkdown
             BehandlingService.LOG.debug("kaller lagPdfFraMarkdown med stønadsbrevMarkdown")
-            dokGenKlient.lagPdfFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(), markdown)
+            dokGenKlient.lagPdfFraMarkdown(vedtak.behandling.brev.toDokGenTemplate(), markdown)
         }
                 .fold(
                         onSuccess = { it },

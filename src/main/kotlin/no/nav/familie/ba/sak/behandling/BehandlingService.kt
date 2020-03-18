@@ -47,7 +47,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun settVilkårsvurdering(behandling: Behandling, resultat: BrevType, begrunnelse: String): Behandling {
         behandling.begrunnelse = begrunnelse
-        behandling.resultat = resultat
+        behandling.brev = resultat
         return lagre(behandling)
     }
 

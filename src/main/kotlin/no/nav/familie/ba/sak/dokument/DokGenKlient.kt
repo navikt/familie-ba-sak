@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BrevType
+import no.nav.familie.ba.sak.behandling.domene.toDokGenTemplate
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
@@ -30,11 +31,11 @@ class DokGenKlient(
     fun hentStønadBrevMarkdown(behandling: Behandling,
                                ansvarligSaksbehandler: String): String {
         val fletteFelter = mapTilBrevfelter(behandling, ansvarligSaksbehandler)
-        return hentMarkdownForMal(behandling.resultat.toDokGenTemplate(), fletteFelter)
+        return hentMarkdownForMal(behandling.brev.toDokGenTemplate(), fletteFelter)
     }
 
     private fun mapTilBrevfelter(behandling: Behandling,
-                                 ansvarligSaksbehandler: String): String = when (behandling.resultat) {
+                                 ansvarligSaksbehandler: String): String = when (behandling.brev) {
         BrevType.INNVILGET -> mapTilInnvilgetBrevFelter(behandling, ansvarligSaksbehandler)
         BrevType.AVSLÅTT -> mapTilAvslagBrevFelter(behandling)
         BrevType.OPPHØRT -> mapTilOpphørtBrevFelter(behandling)

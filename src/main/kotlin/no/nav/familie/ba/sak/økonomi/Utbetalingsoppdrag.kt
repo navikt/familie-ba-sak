@@ -22,7 +22,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                           vedtak: Vedtak,
                           personberegninger: List<VedtakPerson>): Utbetalingsoppdrag {
 
-    val erOpphør = vedtak.behandling.resultat == OPPHØRT
+    val erOpphør = vedtak.behandling.brev == OPPHØRT
 
     val utbetalingsperiodeMal =
             if (erOpphør)

@@ -28,7 +28,7 @@ class DokGenKlientTest(@Autowired
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    resultat = BrevType.INNVILGET),
+                                    brev = BrevType.INNVILGET),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )
@@ -40,7 +40,7 @@ class DokGenKlientTest(@Autowired
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    resultat = BrevType.AVSLÅTT),
+                                    brev = BrevType.AVSLÅTT),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )
@@ -52,7 +52,7 @@ class DokGenKlientTest(@Autowired
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    resultat = BrevType.OPPHØRT),
+                                    brev = BrevType.OPPHØRT),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )
@@ -61,7 +61,7 @@ class DokGenKlientTest(@Autowired
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
         val markdown = dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
                                                            ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
-        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(), markdown)
+        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(vedtak.behandling.brev.toDokGenTemplate(), markdown)
         assert(htmlResponse.startsWith("<html>"))
     }
 
