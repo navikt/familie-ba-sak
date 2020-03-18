@@ -40,5 +40,4 @@ class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
             else -> Kjønn.valueOf(kjønn)
         }
     }
-
 }
