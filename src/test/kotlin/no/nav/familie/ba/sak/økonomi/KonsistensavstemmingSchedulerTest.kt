@@ -4,6 +4,8 @@ import io.mockk.MockKAnnotations
 import io.mockk.called
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -35,12 +37,18 @@ class KonsistensavstemmingSchedulerTest {
     lateinit var batchService: BatchService
 
     @Autowired
+    lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    lateinit var fagsakService: FagsakService
+
+    @Autowired
     lateinit var konsistensavstemmingScheduler: KonsistensavstemmingScheduler
 
     @BeforeEach
     fun setUp() {
         MockKAnnotations.init(this)
-        konsistensavstemmingScheduler = KonsistensavstemmingScheduler(batchService, taskRepository)
+        konsistensavstemmingScheduler = KonsistensavstemmingScheduler(batchService, behandlingService, fagsakService, taskRepository)
         taskRepository = spyk(taskRepository)
     }
 

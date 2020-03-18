@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -45,6 +46,9 @@ class VedtakServiceTest {
     lateinit var persongrunnlagService: PersongrunnlagService
 
     @Autowired
+    lateinit var beregningService: BeregningService
+
+    @Autowired
     lateinit var fagsakService: FagsakService
 
     lateinit var behandlingService: BehandlingService
@@ -55,6 +59,7 @@ class VedtakServiceTest {
         behandlingService = BehandlingService(
                 behandlingRepository,
                 persongrunnlagService,
+                beregningService,
                 fagsakService)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))

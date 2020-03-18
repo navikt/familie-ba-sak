@@ -38,7 +38,7 @@ data class Behandling(
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
-        @Column(name = "gjeldendeForNesteUtbetaling", nullable = false)
+        @Column(name = "gjeldende_for_neste_utbetaling", nullable = false)
         var gjeldendeForNesteUtbetaling: Boolean = false,
 
         @Enumerated(EnumType.STRING)

@@ -5,5 +5,5 @@ CREATE TABLE BEREGNINGRESULTAT (
     STONAD_TOM timestamp not null,
     OPPRETTET_DATO timestamp not null,
     ER_OPPHOER boolean not null default false,
-    UTBETALINGSOPPDRAG json not null
+    UTBETALINGSOPPDRAG text not null
 );

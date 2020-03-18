@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.beregning.domene.BeregningResultat
 import no.nav.familie.ba.sak.beregning.domene.BeregningResultatRepository
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -34,7 +35,7 @@ class BeregningService(
 
         val nyttBeregningsResultat = BeregningResultat(
                 behandling = behandling,
-                utbetalingsoppdrag = utbetalingsoppdrag,
+                utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag),
                 opprettetDato = LocalDate.now(),
                 stønadFom = if (erOpphør) opphørsdato else utbetalingsoppdrag.utbetalingsperiode
                         .filter { !it.erEndringPåEksisterendePeriode }

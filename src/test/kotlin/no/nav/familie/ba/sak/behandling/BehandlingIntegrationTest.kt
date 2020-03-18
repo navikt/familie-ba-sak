@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.common.*
@@ -57,6 +58,9 @@ class BehandlingIntegrationTest {
     lateinit var persongrunnlagService: PersongrunnlagService
 
     @Autowired
+    lateinit var beregningService: BeregningService
+
+    @Autowired
     lateinit var fagsakService: FagsakService
 
     lateinit var behandlingService: BehandlingService
@@ -67,6 +71,7 @@ class BehandlingIntegrationTest {
         behandlingService = BehandlingService(
                 behandlingRepository,
                 persongrunnlagService,
+                beregningService,
                 fagsakService)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))

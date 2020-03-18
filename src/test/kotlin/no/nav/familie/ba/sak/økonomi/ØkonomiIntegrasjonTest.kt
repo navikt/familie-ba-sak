@@ -120,6 +120,12 @@ class ØkonomiIntegrasjonTest {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
+        stubFor(post(anyUrl())
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success("ok")))))
+
         //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -127,12 +133,29 @@ class ØkonomiIntegrasjonTest {
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.of(2020, 1, 1))
-        vedtakService.lagreOgDeaktiverGammel(vedtak)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        vedtakService.lagreOgDeaktiverGammel(vedtak)
+        vedtakService.oppdaterAktivVedtakMedBeregning(
+                vedtak = vedtak!!,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                nyBeregning = NyBeregning(
+                        listOf(PersonBeregning(ident = barnFnr,
+                                beløp = 1054,
+                                stønadFom = LocalDate.of(
+                                        2020,
+                                        1,
+                                        1),
+                                ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
+                )
+        )
+
+
+        økonomiService.lagreBeregningsresultatOgIverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
+        behandlingService.oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsak.id, LocalDate.now())
 
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)

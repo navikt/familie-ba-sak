@@ -1,2 +1,2 @@
 ALTER TABLE behandling
-    ADD COLUMN gjeldendeForNesteUtbetaling boolean default false not null;
+    ADD COLUMN gjeldende_for_neste_utbetaling boolean default false not null;
