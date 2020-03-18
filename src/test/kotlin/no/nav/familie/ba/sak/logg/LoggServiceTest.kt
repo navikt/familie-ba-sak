@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
@@ -110,8 +110,8 @@ class LoggServiceTest(
 
         val behandling = lagBehandling()
         val vilkårsvurdering =
-                SamletVilkårResultat(behandlingId = behandling.id,
-                                     periodeResultat = mutableSetOf(VilkårResultat(person = søker,
+                PeriodeResultat(behandlingId = behandling.id,
+                                periodeResultat = mutableSetOf(VilkårResultat(person = søker,
                                                                                    vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                    resultat = Resultat.NEI),
                                                                     VilkårResultat(person = søker,
@@ -130,8 +130,8 @@ class LoggServiceTest(
 
 
         val nyVilkårsvurdering =
-                SamletVilkårResultat(behandlingId = behandling.id,
-                                     periodeResultat = mutableSetOf(VilkårResultat(person = søker,
+                PeriodeResultat(behandlingId = behandling.id,
+                                periodeResultat = mutableSetOf(VilkårResultat(person = søker,
                                                                                    vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                    resultat = Resultat.JA),
                                                                     VilkårResultat(person = søker,

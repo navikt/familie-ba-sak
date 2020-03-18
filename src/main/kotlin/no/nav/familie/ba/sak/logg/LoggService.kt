@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.logg
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -24,15 +24,15 @@ class LoggService(
     }.toMap()
 
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
-                                    aktivSamletVilkårResultat: SamletVilkårResultat?,
-                                    samletVilkårResultat: SamletVilkårResultat): Logg {
-        return if (aktivSamletVilkårResultat != null) {
+                                    aktivPeriodeResultat: PeriodeResultat?,
+                                    periodeResultat: PeriodeResultat): Logg {
+        return if (aktivPeriodeResultat != null) {
             lagre(Logg(
                     behandlingId = behandling.id,
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Endring på vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat gikk fra ${aktivSamletVilkårResultat.hentSamletResultat()} til ${samletVilkårResultat.hentSamletResultat()}"
+                    tekst = "Resultat gikk fra ${aktivPeriodeResultat.hentSamletResultat()} til ${periodeResultat.hentSamletResultat()}"
             ))
         } else {
             lagre(Logg(
@@ -40,7 +40,7 @@ class LoggService(
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Opprettet vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat ble ${samletVilkårResultat.hentSamletResultat()}"
+                    tekst = "Resultat ble ${periodeResultat.hentSamletResultat()}"
             ))
         }
     }

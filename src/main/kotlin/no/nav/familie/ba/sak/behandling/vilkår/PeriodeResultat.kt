@@ -8,7 +8,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "samlet_vilkar_resultat")
-class SamletVilkårResultat(//TODO: Bør samletvilkårresultat renames til PeriodeResultat? Så er det samlede samlingen av periodene
+class PeriodeResultat(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "samlet_vilkar_resultat_seq_generator")
         @SequenceGenerator(name = "samlet_vilkar_resultat_seq_generator",
@@ -23,13 +23,7 @@ class SamletVilkårResultat(//TODO: Bør samletvilkårresultat renames til Perio
         var aktiv: Boolean = true,
 
         @OneToMany(mappedBy = "samletVilkårResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
-        var periodeResultat: MutableSet<VilkårResultat>,
-
-        @Column(name = "aktørId", nullable = false)
-        val aktørId: AktørId,
-
-        @Column(name = "personIdent", nullable = false)
-        val personIdent: PersonIdent
+        var periodeResultat: MutableSet<VilkårResultat>
 
 ) : BaseEntitet() {
 

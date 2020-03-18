@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.nare.core.evaluations.Resultat
@@ -21,7 +21,7 @@ data class RestBehandling(val aktiv: Boolean,
                           val resultat: BrevType,
                           val begrunnelse: String)
 
-fun SamletVilkårResultat.toRestSamletVilkårResultat() = this.periodeResultat.map {
+fun PeriodeResultat.toRestSamletVilkårResultat() = this.periodeResultat.map {
     RestVilkårResultat(vilkårType = it.vilkårType, resultat = it.resultat, personIdent = it.person.personIdent.ident)
 }
 

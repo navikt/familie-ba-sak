@@ -14,7 +14,7 @@ class VilkårResultat(
         val id: Long = 0,
 
         @ManyToOne @JoinColumn(name = "samlet_vilkar_resultat_id")
-        var samletVilkårResultat: SamletVilkårResultat? = null,
+        var periodeResultat: PeriodeResultat? = null,
 
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)

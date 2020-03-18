@@ -62,9 +62,6 @@ class FagsakService(
         val restBehandlinger: List<RestBehandling> = behandlinger.map { it ->
             val personopplysningGrunnlag = it.id.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
                                            ?: return Ressurs.failure("Fant ikke personopplysningsgrunnlag på behandling")
-
-            val brevType = behandlingResultatRepository.findByBehandlingAndAktiv(it.id)?.brev ?: BrevType.IKKE_VURDERT //TODO: Tilpass restbehandling
-
             val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
                 val personBeregning = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
                 vedtak.toRestVedtak(personBeregning)
@@ -83,7 +80,7 @@ class FagsakService(
                     opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori,
-                    resultat = brevType,
+                    resultat = it.brev,
                     begrunnelse = it.begrunnelse
             )
         }

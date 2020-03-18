@@ -15,23 +15,23 @@ class VilkårService(
         private val loggService: LoggService
 ) {
 
-    fun lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat: SamletVilkårResultat) {
+    fun lagreNyOgDeaktiverGammelSamletVilkårResultat(periodeResultat: PeriodeResultat) {
         val aktivSamletVilkårResultat =
-                samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(samletVilkårResultat.behandlingId)
+                samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(periodeResultat.behandlingId)
 
         if (aktivSamletVilkårResultat != null) {
             aktivSamletVilkårResultat.aktiv = false
             samletVilkårResultatRepository.save(aktivSamletVilkårResultat)
         }
 
-        val behandling = behandlingService.hent(samletVilkårResultat.behandlingId)
-        loggService.opprettVilkårsvurderingLogg(behandling, aktivSamletVilkårResultat, samletVilkårResultat)
+        val behandling = behandlingService.hent(periodeResultat.behandlingId)
+        loggService.opprettVilkårsvurderingLogg(behandling, aktivSamletVilkårResultat, periodeResultat)
 
-        samletVilkårResultatRepository.save(samletVilkårResultat)
+        samletVilkårResultatRepository.save(periodeResultat)
     }
 
     fun vurderVilkårOgLagResultat(personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                  behandlingId: Long): SamletVilkårResultat {
+                                  behandlingId: Long): PeriodeResultat {
         val resultatForSak = mutableSetOf<VilkårResultat>()
         personopplysningGrunnlag.personer.map { person ->
             val tmpFakta = Fakta(personForVurdering = person)
@@ -43,15 +43,15 @@ class VilkårService(
                                                      vilkårType = Vilkår.valueOf(child.identifikator)))
             }
         }
-        val samletVilkårResultat = SamletVilkårResultat(periodeResultat = resultatForSak, behandlingId = behandlingId)
-        resultatForSak.map { it.samletVilkårResultat = samletVilkårResultat }
+        val samletVilkårResultat = PeriodeResultat(periodeResultat = resultatForSak, behandlingId = behandlingId)
+        resultatForSak.map { it.periodeResultat = samletVilkårResultat }
         lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat)
         return samletVilkårResultat
     }
 
     fun kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag: PersonopplysningGrunnlag,
                                   restSamletVilkårResultat: List<RestVilkårResultat>,
-                                  behandlingId: Long): SamletVilkårResultat {
+                                  behandlingId: Long): PeriodeResultat {
         val listeAvVilkårResultat = mutableSetOf<VilkårResultat>()
         personopplysningGrunnlag.personer.map { person ->
             val vilkårForPerson = restSamletVilkårResultat.filter { vilkår -> vilkår.personIdent == person.personIdent.ident }
@@ -68,8 +68,8 @@ class VilkårService(
                 throw IllegalStateException("Vilkårene for ${person.type} er ${vilkårForPerson.map { v -> v.vilkårType }}, men vi forventer $vilkårForPart")
             }
         }
-        val samletVilkårResultat = SamletVilkårResultat(periodeResultat = listeAvVilkårResultat, behandlingId = behandlingId)
-        listeAvVilkårResultat.map { it.samletVilkårResultat = samletVilkårResultat }
+        val samletVilkårResultat = PeriodeResultat(periodeResultat = listeAvVilkårResultat, behandlingId = behandlingId)
+        listeAvVilkårResultat.map { it.periodeResultat = samletVilkårResultat }
         lagreNyOgDeaktiverGammelSamletVilkårResultat(samletVilkårResultat)
         return samletVilkårResultat
 
