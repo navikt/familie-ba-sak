@@ -23,6 +23,16 @@ class LoggService(
                               it.visningsnavn)
     }.toMap()
 
+    fun opprettRegistrertSøknadLogg(behandling: Behandling) {
+        lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.FØDSELSHENDELSE,
+                tittel = "Søknaden ble registrert",
+                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = ""
+        ))
+    }
+
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
                                     aktivSamletVilkårResultat: SamletVilkårResultat?,
                                     samletVilkårResultat: SamletVilkårResultat): Logg {

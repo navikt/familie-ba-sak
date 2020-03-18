@@ -5,16 +5,20 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.writeValueAsString
+import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
 
 @Service
 class RegistrereSøknad(
-        private val søknadGrunnlagService: SøknadGrunnlagService
+        private val søknadGrunnlagService: SøknadGrunnlagService,
+        private val loggService: LoggService
 ) : BehandlingSteg<SøknadDTO> {
 
     override fun utførSteg(behandling: Behandling, data: SøknadDTO): Behandling {
         søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
                                                                                      søknad = data.writeValueAsString()))
+
+        loggService.opprettRegistrertSøknadLogg(behandling)
         return behandling
     }
 
