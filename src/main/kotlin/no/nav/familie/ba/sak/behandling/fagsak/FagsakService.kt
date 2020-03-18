@@ -40,8 +40,9 @@ class FagsakService(
 
                 hentRestFagsak(fagsakId = fagsak.id)
             }
-            else -> Ressurs.failure(
+            else -> Ressurs.failure<RestFagsak>(
                     "Kan ikke opprette fagsak på person som allerede finnes. Gå til fagsak ${hentetFagsak.id} for å se på saken")
+                           .copy(data = hentRestFagsak(hentetFagsak.id).data)
         }
     }
 
