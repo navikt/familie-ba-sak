@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.common.*
@@ -204,10 +203,6 @@ class BehandlingIntegrationTest {
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                        søkerFnr,
-                        listOf(barn1Fnr,
-                               barn2Fnr)),
                 ansvarligSaksbehandler = "saksbehandler1")
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
