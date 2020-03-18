@@ -118,9 +118,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
 fun dato(s: String) = LocalDate.parse(s)
 fun årMnd(s: String) = YearMonth.parse(s)
 
-fun nyOrdinærBehandling(søkersIdent: String, barnasIdenter: List<String>): NyBehandling = NyBehandling(
+fun nyOrdinærBehandling(søkersIdent: String): NyBehandling = NyBehandling(
         søkersIdent = søkersIdent,
-        barnasIdenter = barnasIdenter,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR

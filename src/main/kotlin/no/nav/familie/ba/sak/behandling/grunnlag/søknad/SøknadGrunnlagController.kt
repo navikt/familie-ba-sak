@@ -29,10 +29,7 @@ class SøknadGrunnlagController(
 
         return Result.runCatching {
                     stegService.håndterSøknad(behandling, søknadDTO)
-                    stegService.håndterPersongrunnlag(
-                            behandling,
-                            RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
-                                                       barnasIdenter = søknadDTO.barnaMedOpplysninger.map { it.ident }))
+
                 }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },

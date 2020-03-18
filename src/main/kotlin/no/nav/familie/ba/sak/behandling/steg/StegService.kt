@@ -46,7 +46,6 @@ class StegService(
 
         val behandling = behandlingService.opprettBehandling(NyBehandling(
                 søkersIdent = nyBehandling.søkersIdent,
-                barnasIdenter = nyBehandling.barnasIdenter,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR
@@ -60,12 +59,18 @@ class StegService(
                                                                 barnasIdenter = nyBehandling.barnasIdenter))
     }
 
+    @Transactional
     fun håndterSøknad(behandling: Behandling, søknadDTO: SøknadDTO): Behandling {
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
 
-        return håndterSteg(behandling, behandlingSteg) {
+        val behandlingEtterSøknadshåndtering = håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførSteg(behandling, søknadDTO)
         }
+
+        return håndterPersongrunnlag(
+                behandlingEtterSøknadshåndtering,
+                RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
+                                           barnasIdenter = søknadDTO.barnaMedOpplysninger.map { it.ident }))
     }
 
     fun håndterPersongrunnlag(behandling: Behandling, registrerPersongrunnlagDTO: RegistrerPersongrunnlagDTO): Behandling {

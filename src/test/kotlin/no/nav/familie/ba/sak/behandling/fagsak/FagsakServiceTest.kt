@@ -74,7 +74,6 @@ class FagsakServiceTest(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
-                listOf(barn1Fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
         stegService.håndterPersongrunnlag(førsteBehandling,
@@ -86,7 +85,6 @@ class FagsakServiceTest(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
-                listOf(barn2Fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
         stegService.håndterPersongrunnlag(andreBehandling,
@@ -98,7 +96,6 @@ class FagsakServiceTest(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker2Fnr,
-                listOf(barn1Fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
         stegService.håndterPersongrunnlag(tredjeBehandling,
