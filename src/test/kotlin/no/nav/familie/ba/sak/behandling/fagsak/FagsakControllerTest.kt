@@ -29,24 +29,22 @@ class FagsakControllerTest(
     fun `Skal opprette fagsak`() {
         val fnr = randomFnr()
 
-        fagsakController.nyFagsak(NyFagsak(personIdent = fnr))
+        fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         Assertions.assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
     }
 
     @Test
     @Tag("integration")
-    fun `Skal kaste feil ved opprettelse av fagsak på person som allerede finnes`() {
+    fun `Skal returnere eksisterende fagsak på person som allerede finnes`() {
         val fnr = randomFnr()
 
-        val restFagsak = fagsakController.nyFagsak(NyFagsak(personIdent = fnr))
-        Assertions.assertEquals(Ressurs.Status.SUKSESS, restFagsak.body?.status)
+        val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+        Assertions.assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
         Assertions.assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
 
-        val feilendeRestFagsak = fagsakController.nyFagsak(NyFagsak(
+        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(
                 personIdent = fnr))
-        Assertions.assertEquals(Ressurs.Status.FEILET, feilendeRestFagsak.body?.status)
-        Assertions.assertEquals(
-                "Kan ikke opprette fagsak på person som allerede finnes. Gå til fagsak ${restFagsak.body?.data?.id} for å se på saken",
-                feilendeRestFagsak.body?.melding)
+        Assertions.assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
+        Assertions.assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
     }
 }
