@@ -23,11 +23,12 @@ class LoggService(
                               it.visningsnavn)
     }.toMap()
 
-    fun opprettRegistrertSøknadLogg(behandling: Behandling) {
+    fun opprettRegistrertSøknadLogg(behandling: Behandling, søknadFinnesFraFør: Boolean) {
+        val tittel = if (!søknadFinnesFraFør) "Søknaden ble registrert" else "Søknaden ble endret"
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.FØDSELSHENDELSE,
-                tittel = "Søknaden ble registrert",
+                tittel = tittel,
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = ""
         ))

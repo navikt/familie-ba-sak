@@ -15,10 +15,12 @@ class RegistrereSøknad(
 ) : BehandlingSteg<SøknadDTO> {
 
     override fun utførSteg(behandling: Behandling, data: SøknadDTO): Behandling {
+        val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
+        loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlag != null)
+
         søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
                                                                                      søknad = data.writeValueAsString()))
 
-        loggService.opprettRegistrertSøknadLogg(behandling)
         return behandling
     }
 
