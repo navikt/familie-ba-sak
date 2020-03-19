@@ -5,7 +5,7 @@ import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.fagsak.NyFagsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -127,7 +127,7 @@ class BehandlingIntegrationTest {
         val morId = randomFnr()
         val barnId = randomFnr()
 
-        fagsakService.nyFagsak(NyFagsak(personIdent = morId))
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
         behandling.steg = StegType.GODKJENNE_VEDTAK
         behandlingRepository.saveAndFlush(behandling)
@@ -173,7 +173,7 @@ class BehandlingIntegrationTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        fagsakService.nyFagsak(NyFagsak(personIdent = søkerFnr))
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
         val personopplysningGrunnlag =

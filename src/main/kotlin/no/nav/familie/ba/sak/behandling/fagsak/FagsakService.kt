@@ -28,21 +28,12 @@ class FagsakService(
         private val integrasjonClient: IntegrasjonClient) {
 
     @Transactional
-    fun nyFagsak(nyFagsak: NyFagsak): Ressurs<RestFagsak> {
-        return when (val hentetFagsak =
-                fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(nyFagsak.personIdent))) {
-            null -> {
-                val fagsak = Fagsak(
-                        aktørId = integrasjonClient.hentAktørId(nyFagsak.personIdent),
-                        personIdent = PersonIdent(nyFagsak.personIdent)
-                )
-                lagre(fagsak)
+    fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(fagsakRequest.personIdent))
+                     ?: Fagsak(aktørId = integrasjonClient.hentAktørId(fagsakRequest.personIdent),
+                               personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
 
-                hentRestFagsak(fagsakId = fagsak.id)
-            }
-            else -> Ressurs.failure(
-                    "Kan ikke opprette fagsak på person som allerede finnes. Gå til fagsak ${hentetFagsak.id} for å se på saken")
-        }
+        return hentRestFagsak(fagsakId = fagsak.id)
     }
 
     @Transactional
