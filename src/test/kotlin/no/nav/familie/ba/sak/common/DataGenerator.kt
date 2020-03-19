@@ -116,3 +116,11 @@ fun nyOrdinærBehandling(søkersIdent: String, barnasIdenter: List<String>): NyB
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
+
+fun nyRevurdering(søkersIdent: String, barnasIdenter: List<String>): NyBehandling = NyBehandling(
+        søkersIdent = søkersIdent,
+        barnasIdenter = barnasIdenter,
+        behandlingType = BehandlingType.REVURDERING,
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.ORDINÆR
+)

@@ -11,9 +11,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
-import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.PersonBeregning
-import no.nav.familie.ba.sak.beregning.NyBeregning
+import no.nav.familie.ba.sak.beregning.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
@@ -175,6 +173,45 @@ class BehandlingIntegrationTest {
 
         val behandlinger = behandlingService.hentBehandlinger(fagsakId = fagsak.id)
         Assertions.assertEquals(1, behandlinger.size)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Sett riktig gjeldende behandling ved revurdering`() {
+        val morId = randomFnr()
+        val barnId = randomFnr()
+        val vedtakDato = LocalDate.now()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
+        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
+                morId,
+                fagsak.id.toString(),
+                behandling.id,
+                vedtakDato.minusMonths(2).withDayOfMonth(1),
+                vedtakDato.plusMonths(11),
+                vedtakDato
+        )
+        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+
+        val revurdering = behandlingService.opprettBehandling(nyRevurdering(morId, listOf(barnId)))
+        val utbetalingsoppdragRevurdering = lagTestUtbetalingsoppdragForRevurdering(
+                morId,
+                fagsak.id.toString(),
+                revurdering.id,
+                vedtakDato,
+                vedtakDato.minusMonths(2).withDayOfMonth(1),
+                vedtakDato.plusMonths(11),
+                vedtakDato.withDayOfMonth(1)
+        )
+        beregningService.lagreBeregningsresultat(revurdering, utbetalingsoppdragRevurdering)
+        behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.IVERKSATT)
+
+        val gjeldendeBehandling = behandlingService.oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsak.id, vedtakDato)
+
+        Assertions.assertNotNull(gjeldendeBehandling)
+        Assertions.assertEquals(revurdering.id, gjeldendeBehandling!!.id)
     }
 
     @Test
