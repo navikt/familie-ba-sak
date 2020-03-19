@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 
 interface BehandlingSteg<T> {
     fun utførSteg(behandling: Behandling, data: T): Behandling
@@ -8,27 +9,65 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 }
 
-val initSteg = StegType.REGISTRERE_PERSONGRUNNLAG
+fun initSteg(behandlingType: BehandlingType?): StegType {
+    return if (behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+        StegType.REGISTRERE_PERSONGRUNNLAG
+    } else {
+        StegType.REGISTRERE_PERSONGRUNNLAG
+    }
+}
+
 val sisteSteg = StegType.BEHANDLING_AVSLUTTET
 
-enum class StegType(val tillattFor: List<BehandlerRolle>, val beskrivelse: String) {
-    REGISTRERE_PERSONGRUNNLAG(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-                              beskrivelse = "Registrere persongrunnlag"),
-    VILKÅRSVURDERING(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER), beskrivelse = "Vilkårsvurdering"),
-    SEND_TIL_BESLUTTER(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-                       beskrivelse = "Send til beslutter"),
-    GODKJENNE_VEDTAK(tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER), beskrivelse = "Godkjenne vedtak"),
-    FERDIGSTILLE_BEHANDLING(tillattFor = listOf(BehandlerRolle.SYSTEM), beskrivelse = "Ferdigstille behandling"),
-    BEHANDLING_AVSLUTTET(tillattFor = emptyList(), beskrivelse = "Behandlingen er avsluttet og kan ikke gjenåpnes");
+enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, val beskrivelse: String) {
+    REGISTRERE_SØKNAD(
+            rekkefølge = 1,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            beskrivelse = "Registrere søknad"),
+    REGISTRERE_PERSONGRUNNLAG(
+            rekkefølge = 1,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            beskrivelse = "Registrere persongrunnlag"),
+    VILKÅRSVURDERING(
+            rekkefølge = 2,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            beskrivelse = "Vilkårsvurdering"),
+    SEND_TIL_BESLUTTER(
+            rekkefølge = 3,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            beskrivelse = "Send til beslutter"),
+    GODKJENNE_VEDTAK(
+            rekkefølge = 4,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
+            beskrivelse = "Godkjenne vedtak"),
+    FERDIGSTILLE_BEHANDLING(
+            rekkefølge = 5,
+            tillattFor = listOf(BehandlerRolle.SYSTEM), beskrivelse = "Ferdigstille behandling"),
+    BEHANDLING_AVSLUTTET(
+            rekkefølge = 6,
+            tillattFor = emptyList(),
+            beskrivelse = "Behandlingen er avsluttet og kan ikke gjenåpnes");
 
-    fun hentNesteSteg(): StegType {
-        return when (this) {
-            REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-            VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-            SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK
-            GODKJENNE_VEDTAK -> FERDIGSTILLE_BEHANDLING
-            FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-            BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+    fun hentNesteSteg(behandlingType: BehandlingType): StegType {
+        return when(behandlingType) {
+            BehandlingType.MIGRERING_FRA_INFOTRYGD -> when (this) {
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK
+                GODKJENNE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                else -> error("Ikke godkjent steg for behandlingstype")
+            }
+            else -> when (this) {
+                REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK
+                GODKJENNE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+            }
         }
     }
 }

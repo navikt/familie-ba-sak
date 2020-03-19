@@ -59,7 +59,7 @@ internal class YtelseKalkulatorControllerTest {
 
         val controller = YtelseKalkulatorController(satsService)
 
-        val ytelseKalkulatorResponse = controller.kalkulerYtelserJson(personligeYtelser).body!!
+        val ytelseKalkulatorResponse = controller.kalkulerYtelserJson(personligeYtelser).body!!.data!!
 
         assertEquals(215, ytelseKalkulatorResponse.perioder.size)
     }

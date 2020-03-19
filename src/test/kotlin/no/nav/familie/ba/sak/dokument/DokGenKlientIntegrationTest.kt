@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Tag
@@ -61,7 +62,8 @@ class DokGenKlientIntegrationTest {
         val dokgen = DokGenTestKlient()
         val markdown = dokgen.hentStønadBrevMarkdown(Behandling(
                 id = 1,
-                fagsak = Fagsak(personIdent = PersonIdent(""), aktørId = AktørId("1")),
+                fagsak = Fagsak(personIdent = PersonIdent(""),
+                                                                                           aktørId = AktørId("1")),
                 journalpostID = "invalid",
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 aktiv = true,
@@ -97,7 +99,8 @@ class DokGenKlientIntegrationTest {
 
         val markdown = dokgen.hentStønadBrevMarkdown(Behandling(
                 id = 1,
-                fagsak = Fagsak(personIdent = PersonIdent(""), aktørId = AktørId("1")),
+                fagsak = Fagsak(personIdent = PersonIdent(""),
+                                                                                           aktørId = AktørId("1")),
                 journalpostID = "invalid",
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 aktiv = true,

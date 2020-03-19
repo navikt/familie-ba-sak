@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import io.mockk.every
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
@@ -55,8 +55,9 @@ class RegistrerPersongrunnlagTest(
         val behandling1 =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         stegService.håndterPersongrunnlag(behandling = behandling1,
-                                          registreringsdata = Registreringsdata(ident = morId,
-                                                                                barnasIdenter = listOf(barn1Id, barn2Id)))
+                                          registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+                                                  ident = morId,
+                                                  barnasIdenter = listOf(barn1Id, barn2Id)))
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
@@ -88,8 +89,8 @@ class RegistrerPersongrunnlagTest(
         val behandling1 =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         stegService.håndterPersongrunnlag(behandling = behandling1,
-                                          registreringsdata = Registreringsdata(ident = morId,
-                                                                                barnasIdenter = listOf(barn1Id)))
+                                          registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(ident = morId,
+                                                                                                  barnasIdenter = listOf(barn1Id)))
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
@@ -98,8 +99,9 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertEquals(2, grunnlag1.personer.size)
 
         stegService.håndterPersongrunnlag(behandling = behandling1,
-                                          registreringsdata = Registreringsdata(ident = morId,
-                                                                                barnasIdenter = listOf(barn1Id, barn2Id)))
+                                          registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(ident = morId,
+                                                                                                  barnasIdenter = listOf(barn1Id,
+                                                                                                                         barn2Id)))
 
         val grunnlag2 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
@@ -110,8 +112,9 @@ class RegistrerPersongrunnlagTest(
 
         // Skal ikke føre til flere personer på persongrunnlaget
         stegService.håndterPersongrunnlag(behandling = behandling1,
-                                          registreringsdata = Registreringsdata(ident = morId,
-                                                                                barnasIdenter = listOf(barn1Id, barn2Id)))
+                                          registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(ident = morId,
+                                                                                                  barnasIdenter = listOf(barn1Id,
+                                                                                                                         barn2Id)))
 
         val grunnlag3 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 

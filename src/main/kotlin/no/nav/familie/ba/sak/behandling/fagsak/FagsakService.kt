@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.Fagsak
-import no.nav.familie.ba.sak.behandling.domene.FagsakRepository
-import no.nav.familie.ba.sak.behandling.domene.FagsakStatus
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.domene.vilkår.SamletVilkårResultatRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultatRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -22,27 +21,19 @@ class FagsakService(
         private val vedtakPersonRepository: VedtakPersonRepository,
         private val fagsakRepository: FagsakRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val personRepository: PersonRepository,
         private val samletVilkårResultatRepository: SamletVilkårResultatRepository,
         private val behandlingRepository: BehandlingRepository,
         private val vedtakRepository: VedtakRepository,
         private val integrasjonClient: IntegrasjonClient) {
 
     @Transactional
-    fun nyFagsak(nyFagsak: NyFagsak): Ressurs<RestFagsak> {
-        return when (val hentetFagsak =
-                fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(nyFagsak.personIdent))) {
-            null -> {
-                val fagsak = Fagsak(
-                        aktørId = integrasjonClient.hentAktørId(nyFagsak.personIdent),
-                        personIdent = PersonIdent(nyFagsak.personIdent)
-                )
-                lagre(fagsak)
+    fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(fagsakRequest.personIdent))
+                     ?: Fagsak(aktørId = integrasjonClient.hentAktørId(fagsakRequest.personIdent),
+                               personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
 
-                hentRestFagsak(fagsakId = fagsak.id)
-            }
-            else -> Ressurs.failure(
-                    "Kan ikke opprette fagsak på person som allerede finnes. Gå til fagsak ${hentetFagsak.id} for å se på saken")
-        }
+        return hentRestFagsak(fagsakId = fagsak.id)
     }
 
     @Transactional
@@ -95,7 +86,8 @@ class FagsakService(
 
     private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
         val aktørId = integrasjonClient.hentAktørId(personIdent.ident)
-        val nyFagsak = Fagsak(aktørId = aktørId, personIdent = personIdent)
+        val nyFagsak =
+                Fagsak(aktørId = aktørId, personIdent = personIdent)
         return lagre(nyFagsak)
     }
 
@@ -111,6 +103,34 @@ class FagsakService(
 
     fun hentLøpendeFagsaker(): List<Fagsak> {
         return fagsakRepository.finnLøpendeFagsaker()
+    }
+
+    fun hentFagsaker(personIdent: String): RestFagsakSøk {
+        val personer = personRepository.findByPersonIdent(PersonIdent(personIdent))
+        val personInfo = runCatching {
+            integrasjonClient.hentPersoninfoFor(personIdent)
+        }.fold(
+                onSuccess = { it },
+                onFailure = {
+                    throw IllegalStateException("Feil ved henting av person fra TPS/PDL", it)
+                }
+
+        )
+
+        val assosierteFagsaker = mutableMapOf<Long, RestFunnetFagsak>()
+
+        personer.map {
+            val behandling = behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId)
+            assosierteFagsaker[behandling.fagsak.id] = RestFunnetFagsak(
+                    behandling.fagsak.id,
+                    it.type
+            )
+        }
+
+        return RestFagsakSøk(personIdent,
+                             personInfo.navn ?: "",
+                             personInfo.kjønn ?: Kjønn.UKJENT,
+                             assosierteFagsaker.values.toList())
     }
 
     companion object {

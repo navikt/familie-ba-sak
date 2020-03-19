@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.domene.vilkår
+package no.nav.familie.ba.sak.behandling.vilkår
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query

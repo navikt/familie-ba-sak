@@ -15,9 +15,9 @@ import org.springframework.retry.annotation.EnableRetry
 
 @SpringBootConfiguration
 @EnableJpaAuditing
-@EnableJpaRepositories(ApplicationConfig.pakkenavn)
-@EntityScan(ApplicationConfig.pakkenavn)
-@ComponentScan(ApplicationConfig.pakkenavn)
+@EnableJpaRepositories("no.nav.familie.prosessering", ApplicationConfig.pakkenavn)
+@EntityScan("no.nav.familie.prosessering", ApplicationConfig.pakkenavn)
+@ComponentScan("no.nav.familie.prosessering", ApplicationConfig.pakkenavn)
 @EnableRetry
 @EnableJwtTokenValidation
 @EnableOAuth2Client(cacheEnabled = true)
@@ -34,6 +34,6 @@ class ApplicationConfig {
 
     companion object {
         private val log = LoggerFactory.getLogger(ApplicationConfig::class.java)
-        const val pakkenavn = "no.nav.familie"
+        const val pakkenavn = "no.nav.familie.ba.sak"
     }
 }

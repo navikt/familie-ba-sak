@@ -3,14 +3,13 @@ package no.nav.familie.ba.sak.behandling
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.fagsak.NyFagsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.beregning.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -135,7 +134,7 @@ class BehandlingIntegrationTest {
         val morId = randomFnr()
         val barnId = randomFnr()
 
-        fagsakService.nyFagsak(NyFagsak(personIdent = morId))
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
         behandling.steg = StegType.GODKJENNE_VEDTAK
         behandlingRepository.saveAndFlush(behandling)
@@ -222,7 +221,7 @@ class BehandlingIntegrationTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        fagsakService.nyFagsak(NyFagsak(personIdent = søkerFnr))
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr, listOf(barn1Fnr, barn2Fnr)))
 
         val personopplysningGrunnlag =
@@ -246,10 +245,6 @@ class BehandlingIntegrationTest {
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                        søkerFnr,
-                        listOf(barn1Fnr,
-                               barn2Fnr)),
                 ansvarligSaksbehandler = "saksbehandler1")
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)

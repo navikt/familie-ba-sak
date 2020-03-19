@@ -4,9 +4,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -102,9 +101,6 @@ class VedtakServiceTest {
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                        fnr,
-                        listOf(barnFnr)),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
@@ -133,9 +129,6 @@ class VedtakServiceTest {
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                        fnr,
-                        listOf(barnFnr)),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
@@ -161,9 +154,6 @@ class VedtakServiceTest {
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
-                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                        fnr,
-                        listOf(barnFnr)),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 
@@ -179,9 +169,6 @@ class VedtakServiceTest {
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = revurderingInnvilgetBehandling,
-                restSamletVilkårResultat = vilkårsvurderingKomplettForBarnOgSøker(
-                        fnr,
-                        listOf(barnFnr)),
                 ansvarligSaksbehandler = "ansvarligSaksbehandler"
         )
 

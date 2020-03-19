@@ -1,12 +1,11 @@
-package no.nav.familie.ba.sak.behandling.domene.personopplysninger
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
+import no.nav.familie.ba.sak.common.RessursResponse.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,19 +21,16 @@ class PersonController(private val integrasjonOnBehalfClient: IntegrasjonOnBehal
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @GetMapping()
-    fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<Personinfo>> {
+    @GetMapping
+    fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         return Result.runCatching {
-            integrasjonOnBehalfClient.hentPersoninfo(personIdent)
-
-        }
+                    integrasjonOnBehalfClient.hentPersoninfo(personIdent)
+                }
                 .fold(
                         onFailure = {
-                            logger.error("Hent person feilet")
-                            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                    .body(Ressurs.failure(it.message, it))
+                            illegalState("Hent person feilet: ${it.message}", it)
                         },
-                        onSuccess = { ResponseEntity.ok(Ressurs.success(it)) }
+                        onSuccess = { ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent))) }
                 )
     }
 }

@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.domene.vilkår.VilkårService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -35,10 +35,8 @@ class Vilkårsvurdering(
         } else {
             vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, vilkårsvurdertBehandling.id)
         }
-
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(vilkårsvurdertBehandling,
                                                                  personopplysningGrunnlag,
-                                                                 data.samletVilkårResultat,
                                                                  ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandler())
 
         return vilkårsvurdertBehandling

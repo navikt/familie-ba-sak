@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -35,7 +35,7 @@ class BeregningController(
         FagsakController.logger.info("{} oppdaterer vedtak med beregning for vedtak med id {}", saksbehandlerId, vedtakId)
 
         if (nyBeregning.personBeregninger.isEmpty()) {
-            return badRequest("Barnas beregning er tom")
+            return badRequest("Barnas beregning er tom", null)
         }
 
         val vedtak = vedtakService.hent(vedtakId)
@@ -43,7 +43,7 @@ class BeregningController(
         val behandling = vedtak.behandling
 
         if (behandling.resultat != BehandlingResultat.INNVILGET) {
-            return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget")
+            return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget", null)
         }
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)

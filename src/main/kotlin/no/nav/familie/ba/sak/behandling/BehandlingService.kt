@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
@@ -38,9 +38,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                type = nyBehandling.behandlingType,
                                kategori = nyBehandling.kategori,
                                underkategori = nyBehandling.underkategori,
-                               steg = initSteg))
+                               steg = initSteg(nyBehandling.behandlingType)))
         } else if (aktivBehandling.steg < StegType.GODKJENNE_VEDTAK) {
-            aktivBehandling.steg = initSteg
+            aktivBehandling.steg = initSteg(nyBehandling.behandlingType)
             aktivBehandling.status = BehandlingStatus.OPPRETTET
             behandlingRepository.save(aktivBehandling)
         } else {

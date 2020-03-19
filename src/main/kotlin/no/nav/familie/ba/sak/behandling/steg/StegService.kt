@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
@@ -36,9 +37,7 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandling)
         loggService.opprettBehandlingLogg(behandling)
 
-        return håndterPersongrunnlag(behandling,
-                                     Registreringsdata(ident = nyBehandling.søkersIdent,
-                                                       barnasIdenter = nyBehandling.barnasIdenter))
+        return behandling
     }
 
     @Transactional
@@ -57,16 +56,24 @@ class StegService(
         loggService.opprettBehandlingLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
-                                     Registreringsdata(ident = nyBehandling.søkersIdent,
-                                                       barnasIdenter = nyBehandling.barnasIdenter))
+                                     RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                                                barnasIdenter = nyBehandling.barnasIdenter))
     }
 
-    fun håndterPersongrunnlag(behandling: Behandling, registreringsdata: Registreringsdata): Behandling {
+    fun håndterSøknad(behandling: Behandling, søknadDTO: SøknadDTO): Behandling {
+        val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførSteg(behandling, søknadDTO)
+        }
+    }
+
+    fun håndterPersongrunnlag(behandling: Behandling, registrerPersongrunnlagDTO: RegistrerPersongrunnlagDTO): Behandling {
         val behandlingSteg: RegistrerPersongrunnlag =
                 hentBehandlingSteg(StegType.REGISTRERE_PERSONGRUNNLAG) as RegistrerPersongrunnlag
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, registreringsdata)
+            behandlingSteg.utførSteg(behandling, registrerPersongrunnlagDTO)
         }
     }
 
@@ -112,7 +119,7 @@ class StegService(
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (behandlingSteg.stegType() > behandling.steg) {
+            if (behandlingSteg.stegType().rekkefølge > behandling.steg.rekkefølge) {
                 error("${SikkerhetContext.hentSaksbehandler()} prøver å utføre steg ${behandlingSteg.stegType()}," +
                       " men behandlingen er på steg ${behandling.steg}")
             }
@@ -130,7 +137,7 @@ class StegService(
 
             stegSuksessMetrics[behandling.steg]?.increment()
 
-            val nesteSteg = behandling.steg.hentNesteSteg()
+            val nesteSteg = behandling.steg.hentNesteSteg(behandlingType = behandling.type)
             behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id,
                                                        steg = nesteSteg)
 
