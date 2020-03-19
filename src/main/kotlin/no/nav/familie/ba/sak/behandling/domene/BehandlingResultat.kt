@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.domene
 
 import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.nare.core.evaluations.Resultat
 import javax.persistence.*
 
 @Entity(name = "BehandlingResultat")
@@ -28,6 +29,11 @@ data class BehandlingResultat(
     override fun toString(): String {
         return "BehandlingResultat(id=$id, behandling=${behandling.id})"
     }
+
+    fun hentSamletResultat(): Resultat {
+        return if (behandlingResultat.any { it.hentSamletResultat() == Resultat.NEI }) Resultat.NEI else Resultat.JA
+    }
+
 }
 
 //TODO: Legg ved rett før merge
@@ -43,10 +49,12 @@ alter table behandling rename column resultat to brev;
 
 alter table vilkar_resultat rename constraint vilkar_resultat_samlet_vilkar_resultat_id_fkey to vilkar_resultat_periode_resultat_id_fkey;
 
+alter table samlet_vilkar_resultat drop column fk_behandling_id;
 alter table samlet_vilkar_resultat rename to periode_resultat;
-alter table periode_resultat rename constraint samlet_vilkar_resultat_fk_behandling_id_fkey to periode_resultat_fk_behandling_id_fkey;
 alter table periode_resultat add column behandling_resultat_id bigint references BEHANDLING_RESULTAT (id) default null;
 alter table periode_resultat add column periode_fom timestamp (3);
 alter table periode_resultat add column periode_tom timestamp (3);
 alter index samlet_vilkar_resultat_pkey rename to periode_resultat_pkey;
+
+
  */

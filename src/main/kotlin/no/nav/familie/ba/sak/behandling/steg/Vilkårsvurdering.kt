@@ -33,7 +33,7 @@ class Vilkårsvurdering(
                                                                 data.behandlingResultat,
                                                                 vilkårsvurdertBehandling.id)
         } else {
-            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, vilkårsvurdertBehandling.id)
+            vilkårService.vurderVilkårForFødselshendelse(personopplysningGrunnlag, vilkårsvurdertBehandling.id)
         }
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(vilkårsvurdertBehandling,
                                                                  personopplysningGrunnlag,

@@ -16,9 +16,6 @@ class PeriodeResultat(
                            allocationSize = 50)
         private val id: Long = 0,
 
-        @Column(name = "fk_behandling_id", nullable = false, updatable = false) //TODO: FJERNE?
-        val behandlingId: Long,
-
         @ManyToOne @JoinColumn(name = "behandling_resultat_id")
         var behandlingResultat: BehandlingResultat? = null,
 

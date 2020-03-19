@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultatRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -23,7 +22,6 @@ class FagsakService(
         private val fagsakRepository: FagsakRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
-        private val periodeResultatRepository: PeriodeResultatRepository,
         private val behandlingRepository: BehandlingRepository,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val vedtakRepository: VedtakRepository,
@@ -61,7 +59,7 @@ class FagsakService(
                     aktiv = it.aktiv,
                     behandlingId = it.id,
                     vedtakForBehandling = vedtakForBehandling,
-                    personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
+                    personer = personopplysningGrunnlag.personer.map { it.toRestPerson() },
                     type = it.type,
                     status = it.status,
                     steg = it.steg,

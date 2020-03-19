@@ -50,12 +50,12 @@ class VilkårServiceTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val periodeResultat =
+        val behandlingResultat =
                 vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
                                                                     vilkårsvurderingKomplettForBarnOgSøker(fnr, listOf(barnFnr)),
                                                                     behandling.id
                 )
-        Assertions.assertEquals(periodeResultat.periodeResultat.size,
+        Assertions.assertEquals(behandlingResultat.behandlingResultat.size,
                                 vilkårsvurderingKomplettForBarnOgSøker(fnr, listOf(barnFnr)).size)
     }
 

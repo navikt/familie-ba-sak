@@ -2,58 +2,73 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonVilkårResultat
 import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class VilkårService(
         private val behandlingService: BehandlingService,
-        private val periodeResultatRepository: PeriodeResultatRepository,
-        private val loggService: LoggService
+        private val behandlingRepository: BehandlingRepository,
+        private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val loggService: LoggService,
+        private val periodeService: PeriodeService
 ) {
 
-    fun lagreNyOgDeaktiverGammelPeriodeResultat(periodeResultat: PeriodeResultat) {
-        val aktivtPeriodeResultat =
-                periodeResultatRepository.finnPeriodeResultatPåBehandlingOgAktiv(periodeResultat.behandlingId)
+    fun lagreNyOgDeaktiverGammelBehandlingResultat(behandlingResultat: BehandlingResultat) {
+        val aktivtBehandlingResultat =
+                behandlingResultatRepository.findByBehandlingAndAktiv(behandlingResultat.behandling.id)
 
-        if (aktivtPeriodeResultat != null) {
-            aktivtPeriodeResultat.aktiv = false
-            periodeResultatRepository.save(aktivtPeriodeResultat)
+        if (aktivtBehandlingResultat != null) {
+            aktivtBehandlingResultat.aktiv = false
+            behandlingResultatRepository.save(aktivtBehandlingResultat)
         }
 
-        val behandling = behandlingService.hent(periodeResultat.behandlingId)
-        loggService.opprettVilkårsvurderingLogg(behandling, aktivtPeriodeResultat, periodeResultat)
+        val behandling = behandlingService.hent(behandlingResultat.behandling.id)
+        loggService.opprettVilkårsvurderingLogg(behandling, aktivtBehandlingResultat, behandlingResultat)
 
-        periodeResultatRepository.save(periodeResultat)
+        behandlingResultatRepository.save(behandlingResultat)
     }
 
-    fun vurderVilkårOgLagResultat(personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                  behandlingId: Long): PeriodeResultat {
-        val resultatForSak = mutableSetOf<VilkårResultat>()
+    fun vurderVilkårForFødselshendelse(personopplysningGrunnlag: PersonopplysningGrunnlag,
+                                       behandlingId: Long): BehandlingResultat {
+        val barn = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
+        if (barn.size > 1) {
+            throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse inneholder kan kun inneholde et barn, men inneholder ${barn.size}")
+        }
+        val periodeResultater = mutableSetOf<PeriodeResultat>()
         personopplysningGrunnlag.personer.map { person ->
+            val resultaterForPerson = mutableSetOf<VilkårResultat>()
             val tmpFakta = Fakta(personForVurdering = person)
-            val spesifikasjonerForPerson = spesifikasjonerForPerson(person, behandlingId)
+            val spesifikasjonerForPerson = spesifikasjonerForPerson(person)
             val evaluering = spesifikasjonerForPerson.evaluer(tmpFakta)
             evaluering.children.map { child ->
-                resultatForSak.add(VilkårResultat(person = person,
-                                                     resultat = child.resultat,
-                                                     vilkårType = Vilkår.valueOf(child.identifikator)))
+                resultaterForPerson.add(VilkårResultat(person = person,
+                                                       resultat = child.resultat,
+                                                       vilkårType = Vilkår.valueOf(child.identifikator)))
             }
+            periodeResultater.add(PeriodeResultat(periodeResultat = resultaterForPerson,
+                                                  periodeFom = barn.first().fødselsdato.plusMonths(1),
+                                                  periodeTom = barn.first().fødselsdato.plusYears(18).minusMonths(1)))
         }
-        val periodeResultat = PeriodeResultat(periodeResultat = resultatForSak, behandlingId = behandlingId, periodeFom = LocalDate.now(), periodeTom = LocalDate.now()) //TODO: Oppdater med periode
-        resultatForSak.map { it.periodeResultat = periodeResultat }
-        lagreNyOgDeaktiverGammelPeriodeResultat(periodeResultat)
-        return periodeResultat
+        val behandlingResultat = BehandlingResultat(
+                id = behandlingId,
+                behandling = behandlingRepository.finnBehandling(behandlingId),
+                aktiv = true,
+                behandlingResultat = periodeResultater)
+        lagreNyOgDeaktiverGammelBehandlingResultat(behandlingResultat)
+        return behandlingResultat
     }
 
     fun kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag: PersonopplysningGrunnlag,
                                               restBehandlingResultat: List<RestPersonVilkårResultat>,
-                                              behandlingId: Long): PeriodeResultat {
+                                              behandlingId: Long): BehandlingResultat {
         val listeAvVilkårResultat = mutableSetOf<VilkårResultat>()
         personopplysningGrunnlag.personer.map { person ->
             val vilkårForPerson = restBehandlingResultat
@@ -73,14 +88,19 @@ class VilkårService(
                 throw IllegalStateException("Vilkårene for ${person.type} er ${vilkårForPerson.map { v -> v.vilkårType }}, men vi forventer $vilkårForPart")
             }
         }
-        val periodeResultat = PeriodeResultat(periodeResultat = listeAvVilkårResultat, behandlingId = behandlingId, periodeFom = LocalDate.now(), periodeTom = LocalDate.now()) //TODO: Oppdater med periode
-        listeAvVilkårResultat.map { it.periodeResultat = periodeResultat }
-        lagreNyOgDeaktiverGammelPeriodeResultat(periodeResultat)
-        return periodeResultat
 
-}
+        val periodeResultater = restBehandlingResultat.map { personResultat -> periodeService.restPersonVilkårTilPerioder(personResultat) }.flatten().toMutableSet()
+        val behandlingResultat = BehandlingResultat(
+                id = behandlingId,
+                behandling = behandlingRepository.finnBehandling(behandlingId),
+                aktiv = true,
+                behandlingResultat = periodeResultater) //TODO: Oppdater med mappet behandlingsresultat
+        lagreNyOgDeaktiverGammelBehandlingResultat(behandlingResultat)
+        return behandlingResultat
 
-    fun spesifikasjonerForPerson(person: Person, behandlingId: Long): Spesifikasjon<Fakta> {
+    }
+
+    fun spesifikasjonerForPerson(person: Person): Spesifikasjon<Fakta> {
         val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.VILKÅRGJELDERFOR)
         val samletSpesifikasjon = relevanteVilkår
                 .map { vilkår -> vilkår.spesifikasjon }
