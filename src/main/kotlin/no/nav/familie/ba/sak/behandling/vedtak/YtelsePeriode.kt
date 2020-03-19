@@ -13,7 +13,8 @@ data class YtelsePeriode (
         @SequenceGenerator(name = "ytelse_periode_seq_generator", sequenceName = "ytelse_periode_seq", allocationSize = 50)
         val id: Long = 0,
 
-        @ManyToOne(optional = false) @JoinColumn(name = "fk_vedtak_person_id", nullable = false, updatable = false)
+        @ManyToOne
+        @JoinColumn(name="fk_vedtak_person_id", nullable=false)
         val vedtakPerson: VedtakPerson,
 
         @Column(name = "belop", nullable = false)
