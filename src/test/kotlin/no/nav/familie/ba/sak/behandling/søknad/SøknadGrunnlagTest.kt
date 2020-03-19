@@ -36,7 +36,7 @@ class SøknadGrunnlagTest(
         Assertions.assertEquals(true, søknadGrunnlag?.aktiv)
         Assertions.assertEquals(annenPartIdent, søknadGrunnlag?.hentSøknadDto()?.annenPartIdent)
         Assertions.assertEquals(søkerIdent, søknadGrunnlag?.hentSøknadDto()?.søkerMedOpplysninger?.ident)
-        Assertions.assertTrue(søknadGrunnlag?.hentSøknadDto()?.søkerMedOpplysninger?.opphold?.oppholderSegINorge!!)
+        Assertions.assertTrue(søknadGrunnlag?.hentSøknadDto()?.søkerMedOpplysninger?.oppholderSegINorge!!)
     }
 
     @Test

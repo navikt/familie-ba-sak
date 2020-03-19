@@ -19,20 +19,33 @@ class ClientMocks {
     @Primary
     fun mockIntegrasjonOnBehalfClient(): IntegrasjonOnBehalfClient {
 
-        val mockIntegrasjonOnBehalfClient = mockk<IntegrasjonOnBehalfClient>(relaxed = true)
+        val mockIntegrasjonOnBehalfClient = mockk<IntegrasjonOnBehalfClient>(relaxed = false)
 
         every {
             mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any())
         } returns listOf(Tilgang(true, null))
 
         every {
-            mockIntegrasjonOnBehalfClient.hentPersoninfo(any())
+            mockIntegrasjonOnBehalfClient.hentPersoninfo(eq(søkerFnr[0]))
         } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19),
                              kjønn = Kjønn.KVINNE,
                              navn = "Mor Moresen",
                              familierelasjoner = setOf(
                                      Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN)))
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN),
+                                     Familierelasjoner(personIdent = Personident(id = søkerFnr[1]),
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.EKTE)))
+
+        every {
+            mockIntegrasjonOnBehalfClient.hentPersoninfo(eq(søkerFnr[1]))
+        } returns Personinfo(fødselsdato = LocalDate.of(1995, 2, 19),
+                             kjønn = Kjønn.MANN,
+                             navn = "Far Faresen",
+                             familierelasjoner = setOf(
+                                     Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN),
+                                     Familierelasjoner(personIdent = Personident(id = søkerFnr[0]),
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.EKTE)))
 
         return mockIntegrasjonOnBehalfClient
     }
