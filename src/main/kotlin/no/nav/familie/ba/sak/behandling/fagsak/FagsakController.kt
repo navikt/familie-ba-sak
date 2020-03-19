@@ -32,15 +32,15 @@ class FagsakController(
 ) {
 
     @PostMapping(path = ["fagsaker"])
-    fun nyFagsak(@RequestBody nyFagsak: NyFagsak): ResponseEntity<Ressurs<RestFagsak>> {
+    fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = hentSaksbehandler()
 
-        logger.info("{} oppretter ny fagsak", saksbehandlerId)
+        logger.info("{} henter eller oppretter ny fagsak", saksbehandlerId)
 
-        return Result.runCatching { fagsakService.nyFagsak(nyFagsak) }
+        return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
                 .fold(
                         onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
-                        onFailure = { ResponseEntity.ok(Ressurs.failure("Opprettelse av fagsak feilet", it)) }
+                        onFailure = { ResponseEntity.ok(Ressurs.failure("Opprettelse eller henting av fagsak feilet", it)) }
                 )
     }
 
@@ -93,6 +93,6 @@ class FagsakController(
     }
 }
 
-data class NyFagsak(
+data class FagsakRequest(
         val personIdent: String
 )

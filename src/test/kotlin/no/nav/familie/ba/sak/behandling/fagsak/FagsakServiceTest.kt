@@ -62,11 +62,11 @@ class FagsakServiceTest(
             integrasjonClient.hentPersoninfoFor(eq(søker2Fnr))
         } returns Personinfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "Far Faresen")
 
-        val fagsak0 = fagsakService.nyFagsak(NyFagsak(
+        val fagsak0 = fagsakService.hentEllerOpprettFagsak(FagsakRequest(
                 søker1Fnr
         ))
 
-        val fagsak1 = fagsakService.nyFagsak(NyFagsak(
+        val fagsak1 = fagsakService.hentEllerOpprettFagsak(FagsakRequest(
                 søker2Fnr
         ))
 
@@ -74,7 +74,6 @@ class FagsakServiceTest(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
-                listOf(barn1Fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
         stegService.håndterPersongrunnlag(førsteBehandling,
@@ -86,7 +85,6 @@ class FagsakServiceTest(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
-                listOf(barn2Fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
         stegService.håndterPersongrunnlag(andreBehandling,
@@ -98,7 +96,6 @@ class FagsakServiceTest(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker2Fnr,
-                listOf(barn1Fnr),
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
         stegService.håndterPersongrunnlag(tredjeBehandling,
