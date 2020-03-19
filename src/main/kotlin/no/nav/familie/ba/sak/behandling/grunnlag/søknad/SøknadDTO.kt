@@ -10,24 +10,27 @@ data class SøknadDTO(
         val kategori: BehandlingKategori,
         val underkategori: BehandlingUnderkategori,
         val typeSøker: TypeSøker = TypeSøker.ORDINÆR,
-        val søkerMedOpplysninger: PartMedOpplysninger,
-        val barnaMedOpplysninger: List<PartMedOpplysninger>,
+        val søkerMedOpplysninger: SøkerMedOpplysninger,
+        val barnaMedOpplysninger: List<BarnMedOpplysninger>,
         val annenPartIdent: String
 )
 
 fun SøknadDTO.writeValueAsString(): String = objectMapper.writeValueAsString(this)
 
-data class PartMedOpplysninger(
+data class SøkerMedOpplysninger(
         val ident: String,
-        val personType: PersonType,
-        val opphold: Opphold
-)
-
-data class Opphold(
         val oppholderSegINorge: Boolean = true,
         val harOppholdtSegINorgeSiste12Måneder: Boolean = true,
         val komTilNorge: LocalDate? = null,
         val skalOppholdeSegINorgeNeste12Måneder: Boolean = true,
+        val tilleggsopplysninger: String? = null
+)
+
+data class BarnMedOpplysninger(
+        val ident: String,
+        val borMedSøker: Boolean = true,
+        val oppholderSegINorge: Boolean = true,
+        val harOppholdtSegINorgeSiste12Måneder: Boolean = true,
         val tilleggsopplysninger: String? = null
 )
 
