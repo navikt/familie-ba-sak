@@ -57,7 +57,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori,
-                                      brev = BrevType.OPPHØRT)
+                                      brevType = BrevType.OPPHØRT)
 
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
         behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
@@ -90,9 +90,9 @@ class VedtakService(private val behandlingService: BehandlingService,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = forrigeVedtak?.id,
-                opphørsdato = if (behandling.brev == BrevType.OPPHØRT) LocalDate.now()
+                opphørsdato = if (behandling.brevType == BrevType.OPPHØRT) LocalDate.now()
                         .førsteDagINesteMåned() else null,
-                stønadBrevMarkdown = if (behandling.brev != BrevType.INNVILGET) Result.runCatching {
+                stønadBrevMarkdown = if (behandling.brevType != BrevType.INNVILGET) Result.runCatching {
                             dokGenKlient.hentStønadBrevMarkdown(behandling,
                                                                 ansvarligSaksbehandler)
                         }

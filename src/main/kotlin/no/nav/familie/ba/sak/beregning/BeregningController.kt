@@ -42,7 +42,7 @@ class BeregningController(
 
         val behandling = vedtak.behandling
 
-        if (behandling.brev != BrevType.INNVILGET) {
+        if (behandling.brevType != BrevType.INNVILGET) {
             return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget", null)
         }
 

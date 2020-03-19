@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.restDomene.RestPersonVilkårResultat
 import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -51,11 +52,14 @@ class VilkårService(
     }
 
     fun kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                              restPeriodeResultat: List<RestVilkårResultat>,
+                                              restBehandlingResultat: List<RestPersonVilkårResultat>,
                                               behandlingId: Long): PeriodeResultat {
         val listeAvVilkårResultat = mutableSetOf<VilkårResultat>()
         personopplysningGrunnlag.personer.map { person ->
-            val vilkårForPerson = restPeriodeResultat.filter { vilkår -> vilkår.personIdent == person.personIdent.ident }
+            val vilkårForPerson = restBehandlingResultat
+                    .filter { vilkår -> vilkår.personIdent == person.personIdent.ident }
+                    .first()
+                    .vurderteVilkår
             val vilkårForPart = Vilkår.hentVilkårForPart(person.type)
             vilkårForPerson.forEach {
                 vilkårForPart.find { vilkårType -> vilkårType == it.vilkårType }

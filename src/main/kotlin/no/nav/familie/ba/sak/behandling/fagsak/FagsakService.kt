@@ -65,12 +65,12 @@ class FagsakService(
                     type = it.type,
                     status = it.status,
                     steg = it.steg,
-                    periodeResultat = periodeResultatRepository.finnPeriodeResultatPåBehandlingOgAktiv(it.id)
-                                                   ?.toRestPeriodeResultat() ?: emptyList(),
+                    behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(it.id)
+                                                   ?.toRestBehandlingResultat() ?: emptyList(),
                     opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori,
-                    resultat = it.brev, //TODO: Hva er det egentlig restbehandlingen har behov for her?
+                    brevType = it.brevType, //TODO: Hva er det egentlig restbehandlingen har behov for her?
                     begrunnelse = it.begrunnelse
             )
         }

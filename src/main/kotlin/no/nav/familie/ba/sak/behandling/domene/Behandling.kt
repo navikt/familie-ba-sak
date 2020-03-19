@@ -38,7 +38,7 @@ data class Behandling(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "brev", nullable = false)
-        var brev: BrevType = BrevType.IKKE_VURDERT,
+        var brevType: BrevType = BrevType.IKKE_VURDERT,
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
@@ -56,7 +56,7 @@ data class Behandling(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, brevtype=$brev)"
+        return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, brevtype=$brevType)"
     }
 }
 

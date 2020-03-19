@@ -25,12 +25,12 @@ class Vilkårsvurdering(
 
         val testBehandling = behandlingService.hent(behandlingId = behandling.id)
         val vilkårsvurdertBehandling = behandlingService.settVilkårsvurdering(testBehandling,
-                                                                              data.resultat,
+                                                                              data.brevType,
                                                                               data.begrunnelse)
 
-        if (data.periodeResultat.isNotEmpty()) {
+        if (data.behandlingResultat.isNotEmpty()) {
             vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
-                                                                data.periodeResultat,
+                                                                data.behandlingResultat,
                                                                 vilkårsvurdertBehandling.id)
         } else {
             vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, vilkårsvurdertBehandling.id)

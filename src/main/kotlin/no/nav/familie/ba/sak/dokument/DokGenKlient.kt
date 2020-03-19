@@ -31,11 +31,11 @@ class DokGenKlient(
     fun hentStønadBrevMarkdown(behandling: Behandling,
                                ansvarligSaksbehandler: String): String {
         val fletteFelter = mapTilBrevfelter(behandling, ansvarligSaksbehandler)
-        return hentMarkdownForMal(behandling.brev.toDokGenTemplate(), fletteFelter)
+        return hentMarkdownForMal(behandling.brevType.toDokGenTemplate(), fletteFelter)
     }
 
     private fun mapTilBrevfelter(behandling: Behandling,
-                                 ansvarligSaksbehandler: String): String = when (behandling.brev) {
+                                 ansvarligSaksbehandler: String): String = when (behandling.brevType) {
         BrevType.INNVILGET -> mapTilInnvilgetBrevFelter(behandling, ansvarligSaksbehandler)
         BrevType.AVSLÅTT -> mapTilAvslagBrevFelter(behandling)
         BrevType.OPPHØRT -> mapTilOpphørtBrevFelter(behandling)

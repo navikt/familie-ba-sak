@@ -63,8 +63,8 @@ class StegServiceTest(
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
 
         stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg, RestVilkårsvurdering(
-                resultat = BrevType.INNVILGET,
-                periodeResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr, listOf(barnFnr)),
+                brevType = BrevType.INNVILGET,
+                behandlingResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr, listOf(barnFnr)),
                 begrunnelse = ""
         ))
 
@@ -83,8 +83,8 @@ class StegServiceTest(
 
         assertThrows<IllegalStateException> {
             stegService.håndterVilkårsvurdering(behandling, RestVilkårsvurdering(
-                    resultat = BrevType.INNVILGET,
-                    periodeResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr, listOf(barnFnr)),
+                    brevType = BrevType.INNVILGET,
+                    behandlingResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr, listOf(barnFnr)),
                     begrunnelse = ""
             ))
         }
