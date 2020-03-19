@@ -80,11 +80,13 @@ fun lagPersonVedtak(fom: String,
                     ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD,
                     beløp: Int = sats(ytelsetype),
                     vedtak: Vedtak = lagVedtak()): VedtakPerson {
-    return VedtakPerson(
+    val vedtakPerson = VedtakPerson(
             person = tilfeldigPerson(),
-            vedtak = vedtak,
-            ytelsePerioder = mutableListOf(YtelsePeriode(person = tilfeldigPerson(), beløp = beløp, stønadFom = dato(fom), stønadTom = dato(tom), type = ytelsetype))
-    )
+            vedtak = vedtak)
+
+    val ytelsePerioder = mutableListOf(YtelsePeriode(vedtakPerson = vedtakPerson, beløp = beløp, stønadFom = dato(fom), stønadTom = dato(tom), type = ytelsetype))
+
+    return vedtakPerson.copy(ytelsePerioder = ytelsePerioder)
 }
 
 fun lagTestPersonopplysningGrunnlag(behandlingId: Long,

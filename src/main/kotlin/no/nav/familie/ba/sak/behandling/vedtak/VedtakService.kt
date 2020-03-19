@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
@@ -133,18 +132,22 @@ class VedtakService(private val behandlingService: BehandlingService,
                     error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
                 }
 
-            val ytelsePeriode = YtelsePeriode(person = person, beløp = it.beløp, stønadFom = sikkerStønadFom, stønadTom = sikkerStønadTom, type = it.ytelsetype)
-
-                val eksisterendeBarnPåVedtak =
+                val nyEllerEksisterendeVedtakPerson =
                         vedtakPersonRepository.finnPersonBeregning(vedtakId = vedtak.id, personIdent = person.personIdent.ident)
-                vedtakPersonRepository.save(
-                        VedtakPerson(
-                                id = eksisterendeBarnPåVedtak?.id ?: 0,
+                        ?: VedtakPerson(
                                 person = person,
-                                vedtak = vedtak,
-                                ytelsePerioder = mutableListOf(ytelsePeriode)
-                        )
-                )
+                                vedtak = vedtak)
+
+                val ytelsePeriode = YtelsePeriode(vedtakPerson = nyEllerEksisterendeVedtakPerson,
+                                                  beløp = it.beløp,
+                                                  stønadFom = sikkerStønadFom,
+                                                  stønadTom = sikkerStønadTom,
+                                                  type = it.ytelsetype)
+
+                val oppdatertVedtakPersonMedYtelsePeriode =
+                        nyEllerEksisterendeVedtakPerson.copy(ytelsePerioder = mutableListOf(ytelsePeriode))
+
+                vedtakPersonRepository.save(oppdatertVedtakPersonMedYtelsePeriode)
             }
         }
 

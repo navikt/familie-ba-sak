@@ -14,7 +14,7 @@ data class YtelsePeriode (
         val id: Long = 0,
 
         @ManyToOne(optional = false) @JoinColumn(name = "fk_vedtak_person_id", nullable = false, updatable = false)
-        val person: Person,
+        val vedtakPerson: VedtakPerson,
 
         @Column(name = "belop", nullable = false)
         val beløp: Int,
