@@ -22,14 +22,16 @@ data class Personinfo(
 
 data class Familierelasjoner(
         val personIdent: Personident,
-        val relasjonsrolle: FAMILIERELASJONSROLLE
+        val relasjonsrolle: FAMILIERELASJONSROLLE,
+        val navn: String? = null,
+        val fødselsdato: LocalDate? = null
 )
 
 data class Personident(
         val id: String
 )
 
-enum class FAMILIERELASJONSROLLE { BARN, FAR, MEDMOR, EKTE, MOR }
+enum class FAMILIERELASJONSROLLE { BARN, FAR, MEDMOR, MOR }
 
 class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
     override fun deserialize(jp: JsonParser?, p1: DeserializationContext?): Kjønn {

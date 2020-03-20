@@ -15,12 +15,16 @@ data class RestPersonInfo(
 
 data class RestFamilierelasjon(
         val personIdent: String,
-        val relasjonRolle: FAMILIERELASJONSROLLE
+        val relasjonRolle: FAMILIERELASJONSROLLE,
+        val navn: String,
+        val fødselsdato: LocalDate?
 )
 
 fun Familierelasjoner.toRestFamilieRelasjon() = RestFamilierelasjon(
         personIdent = this.personIdent.id,
-        relasjonRolle = this.relasjonsrolle
+        relasjonRolle = this.relasjonsrolle,
+        navn = this.navn ?: "",
+        fødselsdato = this.fødselsdato
 )
 
 fun Personinfo.toRestPersonInfo(personIdent: String) = RestPersonInfo(
