@@ -29,11 +29,11 @@ class PeriodeResultat(
         val periodeTom: LocalDate?,
 
         @OneToMany(mappedBy = "periodeResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
-        var periodeResultat: MutableSet<VilkårResultat>
+        var vilkårResultater: MutableSet<VilkårResultat>
 
 ) : BaseEntitet() {
 
         fun hentSamletResultat () : Resultat {
-                return if (periodeResultat.any { it.resultat == Resultat.NEI }) Resultat.NEI else Resultat.JA
+                return if (vilkårResultater.any { it.resultat == Resultat.NEI }) Resultat.NEI else Resultat.JA
         }
 }

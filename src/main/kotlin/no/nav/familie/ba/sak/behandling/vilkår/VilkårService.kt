@@ -53,7 +53,7 @@ class VilkårService(
                                                        resultat = child.resultat,
                                                        vilkårType = Vilkår.valueOf(child.identifikator)))
             }
-            periodeResultater.add(PeriodeResultat(periodeResultat = resultaterForPerson,
+            periodeResultater.add(PeriodeResultat(vilkårResultater = resultaterForPerson,
                                                   periodeFom = barn.first().fødselsdato.plusMonths(1),
                                                   periodeTom = barn.first().fødselsdato.plusYears(18).minusMonths(1)))
         }
@@ -61,7 +61,7 @@ class VilkårService(
                 id = behandlingId,
                 behandling = behandlingRepository.finnBehandling(behandlingId),
                 aktiv = true,
-                behandlingResultat = periodeResultater)
+                periodeResultater = periodeResultater)
         lagreNyOgDeaktiverGammelBehandlingResultat(behandlingResultat)
         return behandlingResultat
     }
@@ -94,7 +94,7 @@ class VilkårService(
                 id = behandlingId,
                 behandling = behandlingRepository.finnBehandling(behandlingId),
                 aktiv = true,
-                behandlingResultat = periodeResultater) //TODO: Oppdater med mappet behandlingsresultat
+                periodeResultater = periodeResultater) //TODO: Oppdater med mappet behandlingsresultat
         lagreNyOgDeaktiverGammelBehandlingResultat(behandlingResultat)
         return behandlingResultat
 

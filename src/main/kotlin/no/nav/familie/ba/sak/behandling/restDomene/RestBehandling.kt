@@ -21,7 +21,7 @@ data class RestBehandling(val aktiv: Boolean,
                           val brevType: BrevType, //TODO: Endret format og navn
                           val begrunnelse: String)
 
-fun BehandlingResultat.toRestBehandlingResultat() = this.behandlingResultat.map {
+fun BehandlingResultat.toRestBehandlingResultat() = this.periodeResultater.map {
     RestPersonVilkårResultat(personIdent = "12345678910",
                              vurderteVilkår = listOf(
                                      RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,

@@ -55,7 +55,7 @@ class VilkårServiceTest {
                                                                     vilkårsvurderingKomplettForBarnOgSøker(fnr, listOf(barnFnr)),
                                                                     behandling.id
                 )
-        Assertions.assertEquals(behandlingResultat.behandlingResultat.size,
+        Assertions.assertEquals(behandlingResultat.periodeResultater.size,
                                 vilkårsvurderingKomplettForBarnOgSøker(fnr, listOf(barnFnr)).size)
     }
 

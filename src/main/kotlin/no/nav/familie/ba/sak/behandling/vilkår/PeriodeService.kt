@@ -18,7 +18,7 @@ class PeriodeService {
 
     fun restPersonVilkårTilPerioder(restPersonVilkårResultat: RestPersonVilkårResultat): MutableSet<PeriodeResultat> {
         return mutableSetOf(PeriodeResultat(
-                periodeResultat = mutableSetOf(),
+                vilkårResultater = mutableSetOf(),
                 periodeFom = LocalDate.now(),
                 periodeTom = LocalDate.now()))
     }
