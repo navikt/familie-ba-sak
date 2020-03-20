@@ -9,13 +9,17 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.domene.BeregningResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragId
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.lang.IllegalArgumentException
 import java.time.LocalDate
 
 @Service
@@ -64,7 +68,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun hentGjeldendeBehandlingerForLøpendeFagsaker(): List<OppdragId> {
         return fagsakService.hentLøpendeFagsaker()
-                .mapNotNull { fagsak -> hentGjeldendeForFagsak(fagsak.id) }
+                .flatMap { fagsak -> hentGjeldendeForFagsak(fagsak.id) }
                 .map { behandling ->
                     OppdragId(
                             persongrunnlagService.hentSøker(behandling)!!.personIdent.ident,
@@ -111,31 +115,33 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandlingRepository.save(behandling)
     }
 
-    fun oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsakId: Long, utbetalingsMåned: LocalDate): Behandling? {
+    fun oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsakId: Long, utbetalingsMåned: LocalDate): List<Behandling> {
         val ferdigstilteBehandlinger = behandlingRepository.findByFagsakAndFerdigstiltOrIverksatt(fagsakId)
 
         val beregningResultater = ferdigstilteBehandlinger
                 .sortedBy { it.opprettetTidspunkt }
                 .map { beregningService.hentBeregningsresultatForBehandling(it.id) }
 
-        var gjeldendeBehandling : Behandling? = null
-        beregningResultater.forEach { beregningResultat ->
-            if (beregningResultat.erOpphør) {
-                if (beregningResultat.stønadFom <= utbetalingsMåned) gjeldendeBehandling = null
-            } else {
-                if (beregningResultat.stønadFom <= utbetalingsMåned && beregningResultat.stønadTom >= utbetalingsMåned) {
-                    gjeldendeBehandling = beregningResultat.behandling
-                }
+        beregningResultater.forEach {
+            if (it.stønadTom >= utbetalingsMåned && it.stønadFom != null) {
+                behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForNesteUtbetaling = true })
+            }
+            if (it.opphørFom != null && it.opphørFom <= utbetalingsMåned) {
+                val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(it)
+                behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForNesteUtbetaling = false })
             }
         }
 
-        if (gjeldendeBehandling != null) {
-            behandlingRepository.save(gjeldendeBehandling!!.apply { gjeldendeForNesteUtbetaling = true })
-        }
-        return gjeldendeBehandling
+        return hentGjeldendeForFagsak(fagsakId)
     }
 
-    private fun hentGjeldendeForFagsak(fagsakId: Long): Behandling? {
+    private fun hentBehandlingSomSkalOpphøres(beregningResultat: BeregningResultat): Behandling {
+        val utbetalingsOppdrag = objectMapper.readValue(beregningResultat.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
+        val opphørsPeriode = utbetalingsOppdrag.utbetalingsperiode.find { it.opphør != null } ?: throw IllegalArgumentException("Finner ikke opphør på beregningsresultat med id $beregningResultat.id")
+        return behandlingRepository.finnBehandling(opphørsPeriode.behandlingId)
+    }
+
+    private fun hentGjeldendeForFagsak(fagsakId: Long): List<Behandling> {
         return behandlingRepository.findByFagsakAndGjeldendeForNesteUtbetaling(fagsakId)
     }
 

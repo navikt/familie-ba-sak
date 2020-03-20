@@ -18,14 +18,14 @@ data class BeregningResultat(
         @OneToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
         val behandling: Behandling,
 
-        @Column(name = "stonad_fom", nullable = false)
-        val stønadFom: LocalDate,
+        @Column(name = "stonad_fom", nullable = true)
+        val stønadFom: LocalDate?,
 
         @Column(name = "stonad_tom", nullable = false)
         val stønadTom: LocalDate,
 
-        @Column(name = "er_opphoer", nullable = false)
-        val erOpphør: Boolean = false,
+        @Column(name = "opphor_fom", nullable = true)
+        val opphørFom: LocalDate?,
 
         @Column(name = "opprettet_dato", nullable = false)
         val opprettetDato: LocalDate,

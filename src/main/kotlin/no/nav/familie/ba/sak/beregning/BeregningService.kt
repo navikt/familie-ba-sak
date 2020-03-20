@@ -26,10 +26,9 @@ class BeregningService(
 
     fun lagreBeregningsresultat(behandling: Behandling, utbetalingsoppdrag: Utbetalingsoppdrag) {
 
-        var erOpphør = false
-        var opphørsdato: LocalDate = LocalDate.now()
-        if (utbetalingsoppdrag.utbetalingsperiode.size == 1 && utbetalingsoppdrag.utbetalingsperiode[0].opphør != null) {
-            erOpphør = true
+        val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.size == 1 && utbetalingsoppdrag.utbetalingsperiode[0].opphør != null
+        var opphørsdato: LocalDate? = null
+        if (utbetalingsoppdrag.utbetalingsperiode[0].opphør != null) {
             opphørsdato = utbetalingsoppdrag.utbetalingsperiode[0].opphør!!.opphørDatoFom
         }
 
@@ -37,11 +36,11 @@ class BeregningService(
                 behandling = behandling,
                 utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag),
                 opprettetDato = LocalDate.now(),
-                stønadFom = if (erOpphør) opphørsdato else utbetalingsoppdrag.utbetalingsperiode
+                stønadFom = if (erRentOpphør) null else utbetalingsoppdrag.utbetalingsperiode
                         .filter { !it.erEndringPåEksisterendePeriode }
                         .minBy { it.vedtakdatoFom }!!.vedtakdatoFom,
                 stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxBy { it.vedtakdatoTom }!!.vedtakdatoTom,
-                erOpphør = erOpphør
+                opphørFom = opphørsdato
         )
 
         beregningResultatRepository.save(nyttBeregningsResultat)

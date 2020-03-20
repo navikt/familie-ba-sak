@@ -43,9 +43,9 @@ class BeregningServiceTest {
                 fnr,
                 fagsak.id.toString(),
                 behandling.id,
+                dagensDato,
                 dagensDato.withDayOfMonth(1),
-                dagensDato.plusMonths(10),
-                dagensDato
+                dagensDato.plusMonths(10)
         )
 
         beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
@@ -54,7 +54,7 @@ class BeregningServiceTest {
         Assertions.assertNotNull(beregningResultat)
         Assertions.assertEquals(dagensDato.withDayOfMonth(1), beregningResultat.stønadFom)
         Assertions.assertEquals(dagensDato.plusMonths(10), beregningResultat.stønadTom)
-        Assertions.assertFalse(beregningResultat.erOpphør)
+        Assertions.assertNull(beregningResultat.opphørFom)
 
     }
 
@@ -81,9 +81,9 @@ class BeregningServiceTest {
         val beregningResultat = beregningService.hentBeregningsresultatForBehandling(behandling.id)
 
         Assertions.assertNotNull(beregningResultat)
-        Assertions.assertEquals(opphørsDato, beregningResultat.stønadFom)
         Assertions.assertEquals(dagensDato.plusMonths(10), beregningResultat.stønadTom)
-        Assertions.assertTrue(beregningResultat.erOpphør)
+        Assertions.assertNotNull(beregningResultat.opphørFom)
+        Assertions.assertEquals(opphørsDato, beregningResultat.opphørFom)
     }
 
     @Test
@@ -91,7 +91,8 @@ class BeregningServiceTest {
 
         val fnr = randomFnr()
         val dagensDato = LocalDate.now()
-        val revurderingFra = dagensDato.plusMonths(3).withDayOfMonth(1)
+        val revurderingFom = dagensDato.plusMonths(3).withDayOfMonth(1)
+        val opphørFom = dagensDato.withDayOfMonth(1)
         val tomDato = dagensDato.plusMonths(10)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
@@ -100,17 +101,18 @@ class BeregningServiceTest {
                 fnr,
                 fagsak.id.toString(),
                 behandling.id,
+                behandling.id - 1,
                 dagensDato,
-                dagensDato.withDayOfMonth(1),
+                opphørFom,
                 tomDato,
-                revurderingFra
+                revurderingFom
         )
         beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
         val beregningResultat = beregningService.hentBeregningsresultatForBehandling(behandling.id)
 
         Assertions.assertNotNull(beregningResultat)
-        Assertions.assertEquals(revurderingFra, beregningResultat.stønadFom)
+        Assertions.assertEquals(revurderingFom, beregningResultat.stønadFom)
         Assertions.assertEquals(tomDato, beregningResultat.stønadTom)
-        Assertions.assertFalse(beregningResultat.erOpphør)
+        Assertions.assertEquals(opphørFom, beregningResultat.opphørFom)
     }
 }

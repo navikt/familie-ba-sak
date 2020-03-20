@@ -11,9 +11,9 @@ import java.util.*
 fun lagTestUtbetalingsoppdragForFGB(personIdent: String,
                                     fagsakId: String,
                                     behandlingId: Long,
+                                    vedtakDato: LocalDate,
                                     datoFom: LocalDate,
-                                    datoTom: LocalDate,
-                                    vedtakDato: LocalDate)
+                                    datoTom: LocalDate)
         : Utbetalingsoppdrag {
     return Utbetalingsoppdrag(
             Utbetalingsoppdrag.KodeEndring.NY,
@@ -72,8 +72,9 @@ fun lagTestUtbetalingsoppdragForOpphør(personIdent: String,
 fun lagTestUtbetalingsoppdragForRevurdering(personIdent: String,
                                             fagsakId: String,
                                             behandlingId: Long,
+                                            forrigeBehandlingId: Long,
                                             vedtakDato: LocalDate,
-                                            datoFom: LocalDate,
+                                            opphørFom: LocalDate,
                                             datoTom: LocalDate,
                                             revurderingFom: LocalDate): Utbetalingsoppdrag {
     return Utbetalingsoppdrag(
@@ -84,17 +85,17 @@ fun lagTestUtbetalingsoppdragForRevurdering(personIdent: String,
             "SAKSBEHANDLERID",
             LocalDateTime.now(),
             listOf(Utbetalingsperiode(true,
-                    Opphør(datoFom),
+                    Opphør(opphørFom),
                     1,
                     null,
                     vedtakDato,
                     "BATR",
-                    datoFom,
+                    opphørFom,
                     datoTom,
                     BigDecimal.ONE,
                     Utbetalingsperiode.SatsType.MND,
                     personIdent,
-                    behandlingId
+                    forrigeBehandlingId
             ), Utbetalingsperiode(false,
                     null,
                     2,

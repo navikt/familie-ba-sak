@@ -176,45 +176,6 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
-    fun `Sett riktig gjeldende behandling ved revurdering`() {
-        val morId = randomFnr()
-        val barnId = randomFnr()
-        val vedtakDato = LocalDate.now()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
-                morId,
-                fagsak.id.toString(),
-                behandling.id,
-                vedtakDato.minusMonths(2).withDayOfMonth(1),
-                vedtakDato.plusMonths(11),
-                vedtakDato
-        )
-        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
-
-        val revurdering = behandlingService.opprettBehandling(nyRevurdering(morId, listOf(barnId)))
-        val utbetalingsoppdragRevurdering = lagTestUtbetalingsoppdragForRevurdering(
-                morId,
-                fagsak.id.toString(),
-                revurdering.id,
-                vedtakDato,
-                vedtakDato.minusMonths(2).withDayOfMonth(1),
-                vedtakDato.plusMonths(11),
-                vedtakDato.withDayOfMonth(1)
-        )
-        beregningService.lagreBeregningsresultat(revurdering, utbetalingsoppdragRevurdering)
-        behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.IVERKSATT)
-
-        val gjeldendeBehandling = behandlingService.oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsak.id, vedtakDato)
-
-        Assertions.assertNotNull(gjeldendeBehandling)
-        Assertions.assertEquals(revurdering.id, gjeldendeBehandling!!.id)
-    }
-
-    @Test
-    @Tag("integration")
     fun `Opphør migrert vedtak via task`() {
 
         val søkerFnr = randomFnr()
