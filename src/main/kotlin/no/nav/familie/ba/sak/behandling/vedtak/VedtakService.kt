@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonReposi
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
@@ -115,31 +116,26 @@ class VedtakService(private val behandlingService: BehandlingService,
                                          nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
 
-        // Slett alle vedtakPerson og tilknyttede ytelseperioder som ligger på vedtaket
+        // Slett alle vedtakPerson
         val personberegninger = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId = vedtak.id)
         vedtakPersonRepository.deleteAll(personberegninger)
-        vedtakPersonRepository.flush()
+
+        val identBarnMap = personopplysningGrunnlag.barna
+                .associateBy { it.personIdent.ident }
 
         val nyeVedtakPerson = nyBeregning.personBeregninger
                 .map {
-                    val person =
-                            personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.ident),
-                                                                                          personopplysningGrunnlag.id)
-                            ?: error("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
-                    Pair(it,person)
-                }
-                .filter{
-                    val (_,person) = it
-                    person.type === PersonType.BARN
-                }
-                .map {
 
-                     val (personberegning,person) = it
-                     if (personberegning.stønadFom.isBefore(person.fødselsdato)) {
+                    val person= identBarnMap[it.ident]
+                    if(person==null) {
+                        error("Finner ikke person med ident ${it.ident} i personopplysningsgrunnlaget knyttet til behandlingen")
+                    }
+
+                    if (it.stønadFom.isBefore(person.fødselsdato)) {
                         error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
                     }
 
-                    val sikkerStønadFom = personberegning.stønadFom.withDayOfMonth(1)
+                    val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
                     val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
 
                     if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
@@ -148,11 +144,11 @@ class VedtakService(private val behandlingService: BehandlingService,
 
                     VedtakPerson(personId = person.id,
                                  vedtakId = vedtak.id,
-                                 beløp = personberegning.beløp,
+                                 beløp = it.beløp,
                                  stønadFom = sikkerStønadFom,
                                  stønadTom = sikkerStønadTom,
-                                 type = personberegning.ytelsetype)
-             }
+                                 type = it.ytelsetype)
+                }
 
         vedtakPersonRepository.saveAll(nyeVedtakPerson)
 
