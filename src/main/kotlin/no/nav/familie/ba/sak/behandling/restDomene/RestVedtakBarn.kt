@@ -11,6 +11,6 @@ data class RestVedtakBarn(
 
 fun VedtakPerson.toRestVedtakBarn() = RestVedtakBarn(
         barn = this.person.personIdent.ident,
-        beløp = this.ytelsePerioder.first().beløp, // TODO endre her til å støtte liste
-        stønadFom = this.ytelsePerioder.first().stønadFom
+        beløp = this.beløp, // TODO endre her til å støtte liste
+        stønadFom = this.stønadFom
 )

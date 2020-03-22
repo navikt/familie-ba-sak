@@ -238,7 +238,7 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
-    fun `Oppdater vedtak med beregning`() {
+    fun `Opprett beregning på vedtak`() {
 
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
@@ -282,14 +282,84 @@ class BehandlingIntegrationTest {
 
         val vedtakPersonMap = vedtakPersoner.associateBy { it.person.personIdent.ident }
 
-        Assertions.assertEquals(1,vedtakPersonMap[barn1Fnr]!!.ytelsePerioder.size)
-        Assertions.assertEquals(1054,vedtakPersonMap[barn1Fnr]!!.ytelsePerioder[0].beløp)
-        Assertions.assertEquals(dato_2020_01_01, vedtakPersonMap[barn1Fnr]!!.ytelsePerioder[0].stønadFom)
-        Assertions.assertTrue(dato_2020_01_01 < vedtakPersonMap[barn1Fnr]!!.ytelsePerioder[0].stønadTom)
 
-        Assertions.assertEquals(1,vedtakPersonMap[barn2Fnr]!!.ytelsePerioder.size)
-        Assertions.assertEquals(1354,vedtakPersonMap[barn2Fnr]!!.ytelsePerioder[0].beløp)
-        Assertions.assertEquals(dato_2020_10_01, vedtakPersonMap[barn2Fnr]!!.ytelsePerioder[0].stønadFom)
-        Assertions.assertTrue(dato_2020_10_01 < vedtakPersonMap[barn2Fnr]!!.ytelsePerioder[0].stønadTom)
+        Assertions.assertEquals(1054,vedtakPersonMap[barn1Fnr]!!.beløp)
+        Assertions.assertEquals(dato_2020_01_01, vedtakPersonMap[barn1Fnr]!!.stønadFom)
+        Assertions.assertTrue(dato_2020_01_01 < vedtakPersonMap[barn1Fnr]!!.stønadTom)
+
+        Assertions.assertEquals(1354,vedtakPersonMap[barn2Fnr]!!.beløp)
+        Assertions.assertEquals(dato_2020_10_01, vedtakPersonMap[barn2Fnr]!!.stønadFom)
+        Assertions.assertTrue(dato_2020_10_01 < vedtakPersonMap[barn2Fnr]!!.stønadTom)
     }
+
+    @Test
+    @Tag("integration")
+    fun `Endre beregning på vedtak`() {
+
+        val søkerFnr = randomFnr()
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
+        val barn3Fnr = randomFnr()
+
+        val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
+        val dato_2020_10_01 = LocalDate.of(2020, 10, 1)
+        val dato_2021_01_01 = LocalDate.of(2021, 1, 1)
+        val dato_2021_10_01 = LocalDate.of(2021, 10, 1)
+
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr,barn3Fnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        Assertions.assertNotNull(personopplysningGrunnlag)
+
+        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+                behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                ansvarligSaksbehandler = "saksbehandler1")
+
+        val førsteBeregning = NyBeregning(listOf(
+                PersonBeregning(barn1Fnr,
+                                1054,
+                                dato_2020_01_01,
+                                Ytelsetype.ORDINÆR_BARNETRYGD),
+                PersonBeregning(barn2Fnr,
+                                1354,
+                                dato_2020_10_01,
+                                Ytelsetype.ORDINÆR_BARNETRYGD)
+        ))
+
+        vedtakService.oppdaterAktivVedtakMedBeregning(vedtak, personopplysningGrunnlag, førsteBeregning)
+
+        val andreBeregning = NyBeregning(listOf(
+                PersonBeregning(barn1Fnr,
+                                970,
+                                dato_2021_01_01,
+                                Ytelsetype.MANUELL_VURDERING),
+                PersonBeregning(barn3Fnr,
+                                314,
+                                dato_2021_10_01,
+                                Ytelsetype.EØS)
+        ))
+
+        val oppdatertVedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+
+        vedtakService.oppdaterAktivVedtakMedBeregning(oppdatertVedtak!!, personopplysningGrunnlag, andreBeregning)
+
+        val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(oppdatertVedtak.id)
+        Assertions.assertEquals(2,vedtakPersoner.size)
+
+        val vedtakPersonMap = vedtakPersoner.associateBy { it.person.personIdent.ident }
+
+        Assertions.assertEquals(970,vedtakPersonMap[barn1Fnr]!!.beløp)
+        Assertions.assertEquals(dato_2021_01_01, vedtakPersonMap[barn1Fnr]!!.stønadFom)
+        Assertions.assertTrue(dato_2021_01_01 < vedtakPersonMap[barn1Fnr]!!.stønadTom)
+        
+        Assertions.assertEquals(314,vedtakPersonMap[barn3Fnr]!!.beløp)
+        Assertions.assertEquals(dato_2021_10_01, vedtakPersonMap[barn3Fnr]!!.stønadFom)
+        Assertions.assertTrue(dato_2021_10_01 < vedtakPersonMap[barn3Fnr]!!.stønadTom)
+    }
+
 }

@@ -114,40 +114,46 @@ class VedtakService(private val behandlingService: BehandlingService,
                                         personopplysningGrunnlag: PersonopplysningGrunnlag,
                                         nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
-        nyBeregning.personBeregninger.map {
-            val person =
-                    personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.ident),
-                                                                                  personopplysningGrunnlag.id)
-                    ?: error("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
 
-            if (person.type === PersonType.BARN) {
-                if (it.stønadFom.isBefore(person.fødselsdato)) {
-                    error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
+        // Slett alle vedtakPerson og tilknyttede ytelseperioder som ligger på vedtaket
+        val personberegninger = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId = vedtak.id)
+        vedtakPersonRepository.deleteAll(personberegninger)
+        vedtakPersonRepository.flush()
+
+        val nyeVedtakPerson = nyBeregning.personBeregninger
+                .map {
+                    val person =
+                            personRepository.findByPersonIdentAndPersonopplysningGrunnlag(PersonIdent(it.ident),
+                                                                                          personopplysningGrunnlag.id)
+                            ?: error("Barnet du prøver å registrere på vedtaket er ikke tilknyttet behandlingen.")
+                    Pair(it,person)
                 }
-
-                val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-                val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
-
-                if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
-                    error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
+                .filter{
+                    val (_,person) = it
+                    person.type === PersonType.BARN
                 }
+                .map {
 
-                val nyEllerEksisterendeVedtakPerson =
-                        vedtakPersonRepository.finnPersonBeregning(vedtakId = vedtak.id, personIdent = person.personIdent.ident)
-                        ?: vedtakPersonRepository.saveAndFlush(VedtakPerson(person = person, vedtak = vedtak))
+                     val (personberegning,person) = it
+                     if (personberegning.stønadFom.isBefore(person.fødselsdato)) {
+                        error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
+                    }
 
-                val ytelsePeriode = YtelsePeriode(vedtakPerson = nyEllerEksisterendeVedtakPerson,
-                                                  beløp = it.beløp,
-                                                  stønadFom = sikkerStønadFom,
-                                                  stønadTom = sikkerStønadTom,
-                                                  type = it.ytelsetype)
+                    val sikkerStønadFom = personberegning.stønadFom.withDayOfMonth(1)
+                    val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
 
-                val vedtakPersonMedYtelsePeriode =
-                        nyEllerEksisterendeVedtakPerson.copy(ytelsePerioder = mutableListOf(ytelsePeriode))
+                    if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
+                        error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
+                    }
 
-                vedtakPersonRepository.save(vedtakPersonMedYtelsePeriode)
-            }
-        }
+                    VedtakPerson(person = person, vedtak = vedtak,
+                                                      beløp = personberegning.beløp,
+                                                      stønadFom = sikkerStønadFom,
+                                                      stønadTom = sikkerStønadTom,
+                                                      type = personberegning.ytelsetype)
+             }
+
+        vedtakPersonRepository.saveAll(nyeVedtakPerson)
 
         vedtak.stønadBrevMarkdown = Result.runCatching {
                     dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
