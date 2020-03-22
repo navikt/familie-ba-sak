@@ -28,7 +28,7 @@ fun lagRestVedtakBarn(vedtakPersoner: List<VedtakPerson>, personopplysningGrunnl
                 RestVedtakBarn(
                         barn = idBarnMap?.get(it.key)?.personIdent?.ident,
                         beløp = it.value.map { it.beløp }.sum(),
-                        stønadFom = it.value.fold(LocalDate.MAX) {acc,pv-> minOf(acc,pv.stønadFom)},
+                        stønadFom = it.value.map { it.stønadFom }.min() ?: LocalDate.MIN,
                         ytelsePerioder = it.value.map { it1->RestYtelsePeriode(it1.beløp, it1.stønadFom, it1.stønadTom, it1.type) }
                 )
             }
