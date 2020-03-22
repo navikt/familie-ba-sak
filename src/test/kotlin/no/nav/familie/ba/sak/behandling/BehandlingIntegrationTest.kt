@@ -94,8 +94,7 @@ class BehandlingIntegrationTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         behandlingService.opprettBehandling(nyOrdinærBehandling(
-                fnr,
-                listOf(barnFnr)))
+                fnr))
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
     }
 
@@ -106,10 +105,7 @@ class BehandlingIntegrationTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         behandlingService.opprettBehandling(nyOrdinærBehandling(
-                fnr,
-                listOf(randomFnr(),
-                       randomFnr()
-                )))
+                fnr))
         Assertions.assertEquals(1,
                                 behandlingService.hentBehandlinger(fagsak.id).size)
     }
@@ -132,7 +128,7 @@ class BehandlingIntegrationTest {
         val barnId = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
         behandling.steg = StegType.GODKJENNE_VEDTAK
         behandlingRepository.saveAndFlush(behandling)
 
@@ -141,7 +137,6 @@ class BehandlingIntegrationTest {
                     BehandlingKategori.NASJONAL,
                     BehandlingUnderkategori.ORDINÆR,
                     morId,
-                    listOf(barnId),
                     BehandlingType.REVURDERING,
                     null))
         }
@@ -155,7 +150,7 @@ class BehandlingIntegrationTest {
         val barn2Id = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
-        behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
+        behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
 
         Assertions.assertEquals(1, behandlingService.hentBehandlinger(fagsakId = fagsak.id).size)
 
@@ -163,7 +158,6 @@ class BehandlingIntegrationTest {
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 morId,
-                listOf(barn2Id),
                 BehandlingType.REVURDERING,
                 null))
 
@@ -180,7 +174,7 @@ class BehandlingIntegrationTest {
         val barn2Fnr = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr, listOf(barn1Fnr, barn2Fnr)))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))

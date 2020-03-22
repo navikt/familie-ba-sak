@@ -43,6 +43,7 @@ data class Logg(
 enum class LoggType(val visningsnavn: String) {
     FØDSELSHENDELSE("Fødselshendelse"),
     BEHANDLING_OPPRETTET("Behandling opprettet"),
+    SØKNAD_REGISTRERT("Søknaden ble registrert"),
     VILKÅRSVURDERING("Vilkårsvurdering"),
     SEND_TIL_BESLUTTER("Send til beslutter"),
     GODKJENNE_VEDTAK("Godkjenne vedtak"),
