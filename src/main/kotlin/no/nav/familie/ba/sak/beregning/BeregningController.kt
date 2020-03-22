@@ -3,11 +3,14 @@ package no.nav.familie.ba.sak.beregning
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.notFound
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -50,9 +53,8 @@ class BeregningController(
                                        ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         return Result.runCatching {
-                    vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak,
-                                                                   personopplysningGrunnlag,
-                                                                   nyBeregning)
+                    val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak.id,nyBeregning,personopplysningGrunnlag)
+                    vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
                 }
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },
@@ -75,3 +77,38 @@ data class PersonBeregning(
         val stønadFom: LocalDate,
         val ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
 )
+
+fun mapNyBeregningTilVedtakPerson(vedtakId: Long, nyBeregning: NyBeregning, personopplysningGrunnlag: PersonopplysningGrunnlag)
+ : List<VedtakPerson>{
+
+    val identBarnMap = personopplysningGrunnlag.barna
+            .associateBy { it.personIdent.ident }
+
+    return nyBeregning.personBeregninger
+            .map {
+
+                val person= identBarnMap[it.ident]
+                if(person==null) {
+                    error("Finner ikke person med ident ${it.ident} i personopplysningsgrunnlaget knyttet til behandlingen")
+                }
+
+                if (it.stønadFom.isBefore(person.fødselsdato)) {
+                    error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
+                }
+
+                val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
+                val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
+
+                if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
+                    error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
+                }
+
+                VedtakPerson(personId = person.id,
+                             vedtakId = vedtakId,
+                             beløp = it.beløp,
+                             stønadFom = sikkerStønadFom,
+                             stønadTom = sikkerStønadTom,
+                             type = it.ytelsetype)
+            }
+
+}

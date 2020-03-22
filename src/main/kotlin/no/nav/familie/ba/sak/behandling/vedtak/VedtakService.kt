@@ -29,7 +29,6 @@ class VedtakService(private val behandlingService: BehandlingService,
                     private val vedtakRepository: VedtakRepository,
                     private val vedtakPersonRepository: VedtakPersonRepository,
                     private val dokGenKlient: DokGenKlient,
-                    private val personRepository: PersonRepository,
                     private val fagsakService: FagsakService) {
 
     @Transactional
@@ -112,45 +111,11 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun oppdaterAktivtVedtakMedBeregning(vedtak: Vedtak,
-                                         personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                         nyBeregning: NyBeregning)
+                                         vedtakPersoner : List<VedtakPerson>)
             : Ressurs<RestFagsak> {
 
-        // Slett alle vedtakPerson
-        val personberegninger = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId = vedtak.id)
-        vedtakPersonRepository.deleteAll(personberegninger)
-
-        val identBarnMap = personopplysningGrunnlag.barna
-                .associateBy { it.personIdent.ident }
-
-        val nyeVedtakPerson = nyBeregning.personBeregninger
-                .map {
-
-                    val person= identBarnMap[it.ident]
-                    if(person==null) {
-                        error("Finner ikke person med ident ${it.ident} i personopplysningsgrunnlaget knyttet til behandlingen")
-                    }
-
-                    if (it.stønadFom.isBefore(person.fødselsdato)) {
-                        error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
-                    }
-
-                    val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-                    val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
-
-                    if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
-                        error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
-                    }
-
-                    VedtakPerson(personId = person.id,
-                                 vedtakId = vedtak.id,
-                                 beløp = it.beløp,
-                                 stønadFom = sikkerStønadFom,
-                                 stønadTom = sikkerStønadTom,
-                                 type = it.ytelsetype)
-                }
-
-        vedtakPersonRepository.saveAll(nyeVedtakPerson)
+        vedtakPersonRepository.slettAllePersonBeregningerForVedtak(vedtak.id)
+        vedtakPersonRepository.saveAll(vedtakPersoner)
 
         vedtak.stønadBrevMarkdown = Result.runCatching {
                     dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
