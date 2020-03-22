@@ -19,6 +19,6 @@ data class VedtakPerson(
         @ManyToOne(optional = false) @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
         val person: Person,
 
-        @OneToMany(mappedBy="vedtakPerson", fetch = FetchType.EAGER)
+        @OneToMany(mappedBy="vedtakPerson", fetch = FetchType.EAGER, cascade = [CascadeType.ALL],orphanRemoval = true)
         val ytelsePerioder: MutableList<YtelsePeriode> = mutableListOf()
 ) : BaseEntitet()

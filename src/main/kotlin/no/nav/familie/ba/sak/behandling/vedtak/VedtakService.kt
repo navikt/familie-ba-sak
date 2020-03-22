@@ -134,9 +134,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
                 val nyEllerEksisterendeVedtakPerson =
                         vedtakPersonRepository.finnPersonBeregning(vedtakId = vedtak.id, personIdent = person.personIdent.ident)
-                        ?: VedtakPerson(
-                                person = person,
-                                vedtak = vedtak)
+                        ?: vedtakPersonRepository.saveAndFlush(VedtakPerson(person = person, vedtak = vedtak))
 
                 val ytelsePeriode = YtelsePeriode(vedtakPerson = nyEllerEksisterendeVedtakPerson,
                                                   beløp = it.beløp,
@@ -144,10 +142,10 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                   stønadTom = sikkerStønadTom,
                                                   type = it.ytelsetype)
 
-                val oppdatertVedtakPersonMedYtelsePeriode =
+                val vedtakPersonMedYtelsePeriode =
                         nyEllerEksisterendeVedtakPerson.copy(ytelsePerioder = mutableListOf(ytelsePeriode))
 
-                vedtakPersonRepository.save(oppdatertVedtakPersonMedYtelsePeriode)
+                vedtakPersonRepository.save(vedtakPersonMedYtelsePeriode)
             }
         }
 

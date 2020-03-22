@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
@@ -51,6 +52,9 @@ class BehandlingIntegrationTest {
 
     @Autowired
     lateinit var vedtakService: VedtakService
+
+    @Autowired
+    lateinit var vedtakPersonRepository: VedtakPersonRepository
 
     @Autowired
     lateinit var persongrunnlagService: PersongrunnlagService
@@ -230,5 +234,62 @@ class BehandlingIntegrationTest {
 
         Assertions.assertEquals(BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, aktivBehandling!!.type)
         Assertions.assertNotEquals(behandling.id, aktivBehandling.id)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Oppdater vedtak med beregning`() {
+
+        val søkerFnr = randomFnr()
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
+
+        val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
+        val dato_2020_10_01 = LocalDate.of(2020, 10, 1)
+        
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        Assertions.assertNotNull(personopplysningGrunnlag)
+
+        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+                behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                ansvarligSaksbehandler = "saksbehandler1")
+
+        val personBeregninger = listOf(
+                PersonBeregning(barn1Fnr,
+                                1054,
+                                dato_2020_01_01,
+                                Ytelsetype.ORDINÆR_BARNETRYGD),
+                PersonBeregning(barn2Fnr,
+                                1354,
+                                dato_2020_10_01,
+                                Ytelsetype.ORDINÆR_BARNETRYGD)
+        )
+        val nyBeregning = NyBeregning(personBeregninger)
+
+        vedtakService.oppdaterAktivVedtakMedBeregning(vedtak, personopplysningGrunnlag, nyBeregning)
+
+        val oppdatertVedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+
+        val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(oppdatertVedtak!!.id)
+        Assertions.assertEquals(2,vedtakPersoner.size)
+
+        val vedtakPersonMap = vedtakPersoner.associateBy { it.person.personIdent.ident }
+
+        Assertions.assertEquals(1,vedtakPersonMap[barn1Fnr]!!.ytelsePerioder.size)
+        Assertions.assertEquals(1054,vedtakPersonMap[barn1Fnr]!!.ytelsePerioder[0].beløp)
+        Assertions.assertEquals(dato_2020_01_01, vedtakPersonMap[barn1Fnr]!!.ytelsePerioder[0].stønadFom)
+        Assertions.assertTrue(dato_2020_01_01 < vedtakPersonMap[barn1Fnr]!!.ytelsePerioder[0].stønadTom)
+
+        Assertions.assertEquals(1,vedtakPersonMap[barn2Fnr]!!.ytelsePerioder.size)
+        Assertions.assertEquals(1354,vedtakPersonMap[barn2Fnr]!!.ytelsePerioder[0].beløp)
+        Assertions.assertEquals(dato_2020_10_01, vedtakPersonMap[barn2Fnr]!!.ytelsePerioder[0].stønadFom)
+        Assertions.assertTrue(dato_2020_10_01 < vedtakPersonMap[barn2Fnr]!!.ytelsePerioder[0].stønadTom)
     }
 }
