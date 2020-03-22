@@ -50,9 +50,9 @@ class BeregningController(
                                        ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         return Result.runCatching {
-                    vedtakService.oppdaterAktivVedtakMedBeregning(vedtak,
-                                                                  personopplysningGrunnlag,
-                                                                  nyBeregning)
+                    vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak,
+                                                                   personopplysningGrunnlag,
+                                                                   nyBeregning)
                 }
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },

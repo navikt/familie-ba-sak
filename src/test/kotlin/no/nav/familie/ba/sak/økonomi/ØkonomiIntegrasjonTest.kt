@@ -90,7 +90,7 @@ class ØkonomiIntegrasjonTest {
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        val oppdatertFagsak = vedtakService.oppdaterAktivVedtakMedBeregning(
+        val oppdatertFagsak = vedtakService.oppdaterAktivtVedtakMedBeregning(
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(

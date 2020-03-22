@@ -110,9 +110,9 @@ class VedtakService(private val behandlingService: BehandlingService,
 
 
     @Transactional
-    fun oppdaterAktivVedtakMedBeregning(vedtak: Vedtak,
-                                        personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                        nyBeregning: NyBeregning)
+    fun oppdaterAktivtVedtakMedBeregning(vedtak: Vedtak,
+                                         personopplysningGrunnlag: PersonopplysningGrunnlag,
+                                         nyBeregning: NyBeregning)
             : Ressurs<RestFagsak> {
 
         // Slett alle vedtakPerson og tilknyttede ytelseperioder som ligger på vedtaket

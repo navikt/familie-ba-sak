@@ -103,7 +103,7 @@ class DokumentServiceTest(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        vedtakService.oppdaterAktivVedtakMedBeregning(
+        vedtakService.oppdaterAktivtVedtakMedBeregning(
                 vedtak = vedtak!!,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 nyBeregning = NyBeregning(

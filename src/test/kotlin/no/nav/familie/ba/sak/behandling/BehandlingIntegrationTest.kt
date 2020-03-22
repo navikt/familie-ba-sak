@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.lagRestVedtakBarn
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
@@ -210,7 +209,7 @@ class BehandlingIntegrationTest {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        vedtakService.oppdaterAktivVedtakMedBeregning(vedtak!!, personopplysningGrunnlag, nyBeregning)
+        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak!!, personopplysningGrunnlag, nyBeregning)
 
         val task = opprettOpphørVedtakTask(
                 behandling,
@@ -271,14 +270,10 @@ class BehandlingIntegrationTest {
         )
         val nyBeregning = NyBeregning(personBeregninger)
 
-        vedtakService.oppdaterAktivVedtakMedBeregning(vedtak, personopplysningGrunnlag, nyBeregning)
-
-        val oppdatertVedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-
-        val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(oppdatertVedtak!!.id)
-        Assertions.assertEquals(2,vedtakPersoner.size)
-
-        val restVedtakBarnMap = lagRestVedtakBarn(vedtakPersoner, personopplysningGrunnlag)
+        val restVedtakBarnMap = vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, personopplysningGrunnlag, nyBeregning)
+                .data!!.behandlinger
+                .flatMap { it.vedtakForBehandling }
+                .flatMap { it!!.personBeregninger }
                 .associateBy({it.barn}, {it.ytelsePerioder[0]} )
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
@@ -326,7 +321,7 @@ class BehandlingIntegrationTest {
                 PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
         ))
 
-        vedtakService.oppdaterAktivVedtakMedBeregning(vedtak, personopplysningGrunnlag, førsteBeregning)
+        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, personopplysningGrunnlag, førsteBeregning)
 
         val andreBeregning = NyBeregning(listOf(
                 PersonBeregning(barn1Fnr, 970, dato_2021_01_01, Ytelsetype.MANUELL_VURDERING),
@@ -335,12 +330,10 @@ class BehandlingIntegrationTest {
 
         val oppdatertVedtak = vedtakRepository.findById(vedtak.id).get()
 
-        vedtakService.oppdaterAktivVedtakMedBeregning(oppdatertVedtak, personopplysningGrunnlag, andreBeregning)
-
-        val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(oppdatertVedtak.id)
-        Assertions.assertEquals(2,vedtakPersoner.size)
-
-        val restVedtakBarnMap = lagRestVedtakBarn(vedtakPersoner, personopplysningGrunnlag)
+        val restVedtakBarnMap = vedtakService.oppdaterAktivtVedtakMedBeregning(oppdatertVedtak, personopplysningGrunnlag, andreBeregning)
+                .data!!.behandlinger
+                .flatMap { it.vedtakForBehandling }
+                .flatMap { it!!.personBeregninger }
                 .associateBy({it.barn}, {it.ytelsePerioder[0]} )
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
