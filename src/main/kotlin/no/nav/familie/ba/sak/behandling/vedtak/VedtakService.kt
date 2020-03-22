@@ -146,11 +146,12 @@ class VedtakService(private val behandlingService: BehandlingService,
                         error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
                     }
 
-                    VedtakPerson(person = person, vedtak = vedtak,
-                                                      beløp = personberegning.beløp,
-                                                      stønadFom = sikkerStønadFom,
-                                                      stønadTom = sikkerStønadTom,
-                                                      type = personberegning.ytelsetype)
+                    VedtakPerson(personId = person.id,
+                                 vedtakId = vedtak.id,
+                                 beløp = personberegning.beløp,
+                                 stønadFom = sikkerStønadFom,
+                                 stønadTom = sikkerStønadTom,
+                                 type = personberegning.ytelsetype)
              }
 
         vedtakPersonRepository.saveAll(nyeVedtakPerson)

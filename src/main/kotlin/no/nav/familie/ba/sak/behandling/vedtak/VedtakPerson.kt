@@ -13,11 +13,11 @@ data class VedtakPerson(
         @SequenceGenerator(name = "vedtak_person_seq_generator", sequenceName = "vedtak_person_seq", allocationSize = 50)
         val id: Long = 0,
 
-        @ManyToOne(optional = false) @JoinColumn(name = "fk_vedtak_id", nullable = false, updatable = false)
-        val vedtak: Vedtak,
+        @Column(name = "fk_vedtak_id", nullable = false, updatable = false)
+        val vedtakId: Long,
 
-        @ManyToOne(optional = false) @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
-        val person: Person,
+        @Column(name = "fk_person_id", nullable = false, updatable = false)
+        val personId: Long,
 
         @Column(name = "belop", nullable = false)
         val beløp: Int,

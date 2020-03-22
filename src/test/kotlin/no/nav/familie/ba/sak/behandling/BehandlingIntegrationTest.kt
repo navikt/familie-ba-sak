@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
+import no.nav.familie.ba.sak.behandling.restDomene.toRestVedtakBarn
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
@@ -274,7 +275,7 @@ class BehandlingIntegrationTest {
         val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(oppdatertVedtak!!.id)
         Assertions.assertEquals(2,vedtakPersoner.size)
 
-        val vedtakPersonMap = vedtakPersoner.associateBy { it.person.personIdent.ident }
+        val vedtakPersonMap = vedtakPersoner.map { it.toRestVedtakBarn(personopplysningGrunnlag) }.associateBy { it.barn }
 
         Assertions.assertEquals(1054,vedtakPersonMap[barn1Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_01_01, vedtakPersonMap[barn1Fnr]!!.stønadFom)
@@ -334,7 +335,7 @@ class BehandlingIntegrationTest {
         val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(oppdatertVedtak.id)
         Assertions.assertEquals(2,vedtakPersoner.size)
 
-        val vedtakPersonMap = vedtakPersoner.associateBy { it.person.personIdent.ident }
+        val vedtakPersonMap = vedtakPersoner.map { it.toRestVedtakBarn(personopplysningGrunnlag) }.associateBy { it.barn }
 
         Assertions.assertEquals(970,vedtakPersonMap[barn1Fnr]!!.beløp)
         Assertions.assertEquals(dato_2021_01_01, vedtakPersonMap[barn1Fnr]!!.stønadFom)

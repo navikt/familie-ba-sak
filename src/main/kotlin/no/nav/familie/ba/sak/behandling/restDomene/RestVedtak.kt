@@ -12,10 +12,10 @@ data class RestVedtak(
         val id: Long
 )
 
-fun Vedtak.toRestVedtak(personBeregning: List<VedtakPerson>) = RestVedtak(
+fun Vedtak.toRestVedtak(restVedtakBarn: List<RestVedtakBarn>) = RestVedtak(
         aktiv = this.aktiv,
         ansvarligSaksbehandler = this.ansvarligSaksbehandler,
-        personBeregninger = personBeregning.map { it.toRestVedtakBarn() },
+        personBeregninger = restVedtakBarn,
         vedtaksdato = this.vedtaksdato,
         id= this.id
 )

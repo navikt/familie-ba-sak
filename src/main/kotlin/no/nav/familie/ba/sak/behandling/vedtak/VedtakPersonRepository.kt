@@ -4,9 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
 interface VedtakPersonRepository : JpaRepository<VedtakPerson, Long> {
-    @Query(value = "SELECT vb FROM VedtakPerson vb JOIN vb.vedtak v WHERE v.id = :vedtakId")
+    @Query(value = "SELECT vb FROM VedtakPerson vb WHERE vb.vedtakId = :vedtakId")
     fun finnPersonBeregningForVedtak(vedtakId: Long): List<VedtakPerson>
-
-    @Query(value = "SELECT vb FROM VedtakPerson vb JOIN vb.vedtak v WHERE v.id = :vedtakId AND vb.person.personIdent.ident = :personIdent")
-    fun finnPersonBeregning(vedtakId: Long, personIdent: String): VedtakPerson?
 }
