@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultatRepository
@@ -15,6 +17,8 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+
 
 @Service
 class FagsakService(
@@ -51,8 +55,8 @@ class FagsakService(
             val personopplysningGrunnlag = it.id.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
-                val restVedtakBarn = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
-                        .map { it.toRestVedtakBarn(personopplysningGrunnlag) }
+                val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
+                val restVedtakBarn = lagRestVedtakBarn(vedtakPersoner, personopplysningGrunnlag)
                 vedtak.toRestVedtak(restVedtakBarn)
             }
 

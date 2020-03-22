@@ -2,18 +2,21 @@ package no.nav.familie.ba.sak.behandling
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
-import no.nav.familie.ba.sak.behandling.restDomene.toRestVedtakBarn
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.lagRestVedtakBarn
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.NyBeregning
+import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
@@ -275,17 +278,19 @@ class BehandlingIntegrationTest {
         val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(oppdatertVedtak!!.id)
         Assertions.assertEquals(2,vedtakPersoner.size)
 
-        val vedtakPersonMap = vedtakPersoner.map { it.toRestVedtakBarn(personopplysningGrunnlag) }.associateBy { it.barn }
+        val restVedtakBarnMap = lagRestVedtakBarn(vedtakPersoner, personopplysningGrunnlag)
+                .associateBy({it.barn}, {it.ytelsePerioder[0]} )
 
-        Assertions.assertEquals(1054,vedtakPersonMap[barn1Fnr]!!.beløp)
-        Assertions.assertEquals(dato_2020_01_01, vedtakPersonMap[barn1Fnr]!!.stønadFom)
-        Assertions.assertTrue(dato_2020_01_01 < vedtakPersonMap[barn1Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD,vedtakPersonMap[barn1Fnr]!!.type)
+        Assertions.assertEquals(2, restVedtakBarnMap.size)
+        Assertions.assertEquals(1054,restVedtakBarnMap[barn1Fnr]!!.beløp)
+        Assertions.assertEquals(dato_2020_01_01, restVedtakBarnMap[barn1Fnr]!!.stønadFom)
+        Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!!.stønadTom)
+        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD,restVedtakBarnMap[barn1Fnr]!!.type)
 
-        Assertions.assertEquals(1354,vedtakPersonMap[barn2Fnr]!!.beløp)
-        Assertions.assertEquals(dato_2020_10_01, vedtakPersonMap[barn2Fnr]!!.stønadFom)
-        Assertions.assertTrue(dato_2020_10_01 < vedtakPersonMap[barn2Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD,vedtakPersonMap[barn2Fnr]!!.type)
+        Assertions.assertEquals(1354,restVedtakBarnMap[barn2Fnr]!!.beløp)
+        Assertions.assertEquals(dato_2020_10_01, restVedtakBarnMap[barn2Fnr]!!.stønadFom)
+        Assertions.assertTrue(dato_2020_10_01 < restVedtakBarnMap[barn2Fnr]!!.stønadTom)
+        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD,restVedtakBarnMap[barn2Fnr]!!.type)
     }
 
     @Test
@@ -335,16 +340,18 @@ class BehandlingIntegrationTest {
         val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(oppdatertVedtak.id)
         Assertions.assertEquals(2,vedtakPersoner.size)
 
-        val vedtakPersonMap = vedtakPersoner.map { it.toRestVedtakBarn(personopplysningGrunnlag) }.associateBy { it.barn }
+        val restVedtakBarnMap = lagRestVedtakBarn(vedtakPersoner, personopplysningGrunnlag)
+                .associateBy({it.barn}, {it.ytelsePerioder[0]} )
 
-        Assertions.assertEquals(970,vedtakPersonMap[barn1Fnr]!!.beløp)
-        Assertions.assertEquals(dato_2021_01_01, vedtakPersonMap[barn1Fnr]!!.stønadFom)
-        Assertions.assertTrue(dato_2021_01_01 < vedtakPersonMap[barn1Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.MANUELL_VURDERING,vedtakPersonMap[barn1Fnr]!!.type)
+        Assertions.assertEquals(2, restVedtakBarnMap.size)
+        Assertions.assertEquals(970,restVedtakBarnMap[barn1Fnr]!!.beløp)
+        Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn1Fnr]!!.stønadFom)
+        Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn1Fnr]!!.stønadTom)
+        Assertions.assertEquals(Ytelsetype.MANUELL_VURDERING,restVedtakBarnMap[barn1Fnr]!!.type)
 
-        Assertions.assertEquals(314,vedtakPersonMap[barn3Fnr]!!.beløp)
-        Assertions.assertEquals(dato_2021_10_01, vedtakPersonMap[barn3Fnr]!!.stønadFom)
-        Assertions.assertTrue(dato_2021_10_01 < vedtakPersonMap[barn3Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.EØS,vedtakPersonMap[barn3Fnr]!!.type)
+        Assertions.assertEquals(314,restVedtakBarnMap[barn3Fnr]!!.beløp)
+        Assertions.assertEquals(dato_2021_10_01, restVedtakBarnMap[barn3Fnr]!!.stønadFom)
+        Assertions.assertTrue(dato_2021_10_01 < restVedtakBarnMap[barn3Fnr]!!.stønadTom)
+        Assertions.assertEquals(Ytelsetype.EØS,restVedtakBarnMap[barn3Fnr]!!.type)
     }
 }

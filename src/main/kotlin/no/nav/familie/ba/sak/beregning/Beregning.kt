@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
-import no.nav.familie.ba.sak.behandling.vedtak.YtelsePeriode
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
