@@ -238,7 +238,7 @@ class BehandlingIntegrationTest {
 
     @Test
     @Tag("integration")
-    fun `Opprett beregning på vedtak`() {
+    fun `Opprett barnas beregning på vedtak`() {
 
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
@@ -262,14 +262,8 @@ class BehandlingIntegrationTest {
                 ansvarligSaksbehandler = "saksbehandler1")
 
         val personBeregninger = listOf(
-                PersonBeregning(barn1Fnr,
-                                1054,
-                                dato_2020_01_01,
-                                Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr,
-                                1354,
-                                dato_2020_10_01,
-                                Ytelsetype.ORDINÆR_BARNETRYGD)
+                PersonBeregning(barn1Fnr, 1054, dato_2020_01_01, Ytelsetype.ORDINÆR_BARNETRYGD),
+                PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
         )
         val nyBeregning = NyBeregning(personBeregninger)
 
@@ -282,19 +276,20 @@ class BehandlingIntegrationTest {
 
         val vedtakPersonMap = vedtakPersoner.associateBy { it.person.personIdent.ident }
 
-
         Assertions.assertEquals(1054,vedtakPersonMap[barn1Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_01_01, vedtakPersonMap[barn1Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2020_01_01 < vedtakPersonMap[barn1Fnr]!!.stønadTom)
+        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD,vedtakPersonMap[barn1Fnr]!!.type)
 
         Assertions.assertEquals(1354,vedtakPersonMap[barn2Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_10_01, vedtakPersonMap[barn2Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2020_10_01 < vedtakPersonMap[barn2Fnr]!!.stønadTom)
+        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD,vedtakPersonMap[barn2Fnr]!!.type)
     }
 
     @Test
     @Tag("integration")
-    fun `Endre beregning på vedtak`() {
+    fun `Endre barnas beregning på vedtak`() {
 
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
@@ -321,32 +316,20 @@ class BehandlingIntegrationTest {
                 ansvarligSaksbehandler = "saksbehandler1")
 
         val førsteBeregning = NyBeregning(listOf(
-                PersonBeregning(barn1Fnr,
-                                1054,
-                                dato_2020_01_01,
-                                Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr,
-                                1354,
-                                dato_2020_10_01,
-                                Ytelsetype.ORDINÆR_BARNETRYGD)
+                PersonBeregning(barn1Fnr, 1054, dato_2020_01_01, Ytelsetype.ORDINÆR_BARNETRYGD),
+                PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
         ))
 
         vedtakService.oppdaterAktivVedtakMedBeregning(vedtak, personopplysningGrunnlag, førsteBeregning)
 
         val andreBeregning = NyBeregning(listOf(
-                PersonBeregning(barn1Fnr,
-                                970,
-                                dato_2021_01_01,
-                                Ytelsetype.MANUELL_VURDERING),
-                PersonBeregning(barn3Fnr,
-                                314,
-                                dato_2021_10_01,
-                                Ytelsetype.EØS)
+                PersonBeregning(barn1Fnr, 970, dato_2021_01_01, Ytelsetype.MANUELL_VURDERING),
+                PersonBeregning(barn3Fnr, 314, dato_2021_10_01, Ytelsetype.EØS)
         ))
 
-        val oppdatertVedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+        val oppdatertVedtak = vedtakRepository.findById(vedtak.id).get()
 
-        vedtakService.oppdaterAktivVedtakMedBeregning(oppdatertVedtak!!, personopplysningGrunnlag, andreBeregning)
+        vedtakService.oppdaterAktivVedtakMedBeregning(oppdatertVedtak, personopplysningGrunnlag, andreBeregning)
 
         val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(oppdatertVedtak.id)
         Assertions.assertEquals(2,vedtakPersoner.size)
@@ -356,10 +339,11 @@ class BehandlingIntegrationTest {
         Assertions.assertEquals(970,vedtakPersonMap[barn1Fnr]!!.beløp)
         Assertions.assertEquals(dato_2021_01_01, vedtakPersonMap[barn1Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < vedtakPersonMap[barn1Fnr]!!.stønadTom)
-        
+        Assertions.assertEquals(Ytelsetype.MANUELL_VURDERING,vedtakPersonMap[barn1Fnr]!!.type)
+
         Assertions.assertEquals(314,vedtakPersonMap[barn3Fnr]!!.beløp)
         Assertions.assertEquals(dato_2021_10_01, vedtakPersonMap[barn3Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2021_10_01 < vedtakPersonMap[barn3Fnr]!!.stønadTom)
+        Assertions.assertEquals(Ytelsetype.EØS,vedtakPersonMap[barn3Fnr]!!.type)
     }
-
 }
