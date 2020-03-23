@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.behandling.grunnlag.søknad
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.RessursResponse.illegalState
 import no.nav.familie.ba.sak.common.RessursResponse.notFound
@@ -29,10 +28,6 @@ class SøknadGrunnlagController(
 
         return Result.runCatching {
                     stegService.håndterSøknad(behandling, søknadDTO)
-                    stegService.håndterPersongrunnlag(
-                            behandling,
-                            RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
-                                                       barnasIdenter = søknadDTO.barnaMedOpplysninger.map { it.ident }))
                 }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
