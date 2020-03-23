@@ -30,7 +30,9 @@ class PersonController(private val integrasjonOnBehalfClient: IntegrasjonOnBehal
                         onFailure = {
                             illegalState("Hent person feilet: ${it.message}", it)
                         },
-                        onSuccess = { ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent))) }
+                        onSuccess = {
+                            ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent)))
+                        }
                 )
     }
 }
