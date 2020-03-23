@@ -55,6 +55,4 @@ alter table periode_resultat add column behandling_resultat_id bigint references
 alter table periode_resultat add column periode_fom timestamp (3);
 alter table periode_resultat add column periode_tom timestamp (3);
 alter index samlet_vilkar_resultat_pkey rename to periode_resultat_pkey;
-
-
  */

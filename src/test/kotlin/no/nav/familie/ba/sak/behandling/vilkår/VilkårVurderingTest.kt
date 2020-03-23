@@ -144,9 +144,6 @@ class VilkårVurderingTest {
         Assertions.assertEquals(Resultat.NEI, periodeResultat.hentSamletResultat())
     }
 
-
-
-    /*
     @Test
     fun `Henting og evaluering av oppfylte vilkår gir rett antall samlede resultater`() {
 
@@ -160,14 +157,12 @@ class VilkårVurderingTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val periodeResultat = vilkårService.vurderVilkårForFødselshendelse(personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                           behandlingId = behandling.id)
+        val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
 
-        val forventetAntallVurderteVilkår =
-                Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
-        Assertions.assertEquals(forventetAntallVurderteVilkår, periodeResultat.periodeResultat.size)
-    }*/
-    //TODO: Oppdater test
+        val forventetAntallVurderteVilkår = Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
+        Assertions.assertEquals(forventetAntallVurderteVilkår,
+                                behandlingResultat.periodeResultater.flatMap { periodeResultat -> periodeResultat.vilkårResultater }.size)
+    }
 
     @Test
     fun `Sjekk gyldig vilkårsperiode`() {
@@ -184,6 +179,3 @@ class VilkårVurderingTest {
         assertFalse(begrensetGyldigVilkårsperiode.gyldigFor(LocalDate.now().plusDays(6)))
     }
 }
-
-
-

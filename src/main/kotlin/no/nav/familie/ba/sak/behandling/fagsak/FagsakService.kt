@@ -68,7 +68,7 @@ class FagsakService(
                     opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori,
-                    brevType = it.brevType, //TODO: Hva er det egentlig restbehandlingen har behov for her?
+                    brevType = it.brevType,
                     begrunnelse = it.begrunnelse
             )
         }
