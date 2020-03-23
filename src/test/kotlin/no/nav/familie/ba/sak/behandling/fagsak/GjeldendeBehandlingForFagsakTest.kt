@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.lagTestUtbetalingsoppdragForFGB
@@ -40,25 +41,14 @@ class GjeldendeBehandlingForFagsakTest {
     @Test
     fun `Skal oppdatere gjeldende behandling FGB`() {
         val morId = randomFnr()
-        val barnId = randomFnr()
         val vedtakDato = LocalDate.now()
         val stønadFom = UTBETALINGSMÅNED.minusMonths(1)
         val stønadTom = UTBETALINGSMÅNED.plusMonths(3)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
-                morId,
-                fagsak.id.toString(),
-                behandling.id,
-                vedtakDato,
-                stønadFom,
-                stønadTom
-        )
-        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+        val behandling = lagFerdigstiltFGB(fagsak, morId, vedtakDato, stønadFom, stønadTom)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
 
         Assertions.assertEquals(1, gjeldendeBehandlinger.size)
         Assertions.assertEquals(behandling.id, gjeldendeBehandlinger[0].id)
@@ -68,26 +58,15 @@ class GjeldendeBehandlingForFagsakTest {
     @Test
     fun `Skal oppdatere gjeldende behandling for FGB med opphør frem i tid`() {
         val morId = randomFnr()
-        val barnId = randomFnr()
         val vedtakDato = LocalDate.now()
         val opphørFom = UTBETALINGSMÅNED.plusMonths(2)
         val stønadFom = UTBETALINGSMÅNED.minusMonths(1)
         val stønadTom = UTBETALINGSMÅNED.plusMonths(3)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
-                morId,
-                fagsak.id.toString(),
-                behandling.id,
-                vedtakDato,
-                stønadFom,
-                stønadTom
-        )
-        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+        val behandling = lagFerdigstiltFGB(fagsak, morId, vedtakDato, stønadFom, stønadTom)
 
-        val opphør = behandlingService.opprettBehandling(nyRevurdering(morId, listOf(barnId)))
+        val opphør = behandlingService.opprettBehandling(nyRevurdering(morId))
         val utbetalingsoppdragOpphør = lagTestUtbetalingsoppdragForOpphør(
                 morId,
                 fagsak.id.toString(),
@@ -100,7 +79,7 @@ class GjeldendeBehandlingForFagsakTest {
         beregningService.lagreBeregningsresultat(opphør, utbetalingsoppdragOpphør)
         behandlingService.oppdaterStatusPåBehandling(opphør.id, BehandlingStatus.IVERKSATT)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
 
         Assertions.assertEquals(1, gjeldendeBehandlinger.size)
         Assertions.assertEquals(behandling.id, gjeldendeBehandlinger[0].id)
@@ -110,26 +89,15 @@ class GjeldendeBehandlingForFagsakTest {
     @Test
     fun `Skal oppdatere gjeldende behandling for FGB med opphør denne måneden`() {
         val morId = randomFnr()
-        val barnId = randomFnr()
         val vedtakDato = LocalDate.now()
         val opphørFom = UTBETALINGSMÅNED.withDayOfMonth(1)
         val stønadFom = UTBETALINGSMÅNED.minusMonths(1)
         val stønadTom = UTBETALINGSMÅNED.plusMonths(3)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
-                morId,
-                fagsak.id.toString(),
-                behandling.id,
-                vedtakDato,
-                stønadFom,
-                stønadTom
-        )
-        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+        val behandling = lagFerdigstiltFGB(fagsak, morId, vedtakDato, stønadFom, stønadTom)
 
-        val opphør = behandlingService.opprettBehandling(nyRevurdering(morId, listOf(barnId)))
+        val opphør = behandlingService.opprettBehandling(nyRevurdering(morId))
         val utbetalingsoppdragOpphør = lagTestUtbetalingsoppdragForOpphør(
                 morId,
                 fagsak.id.toString(),
@@ -142,7 +110,7 @@ class GjeldendeBehandlingForFagsakTest {
         beregningService.lagreBeregningsresultat(opphør, utbetalingsoppdragOpphør)
         behandlingService.oppdaterStatusPåBehandling(opphør.id, BehandlingStatus.IVERKSATT)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
 
         Assertions.assertTrue(gjeldendeBehandlinger.isEmpty())
     }
@@ -150,7 +118,6 @@ class GjeldendeBehandlingForFagsakTest {
     @Test
     fun `Sett riktig gjeldende behandling for revurdering frem i tid`() {
         val morId = randomFnr()
-        val barnId = randomFnr()
         val vedtakDato = LocalDate.now()
         val opphørFom = UTBETALINGSMÅNED.plusMonths(2)
         val stønadFom = UTBETALINGSMÅNED.minusMonths(1)
@@ -158,19 +125,9 @@ class GjeldendeBehandlingForFagsakTest {
         val stønadTom = UTBETALINGSMÅNED.plusMonths(3)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
-                morId,
-                fagsak.id.toString(),
-                behandling.id,
-                vedtakDato,
-                stønadFom,
-                stønadTom
-        )
-        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+        val behandling = lagFerdigstiltFGB(fagsak, morId, vedtakDato, stønadFom, stønadTom)
 
-        val revurdering = behandlingService.opprettBehandling(nyRevurdering(morId, listOf(barnId)))
+        val revurdering = behandlingService.opprettBehandling(nyRevurdering(morId))
         val utbetalingsoppdragRevurdering = lagTestUtbetalingsoppdragForRevurdering(
                 morId,
                 fagsak.id.toString(),
@@ -184,7 +141,7 @@ class GjeldendeBehandlingForFagsakTest {
         beregningService.lagreBeregningsresultat(revurdering, utbetalingsoppdragRevurdering)
         behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.IVERKSATT)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
 
         Assertions.assertEquals(2, gjeldendeBehandlinger.size)
     }
@@ -192,7 +149,6 @@ class GjeldendeBehandlingForFagsakTest {
     @Test
     fun `Sett riktig gjeldende behandling ved revurdering denne måneden`() {
         val morId = randomFnr()
-        val barnId = randomFnr()
         val vedtakDato = LocalDate.now()
         val opphørFom = UTBETALINGSMÅNED.withDayOfMonth(1)
         val stønadFom = UTBETALINGSMÅNED.minusMonths(1)
@@ -200,21 +156,10 @@ class GjeldendeBehandlingForFagsakTest {
         val stønadTom = UTBETALINGSMÅNED.plusMonths(3)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
-
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
-                morId,
-                fagsak.id.toString(),
-                behandling.id,
-                stønadFom,
-                stønadFom,
-                stønadTom
-        )
-        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+        val behandling = lagFerdigstiltFGB(fagsak, morId, vedtakDato, stønadFom, stønadTom)
 
 
-        val revurdering = behandlingService.opprettBehandling(nyRevurdering(morId, listOf(barnId)))
+        val revurdering = behandlingService.opprettBehandling(nyRevurdering(morId))
         val utbetalingsoppdragRevurdering = lagTestUtbetalingsoppdragForRevurdering(
                 morId,
                 fagsak.id.toString(),
@@ -228,7 +173,7 @@ class GjeldendeBehandlingForFagsakTest {
         beregningService.lagreBeregningsresultat(revurdering, utbetalingsoppdragRevurdering)
         behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.IVERKSATT)
 
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsak.id, vedtakDato)
+        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
 
         Assertions.assertEquals(1, gjeldendeBehandlinger.size)
         Assertions.assertEquals(revurdering.id, gjeldendeBehandlinger[0].id)
@@ -238,15 +183,22 @@ class GjeldendeBehandlingForFagsakTest {
     @Test
     fun `Skal oppdatere gjeldende behandling for avsluttet behandling`() {
         val morId = randomFnr()
-        val barnId = randomFnr()
         val vedtakDato = LocalDate.now()
         val stønadFom = UTBETALINGSMÅNED.minusMonths(4)
         val stønadTom = UTBETALINGSMÅNED.minusMonths(1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId, listOf(barnId)))
+        lagFerdigstiltFGB(fagsak, morId, vedtakDato, stønadFom, stønadTom)
+
+        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
+
+        Assertions.assertTrue(gjeldendeBehandlinger.isEmpty())
+    }
+
+    private fun lagFerdigstiltFGB(fagsak: Fagsak, personIdent: String, vedtakDato: LocalDate, stønadFom: LocalDate, stønadTom: LocalDate): Behandling {
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
         val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
-                morId,
+                personIdent,
                 fagsak.id.toString(),
                 behandling.id,
                 vedtakDato,
@@ -255,9 +207,6 @@ class GjeldendeBehandlingForFagsakTest {
         )
         beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
-
-        val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForNesteUtbetaling(fagsak.id, vedtakDato)
-
-        Assertions.assertTrue(gjeldendeBehandlinger.isEmpty())
+        return behandling
     }
 }

@@ -49,12 +49,6 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak) = Behandling(id = nesteBehandl
                                                                kategori = BehandlingKategori.NASJONAL,
                                                                underkategori = BehandlingUnderkategori.ORDINÆR)
 
-fun lagRevurdering(fagsak: Fagsak = defaultFagsak) = Behandling(id = nesteBehandlingId(),
-        fagsak = fagsak,
-        type = BehandlingType.REVURDERING,
-        kategori = BehandlingKategori.NASJONAL,
-        underkategori = BehandlingUnderkategori.ORDINÆR)
-
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
         aktørId = randomAktørId(),
         personIdent = PersonIdent(randomFnr()),
@@ -131,9 +125,8 @@ fun nyOrdinærBehandling(søkersIdent: String): NyBehandling = NyBehandling(
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
 
-fun nyRevurdering(søkersIdent: String, barnasIdenter: List<String>): NyBehandling = NyBehandling(
+fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
         søkersIdent = søkersIdent,
-        barnasIdenter = barnasIdenter,
         behandlingType = BehandlingType.REVURDERING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR
