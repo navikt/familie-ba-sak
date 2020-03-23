@@ -77,8 +77,8 @@ class VilkårService(
         personopplysningGrunnlag.personer.map { person ->
             val vilkårForPerson = restBehandlingResultat
                     .filter { vilkår -> vilkår.personIdent == person.personIdent.ident }
-                    .first()
-                    .vurderteVilkår
+                    .firstOrNull()
+                    ?.vurderteVilkår ?: error("Fant ingen vurderte vilkår for person")
             val vilkårForPart = Vilkår.hentVilkårForPart(person.type)
             vilkårForPerson.forEach {
                 vilkårForPart.find { vilkårType -> vilkårType == it.vilkårType }

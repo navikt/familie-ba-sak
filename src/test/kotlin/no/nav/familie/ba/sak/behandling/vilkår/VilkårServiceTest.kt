@@ -71,13 +71,13 @@ class VilkårServiceTest {
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         assertThrows<IllegalStateException> {
-            vilkårService.kontrollerVurderteVilkårOgLagResultat(vilkårsvurderingUtenKomplettBarnVurdering,
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(vilkårsvurderingUtenKomplettBarnVurdering(fnr, listOf(barnFnr)),
                                                                 behandling.id
             )
         }
 
         assertThrows<IllegalStateException> {
-            vilkårService.kontrollerVurderteVilkårOgLagResultat(vilkårsvurderingUtenKomplettSøkerVurdering,
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(vilkårsvurderingUtenKomplettSøkerVurdering(fnr, listOf(barnFnr)),
                                                                 behandling.id
             )
         }
@@ -139,40 +139,50 @@ fun vilkårsvurderingKomplettForBarnOgSøker(søkerPersonIdent: String,
 }
 
 
-val vilkårsvurderingUtenKomplettBarnVurdering = listOf(
-        RestPersonVilkårResultat(
-                personIdent = "1",
-                vurderteVilkår = listOf(
-                        RestVilkårResultat(vilkårType = Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                           resultat = Resultat.JA,
-                                           fom = LocalDate.now(),
-                                           tom = LocalDate.now().plusYears(10),
-                                           begrunnelse = "OK"))),
-        RestPersonVilkårResultat(
-                personIdent = "12345678910",
-                vurderteVilkår = listOf(
-                        RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                           resultat = Resultat.JA,
-                                           fom = LocalDate.now(),
-                                           tom = LocalDate.now().plusYears(10),
-                                           begrunnelse = "OK"),
-                        RestVilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
-                                           resultat = Resultat.JA,
-                                           fom = LocalDate.now(),
-                                           tom = LocalDate.now().plusYears(10),
-                                           begrunnelse = "OK"))))
+fun vilkårsvurderingUtenKomplettBarnVurdering(søkerPersonIdent: String,
+                                           barnPersonIdenter: List<String>): List<RestPersonVilkårResultat> {
+    val søkerVilkår = RestPersonVilkårResultat(
+            personIdent = søkerPersonIdent,
+            vurderteVilkår = listOf(
+                    RestVilkårResultat(vilkårType = Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                                       resultat = Resultat.JA,
+                                       fom = LocalDate.now(),
+                                       tom = LocalDate.now().plusYears(10),
+                                       begrunnelse = "OK")))
 
-val vilkårsvurderingUtenKomplettSøkerVurdering = listOf(
+    val barnasVilkår = barnPersonIdenter.map {
         RestPersonVilkårResultat(
-                personIdent = "1",
+                personIdent = it,
                 vurderteVilkår = listOf(
                         RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
                                            resultat = Resultat.JA,
                                            fom = LocalDate.now(),
                                            tom = LocalDate.now().plusYears(10),
-                                           begrunnelse = "OK"))),
+                                           begrunnelse = "OK"),
+                        RestVilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
+                                           resultat = Resultat.JA,
+                                           fom = LocalDate.now(),
+                                           tom = LocalDate.now().plusYears(10),
+                                           begrunnelse = "OK")))
+    }.toTypedArray()
+
+    return listOf(søkerVilkår, *barnasVilkår)
+}
+
+fun vilkårsvurderingUtenKomplettSøkerVurdering(søkerPersonIdent: String,
+                                              barnPersonIdenter: List<String>): List<RestPersonVilkårResultat> {
+    val søkerVilkår = RestPersonVilkårResultat(
+            personIdent = søkerPersonIdent,
+            vurderteVilkår = listOf(
+                    RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
+                                       resultat = Resultat.JA,
+                                       fom = LocalDate.now(),
+                                       tom = LocalDate.now().plusYears(10),
+                                       begrunnelse = "OK")))
+
+    val barnasVilkår = barnPersonIdenter.map {
         RestPersonVilkårResultat(
-                personIdent = "12345678910",
+                personIdent = it,
                 vurderteVilkår = listOf(
                         RestVilkårResultat(vilkårType = Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
                                            resultat = Resultat.JA,
@@ -188,4 +198,8 @@ val vilkårsvurderingUtenKomplettSøkerVurdering = listOf(
                                            resultat = Resultat.JA,
                                            fom = LocalDate.now(),
                                            tom = LocalDate.now().plusYears(10),
-                                           begrunnelse = "OK"))))
+                                           begrunnelse = "OK")))
+    }.toTypedArray()
+
+    return listOf(søkerVilkår, *barnasVilkår)
+}
