@@ -5,17 +5,11 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.dokument.DokGenKlient
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
@@ -111,11 +105,11 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun oppdaterAktivtVedtakMedBeregning(vedtak: Vedtak,
-                                         vedtakPersoner : List<VedtakPerson>)
+                                         vedtakPersonYtelsesperioder : List<VedtakPersonYtelsesperiode>)
             : Ressurs<RestFagsak> {
 
         vedtakPersonRepository.slettAllePersonBeregningerForVedtak(vedtak.id)
-        vedtakPersonRepository.saveAll(vedtakPersoner)
+        vedtakPersonRepository.saveAll(vedtakPersonYtelsesperioder)
 
         vedtak.stønadBrevMarkdown = Result.runCatching {
                     dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,

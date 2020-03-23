@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import java.time.LocalDate
 
@@ -19,11 +19,11 @@ data class RestYtelsePeriode (
         val type: Ytelsetype
 )
 
-fun lagRestVedtakBarn(vedtakPersoner: List<VedtakPerson>, personopplysningGrunnlag: PersonopplysningGrunnlag?)
+fun lagRestVedtakBarn(vedtakPersonYtelsesperioder: List<VedtakPersonYtelsesperiode>, personopplysningGrunnlag: PersonopplysningGrunnlag?)
         : List<RestVedtakBarn>{
 
     val idBarnMap = personopplysningGrunnlag?.barna?.associateBy { it.id }
-    return vedtakPersoner.groupBy { it.personId }
+    return vedtakPersonYtelsesperioder.groupBy { it.personId }
             .map {
                 RestVedtakBarn(
                         barn = idBarnMap?.get(it.key)?.personIdent?.ident,

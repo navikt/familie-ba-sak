@@ -91,7 +91,6 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    @Tag("integration")
     fun `Kjør flyway migreringer og sjekk at behandlingslagerservice klarer å lese å skrive til postgresql`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -103,7 +102,6 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    @Tag("integration")
     fun `Test at opprettEllerOppdaterBehandling kjører uten feil`() {
         val fnr = randomFnr()
 
@@ -115,7 +113,6 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    @Tag("integration")
     @Transactional
     fun `Opprett behandling`() {
         val fnr = randomFnr()
@@ -126,7 +123,6 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    @Tag("integration")
     fun `Kast feil om man lager ny behandling på fagsak som har behandling som skal godkjennes`() {
         val morId = randomFnr()
         val barnId = randomFnr()
@@ -147,8 +143,7 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    @Tag("integration")
-    fun `Bruk samme behandling hvis nytt barn kommer på fagsak med aktiv behandling`() {
+     fun `Bruk samme behandling hvis nytt barn kommer på fagsak med aktiv behandling`() {
         val morId = randomFnr()
         val barnId = randomFnr()
         val barn2Id = randomFnr()
@@ -170,7 +165,6 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    @Tag("integration")
     fun `Opphør migrert vedtak via task`() {
 
         val søkerFnr = randomFnr()
@@ -236,7 +230,6 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    @Tag("integration")
     fun `Opprett barnas beregning på vedtak`() {
 
         val søkerFnr = randomFnr()
@@ -287,7 +280,6 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    @Tag("integration")
     fun `Endre barnas beregning på vedtak`() {
 
         val søkerFnr = randomFnr()

@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
@@ -79,18 +79,16 @@ data class PersonBeregning(
 )
 
 fun mapNyBeregningTilVedtakPerson(vedtakId: Long, nyBeregning: NyBeregning, personopplysningGrunnlag: PersonopplysningGrunnlag)
- : List<VedtakPerson>{
+ : List<VedtakPersonYtelsesperiode>{
 
     val identBarnMap = personopplysningGrunnlag.barna
             .associateBy { it.personIdent.ident }
 
     return nyBeregning.personBeregninger
+            .filter{ identBarnMap.containsKey(it.ident) }
             .map {
 
-                val person= identBarnMap[it.ident]
-                if(person==null) {
-                    error("Finner ikke person med ident ${it.ident} i personopplysningsgrunnlaget knyttet til behandlingen")
-                }
+                val person= identBarnMap[it.ident]!!
 
                 if (it.stønadFom.isBefore(person.fødselsdato)) {
                     error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
@@ -103,12 +101,12 @@ fun mapNyBeregningTilVedtakPerson(vedtakId: Long, nyBeregning: NyBeregning, pers
                     error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
                 }
 
-                VedtakPerson(personId = person.id,
-                             vedtakId = vedtakId,
-                             beløp = it.beløp,
-                             stønadFom = sikkerStønadFom,
-                             stønadTom = sikkerStønadTom,
-                             type = it.ytelsetype)
+                VedtakPersonYtelsesperiode(personId = person.id,
+                                           vedtakId = vedtakId,
+                                           beløp = it.beløp,
+                                           stønadFom = sikkerStønadFom,
+                                           stønadTom = sikkerStønadTom,
+                                           type = it.ytelsetype)
             }
 
 }

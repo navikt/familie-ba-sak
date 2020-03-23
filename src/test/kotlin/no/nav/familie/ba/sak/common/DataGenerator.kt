@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -85,8 +85,8 @@ fun lagPersonVedtak(fom: String,
                     tom: String,
                     ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD,
                     beløp: Int = sats(ytelsetype),
-                    vedtak: Vedtak = lagVedtak()): VedtakPerson {
-    return VedtakPerson(
+                    vedtak: Vedtak = lagVedtak()): VedtakPersonYtelsesperiode {
+    return VedtakPersonYtelsesperiode(
             personId = tilfeldigPerson().id,
             vedtakId = vedtak.id, beløp = beløp, stønadFom = dato(fom), stønadTom = dato(tom), type = ytelsetype)
 }
