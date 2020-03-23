@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonVilkårResultat
 import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
@@ -17,6 +18,7 @@ class VilkårService(
         private val behandlingService: BehandlingService,
         private val behandlingRepository: BehandlingRepository,
         private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val loggService: LoggService,
         private val periodeService: PeriodeService
 ) {
@@ -36,8 +38,9 @@ class VilkårService(
         behandlingResultatRepository.save(behandlingResultat)
     }
 
-    fun vurderVilkårForFødselshendelse(personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                       behandlingId: Long): BehandlingResultat {
+    fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
+                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
         val barn = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
         if (barn.size > 1) {
             throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse inneholder kan kun inneholde et barn, men inneholder ${barn.size}")
@@ -66,9 +69,10 @@ class VilkårService(
         return behandlingResultat
     }
 
-    fun kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                              restBehandlingResultat: List<RestPersonVilkårResultat>,
+    fun kontrollerVurderteVilkårOgLagResultat(restBehandlingResultat: List<RestPersonVilkårResultat>,
                                               behandlingId: Long): BehandlingResultat {
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
+                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
         val listeAvVilkårResultat = mutableSetOf<VilkårResultat>()
         personopplysningGrunnlag.personer.map { person ->
             val vilkårForPerson = restBehandlingResultat
@@ -89,7 +93,10 @@ class VilkårService(
             }
         }
 
-        val periodeResultater = restBehandlingResultat.map { personResultat -> periodeService.restPersonVilkårTilPerioder(personResultat) }.flatten().toMutableSet()
+        val periodeResultater =
+                restBehandlingResultat.map { personResultat -> periodeService.restPersonVilkårTilPerioder(personResultat) }
+                        .flatten()
+                        .toMutableSet()
         val behandlingResultat = BehandlingResultat(
                 id = behandlingId,
                 behandling = behandlingRepository.finnBehandling(behandlingId),

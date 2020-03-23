@@ -29,11 +29,10 @@ class Vilkårsvurdering(
                                                                               data.begrunnelse)
 
         if (data.behandlingResultat.isNotEmpty()) {
-            vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
-                                                                data.behandlingResultat,
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(data.behandlingResultat,
                                                                 vilkårsvurdertBehandling.id)
         } else {
-            vilkårService.vurderVilkårForFødselshendelse(personopplysningGrunnlag, vilkårsvurdertBehandling.id)
+            vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)
         }
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(vilkårsvurdertBehandling,
                                                                  personopplysningGrunnlag,

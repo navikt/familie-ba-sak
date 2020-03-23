@@ -101,8 +101,7 @@ class VilkårVurderingTest {
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         assertThrows<IllegalStateException> {
-            vilkårService.vurderVilkårForFødselshendelse(personopplysningGrunnlag = personopplysningGrunnlag,
-                                                         behandlingId = behandling.id)
+            vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
         }
     }
 
@@ -118,8 +117,7 @@ class VilkårVurderingTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val periodeResultat = vilkårService.vurderVilkårForFødselshendelse(personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                           behandlingId = behandling.id)
+        val periodeResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
         Assertions.assertEquals(Resultat.JA, periodeResultat.hentSamletResultat())
     }
 
@@ -141,8 +139,7 @@ class VilkårVurderingTest {
                                                      kjønn = Kjønn.MANN))
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-        val periodeResultat = vilkårService.vurderVilkårForFødselshendelse(personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                           behandlingId = behandling.id)
+        val periodeResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
 
         Assertions.assertEquals(Resultat.NEI, periodeResultat.hentSamletResultat())
     }
