@@ -66,8 +66,8 @@ class ØkonomiKlient(
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
         return restOperations.exchange(
-                URI.create("$familieOppdragUri/utbetalingsoppdrag"),
-                HttpMethod.GET,
+                URI.create("$familieOppdragUri/utbetalingsoppdrag/BA"),
+                HttpMethod.POST,
                 HttpEntity(oppdragId, headers))
     }
 
