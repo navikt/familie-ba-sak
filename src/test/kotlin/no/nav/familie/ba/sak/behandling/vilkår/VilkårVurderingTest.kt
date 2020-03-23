@@ -16,9 +16,11 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import java.lang.IllegalStateException
 import java.time.LocalDate
 
 @SpringBootTest
@@ -57,7 +59,7 @@ class VilkårVurderingTest {
     }
 
     @Test
-    fun`Hent relevante vilkår for saktype`() { //Banal test, legg til saktyper
+    fun `Hent relevante vilkår for saktype`() { //Banal test, legg til saktyper
         val relevanteVilkårSaktypeFinnes = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERFOR)
         val relevanteVilkårSaktypeFinnesIkke = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERIKKEFOR)
         val vilkårForSaktypeFinnes = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
@@ -78,7 +80,7 @@ class VilkårVurderingTest {
     }
 
     @Test
-    fun `Henting og evaluering av oppfylte vilkår gir samlet resultat JA`() {
+    fun `Henting og evaluering av fødselshendelse med flere barn kaster exception`() {
 
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -86,8 +88,34 @@ class VilkårVurderingTest {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+
+        personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
+                                                     personIdent = PersonIdent("11111111111"),
+                                                     type = PersonType.BARN,
+                                                     personopplysningGrunnlag = personopplysningGrunnlag,
+                                                     fødselsdato = LocalDate.now(),
+                                                     navn = "",
+                                                     kjønn = Kjønn.MANN))
+
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        assertThrows<IllegalStateException> {
+            vilkårService.vurderVilkårForFødselshendelse(personopplysningGrunnlag = personopplysningGrunnlag,
+                                                         behandlingId = behandling.id)
+        }
+    }
+
+    @Test
+    fun `Henting og evaluering av fødselshendelse med oppfylte vilkår gir samlet resultat JA`() {
+
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val periodeResultat = vilkårService.vurderVilkårForFødselshendelse(personopplysningGrunnlag = personopplysningGrunnlag,
@@ -96,33 +124,30 @@ class VilkårVurderingTest {
     }
 
     @Test
-    fun `Henting og evaluering ikke-oppfylte vilkår gir samlet resultat NEI`() {
+    fun `Henting og evaluering av fødselshendelse uten oppfylte vilkår gir samlet resultat NEI`() {
 
         val fnr = randomFnr()
-        val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-
-        //Legger til barn over 18 år
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, emptyList())
         personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
                                                      personIdent = PersonIdent("11111111111"),
                                                      type = PersonType.BARN,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
-                                                     fødselsdato = LocalDate.of(1980, 1, 1),
+                                                     fødselsdato = LocalDate.of(1980, 1, 1), //Over 18år
                                                      navn = "",
                                                      kjønn = Kjønn.MANN))
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-
         val periodeResultat = vilkårService.vurderVilkårForFødselshendelse(personopplysningGrunnlag = personopplysningGrunnlag,
                                                                            behandlingId = behandling.id)
 
         Assertions.assertEquals(Resultat.NEI, periodeResultat.hentSamletResultat())
     }
+
+
 
     /*
     @Test
