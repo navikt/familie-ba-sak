@@ -36,7 +36,7 @@ data class BehandlingResultat(
 
 }
 
-//TODO: Legg ved rett før merge
+//TODO: V34 flyway script
 /*
 CREATE TABLE BEHANDLING_RESULTAT
 (

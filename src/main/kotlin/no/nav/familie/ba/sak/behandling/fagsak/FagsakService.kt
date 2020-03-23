@@ -64,7 +64,7 @@ class FagsakService(
                     status = it.status,
                     steg = it.steg,
                     behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(it.id)
-                                                   ?.toRestBehandlingResultat() ?: emptyList(),
+                                                   ?.tilRestBehandlingResultat() ?: emptyList(),
                     opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori,

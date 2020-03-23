@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.nare.core.specifications.Spesifikasjon
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
@@ -10,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonVilkårResultat
+import no.nav.familie.ba.sak.behandling.restDomene.tilPeriodeResultater
 import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
 
@@ -19,8 +19,7 @@ class VilkårService(
         private val behandlingRepository: BehandlingRepository,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val loggService: LoggService,
-        private val periodeService: PeriodeService
+        private val loggService: LoggService
 ) {
 
     fun lagreNyOgDeaktiverGammelBehandlingResultat(behandlingResultat: BehandlingResultat) {
@@ -92,16 +91,15 @@ class VilkårService(
                 throw IllegalStateException("Vilkårene for ${person.type} er ${vilkårForPerson.map { v -> v.vilkårType }}, men vi forventer $vilkårForPart")
             }
         }
-
         val periodeResultater =
-                restBehandlingResultat.map { personResultat -> periodeService.restPersonVilkårTilPerioder(personResultat) }
+                restBehandlingResultat.map { restPersonResultat -> restPersonResultat.tilPeriodeResultater() }
                         .flatten()
                         .toMutableSet()
         val behandlingResultat = BehandlingResultat(
                 id = behandlingId,
                 behandling = behandlingRepository.finnBehandling(behandlingId),
                 aktiv = true,
-                periodeResultater = periodeResultater) //TODO: Oppdater med mappet behandlingsresultat
+                periodeResultater = periodeResultater)
         lagreNyOgDeaktiverGammelBehandlingResultat(behandlingResultat)
         return behandlingResultat
 
