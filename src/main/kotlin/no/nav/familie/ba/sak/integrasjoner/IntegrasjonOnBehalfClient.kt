@@ -29,8 +29,13 @@ class IntegrasjonOnBehalfClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") priv
     val personinfoEnkelUri = URI.create("$integrasjonUri/personopplysning/v1/infoEnkel/BAR")
 
     fun sjekkTilgangTilPersoner(personer: Set<Person>): List<Tilgang> {
-        val identer = personer.map { it.personIdent.ident }
-        return postForEntity(tilgangUri, identer)!!
+        return sjekkTilgangTilPersoner(
+                personer.map { it.personIdent.ident }
+        )
+    }
+
+    fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
+        return postForEntity(tilgangUri, personIdenter)!!
     }
 
     fun hentPersoninfo(personident: String): Personinfo {
