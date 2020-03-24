@@ -1,12 +1,14 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 
-interface VedtakPersonRepository : JpaRepository<VedtakPerson, Long> {
-    @Query(value = "SELECT vb FROM VedtakPerson vb JOIN vb.vedtak v WHERE v.id = :vedtakId")
-    fun finnPersonBeregningForVedtak(vedtakId: Long): List<VedtakPerson>
+interface VedtakPersonRepository : JpaRepository<VedtakPersonYtelsesperiode, Long> {
+    @Query(value = "SELECT vb FROM VedtakPerson vb WHERE vb.vedtakId = :vedtakId")
+    fun finnPersonBeregningForVedtak(vedtakId: Long): List<VedtakPersonYtelsesperiode>
 
-    @Query(value = "SELECT vb FROM VedtakPerson vb JOIN vb.vedtak v WHERE v.id = :vedtakId AND vb.person.personIdent.ident = :personIdent")
-    fun finnPersonBeregning(vedtakId: Long, personIdent: String): VedtakPerson?
+    @Modifying
+    @Query(value = "DELETE FROM VedtakPerson vb WHERE vb.vedtakId = :vedtakId")
+    fun slettAllePersonBeregningerForVedtak(vedtakId: Long)
 }

@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -26,6 +26,7 @@ fun randomAktørId(): AktørId = AktørId(UUID.randomUUID().toString())
 
 private var gjeldendeVedtakId: Long = 1
 private var gjeldendeBehandlingId: Long = 1
+private var gjeldendePersonId: Long = 1
 private val id_inkrement = 50
 
 fun nesteVedtakId(): Long {
@@ -36,6 +37,11 @@ fun nesteVedtakId(): Long {
 fun nesteBehandlingId(): Long {
     gjeldendeBehandlingId += id_inkrement
     return gjeldendeBehandlingId
+}
+
+fun nestePersonId(): Long {
+    gjeldendePersonId += id_inkrement
+    return gjeldendePersonId
 }
 
 val defaultFagsak = Fagsak(1,
@@ -50,6 +56,7 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak) = Behandling(id = nesteBehandl
                                                                underkategori = BehandlingUnderkategori.ORDINÆR)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
+        id= nestePersonId(),
         aktørId = randomAktørId(),
         personIdent = PersonIdent(randomFnr()),
         fødselsdato = fødselsdato,
@@ -78,15 +85,10 @@ fun lagPersonVedtak(fom: String,
                     tom: String,
                     ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD,
                     beløp: Int = sats(ytelsetype),
-                    vedtak: Vedtak = lagVedtak()): VedtakPerson {
-    return VedtakPerson(
-            person = tilfeldigPerson(),
-            stønadFom = dato(fom),
-            stønadTom = dato(tom),
-            beløp = beløp,
-            vedtak = vedtak,
-            type = ytelsetype
-    )
+                    vedtak: Vedtak = lagVedtak()): VedtakPersonYtelsesperiode {
+    return VedtakPersonYtelsesperiode(
+            personId = tilfeldigPerson().id,
+            vedtakId = vedtak.id, beløp = beløp, stønadFom = dato(fom), stønadTom = dato(tom), type = ytelsetype)
 }
 
 fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
