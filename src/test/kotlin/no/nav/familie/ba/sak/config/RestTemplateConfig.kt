@@ -42,7 +42,6 @@ class RestTemplateConfig {
                                       mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor)
             : RestOperations {
         return RestTemplateBuilder()
-                .additionalCustomizers(NaisProxyCustomizer())
                 .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
                 .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
                 .build()

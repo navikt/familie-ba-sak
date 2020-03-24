@@ -37,7 +37,6 @@ ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILI
 
 logging:
   config: "classpath:logback-spring.xml"
-logging.level.no.nav.security: DEBUG
 
 funksjonsbrytere:
   enabled: false
