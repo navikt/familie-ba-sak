@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner
 import medPersonident
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.http.client.AbstractPingableRestClient
@@ -25,6 +26,7 @@ class IntegrasjonOnBehalfClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") priv
 
     val tilgangUri = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()
     val personinfoUri = URI.create("$integrasjonUri/personopplysning/v1/info/BAR")
+    val personinfoEnkelUri = URI.create("$integrasjonUri/personopplysning/v1/infoEnkel/BAR")
 
     fun sjekkTilgangTilPersoner(personer: Set<Person>): List<Tilgang> {
         val identer = personer.map { it.personIdent.ident }
@@ -33,9 +35,19 @@ class IntegrasjonOnBehalfClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") priv
 
     fun hentPersoninfo(personident: String): Personinfo {
         return try {
-            val response = getForEntity<Ressurs<Personinfo>>(personinfoUri, HttpHeaders().medPersonident(personident))
-            secureLogger.info("Personinfo fra $personinfoUri for {}: {}", personident, response.data)
-            response.data!!
+            val personinfo = getForEntity<Ressurs<Personinfo>>(personinfoUri, HttpHeaders().medPersonident(personident)).data!!
+            secureLogger.info("Personinfo fra $personinfoUri for {}: {}", personident, personinfo)
+
+            val barnMedNavnOgFødselsdato =
+                    personinfo.familierelasjoner
+                            .filter { it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN }
+                            .map {
+                                val barn = getForEntity<Ressurs<Personinfo>>(
+                                        personinfoEnkelUri, HttpHeaders().medPersonident(it.personIdent.id)).data!!
+                                it.copy(navn = barn.navn, fødselsdato = barn.fødselsdato)
+                            }
+                            .toSet()
+            personinfo.copy(familierelasjoner = barnMedNavnOgFødselsdato)
         } catch (e: Exception) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, personinfoUri, personident)
         }
