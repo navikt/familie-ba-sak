@@ -137,19 +137,18 @@ class ØkonomiIntegrasjonTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         vedtakService.lagreOgDeaktiverGammel(vedtak)
-        vedtakService.oppdaterAktivVedtakMedBeregning(
-                vedtak = vedtak!!,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                nyBeregning = NyBeregning(
-                        listOf(PersonBeregning(ident = barnFnr,
-                                beløp = 1054,
-                                stønadFom = LocalDate.of(
-                                        2020,
-                                        1,
-                                        1),
-                                ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
-                )
+
+        val nyBeregning = NyBeregning(
+                listOf(PersonBeregning(ident = barnFnr,
+                        beløp = 1054,
+                        stønadFom = LocalDate.of(
+                                2020,
+                                1,
+                                1),
+                        ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
         )
+        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak.id, nyBeregning, personopplysningGrunnlag)
+        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
 
 
         økonomiService.lagreBeregningsresultatOgIverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
