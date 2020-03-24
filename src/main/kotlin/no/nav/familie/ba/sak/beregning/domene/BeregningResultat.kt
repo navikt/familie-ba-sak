@@ -7,12 +7,12 @@ import java.time.LocalDate
 import javax.persistence.*
 
 @Entity(name = "BeregningResultat")
-@Table(name = "BEREGNINGRESULTAT")
+@Table(name = "BEREGNING_RESULTAT")
 data class BeregningResultat(
 
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "beregningresultat_seq_generator")
-        @SequenceGenerator(name = "beregningresultat_seq_generator", sequenceName = "beregningresultat_seq", allocationSize = 50)
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "beregning_resultat_seq_generator")
+        @SequenceGenerator(name = "beregning_resultat_seq_generator", sequenceName = "beregning_resultat_seq", allocationSize = 50)
         val id: Long = 0,
 
         @OneToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)

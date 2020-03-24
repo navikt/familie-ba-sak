@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPerson
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
 import no.nav.familie.ba.sak.beregning.domene.BeregningResultat
 import no.nav.familie.ba.sak.beregning.domene.BeregningResultatRepository
@@ -22,7 +22,7 @@ class BeregningService(
         private val økonomiKlient: ØkonomiKlient
 ) {
 
-    fun hentPersonerForVedtak(vedtakId: Long): List<VedtakPerson> {
+    fun hentPersonerForVedtak(vedtakId: Long): List<VedtakPersonYtelsesperiode> {
         return vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId)
     }
 

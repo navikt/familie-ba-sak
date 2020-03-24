@@ -32,9 +32,11 @@ class ClientMocks {
                              navn = "Mor Moresen",
                              familierelasjoner = setOf(
                                      Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN),
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                       navn = "Gutten Barnesen",
+                                                       fødselsdato = LocalDate.of(2015, 10, 3)),
                                      Familierelasjoner(personIdent = Personident(id = søkerFnr[1]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.EKTE)))
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
 
         every {
             mockIntegrasjonOnBehalfClient.hentPersoninfo(eq(søkerFnr[1]))
@@ -43,9 +45,11 @@ class ClientMocks {
                              navn = "Far Faresen",
                              familierelasjoner = setOf(
                                      Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN),
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                       navn = "Barn Barney Barnesen",
+                                                       fødselsdato = LocalDate.of(2017, 4, 13)),
                                      Familierelasjoner(personIdent = Personident(id = søkerFnr[0]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.EKTE)))
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
 
         return mockIntegrasjonOnBehalfClient
     }

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+
 @Service
 class FagsakService(
         private val vedtakPersonRepository: VedtakPersonRepository,
@@ -50,15 +51,16 @@ class FagsakService(
         val restBehandlinger: List<RestBehandling> = behandlinger.map { it ->
             val personopplysningGrunnlag = it.id.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
 
-            val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
-                val personBeregning = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
-                vedtak.toRestVedtak(personBeregning)
+            val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
+                val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
+                val restVedtakBarn = lagRestVedtakBarn(vedtakPersoner, personopplysningGrunnlag)
+                vedtak.toRestVedtak(restVedtakBarn)
             }
 
             RestBehandling(
                     aktiv = it.aktiv,
                     behandlingId = it.id,
-                    vedtakForBehandling = vedtakForBehandling,
+                    vedtakForBehandling = restVedtakForBehandling,
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
                     type = it.type,
                     status = it.status,
