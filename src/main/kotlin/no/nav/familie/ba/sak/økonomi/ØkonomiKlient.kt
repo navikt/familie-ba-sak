@@ -66,9 +66,9 @@ class ØkonomiKlient(
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
         return restOperations.exchange(
-                URI.create("$familieOppdragUri/utbetalingsoppdrag/BA"),
-                HttpMethod.POST,
-                HttpEntity(oppdragId, headers))
+                URI.create("$familieOppdragUri/utbetalingsoppdrag/$FAGSYSTEM/?personId=${oppdragId.personIdent}&behandlingId=${oppdragId.behandlingsId}"),
+                HttpMethod.GET,
+                HttpEntity<Any>(headers))
     }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
