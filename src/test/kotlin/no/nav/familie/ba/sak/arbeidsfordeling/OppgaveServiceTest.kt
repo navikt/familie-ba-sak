@@ -4,10 +4,11 @@ import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.familie.ba.sak.arbeidsfordeling.OppgaveService.Behandlingstema
+import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.oppgave.IdentType
