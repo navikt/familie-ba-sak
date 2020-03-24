@@ -17,8 +17,8 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 @Configuration
-@Profile("dev")
 @Import(ConsumerIdClientInterceptor::class, MdcValuesPropagatingClientInterceptor::class)
+@Profile("integrasjonstest")
 class RestTemplateConfig {
 
     @Bean

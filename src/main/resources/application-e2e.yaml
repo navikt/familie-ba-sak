@@ -1,7 +1,7 @@
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
-    accepted_audience: ${MOTTAK_CLIENT_ID}
+    accepted_audience: ${BA_SAK_CLIENT_ID}
     cookie_name: azure_token
   client:
     registration:
@@ -37,6 +37,7 @@ ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILI
 
 logging:
   config: "classpath:logback-spring.xml"
+logging.level.no.nav.security: DEBUG
 
 funksjonsbrytere:
   enabled: false
