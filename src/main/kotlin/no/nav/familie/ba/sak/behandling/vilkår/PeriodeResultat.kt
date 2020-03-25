@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
@@ -21,8 +20,8 @@ class PeriodeResultat(
         @ManyToOne @JoinColumn(name = "behandling_resultat_id")
         var behandlingResultat: BehandlingResultat? = null,
 
-        @ManyToOne(optional = false) @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
-        val person: Person,
+        @Column(name = "person_ident", nullable = false, updatable = false)
+        val personIdent: String,
 
         @Column(name = "periode_fom", nullable = false, updatable = false)
         val periodeFom: LocalDate,
@@ -36,12 +35,13 @@ class PeriodeResultat(
 ) : BaseEntitet() {
 
         fun hentSamletResultat(): BehandlingResultatType {
-                if ( vilkårResultater.none { it.resultat == Resultat.NEI }) {
-                        return BehandlingResultatType.INNVILGET
-                } else if ( vilkårResultater.none { it.resultat == Resultat.JA }) {
-                        return BehandlingResultatType.AVSLÅTT
-                } else {
-                        return BehandlingResultatType.DELVIS_INNVILGET
+                return when {
+                    vilkårResultater.all { it.resultat == Resultat.JA } -> {
+                            BehandlingResultatType.INNVILGET
+                    }
+                    else -> {
+                            BehandlingResultatType.AVSLÅTT
+                    }
                 }
         }
 }

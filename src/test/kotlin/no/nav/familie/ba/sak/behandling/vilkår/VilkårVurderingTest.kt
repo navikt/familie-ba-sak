@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
@@ -11,7 +12,6 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -117,21 +117,22 @@ class VilkårVurderingTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val periodeResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
-        Assertions.assertEquals(Resultat.JA, periodeResultat.hentSamletResultat())
+        val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
+        Assertions.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
     }
 
     @Test
     fun `Henting og evaluering av fødselshendelse uten oppfylte vilkår gir samlet resultat NEI`() {
 
-        val fnr = randomFnr()
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, emptyList())
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, emptyList())
         personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
-                                                     personIdent = PersonIdent("11111111111"),
+                                                     personIdent = PersonIdent(barnFnr),
                                                      type = PersonType.BARN,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
                                                      fødselsdato = LocalDate.of(1980, 1, 1), //Over 18år
@@ -139,9 +140,9 @@ class VilkårVurderingTest {
                                                      kjønn = Kjønn.MANN))
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-        val periodeResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
+        val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
 
-        Assertions.assertEquals(Resultat.NEI, periodeResultat.hentSamletResultat())
+        Assertions.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
     }
 
     @Test

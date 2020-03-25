@@ -116,7 +116,7 @@ class DokumentServiceTest(
 
         val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak!!.id,nyBeregning,personopplysningGrunnlag)
 
-        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak!!,vedtakPersoner)
+        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
 
         val htmlvedtaksbrevRess = dokumentService.hentHtmlForVedtak(behandling.id)
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)

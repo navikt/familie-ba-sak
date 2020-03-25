@@ -23,7 +23,6 @@ data class BehandlingResultat(
         @OneToMany(mappedBy = "behandlingResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
         var periodeResultater: MutableSet<PeriodeResultat> = mutableSetOf()
 
-
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -31,37 +30,15 @@ data class BehandlingResultat(
     }
 
     fun hentSamletResultat(): BehandlingResultatType {
-        if ( periodeResultater.none { it.hentSamletResultat() == BehandlingResultatType.AVSLÅTT }) {
-            return BehandlingResultatType.INNVILGET
-        } else if (periodeResultater.none { it.hentSamletResultat() == BehandlingResultatType.INNVILGET }) {
-            return BehandlingResultatType.AVSLÅTT
-        } else {
-            return BehandlingResultatType.DELVIS_INNVILGET
+        return when {
+            periodeResultater.all { it.hentSamletResultat() == BehandlingResultatType.INNVILGET } -> {
+                BehandlingResultatType.INNVILGET
+            }
+            else -> BehandlingResultatType.AVSLÅTT
         }
     }
 }
 
 enum class BehandlingResultatType {
-    IKKE_VURDERT, INNVILGET, DELVIS_INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
+    INNVILGET, DELVIS_INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
 }
-
-//TODO: V34 flyway script
-/*
-CREATE TABLE BEHANDLING_RESULTAT
-(
-    ID               BIGINT PRIMARY KEY,
-    FK_BEHANDLING_ID BIGINT REFERENCES behandling (id)   NOT NULL,
-    AKTIV            BOOLEAN      DEFAULT TRUE           NOT NULL
-);
-
-alter table behandling rename column resultat to brev;
-
-alter table vilkar_resultat rename constraint vilkar_resultat_samlet_vilkar_resultat_id_fkey to vilkar_resultat_periode_resultat_id_fkey;
-
-alter table samlet_vilkar_resultat drop column fk_behandling_id;
-alter table samlet_vilkar_resultat rename to periode_resultat;
-alter table periode_resultat add column behandling_resultat_id bigint references BEHANDLING_RESULTAT (id) default null;
-alter table periode_resultat add column periode_fom timestamp (3);
-alter table periode_resultat add column periode_tom timestamp (3);
-alter index samlet_vilkar_resultat_pkey rename to periode_resultat_pkey;
- */

@@ -37,7 +37,7 @@ data class Behandling(
         val underkategori: BehandlingUnderkategori,
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "brev", nullable = false)
+        @Column(name = "brev_type", nullable = false)
         var brevType: BrevType = BrevType.IKKE_VURDERT,
 
         @Column(name = "aktiv", nullable = false)
