@@ -13,9 +13,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.beregning.NyBeregning
-import no.nav.familie.ba.sak.beregning.PersonBeregning
-import no.nav.familie.ba.sak.beregning.mapNyBeregningTilVedtakPerson
+import no.nav.familie.ba.sak.beregning.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
@@ -60,6 +58,9 @@ class BehandlingIntegrationTest {
     lateinit var persongrunnlagService: PersongrunnlagService
 
     @Autowired
+    lateinit var beregningService: BeregningService
+
+    @Autowired
     lateinit var fagsakService: FagsakService
 
     lateinit var behandlingService: BehandlingService
@@ -70,6 +71,7 @@ class BehandlingIntegrationTest {
         behandlingService = BehandlingService(
                 behandlingRepository,
                 persongrunnlagService,
+                beregningService,
                 fagsakService)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
@@ -238,7 +240,7 @@ class BehandlingIntegrationTest {
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
         val dato_2020_10_01 = LocalDate.of(2020, 10, 1)
-        
+
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 

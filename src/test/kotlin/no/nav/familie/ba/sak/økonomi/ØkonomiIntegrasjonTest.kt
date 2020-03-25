@@ -107,7 +107,7 @@ class ØkonomiIntegrasjonTest {
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
-        økonomiService.iverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
+        økonomiService.lagreBeregningsresultatOgIverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
 
         val oppdatertBehandling = behandlingService.hent(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling.status)
@@ -119,6 +119,12 @@ class ØkonomiIntegrasjonTest {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
+        stubFor(post(anyUrl())
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success("ok")))))
+
         //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -126,17 +132,33 @@ class ØkonomiIntegrasjonTest {
         val vedtak = Vedtak(behandling = behandling,
                             ansvarligSaksbehandler = "ansvarligSaksbehandler",
                             vedtaksdato = LocalDate.of(2020, 1, 1))
-        vedtakService.lagreOgDeaktiverGammel(vedtak)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        vedtakService.lagreOgDeaktiverGammel(vedtak)
+
+        val nyBeregning = NyBeregning(
+                listOf(PersonBeregning(ident = barnFnr,
+                        beløp = 1054,
+                        stønadFom = LocalDate.of(
+                                2020,
+                                1,
+                                1),
+                        ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
+        )
+        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak.id, nyBeregning, personopplysningGrunnlag)
+        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
+
+
+        økonomiService.lagreBeregningsresultatOgIverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
+        behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
 
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)
 
-        val oppdragIdListe = behandlingService.hentAktiveBehandlingerForLøpendeFagsaker()
+        val oppdragIdListe = behandlingService.hentGjeldendeBehandlingerForLøpendeFagsaker()
 
         Assertions.assertTrue(oppdragIdListe.contains(OppdragId(fnr, behandling.id)))
     }

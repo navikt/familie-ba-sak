@@ -27,6 +27,7 @@ import java.time.LocalDate
 @Validated
 class BeregningController(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val beregningService: BeregningService,
         private val vedtakService: VedtakService
 ) {
 
@@ -64,6 +65,21 @@ class BeregningController(
                                                           e))
                         }
                 )
+    }
+
+    @PostMapping(path = ["/beregningsresultat"])
+    fun lagreSamletBeregningsresultat(): ResponseEntity<Ressurs<String>> {
+
+        return Result.runCatching {
+            beregningService.migrerBeregningsresultatForEksisterendeBehandlinger()
+        }.fold(
+                onSuccess = { ResponseEntity.ok(Ressurs.success("Lagret beregningsresultat for alle behandlinger")) },
+                onFailure = { e ->
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(Ressurs.failure(e.cause?.message ?: e.message,
+                                    e))
+                }
+        )
     }
 }
 
