@@ -54,11 +54,8 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Opprett oppgave skal returnere oppgave id`() {
         MDC.put("callId", "opprettOppgave")
-        stubFor(post(urlEqualTo("/api/oppgave/"))
-                        .willReturn(aResponse()
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(
-                                                    objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))))
+        stubFor(post("/api/oppgave/").willReturn(
+                okJson(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))))
 
         val request = lagTestOppgave()
 
@@ -74,10 +71,9 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `Opprett oppgave skal kaste feil hvis response er ugyldig`() {
-        stubFor(post(urlEqualTo("/api/oppgave/"))
-                        .willReturn(aResponse()
-                                            .withStatus(500)
-                                            .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
+        stubFor(post("/api/oppgave/").willReturn(aResponse()
+                .withStatus(500)
+                .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
 
         assertThatThrownBy {
             integrasjonClient.opprettOppgave(lagTestOppgave())
@@ -101,7 +97,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Journalfør vedtaksbrev skal journalføre dokument, returnere 201 og journalpostId`() {
         MDC.put("callId", "journalfør")
-        stubFor(post(urlEqualTo("/api/arkiv/v2"))
+        stubFor(post("/api/arkiv/v2")
                         .withHeader("Accept", containing("json"))
                         .willReturn(aResponse()
                                             .withStatus(201)
@@ -122,12 +118,9 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `distribuerVedtaksbrev returnerer normalt ved vellykket integrasjonskall`() {
         MDC.put("callId", "distribuerVedtaksbrev")
-        stubFor(post(urlEqualTo("/api/dist/v1"))
+        stubFor(post("/api/dist/v1")
                         .withHeader("Accept", containing("json"))
-                        .willReturn(aResponse()
-                                            .withStatus(200)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(success("1234567")))))
+                        .willReturn(okJson(objectMapper.writeValueAsString(success("1234567")))))
 
 
 
@@ -143,12 +136,9 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `distribuerVedtaksbrev kaster exception hvis integrasjoner gir blank response`() {
-        stubFor(post(urlEqualTo("/api/dist/v1"))
+        stubFor(post("/api/dist/v1")
                         .withHeader("Accept", containing("json"))
-                        .willReturn(aResponse()
-                                            .withStatus(200)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(success("")))))
+                        .willReturn(okJson(objectMapper.writeValueAsString(success("")))))
 
         assertThrows<IllegalStateException> { integrasjonClient.distribuerVedtaksbrev("123456789") }
     }
@@ -156,12 +146,9 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `distribuerVedtaksbrev kaster exception hvis integrasjoner gir failure response`() {
-        stubFor(post(urlEqualTo("/api/dist/v1"))
+        stubFor(post("/api/dist/v1")
                         .withHeader("Accept", containing("json"))
-                        .willReturn(aResponse()
-                                            .withStatus(200)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(failure<Any>("")))))
+                        .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>("")))))
 
         assertThrows<IllegalStateException> { integrasjonClient.distribuerVedtaksbrev("123456789") }
     }
@@ -169,7 +156,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `distribuerVedtaksbrev kaster exception hvis responsekoden ikke er 2xx`() {
-        stubFor(post(urlEqualTo("/api/dist/v1"))
+        stubFor(post("/api/dist/v1")
                         .withHeader("Accept", containing("json"))
                         .willReturn(aResponse()
                                             .withStatus(400)
@@ -185,10 +172,7 @@ class IntergrasjonTjenesteTest {
         MDC.put("callId", "ferdigstillOppgave")
         stubFor(patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
                         .withHeader("Accept", containing("json"))
-                        .willReturn(aResponse()
-                                            .withStatus(200)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(success("")))))
+                        .willReturn(okJson(objectMapper.writeValueAsString(success("")))))
 
         integrasjonClient.ferdigstillOppgave(123)
 
@@ -219,13 +203,10 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `hentBehandlendeEnhet returnerer OK`() {
-        stubFor(get(urlEqualTo("/api/arbeidsfordeling/enhet?tema=BAR&geografi=1&diskresjonskode"))
+        stubFor(get("/api/arbeidsfordeling/enhet?tema=BAR&geografi=1&diskresjonskode")
                         .withHeader("Accept", containing("json"))
-                        .willReturn(aResponse()
-                                            .withStatus(200)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(success(listOf(
-                                                    Arbeidsfordelingsenhet("2", "foo")))))))
+                        .willReturn(okJson(objectMapper.writeValueAsString(success(listOf(
+                                Arbeidsfordelingsenhet("2", "foo")))))))
 
         val enhet = integrasjonClient.hentBehandlendeEnhet("1", null)
         assertThat(enhet).isNotEmpty
@@ -235,11 +216,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `hentAktør returnerer OK`() {
-        stubFor(get(urlEqualTo("/api/aktoer/v1"))
-                        .willReturn(aResponse()
-                                            .withStatus(200)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(success(mapOf("aktørId" to 1L))))))
+        stubFor(get("/api/aktoer/v1").willReturn(okJson(objectMapper.writeValueAsString(success(mapOf("aktørId" to 1L))))))
 
         val aktørId = integrasjonClient.hentAktørId("12")
         assertThat(aktørId.id).isEqualTo("1")
@@ -251,18 +228,10 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `hentPerson returnerer OK`() {
-        stubFor(get(urlMatching("/api/personopplysning/v1/info"))
-                        .willReturn(aResponse()
-                                            .withStatus(200)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(
-                                                    success(Personinfo(fødselsdato = LocalDate.now()))))))
-        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR"))
-                        .willReturn(aResponse()
-                                            .withStatus(200)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(
-                                                    success(Personinfo(fødselsdato = LocalDate.now()))))))
+        stubFor(get(urlMatching("/api/personopplysning/v1/info")).willReturn(
+                okJson(objectMapper.writeValueAsString(success(Personinfo(fødselsdato = LocalDate.now()))))))
+        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(
+                okJson(objectMapper.writeValueAsString(success(Personinfo(fødselsdato = LocalDate.now()))))))
 
         val personinfo = integrasjonClient.hentPersoninfoFor("12")
         assertThat(personinfo.fødselsdato).isEqualTo(LocalDate.now())
