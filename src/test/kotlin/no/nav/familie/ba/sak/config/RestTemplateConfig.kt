@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 @Configuration
-@Profile("dev")
+@Profile("dev || postgres")
 @Import(ConsumerIdClientInterceptor::class, MdcValuesPropagatingClientInterceptor::class)
 class RestTemplateConfig {
 
