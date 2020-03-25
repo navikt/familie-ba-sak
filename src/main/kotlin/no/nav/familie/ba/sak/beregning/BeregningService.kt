@@ -32,13 +32,49 @@ class BeregningService(
 
     fun lagreBeregningsresultat(behandling: Behandling, utbetalingsoppdrag: Utbetalingsoppdrag) {
 
+        val nyttBeregningsResultat = populerBeregningsresultat(behandling, utbetalingsoppdrag)
+        beregningResultatRepository.save(nyttBeregningsResultat)
+    }
+
+    fun migrerBeregningsresultatForEksisterendeBehandlinger() {
+        val alleBehandlinger = behandlingRepository.hentAlleBehandlinger()
+
+        val utbetalingsoppdrag: List<Pair<Behandling, Utbetalingsoppdrag>> = alleBehandlinger.map { behandling ->
+            Result.runCatching {
+                økonomiKlient.hentUtbetalingsoppdrag(OppdragId(behandling.fagsak.personIdent.ident, behandling.id))
+            }
+                    .fold(
+                            onSuccess = {
+                                checkNotNull(it.body) { "Finner ikke ressurs" }
+                                checkNotNull(it.body?.data) { "Ressurs mangler data" }
+                                behandling to it.body?.data!!
+                            },
+                            onFailure = {
+                                throw Exception("Henting av utbetalingsoppdrag fra familie-oppdrag feilet", it)
+                            }
+                    )
+        }
+
+        lagreAlleBeregningsresultater(utbetalingsoppdrag.toMap())
+    }
+
+    @Transactional
+    fun lagreAlleBeregningsresultater(behandlingerMedUtbetalingsoppdrag: Map<Behandling, Utbetalingsoppdrag>) {
+        val beregningsResultater = behandlingerMedUtbetalingsoppdrag.map {
+            populerBeregningsresultat(behandling = it.key, utbetalingsoppdrag = it.value)
+        }
+
+        beregningResultatRepository.saveAll(beregningsResultater)
+    }
+
+    private fun populerBeregningsresultat(behandling: Behandling, utbetalingsoppdrag: Utbetalingsoppdrag): BeregningResultat {
         val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.size == 1 && utbetalingsoppdrag.utbetalingsperiode[0].opphør != null
         var opphørsdato: LocalDate? = null
         if (utbetalingsoppdrag.utbetalingsperiode[0].opphør != null) {
             opphørsdato = utbetalingsoppdrag.utbetalingsperiode[0].opphør!!.opphørDatoFom
         }
 
-        val nyttBeregningsResultat = BeregningResultat(
+        return BeregningResultat(
                 behandling = behandling,
                 utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag),
                 opprettetDato = LocalDate.now(),
@@ -48,31 +84,5 @@ class BeregningService(
                 stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxBy { it.vedtakdatoTom }!!.vedtakdatoTom,
                 opphørFom = opphørsdato
         )
-
-        beregningResultatRepository.save(nyttBeregningsResultat)
-    }
-
-    @Transactional
-    fun migrerBeregningsresultatForEksisterendeBehandlinger() {
-        val alleBehandlinger = behandlingRepository.hentAlleBehandlinger()
-
-        alleBehandlinger.forEach { behandling ->
-            Result.runCatching {
-                økonomiKlient.hentUtbetalingsoppdrag(OppdragId(behandling.fagsak.personIdent.ident, behandling.id))
-            }
-                    .fold(
-                            onSuccess = {
-                                checkNotNull(it.body) { "Finner ikke ressurs" }
-                                checkNotNull(it.body?.data) { "Ressurs mangler data" }
-                                lagreBeregningsresultat(behandling, it.body?.data!!)
-                            },
-                            onFailure = {
-                                throw Exception("Henting av utbetalingsoppdrag fra familie-oppdrag feilet", it)
-                            }
-                    )
-
-        }
-
-
     }
 }
