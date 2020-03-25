@@ -30,10 +30,21 @@ data class BehandlingResultat(
         return "BehandlingResultat(id=$id, behandling=${behandling.id})"
     }
 
-    fun hentSamletResultat(): Resultat {
-        return if (periodeResultater.any { it.hentSamletResultat() == Resultat.NEI }) Resultat.NEI else Resultat.JA
+    fun hentSamletResultat(): BehandlingResultatType {
+        if ( ! periodeResultater.contains( BehandlingResultatType.AVSLÅTT )) {
+            return BehandlingResultatType.INNVILGET
+        }
+        else if ( ! periodeResultater.contains( BehandlingResultatType.INNVILGET )) {
+            return BehandlingResultatType.AVSLÅTT
+        }
+        else {
+            return BehandlingResultatType.DELVIS_INNVILGET
+        }
     }
+}
 
+enum class BehandlingResultatType {
+    IKKE_VURDERT, INNVILGET, DELVIS_INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
 }
 
 //TODO: V34 flyway script

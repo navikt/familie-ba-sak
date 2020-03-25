@@ -49,7 +49,6 @@ class FagsakService(
 
         val restBehandlinger: List<RestBehandling> = behandlinger.map { it ->
             val personopplysningGrunnlag = it.id.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
-                                           ?: return Ressurs.failure("Fant ikke personopplysningsgrunnlag på behandling")
             val vedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
                 val personBeregning = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
                 vedtak.toRestVedtak(personBeregning)
@@ -59,7 +58,7 @@ class FagsakService(
                     aktiv = it.aktiv,
                     behandlingId = it.id,
                     vedtakForBehandling = vedtakForBehandling,
-                    personer = personopplysningGrunnlag.personer.map { it.toRestPerson() },
+                    personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
                     type = it.type,
                     status = it.status,
                     steg = it.steg,

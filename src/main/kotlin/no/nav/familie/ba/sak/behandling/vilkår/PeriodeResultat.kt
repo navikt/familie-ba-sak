@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
@@ -33,7 +34,7 @@ class PeriodeResultat(
 
 ) : BaseEntitet() {
 
-        fun hentSamletResultat () : Resultat {
-                return if (vilkårResultater.any { it.resultat == Resultat.NEI }) Resultat.NEI else Resultat.JA
+        fun hentSamletResultat () : BehandlingResultatType {
+                return if (vilkårResultater.any { it.resultat == Resultat.NEI }) BehandlingResultatType.AVSLÅTT else BehandlingResultatType.INNVILGET
         }
 }
