@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.config
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
@@ -22,7 +23,11 @@ class ClientMocks {
         val mockIntegrasjonOnBehalfClient = mockk<IntegrasjonOnBehalfClient>(relaxed = false)
 
         every {
-            mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any())
+            mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any<Set<Person>>())
+        } returns listOf(Tilgang(true, null))
+
+        every {
+            mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any<List<String>>())
         } returns listOf(Tilgang(true, null))
 
         every {
