@@ -4,12 +4,10 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestPeriodeResultat
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.springframework.stereotype.Service
 
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service
 class VilkårService(
         private val behandlingService: BehandlingService,
         private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val personRepository: PersonRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val loggService: LoggService
 ) {

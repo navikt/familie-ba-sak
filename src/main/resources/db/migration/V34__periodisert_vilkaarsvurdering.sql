@@ -17,7 +17,7 @@ alter table vilkar_resultat
     rename constraint vilkar_resultat_samlet_vilkar_resultat_id_fkey to vilkar_resultat_periode_resultat_id_fkey;
 
 alter table samlet_vilkar_resultat
-    drop column fk_behandling_id;
+    drop column fk_behandling_id, drop column aktiv;
 alter table samlet_vilkar_resultat
     rename to periode_resultat;
 alter table periode_resultat
