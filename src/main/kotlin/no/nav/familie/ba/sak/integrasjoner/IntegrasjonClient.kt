@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -61,16 +58,12 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
         val uri = URI.create("$integrasjonUri/personopplysning/v1/info/BAR")
 
-        return hentPersoninfo(personIdent, uri)
-    }
-
-    private fun hentPersoninfo(personident: String, uri: URI): Personinfo {
         return try {
-            val response = getForEntity<Ressurs<Personinfo>>(uri, HttpHeaders().medPersonident(personident))
-            secureLogger.info("Personinfo fra $uri for {}: {}", personident, response.data)
+            val response = getForEntity<Ressurs<Personinfo>>(uri, HttpHeaders().medPersonident(personIdent))
+            secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.data)
             response.data!!
         } catch (e: Exception) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personident)
+            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
         }
     }
 
