@@ -17,8 +17,8 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 @Configuration
-@Profile("dev || postgres")
 @Import(ConsumerIdClientInterceptor::class, MdcValuesPropagatingClientInterceptor::class)
+@Profile("integrasjonstest")
 class RestTemplateConfig {
 
     @Bean
@@ -42,7 +42,6 @@ class RestTemplateConfig {
                                       mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor)
             : RestOperations {
         return RestTemplateBuilder()
-                .additionalCustomizers(NaisProxyCustomizer())
                 .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
                 .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
                 .build()
