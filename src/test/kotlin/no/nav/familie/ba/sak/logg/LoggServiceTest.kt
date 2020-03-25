@@ -15,6 +15,8 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
@@ -31,7 +33,11 @@ class LoggServiceTest(
         private val loggService: LoggService,
 
         @Autowired
-        private val stegService: StegService
+        private val stegService: StegService,
+
+        @Autowired
+        private val mockIntegrasjonClient: IntegrasjonClient
+
 ) {
 
     @Test
@@ -75,9 +81,14 @@ class LoggServiceTest(
 
     @Test
     fun `Skal lage logginnslag ved stegflyt for automatisk behandling`() {
+        val søkersIdent = randomFnr()
+        val barnesIdent = randomFnr()
+
+        mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkersIdent, barnesIdent)
+
         val behandling = stegService.håndterNyBehandlingFraHendelse(NyBehandlingHendelse(
-                søkersIdent = randomFnr(),
-                barnasIdenter = listOf(randomFnr())
+                søkersIdent = søkersIdent,
+                barnasIdenter = listOf(barnesIdent)
         ))
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)

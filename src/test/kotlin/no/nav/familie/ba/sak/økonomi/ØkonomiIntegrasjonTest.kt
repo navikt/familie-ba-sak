@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.NyBeregning
+import no.nav.familie.ba.sak.beregning.mapNyBeregningTilVedtakPerson
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
@@ -90,19 +91,19 @@ class ØkonomiIntegrasjonTest {
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        val oppdatertFagsak = vedtakService.oppdaterAktivVedtakMedBeregning(
-                vedtak = vedtak!!,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                nyBeregning = NyBeregning(
-                        listOf(PersonBeregning(ident = barnFnr,
-                                             beløp = 1054,
-                                             stønadFom = LocalDate.of(
-                                                     2020,
-                                                     1,
-                                                     1),
-                                             ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
-                )
+        val nyBeregning = NyBeregning(
+                listOf(PersonBeregning(ident = barnFnr,
+                                       beløp = 1054,
+                                       stønadFom = LocalDate.of(
+                                               2020,
+                                               1,
+                                               1),
+                                       ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
         )
+
+        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak!!.id,nyBeregning,personopplysningGrunnlag)
+
+        val oppdatertFagsak = vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.config
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
@@ -22,7 +23,11 @@ class ClientMocks {
         val mockIntegrasjonOnBehalfClient = mockk<IntegrasjonOnBehalfClient>(relaxed = false)
 
         every {
-            mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any())
+            mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any<Set<Person>>())
+        } returns listOf(Tilgang(true, null))
+
+        every {
+            mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any<List<String>>())
         } returns listOf(Tilgang(true, null))
 
         every {
@@ -32,9 +37,11 @@ class ClientMocks {
                              navn = "Mor Moresen",
                              familierelasjoner = setOf(
                                      Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN),
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                       navn = "Gutten Barnesen",
+                                                       fødselsdato = LocalDate.of(2015, 10, 3)),
                                      Familierelasjoner(personIdent = Personident(id = søkerFnr[1]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.EKTE)))
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
 
         every {
             mockIntegrasjonOnBehalfClient.hentPersoninfo(eq(søkerFnr[1]))
@@ -43,9 +50,11 @@ class ClientMocks {
                              navn = "Far Faresen",
                              familierelasjoner = setOf(
                                      Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN),
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                       navn = "Barn Barney Barnesen",
+                                                       fødselsdato = LocalDate.of(2017, 4, 13)),
                                      Familierelasjoner(personIdent = Personident(id = søkerFnr[0]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.EKTE)))
+                                                       relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
 
         return mockIntegrasjonOnBehalfClient
     }
