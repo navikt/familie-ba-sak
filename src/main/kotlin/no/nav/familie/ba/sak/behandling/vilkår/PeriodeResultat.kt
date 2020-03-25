@@ -8,8 +8,8 @@ import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import javax.persistence.*
 
-@Entity
-@Table(name = "periode_resultat")
+@Entity(name = "PeriodeResultat")
+@Table(name = "PERIODE_RESULTAT")
 class PeriodeResultat(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "periode_resultat_seq_generator")
