@@ -37,7 +37,7 @@ class BeregningService(
     }
 
     fun migrerBeregningsresultatForEksisterendeBehandlinger() {
-        val alleBehandlinger = behandlingRepository.hentAlleBehandlinger()
+        val alleBehandlinger = behandlingRepository.findByFerdigstiltOrIverksatt()
 
         val utbetalingsoppdrag: List<Pair<Behandling, Utbetalingsoppdrag>> = alleBehandlinger.map { behandling ->
             Result.runCatching {
