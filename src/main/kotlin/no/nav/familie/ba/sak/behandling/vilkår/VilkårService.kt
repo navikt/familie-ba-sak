@@ -8,8 +8,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.restDomene.RestPersonVilkårResultat
-import no.nav.familie.ba.sak.behandling.restDomene.tilPeriodeResultater
+import no.nav.familie.ba.sak.behandling.restDomene.RestPeriodeResultat
 import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
 
@@ -51,11 +50,11 @@ class VilkårService(
             val spesifikasjonerForPerson = spesifikasjonerForPerson(person)
             val evaluering = spesifikasjonerForPerson.evaluer(tmpFakta)
             evaluering.children.map { child ->
-                resultaterForPerson.add(VilkårResultat(person = person,
-                                                       resultat = child.resultat,
+                resultaterForPerson.add(VilkårResultat(resultat = child.resultat,
                                                        vilkårType = Vilkår.valueOf(child.identifikator)))
             }
-            periodeResultater.add(PeriodeResultat(vilkårResultater = resultaterForPerson,
+            periodeResultater.add(PeriodeResultat(personIdent = person.personIdent.ident,
+                                                  vilkårResultater = resultaterForPerson,
                                                   periodeFom = barn.first().fødselsdato.plusMonths(1),
                                                   periodeTom = barn.first().fødselsdato.plusYears(18).minusMonths(1)))
         }
@@ -68,41 +67,30 @@ class VilkårService(
         return behandlingResultat
     }
 
-    fun kontrollerVurderteVilkårOgLagResultat(restBehandlingResultat: List<RestPersonVilkårResultat>,
+    fun kontrollerVurderteVilkårOgLagResultat(periodeResultater: List<RestPeriodeResultat>,
                                               behandlingId: Long): BehandlingResultat {
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
-                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
-        val listeAvVilkårResultat = mutableSetOf<VilkårResultat>()
-        personopplysningGrunnlag.personer.map { person ->
-            val vilkårForPerson = restBehandlingResultat
-                    .filter { vilkår -> vilkår.personIdent == person.personIdent.ident }
-                    .firstOrNull()
-                    ?.vurderteVilkår ?: error("Fant ingen vurderte vilkår for person")
-            val vilkårForPart = Vilkår.hentVilkårForPart(person.type)
-            vilkårForPerson.forEach {
-                vilkårForPart.find { vilkårType -> vilkårType == it.vilkårType }
-                ?: error("Vilkåret $it finnes ikke i grunnlaget for parten $vilkårForPart")
-
-                listeAvVilkårResultat.add(VilkårResultat(vilkårType = it.vilkårType,
-                                                         resultat = it.resultat,
-                                                         person = person))
-            }
-            if (listeAvVilkårResultat.filter { it.person.personIdent.ident == person.personIdent.ident }.size != vilkårForPart.size) {
-                throw IllegalStateException("Vilkårene for ${person.type} er ${vilkårForPerson.map { v -> v.vilkårType }}, men vi forventer $vilkårForPart")
-            }
-        }
-        val periodeResultater =
-                restBehandlingResultat.map { restPersonResultat -> restPersonResultat.tilPeriodeResultater() }
-                        .flatten()
-                        .toMutableSet()
         val behandlingResultat = BehandlingResultat(
                 id = behandlingId,
                 behandling = behandlingRepository.finnBehandling(behandlingId),
-                aktiv = true,
-                periodeResultater = periodeResultater)
+                aktiv = true)
+        behandlingResultat.periodeResultater = periodeResultater.map {
+            val periodeResultat = PeriodeResultat(personIdent = it.personIdent,
+                                                  periodeFom = it.periodeFom,
+                                                  periodeTom = it.periodeTom
+            )
+            PeriodeResultat(personIdent = it.personIdent,
+                            periodeFom = it.periodeFom,
+                            periodeTom = it.periodeTom,
+                            vilkårResultater = it.vilkårResultater?.map { restVilkårResultat ->
+                                VilkårResultat(
+                                        periodeResultat = periodeResultat,
+                                        vilkårType = restVilkårResultat.vilkårType,
+                                        resultat = restVilkårResultat.resultat
+                                )
+                            }?.toMutableSet() ?: mutableSetOf())
+        }.toMutableSet()
         lagreNyOgDeaktiverGammelBehandlingResultat(behandlingResultat)
         return behandlingResultat
-
     }
 
     fun spesifikasjonerForPerson(person: Person): Spesifikasjon<Fakta> {

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
@@ -20,21 +21,27 @@ class PeriodeResultat(
         @ManyToOne @JoinColumn(name = "behandling_resultat_id")
         var behandlingResultat: BehandlingResultat? = null,
 
-        @Column(name = "aktiv", nullable = false)
-        var aktiv: Boolean = true,
+        @ManyToOne(optional = false) @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
+        val person: Person,
 
         @Column(name = "periode_fom", nullable = false, updatable = false)
-        val periodeFom: LocalDate?,
+        val periodeFom: LocalDate,
 
         @Column(name = "periode_tom", nullable = false, updatable = false)
         val periodeTom: LocalDate?,
 
         @OneToMany(mappedBy = "periodeResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
-        var vilkårResultater: MutableSet<VilkårResultat>
+        var vilkårResultater: MutableSet<VilkårResultat> = mutableSetOf()
 
 ) : BaseEntitet() {
 
-        fun hentSamletResultat () : BehandlingResultatType {
-                return if (vilkårResultater.any { it.resultat == Resultat.NEI }) BehandlingResultatType.AVSLÅTT else BehandlingResultatType.INNVILGET
+        fun hentSamletResultat(): BehandlingResultatType {
+                if ( vilkårResultater.none { it.resultat == Resultat.NEI }) {
+                        return BehandlingResultatType.INNVILGET
+                } else if ( vilkårResultater.none { it.resultat == Resultat.JA }) {
+                        return BehandlingResultatType.AVSLÅTT
+                } else {
+                        return BehandlingResultatType.DELVIS_INNVILGET
+                }
         }
 }

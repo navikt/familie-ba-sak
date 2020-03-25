@@ -17,39 +17,27 @@ data class RestBehandling(val aktiv: Boolean,
                           val personer: List<RestPerson>,
                           val opprettetTidspunkt: LocalDateTime,
                           val underkategori: BehandlingUnderkategori,
-                          val behandlingResultat: List<RestPersonVilkårResultat>,
+                          val periodeResultater: List<RestPeriodeResultat>,
                           val vedtakForBehandling: List<RestVedtak?>,
                           val brevType: BrevType,
                           val begrunnelse: String)
 
-data class RestPersonVilkårResultat(
+data class RestPeriodeResultat(
         val personIdent: String,
-        val vurderteVilkår: List<RestVilkårResultat>
+        val periodeFom: LocalDate,
+        val periodeTom: LocalDate?,
+        val vilkårResultater: List<RestVilkårResultat>?
 )
 
 data class RestVilkårResultat(
         val vilkårType: Vilkår,
-        val resultat: Resultat,
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val begrunnelse: String
+        val resultat: Resultat
 )
 
-//TODO: Inntil perioder er implementert, lagre resultat fra frontend som et PeriodeResultat i én lenger periode
-fun RestPersonVilkårResultat.tilPeriodeResultater(): MutableSet<PeriodeResultat> {
-    //this.vurderteVilkår.map { vilkår -> VilkårResultat( 1,periodeResultat =  ,vilkårType = vilkår.vilkårType, resultat = vilkår.resultat ) }
-    return mutableSetOf(PeriodeResultat(
-            vilkårResultater = mutableSetOf(),
-            periodeFom = LocalDate.now(),
-            periodeTom = LocalDate.now()))
-}
-
-
-//TODO: Må sortere resultater fra this.periodeResultater på vilkår og se om noen av de er sammenhengende og kan plasseres som et RestVilkårResultat
-fun BehandlingResultat.tilRestBehandlingResultat() = listOf(RestPersonVilkårResultat(personIdent = "12345678910",
-                                                                                     vurderteVilkår = listOf(
-                                                                                             RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                                                                resultat = Resultat.JA,
-                                                                                                                fom = LocalDate.now(),
-                                                                                                                tom = LocalDate.now(),
-                                                                                                                begrunnelse = "OK"))))
+fun PeriodeResultat.tilRestPeriodeResultat() = RestPeriodeResultat(personIdent = this.person.personIdent.ident,
+                                                                   periodeFom = this.periodeFom,
+                                                                   periodeTom = this.periodeTom,
+                                                                   vilkårResultater = this.vilkårResultater.map { resultat ->
+                                                                       RestVilkårResultat(resultat = resultat.resultat,
+                                                                                          vilkårType = resultat.vilkårType)
+                                                                   })

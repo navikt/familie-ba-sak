@@ -21,7 +21,7 @@ data class BehandlingResultat(
         var aktiv: Boolean = true,
 
         @OneToMany(mappedBy = "behandlingResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
-        var periodeResultater: MutableSet<PeriodeResultat>
+        var periodeResultater: MutableSet<PeriodeResultat> = mutableSetOf()
 
 
 ) : BaseEntitet() {
@@ -31,13 +31,11 @@ data class BehandlingResultat(
     }
 
     fun hentSamletResultat(): BehandlingResultatType {
-        if ( ! periodeResultater.contains( BehandlingResultatType.AVSLÅTT )) {
+        if ( periodeResultater.none { it.hentSamletResultat() == BehandlingResultatType.AVSLÅTT }) {
             return BehandlingResultatType.INNVILGET
-        }
-        else if ( ! periodeResultater.contains( BehandlingResultatType.INNVILGET )) {
+        } else if (periodeResultater.none { it.hentSamletResultat() == BehandlingResultatType.INNVILGET }) {
             return BehandlingResultatType.AVSLÅTT
-        }
-        else {
+        } else {
             return BehandlingResultatType.DELVIS_INNVILGET
         }
     }

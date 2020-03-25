@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.BrevType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
-import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingKomplettForBarnOgSøker
+import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingInnvilget
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
@@ -64,7 +64,7 @@ class StegServiceTest(
 
         stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg, RestVilkårsvurdering(
                 brevType = BrevType.INNVILGET,
-                behandlingResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr, listOf(barnFnr)),
+                periodeResultater = vilkårsvurderingInnvilget(søkerFnr),
                 begrunnelse = ""
         ))
 
@@ -84,7 +84,7 @@ class StegServiceTest(
         assertThrows<IllegalStateException> {
             stegService.håndterVilkårsvurdering(behandling, RestVilkårsvurdering(
                     brevType = BrevType.INNVILGET,
-                    behandlingResultat = vilkårsvurderingKomplettForBarnOgSøker(søkerFnr, listOf(barnFnr)),
+                    periodeResultater = vilkårsvurderingInnvilget(søkerFnr),
                     begrunnelse = ""
             ))
         }

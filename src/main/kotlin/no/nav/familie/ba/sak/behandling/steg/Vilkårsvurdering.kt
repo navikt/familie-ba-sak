@@ -28,8 +28,8 @@ class Vilkårsvurdering(
                                                                               data.brevType,
                                                                               data.begrunnelse)
 
-        if (data.behandlingResultat.isNotEmpty()) {
-            vilkårService.kontrollerVurderteVilkårOgLagResultat(data.behandlingResultat,
+        if (data.periodeResultater.isNotEmpty()) {
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(data.periodeResultater,
                                                                 vilkårsvurdertBehandling.id)
         } else {
             vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)

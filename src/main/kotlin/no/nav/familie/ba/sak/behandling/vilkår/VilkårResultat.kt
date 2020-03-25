@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
 import javax.persistence.*
@@ -15,10 +14,6 @@ class VilkårResultat(
 
         @ManyToOne @JoinColumn(name = "periode_resultat_id")
         var periodeResultat: PeriodeResultat? = null,
-
-        @ManyToOne(optional = false)
-        @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
-        val person: Person,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "vilkar")
