@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.RessursResponse.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
+import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -22,6 +23,7 @@ class PersonController(private val integrasjonOnBehalfClient: IntegrasjonOnBehal
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @GetMapping
+    @PersontilgangConstraint
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         return Result.runCatching {
                     integrasjonOnBehalfClient.hentPersoninfo(personIdent)
