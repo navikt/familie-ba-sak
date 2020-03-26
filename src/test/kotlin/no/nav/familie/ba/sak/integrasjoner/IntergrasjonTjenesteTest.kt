@@ -30,7 +30,7 @@ import java.time.LocalDate
 
 
 @SpringBootTest(classes = [ApplicationConfig::class], properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
-@ActiveProfiles("dev", "mock-oauth")
+@ActiveProfiles("dev", "integrasjonstest", "mock-oauth")
 @AutoConfigureWireMock(port = 28085)
 @TestInstance(Lifecycle.PER_CLASS)
 class IntergrasjonTjenesteTest {
@@ -38,9 +38,6 @@ class IntergrasjonTjenesteTest {
     @Autowired
     @Qualifier("integrasjonClient")
     lateinit var integrasjonClient: IntegrasjonClient
-
-    @Value("\${FAMILIE_INTEGRASJONER_API_URL}")
-    lateinit var integrasjonerUri: String
 
     @AfterEach
     fun cleanUp() {
@@ -257,8 +254,6 @@ class IntergrasjonTjenesteTest {
         val personinfo = integrasjonClient.hentPersoninfoFor("12")
         assertThat(personinfo.fødselsdato).isEqualTo(LocalDate.now())
 
-        verify(getRequestedFor(urlEqualTo("/api/personopplysning/v1/info"))
-                       .withHeader("Nav-Personident", equalTo("12")))
         verify(getRequestedFor(urlEqualTo("/api/personopplysning/v1/info/BAR"))
                        .withHeader("Nav-Personident", equalTo("12")))
     }
