@@ -1,27 +1,50 @@
+alter table behandling rename column resultat to brev_type;
+
 CREATE TABLE BEHANDLING_RESULTAT
 (
-    ID               BIGINT PRIMARY KEY,
-    FK_BEHANDLING_ID BIGINT REFERENCES behandling (id)   NOT NULL,
-    AKTIV            BOOLEAN      DEFAULT TRUE           NOT NULL,
-    VERSJON          BIGINT       DEFAULT 0              NOT NULL,
-    OPPRETTET_AV     VARCHAR      DEFAULT 'VL'           NOT NULL,
-    OPPRETTET_TID    TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    ENDRET_AV        VARCHAR,
-    ENDRET_TID       TIMESTAMP(3)
+    ID                            BIGINT PRIMARY KEY,
+    FK_BEHANDLING_ID              BIGINT REFERENCES behandling (id)   NOT NULL,
+    AKTIV                         BOOLEAN      DEFAULT TRUE           NOT NULL,
+    VERSJON                       BIGINT       DEFAULT 0              NOT NULL,
+    OPPRETTET_AV                  VARCHAR      DEFAULT 'VL'           NOT NULL,
+    OPPRETTET_TID                 TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    ENDRET_AV                     VARCHAR,
+    ENDRET_TID                    TIMESTAMP(3),
+    TMP_SAMLET_VILKAR_RESULTAT_ID BIGINT
 );
-
 CREATE SEQUENCE BEHANDLING_RESULTAT_SEQ INCREMENT BY 50 START WITH 1000000 NO CYCLE;
-insert into BEHANDLING_RESULTAT (id, fk_behandling_id, aktiv, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid)
-select nextval('BEHANDLING_RESULTAT_SEQ'), fk_behandling_id, aktiv, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid from samlet_vilkar_resultat;
 
-alter table samlet_vilkar_resultat add column person_ident varchar;
-update samlet_vilkar_resultat svr set person_ident=(select distinct p.person_ident from po_person p, vilkar_resultat vr where p.id = vr.fk_person_id and vr.samlet_vilkar_resultat_id=svr.id limit 1);
+insert into BEHANDLING_RESULTAT (id, tmp_samlet_vilkar_resultat_id, fk_behandling_id, aktiv, versjon, opprettet_av, opprettet_tid,
+                                 endret_av, endret_tid)
+select nextval('BEHANDLING_RESULTAT_SEQ'),
+       id,
+       fk_behandling_id,
+       aktiv,
+       versjon,
+       opprettet_av,
+       opprettet_tid,
+       endret_av,
+       endret_tid
+from samlet_vilkar_resultat;
 
-alter table samlet_vilkar_resultat add column behandling_resultat_id bigint references BEHANDLING_RESULTAT (id) default null;
-update samlet_vilkar_resultat svr set behandling_resultat_id=(select distinct br.id from behandling_resultat br, samlet_vilkar_resultat svr where svr.fk_behandling_id = br.fk_behandling_id);
+alter table samlet_vilkar_resultat
+    add column person_ident varchar;
 
-alter table behandling
-    rename column resultat to brev_type;
+update samlet_vilkar_resultat svr
+set person_ident=(select distinct p.person_ident
+                  from po_person p,
+                       vilkar_resultat vr
+                  where p.id = vr.fk_person_id
+                    and vr.samlet_vilkar_resultat_id = svr.id
+                  limit 1);
+
+alter table samlet_vilkar_resultat
+    add column behandling_resultat_id bigint references BEHANDLING_RESULTAT (id) default null;
+update samlet_vilkar_resultat svr
+set behandling_resultat_id=(select distinct br.id from behandling_resultat br where svr.id = br.tmp_samlet_vilkar_resultat_id limit 1);
+alter table behandling_resultat
+    drop column tmp_samlet_vilkar_resultat_id;
+
 
 alter table samlet_vilkar_resultat
     drop column fk_behandling_id,
