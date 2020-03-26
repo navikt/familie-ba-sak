@@ -123,10 +123,14 @@ class OppgaveServiceTest {
     @Suppress("UNCHECKED_CAST")
     @Test
     fun `finnOppgaverKnyttetTilSaksbehandlerOgEnhet via OppgaveController skal fungere`() {
-        every { integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any()) } returns listOf(OppgaveDto())
+        every {
+            integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any())
+        } returns listOf(OppgaveDto(tema = "BAR"))
         val controller = OppgaveController(oppgaveService)
-        val oppgaver = controller.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(null, null, null, null)
-        assertThat(oppgaver.body?.data as List<OppgaveDto>).hasSize(1)
+        val response = controller.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(null, null, null, null)
+        val oppgaver = response.body?.data as List<OppgaveDto>
+        assertThat(oppgaver).hasSize(1)
+        assertThat(oppgaver.first().tema).isEqualTo("BAR")
     }
 
     @Test
