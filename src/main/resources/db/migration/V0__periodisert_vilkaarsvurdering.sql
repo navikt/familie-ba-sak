@@ -9,11 +9,10 @@ CREATE TABLE BEHANDLING_RESULTAT
     ENDRET_AV        VARCHAR,
     ENDRET_TID       TIMESTAMP(3)
 );
-alter table BEHANDLING_RESULTAT add column SAM_VIL_RES_ID BIGINT;
 
 CREATE SEQUENCE BEHANDLING_RESULTAT_SEQ INCREMENT BY 50 START WITH 1000000 NO CYCLE;
-insert into BEHANDLING_RESULTAT (id, SAM_VIL_RES_ID, fk_behandling_id, aktiv, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid)
-select nextval('BEHANDLING_RESULTAT_SEQ'), id, fk_behandling_id, aktiv, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid from samlet_vilkar_resultat;
+insert into BEHANDLING_RESULTAT (id, fk_behandling_id, aktiv, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid)
+select nextval('BEHANDLING_RESULTAT_SEQ'), fk_behandling_id, aktiv, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid from samlet_vilkar_resultat;
 
 alter table samlet_vilkar_resultat add column person_ident varchar;
 update samlet_vilkar_resultat svr set person_ident=(select distinct p.person_ident from po_person p, vilkar_resultat vr where p.id = vr.fk_person_id and vr.samlet_vilkar_resultat_id=svr.id limit 1);
