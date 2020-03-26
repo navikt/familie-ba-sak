@@ -88,7 +88,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-
     fun distribuerVedtaksbrev(journalpostId: String) {
         val uri = URI.create("$integrasjonUri/dist/v1")
         logger.info("Kaller dokdist-tjeneste med journalpostId $journalpostId")
@@ -108,7 +107,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 }
         )
     }
-
 
     fun ferdigstillOppgave(oppgaveId: Long) {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId/ferdigstill")
