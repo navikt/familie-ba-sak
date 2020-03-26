@@ -45,6 +45,12 @@ class PersontilgangTest {
         assertFalse(harTilgang)
     }
 
+    @Test
+    fun `isValid returnerer true hvis noe har feilet og det ikke ligger persondata på responsen`() {
+        val harTilgang = persontilgang.isValid(ResponseEntity.ok(Ressurs.failure("Dette gikk dårlig")), mockk())
+        assertTrue(harTilgang)
+    }
+
     private fun restPersonInfo(): RestPersonInfo {
         val familierelasjoner = listOf(
                 RestFamilierelasjon(personIdent = "123", navn = "", relasjonRolle = FAMILIERELASJONSROLLE.BARN, fødselsdato = null),
