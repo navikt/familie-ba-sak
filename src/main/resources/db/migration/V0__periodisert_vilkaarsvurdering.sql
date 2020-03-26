@@ -29,19 +29,24 @@ CREATE TABLE PERIODE_RESULTAT
     PERIODE_TOM                   TIMESTAMP(3)
 );
 CREATE SEQUENCE PERIODE_RESULTAT_SEQ INCREMENT BY 50 START WITH 1000000 NO CYCLE;
-insert into PERIODE_RESULTAT_SEQ (id, fk_behandling_resultat_id, person_ident)
-select nextval('PERIODE_RESULTAT_SEQ'), samlet_vilkar_resultat_id, fk_person_id from vilkar_resultat
-group by samlet_vilkar_resultat_id, fk_person_id;
+
+alter table vilkar_resultat add column tmp_person_ident varchar;
+update vilkar_resultat vr set tmp_person_ident=(select distinct p.person_ident from po_person p where p.id = vr.fk_person_id limit 1);
+//OPPDATERER IKKE KORREKT
+
+insert into PERIODE_RESULTAT(id, fk_behandling_resultat_id, person_ident)
+select nextval('PERIODE_RESULTAT_SEQ'), samlet_vilkar_resultat_id, tmp_person_ident from vilkar_resultat
+group by samlet_vilkar_resultat_id, tmp_person_ident;
 
 update PERIODE_RESULTAT pr
 set VERSJON= br.VERSJON, OPPRETTET_AV=br.OPPRETTET_AV,  OPPRETTET_TID=br.OPPRETTET_TID,  ENDRET_AV=br.ENDRET_AV, ENDRET_TID=br.ENDRET_TID
 from BEHANDLING_RESULTAT br
 where pr.FK_BEHANDLING_RESULTAT_ID = br.ID;
-update PERIODE_RESULTAT pr
-set person_ident=(select distinct p.person_ident from po_person p where p.id = pr.PERSON_IDENT limit 1);
 
-alter index samlet_vilkar_resultat_pkey rename to periode_resultat_pkey;
-alter table vilkar_resultat rename constraint vilkar_resultat_samlet_vilkar_resultat_id_fkey to vilkar_resultat_periode_resultat_id_fkey;
-alter table vilkar_resultat rename column samlet_vilkar_resultat_id to periode_resultat_id;
-update vilkar_resultat vr set periode_resultat_id=(select pr.id from PERIODE_RESULTAT pr where vr.periode_resultat_id = pr.FK_BEHANDLING_RESULTAT_ID limit 1);
-alter table vilkar_resultat drop column fk_person_id;
+alter table vilkar_resultat add column periode_resultat_id BIGINT REFERENCES PERIODE_RESULTAT (id);
+update vilkar_resultat vr set periode_resultat_id=(select pr.id from PERIODE_RESULTAT pr where vr.samlet_vilkar_resultat_id = pr.FK_BEHANDLING_RESULTAT_ID and vr.tmp_person_ident = pr.person_ident limit 1);
+
+drop table samlet_vilkar_resultat cascade;
+alter table vilkar_resultat
+    drop column fk_person_id,
+    drop column tmp_person_ident;
