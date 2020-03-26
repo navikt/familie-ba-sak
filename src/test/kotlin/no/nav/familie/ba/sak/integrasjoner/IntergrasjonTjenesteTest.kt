@@ -23,7 +23,6 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
@@ -84,9 +83,9 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `finnOppgaverKnyttetTilSaksbehandlerOgEnhet skal returnere en liste av oppgaver`() {
         val oppgave = OppgaveDto()
-        stubFor(get("/api/oppgave").willReturn(okJson(objectMapper.writeValueAsString(success(listOf<OppgaveDto>(oppgave))))))
+        stubFor(get("/api/oppgave?tema=BAR&enhet=4820&saksbehandler=Z012345").willReturn(okJson(objectMapper.writeValueAsString(success(listOf<OppgaveDto>(oppgave))))))
 
-        val oppgaver = integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(null, null, null, null)
+        val oppgaver = integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(null, null, "4820", "Z012345")
         assertThat(oppgaver).hasSize(1)
     }
 

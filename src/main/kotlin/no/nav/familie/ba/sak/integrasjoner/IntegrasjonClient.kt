@@ -26,6 +26,7 @@ import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
+import java.time.LocalDate
 
 @Component
 class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
@@ -146,7 +147,16 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?, oppgavetype: String?, enhet: String?, saksbehandler: String?): List<OppgaveDto> {
-        val uri = URI.create("$integrasjonUri/oppgave")
+
+        val uriBuilder = UriComponentsBuilder.fromUriString("$integrasjonUri/oppgave")
+
+        uriBuilder.queryParam("tema", "BAR")
+        behandlingstema?.apply { uriBuilder.queryParam("behandlingstema", this) }
+        oppgavetype?.apply { uriBuilder.queryParam("oppgavetype", this) }
+        enhet?.apply { uriBuilder.queryParam("enhet", this) }
+        saksbehandler?.apply { uriBuilder.queryParam("saksbehandler", this) }
+
+        val uri = uriBuilder.build().toUri()
 
         return try {
             val ressurs = getForEntity<Ressurs<List<OppgaveDto>>>(uri, HttpHeaders().medContentTypeJsonUTF8())
