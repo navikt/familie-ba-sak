@@ -127,6 +127,13 @@ fun nyOrdinærBehandling(søkersIdent: String): NyBehandling = NyBehandling(
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
 
+fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
+        søkersIdent = søkersIdent,
+        behandlingType = BehandlingType.REVURDERING,
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.ORDINÆR
+)
+
 fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: List<String>): SøknadDTO {
     return SøknadDTO(
             kategori = BehandlingKategori.NASJONAL,
