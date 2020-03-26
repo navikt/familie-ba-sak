@@ -26,7 +26,6 @@ import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
-import java.time.LocalDate
 
 @Component
 class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
