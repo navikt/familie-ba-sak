@@ -18,7 +18,7 @@ select nextval('BEHANDLING_RESULTAT_SEQ'), id, fk_behandling_id, aktiv, versjon,
 alter table samlet_vilkar_resultat add column person_ident varchar;
 update samlet_vilkar_resultat svr set person_ident=(select distinct p.person_ident from po_person p, vilkar_resultat vr where p.id = vr.fk_person_id and vr.samlet_vilkar_resultat_id=svr.id limit 1);
 
-alter table samlet_vilkar_resultat add column behandling_resultat_id references BEHANDLING_RESULTAT (id) default null;
+alter table samlet_vilkar_resultat add column behandling_resultat_id bigint references BEHANDLING_RESULTAT (id) default null;
 update samlet_vilkar_resultat svr set behandling_resultat_id=(select distinct br.id from behandling_resultat br, samlet_vilkar_resultat svr where svr.fk_behandling_id = br.fk_behandling_id);
 
 alter table behandling
@@ -31,8 +31,6 @@ alter table samlet_vilkar_resultat
 alter table samlet_vilkar_resultat
     rename to periode_resultat;
 alter table periode_resultat
-    add column behandling_resultat_id bigint references BEHANDLING_RESULTAT (id) default null,
-    add column person_ident varchar default '' not null,
     add column periode_fom timestamp(3),
     add column periode_tom timestamp(3);
 alter index samlet_vilkar_resultat_pkey rename to periode_resultat_pkey;
