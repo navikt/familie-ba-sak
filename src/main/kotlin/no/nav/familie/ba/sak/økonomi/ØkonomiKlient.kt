@@ -60,17 +60,6 @@ class ØkonomiKlient(
                 HttpEntity(statusFraOppdragDTO, headers))
     }
 
-    fun hentUtbetalingsoppdrag(oppdragId: OppdragId): ResponseEntity<Ressurs<Utbetalingsoppdrag>> {
-        val headers = HttpHeaders()
-                .medContentTypeJsonUTF8()
-        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
-
-        return restOperations.exchange(
-                URI.create("$familieOppdragUri/utbetalingsoppdrag/$FAGSYSTEM/?personId=${oppdragId.personIdent}&behandlingId=${oppdragId.behandlingsId}"),
-                HttpMethod.GET,
-                HttpEntity<Any>(headers))
-    }
-
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders()
         headers.acceptCharset = listOf(Charsets.UTF_8)
