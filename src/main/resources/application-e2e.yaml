@@ -1,13 +1,13 @@
 no.nav.security.jwt:
   issuer.azuread:
-    discoveryurl: https://login.microsoftonline.com/navq.onmicrosoft.com/v2.0/.well-known/openid-configuration
-    accepted_audience: ${BA_SAK_CLIENT_ID}
+    discoveryurl: http://host.docker.internal:1111/v2.0/.well-known/openid-configuration
+    accepted_audience: api://${BA_SAK_CLIENT_ID}/.default
     cookie_name: azure_token
   client:
     registration:
       familie-integrasjoner-onbehalfof:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
-        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        token-endpoint-url: http://host.docker.internal:1111/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
@@ -16,7 +16,7 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
       familie-integrasjoner-clientcredentials:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
-        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        token-endpoint-url: http://host.docker.internal:1111/v2.0/token
         grant-type: client_credentials
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
@@ -25,7 +25,7 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
       familie-oppdrag-clientcredentials:
         resource-url: ${FAMILIE_OPPDRAG_API_URL}
-        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        token-endpoint-url: http://host.docker.internal:1111/v2.0/token
         grant-type: client_credentials
         scope: ${FAMILIE_OPPDRAG_SCOPE}
         authentication:
