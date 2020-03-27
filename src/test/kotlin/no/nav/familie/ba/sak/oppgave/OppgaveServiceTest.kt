@@ -11,8 +11,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.integrasjoner.oppgave.domene.OppgaveDto
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.IdentType
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdent
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
@@ -20,7 +18,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Tema
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 
@@ -118,26 +115,6 @@ class OppgaveServiceTest {
         assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID) }
                 .hasMessage("Kan ikke finne oppgave for behandlingId $BEHANDLING_ID")
                 .isInstanceOf(java.lang.IllegalStateException::class.java)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    @Test
-    fun `finnOppgaverKnyttetTilSaksbehandlerOgEnhet via OppgaveController skal fungere`() {
-        every {
-            integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any())
-        } returns listOf(OppgaveDto(tema = "BAR"))
-        val controller = OppgaveController(oppgaveService)
-        val response = controller.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(null, null, null, null)
-        val oppgaver = response.body?.data as List<OppgaveDto>
-        assertThat(oppgaver).hasSize(1)
-        assertThat(oppgaver.first().tema).isEqualTo("BAR")
-    }
-
-    @Test
-    fun `finnOppgaverKnyttetTilSaksbehandlerOgEnhet skal feile ved ukjent behandlingstema`() {
-        val oppgaver = oppgaveService.finnOppgaverKnyttetTilSaksbehandlerOgEnhet("ab1000", null, null, null)
-        assertThat(oppgaver.body?.status).isEqualTo(Ressurs.Status.FEILET)
-        assertThat(oppgaver.body?.melding).isEqualTo("Ugyldig behandlingstema")
     }
 
     private fun lagTestBehandling(): Behandling {

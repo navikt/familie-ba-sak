@@ -3,13 +3,12 @@ package no.nav.familie.ba.sak.oppgave
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.integrasjoner.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentType
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdent
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
 import no.nav.familie.kontrakter.felles.oppgave.Tema
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -58,13 +57,9 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     }
 
     fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?, oppgavetype: String?, enhet: String?, saksbehandler: String?)
-            : ResponseEntity<Ressurs<*>> {
-        if (!behandlingstema.isNullOrEmpty() && Behandlingstema.values().all { it.kode != behandlingstema }) {
-            return ResponseEntity.ok().body(Ressurs.failure<Any>("Ugyldig behandlingstema"))
-        }
+            : List<OppgaveDto> {
 
-        val oppgaver = integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)
-        return ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
+        return integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)
     }
 
     enum class Behandlingstema(val kode: String) {
