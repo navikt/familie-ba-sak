@@ -10,7 +10,7 @@ import javax.persistence.*
 data class BehandlingResultat(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_resultat_seq_generator")
-        @SequenceGenerator(name = "behandling_resultat_seq_generator", sequenceName = "behandling_seq", allocationSize = 50)
+        @SequenceGenerator(name = "behandling_resultat_seq_generator", sequenceName = "behandling_resultat_seq", allocationSize = 50)
         val id: Long = 0,
 
         @ManyToOne(optional = false)

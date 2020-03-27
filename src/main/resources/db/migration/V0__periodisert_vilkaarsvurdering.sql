@@ -32,7 +32,6 @@ CREATE SEQUENCE PERIODE_RESULTAT_SEQ INCREMENT BY 50 START WITH 1000000 NO CYCLE
 
 alter table vilkar_resultat add column tmp_person_ident varchar;
 update vilkar_resultat vr set tmp_person_ident=(select distinct p.person_ident from po_person p where p.id = vr.fk_person_id limit 1);
-//OPPDATERER IKKE KORREKT
 
 insert into PERIODE_RESULTAT(id, fk_behandling_resultat_id, person_ident)
 select nextval('PERIODE_RESULTAT_SEQ'), samlet_vilkar_resultat_id, tmp_person_ident from vilkar_resultat
