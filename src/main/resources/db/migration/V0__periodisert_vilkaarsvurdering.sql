@@ -42,8 +42,9 @@ set VERSJON= br.VERSJON, OPPRETTET_AV=br.OPPRETTET_AV,  OPPRETTET_TID=br.OPPRETT
 from BEHANDLING_RESULTAT br
 where pr.FK_BEHANDLING_RESULTAT_ID = br.ID;
 
-alter table vilkar_resultat add column periode_resultat_id BIGINT REFERENCES PERIODE_RESULTAT (id);
-update vilkar_resultat vr set periode_resultat_id=(select pr.id from PERIODE_RESULTAT pr where vr.samlet_vilkar_resultat_id = pr.FK_BEHANDLING_RESULTAT_ID and vr.tmp_person_ident = pr.person_ident limit 1);
+alter table vilkar_resultat add column fk_periode_resultat_id BIGINT REFERENCES PERIODE_RESULTAT (id);
+update vilkar_resultat vr set fk_periode_resultat_id=(select pr.id from PERIODE_RESULTAT pr where vr.samlet_vilkar_resultat_id = pr.FK_BEHANDLING_RESULTAT_ID and vr.tmp_person_ident = pr.person_ident limit 1);
+ALTER TABLE vilkar_resultat ALTER COLUMN fk_periode_resultat_id SET NOT NULL;
 
 drop table samlet_vilkar_resultat cascade;
 alter table vilkar_resultat

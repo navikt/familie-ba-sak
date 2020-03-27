@@ -17,7 +17,7 @@ class PeriodeResultat(
                            allocationSize = 50)
         private val id: Long = 0,
 
-        @ManyToOne @JoinColumn(name = "behandling_resultat_id")
+        @ManyToOne @JoinColumn(name = "fk_behandling_resultat_id")
         var behandlingResultat: BehandlingResultat? = null,
 
         @Column(name = "person_ident", nullable = false, updatable = false)

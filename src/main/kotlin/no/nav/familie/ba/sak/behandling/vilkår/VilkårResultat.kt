@@ -12,7 +12,7 @@ class VilkårResultat(
         @SequenceGenerator(name = "vilkar_resultat_seq_generator", sequenceName = "vilkar_resultat_seq", allocationSize = 50)
         val id: Long = 0,
 
-        @ManyToOne @JoinColumn(name = "periode_resultat_id")
+        @ManyToOne @JoinColumn(name = "fk_periode_resultat_id")
         var periodeResultat: PeriodeResultat? = null,
 
         @Enumerated(EnumType.STRING)
