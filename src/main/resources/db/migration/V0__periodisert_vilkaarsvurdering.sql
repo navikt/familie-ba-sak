@@ -47,5 +47,6 @@ update vilkar_resultat vr set periode_resultat_id=(select pr.id from PERIODE_RES
 
 drop table samlet_vilkar_resultat cascade;
 alter table vilkar_resultat
+    drop column samlet_vilkar_resultat_id,
     drop column fk_person_id,
     drop column tmp_person_ident;
