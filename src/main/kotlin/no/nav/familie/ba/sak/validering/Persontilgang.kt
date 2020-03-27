@@ -16,7 +16,7 @@ class Persontilgang(private val integrasjonOnBehalfClient: IntegrasjonOnBehalfCl
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun isValid(response: ResponseEntity<Ressurs<RestPersonInfo>>, ctx: ConstraintValidatorContext): Boolean {
-        val personInfo = response.body?.data!!
+        val personInfo = response.body?.data ?: return true
         val personIdenter = personInfo.familierelasjoner.map { it.personIdent }.toMutableList()
         personIdenter.add(personInfo.personIdent)
         integrasjonOnBehalfClient.sjekkTilgangTilPersoner(personIdenter)
@@ -25,7 +25,6 @@ class Persontilgang(private val integrasjonOnBehalfClient: IntegrasjonOnBehalfCl
                     logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")
                     return false
                 }
-
         return true
     }
 
