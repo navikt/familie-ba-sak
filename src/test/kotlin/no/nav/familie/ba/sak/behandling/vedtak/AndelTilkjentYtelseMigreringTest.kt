@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -132,18 +133,18 @@ internal class AndelTilkjentYtelseMigreringTest {
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val andelTilkjentYtelse = mapNyBeregningTilAndelTilkjentYtelse(behandling2.id, andreBeregning, personopplysningGrunnlag)
+        val andelTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling2.id, andreBeregning, personopplysningGrunnlag)
         andelTilkjentYtelseRepository.saveAll(andelTilkjentYtelse)
 
         val andelTilkjentYtelseForBeregning1 =
-                andelTilkjentYtelseRepository.finnAndelTilkjentYtelseForBeregning(behandling1.id)
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBeregning(behandling1.id)
                         .sortedBy { it.beløp }
         Assertions.assertEquals(2, andelTilkjentYtelseForBeregning1.size)
         Assertions.assertEquals(1054, andelTilkjentYtelseForBeregning1[0].beløp)
         Assertions.assertEquals(1354, andelTilkjentYtelseForBeregning1[1].beløp)
 
         val andelTilkjentYtelseForBeregning2 =
-                andelTilkjentYtelseRepository.finnAndelTilkjentYtelseForBeregning(behandling2.id)
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBeregning(behandling2.id)
                         .sortedBy { it.beløp }
         Assertions.assertEquals(2, andelTilkjentYtelseForBeregning2.size)
         Assertions.assertEquals(314, andelTilkjentYtelseForBeregning2[0].beløp)
@@ -159,7 +160,7 @@ internal class AndelTilkjentYtelseMigreringTest {
                 .forEach {vedtakPersonRepository.save(it) }
 
         val andelTilkjentYtelseForBeregning3 =
-                andelTilkjentYtelseRepository.finnAndelTilkjentYtelseForBeregning(behandling1.id)
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBeregning(behandling1.id)
                         .sortedBy { it.beløp }
         Assertions.assertEquals(2, andelTilkjentYtelseForBeregning3.size)
         Assertions.assertEquals(1154, andelTilkjentYtelseForBeregning3[0].beløp)
@@ -172,7 +173,40 @@ internal class AndelTilkjentYtelseMigreringTest {
 
         // Slett-migrering
         vedtakService.slettAlleBeregninger(vedtak)
-        Assertions.assertEquals(0, andelTilkjentYtelseRepository.finnAndelTilkjentYtelseForBeregning(behandling1.id).size)
+        Assertions.assertEquals(0, andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBeregning(behandling1.id).size)
+
+    }
+
+    fun mapNyBeregningTilVedtakPerson(vedtakId: Long, nyBeregning: NyBeregning, personopplysningGrunnlag: PersonopplysningGrunnlag)
+            : List<VedtakPersonYtelsesperiode>{
+
+        val identBarnMap = personopplysningGrunnlag.barna
+                .associateBy { it.personIdent.ident }
+
+        return nyBeregning.personBeregninger
+                .filter{ identBarnMap.containsKey(it.ident) }
+                .map {
+
+                    val person= identBarnMap[it.ident]!!
+
+                    if (it.stønadFom.isBefore(person.fødselsdato)) {
+                        error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
+                    }
+
+                    val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
+                    val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
+
+                    if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
+                        error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
+                    }
+
+                    VedtakPersonYtelsesperiode(personId = person.id,
+                                               vedtakId = vedtakId,
+                                               beløp = it.beløp,
+                                               stønadFom = sikkerStønadFom,
+                                               stønadTom = sikkerStønadTom,
+                                               type = it.ytelsetype)
+                }
 
     }
 

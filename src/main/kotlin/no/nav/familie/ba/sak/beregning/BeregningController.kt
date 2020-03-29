@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
@@ -54,8 +53,8 @@ class BeregningController(
                                        ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         return Result.runCatching {
-                    val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak.id,nyBeregning,personopplysningGrunnlag)
-                    vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
+                    val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
+                    vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, andelerTilkjentYtelse)
                 }
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },
@@ -79,41 +78,7 @@ data class PersonBeregning(
         val ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
 )
 
-@Deprecated("Bruk mapNyBeregningTilAndelTilkjentYtelse")
-fun mapNyBeregningTilVedtakPerson(vedtakId: Long, nyBeregning: NyBeregning, personopplysningGrunnlag: PersonopplysningGrunnlag)
- : List<VedtakPersonYtelsesperiode>{
-
-    val identBarnMap = personopplysningGrunnlag.barna
-            .associateBy { it.personIdent.ident }
-
-    return nyBeregning.personBeregninger
-            .filter{ identBarnMap.containsKey(it.ident) }
-            .map {
-
-                val person= identBarnMap[it.ident]!!
-
-                if (it.stønadFom.isBefore(person.fødselsdato)) {
-                    error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
-                }
-
-                val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-                val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
-
-                if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
-                    error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
-                }
-
-                VedtakPersonYtelsesperiode(personId = person.id,
-                                           vedtakId = vedtakId,
-                                           beløp = it.beløp,
-                                           stønadFom = sikkerStønadFom,
-                                           stønadTom = sikkerStønadTom,
-                                           type = it.ytelsetype)
-            }
-
-}
-
-fun mapNyBeregningTilAndelTilkjentYtelse(behandlingId: Long, nyBeregning: NyBeregning, personopplysningGrunnlag: PersonopplysningGrunnlag)
+fun mapNyBeregningTilAndelerTilkjentYtelse(behandlingId: Long, nyBeregning: NyBeregning, personopplysningGrunnlag: PersonopplysningGrunnlag)
         : List<AndelTilkjentYtelse>{
 
     val identBarnMap = personopplysningGrunnlag.barna

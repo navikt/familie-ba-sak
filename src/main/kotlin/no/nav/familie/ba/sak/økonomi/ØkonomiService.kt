@@ -21,11 +21,13 @@ class ØkonomiService(
     fun lagreBeregningsresultatOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
         val vedtak = vedtakService.hent(vedtakId)
 
-        val personberegninger = if (vedtak.behandling.resultat == BehandlingResultat.OPPHØRT)
-            beregningService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)
-        else beregningService.hentPersonerForVedtak(vedtak.id)
+        val andelerTilkjentYtelse = if (vedtak.behandling.resultat == BehandlingResultat.OPPHØRT) {
+            val forrigeVedtak = vedtakService.hent(vedtak.forrigeVedtakId!!)
+            beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id)
+        }
+        else beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingsId)
 
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, personberegninger)
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, andelerTilkjentYtelse)
 
         beregningService.lagreBeregningsresultat(vedtak.behandling, utbetalingsoppdrag)
         iverksettOppdrag(vedtak.behandling.id, utbetalingsoppdrag)

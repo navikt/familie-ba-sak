@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
+import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -20,13 +20,14 @@ import no.nav.familie.ba.sak.økonomi.sats
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
+import kotlin.random.Random
 
 fun randomFnr(): String = UUID.randomUUID().toString()
 fun randomAktørId(): AktørId = AktørId(UUID.randomUUID().toString())
 
-private var gjeldendeVedtakId: Long = 1
-private var gjeldendeBehandlingId: Long = 1
-private var gjeldendePersonId: Long = 1
+private var gjeldendeVedtakId: Long = Random.nextLong()
+private var gjeldendeBehandlingId: Long = Random.nextLong()
+private var gjeldendePersonId: Long = Random.nextLong()
 private val id_inkrement = 50
 
 fun nesteVedtakId(): Long {
@@ -81,14 +82,14 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
                opphørsdato = opphørsdato
         )
 
-fun lagPersonVedtak(fom: String,
+fun lagAndelTilkjentYtelse(fom: String,
                     tom: String,
                     ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD,
                     beløp: Int = sats(ytelsetype),
-                    vedtak: Vedtak = lagVedtak()): VedtakPersonYtelsesperiode {
-    return VedtakPersonYtelsesperiode(
+                    behandling: Behandling = lagBehandling()): AndelTilkjentYtelse {
+    return AndelTilkjentYtelse(
             personId = tilfeldigPerson().id,
-            vedtakId = vedtak.id, beløp = beløp, stønadFom = dato(fom), stønadTom = dato(tom), type = ytelsetype)
+            behandlingId = behandling.id, beløp = beløp, stønadFom = dato(fom), stønadTom = dato(tom), type = ytelsetype)
 }
 
 fun lagTestPersonopplysningGrunnlag(behandlingId: Long,

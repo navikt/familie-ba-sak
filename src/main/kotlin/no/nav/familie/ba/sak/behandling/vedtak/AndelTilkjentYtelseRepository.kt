@@ -16,9 +16,9 @@ interface VedtakPersonRepository : JpaRepository<VedtakPersonYtelsesperiode, Lon
 
 interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Long> {
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId")
-    fun finnAndelTilkjentYtelseForBeregning(behandlingId: Long): List<AndelTilkjentYtelse>
+    fun finnAndelerTilkjentYtelseForBeregning(behandlingId: Long): List<AndelTilkjentYtelse>
 
     @Modifying
     @Query(value = "DELETE FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId")
-    fun slettAlleAndelTilkjentYtelseForBehandling(behandlingId: Long)
+    fun slettAlleAndelerTilkjentYtelseForBehandling(behandlingId: Long)
 }
