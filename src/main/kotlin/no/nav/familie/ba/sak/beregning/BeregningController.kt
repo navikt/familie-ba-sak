@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
@@ -78,6 +79,7 @@ data class PersonBeregning(
         val ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
 )
 
+@Deprecated("Bruk mapNyBeregningTilAndelTilkjentYtelse")
 fun mapNyBeregningTilVedtakPerson(vedtakId: Long, nyBeregning: NyBeregning, personopplysningGrunnlag: PersonopplysningGrunnlag)
  : List<VedtakPersonYtelsesperiode>{
 
@@ -107,6 +109,39 @@ fun mapNyBeregningTilVedtakPerson(vedtakId: Long, nyBeregning: NyBeregning, pers
                                            stønadFom = sikkerStønadFom,
                                            stønadTom = sikkerStønadTom,
                                            type = it.ytelsetype)
+            }
+
+}
+
+fun mapNyBeregningTilAndelTilkjentYtelse(behandlingId: Long, nyBeregning: NyBeregning, personopplysningGrunnlag: PersonopplysningGrunnlag)
+        : List<AndelTilkjentYtelse>{
+
+    val identBarnMap = personopplysningGrunnlag.barna
+            .associateBy { it.personIdent.ident }
+
+    return nyBeregning.personBeregninger
+            .filter{ identBarnMap.containsKey(it.ident) }
+            .map {
+
+                val person= identBarnMap[it.ident]!!
+
+                if (it.stønadFom.isBefore(person.fødselsdato)) {
+                    error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
+                }
+
+                val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
+                val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
+
+                if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
+                    error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
+                }
+
+                AndelTilkjentYtelse(personId = person.id,
+                                         behandlingId = behandlingId,
+                                         beløp = it.beløp,
+                                         stønadFom = sikkerStønadFom,
+                                         stønadTom = sikkerStønadTom,
+                                         type = it.ytelsetype)
             }
 
 }

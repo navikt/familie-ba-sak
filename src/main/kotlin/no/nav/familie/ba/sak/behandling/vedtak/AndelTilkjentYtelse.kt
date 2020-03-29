@@ -7,6 +7,7 @@ import javax.persistence.*
 
 @Entity(name = "VedtakPerson")
 @Table(name = "VEDTAK_PERSON")
+@Deprecated("Er erstattet av AndelTilkjentYtelse")
 data class VedtakPersonYtelsesperiode(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_person_seq_generator")
@@ -32,6 +33,35 @@ data class VedtakPersonYtelsesperiode(
         @Column(name = "type", nullable = false)
         val type: Ytelsetype
 ) : BaseEntitet()
+
+@Entity(name = "AndelTilkjentYtelse")
+@Table(name = "ANDEL_TILKJENT_YTELSE")
+data class AndelTilkjentYtelse(
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "andel_tilkjent_ytelse_seq_generator")
+        @SequenceGenerator(name = "andel_tilkjent_ytelse_seq_generator", sequenceName = "andel_tilkjent_ytelse_seq", allocationSize = 50)
+        val id: Long = 0,
+
+        @Column(name = "fk_behandling_id", nullable = false, updatable = false)
+        val behandlingId: Long,
+
+        @Column(name = "fk_person_id", nullable = false, updatable = false)
+        val personId: Long,
+
+        @Column(name = "belop", nullable = false)
+        val beløp: Int,
+
+        @Column(name = "stonad_fom", nullable = false)
+        val stønadFom: LocalDate,
+
+        @Column(name = "stonad_tom", nullable = false)
+        val stønadTom: LocalDate,
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "type", nullable = false)
+        val type: Ytelsetype
+) : BaseEntitet()
+
 
 enum class Ytelsetype(val klassifisering: String) {
         ORDINÆR_BARNETRYGD("BATR"),

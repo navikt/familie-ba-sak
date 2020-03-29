@@ -128,6 +128,12 @@ class VedtakService(private val behandlingService: BehandlingService,
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
 
+    @Transactional
+    @Deprecated("Brukes for test")
+    fun slettAlleBeregninger(vedtak: Vedtak) {
+        vedtakPersonRepository.slettAllePersonBeregningerForVedtak(vedtak.id)
+    }
+
     fun hentForrigeVedtak(behandling: Behandling): Vedtak? {
         val behandlinger = behandlingService.hentBehandlinger(behandling.fagsak.id)
 
