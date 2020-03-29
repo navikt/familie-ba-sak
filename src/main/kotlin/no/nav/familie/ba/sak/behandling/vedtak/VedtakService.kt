@@ -36,7 +36,7 @@ class VedtakService(private val behandlingService: BehandlingService,
         val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
                               ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling $gjeldendeBehandlingsId")
 
-        val gjeldendeAndelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBeregning(gjeldendeBehandlingsId)
+        val gjeldendeAndelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(gjeldendeBehandlingsId)
         if (gjeldendeAndelerTilkjentYtelse.isEmpty()) {
             return Ressurs.failure(
                     "Fant ikke andeler tilkjent ytelse tilknyttet behandling $gjeldendeBehandlingsId")

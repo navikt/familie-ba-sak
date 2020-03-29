@@ -16,7 +16,7 @@ class BeregningService(
         private val beregningResultatRepository: BeregningResultatRepository
 ) {
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
-        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBeregning(behandlingId)
+        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
     }
 
     fun hentBeregningsresultatForBehandling(behandlingId: Long): BeregningResultat {

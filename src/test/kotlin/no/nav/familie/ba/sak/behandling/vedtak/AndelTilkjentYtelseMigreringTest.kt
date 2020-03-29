@@ -137,14 +137,14 @@ internal class AndelTilkjentYtelseMigreringTest {
         andelTilkjentYtelseRepository.saveAll(andelTilkjentYtelse)
 
         val andelTilkjentYtelseForBeregning1 =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBeregning(behandling1.id)
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling1.id)
                         .sortedBy { it.beløp }
         Assertions.assertEquals(2, andelTilkjentYtelseForBeregning1.size)
         Assertions.assertEquals(1054, andelTilkjentYtelseForBeregning1[0].beløp)
         Assertions.assertEquals(1354, andelTilkjentYtelseForBeregning1[1].beløp)
 
         val andelTilkjentYtelseForBeregning2 =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBeregning(behandling2.id)
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling2.id)
                         .sortedBy { it.beløp }
         Assertions.assertEquals(2, andelTilkjentYtelseForBeregning2.size)
         Assertions.assertEquals(314, andelTilkjentYtelseForBeregning2[0].beløp)
@@ -160,7 +160,7 @@ internal class AndelTilkjentYtelseMigreringTest {
                 .forEach {vedtakPersonRepository.save(it) }
 
         val andelTilkjentYtelseForBeregning3 =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBeregning(behandling1.id)
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling1.id)
                         .sortedBy { it.beløp }
         Assertions.assertEquals(2, andelTilkjentYtelseForBeregning3.size)
         Assertions.assertEquals(1154, andelTilkjentYtelseForBeregning3[0].beløp)
@@ -173,7 +173,7 @@ internal class AndelTilkjentYtelseMigreringTest {
 
         // Slett-migrering
         vedtakService.slettAlleBeregninger(vedtak)
-        Assertions.assertEquals(0, andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBeregning(behandling1.id).size)
+        Assertions.assertEquals(0, andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling1.id).size)
 
     }
 
