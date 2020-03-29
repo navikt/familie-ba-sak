@@ -24,7 +24,7 @@ data class RestBehandling(val aktiv: Boolean,
 
 data class RestPeriodeResultat(
         val personIdent: String,
-        val periodeFom: LocalDate,
+        val periodeFom: LocalDate?,
         val periodeTom: LocalDate?,
         val vilkårResultater: List<RestVilkårResultat>?
 )
