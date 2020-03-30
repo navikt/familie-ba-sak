@@ -10,13 +10,13 @@ create table ANDEL_TILKJENT_YTELSE
     fk_behandling_id        bigint       references BEHANDLING (id)                 not null,
     fk_person_id            bigint       references po_person (id)                  not null,
     versjon                 bigint       default 0                                  not null,
-    opprettet_av            VARCHAR(20)  default 'VL'                               not null,
+    opprettet_av            VARCHAR(512) default 'VL'                               not null,
     opprettet_tid           TIMESTAMP(3) default localtimestamp                     not null,
     stonad_fom              TIMESTAMP(3)                                            not null,
     stonad_tom              TIMESTAMP(3)                                            not null,
     type                    varchar(50)                                             not null,
     belop                   numeric,
-    endret_av               VARCHAR(20),
+    endret_av               VARCHAR(512),
     endret_tid              TIMESTAMP(3)
 );
 
