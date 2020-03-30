@@ -1,7 +1,9 @@
-package no.nav.familie.ba.sak.arbeidsfordeling
+package no.nav.familie.ba.sak.oppgave
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.integrasjoner.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentType
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdent
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
@@ -45,7 +47,6 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         integrasjonClient.ferdigstillOppgave(oppgaveId)
     }
 
-
     private fun lagOppgaveTekst(fagsakId: Long): String {
         //TODO Tekst skal oppdateres når man får et forslag
         var oppgaveTekst =
@@ -55,6 +56,11 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return oppgaveTekst
     }
 
+    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?, oppgavetype: String?, enhet: String?, saksbehandler: String?)
+            : List<OppgaveDto> {
+
+        return integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)
+    }
 
     enum class Behandlingstema(val kode: String) {
         ORDINÆR_BARNETRYGD("ab0180"),
