@@ -23,10 +23,10 @@ class PeriodeResultat(
         @Column(name = "person_ident", nullable = false, updatable = false)
         val personIdent: String,
 
-        @Column(name = "periode_fom", nullable = false, updatable = false)
-        val periodeFom: LocalDate,
+        @Column(name = "periode_fom")
+        val periodeFom: LocalDate?,
 
-        @Column(name = "periode_tom", nullable = false, updatable = false)
+        @Column(name = "periode_tom")
         val periodeTom: LocalDate?,
 
         @OneToMany(mappedBy = "periodeResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
