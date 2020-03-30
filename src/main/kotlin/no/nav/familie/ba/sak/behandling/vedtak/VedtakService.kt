@@ -21,7 +21,6 @@ import java.time.LocalDate
 class VedtakService(private val behandlingService: BehandlingService,
                     private val behandlingRepository: BehandlingRepository,
                     private val vedtakRepository: VedtakRepository,
-                    private val vedtakPersonRepository: VedtakPersonRepository,
                     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokGenKlient: DokGenKlient,
                     private val fagsakService: FagsakService) {
@@ -127,12 +126,6 @@ class VedtakService(private val behandlingService: BehandlingService,
         lagreOgDeaktiverGammel(vedtak)
 
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
-    }
-
-    @Transactional
-    @Deprecated("Brukes for test")
-    fun slettAlleBeregninger(vedtak: Vedtak) {
-        vedtakPersonRepository.slettAllePersonBeregningerForVedtak(vedtak.id)
     }
 
     fun hentForrigeVedtak(behandling: Behandling): Vedtak? {
