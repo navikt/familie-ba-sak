@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype.*
-import no.nav.familie.ba.sak.common.lagPersonVedtak
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.økonomi.lagSegmentBeløp
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -27,15 +27,15 @@ class BeregningTest {
     fun `Skal sjekke at tidslinjen for 3 barn blir riktig`() {
 
         val tidslinjeMap = beregnUtbetalingsperioder(listOf(
-                lagPersonVedtak("2020-04-01",
+                lagAndelTilkjentYtelse("2020-04-01",
                                 "2038-03-31",
                                 ORDINÆR_BARNETRYGD,
                                 1054),
-                lagPersonVedtak("2022-04-01",
+                lagAndelTilkjentYtelse("2022-04-01",
                                 "2040-03-31",
                                 ORDINÆR_BARNETRYGD,
                                 1054),
-                lagPersonVedtak("2023-04-01",
+                lagAndelTilkjentYtelse("2023-04-01",
                                 "2038-03-31",
                                 ORDINÆR_BARNETRYGD,
                                 1054)))
@@ -58,15 +58,15 @@ class BeregningTest {
         // Utvidet barnetrygd 1/4/2020 - 31/1/2021
 
         val tidslinjeMap = beregnUtbetalingsperioder(listOf(
-                lagPersonVedtak("2020-04-01",
+                lagAndelTilkjentYtelse("2020-04-01",
                                 "2023-03-31",
                                 SMÅBARNSTILLEGG,
                                 660),
-                lagPersonVedtak("2020-04-01",
+                lagAndelTilkjentYtelse("2020-04-01",
                                 "2038-03-31",
                                 ORDINÆR_BARNETRYGD,
                                 1054),
-                lagPersonVedtak("2020-04-01",
+                lagAndelTilkjentYtelse("2020-04-01",
                                 "2021-01-31",
                                 UTVIDET_BARNETRYGD,
                                 1054)))

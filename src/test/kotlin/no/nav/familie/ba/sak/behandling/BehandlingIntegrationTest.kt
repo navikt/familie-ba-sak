@@ -199,9 +199,9 @@ class BehandlingIntegrationTest {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak!!.id,nyBeregning,personopplysningGrunnlag)
+        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
 
-        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak!!, vedtakPersoner)
+        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak!!, andelerTilkjentYtelse)
 
         val task = opprettOpphørVedtakTask(
                 behandling,
@@ -261,9 +261,9 @@ class BehandlingIntegrationTest {
 
         val nyBeregning = NyBeregning(personBeregninger)
 
-        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak.id,nyBeregning,personopplysningGrunnlag)
+        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
 
-        val restVedtakBarnMap = vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
+        val restVedtakBarnMap = vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, andelerTilkjentYtelse)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
@@ -313,20 +313,20 @@ class BehandlingIntegrationTest {
                 PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
         ))
 
-        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak.id,førsteBeregning,personopplysningGrunnlag)
+        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, førsteBeregning, personopplysningGrunnlag)
 
-        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
+        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, andelerTilkjentYtelse)
 
         val andreBeregning = NyBeregning(listOf(
                 PersonBeregning(barn1Fnr, 970, dato_2021_01_01, Ytelsetype.MANUELL_VURDERING),
                 PersonBeregning(barn3Fnr, 314, dato_2021_10_01, Ytelsetype.EØS)
         ))
 
-        val andreVedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak.id,andreBeregning,personopplysningGrunnlag)
+        val andreAndelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, andreBeregning, personopplysningGrunnlag)
 
         val oppdatertVedtak = vedtakRepository.findById(vedtak.id).get()
 
-        val restVedtakBarnMap = vedtakService.oppdaterAktivtVedtakMedBeregning(oppdatertVedtak, andreVedtakPersoner)
+        val restVedtakBarnMap = vedtakService.oppdaterAktivtVedtakMedBeregning(oppdatertVedtak, andreAndelerTilkjentYtelse)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }

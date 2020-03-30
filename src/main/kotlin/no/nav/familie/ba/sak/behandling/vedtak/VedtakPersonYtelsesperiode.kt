@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import javax.persistence.*
 
 @Entity(name = "VedtakPerson")
 @Table(name = "VEDTAK_PERSON")
+@Deprecated("Er erstattet av AndelTilkjentYtelse")
 data class VedtakPersonYtelsesperiode(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_person_seq_generator")
@@ -32,11 +32,3 @@ data class VedtakPersonYtelsesperiode(
         @Column(name = "type", nullable = false)
         val type: Ytelsetype
 ) : BaseEntitet()
-
-enum class Ytelsetype(val klassifisering: String) {
-        ORDINÆR_BARNETRYGD("BATR"),
-        UTVIDET_BARNETRYGD("BATR"),
-        SMÅBARNSTILLEGG("BATRSMA"),
-        EØS("BATR"),
-        MANUELL_VURDERING("BATR")
-}
