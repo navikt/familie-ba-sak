@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.integrasjoner.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
@@ -86,7 +87,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-
     fun distribuerVedtaksbrev(journalpostId: String) {
         val uri = URI.create("$integrasjonUri/dist/v1")
         logger.info("Kaller dokdist-tjeneste med journalpostId $journalpostId")
@@ -106,7 +106,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 }
         )
     }
-
 
     fun ferdigstillOppgave(oppgaveId: Long) {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId/ferdigstill")
@@ -142,6 +141,31 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                                opprettOppgave.ident.ident)
                 }
         )
+    }
+
+    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?, oppgavetype: String?, enhet: String?, saksbehandler: String?): List<OppgaveDto> {
+
+        val uriBuilder = UriComponentsBuilder.fromUriString("$integrasjonUri/oppgave")
+
+        uriBuilder.queryParam("tema", "BAR")
+        behandlingstema?.apply { uriBuilder.queryParam("behandlingstema", this) }
+        oppgavetype?.apply { uriBuilder.queryParam("oppgavetype", this) }
+        enhet?.apply { uriBuilder.queryParam("enhet", this) }
+        saksbehandler?.apply { uriBuilder.queryParam("saksbehandler", this) }
+
+        val uri = uriBuilder.build().toUri()
+
+        return try {
+            val ressurs = getForEntity<Ressurs<List<OppgaveDto>>>(uri, HttpHeaders().medContentTypeJsonUTF8())
+            assertGenerelleSuksessKriterier(ressurs)
+            ressurs.data ?: throw IntegrasjonException("Ressurs mangler.", null, uri, null)
+        } catch (e: Exception) {
+            val message = if (e is RestClientResponseException) e.responseBodyAsString else ""
+            throw IntegrasjonException("Kall mot integrasjon feilet ved finnOppgaverKnyttetTilSaksbehandlerOgEnhet. response=$message",
+                    e,
+                    uri,
+                    "behandlingstema: ${behandlingstema}, oppgavetype: ${oppgavetype}, enhet: ${enhet}, saksbehandler: ${saksbehandler}")
+        }
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
