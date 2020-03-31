@@ -8,7 +8,7 @@ interface BehandlingResultatRepository : JpaRepository<BehandlingResultat, Long>
     fun finnBehandlingResutat(behandlingResultatId: Long): BehandlingResultat
 
     @Query(value = "SELECT r FROM BehandlingResultat r JOIN r.behandling b WHERE b.id = :behandlingId")
-    fun finnBehandlingResultater(behandlingId: Long): List<Behandling>
+    fun finnBehandlingResultater(behandlingId: Long): List<BehandlingResultat>
 
     @Query("SELECT r FROM BehandlingResultat r JOIN r.behandling b WHERE b.id = :behandlingId AND r.aktiv = true")
     fun findByBehandlingAndAktiv(behandlingId: Long): BehandlingResultat?

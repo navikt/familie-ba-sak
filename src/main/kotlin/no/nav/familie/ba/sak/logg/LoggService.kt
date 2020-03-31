@@ -35,15 +35,15 @@ class LoggService(
     }
 
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
-                                    aktivBehandlingResultat: BehandlingResultat?,
-                                    behandlingResultat: BehandlingResultat): Logg {
-        return if (aktivBehandlingResultat != null) {
+                                    forrigeBehandlingResultat: BehandlingResultat?,
+                                    nyttBehandlingResultat: BehandlingResultat): Logg {
+        return if (forrigeBehandlingResultat != null) {
             lagre(Logg(
                     behandlingId = behandling.id,
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Endring på vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat gikk fra ${aktivBehandlingResultat.hentSamletResultat()} til ${behandlingResultat.hentSamletResultat()}"
+                    tekst = "Resultat gikk fra ${forrigeBehandlingResultat.hentSamletResultat()} til ${nyttBehandlingResultat.hentSamletResultat()}"
             ))
         } else {
             lagre(Logg(
@@ -51,7 +51,7 @@ class LoggService(
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Opprettet vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat ble ${behandlingResultat.hentSamletResultat()}"
+                    tekst = "Resultat ble ${nyttBehandlingResultat.hentSamletResultat()}"
             ))
         }
     }

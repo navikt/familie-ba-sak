@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.domene
 
 import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.nare.core.evaluations.Resultat
 import javax.persistence.*
 
 @Entity(name = "BehandlingResultat")
@@ -21,7 +20,7 @@ data class BehandlingResultat(
         var aktiv: Boolean = true,
 
         @OneToMany(mappedBy = "behandlingResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
-        var periodeResultater: MutableSet<PeriodeResultat> = mutableSetOf()
+        var periodeResultater: Set<PeriodeResultat> = setOf()
 
 ) : BaseEntitet() {
 
@@ -31,9 +30,10 @@ data class BehandlingResultat(
 
     fun hentSamletResultat(): BehandlingResultatType {
         return when {
-            periodeResultater.all { it.hentSamletResultat() == BehandlingResultatType.INNVILGET } -> {
+            periodeResultater.all { it.hentSamletResultat() == BehandlingResultatType.INNVILGET } ->
                 BehandlingResultatType.INNVILGET
-            }
+            periodeResultater.any { it.hentSamletResultat() == BehandlingResultatType.INNVILGET } ->
+                BehandlingResultatType.DELVIS_INNVILGET
             else -> BehandlingResultatType.AVSLÅTT
         }
     }

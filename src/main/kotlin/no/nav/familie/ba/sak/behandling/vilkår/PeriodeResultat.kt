@@ -30,7 +30,7 @@ class PeriodeResultat(
         val periodeTom: LocalDate?,
 
         @OneToMany(mappedBy = "periodeResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
-        var vilkårResultater: MutableSet<VilkårResultat> = mutableSetOf()
+        var vilkårResultater: Set<VilkårResultat> = setOf()
 
 ) : BaseEntitet() {
 
