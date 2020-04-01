@@ -41,6 +41,25 @@ class FagsakServiceTest(
         private val integrasjonClient: IntegrasjonClient
 ) {
 
+    /*
+    This is a complicated test against following family relationship:
+    søker3-----------
+    (no case)       | (medmor)
+                    barn2
+                    | (medmor)
+    søker1-----------
+                    | (mor)
+                    barn1
+                    | (far)
+    søker2-----------
+                    | (far)
+                    barn3
+
+     We tests three search:
+     1) search for søker1, one participant (søker1) should be returned
+     2) search for barn1, three participants (barn1, søker1, søker2) should be returned
+     3) search for barn2, three participants (barn2, søker3, søker1) should be returned, where fagsakId of søker3 is null
+     */
     @Test
     fun `test å søke fagsak med fnr`() {
         val søker1Fnr = UUID.randomUUID().toString()
@@ -84,11 +103,6 @@ class FagsakServiceTest(
                 søker2Fnr
         ))
 
-        val fagsak2 = fagsakService.hentEllerOpprettFagsak(FagsakRequest(
-                søker3Fnr
-        ))
-
-
         val førsteBehandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
@@ -120,15 +134,6 @@ class FagsakServiceTest(
         stegService.håndterPersongrunnlag(tredjeBehandling,
                                           RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr)))
 
-        val fjerdeBehandling = stegService.håndterNyBehandling(NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                søker3Fnr,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-        ))
-        stegService.håndterPersongrunnlag(fjerdeBehandling,
-                RegistrerPersongrunnlagDTO(ident = søker3Fnr, barnasIdenter = listOf(barn3Fnr)))
-
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
         Assertions.assertEquals(1, søkeresultat1.size)
         Assertions.assertEquals(Kjønn.KVINNE, søkeresultat1[0].kjønn)
@@ -151,6 +156,6 @@ class FagsakServiceTest(
         Assertions.assertEquals(fagsak0.data!!.id, søkeresultat3.find{it.ident== søker1Fnr}!!.fagsakId)
         Assertions.assertEquals(1, søkeresultat3.filter { it.ident== søker3Fnr }.size)
         Assertions.assertEquals("søker3", søkeresultat3.filter { it.ident== søker3Fnr }[0].navn)
-        Assertions.assertEquals(fagsak2.data!!.id, søkeresultat3.find { it.ident== søker3Fnr }!!.fagsakId)
+        Assertions.assertNull(søkeresultat3.find { it.ident== søker3Fnr }!!.fagsakId)
     }
 }

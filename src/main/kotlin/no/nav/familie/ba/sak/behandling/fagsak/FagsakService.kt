@@ -127,7 +127,7 @@ class FagsakService(
         personer.forEach {
             if (it.personopplysningGrunnlag.aktiv) {
                 val behandling = behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId)
-                if (behandling.aktiv) {
+                if (behandling.aktiv && !assosierteFagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
                     //get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
                     val søkerInfo = if (behandling.fagsak.personIdent.ident == personIdent) personInfo else
                         runCatching {
