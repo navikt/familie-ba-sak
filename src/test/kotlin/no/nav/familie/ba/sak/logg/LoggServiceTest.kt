@@ -124,21 +124,24 @@ class LoggServiceTest(
         val vilkårsvurdering = BehandlingResultat(
                 id = behandling.id,
                 behandling = behandling,
-                aktiv = true,
-                periodeResultater = mutableSetOf(
-                        PeriodeResultat(
-                                personIdent = søker.personIdent.ident,
-                                vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                               resultat = Resultat.NEI),
-                                                                VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
-                                                                               resultat = Resultat.JA)),
-                                periodeFom = LocalDate.now(), periodeTom = LocalDate.now()),
-                        PeriodeResultat(personIdent = barn.personIdent.ident,
-                                        vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                                       resultat = Resultat.NEI),
-                                                                        VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
-                                                                                       resultat = Resultat.NEI)),
-                                        periodeFom = LocalDate.now(), periodeTom = LocalDate.now())))//TODO: Oppdater med periode
+                aktiv = true)
+        vilkårsvurdering.periodeResultater = mutableSetOf(
+                PeriodeResultat(
+                        behandlingResultat = vilkårsvurdering,
+                        personIdent = søker.personIdent.ident,
+                        vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                       resultat = Resultat.NEI),
+                                                        VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
+                                                                       resultat = Resultat.JA)),
+                        periodeFom = LocalDate.now(), periodeTom = LocalDate.now()),
+                PeriodeResultat(
+                        behandlingResultat = vilkårsvurdering,
+                        personIdent = barn.personIdent.ident,
+                        vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                       resultat = Resultat.NEI),
+                                                        VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
+                                                                       resultat = Resultat.NEI)),
+                        periodeFom = LocalDate.now(), periodeTom = LocalDate.now()))//TODO: Oppdater med periode
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, null, vilkårsvurdering)
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
@@ -148,21 +151,24 @@ class LoggServiceTest(
         val nyVilkårsvurdering = BehandlingResultat(
                 id = behandling.id,
                 behandling = behandling,
-                aktiv = true,
-                periodeResultater = mutableSetOf(
-                        PeriodeResultat(
-                                personIdent = søker.personIdent.ident,
-                                vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                               resultat = Resultat.JA),
-                                                                VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
-                                                                               resultat = Resultat.JA)),
-                                periodeFom = LocalDate.now(), periodeTom = LocalDate.now()),
-                        PeriodeResultat(personIdent = barn.personIdent.ident,
-                                        vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                                       resultat = Resultat.NEI),
-                                                                        VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
-                                                                                       resultat = Resultat.NEI)),
-                                        periodeFom = LocalDate.now(), periodeTom = LocalDate.now())))//TODO: Oppdater med periode
+                aktiv = true)
+        nyVilkårsvurdering.periodeResultater = mutableSetOf(
+                PeriodeResultat(
+                        behandlingResultat = nyVilkårsvurdering,
+                        personIdent = søker.personIdent.ident,
+                        vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                       resultat = Resultat.JA),
+                                                        VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
+                                                                       resultat = Resultat.JA)),
+                        periodeFom = LocalDate.now(), periodeTom = LocalDate.now()),
+                PeriodeResultat(
+                        behandlingResultat = nyVilkårsvurdering,
+                        personIdent = barn.personIdent.ident,
+                        vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                                       resultat = Resultat.NEI),
+                                                        VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
+                                                                       resultat = Resultat.NEI)),
+                        periodeFom = LocalDate.now(), periodeTom = LocalDate.now()))//TODO: Oppdater med periode
         val nyVilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, vilkårsvurdering, nyVilkårsvurdering)
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)

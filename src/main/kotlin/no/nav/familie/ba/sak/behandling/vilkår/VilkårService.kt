@@ -25,7 +25,12 @@ class VilkårService(
             throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse inneholder kan kun inneholde ett barn, men inneholder ${barn.size}")
         }
 
-        val periodeResultater = personopplysningGrunnlag.personer.map { person ->
+
+        val behandlingResultat = BehandlingResultat(
+                behandling = behandlingService.hent(behandlingId),
+                aktiv = true)
+
+        behandlingResultat.periodeResultater = personopplysningGrunnlag.personer.map { person ->
             val spesifikasjonerForPerson = spesifikasjonerForPerson(person)
             val evaluering = spesifikasjonerForPerson.evaluer(
                     Fakta(personForVurdering = person)
@@ -34,16 +39,12 @@ class VilkårService(
                 VilkårResultat(resultat = child.resultat,
                                vilkårType = Vilkår.valueOf(child.identifikator))
             }.toSet()
-            PeriodeResultat(personIdent = person.personIdent.ident,
+            PeriodeResultat(behandlingResultat = behandlingResultat,
+                            personIdent = person.personIdent.ident,
                             vilkårResultater = resultaterForPerson,
                             periodeFom = barn.first().fødselsdato.plusMonths(1),
                             periodeTom = barn.first().fødselsdato.plusYears(18).minusMonths(1))
         }.toSet()
-
-        val behandlingResultat = BehandlingResultat(
-                behandling = behandlingService.hent(behandlingId),
-                aktiv = true,
-                periodeResultater = periodeResultater)
 
         return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
     }
@@ -55,7 +56,8 @@ class VilkårService(
                 aktiv = true)
 
         behandlingResultat.periodeResultater = periodeResultater.map { restPeriodeResultat ->
-            val periodeResultat = PeriodeResultat(personIdent = restPeriodeResultat.personIdent,
+            val periodeResultat = PeriodeResultat(behandlingResultat = behandlingResultat,
+                                                  personIdent = restPeriodeResultat.personIdent,
                                                   periodeFom = restPeriodeResultat.periodeFom,
                                                   periodeTom = restPeriodeResultat.periodeTom
             )
