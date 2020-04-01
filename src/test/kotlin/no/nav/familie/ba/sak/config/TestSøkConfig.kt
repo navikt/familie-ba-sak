@@ -18,24 +18,18 @@ import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
 import no.nav.familie.ba.sak.integrasjoner.domene.Personident
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
+import org.springframework.stereotype.Component
 import java.time.LocalDate
+import javax.annotation.PostConstruct
 
 @TestConfiguration
-class SøkTestConfig (
-        @Autowired
-        private val fagsakService: FagsakService,
-
-        @Autowired
-        private val behandlingService: BehandlingService,
-
-        @Autowired
-        private val stegService: StegService
-){
+class TestSøkConfig{
     @Profile("test-søk")
     @Bean
     @Primary
@@ -62,21 +56,45 @@ class SøkTestConfig (
                         Familierelasjoner(Personident(morId), FAMILIERELASJONSROLLE.MOR, "Mor Mocksen", LocalDate.of(1979, 5, 1))
                 ))
 
+        every {
+            mockIntegrasjonClient.hentAktørId(farId)
+        } returns AktørId(farId)
+
+        every {
+            mockIntegrasjonClient.hentAktørId(barnId)
+        } returns AktørId(barnId)
+
+        return mockIntegrasjonClient
+    }
+}
+
+@Component
+@Profile("test-søk")
+class MockFagsakConfig (
+        @Autowired
+        private val fagsakService: FagsakService,
+
+        @Autowired
+        private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val stegService: StegService
+){
+    @PostConstruct
+    fun createMockFagsak(){
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(
-                farId
+                "12345678910"
         ))
 
         val førsteBehandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
-                farId,
+                "12345678910",
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
         stegService.håndterPersongrunnlag(førsteBehandling,
-                RegistrerPersongrunnlagDTO(ident = farId, barnasIdenter = listOf(barnId)))
+                RegistrerPersongrunnlagDTO(ident = "12345678910", barnasIdenter = listOf("31245678910")))
 
         behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.FERDIGSTILT)
-
-        return mockIntegrasjonClient
     }
 }
