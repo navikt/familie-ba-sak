@@ -61,7 +61,7 @@ class ClientMocks {
     }
 
     @Bean
-    @Profile("!mock-pdl")
+    @Profile("!test-søk")
     @Primary
     fun mockIntegrasjonClient(): IntegrasjonClient {
 
