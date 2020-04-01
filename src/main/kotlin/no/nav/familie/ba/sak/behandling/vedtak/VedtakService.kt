@@ -19,7 +19,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     private val behandlingRepository: BehandlingRepository,
                     private val behandlingResultatService: BehandlingResultatService,
                     private val vedtakRepository: VedtakRepository,
-                    private val vedtakPersonRepository: VedtakPersonRepository,
+                    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokGenKlient: DokGenKlient,
                     private val fagsakService: FagsakService) {
 
@@ -33,10 +33,10 @@ class VedtakService(private val behandlingService: BehandlingService,
         val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
                               ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling $gjeldendeBehandlingsId")
 
-        val gjeldendeVedtakPerson = vedtakPersonRepository.finnPersonBeregningForVedtak(gjeldendeVedtak.id)
-        if (gjeldendeVedtakPerson.isEmpty()) {
+        val gjeldendeAndelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(gjeldendeBehandlingsId)
+        if (gjeldendeAndelerTilkjentYtelse.isEmpty()) {
             return Ressurs.failure(
-                    "Fant ikke vedtak personer tilknyttet behandling $gjeldendeBehandlingsId og vedtak ${gjeldendeVedtak.id}")
+                    "Fant ikke andeler tilkjent ytelse tilknyttet behandling $gjeldendeBehandlingsId")
         }
 
         val gjeldendeBehandling = gjeldendeVedtak.behandling
@@ -105,11 +105,11 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun oppdaterAktivtVedtakMedBeregning(vedtak: Vedtak,
-                                         vedtakPersonYtelsesperioder: List<VedtakPersonYtelsesperiode>)
+                                         andelerTilkjentYtelse : List<AndelTilkjentYtelse>)
             : Ressurs<RestFagsak> {
 
-        vedtakPersonRepository.slettAllePersonBeregningerForVedtak(vedtak.id)
-        vedtakPersonRepository.saveAll(vedtakPersonYtelsesperioder)
+        andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+        andelTilkjentYtelseRepository.saveAll(andelerTilkjentYtelse)
 
         val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(vedtak.behandling.id)
         vedtak.stønadBrevMarkdown = Result.runCatching {

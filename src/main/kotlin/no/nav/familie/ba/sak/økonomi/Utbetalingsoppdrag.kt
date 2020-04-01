@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioder
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
@@ -21,7 +21,7 @@ import java.math.BigDecimal
 fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                           vedtak: Vedtak,
                           behandlingResultatType: BehandlingResultatType,
-                          personberegninger: List<VedtakPersonYtelsesperiode>): Utbetalingsoppdrag {
+                          andelerTilkjentYtelse: List<AndelTilkjentYtelse>): Utbetalingsoppdrag {
 
     val erOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
 
@@ -31,7 +31,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
             else
                 UtbetalingsperiodeMal(vedtak)
 
-    val tidslinjeMap = beregnUtbetalingsperioder(personberegninger)
+    val tidslinjeMap = beregnUtbetalingsperioder(andelerTilkjentYtelse)
 
     val utbetalingsperioder = tidslinjeMap.flatMap { (klassifisering, tidslinje) ->
         tidslinje.toSegments()

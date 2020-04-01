@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.grunnlag.søknad
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
 
@@ -31,6 +30,9 @@ data class BarnMedOpplysninger(
         val borMedSøker: Boolean = true,
         val oppholderSegINorge: Boolean = true,
         val harOppholdtSegINorgeSiste12Måneder: Boolean = true,
+        val navn: String = "",
+        val inkludertISøknaden: Boolean = true,
+        val fødselsdato: LocalDate? = null,
         val tilleggsopplysninger: String? = null
 )
 

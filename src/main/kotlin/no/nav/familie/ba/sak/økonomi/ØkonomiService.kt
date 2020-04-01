@@ -25,11 +25,13 @@ class ØkonomiService(
         val behandlingResultatType =
                 behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
-        val personberegninger = if (behandlingResultatType == BehandlingResultatType.OPPHØRT)
-            beregningService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)
-        else beregningService.hentPersonerForVedtak(vedtak.id)
+        val andelerTilkjentYtelse = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) {
+            val forrigeVedtak = vedtakService.hent(vedtak.forrigeVedtakId!!)
+            beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id)
+        }
+        else beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingsId)
 
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, behandlingResultatType, personberegninger)
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, behandlingResultatType, andelerTilkjentYtelse)
 
         beregningService.lagreBeregningsresultat(vedtak.behandling, utbetalingsoppdrag)
         iverksettOppdrag(vedtak.behandling.id, utbetalingsoppdrag)

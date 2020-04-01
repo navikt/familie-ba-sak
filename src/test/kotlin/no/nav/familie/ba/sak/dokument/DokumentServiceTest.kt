@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.NyBeregning
-import no.nav.familie.ba.sak.beregning.mapNyBeregningTilVedtakPerson
+import no.nav.familie.ba.sak.beregning.mapNyBeregningTilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -135,9 +135,10 @@ class DokumentServiceTest(
                                        ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
         )
 
-        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak!!.id,nyBeregning,personopplysningGrunnlag)
+        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
 
-        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
+        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak!!, andelerTilkjentYtelse)
+
 
         val htmlvedtaksbrevRess = dokumentService.hentHtmlForVedtak(vedtak.id)
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)

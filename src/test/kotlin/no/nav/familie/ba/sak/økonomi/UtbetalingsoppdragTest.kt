@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype.*
-import no.nav.familie.ba.sak.common.dato
-import no.nav.familie.ba.sak.common.lagPersonVedtak
-import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -17,15 +15,16 @@ internal class UtbetalingsoppdragPeriodiseringTest {
 
     @Test
     fun `skal opprette et nytt utbetalingsoppdrag med løpende periodeId fordelt på flere klasser`() {
-        val vedtak = lagVedtak()
-        val personvedtak = listOf(
-                lagPersonVedtak("2018-07-01", "2021-06-30", SMÅBARNSTILLEGG, 660, vedtak),
-                lagPersonVedtak("2020-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, vedtak),
-                lagPersonVedtak("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, vedtak),
-                lagPersonVedtak("2020-05-01", "2021-02-28", UTVIDET_BARNETRYGD, 1054, vedtak))
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling=behandling)
+        val andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse("2018-07-01", "2021-06-30", SMÅBARNSTILLEGG, 660, behandling),
+                lagAndelTilkjentYtelse("2020-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, behandling),
+                lagAndelTilkjentYtelse("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, behandling),
+                lagAndelTilkjentYtelse("2020-05-01", "2021-02-28", UTVIDET_BARNETRYGD, 1054, behandling))
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, personvedtak)
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(6, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -43,16 +42,17 @@ internal class UtbetalingsoppdragPeriodiseringTest {
 
     @Test
     fun `skal opprette et opphør med løpende periodeId fordelt på flere klasser`() {
-        val vedtak = lagVedtak()
-        val personvedtak = listOf(
-                lagPersonVedtak("2018-07-01", "2021-06-30", SMÅBARNSTILLEGG, 660, vedtak),
-                lagPersonVedtak("2020-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, vedtak),
-                lagPersonVedtak("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, vedtak),
-                lagPersonVedtak("2020-05-01", "2021-02-28", UTVIDET_BARNETRYGD, 1054, vedtak))
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling)
+        val andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse("2018-07-01", "2021-06-30", SMÅBARNSTILLEGG, 660, behandling),
+                lagAndelTilkjentYtelse("2020-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, behandling),
+                lagAndelTilkjentYtelse("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, behandling),
+                lagAndelTilkjentYtelse("2020-05-01", "2021-02-28", UTVIDET_BARNETRYGD, 1054, behandling))
 
         val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = now())
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, personvedtak)
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)

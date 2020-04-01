@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
+import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class FagsakService(
-        private val vedtakPersonRepository: VedtakPersonRepository,
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakRepository: FagsakRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
@@ -47,29 +47,29 @@ class FagsakService(
 
         val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
 
-        val restBehandlinger: List<RestBehandling> = behandlinger.map { it ->
-            val personopplysningGrunnlag = it.id.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
+        val restBehandlinger: List<RestBehandling> = behandlinger.map { behandling ->
+            val personopplysningGrunnlag = behandling.id.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
 
-            val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(it.id).map { vedtak ->
-                val vedtakPersoner = vedtakPersonRepository.finnPersonBeregningForVedtak(vedtak.id)
-                val restVedtakBarn = lagRestVedtakBarn(vedtakPersoner, personopplysningGrunnlag)
+            val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
+                val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                val restVedtakBarn = lagRestVedtakBarn(andelerTilkjentYtelse, personopplysningGrunnlag)
                 vedtak.toRestVedtak(restVedtakBarn)
             }
 
             RestBehandling(
-                    aktiv = it.aktiv,
-                    behandlingId = it.id,
+                    aktiv = behandling.aktiv,
+                    behandlingId = behandling.id,
                     vedtakForBehandling = restVedtakForBehandling,
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
-                    type = it.type,
-                    status = it.status,
-                    steg = it.steg,
-                    periodeResultater = behandlingResultatService.hentAktivForBehandling(it.id)
+                    type = behandling.type,
+                    status = behandling.status,
+                    steg = behandling.steg,
+                    periodeResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                 ?.periodeResultater?.map { it.tilRestPeriodeResultat() } ?: emptyList(),
-                    opprettetTidspunkt = it.opprettetTidspunkt,
-                    kategori = it.kategori,
-                    underkategori = it.underkategori,
-                    begrunnelse = it.begrunnelse
+                    opprettetTidspunkt = behandling.opprettetTidspunkt,
+                    kategori = behandling.kategori,
+                    underkategori = behandling.underkategori,
+                    begrunnelse = behandling.begrunnelse
             )
         }
 

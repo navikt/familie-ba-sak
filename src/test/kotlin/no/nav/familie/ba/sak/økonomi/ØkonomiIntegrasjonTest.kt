@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.beregning.PersonBeregning
-import no.nav.familie.ba.sak.beregning.mapNyBeregningTilVedtakPerson
+import no.nav.familie.ba.sak.beregning.mapNyBeregningTilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
@@ -122,9 +122,9 @@ class ØkonomiIntegrasjonTest {
                                        ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
         )
 
-        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak!!.id, nyBeregning, personopplysningGrunnlag)
+        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
 
-        val oppdatertFagsak = vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
+        val oppdatertFagsak = vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak!!, andelerTilkjentYtelse)
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
@@ -168,8 +168,8 @@ class ØkonomiIntegrasjonTest {
                                                1),
                                        ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
         )
-        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak.id, nyBeregning, personopplysningGrunnlag)
-        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
+        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
+        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, andelerTilkjentYtelse)
 
 
         økonomiService.lagreBeregningsresultatOgIverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")

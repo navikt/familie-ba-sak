@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonRepository
+import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.BeregningResultat
 import no.nav.familie.ba.sak.beregning.domene.BeregningResultatRepository
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -12,12 +12,11 @@ import java.time.LocalDate
 
 @Service
 class BeregningService(
-        private val vedtakPersonRepository: VedtakPersonRepository,
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val beregningResultatRepository: BeregningResultatRepository
 ) {
-
-    fun hentPersonerForVedtak(vedtakId: Long): List<VedtakPersonYtelsesperiode> {
-        return vedtakPersonRepository.finnPersonBeregningForVedtak(vedtakId)
+    fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
+        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
     }
 
     fun hentBeregningsresultatForBehandling(behandlingId: Long): BeregningResultat {
