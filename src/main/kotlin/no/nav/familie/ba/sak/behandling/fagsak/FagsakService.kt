@@ -142,10 +142,10 @@ class FagsakService(
 
                     assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
                             navn = søkerInfo.navn,
-                            ident = behandling.fagsak.personIdent.toString(),
+                            ident = behandling.fagsak.personIdent.ident,
                             rolle = FagsakDeltagerRolle.FORELDER,
                             kjønn = søkerInfo.kjønn,
-                            fagsakId = behandling.fagsak.id.toString()
+                            fagsakId = behandling.fagsak.id
                     )
                 }
             }
@@ -179,11 +179,14 @@ class FagsakService(
 
                         )
 
+                    val fagsak= fagsakRepository.finnFagsakForPersonIdent(PersonIdent(it.personIdent.id))
+
                     assosierteFagsakDeltager.add(RestFagsakDeltager(
                             navn = forelderInfo.navn,
                             ident = it.personIdent.id,
                             rolle = FagsakDeltagerRolle.FORELDER,
-                            kjønn = forelderInfo.kjønn
+                            kjønn = forelderInfo.kjønn,
+                            fagsakId = fagsak?.id
                     ))
                 }
             }

@@ -17,5 +17,5 @@ data class RestFagsakDeltager(
         var ident: String,
         var rolle: FagsakDeltagerRolle,
         var kjønn: Kjønn?= Kjønn.UKJENT,
-        var fagsakId: String?= null
+        var fagsakId: Long?= null
 )
