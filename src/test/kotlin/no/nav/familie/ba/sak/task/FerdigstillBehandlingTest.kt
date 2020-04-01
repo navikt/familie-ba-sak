@@ -12,10 +12,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -64,16 +61,7 @@ class FerdigstillBehandlingTest {
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
 
-        val behandlingResultat = BehandlingResultat(
-                behandling = behandling
-        )
-        behandlingResultat.periodeResultater = setOf(PeriodeResultat(
-                behandlingResultat = behandlingResultat,
-                personIdent = fnr,
-                periodeFom = LocalDate.now(),
-                periodeTom = LocalDate.now(),
-                vilkårResultater = setOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET, resultat = resultat))
-        ))
+        val behandlingResultat = lagBehandlingResultat(fnr, behandling, resultat)
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
         Assertions.assertNotNull(behandling.fagsak.id)

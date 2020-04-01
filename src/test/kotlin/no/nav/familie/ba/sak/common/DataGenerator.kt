@@ -14,9 +14,13 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
+import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
@@ -111,7 +115,6 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      navn = "",
                                                      kjønn = Kjønn.MANN))
     }
-
     return personopplysningGrunnlag
 }
 
@@ -146,4 +149,21 @@ fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: Li
                 )
             }
     )
+}
+
+fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat) : BehandlingResultat {
+    val behandlingResultat = BehandlingResultat(
+            behandling = behandling
+    )
+    val periodeResultat = PeriodeResultat(
+            behandlingResultat = behandlingResultat,
+            personIdent = fnr,
+            periodeFom = LocalDate.now(),
+            periodeTom = LocalDate.now())
+    periodeResultat.vilkårResultater =
+            setOf(VilkårResultat(periodeResultat = periodeResultat,
+                                 vilkårType = Vilkår.BOSATT_I_RIKET,
+                                 resultat = resultat))
+    behandlingResultat.periodeResultater = setOf(periodeResultat)
+    return behandlingResultat
 }

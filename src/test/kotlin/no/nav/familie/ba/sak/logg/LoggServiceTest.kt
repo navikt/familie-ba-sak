@@ -2,29 +2,19 @@ package no.nav.familie.ba.sak.logg
 
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import java.time.LocalDate
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -101,75 +91,17 @@ class LoggServiceTest(
     @Test
     fun `Skal lage nye vilkårslogger og endringer`() {
         val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0L)
-        val søker = Person(aktørId = randomAktørId(),
-                           personIdent = PersonIdent(søkerFnr),
-                           type = PersonType.SØKER,
-                           personopplysningGrunnlag = personopplysningGrunnlag,
-                           fødselsdato = LocalDate.of(2019, 1, 1),
-                           navn = "",
-                           kjønn = Kjønn.KVINNE)
-
-        val barn = Person(aktørId = randomAktørId(),
-                          personIdent = PersonIdent(barnFnr),
-                          type = PersonType.BARN,
-                          personopplysningGrunnlag = personopplysningGrunnlag,
-                          fødselsdato = LocalDate.of(2019, 1, 1),
-                          navn = "",
-                          kjønn = Kjønn.MANN)
 
         val behandling = lagBehandling()
-        val vilkårsvurdering = BehandlingResultat(
-                id = behandling.id,
-                behandling = behandling,
-                aktiv = true)
-        vilkårsvurdering.periodeResultater = mutableSetOf(
-                PeriodeResultat(
-                        behandlingResultat = vilkårsvurdering,
-                        personIdent = søker.personIdent.ident,
-                        vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                       resultat = Resultat.NEI),
-                                                        VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
-                                                                       resultat = Resultat.JA)),
-                        periodeFom = LocalDate.now(), periodeTom = LocalDate.now()),
-                PeriodeResultat(
-                        behandlingResultat = vilkårsvurdering,
-                        personIdent = barn.personIdent.ident,
-                        vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                       resultat = Resultat.NEI),
-                                                        VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
-                                                                       resultat = Resultat.NEI)),
-                        periodeFom = LocalDate.now(), periodeTom = LocalDate.now()))//TODO: Oppdater med periode
-        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, null, vilkårsvurdering)
+        val behandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.JA)
+        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, null, behandlingResultat)
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
         Assertions.assertEquals("Opprettet vilkårsvurdering", vilkårsvurderingLogg.tittel)
 
 
-        val nyVilkårsvurdering = BehandlingResultat(
-                id = behandling.id,
-                behandling = behandling,
-                aktiv = true)
-        nyVilkårsvurdering.periodeResultater = mutableSetOf(
-                PeriodeResultat(
-                        behandlingResultat = nyVilkårsvurdering,
-                        personIdent = søker.personIdent.ident,
-                        vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                       resultat = Resultat.JA),
-                                                        VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
-                                                                       resultat = Resultat.JA)),
-                        periodeFom = LocalDate.now(), periodeTom = LocalDate.now()),
-                PeriodeResultat(
-                        behandlingResultat = nyVilkårsvurdering,
-                        personIdent = barn.personIdent.ident,
-                        vilkårResultater = mutableSetOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                       resultat = Resultat.NEI),
-                                                        VilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
-                                                                       resultat = Resultat.NEI)),
-                        periodeFom = LocalDate.now(), periodeTom = LocalDate.now()))//TODO: Oppdater med periode
-        val nyVilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, vilkårsvurdering, nyVilkårsvurdering)
+        val nyttBehandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.NEI)
+        val nyVilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, behandlingResultat, nyttBehandlingResultat)
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)
         Assertions.assertEquals("Endring på vilkårsvurdering", nyVilkårsvurderingLogg.tittel)

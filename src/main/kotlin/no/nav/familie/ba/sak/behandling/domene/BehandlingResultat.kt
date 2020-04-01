@@ -38,9 +38,9 @@ data class BehandlingResultat(
         return when {
             periodeResultater.all { it.hentSamletResultat() == BehandlingResultatType.INNVILGET } ->
                 BehandlingResultatType.INNVILGET
-            periodeResultater.any { it.hentSamletResultat() == BehandlingResultatType.INNVILGET } ->
-                BehandlingResultatType.DELVIS_INNVILGET
-            else -> BehandlingResultatType.AVSLÅTT
+            else ->
+                if (behandling.type == BehandlingType.REVURDERING) BehandlingResultatType.OPPHØRT
+                else BehandlingResultatType.AVSLÅTT
         }
     }
 }

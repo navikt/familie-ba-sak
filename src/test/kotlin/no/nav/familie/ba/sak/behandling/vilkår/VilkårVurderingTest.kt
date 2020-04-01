@@ -106,7 +106,7 @@ class VilkårVurderingTest {
     }
 
     @Test
-    fun `Henting og evaluering av fødselshendelse med oppfylte vilkår gir samlet resultat JA`() {
+    fun `Henting og evaluering av fødselshendelse med oppfylte vilkår gir behandlingsresultat innvilget`() {
 
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -122,7 +122,7 @@ class VilkårVurderingTest {
     }
 
     @Test
-    fun `Henting og evaluering av fødselshendelse uten oppfylte vilkår gir samlet resultat NEI`() {
+    fun `Henting og evaluering av fødselshendelse uten oppfylte vilkår gir samlet behandlingsresultat avslått`() {
 
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()

@@ -31,19 +31,21 @@ class VilkårService(
                 aktiv = true)
 
         behandlingResultat.periodeResultater = personopplysningGrunnlag.personer.map { person ->
+            val periodeResultat = PeriodeResultat(behandlingResultat = behandlingResultat,
+                                                  personIdent = person.personIdent.ident,
+                                                  periodeFom = barn.first().fødselsdato.plusMonths(1),
+                                                  periodeTom = barn.first().fødselsdato.plusYears(18).minusMonths(1))
             val spesifikasjonerForPerson = spesifikasjonerForPerson(person)
             val evaluering = spesifikasjonerForPerson.evaluer(
                     Fakta(personForVurdering = person)
             )
-            val resultaterForPerson = evaluering.children.map { child ->
-                VilkårResultat(resultat = child.resultat,
+            periodeResultat.vilkårResultater = evaluering.children.map { child ->
+                VilkårResultat(periodeResultat = periodeResultat,
+                               resultat = child.resultat,
                                vilkårType = Vilkår.valueOf(child.identifikator))
+
             }.toSet()
-            PeriodeResultat(behandlingResultat = behandlingResultat,
-                            personIdent = person.personIdent.ident,
-                            vilkårResultater = resultaterForPerson,
-                            periodeFom = barn.first().fødselsdato.plusMonths(1),
-                            periodeTom = barn.first().fødselsdato.plusYears(18).minusMonths(1))
+            periodeResultat
         }.toSet()
 
         return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)

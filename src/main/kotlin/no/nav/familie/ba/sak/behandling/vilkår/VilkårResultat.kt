@@ -12,8 +12,8 @@ class VilkårResultat(
         @SequenceGenerator(name = "vilkar_resultat_seq_generator", sequenceName = "vilkar_resultat_seq", allocationSize = 50)
         val id: Long = 0,
 
-        @ManyToOne @JoinColumn(name = "fk_periode_resultat_id")
-        var periodeResultat: PeriodeResultat? = null,
+        @ManyToOne @JoinColumn(name = "fk_periode_resultat_id", nullable = false)
+        var periodeResultat: PeriodeResultat,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "vilkar")

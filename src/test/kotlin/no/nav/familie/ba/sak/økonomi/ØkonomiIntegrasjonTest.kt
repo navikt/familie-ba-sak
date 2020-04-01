@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.mapNyBeregningTilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
@@ -85,16 +86,7 @@ class ØkonomiIntegrasjonTest {
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling = behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
 
-        val behandlingResultat = BehandlingResultat(
-                behandling = behandling
-        )
-        behandlingResultat.periodeResultater = setOf(PeriodeResultat(
-                behandlingResultat = behandlingResultat,
-                personIdent = fnr,
-                periodeFom = LocalDate.now(),
-                periodeTom = LocalDate.now(),
-                vilkårResultater = setOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET, resultat = Resultat.JA))
-        ))
+        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
         Assertions.assertNotNull(behandling.fagsak.id)
