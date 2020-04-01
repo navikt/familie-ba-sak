@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat.OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -23,7 +23,8 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                 lagAndelTilkjentYtelse("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, behandling),
                 lagAndelTilkjentYtelse("2020-05-01", "2021-02-28", UTVIDET_BARNETRYGD, 1054, behandling))
 
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, andelerTilkjentYtelse)
+        val behandlingResultatType = BehandlingResultatType.INNVILGET
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(6, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -49,8 +50,9 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                 lagAndelTilkjentYtelse("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, behandling),
                 lagAndelTilkjentYtelse("2020-05-01", "2021-02-28", UTVIDET_BARNETRYGD, 1054, behandling))
 
-        val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, resultat = OPPHØRT, opphørsdato = now())
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, andelerTilkjentYtelse)
+        val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = now())
+        val behandlingResultatType = BehandlingResultatType.OPPHØRT
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
