@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BrevType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.common.DbContainerInitializer
@@ -54,7 +53,7 @@ class BeregningNegativeIntegrationTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandlingService.settVilkårsvurdering(behandling, BrevType.AVSLÅTT, "")
+        behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag =

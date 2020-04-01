@@ -2,16 +2,20 @@ package no.nav.familie.ba.sak.økonomi
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BrevType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.beregning.PersonBeregning
+import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.NyBeregning
+import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.mapNyBeregningTilVedtakPerson
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -19,6 +23,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -41,6 +46,9 @@ class ØkonomiIntegrasjonTest {
 
     @Autowired
     lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    lateinit var behandlingResultatService: BehandlingResultatService
 
     @Autowired
     lateinit var fagsakService: FagsakService
@@ -75,7 +83,20 @@ class ØkonomiIntegrasjonTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandling = behandlingService.settVilkårsvurdering(behandling, BrevType.INNVILGET, "")
+        behandling = behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
+
+        val behandlingResultat = BehandlingResultat(
+                behandling = behandling
+        )
+        behandlingResultat.periodeResultater = setOf(PeriodeResultat(
+                behandlingResultat = behandlingResultat,
+                personIdent = fnr,
+                periodeFom = LocalDate.now(),
+                periodeTom = LocalDate.now(),
+                vilkårResultater = setOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET, resultat = Resultat.JA))
+        ))
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag =
@@ -101,7 +122,7 @@ class ØkonomiIntegrasjonTest {
                                        ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
         )
 
-        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak!!.id,nyBeregning,personopplysningGrunnlag)
+        val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak!!.id, nyBeregning, personopplysningGrunnlag)
 
         val oppdatertFagsak = vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)
 
@@ -120,10 +141,10 @@ class ØkonomiIntegrasjonTest {
         val barnFnr = randomFnr()
 
         stubFor(post(anyUrl())
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success("ok")))))
+                        .willReturn(aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success("ok")))))
 
         //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
@@ -140,12 +161,12 @@ class ØkonomiIntegrasjonTest {
 
         val nyBeregning = NyBeregning(
                 listOf(PersonBeregning(ident = barnFnr,
-                        beløp = 1054,
-                        stønadFom = LocalDate.of(
-                                2020,
-                                1,
-                                1),
-                        ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
+                                       beløp = 1054,
+                                       stønadFom = LocalDate.of(
+                                               2020,
+                                               1,
+                                               1),
+                                       ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
         )
         val vedtakPersoner = mapNyBeregningTilVedtakPerson(vedtak.id, nyBeregning, personopplysningGrunnlag)
         vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, vedtakPersoner)

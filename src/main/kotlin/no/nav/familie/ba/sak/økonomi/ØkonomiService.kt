@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BrevType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -14,18 +15,21 @@ import org.springframework.stereotype.Service
 class ØkonomiService(
         private val økonomiKlient: ØkonomiKlient,
         private val behandlingService: BehandlingService,
+        private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService
 ) {
 
     fun lagreBeregningsresultatOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
         val vedtak = vedtakService.hent(vedtakId)
+        val behandlingResultatType =
+                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
-        val personberegninger = if (vedtak.behandling.brevType == BrevType.OPPHØRT)
+        val personberegninger = if (behandlingResultatType == BehandlingResultatType.OPPHØRT)
             beregningService.hentPersonerForVedtak(vedtak.forrigeVedtakId!!)
         else beregningService.hentPersonerForVedtak(vedtak.id)
 
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, personberegninger)
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, behandlingResultatType, personberegninger)
 
         beregningService.lagreBeregningsresultat(vedtak.behandling, utbetalingsoppdrag)
         iverksettOppdrag(vedtak.behandling.id, utbetalingsoppdrag)

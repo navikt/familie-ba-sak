@@ -36,10 +36,6 @@ data class Behandling(
         @Column(name = "underkategori", nullable = false)
         val underkategori: BehandlingUnderkategori,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "brev_type", nullable = false)
-        var brevType: BrevType = BrevType.IKKE_VURDERT,
-
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
@@ -59,20 +55,8 @@ data class Behandling(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, brevtype=$brevType)"
+        return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori)"
     }
-}
-
-fun BrevType.toDokGenTemplate(): String {
-    return when (this) {
-        BrevType.INNVILGET -> "Innvilget"
-        BrevType.AVSLÅTT -> "Avslag"
-        BrevType.OPPHØRT -> "Opphor"
-        else -> error("Invalid/Unsupported vedtak result")
-    }
-}
-enum class BrevType {
-    IKKE_VURDERT, INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
 }
 
 enum class BehandlingType(val visningsnavn: String) {

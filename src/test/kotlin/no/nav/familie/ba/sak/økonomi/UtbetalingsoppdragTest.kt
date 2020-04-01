@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.domene.BrevType.OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype.*
 import no.nav.familie.ba.sak.common.dato
 import no.nav.familie.ba.sak.common.lagPersonVedtak
@@ -24,7 +24,8 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                 lagPersonVedtak("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, vedtak),
                 lagPersonVedtak("2020-05-01", "2021-02-28", UTVIDET_BARNETRYGD, 1054, vedtak))
 
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, personvedtak)
+        val behandlingResultatType = BehandlingResultatType.INNVILGET
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, personvedtak)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(6, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -49,8 +50,9 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                 lagPersonVedtak("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, vedtak),
                 lagPersonVedtak("2020-05-01", "2021-02-28", UTVIDET_BARNETRYGD, 1054, vedtak))
 
-        val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, resultat = OPPHØRT, opphørsdato = now())
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, personvedtak)
+        val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = now())
+        val behandlingResultatType = BehandlingResultatType.OPPHØRT
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, personvedtak)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)

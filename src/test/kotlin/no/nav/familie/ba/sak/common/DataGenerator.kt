@@ -67,13 +67,10 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: Perso
 )
 
 fun lagVedtak(behandling: Behandling = lagBehandling(),
-              resultat: BrevType = BrevType.INNVILGET,
               forrigeVedtak: Vedtak? = null,
               opphørsdato: LocalDate? = null) =
         Vedtak(id = nesteVedtakId(),
-               behandling = behandling.copy(
-                       brevType = resultat
-               ),
+               behandling = behandling,
                ansvarligSaksbehandler = "ansvarligSaksbehandler",
                vedtaksdato = LocalDate.now(),
                stønadBrevMarkdown = "",

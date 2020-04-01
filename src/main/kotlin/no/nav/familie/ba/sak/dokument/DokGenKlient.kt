@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BrevType
-import no.nav.familie.ba.sak.behandling.domene.toDokGenTemplate
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
@@ -29,17 +28,19 @@ class DokGenKlient(
 ) {
 
     fun hentStønadBrevMarkdown(behandling: Behandling,
+                               behandlingResultatType: BehandlingResultatType,
                                ansvarligSaksbehandler: String): String {
-        val fletteFelter = mapTilBrevfelter(behandling, ansvarligSaksbehandler)
-        return hentMarkdownForMal(behandling.brevType.toDokGenTemplate(), fletteFelter)
+        val fletteFelter = mapTilBrevfelter(behandling, behandlingResultatType, ansvarligSaksbehandler)
+        return hentMarkdownForMal(behandlingResultatType.brevMal, fletteFelter)
     }
 
     private fun mapTilBrevfelter(behandling: Behandling,
-                                 ansvarligSaksbehandler: String): String = when (behandling.brevType) {
-        BrevType.INNVILGET -> mapTilInnvilgetBrevFelter(behandling, ansvarligSaksbehandler)
-        BrevType.AVSLÅTT -> mapTilAvslagBrevFelter(behandling)
-        BrevType.OPPHØRT -> mapTilOpphørtBrevFelter(behandling)
-        else -> error("Invalid/unsupported vedtak.resultat")
+                                 behandlingResultatType: BehandlingResultatType,
+                                 ansvarligSaksbehandler: String): String = when (behandlingResultatType) {
+        BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(behandling, ansvarligSaksbehandler)
+        BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(behandling)
+        BehandlingResultatType.OPPHØRT -> mapTilOpphørtBrevFelter(behandling)
+        else -> error("Invalid/unsupported behandling resultat type")
     }
 
     private fun mapTilOpphørtBrevFelter(behandling: Behandling): String {

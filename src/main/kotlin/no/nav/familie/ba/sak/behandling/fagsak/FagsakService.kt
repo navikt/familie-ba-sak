@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -23,7 +23,7 @@ class FagsakService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
         private val behandlingRepository: BehandlingRepository,
-        private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val behandlingResultatService: BehandlingResultatService,
         private val vedtakRepository: VedtakRepository,
         private val integrasjonClient: IntegrasjonClient) {
 
@@ -64,12 +64,11 @@ class FagsakService(
                     type = it.type,
                     status = it.status,
                     steg = it.steg,
-                    periodeResultater = behandlingResultatRepository.findByBehandlingAndAktiv(it.id)
-                                                   ?.periodeResultater?.map { it.tilRestPeriodeResultat() } ?: emptyList(),
+                    periodeResultater = behandlingResultatService.hentAktivForBehandling(it.id)
+                                                ?.periodeResultater?.map { it.tilRestPeriodeResultat() } ?: emptyList(),
                     opprettetTidspunkt = it.opprettetTidspunkt,
                     kategori = it.kategori,
                     underkategori = it.underkategori,
-                    brevType = it.brevType,
                     begrunnelse = it.begrunnelse
             )
         }

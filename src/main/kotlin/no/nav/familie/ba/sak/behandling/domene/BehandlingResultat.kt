@@ -9,7 +9,9 @@ import javax.persistence.*
 data class BehandlingResultat(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_resultat_seq_generator")
-        @SequenceGenerator(name = "behandling_resultat_seq_generator", sequenceName = "behandling_resultat_seq", allocationSize = 50)
+        @SequenceGenerator(name = "behandling_resultat_seq_generator",
+                           sequenceName = "behandling_resultat_seq",
+                           allocationSize = 50)
         val id: Long = 0,
 
         @ManyToOne(optional = false)
@@ -29,6 +31,10 @@ data class BehandlingResultat(
     }
 
     fun hentSamletResultat(): BehandlingResultatType {
+        if (periodeResultater.isEmpty()) {
+            return BehandlingResultatType.IKKE_VURDERT
+        }
+
         return when {
             periodeResultater.all { it.hentSamletResultat() == BehandlingResultatType.INNVILGET } ->
                 BehandlingResultatType.INNVILGET
@@ -39,6 +45,6 @@ data class BehandlingResultat(
     }
 }
 
-enum class BehandlingResultatType {
-    INNVILGET, DELVIS_INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
+enum class BehandlingResultatType(val brevMal: String) {
+    INNVILGET("Innvilget"), DELVIS_INNVILGET("Ukjent"), AVSLÅTT("Avslag"), OPPHØRT("Opphor"), HENLAGT("Ukjent"), IKKE_VURDERT("Ukjent")
 }

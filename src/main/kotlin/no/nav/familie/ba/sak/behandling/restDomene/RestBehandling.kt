@@ -19,7 +19,6 @@ data class RestBehandling(val aktiv: Boolean,
                           val underkategori: BehandlingUnderkategori,
                           val periodeResultater: List<RestPeriodeResultat>,
                           val vedtakForBehandling: List<RestVedtak?>,
-                          val brevType: BrevType,
                           val begrunnelse: String)
 
 data class RestPeriodeResultat(

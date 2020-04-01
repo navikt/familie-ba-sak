@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BrevType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
@@ -63,7 +62,6 @@ class StegServiceTest(
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
 
         stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg, RestVilkårsvurdering(
-                brevType = BrevType.INNVILGET,
                 periodeResultater = vilkårsvurderingInnvilget(søkerFnr),
                 begrunnelse = ""
         ))
@@ -83,7 +81,6 @@ class StegServiceTest(
 
         assertThrows<IllegalStateException> {
             stegService.håndterVilkårsvurdering(behandling, RestVilkårsvurdering(
-                    brevType = BrevType.INNVILGET,
                     periodeResultater = vilkårsvurderingInnvilget(søkerFnr),
                     begrunnelse = ""
             ))

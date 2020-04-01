@@ -2,21 +2,19 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestPeriodeResultat
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.springframework.stereotype.Service
 
 @Service
 class VilkårService(
         private val behandlingService: BehandlingService,
-        private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val loggService: LoggService
+        private val behandlingResultatService: BehandlingResultatService,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
     fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
@@ -47,8 +45,7 @@ class VilkårService(
                 aktiv = true,
                 periodeResultater = periodeResultater)
 
-        lagreNyOgDeaktiverGammelBehandlingResultat(behandlingResultat)
-        return behandlingResultat
+        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
     }
 
     fun kontrollerVurderteVilkårOgLagResultat(periodeResultater: List<RestPeriodeResultat>,
@@ -73,8 +70,7 @@ class VilkårService(
             periodeResultat
         }.toSet()
 
-        lagreNyOgDeaktiverGammelBehandlingResultat(behandlingResultat)
-        return behandlingResultat
+        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
     }
 
     private fun spesifikasjonerForPerson(person: Person): Spesifikasjon<Fakta> {
@@ -83,20 +79,5 @@ class VilkårService(
         return relevanteVilkår
                 .map { vilkår -> vilkår.spesifikasjon }
                 .reduce { samledeVilkår, vilkår -> samledeVilkår og vilkår }
-    }
-
-    private fun lagreNyOgDeaktiverGammelBehandlingResultat(nyttBehandlingResultat: BehandlingResultat) {
-        val behandlingResultatSomSettesInaktivt =
-                behandlingResultatRepository.findByBehandlingAndAktiv(nyttBehandlingResultat.behandling.id)
-
-        if (behandlingResultatSomSettesInaktivt != null) {
-            behandlingResultatSomSettesInaktivt.aktiv = false
-            behandlingResultatRepository.save(behandlingResultatSomSettesInaktivt)
-        }
-
-        val behandling = behandlingService.hent(nyttBehandlingResultat.behandling.id)
-        loggService.opprettVilkårsvurderingLogg(behandling, behandlingResultatSomSettesInaktivt, nyttBehandlingResultat)
-
-        behandlingResultatRepository.save(nyttBehandlingResultat)
     }
 }

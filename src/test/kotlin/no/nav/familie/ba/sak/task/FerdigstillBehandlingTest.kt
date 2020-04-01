@@ -1,14 +1,17 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BrevType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -16,6 +19,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
+import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -25,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.time.LocalDate
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -46,19 +51,31 @@ class FerdigstillBehandlingTest {
     lateinit var behandlingService: BehandlingService
 
     @Autowired
-    lateinit var behandlingRepository: BehandlingRepository
+    lateinit var behandlingResultatService: BehandlingResultatService
 
     @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
-
-    fun lagTestTask(brevType: BrevType): Task {
+    private fun lagTestTask(resultat: Resultat): Task {
         val fnr = randomFnr()
         val fnrBarn = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandlingService.settVilkårsvurdering(behandling, brevType, "")
+        behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
+
+        val behandlingResultat = BehandlingResultat(
+                behandling = behandling
+        )
+        behandlingResultat.periodeResultater = setOf(PeriodeResultat(
+                behandlingResultat = behandlingResultat,
+                personIdent = fnr,
+                periodeFom = LocalDate.now(),
+                periodeTom = LocalDate.now(),
+                vilkårResultater = setOf(VilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET, resultat = resultat))
+        ))
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag =
@@ -79,7 +96,7 @@ class FerdigstillBehandlingTest {
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til løpende`() {
-        val testTask = lagTestTask(BrevType.INNVILGET)
+        val testTask = lagTestTask(Resultat.JA)
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
         ferdigstillBehandling.doTask(testTask)
@@ -94,7 +111,7 @@ class FerdigstillBehandlingTest {
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
-        val testTask = lagTestTask(BrevType.AVSLÅTT)
+        val testTask = lagTestTask(Resultat.NEI)
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
         ferdigstillBehandling.doTask(testTask)

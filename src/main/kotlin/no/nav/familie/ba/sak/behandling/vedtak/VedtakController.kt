@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BrevType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -140,7 +139,6 @@ class VedtakController(
 }
 
 data class RestVilkårsvurdering(
-        val brevType: BrevType,
         val periodeResultater: List<RestPeriodeResultat>,
         val begrunnelse: String
 )

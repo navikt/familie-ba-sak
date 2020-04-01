@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.domene.BrevType.OPPHØRT
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakPersonYtelsesperiode
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioder
@@ -20,9 +20,10 @@ import java.math.BigDecimal
 // Beholder bare siste utbetalingsperiode hvis det er opphør.
 fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                           vedtak: Vedtak,
+                          behandlingResultatType: BehandlingResultatType,
                           personberegninger: List<VedtakPersonYtelsesperiode>): Utbetalingsoppdrag {
 
-    val erOpphør = vedtak.behandling.brevType == OPPHØRT
+    val erOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
 
     val utbetalingsperiodeMal =
             if (erOpphør)
