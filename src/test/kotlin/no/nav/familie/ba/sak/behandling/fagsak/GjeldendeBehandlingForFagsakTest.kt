@@ -76,7 +76,7 @@ class GjeldendeBehandlingForFagsakTest {
                 stønadTom,
                 opphørFom
         )
-        beregningService.lagreBeregningsresultat(opphør, utbetalingsoppdragOpphør)
+        beregningService.lagreTilkjentYtelse(opphør, utbetalingsoppdragOpphør)
         behandlingService.oppdaterStatusPåBehandling(opphør.id, BehandlingStatus.IVERKSATT)
 
         val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
@@ -107,7 +107,7 @@ class GjeldendeBehandlingForFagsakTest {
                 stønadTom,
                 opphørFom
         )
-        beregningService.lagreBeregningsresultat(opphør, utbetalingsoppdragOpphør)
+        beregningService.lagreTilkjentYtelse(opphør, utbetalingsoppdragOpphør)
         behandlingService.oppdaterStatusPåBehandling(opphør.id, BehandlingStatus.IVERKSATT)
 
         val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
@@ -138,7 +138,7 @@ class GjeldendeBehandlingForFagsakTest {
                 stønadTom,
                 revurderingFom
         )
-        beregningService.lagreBeregningsresultat(revurdering, utbetalingsoppdragRevurdering)
+        beregningService.lagreTilkjentYtelse(revurdering, utbetalingsoppdragRevurdering)
         behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.IVERKSATT)
 
         val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
@@ -170,7 +170,7 @@ class GjeldendeBehandlingForFagsakTest {
                 stønadTom,
                 revurderingFom
         )
-        beregningService.lagreBeregningsresultat(revurdering, utbetalingsoppdragRevurdering)
+        beregningService.lagreTilkjentYtelse(revurdering, utbetalingsoppdragRevurdering)
         behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.IVERKSATT)
 
         val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
@@ -205,7 +205,7 @@ class GjeldendeBehandlingForFagsakTest {
                 stønadFom,
                 stønadTom
         )
-        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
+        beregningService.lagreTilkjentYtelse(behandling, utbetalingsoppdrag)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
         return behandling
     }

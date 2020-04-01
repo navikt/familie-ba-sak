@@ -6,13 +6,13 @@ import org.hibernate.annotations.Type
 import java.time.LocalDate
 import javax.persistence.*
 
-@Entity(name = "BeregningResultat")
-@Table(name = "BEREGNING_RESULTAT")
-data class BeregningResultat(
+@Entity(name = "TilkjentYtelse")
+@Table(name = "TILKJENT_YTELSE")
+data class TilkjentYtelse(
 
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "beregning_resultat_seq_generator")
-        @SequenceGenerator(name = "beregning_resultat_seq_generator", sequenceName = "beregning_resultat_seq", allocationSize = 50)
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tilkjent_ytelse_seq_generator")
+        @SequenceGenerator(name = "tilkjent_ytelse_seq_generator", sequenceName = "tilkjent_ytelse_seq", allocationSize = 50)
         val id: Long = 0,
 
         @OneToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)

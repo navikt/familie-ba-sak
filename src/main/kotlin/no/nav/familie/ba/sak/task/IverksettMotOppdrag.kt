@@ -29,7 +29,7 @@ class IverksettMotOppdrag(
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         LOG.debug("Iverksetter vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag")
-        økonomiService.lagreBeregningsresultatOgIverksettVedtak(iverksettingTask.behandlingsId,
+        økonomiService.lagreTilkjentYtelseOgIverksettVedtak(iverksettingTask.behandlingsId,
                                        iverksettingTask.vedtaksId,
                                        iverksettingTask.saksbehandlerId)
     }

@@ -33,7 +33,7 @@ class BeregningServiceTest {
     private lateinit var behandlingService: BehandlingService
 
     @Test
-    fun skalLagreRiktigBeregningsresultatForFGB() {
+    fun skalLagreRiktigTilkjentYtelseForFGB() {
         val fnr = randomFnr()
         val dagensDato = LocalDate.now()
 
@@ -48,18 +48,18 @@ class BeregningServiceTest {
                 dagensDato.plusMonths(10)
         )
 
-        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
-        val beregningResultat = beregningService.hentBeregningsresultatForBehandling(behandling.id)
+        beregningService.lagreTilkjentYtelse(behandling, utbetalingsoppdrag)
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandling.id)
 
-        Assertions.assertNotNull(beregningResultat)
-        Assertions.assertEquals(dagensDato.withDayOfMonth(1), beregningResultat.stønadFom)
-        Assertions.assertEquals(dagensDato.plusMonths(10), beregningResultat.stønadTom)
-        Assertions.assertNull(beregningResultat.opphørFom)
+        Assertions.assertNotNull(tilkjentYtelse)
+        Assertions.assertEquals(dagensDato.withDayOfMonth(1), tilkjentYtelse.stønadFom)
+        Assertions.assertEquals(dagensDato.plusMonths(10), tilkjentYtelse.stønadTom)
+        Assertions.assertNull(tilkjentYtelse.opphørFom)
 
     }
 
     @Test
-    fun skalLagreRiktigBeregningsresultatForOpphør() {
+    fun skalLagreRiktigTilkjentYtelseForOpphør() {
 
         val fnr = randomFnr()
         val dagensDato = LocalDate.now()
@@ -77,17 +77,17 @@ class BeregningServiceTest {
                 opphørsDato
         )
 
-        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
-        val beregningResultat = beregningService.hentBeregningsresultatForBehandling(behandling.id)
+        beregningService.lagreTilkjentYtelse(behandling, utbetalingsoppdrag)
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandling.id)
 
-        Assertions.assertNotNull(beregningResultat)
-        Assertions.assertEquals(dagensDato.plusMonths(10), beregningResultat.stønadTom)
-        Assertions.assertNotNull(beregningResultat.opphørFom)
-        Assertions.assertEquals(opphørsDato, beregningResultat.opphørFom)
+        Assertions.assertNotNull(tilkjentYtelse)
+        Assertions.assertEquals(dagensDato.plusMonths(10), tilkjentYtelse.stønadTom)
+        Assertions.assertNotNull(tilkjentYtelse.opphørFom)
+        Assertions.assertEquals(opphørsDato, tilkjentYtelse.opphørFom)
     }
 
     @Test
-    fun skalLagreRiktigBeregningsresultatForRevurdering() {
+    fun skalLagreRiktigTilkjentYtelseForRevurdering() {
 
         val fnr = randomFnr()
         val dagensDato = LocalDate.now()
@@ -107,12 +107,12 @@ class BeregningServiceTest {
                 tomDato,
                 revurderingFom
         )
-        beregningService.lagreBeregningsresultat(behandling, utbetalingsoppdrag)
-        val beregningResultat = beregningService.hentBeregningsresultatForBehandling(behandling.id)
+        beregningService.lagreTilkjentYtelse(behandling, utbetalingsoppdrag)
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandling.id)
 
-        Assertions.assertNotNull(beregningResultat)
-        Assertions.assertEquals(revurderingFom, beregningResultat.stønadFom)
-        Assertions.assertEquals(tomDato, beregningResultat.stønadTom)
-        Assertions.assertEquals(opphørFom, beregningResultat.opphørFom)
+        Assertions.assertNotNull(tilkjentYtelse)
+        Assertions.assertEquals(revurderingFom, tilkjentYtelse.stønadFom)
+        Assertions.assertEquals(tomDato, tilkjentYtelse.stønadTom)
+        Assertions.assertEquals(opphørFom, tilkjentYtelse.opphørFom)
     }
 }
