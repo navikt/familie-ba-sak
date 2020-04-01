@@ -1,4 +1,4 @@
-alter table behandling rename column resultat to brev_type;
+alter table behandling drop column resultat;
 
 CREATE TABLE BEHANDLING_RESULTAT
 (

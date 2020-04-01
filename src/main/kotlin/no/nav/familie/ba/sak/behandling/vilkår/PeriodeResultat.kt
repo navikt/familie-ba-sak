@@ -29,19 +29,21 @@ class PeriodeResultat(
         @Column(name = "periode_tom")
         val periodeTom: LocalDate?,
 
-        @OneToMany(mappedBy = "periodeResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "periodeResultat",
+                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
         var vilkårResultater: Set<VilkårResultat> = setOf()
 
 ) : BaseEntitet() {
 
-        fun hentSamletResultat(): BehandlingResultatType {
-                return when {
-                    vilkårResultater.all { it.resultat == Resultat.JA } -> {
-                            BehandlingResultatType.INNVILGET
-                    }
-                    else -> {
-                            BehandlingResultatType.AVSLÅTT
-                    }
-                }
+    fun hentSamletResultat(): BehandlingResultatType {
+        return when {
+            vilkårResultater.all { it.resultat == Resultat.JA } -> {
+                BehandlingResultatType.INNVILGET
+            }
+            else -> {
+                BehandlingResultatType.AVSLÅTT
+            }
         }
+    }
 }

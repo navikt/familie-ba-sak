@@ -21,7 +21,10 @@ data class BehandlingResultat(
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
-        @OneToMany(mappedBy = "behandlingResultat", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "behandlingResultat",
+                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE]
+        )
         var periodeResultater: Set<PeriodeResultat> = setOf()
 
 ) : BaseEntitet() {
