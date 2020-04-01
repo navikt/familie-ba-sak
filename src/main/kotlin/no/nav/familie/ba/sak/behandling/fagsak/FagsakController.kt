@@ -74,7 +74,7 @@ class FagsakController(
         return ResponseEntity.ok(Ressurs.success("Laget task for avstemming"))
     }
 
-    @PostMapping(path = ["fagsaker/søk"])
+    @PostMapping(path = ["fagsaker/sok"])
     fun søkFagsak(@RequestBody søkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         val saksbehandlerId = hentSaksbehandler()
 

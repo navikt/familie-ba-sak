@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.integrasjoner.domene.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -60,6 +61,7 @@ class ClientMocks {
     }
 
     @Bean
+    @Profile("!mock-pdl")
     @Primary
     fun mockIntegrasjonClient(): IntegrasjonClient {
 
