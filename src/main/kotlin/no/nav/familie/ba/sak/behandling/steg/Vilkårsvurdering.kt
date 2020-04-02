@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.behandling.steg
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,21 +23,20 @@ class Vilkårsvurdering(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        val testBehandling = behandlingService.hent(behandlingId = behandling.id)
-        val vilkårsvurdertBehandling = behandlingService.settVilkårsvurdering(testBehandling,
-                                                                              data.resultat,
-                                                                              data.begrunnelse)
+        val vilkårsvurdertBehandling = behandlingService.settBegrunnelseForVilkårsvurdering(
+                behandlingService.hent(behandlingId = behandling.id),
+                data.begrunnelse)
 
-        if (data.samletVilkårResultat.isNotEmpty()) {
-            vilkårService.kontrollerVurderteVilkårOgLagResultat(personopplysningGrunnlag,
-                                                                data.samletVilkårResultat,
+        if (data.periodeResultater.isNotEmpty()) {
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(data.periodeResultater,
                                                                 vilkårsvurdertBehandling.id)
         } else {
-            vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag, vilkårsvurdertBehandling.id)
+            vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)
         }
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(vilkårsvurdertBehandling,
-                                                                 personopplysningGrunnlag,
-                                                                 ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandler())
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+                vilkårsvurdertBehandling,
+                personopplysningGrunnlag,
+                ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandler())
 
         return vilkårsvurdertBehandling
     }

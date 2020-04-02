@@ -1,12 +1,9 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.dokument.DokGenKlient
@@ -20,6 +17,7 @@ import java.time.LocalDate
 @Service
 class VedtakService(private val behandlingService: BehandlingService,
                     private val behandlingRepository: BehandlingRepository,
+                    private val behandlingResultatService: BehandlingResultatService,
                     private val vedtakRepository: VedtakRepository,
                     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokGenKlient: DokGenKlient,
@@ -50,8 +48,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                                       journalpostID = null,
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
-                                      underkategori = gjeldendeBehandling.underkategori,
-                                      resultat = BehandlingResultat.OPPHØRT)
+                                      underkategori = gjeldendeBehandling.underkategori)
 
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
         behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
@@ -79,17 +76,20 @@ class VedtakService(private val behandlingService: BehandlingService,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag,
                                                    ansvarligSaksbehandler: String): Vedtak {
         val forrigeVedtak = hentForrigeVedtak(behandling = behandling)
+        val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
+
         val vedtak = Vedtak(
                 behandling = behandling,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = forrigeVedtak?.id,
-                opphørsdato = if (behandling.resultat == BehandlingResultat.OPPHØRT) LocalDate.now()
+                opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) LocalDate.now()
                         .førsteDagINesteMåned() else null,
-                stønadBrevMarkdown = if (behandling.resultat != BehandlingResultat.INNVILGET) Result.runCatching {
-                            dokGenKlient.hentStønadBrevMarkdown(behandling,
-                                                                ansvarligSaksbehandler)
-                        }
+                stønadBrevMarkdown = if (behandlingResultatType != BehandlingResultatType.INNVILGET) Result.runCatching {
+                    dokGenKlient.hentStønadBrevMarkdown(behandling,
+                                                        behandlingResultatType,
+                                                        ansvarligSaksbehandler)
+                }
                         .fold(
                                 onSuccess = { it },
                                 onFailure = {
@@ -111,10 +111,12 @@ class VedtakService(private val behandlingService: BehandlingService,
         andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
         andelTilkjentYtelseRepository.saveAll(andelerTilkjentYtelse)
 
+        val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(vedtak.behandling.id)
         vedtak.stønadBrevMarkdown = Result.runCatching {
-                    dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
-                                                        ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
-                }
+            dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
+                                                behandlingResultatType = behandlingResultatType,
+                                                ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
+        }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->

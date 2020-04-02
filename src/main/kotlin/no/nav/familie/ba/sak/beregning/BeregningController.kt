@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -27,6 +29,7 @@ import java.time.LocalDate
 @Validated
 class BeregningController(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService
 ) {
 
@@ -44,8 +47,10 @@ class BeregningController(
         val vedtak = vedtakService.hent(vedtakId)
 
         val behandling = vedtak.behandling
+        val behandlingResultatType =
+                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
-        if (behandling.resultat != BehandlingResultat.INNVILGET) {
+        if (behandlingResultatType != BehandlingResultatType.INNVILGET) {
             return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget", null)
         }
 
@@ -85,10 +90,10 @@ fun mapNyBeregningTilAndelerTilkjentYtelse(behandlingId: Long, nyBeregning: NyBe
             .associateBy { it.personIdent.ident }
 
     return nyBeregning.personBeregninger
-            .filter{ identBarnMap.containsKey(it.ident) }
+            .filter { identBarnMap.containsKey(it.ident) }
             .map {
 
-                val person= identBarnMap[it.ident]!!
+                val person = identBarnMap[it.ident]!!
 
                 if (it.stønadFom.isBefore(person.fødselsdato)) {
                     error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")

@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultatRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -19,23 +19,22 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.Period
 
-
 @Service
 class FagsakService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakRepository: FagsakRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
-        private val samletVilkårResultatRepository: SamletVilkårResultatRepository,
         private val behandlingRepository: BehandlingRepository,
+        private val behandlingResultatService: BehandlingResultatService,
         private val vedtakRepository: VedtakRepository,
         private val integrasjonClient: IntegrasjonClient) {
 
     @Transactional
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(fagsakRequest.personIdent))
-                ?: Fagsak(aktørId = integrasjonClient.hentAktørId(fagsakRequest.personIdent),
-                        personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
+                     ?: Fagsak(aktørId = integrasjonClient.hentAktørId(fagsakRequest.personIdent),
+                               personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
 
         return hentRestFagsak(fagsakId = fagsak.id)
     }
@@ -68,12 +67,11 @@ class FagsakService(
                     type = behandling.type,
                     status = behandling.status,
                     steg = behandling.steg,
-                    samletVilkårResultat = samletVilkårResultatRepository.finnSamletVilkårResultatPåBehandlingOgAktiv(behandling.id)
-                            ?.toRestSamletVilkårResultat() ?: emptyList(),
+                    periodeResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
+                                                ?.periodeResultater?.map { it.tilRestPeriodeResultat() } ?: emptyList(),
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
                     underkategori = behandling.underkategori,
-                    resultat = behandling.resultat,
                     begrunnelse = behandling.begrunnelse
             )
         }

@@ -42,6 +42,13 @@ credential:
 logging:
   config: "classpath:logback-test.xml"
 
+funksjonsbrytere:
+  enabled: false
+  unleash:
+    uri: http://dummy/api/
+    cluster: localhost
+    applicationName: familie-ba-sak
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/familie-ba-sak

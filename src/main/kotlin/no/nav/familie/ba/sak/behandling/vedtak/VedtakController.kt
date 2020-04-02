@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.behandling.restDomene.RestPeriodeResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.forbidden
@@ -140,8 +139,7 @@ class VedtakController(
 }
 
 data class RestVilkårsvurdering(
-        val resultat: BehandlingResultat,
-        val samletVilkårResultat: List<RestVilkårResultat>,
+        val periodeResultater: List<RestPeriodeResultat>,
         val begrunnelse: String
 )
 

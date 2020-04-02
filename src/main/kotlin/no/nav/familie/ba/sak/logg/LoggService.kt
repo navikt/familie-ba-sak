@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.logg
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vilkår.SamletVilkårResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -35,15 +35,15 @@ class LoggService(
     }
 
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
-                                    aktivSamletVilkårResultat: SamletVilkårResultat?,
-                                    samletVilkårResultat: SamletVilkårResultat): Logg {
-        return if (aktivSamletVilkårResultat != null) {
+                                    forrigeBehandlingResultat: BehandlingResultat?,
+                                    nyttBehandlingResultat: BehandlingResultat): Logg {
+        return if (forrigeBehandlingResultat != null) {
             lagre(Logg(
                     behandlingId = behandling.id,
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Endring på vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat gikk fra ${aktivSamletVilkårResultat.hentSamletResultat()} til ${samletVilkårResultat.hentSamletResultat()}"
+                    tekst = "Resultat gikk fra ${forrigeBehandlingResultat.hentSamletResultat()} til ${nyttBehandlingResultat.hentSamletResultat()}"
             ))
         } else {
             lagre(Logg(
@@ -51,7 +51,7 @@ class LoggService(
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Opprettet vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat ble ${samletVilkårResultat.hentSamletResultat()}"
+                    tekst = "Resultat ble ${nyttBehandlingResultat.hentSamletResultat()}"
             ))
         }
     }
