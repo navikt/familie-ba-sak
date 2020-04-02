@@ -2,10 +2,9 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -19,7 +18,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.lang.IllegalArgumentException
 import java.time.LocalDate
 
 @Service
@@ -52,9 +50,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    fun settVilkårsvurdering(behandling: Behandling, resultat: BehandlingResultat, begrunnelse: String): Behandling {
+    fun settBegrunnelseForVilkårsvurdering(behandling: Behandling, begrunnelse: String): Behandling {
         behandling.begrunnelse = begrunnelse
-        behandling.resultat = resultat
         return lagre(behandling)
     }
 
@@ -137,7 +134,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun hentBehandlingSomSkalOpphøres(tilkjentYtelse: TilkjentYtelse): Behandling {
         val utbetalingsOppdrag = objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
-        val opphørsperiode = utbetalingsOppdrag.utbetalingsperiode.find { it.opphør != null } ?: throw IllegalArgumentException("Finner ikke opphør på tilkjent ytelse med id $tilkjentYtelse.id")
+        val opphørsperiode = utbetalingsOppdrag.utbetalingsperiode.find { it.opphør != null }
+                             ?: throw IllegalArgumentException("Finner ikke opphør på tilkjent ytelse med id $tilkjentYtelse.id")
         return behandlingRepository.finnBehandling(opphørsperiode.behandlingId)
     }
 

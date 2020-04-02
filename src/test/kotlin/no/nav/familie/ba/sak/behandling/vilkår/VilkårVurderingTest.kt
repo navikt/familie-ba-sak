@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
@@ -11,14 +12,15 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import java.lang.IllegalStateException
 import java.time.LocalDate
 
 @SpringBootTest
@@ -57,7 +59,7 @@ class VilkårVurderingTest {
     }
 
     @Test
-    fun`Hent relevante vilkår for saktype`() { //Banal test, legg til saktyper
+    fun `Hent relevante vilkår for saktype`() { //Banal test, legg til saktyper
         val relevanteVilkårSaktypeFinnes = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERFOR)
         val relevanteVilkårSaktypeFinnesIkke = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERIKKEFOR)
         val vilkårForSaktypeFinnes = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
@@ -78,7 +80,7 @@ class VilkårVurderingTest {
     }
 
     @Test
-    fun `Henting og evaluering av oppfylte vilkår gir samlet resultat JA`() {
+    fun `Henting og evaluering av fødselshendelse med flere barn kaster exception`() {
 
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -86,42 +88,61 @@ class VilkårVurderingTest {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
 
-        val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                           behandlingId = behandling.id)
-        Assertions.assertEquals(Resultat.JA, samletVilkårResultat.hentSamletResultat())
-    }
-
-    @Test
-    fun `Henting og evaluering ikke-oppfylte vilkår gir samlet resultat NEI`() {
-
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-
-        //Legger til barn over 18 år
         personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
                                                      personIdent = PersonIdent("11111111111"),
                                                      type = PersonType.BARN,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
-                                                     fødselsdato = LocalDate.of(1980, 1, 1),
+                                                     fødselsdato = LocalDate.now(),
                                                      navn = "",
                                                      kjønn = Kjønn.MANN))
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                           behandlingId = behandling.id)
+        assertThrows<IllegalStateException> {
+            vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
+        }
+    }
 
-        Assertions.assertEquals(Resultat.NEI, samletVilkårResultat.hentSamletResultat())
+    @Test
+    fun `Henting og evaluering av fødselshendelse med oppfylte vilkår gir behandlingsresultat innvilget`() {
+
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
+        Assertions.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
+    }
+
+    @Test
+    fun `Henting og evaluering av fødselshendelse uten oppfylte vilkår gir samlet behandlingsresultat avslått`() {
+
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, emptyList())
+        personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
+                                                     personIdent = PersonIdent(barnFnr),
+                                                     type = PersonType.BARN,
+                                                     personopplysningGrunnlag = personopplysningGrunnlag,
+                                                     fødselsdato = LocalDate.of(1980, 1, 1), //Over 18år
+                                                     navn = "",
+                                                     kjønn = Kjønn.MANN))
+
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
+
+        Assertions.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
     }
 
     @Test
@@ -137,12 +158,11 @@ class VilkårVurderingTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val samletVilkårResultat = vilkårService.vurderVilkårOgLagResultat(personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                           behandlingId = behandling.id)
+        val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
 
-        val forventetAntallVurderteVilkår =
-                Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
-        Assertions.assertEquals(forventetAntallVurderteVilkår, samletVilkårResultat.samletVilkårResultat.size)
+        val forventetAntallVurderteVilkår = Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
+        Assertions.assertEquals(forventetAntallVurderteVilkår,
+                                behandlingResultat.periodeResultater.flatMap { periodeResultat -> periodeResultat.vilkårResultater }.size)
     }
 
     @Test
@@ -160,6 +180,3 @@ class VilkårVurderingTest {
         assertFalse(begrensetGyldigVilkårsperiode.gyldigFor(LocalDate.now().plusDays(6)))
     }
 }
-
-
-

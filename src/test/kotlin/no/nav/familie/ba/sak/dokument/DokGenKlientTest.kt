@@ -27,8 +27,7 @@ class DokGenKlientTest(@Autowired
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    resultat = BehandlingResultat.INNVILGET),
+                                    underkategori = BehandlingUnderkategori.ORDINÆR),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )
@@ -39,8 +38,7 @@ class DokGenKlientTest(@Autowired
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    resultat = BehandlingResultat.AVSLÅTT),
+                                    underkategori = BehandlingUnderkategori.ORDINÆR),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )
@@ -51,8 +49,7 @@ class DokGenKlientTest(@Autowired
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    resultat = BehandlingResultat.OPPHØRT),
+                                    underkategori = BehandlingUnderkategori.ORDINÆR),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )
@@ -60,14 +57,16 @@ class DokGenKlientTest(@Autowired
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
         val markdown = dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
+                                                           behandlingResultatType = BehandlingResultatType.INNVILGET,
                                                            ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
-        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(vedtak.behandling.resultat.toDokGenTemplate(), markdown)
+        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(BehandlingResultatType.INNVILGET.brevMal, markdown)
         assert(htmlResponse.startsWith("<html>"))
     }
 
     @Test
     fun `Test å generer Markdown for avslag brev`() {
         val markdown = dokGenKlient.hentStønadBrevMarkdown(behandling = avslagVedtak.behandling,
+                                                           behandlingResultatType = BehandlingResultatType.AVSLÅTT,
                                                            ansvarligSaksbehandler = avslagVedtak.ansvarligSaksbehandler)
         assert(markdown.startsWith("<br>Du har ikke rett til barnetrygd fordi ."))
     }
@@ -75,6 +74,7 @@ class DokGenKlientTest(@Autowired
     @Test
     fun `Test å generer Markdown for opphørt brev`() {
         val markdown = dokGenKlient.hentStønadBrevMarkdown(behandling = opphørtVedtak.behandling,
+                                                           behandlingResultatType = BehandlingResultatType.OPPHØRT,
                                                            ansvarligSaksbehandler = opphørtVedtak.ansvarligSaksbehandler)
         assert(markdown.startsWith("<br>Barnetrygden din stanses fra"))
     }

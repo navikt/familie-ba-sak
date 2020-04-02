@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -25,6 +27,7 @@ import java.time.LocalDate
 class BeregningController(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val beregningService: BeregningService,
+        private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService
 ) {
 
@@ -42,8 +45,10 @@ class BeregningController(
         val vedtak = vedtakService.hent(vedtakId)
 
         val behandling = vedtak.behandling
+        val behandlingResultatType =
+                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
-        if (behandling.resultat != BehandlingResultat.INNVILGET) {
+        if (behandlingResultatType != BehandlingResultatType.INNVILGET) {
             return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget", null)
         }
 

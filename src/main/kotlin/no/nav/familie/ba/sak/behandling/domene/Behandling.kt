@@ -50,10 +50,6 @@ data class Behandling(
         @Column(name = "steg", nullable = false)
         var steg: StegType = initSteg(null),
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "resultat", nullable = false)
-        var resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
-
         @Column(name = "begrunnelse", columnDefinition = "TEXT")
         var begrunnelse: String = ""
 ) : BaseEntitet() {
@@ -63,25 +59,12 @@ data class Behandling(
     }
 }
 
-fun BehandlingResultat.toDokGenTemplate(): String {
-    return when (this) {
-        BehandlingResultat.INNVILGET -> "Innvilget"
-        BehandlingResultat.AVSLÅTT -> "Avslag"
-        BehandlingResultat.OPPHØRT -> "Opphor"
-        else -> error("Invalid/Unsupported vedtak result")
-    }
-}
-
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
     REVURDERING("Revurdering"),
     MIGRERING_FRA_INFOTRYGD("Migrering fra infotrygd"),
     KLAGE("Klage"),
     MIGRERING_FRA_INFOTRYGD_OPPHØRT("Opphør migrering fra infotrygd")
-}
-
-enum class BehandlingResultat {
-    IKKE_VURDERT, INNVILGET, AVSLÅTT, OPPHØRT, HENLAGT
 }
 
 enum class BehandlingKategori {

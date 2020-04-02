@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -14,20 +15,23 @@ import org.springframework.stereotype.Service
 class ØkonomiService(
         private val økonomiKlient: ØkonomiKlient,
         private val behandlingService: BehandlingService,
+        private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService
 ) {
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
         val vedtak = vedtakService.hent(vedtakId)
+        val behandlingResultatType =
+                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
-        val andelerTilkjentYtelse = if (vedtak.behandling.resultat == BehandlingResultat.OPPHØRT) {
+        val andelerTilkjentYtelse = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) {
             val forrigeVedtak = vedtakService.hent(vedtak.forrigeVedtakId!!)
             beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id)
         }
         else beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingsId)
 
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, andelerTilkjentYtelse)
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, behandlingResultatType, andelerTilkjentYtelse)
 
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(vedtak.behandling, utbetalingsoppdrag)
         iverksettOppdrag(vedtak.behandling.id, utbetalingsoppdrag)

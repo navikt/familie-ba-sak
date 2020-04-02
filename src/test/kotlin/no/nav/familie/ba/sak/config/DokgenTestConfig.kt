@@ -19,7 +19,7 @@ class DokgenTestConfig {
         every { dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP") } returns "<HTML>HTML_MOCKUP</HTML>"
         every { dokgenService.lagHtmlFraMarkdown("Avslag", "TEST_MARKDOWN_MOCKUP") } returns "<HTML>HTML_MOCKUP</HTML>"
         every { dokgenService.lagHtmlFraMarkdown("Opphørt", "TEST_MARKDOWN_MOCKUP") } returns "<HTML>HTML_MOCKUP</HTML>"
-        every { dokgenService.hentStønadBrevMarkdown(any(), any()) } returns "TEST_MARKDOWN_MOCKUP"
+        every { dokgenService.hentStønadBrevMarkdown(any(), any(), any()) } returns "TEST_MARKDOWN_MOCKUP"
         return dokgenService
     }
 
@@ -29,7 +29,7 @@ class DokgenTestConfig {
     fun mockDokGenNegativeService(): DokGenKlient {
         val dokgenService: DokGenKlient = mockk()
         every { dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP") } throws IllegalStateException()
-        every { dokgenService.hentStønadBrevMarkdown(any(), any()) } returns "TEST_MARKDOWN_MOCKUP"
+        every { dokgenService.hentStønadBrevMarkdown(any(), any(), any()) } returns "TEST_MARKDOWN_MOCKUP"
         return dokgenService
     }
 }

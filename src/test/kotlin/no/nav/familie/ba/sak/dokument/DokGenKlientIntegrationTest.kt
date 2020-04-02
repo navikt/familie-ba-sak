@@ -63,14 +63,13 @@ class DokGenKlientIntegrationTest {
         val markdown = dokgen.hentStønadBrevMarkdown(Behandling(
                 id = 1,
                 fagsak = Fagsak(personIdent = PersonIdent(""),
-                                                                                           aktørId = AktørId("1")),
+                                aktørId = AktørId("1")),
                 journalpostID = "invalid",
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 aktiv = true,
                 kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                resultat = BehandlingResultat.INNVILGET
-        ), ansvarligSaksbehandler = "whoknows")
+                underkategori = BehandlingUnderkategori.ORDINÆR
+        ), behandlingResultatType = BehandlingResultatType.INNVILGET, ansvarligSaksbehandler = "whoknows")
         assert(markdown == "mockup_response")
     }
 
@@ -100,14 +99,13 @@ class DokGenKlientIntegrationTest {
         val markdown = dokgen.hentStønadBrevMarkdown(Behandling(
                 id = 1,
                 fagsak = Fagsak(personIdent = PersonIdent(""),
-                                                                                           aktørId = AktørId("1")),
+                                aktørId = AktørId("1")),
                 journalpostID = "invalid",
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 aktiv = true,
                 kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                resultat = BehandlingResultat.INNVILGET
-        ), ansvarligSaksbehandler = "whoknows")
+                underkategori = BehandlingUnderkategori.ORDINÆR
+        ), behandlingResultatType = BehandlingResultatType.INNVILGET, ansvarligSaksbehandler = "whoknows")
         assert(markdown.isEmpty())
     }
 }

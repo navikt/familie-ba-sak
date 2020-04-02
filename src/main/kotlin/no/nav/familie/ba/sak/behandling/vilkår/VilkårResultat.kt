@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
 import javax.persistence.*
@@ -13,12 +12,8 @@ class VilkårResultat(
         @SequenceGenerator(name = "vilkar_resultat_seq_generator", sequenceName = "vilkar_resultat_seq", allocationSize = 50)
         val id: Long = 0,
 
-        @ManyToOne @JoinColumn(name = "samlet_vilkar_resultat_id")
-        var samletVilkårResultat: SamletVilkårResultat? = null,
-
-        @ManyToOne(optional = false)
-        @JoinColumn(name = "fk_person_id", nullable = false, updatable = false)
-        val person: Person,
+        @ManyToOne @JoinColumn(name = "fk_periode_resultat_id", nullable = false)
+        var periodeResultat: PeriodeResultat,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "vilkar")

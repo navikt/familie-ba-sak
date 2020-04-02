@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 class FerdigstillBehandlingSteg(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
+        private val behandlingResultatService: BehandlingResultatService,
         private val loggService: LoggService
 ): BehandlingSteg<String> {
     private val antallBehandlingerFerdigstilt: Map<BehandlingType, Counter> = BehandlingType.values().map {
@@ -24,12 +25,13 @@ class FerdigstillBehandlingSteg(
 
     override fun utførSteg(behandling: Behandling, data: String): Behandling {
         val fagsak = behandling.fagsak
+        val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
 
         if (behandling.status !== BehandlingStatus.IVERKSATT) {
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 
-        if (behandling.resultat == BehandlingResultat.INNVILGET && fagsak.status != FagsakStatus.LØPENDE) {
+        if (behandlingResultatType == BehandlingResultatType.INNVILGET && fagsak.status != FagsakStatus.LØPENDE) {
             fagsakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
         } else {
             fagsakService.oppdaterStatus(fagsak, FagsakStatus.STANSET)
