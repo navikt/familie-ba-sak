@@ -4,4 +4,4 @@ ALTER SEQUENCE BEREGNING_RESULTAT_SEQ RENAME TO TILKJENT_YTELSE_SEQ;
 ALTER TABLE TILKJENT_YTELSE
     ALTER COLUMN stonad_tom DROP NOT NULL,
     ALTER COLUMN utbetalingsoppdrag DROP NOT NULL,
-    ADD COLUMN endret_dato timestamp not null;
+    ADD COLUMN endret_dato timestamp not null default current_timestamp;
