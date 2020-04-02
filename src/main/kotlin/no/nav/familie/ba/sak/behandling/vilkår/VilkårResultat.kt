@@ -21,5 +21,8 @@ class VilkårResultat(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "resultat")
-        val resultat: Resultat
+        val resultat: Resultat,
+
+        @Column(name = "begrunnelse", columnDefinition = "TEXT")
+        var begrunnelse: String = ""
 ) : BaseEntitet()

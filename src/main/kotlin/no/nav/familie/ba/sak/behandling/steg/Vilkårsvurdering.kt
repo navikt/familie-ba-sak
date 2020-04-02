@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class Vilkårsvurdering(
         private val behandlingService: BehandlingService,
+        private val behandlingResultatService: BehandlingResultatService,
         private val vilkårService: VilkårService,
         private val vedtakService: VedtakService,
         private val persongrunnlagService: PersongrunnlagService
@@ -23,9 +25,7 @@ class Vilkårsvurdering(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        val vilkårsvurdertBehandling = behandlingService.settBegrunnelseForVilkårsvurdering(
-                behandlingService.hent(behandlingId = behandling.id),
-                data.begrunnelse)
+        val vilkårsvurdertBehandling = behandlingService.hent(behandlingId = behandling.id)
 
         if (data.periodeResultater.isNotEmpty()) {
             vilkårService.kontrollerVurderteVilkårOgLagResultat(data.periodeResultater,
@@ -33,6 +33,10 @@ class Vilkårsvurdering(
         } else {
             vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)
         }
+        behandlingResultatService.settBegrunnelseForVilkårsvurderingerPåAktiv(
+                behandlingId = behandling.id,
+                begrunnelse = data.begrunnelse)
+
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 vilkårsvurdertBehandling,
                 personopplysningGrunnlag,
