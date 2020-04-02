@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.beregning.mapNyBeregningTilAndelerTilkjentYtelse
@@ -50,6 +51,9 @@ class ØkonomiIntegrasjonTest {
 
     @Autowired
     lateinit var økonomiService: ØkonomiService
+
+    @Autowired
+    lateinit var beregningService: BeregningService
 
     @Autowired
     private lateinit var vedtakService: VedtakService
@@ -101,13 +105,11 @@ class ØkonomiIntegrasjonTest {
                                        ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
         )
 
-        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
-
-        val oppdatertFagsak = vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak!!, andelerTilkjentYtelse)
+        val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
-        økonomiService.lagreTilkjentYtelseOgIverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
+        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(behandling.id, vedtak!!.id, "ansvarligSaksbehandler")
 
         val oppdatertBehandling = behandlingService.hent(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling.status)
@@ -147,11 +149,9 @@ class ØkonomiIntegrasjonTest {
                                 1),
                         ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
         )
-        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
-        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, andelerTilkjentYtelse)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
 
-
-        økonomiService.lagreTilkjentYtelseOgIverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
+        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
         behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
 

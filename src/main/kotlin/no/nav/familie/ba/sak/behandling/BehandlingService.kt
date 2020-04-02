@@ -123,10 +123,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 .map { beregningService.hentTilkjentYtelseForBehandling(it.id) }
 
         tilkjenteYtelser.forEach {
-            if (it.stønadTom >= utbetalingsMåned && it.stønadFom != null) {
+            if (it.stønadTom!! >= utbetalingsMåned && it.stønadFom != null) {
                 behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForUtbetaling = true })
             }
-            if (it.opphørFom != null && it.opphørFom <= utbetalingsMåned) {
+            if (it.opphørFom != null && it.opphørFom!! <= utbetalingsMåned) {
                 val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(it)
                 behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForUtbetaling = false })
             }

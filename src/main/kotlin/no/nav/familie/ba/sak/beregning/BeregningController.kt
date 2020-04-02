@@ -2,15 +2,12 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.notFound
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -27,6 +24,7 @@ import java.time.LocalDate
 @Validated
 class BeregningController(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val beregningService: BeregningService,
         private val vedtakService: VedtakService
 ) {
 
@@ -53,8 +51,8 @@ class BeregningController(
                                        ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         return Result.runCatching {
-                    val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
-                    vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, andelerTilkjentYtelse)
+                    beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+                    vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
                 }
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },
@@ -77,36 +75,3 @@ data class PersonBeregning(
         val stønadFom: LocalDate,
         val ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
 )
-
-fun mapNyBeregningTilAndelerTilkjentYtelse(behandlingId: Long, nyBeregning: NyBeregning, personopplysningGrunnlag: PersonopplysningGrunnlag)
-        : List<AndelTilkjentYtelse>{
-
-    val identBarnMap = personopplysningGrunnlag.barna
-            .associateBy { it.personIdent.ident }
-
-    return nyBeregning.personBeregninger
-            .filter{ identBarnMap.containsKey(it.ident) }
-            .map {
-
-                val person= identBarnMap[it.ident]!!
-
-                if (it.stønadFom.isBefore(person.fødselsdato)) {
-                    error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
-                }
-
-                val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-                val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
-
-                if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
-                    error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
-                }
-
-                AndelTilkjentYtelse(personId = person.id,
-                                         behandlingId = behandlingId,
-                                         beløp = it.beløp,
-                                         stønadFom = sikkerStønadFom,
-                                         stønadTom = sikkerStønadTom,
-                                         type = it.ytelsetype)
-            }
-
-}

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.beregning.domene
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.hibernate.annotations.Type
 import java.time.LocalDate
@@ -19,17 +20,23 @@ data class TilkjentYtelse(
         val behandling: Behandling,
 
         @Column(name = "stonad_fom", nullable = true)
-        val stønadFom: LocalDate?,
+        var stønadFom: LocalDate? = null,
 
-        @Column(name = "stonad_tom", nullable = false)
-        val stønadTom: LocalDate,
+        @Column(name = "stonad_tom", nullable = true)
+        var stønadTom: LocalDate? = null,
 
         @Column(name = "opphor_fom", nullable = true)
-        val opphørFom: LocalDate?,
+        var opphørFom: LocalDate? = null,
 
         @Column(name = "opprettet_dato", nullable = false)
         val opprettetDato: LocalDate,
 
+        @Column(name = "endret_dato", nullable = false)
+        var endretDato: LocalDate,
+
         @Column(name = "utbetalingsoppdrag", columnDefinition = "TEXT")
-        val utbetalingsoppdrag: String
+        var utbetalingsoppdrag: String? = null,
+
+        @OneToMany(mappedBy = "tilkjentYtelse", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
+        val andelerTilkjentYtelse: Set<AndelTilkjentYtelse>
 )

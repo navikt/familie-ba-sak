@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import javax.persistence.*
@@ -14,6 +15,9 @@ data class AndelTilkjentYtelse(
 
         @Column(name = "fk_behandling_id", nullable = false, updatable = false)
         val behandlingId: Long,
+
+        @ManyToOne @JoinColumn(name = "tilkjent_ytelse_id")
+        var tilkjentYtelse: TilkjentYtelse? = null,
 
         @Column(name = "fk_person_id", nullable = false, updatable = false)
         val personId: Long,

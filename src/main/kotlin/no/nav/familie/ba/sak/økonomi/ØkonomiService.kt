@@ -18,7 +18,7 @@ class ØkonomiService(
         private val beregningService: BeregningService
 ) {
 
-    fun lagreTilkjentYtelseOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
+    fun oppdaterTilkjentYtelseOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
         val vedtak = vedtakService.hent(vedtakId)
 
         val andelerTilkjentYtelse = if (vedtak.behandling.resultat == BehandlingResultat.OPPHØRT) {
@@ -29,7 +29,7 @@ class ØkonomiService(
 
         val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, andelerTilkjentYtelse)
 
-        beregningService.lagreTilkjentYtelse(vedtak.behandling, utbetalingsoppdrag)
+        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(vedtak.behandling, utbetalingsoppdrag)
         iverksettOppdrag(vedtak.behandling.id, utbetalingsoppdrag)
     }
 
