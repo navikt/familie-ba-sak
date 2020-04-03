@@ -26,7 +26,7 @@ class FagsakServiceNegativeTest {
     lateinit var integrasjonClient: IntegrasjonClient
 
     @Test
-    fun `test å søke fagsak med ugyldig fnr`() {
+    fun `test å søke fagsak deltager med ugyldig fnr`() {
         val ugyldigFnr = UUID.randomUUID().toString()
 
         every {
@@ -34,7 +34,7 @@ class FagsakServiceNegativeTest {
         } throws (IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo"))
 
         assertThrows<IllegalStateException> {
-            fagsakService.hentFagsaker(ugyldigFnr)
+            fagsakService.hentFagsakDeltager(ugyldigFnr)
         }
     }
 }

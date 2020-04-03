@@ -84,7 +84,6 @@ class ØkonomiIntegrasjonTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandling = behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
 

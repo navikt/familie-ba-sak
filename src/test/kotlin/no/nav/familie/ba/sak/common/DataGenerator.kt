@@ -61,7 +61,7 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak) = Behandling(id = nesteBehandl
                                                                underkategori = BehandlingUnderkategori.ORDINÆR)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
-        id= nestePersonId(),
+        id = nestePersonId(),
         aktørId = randomAktørId(),
         personIdent = PersonIdent(randomFnr()),
         fødselsdato = fødselsdato,
@@ -84,10 +84,10 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
         )
 
 fun lagAndelTilkjentYtelse(fom: String,
-                    tom: String,
-                    ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD,
-                    beløp: Int = sats(ytelsetype),
-                    behandling: Behandling = lagBehandling()): AndelTilkjentYtelse {
+                           tom: String,
+                           ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD,
+                           beløp: Int = sats(ytelsetype),
+                           behandling: Behandling = lagBehandling()): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
             personId = tilfeldigPerson().id,
             behandlingId = behandling.id, beløp = beløp, stønadFom = dato(fom), stønadTom = dato(tom), type = ytelsetype)
@@ -151,7 +151,7 @@ fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: Li
     )
 }
 
-fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat) : BehandlingResultat {
+fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat): BehandlingResultat {
     val behandlingResultat = BehandlingResultat(
             behandling = behandling
     )
@@ -163,7 +163,8 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
     periodeResultat.vilkårResultater =
             setOf(VilkårResultat(periodeResultat = periodeResultat,
                                  vilkårType = Vilkår.BOSATT_I_RIKET,
-                                 resultat = resultat))
+                                 resultat = resultat,
+                                 begrunnelse = ""))
     behandlingResultat.periodeResultater = setOf(periodeResultat)
     return behandlingResultat
 }

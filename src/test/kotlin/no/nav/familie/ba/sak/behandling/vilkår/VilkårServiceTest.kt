@@ -51,6 +51,7 @@ class VilkårServiceTest {
 
         val behandlingResultat =
                 vilkårService.kontrollerVurderteVilkårOgLagResultat(vilkårsvurderingInnvilget(fnr),
+                                                                    "",
                                                                     behandling.id
                 )
         Assertions.assertEquals(behandlingResultat.periodeResultater.size,
