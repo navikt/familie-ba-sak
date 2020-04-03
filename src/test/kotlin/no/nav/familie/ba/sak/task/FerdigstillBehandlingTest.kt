@@ -59,7 +59,6 @@ class FerdigstillBehandlingTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        ////behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, resultat)
 

@@ -53,7 +53,6 @@ class BeregningNegativeIntegrationTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        ////behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag =
