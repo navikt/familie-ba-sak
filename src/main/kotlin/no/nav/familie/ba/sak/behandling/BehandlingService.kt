@@ -50,11 +50,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    fun settBegrunnelseForVilkårsvurdering(behandling: Behandling, begrunnelse: String): Behandling {
-        behandling.begrunnelse = begrunnelse
-        return lagre(behandling)
-    }
-
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
     }
@@ -75,10 +70,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
-    }
-
-    fun lagre(behandling: Behandling): Behandling {
-        return behandlingRepository.save(behandling)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {

@@ -48,10 +48,7 @@ data class Behandling(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "steg", nullable = false)
-        var steg: StegType = initSteg(null),
-
-        @Column(name = "begrunnelse", columnDefinition = "TEXT")
-        var begrunnelse: String = ""
+        var steg: StegType = initSteg(null)
 ) : BaseEntitet() {
 
     override fun toString(): String {

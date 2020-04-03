@@ -51,13 +51,18 @@ class FagsakService(
         val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
 
         val restBehandlinger: List<RestBehandling> = behandlinger.map { behandling ->
-            val personopplysningGrunnlag = behandling.id.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
+            val personopplysningGrunnlag =
+                    behandling.id.let { id -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(id) }
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
                 val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
                 val restVedtakBarn = lagRestVedtakBarn(andelerTilkjentYtelse, personopplysningGrunnlag)
                 vedtak.toRestVedtak(restVedtakBarn)
             }
+
+            val begrunnelse =
+                    behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)?.periodeResultater?.first()?.vilkårResultater?.first()?.begrunnelse
+                    ?: ""
 
             RestBehandling(
                     aktiv = behandling.aktiv,
@@ -72,7 +77,7 @@ class FagsakService(
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
                     underkategori = behandling.underkategori,
-                    begrunnelse = behandling.begrunnelse
+                    begrunnelse = begrunnelse
             )
         }
 

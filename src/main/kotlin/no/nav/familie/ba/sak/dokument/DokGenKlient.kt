@@ -48,7 +48,7 @@ class DokGenKlient(
                "\"navn\": \"No Name\",\n" +
                "\"tdato\": \"01.01.01\",\n" +
                "\"hjemmel\": \"\",\n" +
-               "\"fritekst\": \"${behandling.begrunnelse}\"}"
+               "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
     }
 
     private fun mapTilInnvilgetBrevFelter(behandling: Behandling,
@@ -64,7 +64,7 @@ class DokGenKlient(
                "\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
                "\"fodselsdato\": \"24.12.19\",\n" +
                "\"saksbehandler\": \"${ansvarligSaksbehandler}\", \n" +
-               "\"fritekst\": \"${behandling.begrunnelse}\"}"
+               "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
     }
 
     private fun mapTilAvslagBrevFelter(behandling: Behandling): String {
@@ -73,7 +73,7 @@ class DokGenKlient(
         return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
                "\"navn\": \"No Name\",\n" +
                "\"hjemmel\": \"\",\n" +
-               "\"fritekst\": \"${behandling.begrunnelse}\"}"
+               "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
     }
 
     private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
