@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.økonomi
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -12,12 +11,8 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.NyBeregning
 import no.nav.familie.ba.sak.beregning.PersonBeregning
-import no.nav.familie.ba.sak.beregning.mapNyBeregningTilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag

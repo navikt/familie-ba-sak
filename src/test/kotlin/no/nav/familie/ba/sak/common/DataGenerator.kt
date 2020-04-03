@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
@@ -90,7 +91,17 @@ fun lagAndelTilkjentYtelse(fom: String,
                     behandling: Behandling = lagBehandling()): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
             personId = tilfeldigPerson().id,
-            behandlingId = behandling.id, beløp = beløp, stønadFom = dato(fom), stønadTom = dato(tom), type = ytelsetype)
+            behandlingId = behandling.id,
+            tilkjentYtelse = lagInitiellTilkjentYtelse(behandling),
+            beløp = beløp,
+            stønadFom = dato(fom),
+            stønadTom = dato(tom),
+            type = ytelsetype
+    )
+}
+
+fun lagInitiellTilkjentYtelse(behandling: Behandling): TilkjentYtelse {
+    return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
 }
 
 fun lagTestPersonopplysningGrunnlag(behandlingId: Long,

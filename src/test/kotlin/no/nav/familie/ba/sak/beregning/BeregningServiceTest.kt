@@ -3,12 +3,13 @@ package no.nav.familie.ba.sak.beregning
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
@@ -36,6 +37,9 @@ class BeregningServiceTest {
 
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @Autowired
+    private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Autowired
     private lateinit var behandlingService: BehandlingService
@@ -128,12 +132,50 @@ class BeregningServiceTest {
         Assertions.assertEquals(opphørFom, tilkjentYtelse.opphørFom)
     }
 
+    @Test
+    fun `Skal Lagre AndelerTilkjentYtelse Med Kobling Til TilkjentYtelse`() {
+        val søkerFnr = randomFnr()
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
+        val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
+        val dato_2020_10_01 = LocalDate.of(2020, 10, 1)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.id
+        val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.id
+
+        val beregning = NyBeregning(listOf(
+                PersonBeregning(barn1Fnr, 1054, dato_2020_01_01, Ytelsetype.ORDINÆR_BARNETRYGD),
+                PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
+        ))
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, beregning)
+
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personId == barn1Id }
+        val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personId == barn2Id }
+
+        Assertions.assertNotNull(tilkjentYtelse)
+        Assertions.assertTrue(tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty())
+        Assertions.assertNotNull(andelBarn1)
+        Assertions.assertNotNull(andelBarn2)
+        tilkjentYtelse.andelerTilkjentYtelse.forEach {
+            Assertions.assertEquals(tilkjentYtelse, it.tilkjentYtelse)
+        }
+        Assertions.assertEquals(1054, andelBarn1!!.beløp)
+        Assertions.assertEquals(1354, andelBarn2!!.beløp)
+    }
+
     private fun opprettTilkjentYtelse(behandling: Behandling) {
         tilkjentYtelseRepository.save(TilkjentYtelse(
                 behandling = behandling,
                 opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now(),
-                andelerTilkjentYtelse = emptySet()
+                endretDato = LocalDate.now()
         ))
     }
 }

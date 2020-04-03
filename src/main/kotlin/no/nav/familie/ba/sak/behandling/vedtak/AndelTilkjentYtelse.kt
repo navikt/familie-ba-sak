@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
+import java.util.*
 import javax.persistence.*
 
 @Entity(name = "AndelTilkjentYtelse")
@@ -16,8 +18,9 @@ data class AndelTilkjentYtelse(
         @Column(name = "fk_behandling_id", nullable = false, updatable = false)
         val behandlingId: Long,
 
-        @ManyToOne @JoinColumn(name = "tilkjent_ytelse_id")
-        var tilkjentYtelse: TilkjentYtelse? = null,
+        @ManyToOne
+        @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
+        var tilkjentYtelse: TilkjentYtelse,
 
         @Column(name = "fk_person_id", nullable = false, updatable = false)
         val personId: Long,
@@ -34,7 +37,32 @@ data class AndelTilkjentYtelse(
         @Enumerated(EnumType.STRING)
         @Column(name = "type", nullable = false)
         val type: Ytelsetype
-) : BaseEntitet()
+) : BaseEntitet() {
+
+        override fun equals(other: Any?): Boolean {
+                if (other == null || javaClass != other.javaClass) {
+                        return false
+                } else if (this === other) {
+                        return true
+                }
+
+                val annen = other as AndelTilkjentYtelse
+                return Objects.equals(behandlingId, annen.behandlingId)
+                        && Objects.equals(type, annen.type)
+                        && Objects.equals(beløp, annen.beløp)
+                        && Objects.equals(stønadFom, annen.stønadFom)
+                        && Objects.equals(stønadTom, annen.stønadTom)
+                        && Objects.equals(personId, annen.personId)
+        }
+
+        override fun hashCode(): Int {
+                return Objects.hash(id, behandlingId, type, beløp, stønadFom, stønadTom, personId)
+        }
+
+        override fun toString(): String {
+                return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, person = $personId)"
+        }
+}
 
 
 enum class Ytelsetype(val klassifisering: String) {

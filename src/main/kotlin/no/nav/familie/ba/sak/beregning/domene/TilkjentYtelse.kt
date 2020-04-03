@@ -37,6 +37,8 @@ data class TilkjentYtelse(
         @Column(name = "utbetalingsoppdrag", columnDefinition = "TEXT")
         var utbetalingsoppdrag: String? = null,
 
-        @OneToMany(mappedBy = "tilkjentYtelse", cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
-        val andelerTilkjentYtelse: Set<AndelTilkjentYtelse>
+        @OneToMany(fetch = FetchType.EAGER,
+                mappedBy = "tilkjentYtelse",
+                cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
+        val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf()
 )

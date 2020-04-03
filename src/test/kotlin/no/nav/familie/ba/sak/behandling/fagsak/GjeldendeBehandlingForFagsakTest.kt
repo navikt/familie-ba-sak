@@ -224,8 +224,7 @@ class GjeldendeBehandlingForFagsakTest {
         tilkjentYtelseRepository.save(TilkjentYtelse(
                 behandling = behandling,
                 opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now(),
-                andelerTilkjentYtelse = emptySet()
+                endretDato = LocalDate.now()
         ))
     }
 }

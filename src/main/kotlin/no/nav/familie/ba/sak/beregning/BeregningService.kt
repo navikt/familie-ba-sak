@@ -35,15 +35,21 @@ class BeregningService(
                                        personopplysningGrunnlag: PersonopplysningGrunnlag,
                                        nyBeregning: NyBeregning): Ressurs<RestFagsak> {
 
-        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
         andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(behandling.id)
+        tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
 
         val tilkjentYtelse = TilkjentYtelse(
                 behandling = behandling,
                 opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now(),
-                andelerTilkjentYtelse = andelerTilkjentYtelse.toMutableSet()
+                endretDato = LocalDate.now()
         )
+        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(
+                behandling.id,
+                nyBeregning,
+                tilkjentYtelse,
+                personopplysningGrunnlag
+        )
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
         return fagsakService.hentRestFagsak(behandling.fagsak.id)
@@ -78,7 +84,10 @@ class BeregningService(
     }
 }
 
-fun mapNyBeregningTilAndelerTilkjentYtelse(behandlingId: Long, nyBeregning: NyBeregning, personopplysningGrunnlag: PersonopplysningGrunnlag)
+private fun mapNyBeregningTilAndelerTilkjentYtelse(behandlingId: Long,
+                                           nyBeregning: NyBeregning,
+                                           tilkjentYtelse: TilkjentYtelse,
+                                           personopplysningGrunnlag: PersonopplysningGrunnlag)
         : List<AndelTilkjentYtelse> {
 
     val identBarnMap = personopplysningGrunnlag.barna
@@ -103,6 +112,7 @@ fun mapNyBeregningTilAndelerTilkjentYtelse(behandlingId: Long, nyBeregning: NyBe
 
                 AndelTilkjentYtelse(personId = person.id,
                         behandlingId = behandlingId,
+                        tilkjentYtelse = tilkjentYtelse,
                         beløp = it.beløp,
                         stønadFom = sikkerStønadFom,
                         stønadTom = sikkerStønadTom,
