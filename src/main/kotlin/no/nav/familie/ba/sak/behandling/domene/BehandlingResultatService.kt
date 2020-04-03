@@ -34,14 +34,6 @@ class BehandlingResultatService(
         return behandlingResultatRepository.save(behandlingResultat)
     }
 
-    fun settBegrunnelseForVilkårsvurderingerPåAktiv(behandlingId: Long, begrunnelse: String): BehandlingResultat {
-        val aktivBehandlingResultat = hentAktivForBehandling(behandlingId) ?: throw IllegalStateException("Ingen aktiv BehandlingResultat når begrunnelse skal settes på behandling med ID: $behandlingId}\"")
-        aktivBehandlingResultat.periodeResultater.forEach { periodeResultat ->
-            periodeResultat.vilkårResultater.forEach { vilkårResultat -> vilkårResultat.begrunnelse = begrunnelse }
-        }
-        return behandlingResultatRepository.save(aktivBehandlingResultat)
-    }
-
     companion object {
         private val LOG = LoggerFactory.getLogger(this::class.java)
     }

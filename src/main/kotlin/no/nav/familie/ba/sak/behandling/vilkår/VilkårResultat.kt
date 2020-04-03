@@ -23,6 +23,6 @@ class VilkårResultat(
         @Column(name = "resultat")
         val resultat: Resultat,
 
-        @Column(name = "begrunnelse", columnDefinition = "TEXT")
-        var begrunnelse: String = ""
+        @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
+        var begrunnelse: String
 ) : BaseEntitet()

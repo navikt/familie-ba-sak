@@ -88,7 +88,6 @@ class ØkonomiIntegrasjonTest {
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
-        behandlingResultatService.settBegrunnelseForVilkårsvurderingerPåAktiv(behandlingId = behandling.id, begrunnelse = "")
 
         Assertions.assertNotNull(behandling.fagsak.id)
 

@@ -19,7 +19,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -51,10 +50,6 @@ class BehandlingIntegrationTest {
 
     @Autowired
     lateinit var vedtakService: VedtakService
-
-    @Autowired
-    lateinit var behandlingResultatService: BehandlingResultatService
-
     @Autowired
     lateinit var persongrunnlagService: PersongrunnlagService
 
@@ -176,9 +171,6 @@ class BehandlingIntegrationTest {
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
-        behandlingResultatService.lagreNyOgDeaktiverGammel(lagBehandlingResultat(søkerFnr, behandling, Resultat.JA))
-        behandlingResultatService.settBegrunnelseForVilkårsvurderingerPåAktiv(behandlingId = behandling.id, begrunnelse = "")
-
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -246,9 +238,6 @@ class BehandlingIntegrationTest {
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
-        behandlingResultatService.lagreNyOgDeaktiverGammel(lagBehandlingResultat(søkerFnr, behandling, Resultat.JA))
-        behandlingResultatService.settBegrunnelseForVilkårsvurderingerPåAktiv(behandlingId = behandling.id, begrunnelse = "")
-
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
@@ -302,8 +291,6 @@ class BehandlingIntegrationTest {
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
-        behandlingResultatService.lagreNyOgDeaktiverGammel(lagBehandlingResultat(søkerFnr, behandling, Resultat.JA))
-        behandlingResultatService.settBegrunnelseForVilkårsvurderingerPåAktiv(behandlingId = behandling.id, begrunnelse = "")
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr,barn3Fnr))

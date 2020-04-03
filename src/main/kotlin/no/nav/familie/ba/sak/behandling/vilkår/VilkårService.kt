@@ -42,7 +42,8 @@ class VilkårService(
             periodeResultat.vilkårResultater = evaluering.children.map { child ->
                 VilkårResultat(periodeResultat = periodeResultat,
                                resultat = child.resultat,
-                               vilkårType = Vilkår.valueOf(child.identifikator))
+                               vilkårType = Vilkår.valueOf(child.identifikator),
+                               begrunnelse = "")
 
             }.toSet()
             periodeResultat
@@ -52,6 +53,7 @@ class VilkårService(
     }
 
     fun kontrollerVurderteVilkårOgLagResultat(periodeResultater: List<RestPeriodeResultat>,
+                                              begrunnelse: String,
                                               behandlingId: Long): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(
                 behandling = behandlingService.hent(behandlingId),
@@ -67,7 +69,8 @@ class VilkårService(
                 VilkårResultat(
                         periodeResultat = periodeResultat,
                         vilkårType = restVilkårResultat.vilkårType,
-                        resultat = restVilkårResultat.resultat //TODO: Sett begrunnelse her når oppdatert i api (restperioderesultat)
+                        resultat = restVilkårResultat.resultat,
+                        begrunnelse = begrunnelse
                 )
             }?.toSet() ?: setOf()
 

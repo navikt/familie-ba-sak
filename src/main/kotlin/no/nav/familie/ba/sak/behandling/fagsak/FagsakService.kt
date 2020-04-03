@@ -59,7 +59,7 @@ class FagsakService(
 
             val begrunnelse =
                     behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)?.periodeResultater?.first()?.vilkårResultater?.first()?.begrunnelse
-                    ?: error("Kunne ikke finne begrunnelse på behandling med ID: ${behandling.id}")
+                    ?: ""
 
             RestBehandling(
                     aktiv = behandling.aktiv,
