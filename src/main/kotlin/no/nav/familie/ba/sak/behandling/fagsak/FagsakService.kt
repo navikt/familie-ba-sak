@@ -49,7 +49,7 @@ class FagsakService(
 
         val restBehandlinger: List<RestBehandling> = behandlinger.map { behandling ->
             val personopplysningGrunnlag =
-                    behandling.id.let { it1 -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it1) }
+                    behandling.id.let { id -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(id) }
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
                 val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)

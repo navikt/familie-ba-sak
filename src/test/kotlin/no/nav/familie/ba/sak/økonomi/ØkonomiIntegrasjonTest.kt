@@ -88,7 +88,6 @@ class ØkonomiIntegrasjonTest {
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
-
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag =

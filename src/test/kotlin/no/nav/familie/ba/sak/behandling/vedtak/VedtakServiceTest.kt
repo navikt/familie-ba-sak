@@ -92,6 +92,7 @@ class VedtakServiceTest {
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
+
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
 
         val behandlingResultatType =

@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.lang.IllegalStateException
 
 @Service
 class BehandlingResultatService(
@@ -25,6 +24,7 @@ class BehandlingResultatService(
 
     fun lagreNyOgDeaktiverGammel(behandlingResultat: BehandlingResultat): BehandlingResultat {
         val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
+
         if (aktivBehandlingResultat != null) {
             behandlingResultatRepository.saveAndFlush(aktivBehandlingResultat.also { it.aktiv = false })
         }
