@@ -9,12 +9,15 @@ import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.time.Period
 
 @Service
 class FagsakService(
@@ -109,7 +112,7 @@ class FagsakService(
         return fagsakRepository.finnLøpendeFagsaker()
     }
 
-    fun hentFagsaker(personIdent: String): RestFagsakSøk {
+    fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
         val personer = personRepository.findByPersonIdent(PersonIdent(personIdent))
         val personInfo = runCatching {
             integrasjonClient.hentPersoninfoFor(personIdent)
@@ -121,20 +124,78 @@ class FagsakService(
 
         )
 
-        val assosierteFagsaker = mutableMapOf<Long, RestFunnetFagsak>()
+        //We find all cases that either have the given person as applicant, or have it as a child
+        val assosierteFagsakDeltagerMap = mutableMapOf<Long, RestFagsakDeltager>()
 
-        personer.map {
-            val behandling = behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId)
-            assosierteFagsaker[behandling.fagsak.id] = RestFunnetFagsak(
-                    behandling.fagsak.id,
-                    it.type
-            )
+        personer.forEach {
+            if (it.personopplysningGrunnlag.aktiv) {
+                val behandling = behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId)
+                if (behandling.aktiv && !assosierteFagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
+                    //get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
+                    val søkerInfo = if (behandling.fagsak.personIdent.ident == personIdent) personInfo else
+                        runCatching {
+                            integrasjonClient.hentPersoninfoFor(behandling.fagsak.personIdent.ident)
+                        }.fold(
+                                onSuccess = { it },
+                                onFailure = {
+                                    throw IllegalStateException("Feil ved henting av person fra TPS/PDL", it)
+                                }
+
+                        )
+
+                    assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
+                            navn = søkerInfo.navn,
+                            ident = behandling.fagsak.personIdent.ident,
+                            rolle = FagsakDeltagerRolle.FORELDER,
+                            kjønn = søkerInfo.kjønn,
+                            fagsakId = behandling.fagsak.id
+                    )
+                }
+            }
         }
 
-        return RestFagsakSøk(personIdent,
-                             personInfo.navn ?: "",
-                             personInfo.kjønn ?: Kjønn.UKJENT,
-                             assosierteFagsaker.values.toList())
+        //The given person and its parents may be included in the result, no matter whether they have a case.
+        val assosierteFagsakDeltager= assosierteFagsakDeltagerMap.values.toMutableList()
+        val erBarn= Period.between(personInfo.fødselsdato, LocalDate.now()).getYears()<18
+
+        if(assosierteFagsakDeltager.find{it.ident== personIdent} == null){
+            assosierteFagsakDeltager.add(RestFagsakDeltager(
+                    navn = personInfo.navn,
+                    ident = personIdent,
+                    //we set the role to unknown when the person is not a child because the person may not have a child
+                    rolle = if(erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
+                    kjønn = personInfo.kjønn
+            ))
+        }
+
+        if(erBarn){
+            personInfo.familierelasjoner.filter { it.relasjonsrolle== FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle== FAMILIERELASJONSROLLE.MOR
+                    || it.relasjonsrolle== FAMILIERELASJONSROLLE.MEDMOR }.forEach{
+                if(assosierteFagsakDeltager.find({d-> d.ident == it.personIdent.id})== null){
+                    val forelderInfo = runCatching {
+                            integrasjonClient.hentPersoninfoFor(it.personIdent.id)
+                        }.fold(
+                                onSuccess = { it },
+                                onFailure = {
+                                    throw IllegalStateException("Feil ved henting av person fra TPS/PDL", it)
+                                }
+
+                        )
+
+                    val fagsak= fagsakRepository.finnFagsakForPersonIdent(PersonIdent(it.personIdent.id))
+
+                    assosierteFagsakDeltager.add(RestFagsakDeltager(
+                            navn = forelderInfo.navn,
+                            ident = it.personIdent.id,
+                            rolle = FagsakDeltagerRolle.FORELDER,
+                            kjønn = forelderInfo.kjønn,
+                            fagsakId = fagsak?.id
+                    ))
+                }
+            }
+        }
+
+        return assosierteFagsakDeltager
     }
 
     companion object {
