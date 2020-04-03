@@ -104,12 +104,14 @@ class VedtakService(private val behandlingService: BehandlingService,
 
 
     @Transactional
-    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak):Ressurs<RestFagsak> {
+    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Ressurs<RestFagsak> {
 
         val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(vedtak.behandling.id)
         vedtak.stønadBrevMarkdown = Result.runCatching {
             dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
-                    behandlingResultatType = behandlingResultatType,ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
+                    behandlingResultatType = behandlingResultatType,
+                    ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler
+            )
         }
                 .fold(
                         onSuccess = { it },

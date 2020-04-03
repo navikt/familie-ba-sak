@@ -221,10 +221,6 @@ class GjeldendeBehandlingForFagsakTest {
     }
 
     private fun opprettTilkjentYtelseForBehandling(behandling: Behandling) {
-        tilkjentYtelseRepository.save(TilkjentYtelse(
-                behandling = behandling,
-                opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now()
-        ))
+        tilkjentYtelseRepository.save(lagInitiellTilkjentYtelse(behandling))
     }
 }

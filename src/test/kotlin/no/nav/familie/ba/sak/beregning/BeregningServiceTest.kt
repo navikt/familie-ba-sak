@@ -7,10 +7,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -172,10 +169,6 @@ class BeregningServiceTest {
     }
 
     private fun opprettTilkjentYtelse(behandling: Behandling) {
-        tilkjentYtelseRepository.save(TilkjentYtelse(
-                behandling = behandling,
-                opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now()
-        ))
+        tilkjentYtelseRepository.save(lagInitiellTilkjentYtelse(behandling))
     }
 }
