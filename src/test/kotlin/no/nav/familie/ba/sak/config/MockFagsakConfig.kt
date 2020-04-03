@@ -28,46 +28,6 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 import javax.annotation.PostConstruct
 
-@TestConfiguration
-class TestSøkConfig{
-    @Profile("test-søk")
-    @Bean
-    @Primary
-    fun mockPDL() : IntegrasjonClient{
-        val mockIntegrasjonClient= mockk<IntegrasjonClient>()
-
-        val farId= "12345678910"
-        val morId= "21345678910"
-        val barnId= "31245678910"
-
-        every {
-            mockIntegrasjonClient.hentPersoninfoFor(farId)
-        } returns Personinfo(fødselsdato = LocalDate.of(1969, 5, 1), kjønn = Kjønn.MANN, navn = "Far Mocksen")
-
-        every {
-            mockIntegrasjonClient.hentPersoninfoFor(morId)
-        } returns Personinfo(fødselsdato = LocalDate.of(1979, 5, 1), kjønn = Kjønn.KVINNE, navn = "Mor Mocksen")
-
-        every {
-            mockIntegrasjonClient.hentPersoninfoFor(barnId)
-        } returns Personinfo(fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
-                familierelasjoner = setOf(
-                        Familierelasjoner(Personident(farId), FAMILIERELASJONSROLLE.FAR, "Far Mocksen", LocalDate.of(1969, 5, 1)),
-                        Familierelasjoner(Personident(morId), FAMILIERELASJONSROLLE.MOR, "Mor Mocksen", LocalDate.of(1979, 5, 1))
-                ))
-
-        every {
-            mockIntegrasjonClient.hentAktørId(farId)
-        } returns AktørId(farId)
-
-        every {
-            mockIntegrasjonClient.hentAktørId(barnId)
-        } returns AktørId(barnId)
-
-        return mockIntegrasjonClient
-    }
-}
-
 @Component
 @Profile("test-søk")
 class MockFagsakConfig (
