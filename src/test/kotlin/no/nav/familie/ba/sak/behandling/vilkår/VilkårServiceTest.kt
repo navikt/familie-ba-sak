@@ -78,14 +78,12 @@ class VilkårServiceTest {
                 Vilkår.BOR_MED_SØKER,
                 Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD,
-                Vilkår.STØNADSPERIODE
+                Vilkår.LOVLIG_OPPHOLD
         ), Vilkår.hentVilkårForPart(PersonType.BARN))
 
         Assertions.assertEquals(setOf(
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD,
-                Vilkår.STØNADSPERIODE
+                Vilkår.LOVLIG_OPPHOLD
         ), Vilkår.hentVilkårForPart(PersonType.SØKER))
     }
 }
@@ -112,6 +110,6 @@ fun vilkårsvurderingDelvisInnvilget(personIdent: String): List<RestPeriodeResul
         periodeTom = LocalDate.now(),
         vilkårResultater = listOf(RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
                                                      resultat = Resultat.JA),
-                                  RestVilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
+                                  RestVilkårResultat(vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                                      resultat = Resultat.NEI))
 ))

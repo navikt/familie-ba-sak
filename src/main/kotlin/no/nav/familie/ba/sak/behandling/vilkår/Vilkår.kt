@@ -50,14 +50,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     beskrivelse = "§4-2 - Lovlig opphold",
                     identifikator = "BOSATT_I_RIKET",
                     implementasjon = { lovligOpphold(this) }),
-            gyldigVilkårsperiode = GyldigVilkårsperiode()),
-    STØNADSPERIODE(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN, PersonType.SØKER),
-            sakstyperDetteGjelderFor = listOf<SakType>(SakType.VILKÅRGJELDERFOR),
-            spesifikasjon = Spesifikasjon(
-                    beskrivelse = "§22 - Barnetrygd gis fra og med kalendermåneden etter at retten til barnetrygd inntrer",
-                    identifikator = "STØNADSPERIODE",
-                    implementasjon = { Evaluering.ja("Dette er grunnen") }),
             gyldigVilkårsperiode = GyldigVilkårsperiode());
 
     companion object {
