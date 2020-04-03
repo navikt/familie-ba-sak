@@ -67,7 +67,7 @@ class VilkårService(
                 VilkårResultat(
                         periodeResultat = periodeResultat,
                         vilkårType = restVilkårResultat.vilkårType,
-                        resultat = restVilkårResultat.resultat
+                        resultat = restVilkårResultat.resultat //TODO: Sett begrunnelse her når oppdatert i api (restperioderesultat)
                 )
             }?.toSet() ?: setOf()
 
