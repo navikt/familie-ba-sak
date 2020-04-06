@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.beregning.lagTestUtbetalingsoppdragForFGB
 import no.nav.familie.ba.sak.beregning.lagTestUtbetalingsoppdragForOpphør
 import no.nav.familie.ba.sak.beregning.lagTestUtbetalingsoppdragForRevurdering
 import no.nav.familie.ba.sak.common.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -22,6 +23,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
 
+@Disabled
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])

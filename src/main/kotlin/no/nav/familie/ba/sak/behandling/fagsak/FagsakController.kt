@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandler
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -19,7 +20,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
-import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakSøk
+import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.common.RessursResponse.illegalState
 
 @RestController
@@ -73,13 +74,13 @@ class FagsakController(
         return ResponseEntity.ok(Ressurs.success("Laget task for avstemming"))
     }
 
-    @PostMapping(path = ["fagsaker/søk"])
-    fun søkFagsak(@RequestParam personIdent: String): ResponseEntity<Ressurs<RestFagsakSøk>> {
+    @PostMapping(path = ["fagsaker/sok"])
+    fun søkFagsak(@RequestBody søkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         val saksbehandlerId = hentSaksbehandler()
 
         logger.info("{} søker fagsak", saksbehandlerId)
 
-        return Result.runCatching { fagsakService.hentFagsaker(personIdent) }
+        return Result.runCatching { fagsakService.hentFagsakDeltager(søkParam.personIdent) }
                 .fold(
                         onSuccess = { ResponseEntity.ok().body(Ressurs.success(it)) },
                         onFailure = {
