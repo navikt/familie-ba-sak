@@ -48,7 +48,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             sakstyperDetteGjelderFor = listOf<SakType>(SakType.VILKÅRGJELDERFOR),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "§4-2 - Lovlig opphold",
-                    identifikator = "BOSATT_I_RIKET",
+                    identifikator = "LOVLIG_OPPHOLD",
                     implementasjon = { lovligOpphold(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode());
 
