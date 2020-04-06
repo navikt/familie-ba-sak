@@ -43,9 +43,11 @@ class VilkårVurderingTest {
     fun `Hent relevante vilkår for persontype BARN`() {
         val relevanteVilkår = Vilkår.hentVilkårForPart(PersonType.BARN)
         val relevanteVilkårForDato = Vilkår.hentVilkårForPart(PersonType.BARN, LocalDate.now())
-        val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                  Vilkår.STØNADSPERIODE,
-                                  Vilkår.BOSATT_I_RIKET)
+        val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR,
+                                  Vilkår.BOR_MED_SØKER,
+                                  Vilkår.GIFT_PARTNERSKAP,
+                                  Vilkår.BOSATT_I_RIKET,
+                                  Vilkår.LOVLIG_OPPHOLD)
         Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         Assertions.assertEquals(vilkårForBarn, relevanteVilkårForDato)
     }
@@ -53,8 +55,8 @@ class VilkårVurderingTest {
     @Test
     fun `Hent relevante vilkår for persontype SØKER`() {
         val relevanteVilkår = Vilkår.hentVilkårForPart(PersonType.SØKER)
-        val vilkårForSøker = setOf(Vilkår.STØNADSPERIODE,
-                                   Vilkår.BOSATT_I_RIKET)
+        val vilkårForSøker = setOf(Vilkår.BOSATT_I_RIKET,
+                                   Vilkår.LOVLIG_OPPHOLD)
         Assertions.assertEquals(vilkårForSøker, relevanteVilkår)
     }
 
@@ -62,9 +64,11 @@ class VilkårVurderingTest {
     fun `Hent relevante vilkår for saktype`() { //Banal test, legg til saktyper
         val relevanteVilkårSaktypeFinnes = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERFOR)
         val relevanteVilkårSaktypeFinnesIkke = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERIKKEFOR)
-        val vilkårForSaktypeFinnes = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                           Vilkår.STØNADSPERIODE,
-                                           Vilkår.BOSATT_I_RIKET)
+        val vilkårForSaktypeFinnes = setOf(Vilkår.UNDER_18_ÅR,
+                                           Vilkår.BOR_MED_SØKER,
+                                           Vilkår.GIFT_PARTNERSKAP,
+                                           Vilkår.BOSATT_I_RIKET,
+                                           Vilkår.LOVLIG_OPPHOLD)
         val vilkårForSaktypFinnesIkke: Set<Vilkår> = emptySet()
         Assertions.assertEquals(vilkårForSaktypeFinnes, relevanteVilkårSaktypeFinnes)
         Assertions.assertEquals(vilkårForSaktypFinnesIkke, relevanteVilkårSaktypeFinnesIkke)
@@ -73,9 +77,11 @@ class VilkårVurderingTest {
     @Test
     fun `Hent relevante vilkår for persontype og saktype`() {
         val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN, SakType.VILKÅRGJELDERFOR)
-        val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
-                                  Vilkår.STØNADSPERIODE,
-                                  Vilkår.BOSATT_I_RIKET)
+        val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR,
+                                  Vilkår.BOR_MED_SØKER,
+                                  Vilkår.GIFT_PARTNERSKAP,
+                                  Vilkår.BOSATT_I_RIKET,
+                                  Vilkår.LOVLIG_OPPHOLD)
         Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
     }
 

@@ -11,29 +11,45 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val spesifikasjon: Spesifikasjon<Fakta>,
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
-    UNDER_18_ÅR_OG_BOR_MED_SØKER(
+    UNDER_18_ÅR(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
             sakstyperDetteGjelderFor = listOf<SakType>(SakType.VILKÅRGJELDERFOR),
             spesifikasjon = Spesifikasjon(
-                    beskrivelse = "§2 - Er under 18 år og bor med søker",
-                    identifikator = "UNDER_18_ÅR_OG_BOR_MED_SØKER",
-                    implementasjon = { barnUnder18ÅrOgBorMedSøker(this) }),
+                    beskrivelse = "§2 - Er under 18 år",
+                    identifikator = "UNDER_18_ÅR",
+                    implementasjon = { barnUnder18År(this) }),
+            gyldigVilkårsperiode = GyldigVilkårsperiode()),
+    BOR_MED_SØKER(
+            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+            sakstyperDetteGjelderFor = listOf<SakType>(SakType.VILKÅRGJELDERFOR),
+            spesifikasjon = Spesifikasjon(
+                    beskrivelse = "§2-2 - Bor med søker",
+                    identifikator = "BOR_MED_SØKER",
+                    implementasjon = { barnBorMedSøker(this) }),
+            gyldigVilkårsperiode = GyldigVilkårsperiode()),
+    GIFT_PARTNERSKAP(
+            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+            sakstyperDetteGjelderFor = listOf<SakType>(SakType.VILKÅRGJELDERFOR),
+            spesifikasjon = Spesifikasjon(
+                    beskrivelse = "§2-4 - Gift/partnerskap",
+                    identifikator = "GIFT_PARTNERSKAP",
+                    implementasjon = { giftEllerPartneskap(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     BOSATT_I_RIKET(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
             sakstyperDetteGjelderFor = listOf<SakType>(SakType.VILKÅRGJELDERFOR),
             spesifikasjon = Spesifikasjon(
-                    beskrivelse = "§4 - Bosatt i riket",
+                    beskrivelse = "§4-1 - Bosatt i riket",
                     identifikator = "BOSATT_I_RIKET",
                     implementasjon = { bosattINorge(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
-    STØNADSPERIODE(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN, PersonType.SØKER),
+    LOVLIG_OPPHOLD(
+            parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
             sakstyperDetteGjelderFor = listOf<SakType>(SakType.VILKÅRGJELDERFOR),
             spesifikasjon = Spesifikasjon(
-                    beskrivelse = "§22 - Barnetrygd gis fra og med kalendermåneden etter at retten til barnetrygd inntrer",
-                    identifikator = "STØNADSPERIODE",
-                    implementasjon = { Evaluering.ja("Dette er grunnen") }),
+                    beskrivelse = "§4-2 - Lovlig opphold",
+                    identifikator = "LOVLIG_OPPHOLD",
+                    implementasjon = { lovligOpphold(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode());
 
     companion object {

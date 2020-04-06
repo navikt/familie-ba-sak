@@ -75,14 +75,16 @@ class VilkårServiceTest {
     @Test
     fun `Valider gyldige vilkårspermutasjoner for barn og søker`() {
         Assertions.assertEquals(setOf(
-                Vilkår.UNDER_18_ÅR_OG_BOR_MED_SØKER,
+                Vilkår.UNDER_18_ÅR,
+                Vilkår.BOR_MED_SØKER,
+                Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.STØNADSPERIODE
+                Vilkår.LOVLIG_OPPHOLD
         ), Vilkår.hentVilkårForPart(PersonType.BARN))
 
         Assertions.assertEquals(setOf(
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.STØNADSPERIODE
+                Vilkår.LOVLIG_OPPHOLD
         ), Vilkår.hentVilkårForPart(PersonType.SØKER))
     }
 }
@@ -109,6 +111,6 @@ fun vilkårsvurderingDelvisInnvilget(personIdent: String): List<RestPeriodeResul
         periodeTom = LocalDate.now(),
         vilkårResultater = listOf(RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
                                                      resultat = Resultat.JA),
-                                  RestVilkårResultat(vilkårType = Vilkår.STØNADSPERIODE,
+                                  RestVilkårResultat(vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                                      resultat = Resultat.NEI))
 ))
