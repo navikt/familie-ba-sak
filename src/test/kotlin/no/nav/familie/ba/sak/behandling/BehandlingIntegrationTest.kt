@@ -95,7 +95,6 @@ class BehandlingIntegrationTest {
     @Test
     fun `Kjør flyway migreringer og sjekk at behandlingslagerservice klarer å lese å skrive til postgresql`() {
         val fnr = randomFnr()
-        val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         behandlingService.opprettBehandling(nyOrdinærBehandling(
@@ -199,13 +198,12 @@ class BehandlingIntegrationTest {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
-
-        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak!!, andelerTilkjentYtelse)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
 
         val task = opprettOpphørVedtakTask(
                 behandling,
-                vedtak, "saksbehandler",
+                vedtak!!,
+                "saksbehandler",
                 BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
                 LocalDate.now()
         )
@@ -248,7 +246,7 @@ class BehandlingIntegrationTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 ansvarligSaksbehandler = "saksbehandler1")
@@ -258,12 +256,9 @@ class BehandlingIntegrationTest {
                 PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
         )
 
-
         val nyBeregning = NyBeregning(personBeregninger)
 
-        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
-
-        val restVedtakBarnMap = vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, andelerTilkjentYtelse)
+        val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
@@ -303,7 +298,7 @@ class BehandlingIntegrationTest {
 
         Assertions.assertNotNull(personopplysningGrunnlag)
 
-        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 ansvarligSaksbehandler = "saksbehandler1")
@@ -313,20 +308,14 @@ class BehandlingIntegrationTest {
                 PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
         ))
 
-        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, førsteBeregning, personopplysningGrunnlag)
-
-        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak, andelerTilkjentYtelse)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, førsteBeregning)
 
         val andreBeregning = NyBeregning(listOf(
                 PersonBeregning(barn1Fnr, 970, dato_2021_01_01, Ytelsetype.MANUELL_VURDERING),
                 PersonBeregning(barn3Fnr, 314, dato_2021_10_01, Ytelsetype.EØS)
         ))
 
-        val andreAndelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, andreBeregning, personopplysningGrunnlag)
-
-        val oppdatertVedtak = vedtakRepository.findById(vedtak.id).get()
-
-        val restVedtakBarnMap = vedtakService.oppdaterAktivtVedtakMedBeregning(oppdatertVedtak, andreAndelerTilkjentYtelse)
+        val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, andreBeregning)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }

@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.NyBeregning
-import no.nav.familie.ba.sak.beregning.mapNyBeregningTilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -41,6 +41,9 @@ class DokumentServiceTest(
 
         @Autowired
         private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val beregningService: BeregningService,
 
         @Autowired
         private val behandlingResultatService: BehandlingResultatService,
@@ -118,10 +121,8 @@ class DokumentServiceTest(
                                        ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
         )
 
-        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(behandling.id, nyBeregning, personopplysningGrunnlag)
-
-        vedtakService.oppdaterAktivtVedtakMedBeregning(vedtak!!, andelerTilkjentYtelse)
-
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
         val htmlvedtaksbrevRess = dokumentService.hentHtmlForVedtak(vedtak.id)
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
