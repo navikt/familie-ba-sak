@@ -104,24 +104,20 @@ class VedtakService(private val behandlingService: BehandlingService,
 
 
     @Transactional
-    fun oppdaterAktivtVedtakMedBeregning(vedtak: Vedtak,
-                                         andelerTilkjentYtelse : List<AndelTilkjentYtelse>)
-            : Ressurs<RestFagsak> {
-
-        andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
-        andelTilkjentYtelseRepository.saveAll(andelerTilkjentYtelse)
+    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Ressurs<RestFagsak> {
 
         val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(vedtak.behandling.id)
         vedtak.stønadBrevMarkdown = Result.runCatching {
             dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
-                                                behandlingResultatType = behandlingResultatType,
-                                                ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
+                    behandlingResultatType = behandlingResultatType,
+                    ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler
+            )
         }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
                             return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
-                                                   e)
+                                    e)
                         }
                 )
 

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.domene.BeregningResultat
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragId
@@ -106,15 +106,15 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsMåned: LocalDate): List<Behandling> {
         val ferdigstilteBehandlinger = behandlingRepository.findByFagsakAndFerdigstiltOrIverksatt(fagsakId)
 
-        val beregningResultater = ferdigstilteBehandlinger
+        val tilkjenteYtelser = ferdigstilteBehandlinger
                 .sortedBy { it.opprettetTidspunkt }
-                .map { beregningService.hentBeregningsresultatForBehandling(it.id) }
+                .map { beregningService.hentTilkjentYtelseForBehandling(it.id) }
 
-        beregningResultater.forEach {
-            if (it.stønadTom >= utbetalingsMåned && it.stønadFom != null) {
+        tilkjenteYtelser.forEach {
+            if (it.stønadTom!! >= utbetalingsMåned && it.stønadFom != null) {
                 behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForUtbetaling = true })
             }
-            if (it.opphørFom != null && it.opphørFom <= utbetalingsMåned) {
+            if (it.opphørFom != null && it.opphørFom!! <= utbetalingsMåned) {
                 val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(it)
                 behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForUtbetaling = false })
             }
@@ -123,10 +123,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return hentGjeldendeForFagsak(fagsakId)
     }
 
-    private fun hentBehandlingSomSkalOpphøres(beregningResultat: BeregningResultat): Behandling {
-        val utbetalingsOppdrag = objectMapper.readValue(beregningResultat.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
+    private fun hentBehandlingSomSkalOpphøres(tilkjentYtelse: TilkjentYtelse): Behandling {
+        val utbetalingsOppdrag = objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
         val opphørsperiode = utbetalingsOppdrag.utbetalingsperiode.find { it.opphør != null }
-                             ?: throw IllegalArgumentException("Finner ikke opphør på beregningsresultat med id $beregningResultat.id")
+                             ?: throw IllegalArgumentException("Finner ikke opphør på tilkjent ytelse med id $tilkjentYtelse.id")
         return behandlingRepository.finnBehandling(opphørsperiode.behandlingId)
     }
 
