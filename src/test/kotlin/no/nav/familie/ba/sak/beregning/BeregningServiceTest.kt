@@ -54,8 +54,8 @@ class BeregningServiceTest {
                 barn1Fnr,
                 behandlingResultat = behandlingResultat,
                 resultat = Resultat.JA,
-                periodeFom = periodeTom,
-                periodeTom = periodeFom
+                periodeFom = periodeFom,
+                periodeTom = periodeTom
         )
 
         val periodeResultatSøker = lagPeriodeResultat(
