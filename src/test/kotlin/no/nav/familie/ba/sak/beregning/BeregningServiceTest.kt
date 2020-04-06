@@ -1,171 +1,192 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
+import io.mockk.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
+import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.beregning.domene.*
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
-
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres")
-@Tag("integration")
 class BeregningServiceTest {
 
-    @Autowired
-    private lateinit var beregningService: BeregningService
+    val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
+    val behandlingResultatRepository = mockk<BehandlingResultatRepository>()
 
-    @Autowired
-    private lateinit var fagsakService: FagsakService
+    lateinit var satsService: SatsService
+    lateinit var beregningService: BeregningService
 
-    @Autowired
-    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    @BeforeEach
+    fun setUp() {
+        val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+        val fagsakService = mockk<FagsakService>()
+        val satsRepository = mockk<SatsRepository>()
 
-    @Autowired
-    private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+        satsService = SatsService(satsRepository)
+        beregningService = BeregningService(andelTilkjentYtelseRepository, fagsakService, tilkjentYtelseRepository, behandlingResultatRepository, satsService)
 
-    @Autowired
-    private lateinit var behandlingService: BehandlingService
-
-    @Test
-    fun skalLagreRiktigTilkjentYtelseForFGB() {
-        val fnr = randomFnr()
-        val dagensDato = LocalDate.now()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        opprettTilkjentYtelse(behandling)
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
-                fnr,
-                fagsak.id.toString(),
-                behandling.id,
-                dagensDato,
-                dagensDato.withDayOfMonth(1),
-                dagensDato.plusMonths(10)
-        )
-
-        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
-
-        Assertions.assertNotNull(tilkjentYtelse)
-        Assertions.assertEquals(dagensDato.withDayOfMonth(1), tilkjentYtelse.stønadFom)
-        Assertions.assertEquals(dagensDato.plusMonths(10), tilkjentYtelse.stønadTom)
-        Assertions.assertNull(tilkjentYtelse.opphørFom)
-
+        every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
+        every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
+        every { fagsakService.hentRestFagsak(any()) } answers { Ressurs.success(defaultFagsak.toRestFagsak(emptyList())) }
+        every { satsRepository.finnAlleSatserFor(any()) } answers { listOf(Sats(type = SatsType.ORBA, beløp = 1054, gyldigFom = LocalDate.MIN, gyldigTom = LocalDate.MAX)) }
     }
 
     @Test
-    fun skalLagreRiktigTilkjentYtelseForOpphør() {
-
-        val fnr = randomFnr()
-        val dagensDato = LocalDate.now()
-        val opphørsDato = dagensDato.plusMonths(1).withDayOfMonth(1)
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        opprettTilkjentYtelse(behandling)
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForOpphør(
-                fnr,
-                fagsak.id.toString(),
-                behandling.id,
-                dagensDato,
-                dagensDato.withDayOfMonth(1),
-                dagensDato.plusMonths(10),
-                opphørsDato
-        )
-
-        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
-
-        Assertions.assertNotNull(tilkjentYtelse)
-        Assertions.assertEquals(dagensDato.plusMonths(10), tilkjentYtelse.stønadTom)
-        Assertions.assertNotNull(tilkjentYtelse.opphørFom)
-        Assertions.assertEquals(opphørsDato, tilkjentYtelse.opphørFom)
-    }
-
-    @Test
-    fun skalLagreRiktigTilkjentYtelseForRevurdering() {
-
-        val fnr = randomFnr()
-        val dagensDato = LocalDate.now()
-        val revurderingFom = dagensDato.plusMonths(3).withDayOfMonth(1)
-        val opphørFom = dagensDato.withDayOfMonth(1)
-        val tomDato = dagensDato.plusMonths(10)
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        opprettTilkjentYtelse(behandling)
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForRevurdering(
-                fnr,
-                fagsak.id.toString(),
-                behandling.id,
-                behandling.id - 1,
-                dagensDato,
-                opphørFom,
-                tomDato,
-                revurderingFom
-        )
-
-        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
-
-        Assertions.assertNotNull(tilkjentYtelse)
-        Assertions.assertEquals(revurderingFom, tilkjentYtelse.stønadFom)
-        Assertions.assertEquals(tomDato, tilkjentYtelse.stønadTom)
-        Assertions.assertEquals(opphørFom, tilkjentYtelse.opphørFom)
-    }
-
-    @Test
-    fun `Skal Lagre AndelerTilkjentYtelse Med Kobling Til TilkjentYtelse`() {
+    fun `Skal mappe perioderesultat til andel ytelser`() {
+        val behandling = lagBehandling()
+        val barn1Fnr = randomFnr()
         val søkerFnr = randomFnr()
+        val behandlingResultat = BehandlingResultat(behandling = behandling)
+
+        val periodeFom = LocalDate.of(2020, 1, 1)
+        val periodeTom = LocalDate.of(2020, 11, 1)
+        val periodeResultatBarn = lagPeriodeResultat(
+                barn1Fnr,
+                behandlingResultat = behandlingResultat,
+                resultat = Resultat.JA,
+                periodeFom = periodeTom,
+                periodeTom = periodeFom
+        )
+
+        val periodeResultatSøker = lagPeriodeResultat(
+                søkerFnr,
+                behandlingResultat = behandlingResultat,
+                resultat = Resultat.JA,
+                periodeFom = periodeFom,
+                periodeTom = periodeTom
+        )
+        behandlingResultat.periodeResultater = setOf(periodeResultatBarn, periodeResultatSøker)
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, søkerPersonIdent = søkerFnr, barnasIdenter = listOf(barn1Fnr))
+        val slot = slot<TilkjentYtelse>()
+
+        every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
+        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag, nyBeregning = null)
+
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+
+        Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
+        Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().beløp)
+        Assertions.assertEquals(periodeFom.plusMonths(1), slot.captured.andelerTilkjentYtelse.first().stønadFom)
+        Assertions.assertEquals(periodeTom.plusMonths(1).sisteDagIMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
+    }
+
+    @Test
+    fun `For flere barn med forskjellige perioderesultat skal perioderesultat mappes til andel ytelser`() {
+        val behandling = lagBehandling()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
-        val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
-        val dato_2020_10_01 = LocalDate.of(2020, 10, 1)
+        val søkerFnr = randomFnr()
+        val behandlingResultat = BehandlingResultat(
+                behandling = behandling
+        )
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val periode1Fom = LocalDate.of(2020, 1, 1)
+        val periode1Tom = LocalDate.of(2020, 11, 1)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        val periode2Fom = LocalDate.of(2020, 12, 1)
+        val periode2Midt = LocalDate.of(2021, 6, 1)
+        val periode2Tom = LocalDate.of(2021, 12, 11)
 
-        val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.id
-        val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.id
+        val periode3Fom = LocalDate.of(2022, 1, 12)
+        val periode3Midt = LocalDate.of(2023, 6, 1)
+        val periode3Tom = LocalDate.of(2028, 1, 1)
 
-        val beregning = NyBeregning(listOf(
-                PersonBeregning(barn1Fnr, 1054, dato_2020_01_01, Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
-        ))
+        val periodeResultater = mutableSetOf(
+                lagPeriodeResultat(
+                        søkerFnr,
+                        behandlingResultat = behandlingResultat,
+                        resultat = Resultat.JA,
+                        periodeFom = periode1Fom,
+                        periodeTom = periode1Tom
+                ),
+                lagPeriodeResultat(
+                        søkerFnr,
+                        behandlingResultat = behandlingResultat,
+                        resultat = Resultat.NEI,
+                        periodeFom = periode2Fom,
+                        periodeTom = periode2Tom
+                ),
+                lagPeriodeResultat(
+                        søkerFnr,
+                        behandlingResultat = behandlingResultat,
+                        resultat = Resultat.JA,
+                        periodeFom = periode3Fom,
+                        periodeTom = periode3Tom
+                ),
+                lagPeriodeResultat(
+                        barn1Fnr,
+                        behandlingResultat = behandlingResultat,
+                        resultat = Resultat.JA,
+                        periodeFom = periode1Fom.minusYears(1),
+                        periodeTom = periode3Tom.plusYears(1)
+                ),
+                lagPeriodeResultat(
+                        barn2Fnr,
+                        behandlingResultat = behandlingResultat,
+                        resultat = Resultat.JA,
+                        periodeFom = periode2Midt,
+                        periodeTom = periode3Midt
+                )
+        )
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, beregning)
+        behandlingResultat.periodeResultater = periodeResultater
 
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-        val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personId == barn1Id }
-        val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personId == barn2Id }
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barn1Fnr, barn2Fnr)
+        )
+        val slot = slot<TilkjentYtelse>()
 
-        Assertions.assertNotNull(tilkjentYtelse)
-        Assertions.assertTrue(tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty())
-        Assertions.assertNotNull(andelBarn1)
-        Assertions.assertNotNull(andelBarn2)
-        tilkjentYtelse.andelerTilkjentYtelse.forEach {
-            Assertions.assertEquals(tilkjentYtelse, it.tilkjentYtelse)
-        }
-        Assertions.assertEquals(1054, andelBarn1!!.beløp)
-        Assertions.assertEquals(1354, andelBarn2!!.beløp)
+        every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
+        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag, nyBeregning = null)
+
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+
+        Assertions.assertEquals(3, slot.captured.andelerTilkjentYtelse.size)
+        val andelTilkjentYtelser = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
+
+        Assertions.assertEquals(periode1Fom.plusMonths(1).withDayOfMonth(1), andelTilkjentYtelser[0].stønadFom)
+        Assertions.assertEquals(periode1Tom.plusMonths(1).sisteDagIMåned(), andelTilkjentYtelser[0].stønadTom)
+        Assertions.assertEquals(1054, andelTilkjentYtelser[0].beløp)
+
+        Assertions.assertEquals(periode3Fom.plusMonths(1).withDayOfMonth(1), andelTilkjentYtelser[1].stønadFom)
+        Assertions.assertEquals(periode3Midt.plusMonths(1).sisteDagIMåned(), andelTilkjentYtelser[1].stønadTom)
+        Assertions.assertEquals(1054, andelTilkjentYtelser[1].beløp)
+
+        Assertions.assertEquals(periode3Fom.plusMonths(1).withDayOfMonth(1), andelTilkjentYtelser[2].stønadFom)
+        Assertions.assertEquals(periode3Tom.plusMonths(1).sisteDagIMåned(), andelTilkjentYtelser[2].stønadTom)
+        Assertions.assertEquals(1054, andelTilkjentYtelser[2].beløp)
+
+
     }
+}
 
-    private fun opprettTilkjentYtelse(behandling: Behandling) {
-        tilkjentYtelseRepository.save(lagInitiellTilkjentYtelse(behandling))
-    }
+fun lagPeriodeResultat(fnr: String, resultat: Resultat, periodeFom: LocalDate?, periodeTom: LocalDate?, behandlingResultat: BehandlingResultat): PeriodeResultat {
+    val periodeResultat = PeriodeResultat(
+            behandlingResultat = behandlingResultat,
+            personIdent = fnr,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom)
+    periodeResultat.vilkårResultater =
+            setOf(VilkårResultat(periodeResultat = periodeResultat,
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = resultat,
+                    begrunnelse = ""))
+    return periodeResultat
 }
