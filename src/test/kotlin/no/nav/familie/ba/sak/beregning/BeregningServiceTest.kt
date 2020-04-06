@@ -58,8 +58,7 @@ class BeregningServiceTest {
                 dagensDato.plusMonths(10)
         )
 
-        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandling.id)
+        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertEquals(dagensDato.withDayOfMonth(1), tilkjentYtelse.stønadFom)
@@ -88,9 +87,7 @@ class BeregningServiceTest {
                 opphørsDato
         )
 
-
-        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandling.id)
+        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertEquals(dagensDato.plusMonths(10), tilkjentYtelse.stønadTom)
@@ -120,8 +117,8 @@ class BeregningServiceTest {
                 tomDato,
                 revurderingFom
         )
-        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandling.id)
+
+        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertEquals(revurderingFom, tilkjentYtelse.stønadFom)
