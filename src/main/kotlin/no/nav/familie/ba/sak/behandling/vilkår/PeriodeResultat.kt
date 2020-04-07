@@ -24,10 +24,10 @@ class PeriodeResultat(
         val personIdent: String,
 
         @Column(name = "periode_fom")
-        val periodeFom: LocalDate?,
+        val periodeFom: LocalDate? = null,
 
         @Column(name = "periode_tom")
-        val periodeTom: LocalDate?,
+        val periodeTom: LocalDate? = null,
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "periodeResultat",

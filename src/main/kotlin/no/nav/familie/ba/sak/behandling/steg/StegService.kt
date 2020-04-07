@@ -70,7 +70,7 @@ class StegService(
         return håndterPersongrunnlag(
                 behandlingEtterSøknadshåndtering,
                 RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
-                                           barnasIdenter = søknadDTO.barnaMedOpplysninger.map { it.ident }))
+                                           barnasIdenter = søknadDTO.barnaMedOpplysninger.map { barn -> barn.ident }))
     }
 
     fun håndterPersongrunnlag(behandling: Behandling, registrerPersongrunnlagDTO: RegistrerPersongrunnlagDTO): Behandling {

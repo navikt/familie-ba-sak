@@ -3,10 +3,12 @@ package no.nav.familie.ba.sak.behandling.steg
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingInnvilget
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -31,7 +33,10 @@ class StegServiceTest(
         private val fagsakService: FagsakService,
 
         @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient
+        private val mockIntegrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
     @Test
@@ -42,10 +47,13 @@ class StegServiceTest(
 
         mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
 
+
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
 
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr))
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         stegService.håndterSøknad(behandling,
                                   lagSøknadDTO(annenPartIdent = annenPartIdent,
                                                søkerIdent = søkerFnr,

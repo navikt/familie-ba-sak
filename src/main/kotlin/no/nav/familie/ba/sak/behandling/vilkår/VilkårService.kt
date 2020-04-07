@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestPeriodeResultat
+import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.springframework.stereotype.Service
 
@@ -52,7 +53,32 @@ class VilkårService(
         return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
     }
 
-    fun kontrollerVurderteVilkårOgLagResultat(periodeResultater: List<RestPeriodeResultat>,
+    fun initierVilkårForManuellBahandling(behandlingId: Long): BehandlingResultat {
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
+                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
+
+        val behandlingResultat = BehandlingResultat(
+                behandling = behandlingService.hent(behandlingId),
+                aktiv = true)
+
+        behandlingResultat.periodeResultater = personopplysningGrunnlag.personer.map { person ->
+            val periodeResultat = PeriodeResultat(behandlingResultat = behandlingResultat,
+                                                  personIdent = person.personIdent.ident)
+
+            val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.VILKÅRGJELDERFOR)
+            periodeResultat.vilkårResultater = relevanteVilkår.map { vilkår ->
+                VilkårResultat(periodeResultat = periodeResultat,
+                               resultat = Resultat.KANSKJE,
+                               vilkårType = vilkår,
+                               begrunnelse = "")
+            }.toSet()
+            periodeResultat
+        }.toSet()
+
+        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
+    }
+
+     fun kontrollerVurderteVilkårOgLagResultat(periodeResultater: List<RestPeriodeResultat>,
                                               begrunnelse: String,
                                               behandlingId: Long): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(
