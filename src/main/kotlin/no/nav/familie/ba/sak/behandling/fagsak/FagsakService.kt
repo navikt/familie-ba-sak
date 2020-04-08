@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
@@ -60,10 +59,6 @@ class FagsakService(
                 vedtak.toRestVedtak(restVedtakBarn)
             }
 
-            val begrunnelse =
-                    behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)?.periodeResultater?.first()?.vilkårResultater?.first()?.begrunnelse
-                    ?: ""
-
             RestBehandling(
                     aktiv = behandling.aktiv,
                     behandlingId = behandling.id,
@@ -72,12 +67,11 @@ class FagsakService(
                     type = behandling.type,
                     status = behandling.status,
                     steg = behandling.steg,
-                    periodeResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
-                                                ?.periodeResultater?.map { it.tilRestPeriodeResultat() } ?: emptyList(),
+                    personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
+                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
-                    underkategori = behandling.underkategori,
-                    begrunnelse = begrunnelse
+                    underkategori = behandling.underkategori
             )
         }
 

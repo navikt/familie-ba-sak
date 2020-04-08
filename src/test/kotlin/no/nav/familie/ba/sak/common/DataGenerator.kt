@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -206,16 +206,16 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
     val behandlingResultat = BehandlingResultat(
             behandling = behandling
     )
-    val periodeResultat = PeriodeResultat(
+    val personResultat = PersonResultat(
             behandlingResultat = behandlingResultat,
-            personIdent = fnr,
-            periodeFom = LocalDate.now(),
-            periodeTom = LocalDate.now())
-    periodeResultat.vilkårResultater =
-            setOf(VilkårResultat(periodeResultat = periodeResultat,
+            personIdent = fnr)
+    personResultat.vilkårResultater =
+            setOf(VilkårResultat(personResultat = personResultat,
                                  vilkårType = Vilkår.BOSATT_I_RIKET,
                                  resultat = resultat,
+                                 periodeFom = LocalDate.now(),
+                                 periodeTom = LocalDate.now(),
                                  begrunnelse = ""))
-    behandlingResultat.periodeResultater = setOf(periodeResultat)
+    behandlingResultat.personResultater = setOf(personResultat)
     return behandlingResultat
 }

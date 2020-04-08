@@ -95,12 +95,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
-    fun oppdaterStegPåBehandling(behandlingId: Long, steg: StegType) {
+    fun oppdaterStegPåBehandling(behandlingId: Long, steg: StegType): Behandling {
         val behandling = hent(behandlingId)
         LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId fra ${behandling.steg} til $steg")
 
         behandling.steg = steg
-        behandlingRepository.save(behandling)
+        return behandlingRepository.save(behandling)
     }
 
     fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsMåned: LocalDate): List<Behandling> {

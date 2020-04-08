@@ -70,7 +70,7 @@ class StegService(
         return håndterPersongrunnlag(
                 behandlingEtterSøknadshåndtering,
                 RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
-                                           barnasIdenter = søknadDTO.barnaMedOpplysninger.map { it.ident }))
+                                           barnasIdenter = søknadDTO.barnaMedOpplysninger.map { barn -> barn.ident }))
     }
 
     fun håndterPersongrunnlag(behandling: Behandling, registrerPersongrunnlagDTO: RegistrerPersongrunnlagDTO): Behandling {
@@ -143,14 +143,12 @@ class StegService(
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
             val nesteSteg = behandling.steg.hentNesteSteg(behandlingType = behandling.type)
-            behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id,
-                                                       steg = nesteSteg)
-
             if (nesteSteg == sisteSteg) {
                 LOG.info("${SikkerhetContext.hentSaksbehandler()} er ferdig med stegprosess på behandling ${behandling.id}")
             }
 
-            return behandlingEtterSteg
+            return behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id,
+                                                       steg = nesteSteg)
         } catch (exception: Exception) {
             stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
             LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")

@@ -42,29 +42,22 @@ class StegServiceTest(
 
         mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
 
+
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
 
-        stegService.håndterSøknad(behandling,
+        val håndterSøknadBehandling = stegService.håndterSøknad(behandling,
                                   lagSøknadDTO(annenPartIdent = annenPartIdent,
                                                søkerIdent = søkerFnr,
                                                barnasIdenter = listOf(barnFnr)))
-        val behandlingEtterSøknadGrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG, behandlingEtterSøknadGrunnlagSteg.steg)
-
-        stegService.håndterPersongrunnlag(behandlingEtterSøknadGrunnlagSteg, RegistrerPersongrunnlagDTO(
-                ident = søkerFnr,
-                barnasIdenter = listOf(barnFnr)
-        ))
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
 
         stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg, RestVilkårsvurdering(
-                periodeResultater = vilkårsvurderingInnvilget(søkerFnr),
-                begrunnelse = ""
-        ))
+                personResultater = vilkårsvurderingInnvilget(søkerFnr))
+        )
 
         val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
@@ -81,9 +74,8 @@ class StegServiceTest(
 
         assertThrows<IllegalStateException> {
             stegService.håndterVilkårsvurdering(behandling, RestVilkårsvurdering(
-                    periodeResultater = vilkårsvurderingInnvilget(søkerFnr),
-                    begrunnelse = ""
-            ))
+                    personResultater = vilkårsvurderingInnvilget(søkerFnr))
+            )
         }
     }
 }

@@ -20,7 +20,6 @@ class RegistrereSøknad(
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
                                                                                      søknad = data.writeValueAsString()))
-
         return behandling
     }
 
