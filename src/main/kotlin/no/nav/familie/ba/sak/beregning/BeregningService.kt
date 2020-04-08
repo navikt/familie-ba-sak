@@ -152,7 +152,6 @@ class BeregningService(
     }
 }
 
-// TODO: Finn en mer smidig måte å nullsjekke
 private fun maks(periodeFomSoker: LocalDate?, periodeFomBarn: LocalDate?): LocalDate {
     if (periodeFomSoker == null && periodeFomBarn == null) {
         throw IllegalStateException("Både søker og barn kan ikke ha null i periodeFom dato")
