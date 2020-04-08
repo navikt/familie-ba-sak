@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
@@ -40,6 +42,9 @@ class BeregningServiceIntegrationTest {
 
     @Autowired
     private lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    private lateinit var behandlingResultatService: BehandlingResultatService
 
     @Test
     fun skalLagreRiktigTilkjentYtelseForFGB() {
@@ -148,6 +153,10 @@ class BeregningServiceIntegrationTest {
                 PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
         ))
 
+        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        behandlingResultat.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01, dato_2020_01_01.plusYears(17))
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
+
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, beregning)
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
@@ -162,7 +171,7 @@ class BeregningServiceIntegrationTest {
             Assertions.assertEquals(tilkjentYtelse, it.tilkjentYtelse)
         }
         Assertions.assertEquals(1054, andelBarn1!!.beløp)
-        Assertions.assertEquals(1354, andelBarn2!!.beløp)
+        Assertions.assertEquals(1054, andelBarn2!!.beløp)
     }
 
     private fun opprettTilkjentYtelse(behandling: Behandling) {

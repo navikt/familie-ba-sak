@@ -176,17 +176,3 @@ class BeregningServiceTest {
 
     }
 }
-
-fun lagPeriodeResultat(fnr: String, resultat: Resultat, periodeFom: LocalDate?, periodeTom: LocalDate?, behandlingResultat: BehandlingResultat): PeriodeResultat {
-    val periodeResultat = PeriodeResultat(
-            behandlingResultat = behandlingResultat,
-            personIdent = fnr,
-            periodeFom = periodeFom,
-            periodeTom = periodeTom)
-    periodeResultat.vilkårResultater =
-            setOf(VilkårResultat(periodeResultat = periodeResultat,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    resultat = resultat,
-                    begrunnelse = ""))
-    return periodeResultat
-}

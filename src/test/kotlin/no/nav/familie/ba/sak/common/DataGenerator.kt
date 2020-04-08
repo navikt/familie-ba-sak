@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.beregning.lagPeriodeResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
@@ -159,6 +160,32 @@ fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: Li
                         ident = it
                 )
             }
+    )
+}
+
+fun lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat, søkerFnr: String, barn1Fnr: String, barn2Fnr: String, stønadFom: LocalDate, stønadTom: LocalDate): Set<PeriodeResultat> {
+    return setOf(
+            lagPeriodeResultat(
+                    søkerFnr,
+                    behandlingResultat = behandlingResultat,
+                    resultat = Resultat.JA,
+                    periodeFom = stønadFom,
+                    periodeTom = stønadTom
+            ),
+            lagPeriodeResultat(
+                    barn1Fnr,
+                    behandlingResultat = behandlingResultat,
+                    resultat = Resultat.JA,
+                    periodeFom = stønadFom,
+                    periodeTom = stønadTom
+            ),
+            lagPeriodeResultat(
+                    barn2Fnr,
+                    behandlingResultat = behandlingResultat,
+                    resultat = Resultat.JA,
+                    periodeFom = stønadFom,
+                    periodeTom = stønadTom
+            )
     )
 }
 
