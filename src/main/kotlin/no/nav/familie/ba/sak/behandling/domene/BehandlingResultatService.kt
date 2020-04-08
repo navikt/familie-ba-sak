@@ -24,13 +24,19 @@ class BehandlingResultatService(
 
     fun lagreNyOgDeaktiverGammel(behandlingResultat: BehandlingResultat): BehandlingResultat {
         val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
+        val alleBehandlingsresultat = behandlingResultatRepository.finnBehandlingResultater(behandlingResultat.behandling.id)
+        val forrigeBehandlingResultatSomIkkeErAutogenerert: BehandlingResultat? =
+                if (alleBehandlingsresultat != null && alleBehandlingsresultat.size > 1)
+                    aktivBehandlingResultat
+                else null
 
         if (aktivBehandlingResultat != null) {
             behandlingResultatRepository.saveAndFlush(aktivBehandlingResultat.also { it.aktiv = false })
         }
 
         LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling resultat $behandlingResultat")
-        loggService.opprettVilkårsvurderingLogg(behandlingResultat.behandling, aktivBehandlingResultat, behandlingResultat)
+        loggService.opprettVilkårsvurderingLogg(
+                behandlingResultat.behandling, forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)
         return behandlingResultatRepository.save(behandlingResultat)
     }
 

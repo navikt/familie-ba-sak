@@ -43,7 +43,8 @@ class LoggService(
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Endring på vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat gikk fra ${forrigeBehandlingResultat.hentSamletResultat()} til ${nyttBehandlingResultat.hentSamletResultat()}"
+                    tekst = "Resultat gikk fra ${forrigeBehandlingResultat.hentSamletResultat().displayName.toLowerCase()} " +
+                            "til ${nyttBehandlingResultat.hentSamletResultat().displayName.toLowerCase()}"
             ))
         } else {
             lagre(Logg(
@@ -51,7 +52,7 @@ class LoggService(
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Opprettet vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat ble ${nyttBehandlingResultat.hentSamletResultat()}"
+                    tekst = "Resultat ble ${nyttBehandlingResultat.hentSamletResultat().displayName.toLowerCase()}"
             ))
         }
     }
