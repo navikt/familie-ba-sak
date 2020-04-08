@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPeriodeResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -38,7 +39,8 @@ class VedtakController(
 
     @PutMapping(path = ["/{fagsakId}/vedtak"])
     fun opprettEllerOppdaterVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
-                                   @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
+                                   //@RequestBody restPersonResultat: RestPersonResultat): ResponseEntity<Ressurs<RestFagsak>> {
+                                   @RequestBody restPersonResultat: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
         LOG.info("$saksbehandlerId lager nytt vedtak for fagsak med id $fagsakId")
@@ -47,7 +49,7 @@ class VedtakController(
                          ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         return Result.runCatching {
-                    stegService.håndterVilkårsvurdering(behandling, restVilkårsvurdering)
+                    stegService.håndterVilkårsvurdering(behandling, restPersonResultat)
                 }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
@@ -142,6 +144,8 @@ data class RestVilkårsvurdering(
         val periodeResultater: List<RestPeriodeResultat>,
         val begrunnelse: String
 )
+/*
+*/
 
 data class Opphørsvedtak(
         val opphørsdato: LocalDate
