@@ -20,7 +20,7 @@ class RegistrereSøknad(
         val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlag != null)
 
-        vilkårService.initierVilkårForManuellBahandling(behandling.id)
+        vilkårService.initierVilkårForManuellBehandling(behandling.id)
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
                                                                                      søknad = data.writeValueAsString()))

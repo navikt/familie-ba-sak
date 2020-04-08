@@ -53,7 +53,7 @@ class VilkårService(
         return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
     }
 
-    fun initierVilkårForManuellBahandling(behandlingId: Long): BehandlingResultat {
+    fun initierVilkårForManuellBehandling(behandlingId: Long): BehandlingResultat {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
 
