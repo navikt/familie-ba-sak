@@ -169,7 +169,5 @@ class BeregningServiceTest {
         Assertions.assertEquals(periode3Fom.plusMonths(1).withDayOfMonth(1), andelTilkjentYtelser[2].stønadFom)
         Assertions.assertEquals(periode3Tom.plusMonths(1).sisteDagIMåned(), andelTilkjentYtelser[2].stønadTom)
         Assertions.assertEquals(1054, andelTilkjentYtelser[2].beløp)
-
-
     }
 }
