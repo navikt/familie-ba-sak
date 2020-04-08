@@ -139,8 +139,7 @@ class VedtakController(
 }
 
 data class RestVilkårsvurdering(
-        val personResultater: List<RestPersonResultat>,
-        val begrunnelse: String
+        val personResultater: List<RestPersonResultat>
 )
 
 data class Opphørsvedtak(

@@ -84,7 +84,6 @@ class VilkårService(
     }
 
      fun kontrollerVurderteVilkårOgLagResultat(personResultater: List<RestPersonResultat>,
-                                               begrunnelse: String,
                                                behandlingId: Long): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(
                 behandling = behandlingService.hent(behandlingId),

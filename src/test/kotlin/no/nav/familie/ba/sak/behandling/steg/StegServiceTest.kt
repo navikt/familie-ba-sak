@@ -56,9 +56,8 @@ class StegServiceTest(
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
 
         stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg, RestVilkårsvurdering(
-                personResultater = vilkårsvurderingInnvilget(søkerFnr),
-                begrunnelse = ""
-        ))
+                personResultater = vilkårsvurderingInnvilget(søkerFnr))
+        )
 
         val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
@@ -75,9 +74,8 @@ class StegServiceTest(
 
         assertThrows<IllegalStateException> {
             stegService.håndterVilkårsvurdering(behandling, RestVilkårsvurdering(
-                    personResultater = vilkårsvurderingInnvilget(søkerFnr),
-                    begrunnelse = ""
-            ))
+                    personResultater = vilkårsvurderingInnvilget(søkerFnr))
+            )
         }
     }
 }

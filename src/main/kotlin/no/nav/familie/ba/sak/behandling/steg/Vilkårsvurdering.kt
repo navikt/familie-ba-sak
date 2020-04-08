@@ -27,7 +27,6 @@ class Vilkårsvurdering(
 
         if (data.personResultater.isNotEmpty()) {
             vilkårService.kontrollerVurderteVilkårOgLagResultat(data.personResultater,
-                                                                data.begrunnelse,
                                                                 vilkårsvurdertBehandling.id)
         } else {
             vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)
