@@ -12,15 +12,12 @@ import org.springframework.stereotype.Service
 @Service
 class RegistrereSøknad(
         private val søknadGrunnlagService: SøknadGrunnlagService,
-        private val loggService: LoggService,
-        private val vilkårService: VilkårService
+        private val loggService: LoggService
 ) : BehandlingSteg<SøknadDTO> {
 
     override fun utførSteg(behandling: Behandling, data: SøknadDTO): Behandling {
         val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlag != null)
-
-        vilkårService.initierVilkårForManuellBehandling(behandling.id)
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
                                                                                      søknad = data.writeValueAsString()))

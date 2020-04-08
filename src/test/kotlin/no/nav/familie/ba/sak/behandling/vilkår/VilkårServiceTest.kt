@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.restDomene.RestPeriodeResultat
+import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -54,7 +54,7 @@ class VilkårServiceTest {
                                                                     "",
                                                                     behandling.id
                 )
-        Assertions.assertEquals(behandlingResultat.periodeResultater.size,
+        Assertions.assertEquals(behandlingResultat.personResultater.size,
                                 vilkårsvurderingInnvilget(fnr).size)
     }
 
@@ -89,28 +89,20 @@ class VilkårServiceTest {
     }
 }
 
-fun vilkårsvurderingInnvilget(personIdent: String): List<RestPeriodeResultat> = listOf(RestPeriodeResultat(
+fun vilkårsvurderingInnvilget(personIdent: String): List<RestPersonResultat> = listOf(RestPersonResultat(
         personIdent = personIdent,
-        periodeFom = LocalDate.now(),
-        periodeTom = LocalDate.now(),
         vilkårResultater = listOf(RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                     resultat = Resultat.JA))
+                                                     resultat = Resultat.JA,
+                                                     periodeFom = LocalDate.now(),
+                                                     periodeTom = LocalDate.now(),
+                                                     begrunnelse = ""))
 ))
 
-fun vilkårsvurderingAvslått(personIdent: String): List<RestPeriodeResultat> = listOf(RestPeriodeResultat(
+fun vilkårsvurderingAvslått(personIdent: String): List<RestPersonResultat> = listOf(RestPersonResultat(
         personIdent = personIdent,
-        periodeFom = LocalDate.now(),
-        periodeTom = LocalDate.now(),
         vilkårResultater = listOf(RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                     resultat = Resultat.NEI))
-))
-
-fun vilkårsvurderingDelvisInnvilget(personIdent: String): List<RestPeriodeResultat> = listOf(RestPeriodeResultat(
-        personIdent = personIdent,
-        periodeFom = LocalDate.now(),
-        periodeTom = LocalDate.now(),
-        vilkårResultater = listOf(RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                     resultat = Resultat.JA),
-                                  RestVilkårResultat(vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                                     resultat = Resultat.NEI))
+                                                     resultat = Resultat.NEI,
+                                                     periodeFom = LocalDate.now(),
+                                                     periodeTom = LocalDate.now(),
+                                                     begrunnelse = ""))
 ))

@@ -34,6 +34,15 @@ class BehandlingResultatService(
         return behandlingResultatRepository.save(behandlingResultat)
     }
 
+    fun lagre(behandlingResultat: BehandlingResultat): BehandlingResultat {
+        val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
+        if (aktivBehandlingResultat != null) {
+            error("Det finnes allerede et aktivt behandlingsresultat for behandling ${behandlingResultat.behandling.id}")
+        }
+        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling resultat $behandlingResultat")
+        return behandlingResultatRepository.save(behandlingResultat)
+    }
+
     companion object {
         private val LOG = LoggerFactory.getLogger(this::class.java)
     }

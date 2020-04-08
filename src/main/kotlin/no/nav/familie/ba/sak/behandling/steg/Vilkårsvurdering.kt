@@ -25,8 +25,8 @@ class Vilkårsvurdering(
 
         val vilkårsvurdertBehandling = behandlingService.hent(behandlingId = behandling.id)
 
-        if (data.periodeResultater.isNotEmpty()) {
-            vilkårService.kontrollerVurderteVilkårOgLagResultat(data.periodeResultater,
+        if (data.personResultater.isNotEmpty()) {
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(data.personResultater,
                                                                 data.begrunnelse,
                                                                 vilkårsvurdertBehandling.id)
         } else {

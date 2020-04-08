@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestPeriodeResultat
+import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.forbidden
@@ -139,7 +139,7 @@ class VedtakController(
 }
 
 data class RestVilkårsvurdering(
-        val periodeResultater: List<RestPeriodeResultat>,
+        val personResultater: List<RestPersonResultat>,
         val begrunnelse: String
 )
 
