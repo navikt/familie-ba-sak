@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
 import no.nav.familie.ba.sak.beregning.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -188,17 +187,6 @@ class BehandlingIntegrationTest {
         behandlingResultat.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, stønadFom, stønadTom)
         behandlingResultatRepository.save(behandlingResultat)
 
-        val nyBeregning = NyBeregning(listOf(
-                PersonBeregning(barn1Fnr,
-                              1054,
-                              LocalDate.of(2020, 1, 1),
-                              Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr,
-                              1054,
-                              LocalDate.of(2020, 1, 1),
-                              Ytelsetype.ORDINÆR_BARNETRYGD)
-        ))
-
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
@@ -207,7 +195,7 @@ class BehandlingIntegrationTest {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val task = opprettOpphørVedtakTask(
                 behandling,
@@ -287,14 +275,7 @@ class BehandlingIntegrationTest {
         )
         behandlingResultatRepository.save(behandlingResultat)
 
-        val personBeregninger = listOf(
-                PersonBeregning(barn1Fnr, 1054, dato_2020_01_01, Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
-        )
-
-        val nyBeregning = NyBeregning(personBeregninger)
-
-        val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+        val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
@@ -321,9 +302,7 @@ class BehandlingIntegrationTest {
         val barn3Fnr = randomFnr()
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
-        val dato_2020_10_01 = LocalDate.of(2020, 10, 1)
         val dato_2021_01_01 = LocalDate.of(2021, 1, 1)
-        val dato_2021_10_01 = LocalDate.of(2021, 10, 1)
         val stønadTom = dato_2020_01_01.plusYears(17)
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
@@ -344,24 +323,14 @@ class BehandlingIntegrationTest {
         behandlingResultat1.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat1, søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01.minusMonths(1), stønadTom)
         behandlingResultatRepository.save(behandlingResultat1)
 
-        val førsteBeregning = NyBeregning(listOf(
-                PersonBeregning(barn1Fnr, 1054, dato_2020_01_01, Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
-        ))
-
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, førsteBeregning)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
 
         val behandlingResultat2 = BehandlingResultat(behandling = behandling)
         behandlingResultat2.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat2, søkerFnr, barn1Fnr, barn3Fnr, dato_2021_01_01.minusMonths(1), stønadTom)
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat2)
 
-        val andreBeregning = NyBeregning(listOf(
-                PersonBeregning(barn1Fnr, 970, dato_2021_01_01, Ytelsetype.MANUELL_VURDERING),
-                PersonBeregning(barn3Fnr, 314, dato_2021_10_01, Ytelsetype.EØS)
-        ))
-
-        val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, andreBeregning)
+        val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }

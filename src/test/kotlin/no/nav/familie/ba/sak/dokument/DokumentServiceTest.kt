@@ -111,17 +111,7 @@ class DokumentServiceTest(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        val nyBeregning = NyBeregning(
-                listOf(PersonBeregning(ident = barnFnr,
-                                       beløp = 1054,
-                                       stønadFom = LocalDate.of(
-                                               2020,
-                                               1,
-                                               1),
-                                       ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
-        )
-
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
         val htmlvedtaksbrevRess = dokumentService.hentHtmlForVedtak(vedtak.id)

@@ -40,8 +40,7 @@ class BeregningService(
 
     @Transactional
     fun oppdaterBehandlingMedBeregning(behandling: Behandling,
-                                       personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                       nyBeregning: NyBeregning?): Ressurs<RestFagsak> {
+                                       personopplysningGrunnlag: PersonopplysningGrunnlag): Ressurs<RestFagsak> {
 
         andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(behandling.id)
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)

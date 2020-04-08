@@ -6,9 +6,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -73,7 +70,7 @@ class BeregningServiceTest {
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag, nyBeregning = null)
+        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag)
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
@@ -154,7 +151,7 @@ class BeregningServiceTest {
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag, nyBeregning = null)
+        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag)
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 

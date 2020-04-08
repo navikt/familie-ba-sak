@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
@@ -55,8 +54,9 @@ class BeregningController(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
+        // TODO: Dette skal flyttes til vilkårsvurderingen
         return Result.runCatching {
-                    beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+                    beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                     vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
                 }
                 .fold(

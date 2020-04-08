@@ -109,17 +109,7 @@ class ØkonomiIntegrasjonTest {
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        val nyBeregning = NyBeregning(
-                listOf(PersonBeregning(ident = barnFnr,
-                                       beløp = 1054,
-                                       stønadFom = LocalDate.of(
-                                               2020,
-                                               1,
-                                               1),
-                                       ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
-        )
-
-        val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+        val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
@@ -159,16 +149,7 @@ class ØkonomiIntegrasjonTest {
         val behandlingResultat = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
 
-        val nyBeregning = NyBeregning(
-                listOf(PersonBeregning(ident = barnFnr,
-                                       beløp = 1054,
-                                       stønadFom = LocalDate.of(
-                                               2020,
-                                               1,
-                                               1),
-                                       ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
-        )
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)

@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions
@@ -137,7 +136,6 @@ class BeregningServiceIntegrationTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
-        val dato_2020_10_01 = LocalDate.of(2020, 10, 1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -148,16 +146,11 @@ class BeregningServiceIntegrationTest {
         val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.id
         val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.id
 
-        val beregning = NyBeregning(listOf(
-                PersonBeregning(barn1Fnr, 1054, dato_2020_01_01, Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
-        ))
-
         val behandlingResultat = BehandlingResultat(behandling = behandling)
         behandlingResultat.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01, dato_2020_01_01.plusYears(17))
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, beregning)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personId == barn1Id }
