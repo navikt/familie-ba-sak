@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.writeValueAsString
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.logg.LoggService
 import org.springframework.stereotype.Service
 
