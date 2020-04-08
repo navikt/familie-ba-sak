@@ -105,29 +105,39 @@ class BeregningService(
         val søkerMap = personopplysningGrunnlag.søker
                 .associateBy { it.personIdent.ident }
 
-        val periodeResultatSøker = behandlingResultat.periodeResultater.filter { søkerMap.containsKey(it.personIdent) && it.hentSamletResultat() == BehandlingResultatType.INNVILGET }
-        val periodeResultatBarna = behandlingResultat.periodeResultater.filter { identBarnMap.containsKey(it.personIdent) && it.hentSamletResultat() == BehandlingResultatType.INNVILGET }
-        return periodeResultatBarna.flatMap { periodeResultatBarn ->
-            periodeResultatSøker.filter { overlapper(it, periodeResultatBarn) }
-                    .flatMap {fellesPerioderesultat ->
-                        val person = identBarnMap[periodeResultatBarn.personIdent]!!
-                        val stønadFom = maks(fellesPerioderesultat.periodeFom, periodeResultatBarn.periodeFom)
-                        val stønadTom = minimum(fellesPerioderesultat.periodeTom, periodeResultatBarn.periodeTom)
-                        val erOrdinaerBarnetrygdTil18ÅrsDag = YearMonth.from(person.fødselsdato.plusYears(18)) == YearMonth.from(stønadTom) // TODO: Denne bør kunne gjøres på en bedre måte
-                        val beløpsperioder = satsService.hentGyldigSatsFor(SatsType.ORBA, stønadFraOgMed = YearMonth.from(stønadFom), stønadTilOgMed = YearMonth.from(stønadTom))
+        val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater.filter {
+            søkerMap.containsKey(it.personIdent) && it.hentSamletResultat() == BehandlingResultatType.INNVILGET
+        }
+        val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater.filter {
+            identBarnMap.containsKey(it.personIdent) && it.hentSamletResultat() == BehandlingResultatType.INNVILGET
+        }
 
-                        beløpsperioder.map { beløpsperiode ->
-                            AndelTilkjentYtelse(
-                                    behandlingId = behandlingId,
-                                    tilkjentYtelse = tilkjentYtelse,
-                                    personId = person.id,
-                                    stønadFom = settRiktigStønadFom(beløpsperiode),
-                                    stønadTom = settRiktigStønadTom(erOrdinaerBarnetrygdTil18ÅrsDag, beløpsperiode),
-                                    beløp = beløpsperiode.beløp,
-                                    type = Ytelsetype.ORDINÆR_BARNETRYGD
-                            )
-                        }
-                    }
+        return innvilgedePeriodeResultatBarna.flatMap { periodeResultatBarn ->
+            innvilgetPeriodeResultatSøker.filter { overlapper(it, periodeResultatBarn) }.flatMap { fellesPerioderesultat ->
+                val person = identBarnMap[periodeResultatBarn.personIdent]!!
+                val stønadFom = maks(fellesPerioderesultat.periodeFom, periodeResultatBarn.periodeFom)
+                val stønadTom = minimum(fellesPerioderesultat.periodeTom, periodeResultatBarn.periodeTom)
+
+                // TODO: Denne sjekken kan gjøres mer robust når VilkårResultatene får perioder knyttet til seg. Da kan vi sjekke om det var 18-års vilkåret som var utslagsgivende for Tom-datoen
+                val erOrdinærBarnetrygdTil18ÅrsDag = YearMonth.from(person.fødselsdato.plusYears(18)) == YearMonth.from(stønadTom)
+                val beløpsperioder = satsService.hentGyldigSatsFor(
+                        satstype = SatsType.ORBA,
+                        stønadFraOgMed = YearMonth.from(stønadFom),
+                        stønadTilOgMed = YearMonth.from(stønadTom)
+                )
+
+                beløpsperioder.map { beløpsperiode ->
+                    AndelTilkjentYtelse(
+                            behandlingId = behandlingId,
+                            tilkjentYtelse = tilkjentYtelse,
+                            personId = person.id,
+                            stønadFom = settRiktigStønadFom(beløpsperiode),
+                            stønadTom = settRiktigStønadTom(erOrdinærBarnetrygdTil18ÅrsDag, beløpsperiode),
+                            beløp = beløpsperiode.beløp,
+                            type = Ytelsetype.ORDINÆR_BARNETRYGD
+                    )
+                }
+            }
         }
     }
 
@@ -143,7 +153,7 @@ class BeregningService(
 }
 
 // TODO: Finn en mer smidig måte å nullsjekke
-fun maks(periodeFomSoker: LocalDate?, periodeFomBarn: LocalDate?): LocalDate {
+private fun maks(periodeFomSoker: LocalDate?, periodeFomBarn: LocalDate?): LocalDate {
     if (periodeFomSoker == null && periodeFomBarn == null) {
         throw IllegalStateException("Både søker og barn kan ikke ha null i periodeFom dato")
     }
@@ -155,9 +165,9 @@ fun maks(periodeFomSoker: LocalDate?, periodeFomBarn: LocalDate?): LocalDate {
     }
 }
 
-fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): LocalDate {
+private fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): LocalDate {
     if (periodeTomSoker == null && periodeTomBarn == null) {
-        throw IllegalStateException("Både søker og barn kan ikke ha null i periodeFom dato")
+        throw IllegalStateException("Både søker og barn kan ikke ha null i periodeTom dato")
     }
     return when {
         periodeTomSoker == null -> periodeTomBarn!!
@@ -167,6 +177,6 @@ fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): LocalDate 
     }
 }
 
-private fun overlapper(søker: PeriodeResultat, barn: PeriodeResultat) =
+private fun overlapper(søker: PeriodeResultat, barn: PeriodeResultat): Boolean =
         (søker.periodeFom == null || barn.periodeTom == null || søker.periodeFom <= barn.periodeTom)
                 && (søker.periodeTom == null || barn.periodeFom == null || søker.periodeTom >= barn.periodeFom)

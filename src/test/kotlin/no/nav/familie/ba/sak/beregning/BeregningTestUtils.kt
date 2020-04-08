@@ -1,13 +1,8 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import no.nav.nare.core.evaluations.Resultat
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -115,18 +110,4 @@ fun lagTestUtbetalingsoppdragForRevurdering(personIdent: String,
                     behandlingId
             ))
     )
-}
-
-fun lagPeriodeResultat(fnr: String, resultat: Resultat, periodeFom: LocalDate?, periodeTom: LocalDate?, behandlingResultat: BehandlingResultat): PeriodeResultat {
-    val periodeResultat = PeriodeResultat(
-            behandlingResultat = behandlingResultat,
-            personIdent = fnr,
-            periodeFom = periodeFom,
-            periodeTom = periodeTom)
-    periodeResultat.vilkårResultater =
-            setOf(VilkårResultat(periodeResultat = periodeResultat,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    resultat = resultat,
-                    begrunnelse = ""))
-    return periodeResultat
 }

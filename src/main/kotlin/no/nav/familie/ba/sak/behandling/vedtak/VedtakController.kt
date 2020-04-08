@@ -4,11 +4,9 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPeriodeResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.forbidden
 import no.nav.familie.ba.sak.common.RessursResponse.illegalState
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import java.lang.IllegalStateException
 import java.time.LocalDate
 
 @RestController
@@ -36,8 +33,6 @@ class VedtakController(
         private val vedtakService: VedtakService,
         private val fagsakService: FagsakService,
         private val stegService: StegService,
-        private val beregningService: BeregningService,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val taskRepository: TaskRepository
 ) {
 
@@ -50,32 +45,17 @@ class VedtakController(
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                 ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         return Result.runCatching {
-                    stegService.håndterVilkårsvurdering(behandling, restVilkårsvurdering)
+            stegService.håndterVilkårsvurdering(behandling, restVilkårsvurdering)
+        }.fold(
+                onSuccess = {
+                    ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
+                },
+                onFailure = {
+                    badRequest((it.cause?.message ?: it.message).toString(), null)
                 }
-                .fold(
-                        onSuccess = {
-                            Result.runCatching {
-                                beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-                                val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
-                                        ?: throw IllegalStateException("Fant ikke vedtak på behandling ved fullført vilkårsvurdering")
-                                vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
-                            }.fold(
-                                    onSuccess = {
-                                        ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
-                                    },
-                                    onFailure = {
-                                        badRequest((it.cause?.message ?: it.message).toString(), null)
-                                    }
-                            )
-                        },
-                        onFailure = {
-                            badRequest((it.cause?.message ?: it.message).toString(), null)
-                        }
-                )
+        )
     }
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"])

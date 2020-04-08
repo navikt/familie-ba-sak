@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.beregning.lagPeriodeResultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
@@ -187,6 +186,20 @@ fun lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat
                     periodeTom = stønadTom
             )
     )
+}
+
+fun lagPeriodeResultat(fnr: String, resultat: Resultat, periodeFom: LocalDate?, periodeTom: LocalDate?, behandlingResultat: BehandlingResultat): PeriodeResultat {
+    val periodeResultat = PeriodeResultat(
+            behandlingResultat = behandlingResultat,
+            personIdent = fnr,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom)
+    periodeResultat.vilkårResultater =
+            setOf(VilkårResultat(periodeResultat = periodeResultat,
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = resultat,
+                    begrunnelse = ""))
+    return periodeResultat
 }
 
 fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat): BehandlingResultat {

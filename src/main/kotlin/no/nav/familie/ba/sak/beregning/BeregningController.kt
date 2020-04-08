@@ -1,15 +1,9 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.common.RessursResponse.badRequest
-import no.nav.familie.ba.sak.common.RessursResponse.notFound
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -24,40 +18,18 @@ import java.time.LocalDate
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BeregningController(
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val beregningService: BeregningService,
-        private val behandlingResultatService: BehandlingResultatService,
-        private val vedtakService: VedtakService
+    private val fagsakService: FagsakService,
+    private val vedtakService: VedtakService
 ) {
 
+    @Deprecated("Erstattes av direkte mapping fra vilkårsvurdering")
     @PutMapping(path = ["/{vedtakId}/beregning"])
     fun oppdaterVedtakMedBeregning(@PathVariable @VedtaktilgangConstraint vedtakId: Long,
                                    @RequestBody nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-
-        FagsakController.logger.info("{} oppdaterer vedtak med beregning for vedtak med id {}", saksbehandlerId, vedtakId)
-
-        if (nyBeregning.personBeregninger.isEmpty()) {
-            return badRequest("Barnas beregning er tom", null)
-        }
 
         val vedtak = vedtakService.hent(vedtakId)
-
-        val behandling = vedtak.behandling
-        val behandlingResultatType =
-                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
-
-        if (behandlingResultatType != BehandlingResultatType.INNVILGET) {
-            return badRequest("Kan ikke lage beregning på et vedtak som ikke er innvilget", null)
-        }
-
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                                       ?: return notFound("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
-
-        // TODO: Dette skal flyttes til vilkårsvurderingen
         return Result.runCatching {
-                    beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-                    vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
+            fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
                 }
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },
