@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
+import no.nav.familie.ba.sak.beregning.domene.PeriodeVilkår
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -163,25 +164,26 @@ fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: Li
     )
 }
 
-fun lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat, søkerFnr: String, barn1Fnr: String, barn2Fnr: String, stønadFom: LocalDate, stønadTom: LocalDate): Set<PeriodeResultat> {
+fun lagPeriodeResultaterForSøkerOgToBarn(søkerFnr: String,
+                                         barn1Fnr: String,
+                                         barn2Fnr: String,
+                                         stønadFom: LocalDate,
+                                         stønadTom: LocalDate): Set<PeriodeResultat> {
     return setOf(
             lagPeriodeResultat(
                     søkerFnr,
-                    behandlingResultat = behandlingResultat,
                     resultat = Resultat.JA,
                     periodeFom = stønadFom,
                     periodeTom = stønadTom
             ),
             lagPeriodeResultat(
                     barn1Fnr,
-                    behandlingResultat = behandlingResultat,
                     resultat = Resultat.JA,
                     periodeFom = stønadFom,
                     periodeTom = stønadTom
             ),
             lagPeriodeResultat(
                     barn2Fnr,
-                    behandlingResultat = behandlingResultat,
                     resultat = Resultat.JA,
                     periodeFom = stønadFom,
                     periodeTom = stønadTom
@@ -189,17 +191,17 @@ fun lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat
     )
 }
 
-fun lagPeriodeResultat(fnr: String, resultat: Resultat, periodeFom: LocalDate?, periodeTom: LocalDate?, behandlingResultat: BehandlingResultat): PeriodeResultat {
+fun lagPeriodeResultat(fnr: String,
+                       resultat: Resultat,
+                       periodeFom: LocalDate?,
+                       periodeTom: LocalDate?): PeriodeResultat {
     val periodeResultat = PeriodeResultat(
-            behandlingResultat = behandlingResultat,
             personIdent = fnr,
             periodeFom = periodeFom,
-            periodeTom = periodeTom)
-    periodeResultat.vilkårResultater =
-            setOf(VilkårResultat(periodeResultat = periodeResultat,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    resultat = resultat,
-                    begrunnelse = ""))
+            periodeTom = periodeTom,
+            vilkårResultater = setOf(PeriodeVilkår(vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                   resultat = resultat,
+                                                   begrunnelse = "")))
     return periodeResultat
 }
 

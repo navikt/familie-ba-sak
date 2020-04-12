@@ -179,7 +179,7 @@
         <dependency>
             <groupId>no.nav.fpsak.tidsserie</groupId>
             <artifactId>fpsak-tidsserie</artifactId>
-            <version>2.0_20191220142239_d22df82</version>
+            <version>2.3-20200406045853-e288f17</version>
         </dependency>
         <dependency>
             <groupId>no.nav</groupId>

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
+import java.time.LocalDate
 import javax.persistence.*
 
 @Entity(name = "PersonResultat")

@@ -8,6 +8,7 @@ import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+
 data class RestBehandling(val aktiv: Boolean,
                           val behandlingId: Long,
                           val type: BehandlingType,
@@ -24,7 +25,6 @@ data class RestPersonResultat(
         val personIdent: String,
         val vilkårResultater: List<RestVilkårResultat>?
 )
-
 data class RestVilkårResultat(
         val vilkårType: Vilkår,
         val resultat: Resultat,
