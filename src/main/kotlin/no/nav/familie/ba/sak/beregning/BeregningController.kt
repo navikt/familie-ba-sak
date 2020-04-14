@@ -113,6 +113,8 @@ class BeregningController(
                     RestBeregningDetalj(
                             person = RestPerson(
                                     type = personForAndel.type,
+                                    kjønn = personForAndel.kjønn,
+                                    navn = personForAndel.navn,
                                     fødselsdato = personForAndel.fødselsdato,
                                     personIdent = personForAndel.personIdent.ident
                             ),
