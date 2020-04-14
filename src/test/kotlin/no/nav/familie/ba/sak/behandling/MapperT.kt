@@ -166,23 +166,19 @@ class MapperT {
 
         assert(periodeResultater[0].vilkårResultater.size == 1)
         assert(periodeResultater[0].personIdent == fnr1)
-        assert(periodeResultater[0].vilkårResultater.containsAllVilkårType(listOf(Vilkår.UNDER_18_ÅR)))
+        assert(periodeResultater[0].vilkårResultater.any { it.vilkårType == Vilkår.UNDER_18_ÅR })
 
         assert(periodeResultater[1].vilkårResultater.size == 2)
         assert(periodeResultater[1].personIdent == fnr1)
-        assert(periodeResultater[1].vilkårResultater.containsAllVilkårType(listOf(Vilkår.UNDER_18_ÅR, Vilkår.BOSATT_I_RIKET)))
+        assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.UNDER_18_ÅR })
+        assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
 
         assert(periodeResultater[2].vilkårResultater.size == 1)
         assert(periodeResultater[2].personIdent == fnr1)
-        assert(periodeResultater[2].vilkårResultater.containsAllVilkårType(listOf(Vilkår.BOSATT_I_RIKET)))
+        assert(periodeResultater[2].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
 
         assert(periodeResultater[3].vilkårResultater.size == 1)
         assert(periodeResultater[3].personIdent == fnr2)
-        assert(periodeResultater[3].vilkårResultater.containsAllVilkårType(listOf(Vilkår.LOVLIG_OPPHOLD)))
+        assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
     }
-}
-
-private fun Set<PeriodeVilkår>.containsAllVilkårType(vilkårTyper: List<Vilkår>) : Boolean {
-    val periodersVilkårTyper = this.map { it.vilkårType }
-    return periodersVilkårTyper.containsAll(vilkårTyper)
 }
