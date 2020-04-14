@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import java.time.LocalDate
 
 data class RestBeregningOversikt(
         val periodeFom: LocalDate?,
         val periodeTom: LocalDate?,
-        val sakstype: String,
+        val sakstype: BehandlingKategori,
         val detaljvisning: List<RestBeregningDetalj>,
         val stønadstype: List<Ytelsetype>,
         val antallBarn: Int,

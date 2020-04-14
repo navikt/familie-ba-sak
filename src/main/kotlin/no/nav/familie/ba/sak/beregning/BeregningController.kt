@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.beregning
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakController
@@ -87,7 +88,7 @@ class BeregningController(
                     .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                     .map { segment ->
                         val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter { segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom)) }
-                        mapTilRestBeregningOversikt(segment, andelerForSegment, personopplysningGrunnlag)
+                        mapTilRestBeregningOversikt(segment, andelerForSegment, tilkjentYtelseForBehandling.behandling, personopplysningGrunnlag)
                     }
         }.fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(data = it)) },
@@ -99,14 +100,17 @@ class BeregningController(
         )
     }
 
-    private fun mapTilRestBeregningOversikt(segment: LocalDateSegment<Int>, andelerForSegment: List<AndelTilkjentYtelse>, personopplysningGrunnlag: PersonopplysningGrunnlag): RestBeregningOversikt {
+    private fun mapTilRestBeregningOversikt(segment: LocalDateSegment<Int>,
+                                            andelerForSegment: List<AndelTilkjentYtelse>,
+                                            behandling: Behandling,
+                                            personopplysningGrunnlag: PersonopplysningGrunnlag): RestBeregningOversikt {
         return RestBeregningOversikt(
                 periodeFom = segment.fom,
                 periodeTom = segment.tom,
                 stønadstype = andelerForSegment.map(AndelTilkjentYtelse::type),
                 utbetaltPerMnd = segment.value,
                 antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.id == andel.personId } },
-                sakstype = "", //TODO: Denne vet jeg ikke hvor skal komme fra?
+                sakstype = behandling.kategori,
                 detaljvisning = andelerForSegment.map { andel ->
                     val personForAndel = personopplysningGrunnlag.personer.find { person -> andel.personId == person.id }
                             ?: throw java.lang.IllegalStateException("Fant ikke personopplysningsgrunnlag for andel med personId ${andel.personId}")
