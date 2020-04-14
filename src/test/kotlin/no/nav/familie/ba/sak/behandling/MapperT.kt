@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
+import no.nav.familie.ba.sak.beregning.domene.PeriodeVilkår
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagBehandlingResultat
@@ -36,13 +38,14 @@ import java.time.LocalDate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureWireMock(port = 28085)
 class MapperT {
+
     @Autowired
     lateinit var behandlingService: BehandlingService
 
     @Autowired
     lateinit var fagsakService: FagsakService
 
-    fun personrestiltimeline(personres: List<PersonResultat>): LocalDateTimeline<List<VilkårTmp>> {
+    fun kombinerPersonResultater(personres: List<PersonResultat>): LocalDateTimeline<List<VilkårTmp>> {
         val flattMedPerson: List<VilkårTmp> = personres.flatMap { personResultat ->
             personResultat.vilkårResultater.map {
                 VilkårTmp(personIdent = personResultat.personIdent,
@@ -60,7 +63,7 @@ class MapperT {
         val initSammenlagtTidslinje =
                 LocalDateTimeline(listOf(LocalDateSegment(førsteSegment.fom, førsteSegment.tom, listOf(førsteSegment.value))))
         val resterendeTidslinjer = tidslinjer.drop(1)
-        return resterendeTidslinjer.fold(initSammenlagtTidslinje) { lhs, rhs -> (kombinerTidslinjer(lhs, rhs)) }
+        return resterendeTidslinjer.fold(initSammenlagtTidslinje) { sammenlagt, neste -> (kombinerTidslinjer(sammenlagt, neste)) }
     }
 
     private fun vilkårResultatTilTimeline(it: VilkårTmp): LocalDateTimeline<VilkårTmp> =
@@ -73,6 +76,38 @@ class MapperT {
         return lhs.combine(rhs,
                            { dateInterval, left, right -> StandardCombinators.allValues<VilkårTmp>(dateInterval, left, right) },
                            LocalDateTimeline.JoinStyle.CROSS_JOIN)
+    }
+
+    private fun kombinertidslinjerr(lhs: LocalDateTimeline<List<VilkårResultat>>,
+                                    rhs: LocalDateTimeline<VilkårResultat>): LocalDateTimeline<List<VilkårResultat>> {
+        return lhs.combine(rhs,
+                           { dateInterval, left, right ->
+                               StandardCombinators.allValues<VilkårResultat>(dateInterval,
+                                                                             left,
+                                                                             right)
+                           },
+                           LocalDateTimeline.JoinStyle.CROSS_JOIN)
+    }
+
+
+    fun personResultatTilPeriodeResultat(personres: PersonResultat): List<PeriodeResultat> {
+        val tidslinjer: List<LocalDateTimeline<VilkårResultat>> = personres.vilkårResultater.map { vilkårResultat ->
+            LocalDateTimeline(listOf(LocalDateSegment(vilkårResultat.periodeFom,
+                                                      vilkårResultat.periodeTom,
+                                                      vilkårResultat)))
+        }
+        val førsteSegment = tidslinjer.first().toSegments().first()
+        val initSammenlagtTidslinje =
+                LocalDateTimeline(listOf(LocalDateSegment(førsteSegment.fom, førsteSegment.tom, listOf(førsteSegment.value))))
+        val resterendeTidslinjer = tidslinjer.drop(1)
+        val kombinertTidslinje = resterendeTidslinjer.fold(initSammenlagtTidslinje) { sammenlagt, neste -> (kombinertidslinjerr(sammenlagt, neste)) }
+        val periodeResultater = kombinertTidslinje.toSegments().map { segment -> PeriodeResultat(
+                personIdent = personres.personIdent,
+                periodeFom = segment.fom,
+                periodeTom = segment.tom,
+                vilkårResultater = segment.value.map { PeriodeVilkår(it.vilkårType, it.resultat, it.begrunnelse) }.toSet()
+        ) }
+        return periodeResultater
     }
 
     @Test
@@ -106,7 +141,7 @@ class MapperT {
                                periodeTom = d4,
                                begrunnelse = "Fordi"))
 
-        val kombinert = personrestiltimeline(listOf(personResultat))
+        val kombinert = kombinerPersonResultater(listOf(personResultat))
 
         assert(kombinert.toSegments().size.equals(3))
         val verdier1 = kombinert.getSegment(LocalDateInterval(d1, d2))
@@ -123,7 +158,7 @@ class MapperT {
     }
 
     @Test
-    fun `flere personer`() {
+    fun `Returnerer rett når flere personer`() {
         val d1 = LocalDate.now().minusMonths(4);
         val d2 = LocalDate.now().minusMonths(2)
         val d3 = LocalDate.now()
@@ -156,8 +191,8 @@ class MapperT {
 
 
         val personResultat2 = PersonResultat(id = 2,
-                                            behandlingResultat = behandlingResultat,
-                                            personIdent = "")
+                                             behandlingResultat = behandlingResultat,
+                                             personIdent = "")
         personResultat2.vilkårResultater = setOf(
                 VilkårResultat(id = 2,
                                personResultat = personResultat,
@@ -167,7 +202,7 @@ class MapperT {
                                periodeTom = d5,
                                begrunnelse = "Fordi"))
 
-        val kombinert = personrestiltimeline(listOf(personResultat, personResultat2))
+        val kombinert = kombinerPersonResultater(listOf(personResultat, personResultat2))
 
         assert(kombinert.toSegments().size.equals(4))
         val verdier1 = kombinert.getSegment(LocalDateInterval(d1, d2))
@@ -189,4 +224,76 @@ class MapperT {
     }
 
     //TODO: Håndtering av motstridende samme vilkår
+
+    @Test
+    fun `map til perioderesultater`() {
+        val d1 = LocalDate.now().minusMonths(4);
+        val d2 = LocalDate.now().minusMonths(2)
+        val d3 = LocalDate.now()
+        val d4 = LocalDate.now().plusMonths(1)
+        val d5 = LocalDate.now().plusMonths(3)
+
+        val fnr = randomFnr()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
+
+        val fnr1 = "1111111111"
+        val fnr2 = "2222222222"
+        val personResultat = PersonResultat(id = 1,
+                                            behandlingResultat = behandlingResultat,
+                                            personIdent = fnr1)
+        personResultat.vilkårResultater = setOf(
+                VilkårResultat(id = 1,
+                               personResultat = personResultat,
+                               vilkårType = Vilkår.UNDER_18_ÅR,
+                               resultat = Resultat.JA,
+                               periodeFom = d1,
+                               periodeTom = d3,
+                               begrunnelse = "Fordi"),
+                VilkårResultat(id = 2,
+                               personResultat = personResultat,
+                               vilkårType = Vilkår.BOSATT_I_RIKET,
+                               resultat = Resultat.JA,
+                               periodeFom = d2,
+                               periodeTom = d4,
+                               begrunnelse = "Fordi"))
+        val personResultat2 = PersonResultat(id = 2,
+                                             behandlingResultat = behandlingResultat,
+                                             personIdent = fnr2)
+        personResultat2.vilkårResultater = setOf(
+                VilkårResultat(id = 2,
+                               personResultat = personResultat,
+                               vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                               resultat = Resultat.JA,
+                               periodeFom = d2,
+                               periodeTom = d5,
+                               begrunnelse = "Fordi"))
+        val allePersonResultater = listOf(personResultat, personResultat2)
+        val periodeResultater = allePersonResultater.map { personResultatTilPeriodeResultat(it) }.flatten()
+
+        assert(periodeResultater.size == 4)
+
+        println(periodeResultater[0].vilkårResultater.size)
+        println(periodeResultater[0])
+        assert(periodeResultater[0].vilkårResultater.size == 1)
+        assert(periodeResultater[0].personIdent == fnr1)
+        assert(periodeResultater[0].vilkårResultater.all { it.vilkårType == Vilkår.UNDER_18_ÅR })
+
+        println(periodeResultater[1].vilkårResultater.size)
+        println(periodeResultater[1])
+        assert(periodeResultater[1].vilkårResultater.size == 3)
+        assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.UNDER_18_ÅR })
+        assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
+        assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
+
+        println(periodeResultater[2].vilkårResultater.size)
+        assert(periodeResultater[2].vilkårResultater.size == 2)
+        assert(periodeResultater[2].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
+        assert(periodeResultater[2].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
+
+        println(periodeResultater[3].vilkårResultater.size)
+        assert(periodeResultater[3].vilkårResultater.size == 1)
+        assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
+    }
 }
