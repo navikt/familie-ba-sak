@@ -105,7 +105,7 @@ private fun vilkårResultatTilTimeline(it: VilkårTmp): LocalDateTimeline<Vilkå
                                                   it.periodeTom,
                                                   it)))
 private fun  kombinerTidslinjer(lhs: LocalDateTimeline<List<VilkårTmp>>, rhs: LocalDateTimeline<VilkårTmp>): LocalDateTimeline<List<VilkårTmp>> {
-    return lhs.combine(rhs, StandardCombinators::allValues, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+    return lhs.combine(rhs, { dateInterval, lhs, rhs -> StandardCombinators.allValues<VilkårTmp>(dateInterval, lhs, rhs) }, LocalDateTimeline.JoinStyle.CROSS_JOIN)
 }
 
 /*

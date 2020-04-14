@@ -161,17 +161,15 @@ class ØkonomiIntegrasjonTest {
 
     private fun lagBehandlingResultat(behandling: Behandling, søkerFnr: String, barnFnr: String, stønadFom: LocalDate, stønadTom: LocalDate): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.periodeResultater = setOf(
+        behandlingResultat.periodeResultater = setOf( //TODO: bør koble på personresultat her, med referanse opp til behandling. opprett en lagPersonResultat tilsvarende
                 lagPeriodeResultat(
                         søkerFnr,
-                        behandlingResultat = behandlingResultat,
                         resultat = Resultat.JA,
                         periodeFom = stønadFom,
                         periodeTom = stønadTom
                 ),
                 lagPeriodeResultat(
                         barnFnr,
-                        behandlingResultat = behandlingResultat,
                         resultat = Resultat.JA,
                         periodeFom = stønadFom,
                         periodeTom = stønadTom

@@ -50,7 +50,6 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 11, 1)
         val periodeResultatBarn = lagPeriodeResultat(
                 barn1Fnr,
-                behandlingResultat = behandlingResultat,
                 resultat = Resultat.JA,
                 periodeFom = periodeFom,
                 periodeTom = periodeTom
@@ -58,7 +57,6 @@ class BeregningServiceTest {
 
         val periodeResultatSøker = lagPeriodeResultat(
                 søkerFnr,
-                behandlingResultat = behandlingResultat,
                 resultat = Resultat.JA,
                 periodeFom = periodeFom,
                 periodeTom = periodeTom
@@ -92,7 +90,6 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 11, 1)
         val periodeResultatBarn = lagPeriodeResultat(
                 barn1Fnr,
-                behandlingResultat = behandlingResultat,
                 resultat = Resultat.JA,
                 periodeFom = periodeFom,
                 periodeTom = periodeTom
@@ -100,7 +97,6 @@ class BeregningServiceTest {
 
         val periodeResultatSøker = lagPeriodeResultat(
                 søkerFnr,
-                behandlingResultat = behandlingResultat,
                 resultat = Resultat.NEI,
                 periodeFom = periodeFom,
                 periodeTom = periodeTom
@@ -144,35 +140,30 @@ class BeregningServiceTest {
         val periodeResultater = mutableSetOf(
                 lagPeriodeResultat(
                         søkerFnr,
-                        behandlingResultat = behandlingResultat,
                         resultat = Resultat.JA,
                         periodeFom = periode1Fom,
                         periodeTom = periode1Tom
                 ),
                 lagPeriodeResultat(
                         søkerFnr,
-                        behandlingResultat = behandlingResultat,
                         resultat = Resultat.NEI,
                         periodeFom = periode2Fom,
                         periodeTom = periode2Tom
                 ),
                 lagPeriodeResultat(
                         søkerFnr,
-                        behandlingResultat = behandlingResultat,
                         resultat = Resultat.JA,
                         periodeFom = periode3Fom,
                         periodeTom = periode3Tom
                 ),
                 lagPeriodeResultat(
                         barn1Fnr,
-                        behandlingResultat = behandlingResultat,
                         resultat = Resultat.JA,
                         periodeFom = periode1Fom.minusYears(1),
                         periodeTom = periode3Tom.plusYears(1)
                 ),
                 lagPeriodeResultat(
                         barn2Fnr,
-                        behandlingResultat = behandlingResultat,
                         resultat = Resultat.JA,
                         periodeFom = periode2Midt,
                         periodeTom = periode3Midt

@@ -147,7 +147,7 @@ class BeregningServiceIntegrationTest {
         val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.id
 
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01, dato_2020_01_01.plusYears(17))
+        behandlingResultat.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01, dato_2020_01_01.plusYears(17))//TODO: sjekk om personresultat bør lages først
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)

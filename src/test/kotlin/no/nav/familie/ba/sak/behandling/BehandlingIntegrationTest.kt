@@ -184,7 +184,7 @@ class BehandlingIntegrationTest {
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, stønadFom, stønadTom)
+        behandlingResultat.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(søkerFnr, barn1Fnr, barn2Fnr, stønadFom, stønadTom)
         behandlingResultatRepository.save(behandlingResultat)
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
@@ -250,24 +250,21 @@ class BehandlingIntegrationTest {
                 ansvarligSaksbehandler = "saksbehandler1")
 
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.periodeResultater = setOf(
+        behandlingResultat.periodeResultater = setOf(//TODO: Integrasjonstest bør lagre med personresultater og benytte mapper
                 lagPeriodeResultat(
                         søkerFnr,
-                        behandlingResultat = behandlingResultat,
                         resultat = Resultat.JA,
                         periodeFom = dato_2020_01_01.minusMonths(1),
                         periodeTom = stønadTom
                 ),
                 lagPeriodeResultat(
                         barn1Fnr,
-                        behandlingResultat = behandlingResultat,
                         resultat = Resultat.JA,
                         periodeFom = dato_2020_01_01.minusMonths(1),
                         periodeTom = stønadTom
                 ),
                 lagPeriodeResultat(
                         barn2Fnr,
-                        behandlingResultat = behandlingResultat,
                         resultat = Resultat.JA,
                         periodeFom = dato_2020_10_01.minusMonths(1),
                         periodeTom = stønadTom
@@ -320,14 +317,14 @@ class BehandlingIntegrationTest {
                 ansvarligSaksbehandler = "saksbehandler1")
 
         val behandlingResultat1 = BehandlingResultat(behandling = behandling)
-        behandlingResultat1.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat1, søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01.minusMonths(1), stønadTom)
+        behandlingResultat1.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01.minusMonths(1), stønadTom)//TODO: Integrasjonstest bør lagre med personresultater og benytte mapper
         behandlingResultatRepository.save(behandlingResultat1)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
 
         val behandlingResultat2 = BehandlingResultat(behandling = behandling)
-        behandlingResultat2.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(behandlingResultat2, søkerFnr, barn1Fnr, barn3Fnr, dato_2021_01_01.minusMonths(1), stønadTom)
+        behandlingResultat2.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(søkerFnr, barn1Fnr, barn3Fnr, dato_2021_01_01.minusMonths(1), stønadTom) //TODO: Integrasjonstest bør lagre med personresultater og benytte mapper
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat2)
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
