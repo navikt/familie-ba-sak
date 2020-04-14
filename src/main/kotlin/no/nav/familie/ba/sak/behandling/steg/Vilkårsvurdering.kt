@@ -23,12 +23,10 @@ class Vilkårsvurdering(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        val vilkårsvurdertBehandling = behandlingService.settBegrunnelseForVilkårsvurdering(
-                behandlingService.hent(behandlingId = behandling.id),
-                data.begrunnelse)
+        val vilkårsvurdertBehandling = behandlingService.hent(behandlingId = behandling.id)
 
-        if (data.periodeResultater.isNotEmpty()) {
-            vilkårService.kontrollerVurderteVilkårOgLagResultat(data.periodeResultater,
+        if (data.personResultater.isNotEmpty()) {
+            vilkårService.kontrollerVurderteVilkårOgLagResultat(data.personResultater,
                                                                 vilkårsvurdertBehandling.id)
         } else {
             vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)

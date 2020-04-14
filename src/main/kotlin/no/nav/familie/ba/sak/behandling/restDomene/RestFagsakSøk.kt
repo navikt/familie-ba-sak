@@ -4,14 +4,18 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 
 
-data class RestFunnetFagsak(
-    val fagsakId: Long,
-    val personType: PersonType
+data class RestSøkParam(
+        var personIdent: String
 )
 
-data class RestFagsakSøk(
-        val personIdent: String,
-        val navn: String,
-        val kjønn: Kjønn,
-        val fagsaker: List<RestFunnetFagsak>
+enum class FagsakDeltagerRolle {
+    BARN, FORELDER, UKJENT
+}
+
+data class RestFagsakDeltager(
+        var navn: String?= null,
+        var ident: String,
+        var rolle: FagsakDeltagerRolle,
+        var kjønn: Kjønn?= Kjønn.UKJENT,
+        var fagsakId: Long?= null
 )

@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.lagTestUtbetalingsoppdragForFGB
 import no.nav.familie.ba.sak.beregning.lagTestUtbetalingsoppdragForOpphør

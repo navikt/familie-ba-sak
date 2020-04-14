@@ -2,7 +2,8 @@
 Saksbehandling for barnetrygd
 
 ## Kjøring lokalt
-For å kjøre opp appen lokalt kan en kjøre `DevLauncher` med Spring-profilen `dev` satt.
+For å kjøre opp appen lokalt kan en kjøre `DevLauncher` med Spring-profilen `dev` satt. Dette kan feks gjøres ved å sette
+`-Dspring.profiles.active=dev` under Edit Configurations -> VM Options.
 Appen tilgjengeliggjøres da på `localhost:8089`. 
 
 ### Database

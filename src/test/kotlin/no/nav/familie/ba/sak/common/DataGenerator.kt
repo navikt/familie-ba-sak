@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -62,7 +62,7 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak) = Behandling(id = nesteBehandl
                                                                underkategori = BehandlingUnderkategori.ORDINÆR)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
-        id= nestePersonId(),
+        id = nestePersonId(),
         aktørId = randomAktørId(),
         personIdent = PersonIdent(randomFnr()),
         fødselsdato = fødselsdato,
@@ -85,10 +85,10 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
         )
 
 fun lagAndelTilkjentYtelse(fom: String,
-                    tom: String,
-                    ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD,
-                    beløp: Int = sats(ytelsetype),
-                    behandling: Behandling = lagBehandling()): AndelTilkjentYtelse {
+                           tom: String,
+                           ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD,
+                           beløp: Int = sats(ytelsetype),
+                           behandling: Behandling = lagBehandling()): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
             personId = tilfeldigPerson().id,
             behandlingId = behandling.id,
@@ -162,19 +162,20 @@ fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: Li
     )
 }
 
-fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat) : BehandlingResultat {
+fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat): BehandlingResultat {
     val behandlingResultat = BehandlingResultat(
             behandling = behandling
     )
-    val periodeResultat = PeriodeResultat(
+    val personResultat = PersonResultat(
             behandlingResultat = behandlingResultat,
-            personIdent = fnr,
-            periodeFom = LocalDate.now(),
-            periodeTom = LocalDate.now())
-    periodeResultat.vilkårResultater =
-            setOf(VilkårResultat(periodeResultat = periodeResultat,
+            personIdent = fnr)
+    personResultat.vilkårResultater =
+            setOf(VilkårResultat(personResultat = personResultat,
                                  vilkårType = Vilkår.BOSATT_I_RIKET,
-                                 resultat = resultat))
-    behandlingResultat.periodeResultater = setOf(periodeResultat)
+                                 resultat = resultat,
+                                 periodeFom = LocalDate.now(),
+                                 periodeTom = LocalDate.now(),
+                                 begrunnelse = ""))
+    behandlingResultat.personResultater = setOf(personResultat)
     return behandlingResultat
 }

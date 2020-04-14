@@ -56,10 +56,10 @@ class BeregningService(
     }
 
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling: Behandling,
-                                                    utbetalingsoppdrag: Utbetalingsoppdrag) {
+                                                    utbetalingsoppdrag: Utbetalingsoppdrag): TilkjentYtelse {
 
         val nyTilkjentYtelse = populerTilkjentYtelse(behandling, utbetalingsoppdrag)
-        tilkjentYtelseRepository.save(nyTilkjentYtelse)
+        return tilkjentYtelseRepository.save(nyTilkjentYtelse)
     }
 
     private fun populerTilkjentYtelse(behandling: Behandling,

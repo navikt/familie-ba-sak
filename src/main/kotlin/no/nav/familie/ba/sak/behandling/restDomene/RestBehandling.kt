@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
@@ -17,26 +17,28 @@ data class RestBehandling(val aktiv: Boolean,
                           val personer: List<RestPerson>,
                           val opprettetTidspunkt: LocalDateTime,
                           val underkategori: BehandlingUnderkategori,
-                          val periodeResultater: List<RestPeriodeResultat>,
-                          val vedtakForBehandling: List<RestVedtak?>,
-                          val begrunnelse: String)
+                          val personResultater: List<RestPersonResultat>,
+                          val vedtakForBehandling: List<RestVedtak?>)
 
-data class RestPeriodeResultat(
+data class RestPersonResultat(
         val personIdent: String,
-        val periodeFom: LocalDate?,
-        val periodeTom: LocalDate?,
         val vilkårResultater: List<RestVilkårResultat>?
 )
 
 data class RestVilkårResultat(
         val vilkårType: Vilkår,
-        val resultat: Resultat
+        val resultat: Resultat,
+        val periodeFom: LocalDate?,
+        val periodeTom: LocalDate?,
+        val begrunnelse: String
 )
 
-fun PeriodeResultat.tilRestPeriodeResultat() = RestPeriodeResultat(personIdent = this.personIdent,
-                                                                   periodeFom = this.periodeFom,
-                                                                   periodeTom = this.periodeTom,
-                                                                   vilkårResultater = this.vilkårResultater.map { resultat ->
+fun PersonResultat.tilRestPersonResultat() = RestPersonResultat(personIdent = this.personIdent,
+                                                                vilkårResultater = this.vilkårResultater.map { resultat ->
                                                                        RestVilkårResultat(resultat = resultat.resultat,
-                                                                                          vilkårType = resultat.vilkårType)
+                                                                                          vilkårType = resultat.vilkårType,
+                                                                                          periodeFom = resultat.periodeFom,
+                                                                                          periodeTom = resultat.periodeTom,
+                                                                                          begrunnelse = resultat.begrunnelse
+                                                                                          )
                                                                    })

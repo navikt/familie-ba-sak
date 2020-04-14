@@ -90,7 +90,6 @@ class VedtakServiceTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandling = behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
 
@@ -125,7 +124,6 @@ class VedtakServiceTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandling = behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.NEI)
 
@@ -159,7 +157,6 @@ class VedtakServiceTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandling = behandlingService.settBegrunnelseForVilkårsvurdering(behandling, "")
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
