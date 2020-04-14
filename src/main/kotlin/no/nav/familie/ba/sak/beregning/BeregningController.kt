@@ -111,7 +111,7 @@ class BeregningController(
                 utbetaltPerMnd = segment.value,
                 antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.id == andel.personId } },
                 sakstype = behandling.kategori,
-                detaljvisning = andelerForSegment.map { andel ->
+                beregningDetaljer = andelerForSegment.map { andel ->
                     val personForAndel = personopplysningGrunnlag.personer.find { person -> andel.personId == person.id }
                             ?: throw java.lang.IllegalStateException("Fant ikke personopplysningsgrunnlag for andel med personId ${andel.personId}")
                     RestBeregningDetalj(

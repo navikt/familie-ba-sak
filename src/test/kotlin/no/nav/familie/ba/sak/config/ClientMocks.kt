@@ -42,6 +42,10 @@ class ClientMocks {
                                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
                                                        navn = "Gutten Barnesen",
                                                        fødselsdato = LocalDate.of(2015, 10, 3)),
+                                     Familierelasjoner(personIdent = Personident(id = barnFnr[1]),
+                                             relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                             navn = "Jenta Barnesen",
+                                             fødselsdato = LocalDate.of(2011, 12, 22)),
                                      Familierelasjoner(personIdent = Personident(id = søkerFnr[1]),
                                                        relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
 
