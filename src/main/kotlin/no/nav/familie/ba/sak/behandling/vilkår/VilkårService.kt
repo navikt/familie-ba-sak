@@ -1,12 +1,14 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
+import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.springframework.stereotype.Service
@@ -19,6 +21,7 @@ class VilkårService(
 ) {
 
     fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
+        val behandling = behandlingService.hent(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
         val barn = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
@@ -34,19 +37,12 @@ class VilkårService(
         behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
-            val spesifikasjonerForPerson = spesifikasjonerForPerson(person)
+            val spesifikasjonerForPerson = spesifikasjonerForPerson(person, behandling.kategori)
             val evaluering = spesifikasjonerForPerson.evaluer(
                     Fakta(personForVurdering = person)
             )
-            personResultat.vilkårResultater = evaluering.children.map { child ->
-                VilkårResultat(personResultat = personResultat,
-                               resultat = child.resultat,
-                               vilkårType = Vilkår.valueOf(child.identifikator),
-                               periodeFom = barn.first().fødselsdato.plusMonths(1),
-                               periodeTom = barn.first().fødselsdato.plusYears(18).minusMonths(1),
-                               begrunnelse = "")
-
-            }.toSet()
+            val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
+            personResultat.vilkårResultater = vilkårResultater(personResultat, barn, evalueringer)
             personResultat
         }.toSet()
 
@@ -54,6 +50,7 @@ class VilkårService(
     }
 
     fun initierVilkårvurderingForBehandling(behandlingId: Long): BehandlingResultat {
+        val behandling = behandlingService.hent(behandlingId)
         val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
         if (aktivBehandlingResultat != null) {
             return aktivBehandlingResultat
@@ -70,7 +67,7 @@ class VilkårService(
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
-            val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.VILKÅRGJELDERFOR)
+            val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.valueOfType(behandling.kategori))
             personResultat.vilkårResultater = relevanteVilkår.map { vilkår ->
                 VilkårResultat(personResultat = personResultat,
                                resultat = Resultat.KANSKJE,
@@ -83,8 +80,8 @@ class VilkårService(
         return behandlingResultatService.lagre(behandlingResultat)
     }
 
-     fun kontrollerVurderteVilkårOgLagResultat(personResultater: List<RestPersonResultat>,
-                                               behandlingId: Long): BehandlingResultat {
+    fun kontrollerVurderteVilkårOgLagResultat(personResultater: List<RestPersonResultat>,
+                                              behandlingId: Long): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(
                 behandling = behandlingService.hent(behandlingId),
                 aktiv = true)
@@ -110,11 +107,24 @@ class VilkårService(
         return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
     }
 
-    private fun spesifikasjonerForPerson(person: Person): Spesifikasjon<Fakta> {
-        val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.VILKÅRGJELDERFOR)
+    private fun spesifikasjonerForPerson(person: Person, behandlingKategori: BehandlingKategori): Spesifikasjon<Fakta> {
+        val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.valueOfType(behandlingKategori))
 
         return relevanteVilkår
                 .map { vilkår -> vilkår.spesifikasjon }
                 .reduce { samledeVilkår, vilkår -> samledeVilkår og vilkår }
+    }
+
+    private fun vilkårResultater(personResultat: PersonResultat,
+                                 barn: List<Person>,
+                                 evalueringer: List<Evaluering>): Set<VilkårResultat> {
+        return evalueringer.map { child ->
+            VilkårResultat(personResultat = personResultat,
+                           resultat = child.resultat,
+                           vilkårType = Vilkår.valueOf(child.identifikator),
+                           periodeFom = barn.first().fødselsdato.plusMonths(1),
+                           periodeTom = barn.first().fødselsdato.plusYears(18).minusMonths(1),
+                           begrunnelse = "")
+        }.toSet()
     }
 }
