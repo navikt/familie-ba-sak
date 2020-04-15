@@ -5,18 +5,17 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.fpsak.tidsserie.LocalDateSegment
-import no.nav.fpsak.tidsserie.LocalDateTimeline
-import no.nav.fpsak.tidsserie.StandardCombinators
+import no.nav.fpsak.tidsserie.*
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 
-data class PeriodeResultat (
+data class PeriodeResultat(
         val personIdent: String,
         val periodeFom: LocalDate?,
         val periodeTom: LocalDate?,
         val vilkårResultater: Set<PeriodeVilkår>
-){
+) {
+
     fun hentSamletResultat(): BehandlingResultatType {
         return when {
             vilkårResultater.all { it.resultat == Resultat.JA } -> {
@@ -34,17 +33,17 @@ data class PeriodeVilkår(
         val resultat: Resultat,
         var begrunnelse: String)
 
-fun BehandlingResultat.tilPeriodeResultater() : Set<PeriodeResultat> {
+fun BehandlingResultat.tilPeriodeResultater(): Set<PeriodeResultat> {
     return this.personResultater.map { personResultatTilPeriodeResultater(it) }.flatten().toSet()
 }
 
 private fun kombinerVerdier(lhs: LocalDateTimeline<List<VilkårResultat>>,
                             rhs: LocalDateTimeline<VilkårResultat>): LocalDateTimeline<List<VilkårResultat>> {
     return lhs.combine(rhs,
-                       { dateInterval, left, right ->
-                           StandardCombinators.allValues<VilkårResultat>(dateInterval,
-                                                                         left,
-                                                                         right)
+                       { datoIntervall, sammenlagt, neste ->
+                           StandardCombinators.allValues<VilkårResultat>(datoIntervall,
+                                                                         sammenlagt,
+                                                                         neste)
                        },
                        LocalDateTimeline.JoinStyle.CROSS_JOIN)
 }
