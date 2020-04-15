@@ -70,10 +70,20 @@ class VilkårService(
 
             val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.valueOfType(behandling.kategori))
             personResultat.vilkårResultater = relevanteVilkår.map { vilkår ->
+                if (vilkår == Vilkår.UNDER_18_ÅR) {
+                    val evaluering = vilkår.spesifikasjon.evaluer(Fakta(personForVurdering = person))
+                    VilkårResultat(personResultat = personResultat,
+                                   resultat = evaluering.resultat,
+                                   vilkårType = vilkår,
+                                   periodeFom = person.fødselsdato.plusMonths(1),
+                                   periodeTom = person.fødselsdato.plusYears(18).minusMonths(1),
+                                   begrunnelse = "Vurdert og satt automatisk")
+                } else {
                 VilkårResultat(personResultat = personResultat,
                                resultat = Resultat.KANSKJE,
                                vilkårType = vilkår,
                                begrunnelse = "")
+                }
             }.toSet()
             personResultat
         }.toSet()
