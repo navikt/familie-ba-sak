@@ -159,20 +159,24 @@ class ØkonomiIntegrasjonTest {
         Assertions.assertTrue(oppdragIdListe.contains(OppdragId(fnr, behandling.id)))
     }
 
-    private fun lagBehandlingResultat(behandling: Behandling, søkerFnr: String, barnFnr: String, stønadFom: LocalDate, stønadTom: LocalDate): BehandlingResultat {
+    private fun lagBehandlingResultat(behandling: Behandling,
+                                      søkerFnr: String,
+                                      barnFnr: String,
+                                      stønadFom: LocalDate,
+                                      stønadTom: LocalDate): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.periodeResultater = setOf( //TODO: bør koble på personresultat her, med referanse opp til behandling. opprett en lagPersonResultat tilsvarende
-                lagPeriodeResultat(
-                        søkerFnr,
-                        resultat = Resultat.JA,
-                        periodeFom = stønadFom,
-                        periodeTom = stønadTom
+        behandlingResultat.personResultater = setOf(
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = søkerFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = stønadFom,
+                                  periodeTom = stønadTom
                 ),
-                lagPeriodeResultat(
-                        barnFnr,
-                        resultat = Resultat.JA,
-                        periodeFom = stønadFom,
-                        periodeTom = stønadTom
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = barnFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = stønadFom,
+                                  periodeTom = stønadTom
                 )
         )
         return behandlingResultat

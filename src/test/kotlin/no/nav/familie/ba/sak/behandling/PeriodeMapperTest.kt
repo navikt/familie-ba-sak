@@ -84,8 +84,6 @@ class PeriodeMapperTest {
         assert(segment3.value[0].vilkårType == Vilkår.BOSATT_I_RIKET)
     }
 
-    //TODO: Håndtering av motstridende samme vilkår
-
     @Test
     fun `Mapper PersonResultater til PeriodeResultater korrekt`() {
         val d1 = LocalDate.now().minusMonths(2);

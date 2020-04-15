@@ -148,7 +148,7 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-     fun `Bruk samme behandling hvis nytt barn kommer på fagsak med aktiv behandling`() {
+    fun `Bruk samme behandling hvis nytt barn kommer på fagsak med aktiv behandling`() {
         val morId = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
@@ -184,7 +184,8 @@ class BehandlingIntegrationTest {
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(søkerFnr, barn1Fnr, barn2Fnr, stønadFom, stønadTom)
+        behandlingResultat.personResultater =
+                lagPersonResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, stønadFom, stønadTom)
         behandlingResultatRepository.save(behandlingResultat)
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
@@ -250,24 +251,24 @@ class BehandlingIntegrationTest {
                 ansvarligSaksbehandler = "saksbehandler1")
 
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.periodeResultater = setOf(//TODO: Integrasjonstest bør lagre med personresultater og benytte mapper
-                lagPeriodeResultat(
-                        søkerFnr,
-                        resultat = Resultat.JA,
-                        periodeFom = dato_2020_01_01.minusMonths(1),
-                        periodeTom = stønadTom
+        behandlingResultat.personResultater = setOf(
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = søkerFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = dato_2020_01_01.minusMonths(1),
+                                  periodeTom = stønadTom
                 ),
-                lagPeriodeResultat(
-                        barn1Fnr,
-                        resultat = Resultat.JA,
-                        periodeFom = dato_2020_01_01.minusMonths(1),
-                        periodeTom = stønadTom
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = barn1Fnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = dato_2020_01_01.minusMonths(1),
+                                  periodeTom = stønadTom
                 ),
-                lagPeriodeResultat(
-                        barn2Fnr,
-                        resultat = Resultat.JA,
-                        periodeFom = dato_2020_10_01.minusMonths(1),
-                        periodeTom = stønadTom
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = barn2Fnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = dato_2020_10_01.minusMonths(1),
+                                  periodeTom = stønadTom
                 )
         )
         behandlingResultatRepository.save(behandlingResultat)
@@ -276,18 +277,18 @@ class BehandlingIntegrationTest {
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
-                .associateBy({it.barn}, {it.ytelsePerioder[0]} )
+                .associateBy({ it.barn }, { it.ytelsePerioder[0] })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
-        Assertions.assertEquals(1054,restVedtakBarnMap[barn1Fnr]!!.beløp)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_01_01, restVedtakBarnMap[barn1Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD,restVedtakBarnMap[barn1Fnr]!!.type)
+        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!!.type)
 
         Assertions.assertEquals(1054, restVedtakBarnMap[barn2Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_10_01, restVedtakBarnMap[barn2Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2020_10_01 < restVedtakBarnMap[barn2Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD,restVedtakBarnMap[barn2Fnr]!!.type)
+        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!!.type)
     }
 
     @Test
@@ -306,7 +307,7 @@ class BehandlingIntegrationTest {
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
         val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr,barn3Fnr))
+                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         Assertions.assertNotNull(personopplysningGrunnlag)
@@ -317,28 +318,38 @@ class BehandlingIntegrationTest {
                 ansvarligSaksbehandler = "saksbehandler1")
 
         val behandlingResultat1 = BehandlingResultat(behandling = behandling)
-        behandlingResultat1.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01.minusMonths(1), stønadTom)//TODO: Integrasjonstest bør lagre med personresultater og benytte mapper
+        behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat1,
+                                                                                   søkerFnr,
+                                                                                   barn1Fnr,
+                                                                                   barn2Fnr,
+                                                                                   dato_2020_01_01.minusMonths(1),
+                                                                                   stønadTom)
         behandlingResultatRepository.save(behandlingResultat1)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
 
         val behandlingResultat2 = BehandlingResultat(behandling = behandling)
-        behandlingResultat2.periodeResultater = lagPeriodeResultaterForSøkerOgToBarn(søkerFnr, barn1Fnr, barn3Fnr, dato_2021_01_01.minusMonths(1), stønadTom) //TODO: Integrasjonstest bør lagre med personresultater og benytte mapper
+        behandlingResultat2.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat2,
+                                                                                   søkerFnr,
+                                                                                   barn1Fnr,
+                                                                                   barn3Fnr,
+                                                                                   dato_2021_01_01.minusMonths(1),
+                                                                                   stønadTom)
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat2)
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
-                .associateBy({it.barn}, {it.ytelsePerioder[0]} )
+                .associateBy({ it.barn }, { it.ytelsePerioder[0] })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
-        Assertions.assertEquals(1054,restVedtakBarnMap[barn1Fnr]!!.beløp)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)
         Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn1Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn1Fnr]!!.stønadTom)
 
-        Assertions.assertEquals(1054,restVedtakBarnMap[barn3Fnr]!!.beløp)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn3Fnr]!!.beløp)
         Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn3Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn3Fnr]!!.stønadTom)
 
