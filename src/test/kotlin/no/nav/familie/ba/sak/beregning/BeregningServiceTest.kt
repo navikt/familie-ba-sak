@@ -108,7 +108,7 @@ class BeregningServiceTest {
 
         val personResultatSøker = lagPersonResultat(behandlingResultat = behandlingResultat,
                                                     fnr = søkerFnr,
-                                                    resultat = Resultat.JA,
+                                                    resultat = Resultat.NEI,
                                                     periodeFom = periodeFom,
                                                     periodeTom = periodeTom
         )

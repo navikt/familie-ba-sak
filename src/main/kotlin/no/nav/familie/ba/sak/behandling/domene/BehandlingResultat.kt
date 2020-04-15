@@ -49,9 +49,7 @@ data class BehandlingResultat(
         }
     }
 
-    var periodeResultater: Set<PeriodeResultat>
-        get() = this.tilPeriodeResultater()
-        set(value) {} //TODO: INIT https://stackoverflow.com/questions/41440750/kotlin-why-do-i-need-to-initialize-a-var-with-custom-getter
+    val periodeResultater: Set<PeriodeResultat> get() = this.tilPeriodeResultater()
 }
 
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {
