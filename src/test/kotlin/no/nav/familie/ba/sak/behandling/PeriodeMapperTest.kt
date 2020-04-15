@@ -1,68 +1,59 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.foldTidslinjer
-import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.nare.core.evaluations.Resultat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
-@SpringBootTest(classes = [ApplicationConfig::class],
-                properties = ["FAMILIE_OPPDRAG_API_URL=http://localhost:28085/api",
-                    "FAMILIE_BA_DOKGEN_API_URL=http://localhost:28085/api",
-                    "FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureWireMock(port = 28085)
+
 class PeriodeMapperTest {
 
-    @Autowired
-    lateinit var behandlingService: BehandlingService
+    private val datoer = listOf(
+            LocalDate.now().minusMonths(2),
+            LocalDate.now().minusMonths(1),
+            LocalDate.now(),
+            LocalDate.now().plusMonths(1),
+            LocalDate.now().plusMonths(2))
 
-    @Autowired
-    lateinit var fagsakService: FagsakService
+    private lateinit var behandlingResultat: BehandlingResultat
+
+    @BeforeEach fun initEach() {
+        val fagsak = Fagsak(aktørId = AktørId("123"),
+                            personIdent = PersonIdent("123"),
+                            status = FagsakStatus.OPPRETTET)
+        val behandling = Behandling(fagsak = fagsak,
+                                    kategori = BehandlingKategori.NASJONAL,
+                                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING)
+        behandlingResultat = lagBehandlingResultat("", behandling, Resultat.KANSKJE)
+    }
 
     @Test
     fun `Kombinert tidslinje returnerer rette rette vilkårsresultater for tidsintervaller`() {
-        val d1 = LocalDate.now().minusMonths(2);
-        val d2 = LocalDate.now().minusMonths(1)
-        val d3 = LocalDate.now()
-        val d4 = LocalDate.now().plusMonths(1)
-
-        val fnr = randomFnr()
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
         val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = "")
 
-        val tidslinje1 = LocalDateTimeline(listOf(LocalDateSegment(d1,
-                                                                   d3,
+        val tidslinje1 = LocalDateTimeline(listOf(LocalDateSegment(datoer[0],
+                                                                   datoer[2],
                                                                    VilkårResultat(personResultat = personResultat,
                                                                                   vilkårType = Vilkår.UNDER_18_ÅR,
                                                                                   resultat = Resultat.JA,
                                                                                   begrunnelse = ""))))
-        val tidslinje2 = LocalDateTimeline(listOf(LocalDateSegment(d2,
-                                                                   d4,
+        val tidslinje2 = LocalDateTimeline(listOf(LocalDateSegment(datoer[1],
+                                                                   datoer[3],
                                                                    VilkårResultat(personResultat = personResultat,
                                                                                   vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                   resultat = Resultat.JA,
@@ -70,9 +61,9 @@ class PeriodeMapperTest {
         val kombinertTidslinje = foldTidslinjer(listOf(tidslinje1, tidslinje2))
 
         assert(kombinertTidslinje.toSegments().size == 3)
-        val segment1 = kombinertTidslinje.getSegment(LocalDateInterval(d1, d2))
-        val segment2 = kombinertTidslinje.getSegment(LocalDateInterval(d2.plusDays(1), d3))
-        val segment3 = kombinertTidslinje.getSegment(LocalDateInterval(d3.plusDays(1), d4))
+        val segment1 = kombinertTidslinje.getSegment(LocalDateInterval(datoer[0], datoer[1]))
+        val segment2 = kombinertTidslinje.getSegment(LocalDateInterval(datoer[1].plusDays(1), datoer[2]))
+        val segment3 = kombinertTidslinje.getSegment(LocalDateInterval(datoer[2].plusDays(1), datoer[3]))
 
         assert(segment1.value.size == 1)
         assert(segment2.value.size == 2)
@@ -85,36 +76,28 @@ class PeriodeMapperTest {
     }
 
     @Test
-    fun `Mapper PersonResultater til PeriodeResultater korrekt`() {
-        val d1 = LocalDate.now().minusMonths(2);
-        val d2 = LocalDate.now().minusMonths(1)
-        val d3 = LocalDate.now()
-        val d4 = LocalDate.now().plusMonths(1)
-        val d5 = LocalDate.now().plusMonths(2)
+    fun `Mapper tre PersonResultater til fire PeriodeResultater med rette vilkår for to personer`() {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr1)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val behandlingResultat = lagBehandlingResultat(fnr1, behandling, Resultat.JA)
         val personResultat1 = PersonResultat(behandlingResultat = behandlingResultat, personIdent = fnr1)
         val personResultat2 = PersonResultat(behandlingResultat = behandlingResultat, personIdent = fnr2)
         personResultat1.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat1,
                                                                 vilkårType = Vilkår.UNDER_18_ÅR,
                                                                 resultat = Resultat.JA,
-                                                                periodeFom = d1,
-                                                                periodeTom = d3,
+                                                                periodeFom = datoer[0],
+                                                                periodeTom = datoer[2],
                                                                 begrunnelse = ""),
                                                  VilkårResultat(personResultat = personResultat1,
                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                 resultat = Resultat.JA,
-                                                                periodeFom = d2,
-                                                                periodeTom = d4,
+                                                                periodeFom = datoer[1],
+                                                                periodeTom = datoer[3],
                                                                 begrunnelse = ""))
         personResultat2.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat1,
                                                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                                                 resultat = Resultat.JA,
-                                                                periodeFom = d2,
-                                                                periodeTom = d5,
+                                                                periodeFom = datoer[1],
+                                                                periodeTom = datoer[4],
                                                                 begrunnelse = ""))
         behandlingResultat.personResultater = setOf(personResultat1, personResultat2)
         val periodeResultater = behandlingResultat.periodeResultater.toList()
@@ -138,4 +121,5 @@ class PeriodeMapperTest {
         assert(periodeResultater[3].personIdent == fnr2)
         assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
     }
+
 }
