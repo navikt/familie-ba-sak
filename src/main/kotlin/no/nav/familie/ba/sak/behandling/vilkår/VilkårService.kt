@@ -79,10 +79,10 @@ class VilkårService(
                                    periodeTom = person.fødselsdato.plusYears(18).minusMonths(1),
                                    begrunnelse = "Vurdert og satt automatisk")
                 } else {
-                VilkårResultat(personResultat = personResultat,
-                               resultat = Resultat.KANSKJE,
-                               vilkårType = vilkår,
-                               begrunnelse = "")
+                    VilkårResultat(personResultat = personResultat,
+                                   resultat = Resultat.KANSKJE,
+                                   vilkårType = vilkår,
+                                   begrunnelse = "")
                 }
             }.toSet()
             personResultat
@@ -130,7 +130,9 @@ class VilkårService(
                                  barn: List<Person>,
                                  evalueringer: List<Evaluering>): Set<VilkårResultat> {
         return evalueringer.map { child ->
-            val tom: LocalDate? = if (Vilkår.valueOf(child.identifikator) == Vilkår.UNDER_18_ÅR) barn.first().fødselsdato.plusYears(18).minusMonths(1) else null
+            val tom: LocalDate? =
+                    if (Vilkår.valueOf(child.identifikator) == Vilkår.UNDER_18_ÅR) barn.first().fødselsdato.plusYears(18)
+                            .minusMonths(1) else null
 
             VilkårResultat(personResultat = personResultat,
                            resultat = child.resultat,
