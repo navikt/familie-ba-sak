@@ -21,7 +21,8 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.http.HttpStatus
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -37,6 +38,8 @@ class BeregningController(
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService
 ) {
+
+    val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @PutMapping(path = ["/{vedtakId}/beregning"])
     fun oppdaterVedtakMedBeregning(@PathVariable @VedtaktilgangConstraint vedtakId: Long,
@@ -68,20 +71,19 @@ class BeregningController(
                 }
                 .fold(
                         onSuccess = { ResponseEntity.ok(it) },
-                        onFailure = { e ->
-                            ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                    .body(Ressurs.failure(e.cause?.message ?: e.message,
-                                                          e))
-                        }
+                        onFailure = { e -> badRequest("Oppdatering av beregning feilet: ${e.cause?.message ?: e.message}", e) }
                 )
     }
 
     @GetMapping(path = ["/oversikt/{behandlingId}"])
     fun oversiktOverBeregnetUtbetaling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestBeregningOversikt>>> {
+        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+        logger.info("{} henter oversikt over beregnet utbetaling for behandlingId={}", saksbehandlerId, behandlingId)
+
         val tilkjentYtelseForBehandling = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
         val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
-                ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
+                ?: return notFound("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
 
         return Result.runCatching {
             utbetalingsPerioder.toSegments()
@@ -92,11 +94,7 @@ class BeregningController(
                     }
         }.fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(data = it)) },
-                onFailure = { e ->
-                    ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(Ressurs.failure(e.cause?.message ?: e.message,
-                                    e))
-                }
+                onFailure = { e -> badRequest("Uthenting av beregnet utbetaling feilet ${e.cause?.message ?: e.message}", e) }
         )
     }
 
