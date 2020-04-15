@@ -12,6 +12,7 @@ import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class VilkårService(
@@ -119,11 +120,13 @@ class VilkårService(
                                  barn: List<Person>,
                                  evalueringer: List<Evaluering>): Set<VilkårResultat> {
         return evalueringer.map { child ->
+            val tom: LocalDate? = if (Vilkår.valueOf(child.identifikator) == Vilkår.UNDER_18_ÅR) barn.first().fødselsdato.plusYears(18).minusMonths(1) else null
+
             VilkårResultat(personResultat = personResultat,
                            resultat = child.resultat,
                            vilkårType = Vilkår.valueOf(child.identifikator),
                            periodeFom = barn.first().fødselsdato.plusMonths(1),
-                           periodeTom = barn.first().fødselsdato.plusYears(18).minusMonths(1),
+                           periodeTom = tom,
                            begrunnelse = "")
         }.toSet()
     }
