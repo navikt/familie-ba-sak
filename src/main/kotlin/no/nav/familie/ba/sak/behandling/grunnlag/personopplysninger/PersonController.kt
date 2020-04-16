@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
-import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
@@ -25,25 +24,16 @@ class PersonController(private val integrasjonClient: IntegrasjonClient) {
 
     @GetMapping
     @PersontilgangConstraint
-    fun hentPerson(@RequestHeader personIdent: String?,
-                   @RequestHeader aktoerId: String?): ResponseEntity<Ressurs<RestPersonInfo>> {
-        if (personIdent == null && aktoerId == null) {
-            return badRequest("Finner ikke personident eller aktørId på request", null)
-        }
-
-        val hentPersonIdent = personIdent
-                              ?: (integrasjonClient.hentPersonIdent(aktoerId)?.ident
-                                  ?: error("Fant ikke person ident for aktør id"))
-
+    fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         return Result.runCatching {
-            integrasjonClient.hentPersoninfoFor(hentPersonIdent)
+            integrasjonClient.hentPersoninfoFor(personIdent)
         }
                 .fold(
                         onFailure = {
                             illegalState("Hent person feilet: ${it.message}", it)
                         },
                         onSuccess = {
-                            ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(hentPersonIdent)))
+                            ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent)))
                         }
                 )
     }

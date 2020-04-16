@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner
 import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.domene.Journalpost
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
+import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -183,6 +185,26 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
                     throw IntegrasjonException("Kall mot integrasjon feilet ved henting av oppgave med id $oppgaveId. response=$message",
+                                               it,
+                                               uri)
+                }
+        )
+    }
+
+    fun hentJournalpost(journalpostId: String): Ressurs<Journalpost> {
+        val uri = URI.create("$integrasjonUri/journalpost?journalpostId=$journalpostId")
+        logger.debug("henter journalpost med id {}", journalpostId)
+
+        return Result.runCatching {
+            getForEntity<Ressurs<Journalpost>>(uri)
+        }.fold(
+                onSuccess = {
+                    assertGenerelleSuksessKriterier(it)
+                    it
+                },
+                onFailure = {
+                    val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+                    throw IntegrasjonException("Henting av journalpost med id $journalpostId feilet. response=$message",
                                                it,
                                                uri)
                 }

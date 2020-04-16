@@ -31,9 +31,25 @@ class ClientMocks {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
 
+        every { mockIntegrasjonClient.hentJournalpost(any()) } returns success(Journalpost(
+                journalpostId = "466992182",
+                journalposttype = Journalposttype.I,
+                journalstatus = Journalstatus.MOTTATT,
+                tema = Tema.BAR.name,
+                behandlingstema = "ab00001",
+                bruker = Bruker(søkerFnr[0], type = BrukerIdType.FNR),
+                journalforendeEnhet = "9999",
+                kanal = "NAV_NO",
+                dokumenter = listOf(DokumentInfo(tittel = "Søknad om barnetrygd",
+                                                 brevkode = "mock",
+                                                 dokumentstatus = null,
+                                                 dokumentvarianter = emptyList()))
+        ))
+
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 success(OppgaveDto(id = 30531,
                                    aktoerId = "1234",
+                                   journalpostId = "1234",
                                    tildeltEnhetsnr = "4820",
                                    behandlesAvApplikasjon = "FS22",
                                    beskrivelse = "Beskrivelse for oppgave",
