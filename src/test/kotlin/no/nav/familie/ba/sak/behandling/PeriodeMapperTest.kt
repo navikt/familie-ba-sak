@@ -113,6 +113,8 @@ class PeriodeMapperTest {
         /*
         Person 1 med tre overlappende perioder som skal splittes til fem
         Person 2 med én periode som skal bevares som én
+
+        Alle testdatoer er oppgitt som første dag i måned, og en dag trekkes derfor fra tom-datoer.
          */
         assert(periodeResultater.size == 6)
 
@@ -159,5 +161,22 @@ class PeriodeMapperTest {
         assert(periodeResultater[5].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
         assert(periodeResultater[5].periodeFom!! == datoer[1])
         assert(periodeResultater[5].periodeTom!! == datoer[4].minusDays(1))
+    }
+
+    @Test
+    fun `Datoer på vilkårresultater mappes til hele måneder`() {
+        // Periode med fom-dato medio mai og tom-dato medio juni skal bli hele mai og juni
+
+        val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = randomFnr())
+        personResultat.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat,
+                                                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                                                resultat = Resultat.JA,
+                                                                periodeFom = LocalDate.of(2020,5,15),
+                                                                periodeTom = LocalDate.of(2020,6,15),
+                                                                begrunnelse = ""))
+        behandlingResultat.personResultater = setOf(personResultat)
+        val periodeResultat = behandlingResultat.periodeResultater.toList()[0]
+        assert(periodeResultat.periodeFom!! == LocalDate.of(2020,5,1))
+        assert(periodeResultat.periodeTom!! == LocalDate.of(2020,6,30))
     }
 }

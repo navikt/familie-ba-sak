@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.vilk책r.Vilk책rResultat
 import no.nav.fpsak.tidsserie.*
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 
 data class PeriodeResultat(
         val personIdent: String,
@@ -58,8 +59,8 @@ fun lagTidslinjeMedOverlappendePerioder(tidslinjer: List<LocalDateTimeline<Vilk�
 
 fun PersonResultat.tilPeriodeResultater(): List<PeriodeResultat> {
     val tidslinjer = this.vilk책rResultater.map { vilk책rResultat ->
-        LocalDateTimeline(listOf(LocalDateSegment(vilk책rResultat.periodeFom,
-                                                  vilk책rResultat.periodeTom,
+        LocalDateTimeline(listOf(LocalDateSegment(vilk책rResultat.periodeFom?.withDayOfMonth(1),
+                                                  vilk책rResultat.periodeTom?.with(lastDayOfMonth()),
                                                   vilk책rResultat)))
     }
     val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(tidslinjer)
