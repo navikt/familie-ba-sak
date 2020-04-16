@@ -85,19 +85,19 @@ class PeriodeMapperTest {
                                                                 vilkårType = Vilkår.UNDER_18_ÅR,
                                                                 resultat = Resultat.JA,
                                                                 periodeFom = datoer[0],
-                                                                periodeTom = datoer[2].minusDays(1),
+                                                                periodeTom = datoer[2],
                                                                 begrunnelse = ""),
                                                  VilkårResultat(personResultat = personResultat1,
                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                 resultat = Resultat.JA,
                                                                 periodeFom = datoer[1],
-                                                                periodeTom = datoer[3].minusDays(1),
+                                                                periodeTom = datoer[3],
                                                                 begrunnelse = ""))
         personResultat2.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat1,
                                                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                                                 resultat = Resultat.JA,
                                                                 periodeFom = datoer[1],
-                                                                periodeTom = datoer[4].minusDays(1),
+                                                                periodeTom = datoer[4],
                                                                 begrunnelse = ""))
         behandlingResultat.personResultater = setOf(personResultat1, personResultat2)
         val periodeResultater = behandlingResultat.periodeResultater.toList()
@@ -121,15 +121,14 @@ class PeriodeMapperTest {
         assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.UNDER_18_ÅR })
         assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
         assert(periodeResultater[1].periodeFom!! == datoer[1])
-        assert(periodeResultater[1].periodeTom!! == datoer[2].minusDays(1))
+        assert(periodeResultater[1].periodeTom!! == datoer[2])
 
         // Person 1 tredje periode
         assert(periodeResultater[2].vilkårResultater.size == 1)
         assert(periodeResultater[2].personIdent == fnr1)
         assert(periodeResultater[2].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
-        assert(periodeResultater[2].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
-        assert(periodeResultater[2].periodeFom!! == datoer[2])
-        assert(periodeResultater[2].periodeTom!! == datoer[3].minusDays(1))
+        assert(periodeResultater[2].periodeFom!! == datoer[2].plusDays(1))
+        assert(periodeResultater[2].periodeTom!! == datoer[3])
 
         // Person 2
         assert(periodeResultater[3].vilkårResultater.size == 1)
@@ -137,6 +136,6 @@ class PeriodeMapperTest {
         assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
         assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
         assert(periodeResultater[3].periodeFom!! == datoer[1])
-        assert(periodeResultater[3].periodeTom!! == datoer[4].minusDays(1))
+        assert(periodeResultater[3].periodeTom!! == datoer[4])
     }
 }
