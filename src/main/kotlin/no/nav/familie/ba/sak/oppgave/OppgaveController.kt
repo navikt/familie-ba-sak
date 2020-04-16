@@ -52,8 +52,8 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
 
             Ressurs.success(DataForManuellJournalføring(
                     oppgave = oppgave,
-                    journalpost = integrasjonClient.hentJournalpost(oppgave.journalpostId!!).data
-                                  ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
+                    journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId).data
+                                                                               ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
                     person = integrasjonClient.hentPersoninfoFor(personIdent).toRestPersonInfo(personIdent)
             ))
         }.fold(

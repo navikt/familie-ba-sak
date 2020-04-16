@@ -6,5 +6,5 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Journalpost
 data class DataForManuellJournalføring(
         val oppgave: OppgaveDto,
         val person: RestPersonInfo,
-        val journalpost: Journalpost
+        val journalpost: Journalpost?
 )
