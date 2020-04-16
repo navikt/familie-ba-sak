@@ -3,7 +3,8 @@ package no.nav.familie.ba.sak.oppgave
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.integrasjoner.oppgave.domene.OppgaveDto
+import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.IdentType
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdent
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
@@ -39,6 +40,10 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
         behandlingRepository.save(behandling.copy(oppgaveId = opprettetOppgaveId))
         return opprettetOppgaveId
+    }
+
+    fun hentOppgave(oppgaveId: String): Ressurs<OppgaveDto> {
+        return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }
 
     fun ferdigstillOppgave(behandlingsId: Long) {

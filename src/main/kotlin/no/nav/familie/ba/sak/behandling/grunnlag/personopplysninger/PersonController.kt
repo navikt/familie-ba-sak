@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
+import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.illegalState
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -18,22 +19,31 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/person")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class PersonController(private val integrasjonOnBehalfClient: IntegrasjonOnBehalfClient) {
+class PersonController(private val integrasjonClient: IntegrasjonClient) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @GetMapping
     @PersontilgangConstraint
-    fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
+    fun hentPerson(@RequestHeader personIdent: String?,
+                   @RequestHeader aktoerId: String?): ResponseEntity<Ressurs<RestPersonInfo>> {
+        if (personIdent == null && aktoerId == null) {
+            return badRequest("Finner ikke personident eller aktørId på request", null)
+        }
+
+        val hentPersonIdent = personIdent
+                              ?: (integrasjonClient.hentPersonIdent(aktoerId)?.ident
+                                  ?: error("Fant ikke person ident for aktør id"))
+
         return Result.runCatching {
-                    integrasjonOnBehalfClient.hentPersoninfo(personIdent)
-                }
+            integrasjonClient.hentPersoninfoFor(hentPersonIdent)
+        }
                 .fold(
                         onFailure = {
                             illegalState("Hent person feilet: ${it.message}", it)
                         },
                         onSuccess = {
-                            ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent)))
+                            ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(hentPersonIdent)))
                         }
                 )
     }

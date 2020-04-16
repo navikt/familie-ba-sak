@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -18,7 +18,7 @@ internal class FagsaktilgangTest {
 
     private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
-    private lateinit var onBehalfClient: IntegrasjonOnBehalfClient
+    private lateinit var client: IntegrasjonClient
 
     private lateinit var behandlingRepository: BehandlingRepository
 
@@ -28,20 +28,20 @@ internal class FagsaktilgangTest {
     fun setUp() {
         behandlingRepository = mockk()
         personopplysningGrunnlagRepository = mockk()
-        onBehalfClient = mockk()
+        client = mockk()
         every { behandlingRepository.finnBehandlinger(any()) }
                 .returns(behandlinger)
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) }
                 .returns(personopplysningsgrunnlag)
         fagsaktilgang = Fagsaktilgang(behandlingRepository,
                                       personopplysningGrunnlagRepository,
-                                      onBehalfClient)
+                                      client)
     }
 
 
     @Test
     fun `isValid returnerer true om sjekkTilgangTilPersoner gir true for alle personer knyttet til behandlinger for fagsak`() {
-        every { onBehalfClient.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
                 .returns(listOf(Tilgang(true),
                                 Tilgang(true),
                                 Tilgang(true)))
@@ -53,7 +53,7 @@ internal class FagsaktilgangTest {
 
     @Test
     fun `isValid returnerer false om sjekkTilgangTilPersoner gir false for en person knyttet til en behandling for fagsak`() {
-        every { onBehalfClient.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
                 .returns(listOf(Tilgang(true),
                                 Tilgang(false),
                                 Tilgang(true)))

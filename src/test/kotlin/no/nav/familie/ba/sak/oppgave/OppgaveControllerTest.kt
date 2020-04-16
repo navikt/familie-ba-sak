@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.familie.integrasjoner.oppgave.domene.OppgaveDto
+import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test

@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_DOKUMENT_TYPE
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.integrasjoner.oppgave.domene.OppgaveDto
+import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
