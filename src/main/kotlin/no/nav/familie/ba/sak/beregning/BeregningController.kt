@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.common.RessursResponse.badRequest
 import no.nav.familie.ba.sak.common.RessursResponse.notFound
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.validering.BehandlingstilgangConstraint
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.fpsak.tidsserie.LocalDateInterval
@@ -76,7 +77,8 @@ class BeregningController(
     }
 
     @GetMapping(path = ["/oversikt/{behandlingId}"])
-    fun oversiktOverBeregnetUtbetaling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestBeregningOversikt>>> {
+    fun oversiktOverBeregnetUtbetaling(@PathVariable @BehandlingstilgangConstraint behandlingId: Long)
+            : ResponseEntity<Ressurs<List<RestBeregningOversikt>>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
         logger.info("{} henter oversikt over beregnet utbetaling for behandlingId={}", saksbehandlerId, behandlingId)
 
@@ -89,7 +91,9 @@ class BeregningController(
             utbetalingsPerioder.toSegments()
                     .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                     .map { segment ->
-                        val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter { segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom)) }
+                        val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
+                            segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
+                        }
                         mapTilRestBeregningOversikt(segment, andelerForSegment, tilkjentYtelseForBehandling.behandling, personopplysningGrunnlag)
                     }
         }.fold(
