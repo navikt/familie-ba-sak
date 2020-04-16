@@ -33,8 +33,8 @@ data class PeriodeVilkår(
         val resultat: Resultat,
         var begrunnelse: String)
 
-fun BehandlingResultat.tilPeriodeResultater(): Set<PeriodeResultat> {
-    return this.personResultater.map { personResultatTilPeriodeResultater(it) }.flatten().toSet()
+fun BehandlingResultat.personResultaterTilPeriodeResultater(): Set<PeriodeResultat> {
+    return this.personResultater.flatMap { it.tilPeriodeResultater() }.toSet()
 }
 
 private fun kombinerVerdier(lhs: LocalDateTimeline<List<VilkårResultat>>,
@@ -48,7 +48,7 @@ private fun kombinerVerdier(lhs: LocalDateTimeline<List<VilkårResultat>>,
                        LocalDateTimeline.JoinStyle.CROSS_JOIN)
 }
 
-fun foldTidslinjer(tidslinjer: List<LocalDateTimeline<VilkårResultat>>): LocalDateTimeline<List<VilkårResultat>> {
+fun lagTidslinjeMedOverlappendePerioder(tidslinjer: List<LocalDateTimeline<VilkårResultat>>): LocalDateTimeline<List<VilkårResultat>> {
     val førsteSegment = tidslinjer.first().toSegments().first()
     val initiellSammenlagt =
             LocalDateTimeline(listOf(LocalDateSegment(førsteSegment.fom, førsteSegment.tom, listOf(førsteSegment.value))))
@@ -56,16 +56,16 @@ fun foldTidslinjer(tidslinjer: List<LocalDateTimeline<VilkårResultat>>): LocalD
     return resterende.fold(initiellSammenlagt) { sammenlagt, neste -> (kombinerVerdier(sammenlagt, neste)) }
 }
 
-fun personResultatTilPeriodeResultater(personResultat: PersonResultat): List<PeriodeResultat> {
-    val tidslinjer = personResultat.vilkårResultater.map { vilkårResultat ->
+fun PersonResultat.tilPeriodeResultater(): List<PeriodeResultat> {
+    val tidslinjer = this.vilkårResultater.map { vilkårResultat ->
         LocalDateTimeline(listOf(LocalDateSegment(vilkårResultat.periodeFom,
                                                   vilkårResultat.periodeTom,
                                                   vilkårResultat)))
     }
-    val kombinertTidslinje = foldTidslinjer(tidslinjer)
+    val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(tidslinjer)
     val periodeResultater = kombinertTidslinje.toSegments().map { segment ->
         PeriodeResultat(
-                personIdent = personResultat.personIdent,
+                personIdent = this.personIdent,
                 periodeFom = segment.fom,
                 periodeTom = segment.tom,
                 vilkårResultater = segment.value.map { PeriodeVilkår(it.vilkårType, it.resultat, it.begrunnelse) }.toSet()

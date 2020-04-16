@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.beregning.domene.foldTidslinjer
+import no.nav.familie.ba.sak.beregning.domene.lagTidslinjeMedOverlappendePerioder
 import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -58,7 +58,7 @@ class PeriodeMapperTest {
                                                                                   vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                   resultat = Resultat.JA,
                                                                                   begrunnelse = ""))))
-        val kombinertTidslinje = foldTidslinjer(listOf(tidslinje1, tidslinje2))
+        val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(listOf(tidslinje1, tidslinje2))
 
         assert(kombinertTidslinje.toSegments().size == 3)
         val segment1 = kombinertTidslinje.getSegment(LocalDateInterval(datoer[0], datoer[1].minusDays(1)))
