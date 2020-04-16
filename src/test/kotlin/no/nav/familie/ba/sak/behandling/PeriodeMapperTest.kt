@@ -23,12 +23,12 @@ import java.time.LocalDate
 class PeriodeMapperTest {
 
     private val datoer = listOf(
-            LocalDate.now().minusMonths(2),
-            LocalDate.now().minusMonths(1),
-            LocalDate.now(),
-            LocalDate.now().plusMonths(1),
-            LocalDate.now().plusMonths(2),
-            LocalDate.now().plusMonths(3))
+            LocalDate.of(2020,1,1),
+            LocalDate.of(2020,2,1),
+            LocalDate.of(2020,3,1),
+            LocalDate.of(2020,4,1),
+            LocalDate.of(2020,5,1),
+            LocalDate.of(2020,6,1))
 
     private lateinit var behandlingResultat: BehandlingResultat
 
@@ -48,13 +48,13 @@ class PeriodeMapperTest {
         val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = "")
 
         val tidslinje1 = LocalDateTimeline(listOf(LocalDateSegment(datoer[0],
-                                                                   datoer[2],
+                                                                   datoer[2].minusDays(1),
                                                                    VilkårResultat(personResultat = personResultat,
                                                                                   vilkårType = Vilkår.UNDER_18_ÅR,
                                                                                   resultat = Resultat.JA,
                                                                                   begrunnelse = ""))))
         val tidslinje2 = LocalDateTimeline(listOf(LocalDateSegment(datoer[1],
-                                                                   datoer[3],
+                                                                   datoer[3].minusDays(1),
                                                                    VilkårResultat(personResultat = personResultat,
                                                                                   vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                   resultat = Resultat.JA,
@@ -64,8 +64,8 @@ class PeriodeMapperTest {
 
         assert(kombinertTidslinje.toSegments().size == 3)
         val segment1 = kombinertTidslinje.getSegment(LocalDateInterval(datoer[0], datoer[1].minusDays(1)))
-        val segment2 = kombinertTidslinje.getSegment(LocalDateInterval(datoer[1], datoer[2]))
-        val segment3 = kombinertTidslinje.getSegment(LocalDateInterval(datoer[2].plusDays(1), datoer[3]))
+        val segment2 = kombinertTidslinje.getSegment(LocalDateInterval(datoer[1], datoer[2].minusDays(1)))
+        val segment3 = kombinertTidslinje.getSegment(LocalDateInterval(datoer[2], datoer[3].minusDays(1)))
 
         assert(segment1.value.size == 1)
         assert(segment2.value.size == 2)
@@ -87,25 +87,25 @@ class PeriodeMapperTest {
                                                                 vilkårType = Vilkår.UNDER_18_ÅR,
                                                                 resultat = Resultat.JA,
                                                                 periodeFom = datoer[0],
-                                                                periodeTom = datoer[2],
+                                                                periodeTom = datoer[2].minusDays(1),
                                                                 begrunnelse = ""),
                                                  VilkårResultat(personResultat = personResultat1,
                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                 resultat = Resultat.JA,
                                                                 periodeFom = datoer[1],
-                                                                periodeTom = datoer[5],
+                                                                periodeTom = datoer[5].minusDays(1),
                                                                 begrunnelse = ""),
                                                  VilkårResultat(personResultat = personResultat1,
                                                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                                                 resultat = Resultat.JA,
                                                                 periodeFom = datoer[3],
-                                                                periodeTom = datoer[4],
+                                                                periodeTom = datoer[4].minusDays(1),
                                                                 begrunnelse = ""))
         personResultat2.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat2,
                                                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                                                 resultat = Resultat.JA,
                                                                 periodeFom = datoer[1],
-                                                                periodeTom = datoer[4],
+                                                                periodeTom = datoer[4].minusDays(1),
                                                                 begrunnelse = ""))
         behandlingResultat.personResultater = setOf(personResultat1, personResultat2)
         val periodeResultater = behandlingResultat.periodeResultater.toList()
@@ -115,13 +115,6 @@ class PeriodeMapperTest {
         Person 2 med én periode som skal bevares som én
          */
         assert(periodeResultater.size == 6)
-
-        println(periodeResultater[0].toString())
-        println(periodeResultater[1].toString())
-        println(periodeResultater[2].toString())
-        println(periodeResultater[3].toString())
-        println(periodeResultater[4].toString())
-        println(periodeResultater[5].toString())
 
         // Person 1 første periode
         assert(periodeResultater[0].vilkårResultater.size == 1)
@@ -136,13 +129,13 @@ class PeriodeMapperTest {
         assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.UNDER_18_ÅR })
         assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
         assert(periodeResultater[1].periodeFom!! == datoer[1])
-        assert(periodeResultater[1].periodeTom!! == datoer[2])
+        assert(periodeResultater[1].periodeTom!! == datoer[2].minusDays(1))
 
         // Person 1 tredje periode
         assert(periodeResultater[2].vilkårResultater.size == 1)
         assert(periodeResultater[2].personIdent == fnr1)
         assert(periodeResultater[2].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
-        assert(periodeResultater[2].periodeFom!! == datoer[2].plusDays(1))
+        assert(periodeResultater[2].periodeFom!! == datoer[2])
         assert(periodeResultater[2].periodeTom!! == datoer[3].minusDays(1))
 
         // Person 1 fjerde periode
@@ -151,20 +144,20 @@ class PeriodeMapperTest {
         assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
         assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
         assert(periodeResultater[3].periodeFom!! == datoer[3])
-        assert(periodeResultater[3].periodeTom!! == datoer[4])
+        assert(periodeResultater[3].periodeTom!! == datoer[4].minusDays(1))
 
         // Person 1 femte periode
         assert(periodeResultater[4].vilkårResultater.size == 1)
         assert(periodeResultater[4].personIdent == fnr1)
         assert(periodeResultater[4].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
-        assert(periodeResultater[4].periodeFom!! == datoer[4].plusDays(1))
-        assert(periodeResultater[4].periodeTom!! == datoer[5])
+        assert(periodeResultater[4].periodeFom!! == datoer[4])
+        assert(periodeResultater[4].periodeTom!! == datoer[5].minusDays(1))
 
         // Person 2
         assert(periodeResultater[5].vilkårResultater.size == 1)
         assert(periodeResultater[5].personIdent == fnr2)
         assert(periodeResultater[5].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
         assert(periodeResultater[5].periodeFom!! == datoer[1])
-        assert(periodeResultater[5].periodeTom!! == datoer[4])
+        assert(periodeResultater[5].periodeTom!! == datoer[4].minusDays(1))
     }
 }
