@@ -6,6 +6,9 @@ import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Journalpost
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.journalføring.domene.Journalpost
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -251,6 +254,51 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
+    fun ferdigstillJournalpost(journalpostId: String, behandlendeEnhet: String) {
+        val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$behandlendeEnhet")
+
+        Result.runCatching {
+            execute{ putForEntity<Ressurs<Any>>(uri, "") }
+        }.onFailure {
+            val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+            throw IntegrasjonException("Kall mot integrasjon feilet ved ferdigstillJournalpost. response=$message", it, uri)
+        }
+    }
+
+    fun oppdaterJournalpost(request: OppdaterJournalpostRequest, journalpostId: String): OppdaterJournalpostResponse {
+        val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId")
+        return try {
+            val ressurs = putForEntity<Ressurs<OppdaterJournalpostResponse>>(uri, request)
+            assertGenerelleSuksessKriterier(ressurs)
+            ressurs?.data ?: throw IntegrasjonException("Ressurs mangler.", null, uri, null)
+        } catch (e: Exception) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved oppdaterJournalpost", e, uri, request.bruker?.id)
+        }
+    }
+
+    fun hentJournalpost(journalpostId: String): Journalpost {
+        val uri = URI.create("$integrasjonUri/journalpost?journalpostId=$journalpostId")
+        return try {
+            val ressurs = getForEntity<Ressurs<Journalpost>>(uri)
+            assertGenerelleSuksessKriterier(ressurs)
+            ressurs.data ?: throw IntegrasjonException("Ressurs mangler.", null, uri, null)
+        } catch (e: Exception) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved hentJournalpost", e, uri, null)
+        }
+    }
+
+    fun hentDokument(dokumentInfoId: String, journalpostId: String): ByteArray {
+        val uri = URI.create("$integrasjonUri/journalpost/hentdokument/$journalpostId/$dokumentInfoId")
+        return try {
+            val ressurs = getForEntity<Ressurs<ByteArray>>(uri)
+            assertGenerelleSuksessKriterier(ressurs)
+            ressurs.data ?: throw IntegrasjonException("Ressurs mangler.", null, uri, null)
+        } catch (e: Exception) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved hentDokument", e, uri, null)
+        }
+    }
+
+
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun journalFørVedtaksbrev(fnr: String, fagsakId: String, pdf: ByteArray): String {
         return lagJournalpostForVedtaksbrev(fnr, fagsakId, pdf)
@@ -278,6 +326,20 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                     throw IntegrasjonException("Kall mot integrasjon feilet ved lag journalpost.", it, uri, fnr)
                 }
         )
+    }
+
+    private fun <T> execute(xForEntity: () -> Ressurs<T>?): T? {
+        val response = xForEntity.invoke()
+        return validerOgPakkUt(response)
+    }
+
+    private fun <T> validerOgPakkUt(ressurs: Ressurs<T>?): T {
+        when {
+            ressurs == null -> error("Finner ikke ressurs")
+            ressurs.data == null -> error("Ressurs mangler data")
+            ressurs.status != Ressurs.Status.SUKSESS -> error("Ressurs returnerer 2xx men har ressurs status failure")
+            else -> return ressurs.data!!
+        }
     }
 
     val tilgangUri = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()
