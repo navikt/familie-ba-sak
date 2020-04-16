@@ -113,8 +113,6 @@ class PeriodeMapperTest {
         /*
         Person 1 med tre overlappende perioder som skal splittes til fem
         Person 2 med én periode som skal bevares som én
-
-        Siste periode vil alltid få
          */
         assert(periodeResultater.size == 6)
 
