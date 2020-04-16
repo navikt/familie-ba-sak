@@ -27,7 +27,8 @@ class PeriodeMapperTest {
             LocalDate.now().minusMonths(1),
             LocalDate.now(),
             LocalDate.now().plusMonths(1),
-            LocalDate.now().plusMonths(2))
+            LocalDate.now().plusMonths(2),
+            LocalDate.now().plusMonths(3))
 
     private lateinit var behandlingResultat: BehandlingResultat
 
@@ -92,12 +93,12 @@ class PeriodeMapperTest {
                                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                 resultat = Resultat.JA,
                                                                 periodeFom = datoer[1],
-                                                                periodeTom = datoer[3],
+                                                                periodeTom = datoer[5],
                                                                 begrunnelse = ""),
                                                  VilkårResultat(personResultat = personResultat1,
                                                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                                                 resultat = Resultat.JA,
-                                                                periodeFom = datoer[1],
+                                                                periodeFom = datoer[3],
                                                                 periodeTom = datoer[4],
                                                                 begrunnelse = ""))
         personResultat2.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat2,
@@ -110,18 +111,19 @@ class PeriodeMapperTest {
         val periodeResultater = behandlingResultat.periodeResultater.toList()
 
         /*
-        Person 1 med tre overlappende perioder som skal splittes til fire
+        Person 1 med tre overlappende perioder som skal splittes til fem
         Person 2 med én periode som skal bevares som én
 
         Siste periode vil alltid få
          */
-        assert(periodeResultater.size == 5)
+        assert(periodeResultater.size == 6)
 
         println(periodeResultater[0].toString())
         println(periodeResultater[1].toString())
         println(periodeResultater[2].toString())
         println(periodeResultater[3].toString())
         println(periodeResultater[4].toString())
+        println(periodeResultater[5].toString())
 
         // Person 1 første periode
         assert(periodeResultater[0].vilkårResultater.size == 1)
@@ -131,34 +133,40 @@ class PeriodeMapperTest {
         assert(periodeResultater[0].periodeTom!! == datoer[1].minusDays(1))
 
         // Person 1 andre periode (overlappende)
-        assert(periodeResultater[1].vilkårResultater.size == 3)
+        assert(periodeResultater[1].vilkårResultater.size == 2)
         assert(periodeResultater[1].personIdent == fnr1)
         assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.UNDER_18_ÅR })
         assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
-        assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
         assert(periodeResultater[1].periodeFom!! == datoer[1])
         assert(periodeResultater[1].periodeTom!! == datoer[2])
 
         // Person 1 tredje periode
-        assert(periodeResultater[2].vilkårResultater.size == 2)
+        assert(periodeResultater[2].vilkårResultater.size == 1)
         assert(periodeResultater[2].personIdent == fnr1)
         assert(periodeResultater[2].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
-        assert(periodeResultater[2].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
         assert(periodeResultater[2].periodeFom!! == datoer[2].plusDays(1))
-        assert(periodeResultater[2].periodeTom!! == datoer[3])
+        assert(periodeResultater[2].periodeTom!! == datoer[3].minusDays(1))
 
         // Person 1 fjerde periode
-        assert(periodeResultater[3].vilkårResultater.size == 1)
+        assert(periodeResultater[3].vilkårResultater.size == 2)
         assert(periodeResultater[3].personIdent == fnr1)
+        assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
         assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
-        assert(periodeResultater[3].periodeFom!! == datoer[3].plusDays(1))
+        assert(periodeResultater[3].periodeFom!! == datoer[3])
         assert(periodeResultater[3].periodeTom!! == datoer[4])
 
-        // Person 2
+        // Person 1 femte periode
         assert(periodeResultater[4].vilkårResultater.size == 1)
-        assert(periodeResultater[4].personIdent == fnr2)
-        assert(periodeResultater[4].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
-        assert(periodeResultater[4].periodeFom!! == datoer[1])
-        assert(periodeResultater[4].periodeTom!! == datoer[4])
+        assert(periodeResultater[4].personIdent == fnr1)
+        assert(periodeResultater[4].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
+        assert(periodeResultater[4].periodeFom!! == datoer[4].plusDays(1))
+        assert(periodeResultater[4].periodeTom!! == datoer[5])
+
+        // Person 2
+        assert(periodeResultater[5].vilkårResultater.size == 1)
+        assert(periodeResultater[5].personIdent == fnr2)
+        assert(periodeResultater[5].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
+        assert(periodeResultater[5].periodeFom!! == datoer[1])
+        assert(periodeResultater[5].periodeTom!! == datoer[4])
     }
 }
