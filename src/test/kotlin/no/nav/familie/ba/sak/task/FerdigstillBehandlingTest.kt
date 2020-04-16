@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
@@ -9,9 +8,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -26,7 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.LocalDate
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)

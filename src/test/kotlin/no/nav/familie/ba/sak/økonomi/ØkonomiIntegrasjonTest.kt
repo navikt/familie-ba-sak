@@ -159,22 +159,24 @@ class ØkonomiIntegrasjonTest {
         Assertions.assertTrue(oppdragIdListe.contains(OppdragId(fnr, behandling.id)))
     }
 
-    private fun lagBehandlingResultat(behandling: Behandling, søkerFnr: String, barnFnr: String, stønadFom: LocalDate, stønadTom: LocalDate): BehandlingResultat {
+    private fun lagBehandlingResultat(behandling: Behandling,
+                                      søkerFnr: String,
+                                      barnFnr: String,
+                                      stønadFom: LocalDate,
+                                      stønadTom: LocalDate): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.periodeResultater = setOf(
-                lagPeriodeResultat(
-                        søkerFnr,
-                        behandlingResultat = behandlingResultat,
-                        resultat = Resultat.JA,
-                        periodeFom = stønadFom,
-                        periodeTom = stønadTom
+        behandlingResultat.personResultater = setOf(
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = søkerFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = stønadFom,
+                                  periodeTom = stønadTom
                 ),
-                lagPeriodeResultat(
-                        barnFnr,
-                        behandlingResultat = behandlingResultat,
-                        resultat = Resultat.JA,
-                        periodeFom = stønadFom,
-                        periodeTom = stønadTom
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = barnFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = stønadFom,
+                                  periodeTom = stønadTom
                 )
         )
         return behandlingResultat

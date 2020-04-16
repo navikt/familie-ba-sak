@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
@@ -61,22 +62,25 @@ class VilkårVurderingTest {
     }
 
     @Test
-    fun `Hent relevante vilkår for saktype`() { //Banal test, legg til saktyper
-        val relevanteVilkårSaktypeFinnes = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERFOR)
-        val relevanteVilkårSaktypeFinnesIkke = Vilkår.hentVilkårForSakstype(SakType.VILKÅRGJELDERIKKEFOR)
-        val vilkårForSaktypeFinnes = setOf(Vilkår.UNDER_18_ÅR,
-                                           Vilkår.BOR_MED_SØKER,
-                                           Vilkår.GIFT_PARTNERSKAP,
-                                           Vilkår.BOSATT_I_RIKET,
-                                           Vilkår.LOVLIG_OPPHOLD)
-        val vilkårForSaktypFinnesIkke: Set<Vilkår> = emptySet()
-        Assertions.assertEquals(vilkårForSaktypeFinnes, relevanteVilkårSaktypeFinnes)
-        Assertions.assertEquals(vilkårForSaktypFinnesIkke, relevanteVilkårSaktypeFinnesIkke)
+    fun `Hent relevante vilkår for saktype`() {
+        val vilkårForEøs = Vilkår.hentVilkårForSakstype(SakType.valueOfType(BehandlingKategori.EØS))
+        val vilkårForNasjonal = Vilkår.hentVilkårForSakstype(SakType.valueOfType(BehandlingKategori.NASJONAL))
+        Assertions.assertEquals(setOf(Vilkår.UNDER_18_ÅR,
+                                      Vilkår.BOR_MED_SØKER,
+                                      Vilkår.GIFT_PARTNERSKAP,
+                                      Vilkår.BOSATT_I_RIKET,
+                                      Vilkår.LOVLIG_OPPHOLD),
+                                vilkårForEøs)
+        Assertions.assertEquals(setOf(Vilkår.UNDER_18_ÅR,
+                                      Vilkår.BOR_MED_SØKER,
+                                      Vilkår.GIFT_PARTNERSKAP,
+                                      Vilkår.BOSATT_I_RIKET),
+                                vilkårForNasjonal)
     }
 
     @Test
     fun `Hent relevante vilkår for persontype og saktype`() {
-        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN, SakType.VILKÅRGJELDERFOR)
+        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN, SakType.EØS)
         val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR,
                                   Vilkår.BOR_MED_SØKER,
                                   Vilkår.GIFT_PARTNERSKAP,
@@ -166,9 +170,11 @@ class VilkårVurderingTest {
 
         val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
 
-        val forventetAntallVurderteVilkår = Vilkår.hentVilkårForPart(PersonType.BARN).size + Vilkår.hentVilkårForPart(PersonType.SØKER).size
+        val forventetAntallVurderteVilkår =
+                Vilkår.hentVilkårFor(PersonType.BARN, SakType.valueOfType(BehandlingKategori.NASJONAL)).size +
+                Vilkår.hentVilkårFor(PersonType.SØKER, SakType.valueOfType(BehandlingKategori.NASJONAL)).size
         Assertions.assertEquals(forventetAntallVurderteVilkår,
-                                behandlingResultat.periodeResultater.flatMap { periodeResultat -> periodeResultat.vilkårResultater }.size)
+                                behandlingResultat.personResultater.flatMap { personResultat -> personResultat.vilkårResultater }.size)
     }
 
     @Test

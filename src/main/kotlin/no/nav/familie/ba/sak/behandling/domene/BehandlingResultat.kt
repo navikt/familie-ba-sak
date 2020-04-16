@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling.domene
 
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
+import no.nav.familie.ba.sak.beregning.domene.personResultaterTilPeriodeResultater
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
 
@@ -25,7 +27,7 @@ data class BehandlingResultat(
                    mappedBy = "behandlingResultat",
                    cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE]
         )
-        var periodeResultater: Set<PeriodeResultat> = setOf()
+        var personResultater: Set<PersonResultat> = setOf()
 
 ) : BaseEntitet() {
 
@@ -34,20 +36,28 @@ data class BehandlingResultat(
     }
 
     fun hentSamletResultat(): BehandlingResultatType {
-        if (periodeResultater.isEmpty()) {
+        if (personResultater.isEmpty()) {
             return BehandlingResultatType.IKKE_VURDERT
         }
 
         return when {
-            periodeResultater.all { it.hentSamletResultat() == BehandlingResultatType.INNVILGET } ->
+            personResultater.all { it.hentSamletResultat() == BehandlingResultatType.INNVILGET } ->
                 BehandlingResultatType.INNVILGET
             else ->
                 if (behandling.type == BehandlingType.REVURDERING) BehandlingResultatType.OPPHØRT
                 else BehandlingResultatType.AVSLÅTT
         }
     }
+
+    val periodeResultater: Set<PeriodeResultat> get() = this.personResultaterTilPeriodeResultater()
 }
 
-enum class BehandlingResultatType(val brevMal: String) {
-    INNVILGET("Innvilget"), DELVIS_INNVILGET("Ukjent"), AVSLÅTT("Avslag"), OPPHØRT("Opphor"), HENLAGT("Ukjent"), IKKE_VURDERT("Ukjent")
+enum class BehandlingResultatType(val brevMal: String, val displayName: String) {
+    INNVILGET(brevMal = "Innvilget", displayName = "Innvilget"),
+    DELVIS_INNVILGET(brevMal = "Ukjent", displayName = "Delvis innvilget"),
+    AVSLÅTT(brevMal = "Avslag", displayName = "Avslått"),
+    OPPHØRT(brevMal = "Opphor", displayName = "Opphørt"),
+    HENLAGT(brevMal = "Ukjent", displayName = "Henlagt"),
+    IKKE_VURDERT(brevMal = "Ukjent", displayName = "Ikke vurdert")
 }
+

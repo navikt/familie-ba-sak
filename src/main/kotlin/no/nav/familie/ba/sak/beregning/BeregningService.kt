@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.behandling.vilkår.PeriodeResultat
+import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository

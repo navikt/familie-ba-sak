@@ -4,12 +4,11 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
-import java.time.LocalDate
 import javax.persistence.*
 
-@Entity(name = "PeriodeResultat")
-@Table(name = "PERIODE_RESULTAT")
-class PeriodeResultat(
+@Entity(name = "PersonResultat")
+@Table(name = "PERSON_RESULTAT")
+class PersonResultat(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "periode_resultat_seq_generator")
         @SequenceGenerator(name = "periode_resultat_seq_generator",
@@ -23,14 +22,8 @@ class PeriodeResultat(
         @Column(name = "person_ident", nullable = false, updatable = false)
         val personIdent: String,
 
-        @Column(name = "periode_fom")
-        val periodeFom: LocalDate?,
-
-        @Column(name = "periode_tom")
-        val periodeTom: LocalDate?,
-
         @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "periodeResultat",
+                   mappedBy = "personResultat",
                    cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
         var vilkårResultater: Set<VilkårResultat> = setOf()
 

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import javax.validation.constraints.AssertTrue
 
 class BeregningServiceTest {
 
@@ -31,12 +30,21 @@ class BeregningServiceTest {
         val satsRepository = mockk<SatsRepository>()
 
         satsService = SatsService(satsRepository)
-        beregningService = BeregningService(andelTilkjentYtelseRepository, fagsakService, tilkjentYtelseRepository, behandlingResultatRepository, satsService)
+        beregningService = BeregningService(andelTilkjentYtelseRepository,
+                                            fagsakService,
+                                            tilkjentYtelseRepository,
+                                            behandlingResultatRepository,
+                                            satsService)
 
         every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers { Ressurs.success(defaultFagsak.toRestFagsak(emptyList())) }
-        every { satsRepository.finnAlleSatserFor(any()) } answers { listOf(Sats(type = SatsType.ORBA, beløp = 1054, gyldigFom = LocalDate.MIN, gyldigTom = LocalDate.MAX)) }
+        every { satsRepository.finnAlleSatserFor(any()) } answers {
+            listOf(Sats(type = SatsType.ORBA,
+                        beløp = 1054,
+                        gyldigFom = LocalDate.MIN,
+                        gyldigTom = LocalDate.MAX))
+        }
     }
 
     @Test
@@ -48,30 +56,31 @@ class BeregningServiceTest {
 
         val periodeFom = LocalDate.of(2020, 1, 1)
         val periodeTom = LocalDate.of(2020, 11, 1)
-        val periodeResultatBarn = lagPeriodeResultat(
-                barn1Fnr,
-                behandlingResultat = behandlingResultat,
-                resultat = Resultat.JA,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom
+        val personResultatBarn = lagPersonResultat(behandlingResultat = behandlingResultat,
+                                                   fnr = barn1Fnr,
+                                                   resultat = Resultat.JA,
+                                                   periodeFom = periodeFom,
+                                                   periodeTom = periodeTom
         )
 
-        val periodeResultatSøker = lagPeriodeResultat(
-                søkerFnr,
-                behandlingResultat = behandlingResultat,
-                resultat = Resultat.JA,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom
+        val personResultatSøker = lagPersonResultat(behandlingResultat = behandlingResultat,
+                                                    fnr = søkerFnr,
+                                                    resultat = Resultat.JA,
+                                                    periodeFom = periodeFom,
+                                                    periodeTom = periodeTom
         )
-        behandlingResultat.periodeResultater = setOf(periodeResultatBarn, periodeResultatSøker)
+        behandlingResultat.personResultater = setOf(personResultatBarn, personResultatSøker)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, søkerPersonIdent = søkerFnr, barnasIdenter = listOf(barn1Fnr))
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id,
+                                                                       søkerPersonIdent = søkerFnr,
+                                                                       barnasIdenter = listOf(barn1Fnr))
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag)
+        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
+                                                        personopplysningGrunnlag = personopplysningGrunnlag)
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
@@ -90,30 +99,31 @@ class BeregningServiceTest {
 
         val periodeFom = LocalDate.of(2020, 1, 1)
         val periodeTom = LocalDate.of(2020, 11, 1)
-        val periodeResultatBarn = lagPeriodeResultat(
-                barn1Fnr,
-                behandlingResultat = behandlingResultat,
-                resultat = Resultat.JA,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom
+        val personResultatBarn = lagPersonResultat(behandlingResultat = behandlingResultat,
+                                                   fnr = barn1Fnr,
+                                                   resultat = Resultat.JA,
+                                                   periodeFom = periodeFom,
+                                                   periodeTom = periodeTom
         )
 
-        val periodeResultatSøker = lagPeriodeResultat(
-                søkerFnr,
-                behandlingResultat = behandlingResultat,
-                resultat = Resultat.NEI,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom
+        val personResultatSøker = lagPersonResultat(behandlingResultat = behandlingResultat,
+                                                    fnr = søkerFnr,
+                                                    resultat = Resultat.NEI,
+                                                    periodeFom = periodeFom,
+                                                    periodeTom = periodeTom
         )
-        behandlingResultat.periodeResultater = setOf(periodeResultatBarn, periodeResultatSøker)
+        behandlingResultat.personResultater = setOf(personResultatBarn, personResultatSøker)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, søkerPersonIdent = søkerFnr, barnasIdenter = listOf(barn1Fnr))
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id,
+                                                                       søkerPersonIdent = søkerFnr,
+                                                                       barnasIdenter = listOf(barn1Fnr))
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag)
+        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
+                                                        personopplysningGrunnlag = personopplysningGrunnlag)
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
@@ -141,45 +151,40 @@ class BeregningServiceTest {
         val periode3Midt = LocalDate.of(2023, 6, 1)
         val periode3Tom = LocalDate.of(2028, 1, 1)
 
-        val periodeResultater = mutableSetOf(
-                lagPeriodeResultat(
-                        søkerFnr,
-                        behandlingResultat = behandlingResultat,
-                        resultat = Resultat.JA,
-                        periodeFom = periode1Fom,
-                        periodeTom = periode1Tom
+        val personResultat = mutableSetOf(
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = søkerFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = periode1Fom,
+                                  periodeTom = periode1Tom
                 ),
-                lagPeriodeResultat(
-                        søkerFnr,
-                        behandlingResultat = behandlingResultat,
-                        resultat = Resultat.NEI,
-                        periodeFom = periode2Fom,
-                        periodeTom = periode2Tom
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = søkerFnr,
+                                  resultat = Resultat.NEI,
+                                  periodeFom = periode2Fom,
+                                  periodeTom = periode2Tom
                 ),
-                lagPeriodeResultat(
-                        søkerFnr,
-                        behandlingResultat = behandlingResultat,
-                        resultat = Resultat.JA,
-                        periodeFom = periode3Fom,
-                        periodeTom = periode3Tom
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = søkerFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = periode3Fom,
+                                  periodeTom = periode3Tom
                 ),
-                lagPeriodeResultat(
-                        barn1Fnr,
-                        behandlingResultat = behandlingResultat,
-                        resultat = Resultat.JA,
-                        periodeFom = periode1Fom.minusYears(1),
-                        periodeTom = periode3Tom.plusYears(1)
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = barn1Fnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = periode1Fom.minusYears(1),
+                                  periodeTom = periode3Tom.plusYears(1)
                 ),
-                lagPeriodeResultat(
-                        barn2Fnr,
-                        behandlingResultat = behandlingResultat,
-                        resultat = Resultat.JA,
-                        periodeFom = periode2Midt,
-                        periodeTom = periode3Midt
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = barn2Fnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = periode2Midt,
+                                  periodeTom = periode3Midt
                 )
         )
 
-        behandlingResultat.periodeResultater = periodeResultater
+        behandlingResultat.personResultater = personResultat
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
                 behandlingId = behandling.id,
@@ -191,7 +196,8 @@ class BeregningServiceTest {
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling, personopplysningGrunnlag = personopplysningGrunnlag)
+        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
+                                                        personopplysningGrunnlag = personopplysningGrunnlag)
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 

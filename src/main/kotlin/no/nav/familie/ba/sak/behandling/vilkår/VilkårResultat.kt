@@ -2,9 +2,10 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
+import java.time.LocalDate
 import javax.persistence.*
 
-@Entity
+@Entity(name = "VilkårResultat")
 @Table(name = "VILKAR_RESULTAT")
 class VilkårResultat(
         @Id
@@ -13,7 +14,7 @@ class VilkårResultat(
         val id: Long = 0,
 
         @ManyToOne @JoinColumn(name = "fk_periode_resultat_id", nullable = false)
-        var periodeResultat: PeriodeResultat,
+        var personResultat: PersonResultat,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "vilkar")
@@ -22,6 +23,12 @@ class VilkårResultat(
         @Enumerated(EnumType.STRING)
         @Column(name = "resultat")
         val resultat: Resultat,
+
+        @Column(name = "periode_fom")
+        val periodeFom: LocalDate? = null,
+
+        @Column(name = "periode_tom")
+        val periodeTom: LocalDate? = null,
 
         @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
         var begrunnelse: String
