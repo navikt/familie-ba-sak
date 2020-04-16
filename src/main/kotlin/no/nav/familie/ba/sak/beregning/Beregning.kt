@@ -12,6 +12,12 @@ fun beregnUtbetalingsperioder(andelerTilkjentYtelse: List<AndelTilkjentYtelse>):
     ).mapValues { it.value.reduce(::reducer) }
 }
 
+fun beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse: Set<AndelTilkjentYtelse>): LocalDateTimeline<Int> {
+    return andelerTilkjentYtelse
+            .map { personTilTimeline(it) }
+            .reduce (::reducer)
+}
+
 private fun personTilTimeline(it: AndelTilkjentYtelse) =
         LocalDateTimeline(listOf(LocalDateSegment(it.stønadFom, it.stønadTom, it.beløp)))
 
