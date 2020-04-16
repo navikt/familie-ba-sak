@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions
@@ -18,6 +19,10 @@ class OppgaveControllerTest {
 
     @InjectMockKs
     lateinit var oppgaveController: OppgaveController
+
+    // Trengs for autowiring av oppgave service
+    @MockK
+    lateinit var integrasjonClient: IntegrasjonClient
 
     @Test
     fun `finnOppgaverKnyttetTilSaksbehandlerOgEnhet via OppgaveController skal fungere`() {
