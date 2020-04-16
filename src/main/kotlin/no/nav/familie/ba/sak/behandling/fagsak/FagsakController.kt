@@ -84,13 +84,16 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok().body(Ressurs.success(it)) },
                         onFailure = {
-                            illegalState("Søker fagsak feilet: ${it.message}", it)
+                            logger.info("Søker fagsak feilet: ${it.message}")
+                            secureLogger.info("Søker fagsak feilet: ${it.message}", it)
+                            ResponseEntity.status(HttpStatus.NOT_FOUND).body(Ressurs.failure("Søker fagsak feilet: ${it.message}"))
                         }
                 )
     }
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 
