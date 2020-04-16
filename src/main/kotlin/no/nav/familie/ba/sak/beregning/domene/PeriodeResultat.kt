@@ -5,10 +5,10 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.*
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 
 data class PeriodeResultat(
         val personIdent: String,
@@ -60,7 +60,7 @@ fun lagTidslinjeMedOverlappendePerioder(tidslinjer: List<LocalDateTimeline<Vilk�
 fun PersonResultat.tilPeriodeResultater(): List<PeriodeResultat> {
     val tidslinjer = this.vilkårResultater.map { vilkårResultat ->
         LocalDateTimeline(listOf(LocalDateSegment(vilkårResultat.periodeFom?.withDayOfMonth(1),
-                                                  vilkårResultat.periodeTom?.with(lastDayOfMonth()),
+                                                  vilkårResultat.periodeTom?.sisteDagIMåned(),
                                                   vilkårResultat)))
     }
     val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(tidslinjer)
