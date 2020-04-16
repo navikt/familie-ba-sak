@@ -47,14 +47,16 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
             val oppgave = oppgaveService.hentOppgave(oppgaveId).data
                           ?: error("Feil ved henting av oppgave, data finnes ikke på ressurs")
 
-            val personIdent = integrasjonClient.hentPersonIdent(oppgave.aktoerId)?.ident
-                              ?: error("Fant ikke personident for aktør id")
-
             Ressurs.success(DataForManuellJournalføring(
                     oppgave = oppgave,
                     journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId).data
                                                                                ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
-                    person = integrasjonClient.hentPersoninfoFor(personIdent).toRestPersonInfo(personIdent)
+                    person = if (oppgave.aktoerId == null) null else {
+                        val personIdent = integrasjonClient.hentPersonIdent(oppgave.aktoerId)?.ident
+                                          ?: error("Fant ikke personident for aktør id")
+
+                        integrasjonClient.hentPersoninfoFor(personIdent).toRestPersonInfo(personIdent)
+                    }
             ))
         }.fold(
                 onSuccess = { return ResponseEntity.ok().body(it) },
