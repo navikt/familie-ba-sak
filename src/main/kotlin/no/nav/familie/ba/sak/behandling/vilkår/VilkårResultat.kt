@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
@@ -14,7 +13,6 @@ class VilkårResultat(
         @SequenceGenerator(name = "vilkar_resultat_seq_generator", sequenceName = "vilkar_resultat_seq", allocationSize = 50)
         val id: Long = 0,
 
-        @JsonIgnore
         @ManyToOne @JoinColumn(name = "fk_periode_resultat_id", nullable = false)
         var personResultat: PersonResultat,
 
