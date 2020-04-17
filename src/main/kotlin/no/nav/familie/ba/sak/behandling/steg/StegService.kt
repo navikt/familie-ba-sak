@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
+import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
@@ -99,12 +100,12 @@ class StegService(
         }
     }
 
-    fun håndterGodkjenneVedtak(behandling: Behandling): Behandling {
-        val behandlingSteg: GodkjenneVedtakOgStartIverksetting =
-                hentBehandlingSteg(StegType.GODKJENNE_VEDTAK) as GodkjenneVedtakOgStartIverksetting
+    fun håndterBeslutningForVedtak(behandling: Behandling, restBeslutningPåVedtak: RestBeslutningPåVedtak): Behandling {
+        val behandlingSteg: BeslutteVedtak =
+                hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, "")
+            behandlingSteg.utførSteg(behandling, restBeslutningPåVedtak)
         }
     }
 

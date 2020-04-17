@@ -75,11 +75,12 @@ class VedtakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
-    fun iverksettVedtak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+    fun iverksettVedtak(@PathVariable fagsakId: Long,
+                        @RequestBody restBeslutningPåVedtak: RestBeslutningPåVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
-        return Result.runCatching { stegService.håndterGodkjenneVedtak(behandling) }
+        return Result.runCatching { stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak) }
                 .fold(
                         onSuccess = {
                             return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }.fold(
@@ -145,3 +146,13 @@ data class RestVilkårsvurdering(
 data class Opphørsvedtak(
         val opphørsdato: LocalDate
 )
+
+data class RestBeslutningPåVedtak(
+        val beslutning: Beslutning,
+        val begrunnelse: String? = null
+)
+
+enum class Beslutning {
+    GODKJENT, UNDERKJENT;
+    fun erGodkjent() = this == GODKJENT
+}

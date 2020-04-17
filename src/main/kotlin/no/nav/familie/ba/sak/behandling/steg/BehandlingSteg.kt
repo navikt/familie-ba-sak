@@ -36,7 +36,7 @@ enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, 
             rekkefølge = 3,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             beskrivelse = "Send til beslutter"),
-    GODKJENNE_VEDTAK(
+    BESLUTTE_VEDTAK(
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             beskrivelse = "Godkjenne vedtak"),
@@ -53,8 +53,8 @@ enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, 
             BehandlingType.MIGRERING_FRA_INFOTRYGD -> when (this) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK
-                GODKJENNE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                 else -> error("Ikke godkjent steg for behandlingstype")
@@ -63,8 +63,8 @@ enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, 
                 REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK
-                GODKJENNE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
             }

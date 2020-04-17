@@ -12,7 +12,7 @@ class BehandlingStegTest {
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
                 StegType.SEND_TIL_BESLUTTER,
-                StegType.GODKJENNE_VEDTAK,
+                StegType.BESLUTTE_VEDTAK,
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_AVSLUTTET)
 
