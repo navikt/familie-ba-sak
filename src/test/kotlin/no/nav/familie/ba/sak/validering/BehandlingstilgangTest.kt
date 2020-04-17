@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -16,7 +16,7 @@ import java.time.LocalDate
 internal class BehandlingstilgangTest {
 
 
-    private lateinit var onBehalfClient: IntegrasjonOnBehalfClient
+    private lateinit var client: IntegrasjonClient
 
     private lateinit var behandlingstilgang: Behandlingstilgang
 
@@ -25,15 +25,15 @@ internal class BehandlingstilgangTest {
         val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository = mockk()
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) }
                 .returns(personopplysningsgrunnlag)
-        onBehalfClient = mockk()
+        client = mockk()
         behandlingstilgang = Behandlingstilgang(personopplysningGrunnlagRepository,
-                                                onBehalfClient)
+                                                client)
     }
 
 
     @Test
     fun `isValid returnerer true hvis sjekkTilgangTilPersoner returnerer true for alle personer knyttet til behandling`() {
-        every { onBehalfClient.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
                 .returns(listOf(Tilgang(true),
                                 Tilgang(true),
                                 Tilgang(true)))
@@ -45,7 +45,7 @@ internal class BehandlingstilgangTest {
 
     @Test
     fun `isValid returnerer false hvis sjekkTilgangTilPersoner returnerer false for en person knyttet til behandling`() {
-        every { onBehalfClient.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
                 .returns(listOf(Tilgang(true),
                                 Tilgang(false),
                                 Tilgang(true)))

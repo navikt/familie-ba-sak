@@ -3,7 +3,8 @@ package no.nav.familie.ba.sak.oppgave
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.integrasjoner.oppgave.domene.OppgaveDto
+import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.IdentType
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdent
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
@@ -41,6 +42,10 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return opprettetOppgaveId
     }
 
+    fun hentOppgave(oppgaveId: Long): Ressurs<OppgaveDto> {
+        return integrasjonClient.finnOppgaveMedId(oppgaveId)
+    }
+
     fun ferdigstillOppgave(behandlingsId: Long) {
         val oppgaveId = behandlingRepository.finnBehandling(behandlingsId).oppgaveId?.toLong()
                         ?: error("Kan ikke finne oppgave for behandlingId $behandlingsId")
@@ -56,7 +61,10 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return oppgaveTekst
     }
 
-    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?, oppgavetype: String?, enhet: String?, saksbehandler: String?)
+    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?,
+                                                   oppgavetype: String?,
+                                                   enhet: String?,
+                                                   saksbehandler: String?)
             : List<OppgaveDto> {
 
         return integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)

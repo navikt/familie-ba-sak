@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.validering
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import javax.transaction.Transactional
@@ -10,7 +10,7 @@ import javax.validation.ConstraintValidatorContext
 
 @Component
 class Behandlingstilgang(private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-                         private val integrasjonOnBehalfClient: IntegrasjonOnBehalfClient)
+                         internal val integrasjonClient: IntegrasjonClient)
     : ConstraintValidator<BehandlingstilgangConstraint, Long> {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -20,7 +20,7 @@ class Behandlingstilgang(private val personopplysningGrunnlagRepository: Persono
 
         val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.personer
         if (personer != null) {
-            integrasjonOnBehalfClient.sjekkTilgangTilPersoner(personer)
+            integrasjonClient.sjekkTilgangTilPersoner(personer)
                     .filterNot { it.harTilgang }
                     .forEach {
                         logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")

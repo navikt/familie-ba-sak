@@ -1,4 +1,4 @@
-package no.nav.familie.integrasjoner.oppgave.domene
+package no.nav.familie.ba.sak.oppgave.domene
 
 import com.fasterxml.jackson.annotation.JsonInclude
 
