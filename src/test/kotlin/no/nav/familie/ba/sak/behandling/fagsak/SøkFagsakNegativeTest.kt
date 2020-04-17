@@ -36,23 +36,15 @@ class SøkFagsakNegativeTest {
 
     @Test
     fun `test å søke fagsak deltager med ugyldig fnr`() {
-        val ugyldigFnr1 = UUID.randomUUID().toString()
-        val ugyldigFnr2 = UUID.randomUUID().toString()
-
-        every {
-            integrasjonClient.hentPersoninfoFor(eq(ugyldigFnr1))
-        } throws (HttpClientErrorException(HttpStatus.NOT_FOUND, "person not found"))
-
-        every {
-            integrasjonClient.hentPersoninfoFor(eq(ugyldigFnr2))
-        } throws (IntegrasjonException("illegal state"))
+        val ukjentId= "43125678910"
+        val feilId= "41235678910"
 
         assertThrows<HttpClientErrorException> {
-            fagsakService.hentFagsakDeltager(ugyldigFnr1)
+            fagsakService.hentFagsakDeltager(ukjentId)
         }
 
         assertThrows<IllegalStateException>{
-            fagsakService.hentFagsakDeltager(ugyldigFnr2)
+            fagsakService.hentFagsakDeltager(feilId)
         }
     }
 
