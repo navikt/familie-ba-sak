@@ -6,9 +6,12 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
 import no.nav.familie.ba.sak.integrasjoner.domene.*
+import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
+import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -19,58 +22,26 @@ import java.time.LocalDate
 class ClientMocks {
 
     @Bean
-    @Primary
-    fun mockIntegrasjonOnBehalfClient(): IntegrasjonOnBehalfClient {
-
-        val mockIntegrasjonOnBehalfClient = mockk<IntegrasjonOnBehalfClient>(relaxed = false)
-
-        every {
-            mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any<Set<Person>>())
-        } returns listOf(Tilgang(true, null))
-
-        every {
-            mockIntegrasjonOnBehalfClient.sjekkTilgangTilPersoner(any<List<String>>())
-        } returns listOf(Tilgang(true, null))
-
-        every {
-            mockIntegrasjonOnBehalfClient.hentPersoninfo(eq(søkerFnr[0]))
-        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19),
-                             kjønn = Kjønn.KVINNE,
-                             navn = "Mor Moresen",
-                             familierelasjoner = setOf(
-                                     Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                       navn = "Gutten Barnesen",
-                                                       fødselsdato = LocalDate.of(2015, 10, 3)),
-                                     Familierelasjoner(personIdent = Personident(id = barnFnr[1]),
-                                             relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                             navn = "Jenta Barnesen",
-                                             fødselsdato = LocalDate.of(2011, 12, 22)),
-                                     Familierelasjoner(personIdent = Personident(id = søkerFnr[1]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
-
-        every {
-            mockIntegrasjonOnBehalfClient.hentPersoninfo(eq(søkerFnr[1]))
-        } returns Personinfo(fødselsdato = LocalDate.of(1995, 2, 19),
-                             kjønn = Kjønn.MANN,
-                             navn = "Far Faresen",
-                             familierelasjoner = setOf(
-                                     Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                                       navn = "Barn Barney Barnesen",
-                                                       fødselsdato = LocalDate.of(2017, 4, 13)),
-                                     Familierelasjoner(personIdent = Personident(id = søkerFnr[0]),
-                                                       relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
-
-        return mockIntegrasjonOnBehalfClient
-    }
-
-    @Bean
     @Profile("!test-søk")
     @Primary
     fun mockIntegrasjonClient(): IntegrasjonClient {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
+
+        every { mockIntegrasjonClient.hentJournalpost(any()) } returns success(lagTestJournalpost(søkerFnr[0], "1234"))
+
+        every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
+                success(lagTestOppgaveDTO(1L))
+
+        every {
+            mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())
+        } returns listOf(Tilgang(true, null))
+
+        every {
+            mockIntegrasjonClient.sjekkTilgangTilPersoner(any<List<String>>())
+        } returns listOf(Tilgang(true, null))
+
+        every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
         every {
             mockIntegrasjonClient.hentAktørId(any())
@@ -102,12 +73,12 @@ class ClientMocks {
     @Profile("test-søk")
     @Primary
     @Bean
-    fun mockPDL() : IntegrasjonClient{
-        val mockIntegrasjonClient= mockk<IntegrasjonClient>()
+    fun mockPDL(): IntegrasjonClient {
+        val mockIntegrasjonClient = mockk<IntegrasjonClient>()
 
-        val farId= "12345678910"
-        val morId= "21345678910"
-        val barnId= "31245678910"
+        val farId = "12345678910"
+        val morId = "21345678910"
+        val barnId = "31245678910"
 
         every {
             mockIntegrasjonClient.hentPersoninfoFor(farId)
@@ -120,10 +91,16 @@ class ClientMocks {
         every {
             mockIntegrasjonClient.hentPersoninfoFor(barnId)
         } returns Personinfo(fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
-                familierelasjoner = setOf(
-                        Familierelasjoner(Personident(farId), FAMILIERELASJONSROLLE.FAR, "Far Mocksen", LocalDate.of(1969, 5, 1)),
-                        Familierelasjoner(Personident(morId), FAMILIERELASJONSROLLE.MOR, "Mor Mocksen", LocalDate.of(1979, 5, 1))
-                ))
+                             familierelasjoner = setOf(
+                                     Familierelasjoner(Personident(farId),
+                                                       FAMILIERELASJONSROLLE.FAR,
+                                                       "Far Mocksen",
+                                                       LocalDate.of(1969, 5, 1)),
+                                     Familierelasjoner(Personident(morId),
+                                                       FAMILIERELASJONSROLLE.MOR,
+                                                       "Mor Mocksen",
+                                                       LocalDate.of(1979, 5, 1))
+                             ))
 
         every {
             mockIntegrasjonClient.hentAktørId(farId)

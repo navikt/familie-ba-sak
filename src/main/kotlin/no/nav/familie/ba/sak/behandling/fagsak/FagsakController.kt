@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.common.RessursResponse.badRequest
+import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandler
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
@@ -21,7 +21,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
-import no.nav.familie.ba.sak.common.RessursResponse.illegalState
+import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 
 @RestController
 @RequestMapping("/api")
