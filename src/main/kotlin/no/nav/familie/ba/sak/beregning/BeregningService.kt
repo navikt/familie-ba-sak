@@ -116,7 +116,7 @@ class BeregningService(
         }
 
         return innvilgedePeriodeResultatBarna.flatMap { periodeResultatBarn ->
-            innvilgetPeriodeResultatSøker.filter { overlapper(it, periodeResultatBarn) }.flatMap { overlappendePerioderesultatSøker ->
+            innvilgetPeriodeResultatSøker.filter { it.overlapper(periodeResultatBarn) }.flatMap { overlappendePerioderesultatSøker ->
                 val person = identBarnMap[periodeResultatBarn.personIdent]!!
                 val stønadFom = maks(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
                 val stønadTom = minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
@@ -176,9 +176,3 @@ private fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): Lo
         else -> periodeTomBarn
     }
 }
-
-private fun overlapper(søker: PeriodeResultat, barn: PeriodeResultat): Boolean =
-        !(søker.periodeFom == null && barn.periodeFom == null)
-                && !(søker.periodeTom == null && barn.periodeTom == null)
-                && (søker.periodeFom == null || barn.periodeTom == null || søker.periodeFom <= barn.periodeTom)
-                && (søker.periodeTom == null || barn.periodeFom == null || søker.periodeTom >= barn.periodeFom)

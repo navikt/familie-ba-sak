@@ -30,6 +30,13 @@ data class PeriodeResultat(
             }
         }
     }
+
+    fun overlapper(annetPeriodeResultat: PeriodeResultat): Boolean {
+         return !(periodeFom == null && annetPeriodeResultat.periodeFom == null)
+                && !(periodeTom == null && annetPeriodeResultat.periodeTom == null)
+                && (periodeFom == null || annetPeriodeResultat.periodeTom == null || periodeFom <= annetPeriodeResultat.periodeTom)
+                && (periodeTom == null || annetPeriodeResultat.periodeFom == null || periodeTom >= annetPeriodeResultat.periodeFom)
+    }
 }
 
 data class PeriodeVilkår(
