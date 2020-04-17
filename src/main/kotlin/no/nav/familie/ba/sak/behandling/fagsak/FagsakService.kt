@@ -115,7 +115,7 @@ class FagsakService(
         }.fold(
                 onSuccess = { it },
                 onFailure = {
-                    val clientError= it as HttpClientErrorException?
+                    val clientError= it as? HttpClientErrorException?
                     if(clientError!= null && clientError.statusCode == HttpStatus.NOT_FOUND){
                         throw clientError
                     }else{

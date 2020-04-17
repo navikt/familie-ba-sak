@@ -85,7 +85,7 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok().body(Ressurs.success(it)) },
                         onFailure = {
-                            val clientError = it as HttpClientErrorException?
+                            val clientError = it as? HttpClientErrorException?
                             if(clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND){
                                 logger.info("Søker fagsak feilet: ${it.message}")
                                 secureLogger.info("Søker fagsak feilet: ${it.message}", it)

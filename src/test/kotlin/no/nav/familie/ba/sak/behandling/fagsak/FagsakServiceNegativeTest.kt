@@ -9,8 +9,10 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.web.client.HttpClientErrorException
 import java.util.*
 
 @SpringBootTest
@@ -27,14 +29,23 @@ class FagsakServiceNegativeTest {
 
     @Test
     fun `test å søke fagsak deltager med ugyldig fnr`() {
-        val ugyldigFnr = UUID.randomUUID().toString()
+        val ugyldigFnr1 = UUID.randomUUID().toString()
+        val ugyldigFnr2 = UUID.randomUUID().toString()
 
         every {
-            integrasjonClient.hentPersoninfoFor(eq(ugyldigFnr))
-        } throws (IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo"))
+            integrasjonClient.hentPersoninfoFor(eq(ugyldigFnr1))
+        } throws (HttpClientErrorException(HttpStatus.NOT_FOUND, "person not found"))
 
-        assertThrows<IllegalStateException> {
-            fagsakService.hentFagsakDeltager(ugyldigFnr)
+        every {
+            integrasjonClient.hentPersoninfoFor(eq(ugyldigFnr2))
+        } throws (IntegrasjonException("illegal state"))
+
+        assertThrows<HttpClientErrorException> {
+            fagsakService.hentFagsakDeltager(ugyldigFnr1)
+        }
+
+        assertThrows<IllegalStateException>{
+            fagsakService.hentFagsakDeltager(ugyldigFnr2)
         }
     }
 }
