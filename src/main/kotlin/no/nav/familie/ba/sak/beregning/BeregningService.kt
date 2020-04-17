@@ -14,6 +14,9 @@ import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -113,17 +116,15 @@ class BeregningService(
         }
 
         return innvilgedePeriodeResultatBarna.flatMap { periodeResultatBarn ->
-            innvilgetPeriodeResultatSøker.filter { overlapper(it, periodeResultatBarn) }.flatMap { fellesPerioderesultat ->
+            innvilgetPeriodeResultatSøker.filter { overlapper(it, periodeResultatBarn) }.flatMap { overlappendePerioderesultatSøker ->
                 val person = identBarnMap[periodeResultatBarn.personIdent]!!
-                val stønadFom = maks(fellesPerioderesultat.periodeFom, periodeResultatBarn.periodeFom)
-                val stønadTom = minimum(fellesPerioderesultat.periodeTom, periodeResultatBarn.periodeTom)
+                val stønadFom = maks(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
+                val stønadTom = minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
 
-                // TODO: Denne sjekken kan gjøres mer robust når VilkårResultatene får perioder knyttet til seg. Da kan vi sjekke om det var 18-års vilkåret som var utslagsgivende for Tom-datoen
-                val erOrdinærBarnetrygdTil18ÅrsDag = YearMonth.from(person.fødselsdato.plusYears(18)) == YearMonth.from(stønadTom)
                 val beløpsperioder = satsService.hentGyldigSatsFor(
                         satstype = SatsType.ORBA,
-                        stønadFraOgMed = YearMonth.from(stønadFom),
-                        stønadTilOgMed = YearMonth.from(stønadTom)
+                        stønadFraOgMed = settRiktigStønadFom(stønadFom),
+                        stønadTilOgMed = settRiktigStønadTom(periodeResultatBarn.periodeTomKommerFra18ÅrsVilkår, stønadTom)
                 )
 
                 beløpsperioder.map { beløpsperiode ->
@@ -131,8 +132,8 @@ class BeregningService(
                             behandlingId = behandlingId,
                             tilkjentYtelse = tilkjentYtelse,
                             personId = person.id,
-                            stønadFom = settRiktigStønadFom(beløpsperiode),
-                            stønadTom = settRiktigStønadTom(erOrdinærBarnetrygdTil18ÅrsDag, beløpsperiode),
+                            stønadFom = beløpsperiode.fraOgMed.atDay(1),
+                            stønadTom = beløpsperiode.tilOgMed.atEndOfMonth(),
                             beløp = beløpsperiode.beløp,
                             type = Ytelsetype.ORDINÆR_BARNETRYGD
                     )
@@ -141,14 +142,14 @@ class BeregningService(
         }
     }
 
-    private fun settRiktigStønadFom(beløpsperiode: SatsService.BeløpPeriode) =
-            beløpsperiode.fraOgMed.plusMonths(1).atDay(1)
+    private fun settRiktigStønadFom(fraOgMed: LocalDate): YearMonth =
+            YearMonth.from(fraOgMed.førsteDagINesteMåned())
 
-    private fun settRiktigStønadTom(erOrdinaerBarnetrygdTil18ÅrsDag: Boolean, satsPeriode: SatsService.BeløpPeriode): LocalDate {
-        return if (erOrdinaerBarnetrygdTil18ÅrsDag)
-            satsPeriode.tilOgMed.minusMonths(1).atEndOfMonth()
+    private fun settRiktigStønadTom(erBarnetrygdTil18ÅrsDag: Boolean, tilOgMed: LocalDate): YearMonth {
+        return if (erBarnetrygdTil18ÅrsDag)
+            YearMonth.from(tilOgMed.sisteDagIForrigeMåned())
         else
-            satsPeriode.tilOgMed.plusMonths(1).atEndOfMonth()
+            YearMonth.from(tilOgMed.plusMonths(1).sisteDagIMåned())
     }
 }
 
@@ -177,5 +178,7 @@ private fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): Lo
 }
 
 private fun overlapper(søker: PeriodeResultat, barn: PeriodeResultat): Boolean =
-        (søker.periodeFom == null || barn.periodeTom == null || søker.periodeFom <= barn.periodeTom)
+        !(søker.periodeFom == null && barn.periodeFom == null)
+                && !(søker.periodeTom == null && barn.periodeTom == null)
+                && (søker.periodeFom == null || barn.periodeTom == null || søker.periodeFom <= barn.periodeTom)
                 && (søker.periodeTom == null || barn.periodeFom == null || søker.periodeTom >= barn.periodeFom)

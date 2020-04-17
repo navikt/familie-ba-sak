@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.beregning.domene.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -88,6 +89,50 @@ class BeregningServiceTest {
         Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().beløp)
         Assertions.assertEquals(periodeFom.plusMonths(1), slot.captured.andelerTilkjentYtelse.first().stønadFom)
         Assertions.assertEquals(periodeTom.plusMonths(1).sisteDagIMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
+    }
+
+    @Test
+    fun `Skal mappe perioderesultat til andel ytelser for innvilget vedtak med 18års-vilkår som sluttdato`() {
+        val behandling = lagBehandling()
+        val barn1Fnr = randomFnr()
+        val søkerFnr = randomFnr()
+        val behandlingResultat = BehandlingResultat(behandling = behandling)
+
+        val periodeFom = LocalDate.of(2020, 1, 1)
+        val periodeTom = LocalDate.of(2020, 11, 1)
+        val personResultatBarn = lagPersonResultat(behandlingResultat = behandlingResultat,
+                fnr = barn1Fnr,
+                resultat = Resultat.JA,
+                periodeFom = periodeFom,
+                periodeTom = periodeTom,
+                vilkårType = Vilkår.UNDER_18_ÅR
+        )
+
+        val personResultatSøker = lagPersonResultat(behandlingResultat = behandlingResultat,
+                fnr = søkerFnr,
+                resultat = Resultat.JA,
+                periodeFom = periodeFom,
+                periodeTom = periodeTom
+        )
+        behandlingResultat.personResultater = setOf(personResultatBarn, personResultatSøker)
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id,
+                søkerPersonIdent = søkerFnr,
+                barnasIdenter = listOf(barn1Fnr))
+        val slot = slot<TilkjentYtelse>()
+
+        every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
+        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag)
+
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+
+        Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
+        Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().beløp)
+        Assertions.assertEquals(periodeFom.plusMonths(1), slot.captured.andelerTilkjentYtelse.first().stønadFom)
+        Assertions.assertEquals(periodeTom.minusMonths(1).sisteDagIMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
     }
 
     @Test

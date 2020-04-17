@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.*
+import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_BEGYNNELSE
+import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 
@@ -14,6 +16,7 @@ data class PeriodeResultat(
         val personIdent: String,
         val periodeFom: LocalDate?,
         val periodeTom: LocalDate?,
+        val periodeTomKommerFra18ÅrsVilkår: Boolean,
         val vilkårResultater: Set<PeriodeVilkår>
 ) {
 
@@ -65,12 +68,17 @@ fun PersonResultat.tilPeriodeResultater(): List<PeriodeResultat> {
     }
     val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(tidslinjer)
     val periodeResultater = kombinertTidslinje.toSegments().map { segment ->
+        val er18årsVilkår = segment.value.any { vilkårResultat -> gjelderVilkårResultatUnder18År(vilkårResultat, segment) }
         PeriodeResultat(
                 personIdent = this.personIdent,
-                periodeFom = segment.fom,
-                periodeTom = segment.tom,
+                periodeFom = if (segment.fom == TIDENES_BEGYNNELSE) null else segment.fom,
+                periodeTom = if (segment.tom == TIDENES_ENDE) null else segment.tom,
+                periodeTomKommerFra18ÅrsVilkår = er18årsVilkår,
                 vilkårResultater = segment.value.map { PeriodeVilkår(it.vilkårType, it.resultat, it.begrunnelse) }.toSet()
         )
     }
     return periodeResultater
 }
+
+private fun gjelderVilkårResultatUnder18År(vilkårResultat: VilkårResultat, segment: LocalDateSegment<List<VilkårResultat>>) =
+        vilkårResultat.resultat == Resultat.JA && vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR && vilkårResultat.periodeTom?.sisteDagIMåned() == segment.tom

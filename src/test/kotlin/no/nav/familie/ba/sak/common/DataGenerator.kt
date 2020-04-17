@@ -194,14 +194,15 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                       fnr: String,
                       resultat: Resultat,
                       periodeFom: LocalDate?,
-                      periodeTom: LocalDate?): PersonResultat {
+                      periodeTom: LocalDate?,
+                      vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET): PersonResultat {
     val personResultat = PersonResultat(
             behandlingResultat = behandlingResultat,
             personIdent = fnr)
     personResultat.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat,
                                                            periodeFom = periodeFom,
                                                            periodeTom = periodeTom,
-                                                           vilkårType = Vilkår.BOSATT_I_RIKET,
+                                                           vilkårType = vilkårType,
                                                            resultat = resultat,
                                                            begrunnelse = ""))
     return personResultat
