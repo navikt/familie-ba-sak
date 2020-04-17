@@ -86,7 +86,7 @@ class FagsakController(
                         onFailure = {
                             logger.info("Søker fagsak feilet: ${it.message}")
                             secureLogger.info("Søker fagsak feilet: ${it.message}", it)
-                            ResponseEntity.status(HttpStatus.NOT_FOUND).body(Ressurs.failure("Søker fagsak feilet: ${it.message}"))
+                            ResponseEntity.ok().body(Ressurs.failure("Søker fagsak feilet: ${it.message}"))
                         }
                 )
     }
