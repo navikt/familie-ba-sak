@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.common.RessursResponse.illegalState
-import no.nav.familie.ba.sak.common.RessursResponse.notFound
+import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity

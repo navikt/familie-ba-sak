@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.logg
 
-import no.nav.familie.ba.sak.common.RessursResponse.badRequest
+import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.validering.BehandlingstilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims

@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.RestFamilierelasjon
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.RestPersonInfo
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -16,18 +16,18 @@ import org.springframework.http.ResponseEntity
 import java.time.LocalDate
 
 class PersontilgangTest {
-    private lateinit var onBehalfClient: IntegrasjonOnBehalfClient
+    private lateinit var client: IntegrasjonClient
     private lateinit var persontilgang: Persontilgang
 
     @BeforeEach
     fun setUp() {
-        onBehalfClient = mockk()
-        persontilgang = Persontilgang(onBehalfClient)
+        client = mockk()
+        persontilgang = Persontilgang(client)
     }
 
     @Test
     fun `isValid returnerer true hvis sjekkTilgangTilPersoner returnerer true for alle personer`() {
-        every { onBehalfClient.sjekkTilgangTilPersoner(any<List<String>>()) }
+        every { client.sjekkTilgangTilPersoner(any<List<String>>()) }
                 .returns(listOf(Tilgang(true),
                                 Tilgang(true),
                                 Tilgang(true)))
@@ -37,7 +37,7 @@ class PersontilgangTest {
 
     @Test
     fun `isValid returnerer false hvis sjekkTilgangTilPersoner returnerer false for minst en person`() {
-        every { onBehalfClient.sjekkTilgangTilPersoner(any<List<String>>()) }
+        every { client.sjekkTilgangTilPersoner(any<List<String>>()) }
                 .returns(listOf(Tilgang(true),
                                 Tilgang(false),
                                 Tilgang(true)))

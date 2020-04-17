@@ -1,10 +1,16 @@
 package no.nav.familie.ba.sak.integrasjoner
 
+import medAktørId
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.domene.Journalpost
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
+import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.integrasjoner.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
@@ -53,6 +59,31 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
+    fun hentPersonIdent(aktørId: String?): PersonIdent? {
+        if (aktørId == null || aktørId.isEmpty()) {
+            throw IntegrasjonException("Ved henting av personident er aktørId null eller tom")
+        }
+        val uri = URI.create("$integrasjonUri/aktoer/v1/fraaktorid")
+        log.info("Henter fnr fra $uri")
+
+        return try {
+            val response: Ressurs<Map<*, *>> = getForEntity(uri, HttpHeaders().medAktørId(aktørId))
+            assertGenerelleSuksessKriterier(response)
+
+            secureLogger.info("Vekslet inn aktørId: {} til fnr: {}",
+                              aktørId,
+                              response.data!!["personIdent"])
+            val personIdent = response.data!!["personIdent"].toString()
+            if (personIdent.isEmpty()) {
+                throw IntegrasjonException("Personident fra integrasjonstjenesten er tom")
+            } else {
+                PersonIdent(personIdent)
+            }
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personIdent", e, uri, aktørId)
+        }
+    }
+
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentPersoninfoFor(personIdent: String): Personinfo {
         logger.info("Henter personinfo fra $integrasjonUri")
@@ -61,6 +92,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
         return try {
             val response = getForEntity<Ressurs<Personinfo>>(uri, HttpHeaders().medPersonident(personIdent))
+            assertGenerelleSuksessKriterier(response)
+
             secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.data)
             response.data!!
         } catch (e: Exception) {
@@ -143,7 +176,49 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?, oppgavetype: String?, enhet: String?, saksbehandler: String?): List<OppgaveDto> {
+    fun finnOppgaveMedId(oppgaveId: Long): Ressurs<OppgaveDto> {
+        val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
+
+        return Result.runCatching {
+            getForEntity<Ressurs<OppgaveDto>>(uri)
+        }.fold(
+                onSuccess = {
+                    assertGenerelleSuksessKriterier(it)
+                    it
+                },
+                onFailure = {
+                    val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+                    throw IntegrasjonException("Kall mot integrasjon feilet ved henting av oppgave med id $oppgaveId. response=$message",
+                                               it,
+                                               uri)
+                }
+        )
+    }
+
+    fun hentJournalpost(journalpostId: String): Ressurs<Journalpost> {
+        val uri = URI.create("$integrasjonUri/journalpost?journalpostId=$journalpostId")
+        logger.debug("henter journalpost med id {}", journalpostId)
+
+        return Result.runCatching {
+            getForEntity<Ressurs<Journalpost>>(uri)
+        }.fold(
+                onSuccess = {
+                    assertGenerelleSuksessKriterier(it)
+                    it
+                },
+                onFailure = {
+                    val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+                    throw IntegrasjonException("Henting av journalpost med id $journalpostId feilet. response=$message",
+                                               it,
+                                               uri)
+                }
+        )
+    }
+
+    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?,
+                                                   oppgavetype: String?,
+                                                   enhet: String?,
+                                                   saksbehandler: String?): List<OppgaveDto> {
 
         val uriBuilder = UriComponentsBuilder.fromUriString("$integrasjonUri/oppgave")
 
@@ -162,9 +237,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         } catch (e: Exception) {
             val message = if (e is RestClientResponseException) e.responseBodyAsString else ""
             throw IntegrasjonException("Kall mot integrasjon feilet ved finnOppgaverKnyttetTilSaksbehandlerOgEnhet. response=$message",
-                    e,
-                    uri,
-                    "behandlingstema: ${behandlingstema}, oppgavetype: ${oppgavetype}, enhet: ${enhet}, saksbehandler: ${saksbehandler}")
+                                       e,
+                                       uri,
+                                       "behandlingstema: ${behandlingstema}, oppgavetype: ${oppgavetype}, enhet: ${enhet}, saksbehandler: ${saksbehandler}")
         }
     }
 
@@ -197,10 +272,16 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    private inline fun <reified T> assertGenerelleSuksessKriterier(it: Ressurs<T>?) {
-        val status = it?.status ?: error("Finner ikke ressurs")
-        if (status != Ressurs.Status.SUKSESS) error(
-                "Ressurs returnerer 2xx men har ressurs status failure")
+    val tilgangUri = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()
+
+    fun sjekkTilgangTilPersoner(personer: Set<Person>): List<Tilgang> {
+        return sjekkTilgangTilPersoner(
+                personer.map { it.personIdent.ident }
+        )
+    }
+
+    fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
+        return postForEntity(tilgangUri, personIdenter)!!
     }
 
     private fun HttpHeaders.medContentTypeJsonUTF8(): HttpHeaders {
@@ -217,5 +298,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
+        private const val PATH_TILGANGER = "tilgang/personer"
     }
 }
