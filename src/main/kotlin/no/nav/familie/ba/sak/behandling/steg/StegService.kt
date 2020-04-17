@@ -104,7 +104,9 @@ class StegService(
         val behandlingSteg: BeslutteVedtak =
                 hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
 
-        return håndterSteg(behandling, behandlingSteg) {
+        return håndterSteg(behandling,
+                           behandlingSteg,
+                           if (!restBeslutningPåVedtak.beslutning.erGodkjent()) StegType.REGISTRERE_SØKNAD else null) {
             behandlingSteg.utførSteg(behandling, restBeslutningPåVedtak)
         }
     }
@@ -119,7 +121,12 @@ class StegService(
     }
 
     // Generelle stegmetoder
-    fun håndterSteg(behandling: Behandling, behandlingSteg: BehandlingSteg<*>, uførendeSteg: () -> Behandling): Behandling {
+    private fun håndterSteg(behandling: Behandling, behandlingSteg: BehandlingSteg<*>, utførendeSteg: () -> Behandling): Behandling {
+        return håndterSteg(behandling, behandlingSteg, null, utførendeSteg)
+    }
+
+    private fun håndterSteg(behandling: Behandling, behandlingSteg: BehandlingSteg<*>, eksplisittNesteSteg: StegType?,
+                            utførendeSteg: () -> Behandling): Behandling {
         try {
             if (behandling.steg == sisteSteg) {
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
@@ -138,12 +145,12 @@ class StegService(
                 error("${SikkerhetContext.hentSaksbehandler()} kan ikke utføre steg '${behandlingSteg.stegType()}")
             }
 
-            val behandlingEtterSteg = uførendeSteg()
+            val behandlingEtterSteg = utførendeSteg()
             LOG.info("${SikkerhetContext.hentSaksbehandler()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
-            val nesteSteg = behandling.steg.hentNesteSteg(behandlingType = behandling.type)
+            val nesteSteg = eksplisittNesteSteg ?: behandling.steg.hentNesteSteg(behandlingType = behandling.type)
             if (nesteSteg == sisteSteg) {
                 LOG.info("${SikkerhetContext.hentSaksbehandler()} er ferdig med stegprosess på behandling ${behandling.id}")
             }
