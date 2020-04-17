@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner
 import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
-import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterierV1
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Journalpost
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -69,7 +68,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
         return try {
             val response: Ressurs<Map<*, *>> = getForEntity(uri, HttpHeaders().medAktørId(aktørId))
-            assertGenerelleSuksessKriterierV1(response)
+            assertGenerelleSuksessKriterier(response)
 
             secureLogger.info("Vekslet inn aktørId: {} til fnr: {}",
                               aktørId,
@@ -93,6 +92,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
         return try {
             val response = getForEntity<Ressurs<Personinfo>>(uri, HttpHeaders().medPersonident(personIdent))
+            assertGenerelleSuksessKriterier(response)
+
             secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.data)
             response.data!!
         } catch (e: Exception) {
