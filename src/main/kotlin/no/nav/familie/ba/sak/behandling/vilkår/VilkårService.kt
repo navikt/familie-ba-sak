@@ -88,7 +88,7 @@ class VilkårService(
             personResultat
         }.toSet()
 
-        return behandlingResultatService.lagre(behandlingResultat)
+        return behandlingResultatService.lagreInitiert(behandlingResultat)
     }
 
     fun kontrollerVurderteVilkårOgLagResultat(personResultater: List<RestPersonResultat>,
