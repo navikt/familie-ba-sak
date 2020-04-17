@@ -60,4 +60,3 @@ enum class BehandlingResultatType(val brevMal: String, val displayName: String) 
     HENLAGT(brevMal = "Ukjent", displayName = "Henlagt"),
     IKKE_VURDERT(brevMal = "Ukjent", displayName = "Ikke vurdert")
 }
-

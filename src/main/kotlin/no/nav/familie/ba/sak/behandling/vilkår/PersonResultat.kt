@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -16,6 +17,7 @@ class PersonResultat(
                            allocationSize = 50)
         private val id: Long = 0,
 
+        @JsonIgnore
         @ManyToOne @JoinColumn(name = "fk_behandling_resultat_id", nullable = false, updatable = false)
         var behandlingResultat: BehandlingResultat,
 
