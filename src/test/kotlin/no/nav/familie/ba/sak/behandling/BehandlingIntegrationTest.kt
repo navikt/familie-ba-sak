@@ -277,7 +277,7 @@ class BehandlingIntegrationTest {
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
-                .associateBy({ it.barn }, { it.ytelsePerioder[0] })
+                .associateBy({ it.personIdent }, { it.ytelsePerioder[0] })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)
@@ -342,7 +342,7 @@ class BehandlingIntegrationTest {
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
-                .associateBy({ it.barn }, { it.ytelsePerioder[0] })
+                .associateBy({ it.personIdent }, { it.ytelsePerioder[0] })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)
