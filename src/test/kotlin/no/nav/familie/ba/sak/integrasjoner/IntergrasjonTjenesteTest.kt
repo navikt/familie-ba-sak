@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 
 
@@ -279,6 +280,28 @@ class IntergrasjonTjenesteTest {
 
         verify(getRequestedFor(urlEqualTo("/api/personopplysning/v1/info/BAR"))
                        .withHeader("Nav-Personident", equalTo("12")))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `hentPerson ikke funet`() {
+        stubFor(get(urlMatching("/api/personopplysning/v1/info")).willReturn(aResponse().withStatus(404)))
+        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(aResponse().withStatus(404)))
+
+        assertThrows<HttpClientErrorException> {
+            integrasjonClient.hentPersoninfoFor("12345678910")
+        }
+    }
+
+    @Test
+    @Tag("integration")
+    fun `hentPerson feil`() {
+        stubFor(get(urlMatching("/api/personopplysning/v1/info")).willReturn(aResponse().withStatus(400)))
+        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(aResponse().withStatus(400)))
+
+        assertThrows<IntegrasjonException> {
+            integrasjonClient.hentPersoninfoFor("12345678910")
+        }
     }
 
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> {
