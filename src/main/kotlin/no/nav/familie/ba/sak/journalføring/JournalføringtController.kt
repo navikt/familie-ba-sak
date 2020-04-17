@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.journalføring
 
-import no.nav.familie.ba.sak.journalføring.domene.Journalpost
+import no.nav.familie.ba.sak.integrasjoner.domene.Journalpost
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -11,25 +11,25 @@ import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 @RestController
-@RequestMapping("/api/journalføring")
+@RequestMapping("/api/journalpost")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class JournalføringtController(val journalføringService: JournalføringService) {
 
-    @GetMapping(path = ["/hent/{journalpostId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentJournalpost(@PathVariable journalpostId: String)
         : ResponseEntity<Ressurs<Journalpost>> {
-        return ResponseEntity.ok(Ressurs.success(journalføringService.hentJournalpost(journalpostId), "OK"))
+        return ResponseEntity.ok(journalføringService.hentJournalpost(journalpostId))
     }
 
-    @GetMapping("/hent/{journalpostId}/{dokumentInfoId}")
+    @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
     fun hentDokument(@PathVariable journalpostId: String,
                      @PathVariable dokumentInfoId: String)
         : ResponseEntity<Ressurs<ByteArray>> {
         return ResponseEntity.ok(Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId), "OK"))
     }
 
-    @PutMapping(path = ["/ferdigstill/{journalpostId}/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["/{journalpostId}/ferdigstill/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun journalfør(@PathVariable journalpostId: String,
                    @PathVariable oppgaveId: String,
                    @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
