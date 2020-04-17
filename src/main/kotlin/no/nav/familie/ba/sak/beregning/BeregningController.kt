@@ -13,8 +13,8 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
-import no.nav.familie.ba.sak.common.RessursResponse.badRequest
-import no.nav.familie.ba.sak.common.RessursResponse.notFound
+import no.nav.familie.ba.sak.common.RessursUtils.badRequest
+import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.validering.BehandlingstilgangConstraint
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint

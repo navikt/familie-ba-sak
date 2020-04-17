@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_DOKUMENT_TYPE
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.integrasjoner.oppgave.domene.OppgaveDto
+import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -14,7 +15,7 @@ import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.arkivering.Dokument
 import no.nav.familie.kontrakter.felles.arkivering.FilType
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -68,8 +69,8 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Opprett oppgave skal kaste feil hvis response er ugyldig`() {
         stubFor(post("/api/oppgave/").willReturn(aResponse()
-                .withStatus(500)
-                .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
+                                                         .withStatus(500)
+                                                         .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
 
         assertThatThrownBy {
             integrasjonClient.opprettOppgave(lagTestOppgave())
@@ -83,7 +84,8 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `finnOppgaverKnyttetTilSaksbehandlerOgEnhet skal returnere en liste av oppgaver`() {
         val oppgave = OppgaveDto()
-        stubFor(get("/api/oppgave?tema=BAR&enhet=4820&saksbehandler=Z012345").willReturn(okJson(objectMapper.writeValueAsString(success(listOf<OppgaveDto>(oppgave))))))
+        stubFor(get("/api/oppgave?tema=BAR&enhet=4820&saksbehandler=Z012345").willReturn(okJson(objectMapper.writeValueAsString(
+                success(listOf<OppgaveDto>(oppgave))))))
 
         val oppgaver = integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(null, null, "4820", "Z012345")
         assertThat(oppgaver).hasSize(1)
@@ -223,6 +225,49 @@ class IntergrasjonTjenesteTest {
 
     @Test
     @Tag("integration")
+    fun `hentPersonIdent returnerer OK`() {
+        stubFor(get("/api/aktoer/v1/fraaktorid").willReturn(okJson(objectMapper.writeValueAsString(success(mapOf("personIdent" to 1L))))))
+
+        val personIdent = integrasjonClient.hentPersonIdent("12")
+        assertThat(personIdent?.ident).isEqualTo("1")
+
+        verify(getRequestedFor(urlEqualTo("/api/aktoer/v1/fraaktorid"))
+                       .withHeader("Nav-Aktorid", equalTo("12")))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `finnOppgaveMedId returnerer OK`() {
+        val oppgaveId = 1234L
+        stubFor(get("/api/oppgave/$oppgaveId").willReturn(okJson(objectMapper.writeValueAsString(success(lagTestOppgaveDTO(
+                oppgaveId))))))
+
+        val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
+        assertThat(oppgave.data).isNotNull
+        assertThat(oppgave.data?.id).isEqualTo(oppgaveId)
+
+        verify(getRequestedFor(urlEqualTo("/api/oppgave/$oppgaveId")))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `hentJournalpost returnerer OK`() {
+        val journalpostId = "1234"
+        val fnr = randomFnr()
+        stubFor(get("/api/journalpost?journalpostId=$journalpostId").willReturn(okJson(objectMapper.writeValueAsString(success(
+                lagTestJournalpost(fnr, journalpostId))))))
+
+        val oppgave = integrasjonClient.hentJournalpost(journalpostId)
+        assertThat(oppgave.data).isNotNull
+        assertThat(oppgave.data?.journalpostId).isEqualTo(journalpostId)
+        assertThat(oppgave.data?.bruker?.id).isEqualTo(fnr)
+
+        verify(getRequestedFor(urlEqualTo("/api/journalpost?journalpostId=$journalpostId")))
+    }
+
+
+    @Test
+    @Tag("integration")
     fun `hentPerson returnerer OK`() {
         stubFor(get(urlMatching("/api/personopplysning/v1/info")).willReturn(
                 okJson(objectMapper.writeValueAsString(success(Personinfo(fødselsdato = LocalDate.now()))))))
@@ -248,18 +293,6 @@ class IntergrasjonTjenesteTest {
                                       dokumenter = listOf(Dokument(dokument = mockPdf,
                                                                    filType = FilType.PDFA,
                                                                    dokumentType = VEDTAK_DOKUMENT_TYPE)))
-    }
-
-
-    private fun lagTestOppgave(): OpprettOppgave {
-        return OpprettOppgave(ident = OppgaveIdent(ident = "test", type = IdentType.Aktør),
-                              saksId = "123",
-                              tema = Tema.BAR,
-                              oppgavetype = Oppgavetype.BehandleSak,
-                              fristFerdigstillelse = LocalDate.now(),
-                              beskrivelse = "test",
-                              enhetsnummer = "1234",
-                              behandlingstema = "behandlingstema")
     }
 
     companion object {

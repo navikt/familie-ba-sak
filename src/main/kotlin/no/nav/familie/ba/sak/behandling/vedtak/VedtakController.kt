@@ -7,10 +7,10 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.common.RessursResponse.badRequest
-import no.nav.familie.ba.sak.common.RessursResponse.forbidden
-import no.nav.familie.ba.sak.common.RessursResponse.illegalState
-import no.nav.familie.ba.sak.common.RessursResponse.notFound
+import no.nav.familie.ba.sak.common.RessursUtils.badRequest
+import no.nav.familie.ba.sak.common.RessursUtils.forbidden
+import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.OpphørVedtakTask

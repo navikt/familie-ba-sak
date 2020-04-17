@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
-import no.nav.familie.ba.sak.common.RessursResponse.illegalState
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonOnBehalfClient
+import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/person")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class PersonController(private val integrasjonOnBehalfClient: IntegrasjonOnBehalfClient) {
+class PersonController(private val integrasjonClient: IntegrasjonClient) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -26,8 +26,8 @@ class PersonController(private val integrasjonOnBehalfClient: IntegrasjonOnBehal
     @PersontilgangConstraint
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         return Result.runCatching {
-                    integrasjonOnBehalfClient.hentPersoninfo(personIdent)
-                }
+            integrasjonClient.hentPersoninfoFor(personIdent)
+        }
                 .fold(
                         onFailure = {
                             illegalState("Hent person feilet: ${it.message}", it)
