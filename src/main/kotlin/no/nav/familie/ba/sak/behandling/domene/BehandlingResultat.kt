@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling.domene
 
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
+import no.nav.familie.ba.sak.beregning.domene.personResultaterTilPeriodeResultater
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
 
@@ -46,6 +48,8 @@ data class BehandlingResultat(
                 else BehandlingResultatType.AVSLÅTT
         }
     }
+
+    val periodeResultater: Set<PeriodeResultat> get() = this.personResultaterTilPeriodeResultater()
 }
 
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {

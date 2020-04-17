@@ -44,17 +44,18 @@ class VedtakController(
         LOG.info("$saksbehandlerId lager nytt vedtak for fagsak med id $fagsakId")
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         return Result.runCatching {
-                    stegService.håndterVilkårsvurdering(behandling, restVilkårsvurdering)
+            stegService.håndterVilkårsvurdering(behandling, restVilkårsvurdering)
+        }.fold(
+                onSuccess = {
+                    ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
+                },
+                onFailure = {
+                    badRequest((it.cause?.message ?: it.message).toString(), null)
                 }
-                .fold(
-                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
-                        onFailure = {
-                            badRequest((it.cause?.message ?: it.message).toString(), null)
-                        }
-                )
+        )
     }
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"])
@@ -64,7 +65,7 @@ class VedtakController(
         LOG.info("$saksbehandlerId sender behandling til beslutter for fagsak med id $fagsakId")
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         return Result.runCatching { stegService.håndterSendTilBeslutter(behandling) }.fold(
                 onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
@@ -78,7 +79,7 @@ class VedtakController(
     fun iverksettVedtak(@PathVariable fagsakId: Long,
                         @RequestBody restBeslutningPåVedtak: RestBeslutningPåVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         return Result.runCatching { stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak) }
                 .fold(
@@ -100,7 +101,7 @@ class VedtakController(
     fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<String>> {
         val førsteNesteMåned = LocalDate.now().førsteDagINesteMåned()
         return opphørMigrertVedtak(fagsakId,
-                                   Opphørsvedtak(førsteNesteMåned))
+                Opphørsvedtak(førsteNesteMåned))
     }
 
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
@@ -111,10 +112,10 @@ class VedtakController(
         LOG.info("$saksbehandlerId oppretter task for opphør av migrert vedtak for fagsak med id $fagsakId")
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                     ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+                ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
         if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
             return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er migrering")
@@ -125,10 +126,10 @@ class VedtakController(
         }
 
         val task = OpphørVedtakTask.opprettOpphørVedtakTask(behandling,
-                                                            vedtak,
-                                                            saksbehandlerId,
-                                                            BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-                                                            opphørsvedtak.opphørsdato)
+                vedtak,
+                saksbehandlerId,
+                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+                opphørsvedtak.opphørsdato)
         taskRepository.save(task)
 
         return ResponseEntity.ok(Ressurs.success("Task for opphør av migrert behandling og vedtak på fagsak $fagsakId opprettet"))

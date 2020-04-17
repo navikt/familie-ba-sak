@@ -4,6 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.beregning.SatsService
+import no.nav.familie.ba.sak.beregning.domene.Sats
+import no.nav.familie.ba.sak.beregning.domene.SatsRepository
+import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.*
@@ -32,6 +36,9 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 success(lagTestOppgaveDTO(1L))
+
+        every { mockIntegrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any()) } returns
+                listOf(lagTestOppgaveDTO(1L))
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())
@@ -117,6 +124,31 @@ class ClientMocks {
         val søkerFnr = arrayOf("12345678910", "11223344556")
         val barnFnr = arrayOf("01101800033", "01101900033")
     }
+
+    @Profile("dev")
+    @Bean
+    @Primary
+    fun mockSatsService(): SatsService {
+        val satsRepository = mockk<SatsRepository>()
+
+        every { satsRepository.finnAlleSatserFor(SatsType.SMA) } returns listOf(Sats(1, SatsType.SMA, 660, null, null))
+        every { satsRepository.finnAlleSatserFor(SatsType.TILLEGG_ORBA) } returns listOf(Sats(2, SatsType.TILLEGG_ORBA, 1354, LocalDate.of(2020, 9, 1), null))
+        every { satsRepository.finnAlleSatserFor(SatsType.FINN_SVAL) } returns listOf(Sats(3, SatsType.FINN_SVAL, 330, null, LocalDate.of(2014, 3, 31)))
+        every { satsRepository.finnAlleSatserFor(SatsType.ORBA) } returns listOf(
+                Sats(4,
+                        SatsType.ORBA,
+                        1054,
+                        LocalDate.of(2019, 3, 1),
+                        null),
+                Sats(5,
+                        SatsType.ORBA,
+                        970,
+                        null,
+                        LocalDate.of(2019, 2, 28))
+        )
+        return SatsService(satsRepository)
+    }
+
 }
 
 fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, søkerFnr: String, barnFnr: String) {
