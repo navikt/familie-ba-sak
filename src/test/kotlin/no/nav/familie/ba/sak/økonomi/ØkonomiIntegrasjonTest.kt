@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.økonomi
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -9,14 +11,8 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.NyBeregning
-import no.nav.familie.ba.sak.beregning.PersonBeregning
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagBehandlingResultat
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -26,17 +22,22 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
 @SpringBootTest(classes = [ApplicationConfig::class],
                 properties = ["FAMILIE_OPPDRAG_API_URL=http://localhost:28085/api",
                     "FAMILIE_BA_DOKGEN_API_URL=http://localhost:28085/api",
                     "FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
-@ActiveProfiles("dev", "mock-oauth")
+@ExtendWith(SpringExtension::class)
+@ContextConfiguration(initializers = [DbContainerInitializer::class])
+@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth")
 @TestInstance(Lifecycle.PER_CLASS)
 @AutoConfigureWireMock(port = 28085)
 class ØkonomiIntegrasjonTest {
@@ -67,6 +68,8 @@ class ØkonomiIntegrasjonTest {
     fun `Iverksett vedtak på aktiv behandling`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
+        val stønadFom = LocalDate.now()
+        val stønadTom = stønadFom.plusYears(17)
 
         val responseBody = Ressurs.Companion.success("ok")
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
@@ -84,7 +87,7 @@ class ØkonomiIntegrasjonTest {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
+        val behandlingResultat = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -102,17 +105,7 @@ class ØkonomiIntegrasjonTest {
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        val nyBeregning = NyBeregning(
-                listOf(PersonBeregning(ident = barnFnr,
-                                       beløp = 1054,
-                                       stønadFom = LocalDate.of(
-                                               2020,
-                                               1,
-                                               1),
-                                       ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
-        )
-
-        val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+        val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
@@ -127,6 +120,8 @@ class ØkonomiIntegrasjonTest {
     fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
+        val stønadFom = LocalDate.now()
+        val stønadTom = stønadFom.plusYears(17)
 
         stubFor(post(anyUrl())
                         .willReturn(aResponse()
@@ -147,16 +142,10 @@ class ØkonomiIntegrasjonTest {
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         vedtakService.lagreOgDeaktiverGammel(vedtak)
 
-        val nyBeregning = NyBeregning(
-                listOf(PersonBeregning(ident = barnFnr,
-                                       beløp = 1054,
-                                       stønadFom = LocalDate.of(
-                                               2020,
-                                               1,
-                                               1),
-                                       ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD))
-        )
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+        val behandlingResultat = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(behandling.id, vedtak.id, "ansvarligSaksbehandler")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
@@ -168,5 +157,28 @@ class ØkonomiIntegrasjonTest {
         val oppdragIdListe = behandlingService.hentGjeldendeBehandlingerForLøpendeFagsaker()
 
         Assertions.assertTrue(oppdragIdListe.contains(OppdragId(fnr, behandling.id)))
+    }
+
+    private fun lagBehandlingResultat(behandling: Behandling,
+                                      søkerFnr: String,
+                                      barnFnr: String,
+                                      stønadFom: LocalDate,
+                                      stønadTom: LocalDate): BehandlingResultat {
+        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        behandlingResultat.personResultater = setOf(
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = søkerFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = stønadFom,
+                                  periodeTom = stønadTom
+                ),
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = barnFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = stønadFom,
+                                  periodeTom = stønadTom
+                )
+        )
+        return behandlingResultat
     }
 }

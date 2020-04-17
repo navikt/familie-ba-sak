@@ -29,6 +29,9 @@ data class PersonopplysningGrunnlag(
     val barna: List<Person>
         get() = personer.filter { it.type == PersonType.BARN }
 
+    val søker: List<Person>
+        get() = personer.filter { it.type == PersonType.SØKER }
+
     override fun toString(): String {
         val sb = StringBuilder("PersonopplysningGrunnlagEntitet{")
         sb.append("id=").append(id)

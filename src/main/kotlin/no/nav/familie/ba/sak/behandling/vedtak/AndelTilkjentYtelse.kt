@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate

@@ -162,6 +162,52 @@ fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: Li
     )
 }
 
+fun lagPersonResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat,
+                                        søkerFnr: String,
+                                        barn1Fnr: String,
+                                        barn2Fnr: String,
+                                        stønadFom: LocalDate,
+                                        stønadTom: LocalDate): Set<PersonResultat> {
+    return setOf(
+            lagPersonResultat(behandlingResultat = behandlingResultat,
+                              fnr = søkerFnr,
+                              resultat = Resultat.JA,
+                              periodeFom = stønadFom,
+                              periodeTom = stønadTom
+            ),
+            lagPersonResultat(behandlingResultat = behandlingResultat,
+                              fnr = barn1Fnr,
+                              resultat = Resultat.JA,
+                              periodeFom = stønadFom,
+                              periodeTom = stønadTom
+            ),
+            lagPersonResultat(behandlingResultat = behandlingResultat,
+                              fnr = barn2Fnr,
+                              resultat = Resultat.JA,
+                              periodeFom = stønadFom,
+                              periodeTom = stønadTom
+            )
+    )
+}
+
+fun lagPersonResultat(behandlingResultat: BehandlingResultat,
+                      fnr: String,
+                      resultat: Resultat,
+                      periodeFom: LocalDate?,
+                      periodeTom: LocalDate?,
+                      vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET): PersonResultat {
+    val personResultat = PersonResultat(
+            behandlingResultat = behandlingResultat,
+            personIdent = fnr)
+    personResultat.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat,
+                                                           periodeFom = periodeFom,
+                                                           periodeTom = periodeTom,
+                                                           vilkårType = vilkårType,
+                                                           resultat = resultat,
+                                                           begrunnelse = ""))
+    return personResultat
+}
+
 fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat): BehandlingResultat {
     val behandlingResultat = BehandlingResultat(
             behandling = behandling
