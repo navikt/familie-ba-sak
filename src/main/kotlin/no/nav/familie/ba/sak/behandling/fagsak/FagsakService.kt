@@ -13,8 +13,10 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 import java.time.Period
 
@@ -113,7 +115,12 @@ class FagsakService(
         }.fold(
                 onSuccess = { it },
                 onFailure = {
-                    throw IllegalStateException("Feil ved henting av person fra TPS/PDL", it)
+                    val clientError= it as HttpClientErrorException?
+                    if(clientError!= null && clientError.statusCode == HttpStatus.NOT_FOUND){
+                        throw clientError
+                    }else{
+                        throw IllegalStateException("Feil ved henting av person fra TPS/PDL", it)
+                    }
                 }
 
         )
