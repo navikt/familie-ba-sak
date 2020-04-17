@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.oppgave
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.toRestPersonInfo
-import no.nav.familie.ba.sak.common.RessursResponse.badRequest
-import no.nav.familie.ba.sak.common.RessursResponse.illegalState
+import no.nav.familie.ba.sak.common.RessursUtils.badRequest
+import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
@@ -40,7 +40,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
     }
 
     @GetMapping(path = ["/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: String)
+    fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long)
             : ResponseEntity<Ressurs<DataForManuellJournalføring>> {
 
         return Result.runCatching {

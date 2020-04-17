@@ -7,14 +7,11 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.*
-import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
-import no.nav.familie.ba.sak.oppgave.domene.PrioritetEnum
-import no.nav.familie.ba.sak.oppgave.domene.StatusEnum
+import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
+import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.Tema
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -31,37 +28,10 @@ class ClientMocks {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
 
-        every { mockIntegrasjonClient.hentJournalpost(any()) } returns success(Journalpost(
-                journalpostId = "466992182",
-                journalposttype = Journalposttype.I,
-                journalstatus = Journalstatus.MOTTATT,
-                tema = Tema.BAR.name,
-                behandlingstema = "ab00001",
-                bruker = Bruker(søkerFnr[0], type = BrukerIdType.FNR),
-                journalforendeEnhet = "9999",
-                kanal = "NAV_NO",
-                dokumenter = listOf(DokumentInfo(tittel = "Søknad om barnetrygd",
-                                                 brevkode = "mock",
-                                                 dokumentstatus = null,
-                                                 dokumentvarianter = emptyList()))
-        ))
+        every { mockIntegrasjonClient.hentJournalpost(any()) } returns success(lagTestJournalpost(søkerFnr[0], "1234"))
 
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
-                success(OppgaveDto(id = 30531,
-                                   aktoerId = "1234",
-                                   journalpostId = "1234",
-                                   tildeltEnhetsnr = "4820",
-                                   behandlesAvApplikasjon = "FS22",
-                                   beskrivelse = "Beskrivelse for oppgave",
-                                   tema = Tema.BAR.name,
-                                   oppgavetype = Oppgavetype.BehandleSak.name,
-                                   fristFerdigstillelse = LocalDate.of(
-                                           2020,
-                                           2,
-                                           1).toString(),
-                                   prioritet = PrioritetEnum.NORM,
-                                   status = StatusEnum.OPPRETTET
-                ))
+                success(lagTestOppgaveDTO(1L))
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())

@@ -42,7 +42,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return opprettetOppgaveId
     }
 
-    fun hentOppgave(oppgaveId: String): Ressurs<OppgaveDto> {
+    fun hentOppgave(oppgaveId: Long): Ressurs<OppgaveDto> {
         return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }
 
@@ -61,7 +61,10 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return oppgaveTekst
     }
 
-    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?, oppgavetype: String?, enhet: String?, saksbehandler: String?)
+    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?,
+                                                   oppgavetype: String?,
+                                                   enhet: String?,
+                                                   saksbehandler: String?)
             : List<OppgaveDto> {
 
         return integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)

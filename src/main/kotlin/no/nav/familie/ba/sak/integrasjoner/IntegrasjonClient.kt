@@ -2,14 +2,16 @@ package no.nav.familie.ba.sak.integrasjoner
 
 import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
+import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterierV1
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Journalpost
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
-import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
@@ -23,7 +25,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
-import org.springframework.http.ResponseEntity
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -63,11 +64,13 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         if (aktørId == null || aktørId.isEmpty()) {
             throw IntegrasjonException("Ved henting av personident er aktørId null eller tom")
         }
-        val uri = URI.create(integrasjonUri.toString() + "/aktoer/v1/fraaktorid")
+        val uri = URI.create("$integrasjonUri/aktoer/v1/fraaktorid")
         log.info("Henter fnr fra $uri")
 
         return try {
             val response: Ressurs<Map<*, *>> = getForEntity(uri, HttpHeaders().medAktørId(aktørId))
+            assertGenerelleSuksessKriterierV1(response)
+
             secureLogger.info("Vekslet inn aktørId: {} til fnr: {}",
                               aktørId,
                               response.data!!["personIdent"])
@@ -172,7 +175,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun finnOppgaveMedId(oppgaveId: String): Ressurs<OppgaveDto> {
+    fun finnOppgaveMedId(oppgaveId: Long): Ressurs<OppgaveDto> {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
 
         return Result.runCatching {
@@ -211,7 +214,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?, oppgavetype: String?, enhet: String?, saksbehandler: String?): List<OppgaveDto> {
+    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?,
+                                                   oppgavetype: String?,
+                                                   enhet: String?,
+                                                   saksbehandler: String?): List<OppgaveDto> {
 
         val uriBuilder = UriComponentsBuilder.fromUriString("$integrasjonUri/oppgave")
 
@@ -230,9 +236,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         } catch (e: Exception) {
             val message = if (e is RestClientResponseException) e.responseBodyAsString else ""
             throw IntegrasjonException("Kall mot integrasjon feilet ved finnOppgaverKnyttetTilSaksbehandlerOgEnhet. response=$message",
-                    e,
-                    uri,
-                    "behandlingstema: ${behandlingstema}, oppgavetype: ${oppgavetype}, enhet: ${enhet}, saksbehandler: ${saksbehandler}")
+                                       e,
+                                       uri,
+                                       "behandlingstema: ${behandlingstema}, oppgavetype: ${oppgavetype}, enhet: ${enhet}, saksbehandler: ${saksbehandler}")
         }
     }
 
@@ -293,10 +299,4 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
         private const val PATH_TILGANGER = "tilgang/personer"
     }
-}
-
-inline fun <reified T> assertGenerelleSuksessKriterier(it: Ressurs<T>?) {
-    val status = it?.status ?: error("Finner ikke ressurs")
-    if (status != Ressurs.Status.SUKSESS) error(
-            "Ressurs returnerer 2xx men har ressurs status failure")
 }

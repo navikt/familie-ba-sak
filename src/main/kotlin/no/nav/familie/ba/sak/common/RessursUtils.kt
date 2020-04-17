@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
-object RessursResponse {
+object RessursUtils {
     val LOG = LoggerFactory.getLogger(this::class.java)
     val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -27,5 +27,17 @@ object RessursResponse {
         secureLogger.info(errorMessage, throwable)
         LOG.error(errorMessage)
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
+    }
+
+    @Deprecated(message = "Gammel versjon av generell assert funksjon for ressurser. Denne tillater ikke 2xx og feilet ressurs.")
+    inline fun <reified T> assertGenerelleSuksessKriterier(it: Ressurs<T>?) {
+        val status = it?.status ?: error("Finner ikke ressurs")
+        if (status != Ressurs.Status.SUKSESS) error(
+                "Ressurs returnerer 2xx men har ressurs status failure")
+    }
+
+    inline fun <reified T> assertGenerelleSuksessKriterierV1(it: Ressurs<T>?) {
+        val status = it?.status ?: error("Finner ikke ressurs")
+        if (status == Ressurs.Status.SUKSESS && it.data == null) error("Ressurs har status suksess, men mangler data")
     }
 }

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
-import no.nav.familie.ba.sak.common.RessursResponse.illegalState
+import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
