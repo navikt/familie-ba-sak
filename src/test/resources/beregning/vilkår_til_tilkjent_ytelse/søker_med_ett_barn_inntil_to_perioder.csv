@@ -1,4 +1,9 @@
 søkerPeriode1;søkerVilkår1;søkerPeriode2;søkerVilkår2;barn1Periode1;barn1Vilkår1;barn1Periode2;barn1Vilkår2;<resultater>;barn1Andel1Beløp;barn1Andel1Periode;barn1Andel1Type;barn1Andel2Beløp;barn1Andel2Periode;barn1Andel2Type
+;;;;;;;;;;;;;;
+;;;;2021-09 – 2034-05;Under 18;;;;;;;;;
+2020-09 – 2022-05;Gift;;;;;;;;;;;;;
 2020-09 – 2022-05;Gift;;;2021-09 – 2034-05;Gift;;;;1054;2021-10-01 – 2022-06-30;ORDINÆR_BARNETRYGD;;;
+2020-09 – 2022-05;Gift;2022-06 – 2024-11;Gift;2018-09 – 2021-07;Under 18;2023-02 – 2027-04;Under 18;;1054;2020-10-01 – 2021-06-30;ORDINÆR_BARNETRYGD;1054;2023-03-01 – 2024-10-31;ORDINÆR_BARNETRYGD
 2020-09 – 2022-05;Gift;;;2021-09 – 2034-05;Under 18;;;;1054;2021-10-01 – 2022-04-30;ORDINÆR_BARNETRYGD;;;
 2020-09 – 2034-05;Opphold, bosatt;;;2020-09 – 2034-05;Opphold, bosatt, under 18, bor med søker;;;;1054;2020-10-01 – 2034-04-30;ORDINÆR_BARNETRYGD;;;
+2022-09 – 2034-05;Gift;;;2018-09 – 2024-07;Under 18;2027-02 – 2037-10;Under 18;;1054;2022-10-01 – 2024-06-30;ORDINÆR_BARNETRYGD;1054;2027-03-01 – 2034-04-30;ORDINÆR_BARNETRYGD

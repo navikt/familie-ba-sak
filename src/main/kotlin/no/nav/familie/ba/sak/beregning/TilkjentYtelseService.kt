@@ -17,8 +17,8 @@ import java.time.YearMonth
 @Service
 class TilkjentYtelseService(private val satsService: SatsService) {
 
-    fun mapBehandlingResultatTilTilkjentYtelse(behandlingResultat: BehandlingResultat,
-                                               personopplysningGrunnlag: PersonopplysningGrunnlag): TilkjentYtelse {
+    fun beregnTilkjentYtelse(behandlingResultat: BehandlingResultat,
+                             personopplysningGrunnlag: PersonopplysningGrunnlag): TilkjentYtelse {
 
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
@@ -45,7 +45,8 @@ class TilkjentYtelseService(private val satsService: SatsService) {
                             .filter { it.overlapper(periodeResultatBarn) }
                             .flatMap { overlappendePerioderesultatSøker ->
                                 val person = identBarnMap[periodeResultatBarn.personIdent]!!
-                                val stønadFom = maks(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
+                                val stønadFom =
+                                        maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
                                 val stønadTom =
                                         minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
 
@@ -76,26 +77,22 @@ class TilkjentYtelseService(private val satsService: SatsService) {
     }
 
     private fun settRiktigStønadFom(fraOgMed: LocalDate): YearMonth =
-            YearMonth.from(fraOgMed.førsteDagINesteMåned())
+            YearMonth.from(fraOgMed.plusMonths(1))
 
     private fun settRiktigStønadTom(erBarnetrygdTil18ÅrsDag: Boolean, tilOgMed: LocalDate): YearMonth {
         return if (erBarnetrygdTil18ÅrsDag)
-            YearMonth.from(tilOgMed.sisteDagIForrigeMåned())
+            YearMonth.from(tilOgMed.minusMonths(1))
         else
-            YearMonth.from(tilOgMed.plusMonths(1).sisteDagIMåned())
+            YearMonth.from(tilOgMed.plusMonths(1))
     }
 }
 
-private fun maks(periodeFomSoker: LocalDate?, periodeFomBarn: LocalDate?): LocalDate {
+private fun maksimum(periodeFomSoker: LocalDate?, periodeFomBarn: LocalDate?): LocalDate {
     if (periodeFomSoker == null && periodeFomBarn == null) {
         throw IllegalStateException("Både søker og barn kan ikke ha null i periodeFom dato")
     }
-    return when {
-        periodeFomSoker == null -> periodeFomBarn!!
-        periodeFomBarn == null -> periodeFomSoker
-        periodeFomBarn > periodeFomSoker -> periodeFomBarn
-        else -> periodeFomSoker
-    }
+
+    return maxOf(periodeFomSoker ?: LocalDate.MIN, periodeFomBarn ?: LocalDate.MIN)
 }
 
 private fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): LocalDate {
@@ -103,11 +100,6 @@ private fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): Lo
         throw IllegalStateException("Både søker og barn kan ikke ha null i periodeTom dato")
     }
 
-    return when {
-        periodeTomSoker == null -> periodeTomBarn!!
-        periodeTomBarn == null -> periodeTomSoker
-        periodeTomBarn > periodeTomSoker -> periodeTomSoker
-        else -> periodeTomBarn
-    }
+    return minOf(periodeTomBarn ?: LocalDate.MAX, periodeTomSoker ?: LocalDate.MAX)
 }
 

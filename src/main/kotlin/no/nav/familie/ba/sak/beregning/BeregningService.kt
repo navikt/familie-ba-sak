@@ -42,7 +42,7 @@ class BeregningService(
                 ?: throw IllegalStateException("Kunne ikke hente behandlingsresultat for behandling med id ${behandling.id}")
 
         val tilkjentYtelse = tilkjentYtelseService
-                .mapBehandlingResultatTilTilkjentYtelse(behandlingResultat,personopplysningGrunnlag)
+                .beregnTilkjentYtelse(behandlingResultat, personopplysningGrunnlag)
 
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
