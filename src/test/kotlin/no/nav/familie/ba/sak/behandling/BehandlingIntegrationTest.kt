@@ -67,9 +67,6 @@ class BehandlingIntegrationTest {
     @Autowired
     lateinit var fagsakService: FagsakService
 
-    @Autowired
-    lateinit var tilkjentYtelseService: TilkjentYtelseService
-
     lateinit var behandlingService: BehandlingService
 
     @BeforeEach
