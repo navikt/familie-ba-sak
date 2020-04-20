@@ -7,9 +7,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
-import no.nav.familie.ba.sak.common.sisteDagIMåned
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth

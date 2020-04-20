@@ -3,9 +3,6 @@ package no.nav.familie.ba.sak.beregning
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.vedtak.YtelseType.*
-import no.nav.familie.ba.sak.beregning.PersonligYtelseForPeriode
-import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.beregning.YtelseKalkulatorController
 import no.nav.familie.ba.sak.beregning.domene.Sats
 import no.nav.familie.ba.sak.beregning.domene.SatsRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
