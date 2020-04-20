@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import org.springframework.web.client.HttpClientErrorException
 
 @RestController
 @RequestMapping("/api")
@@ -84,13 +85,21 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok().body(Ressurs.success(it)) },
                         onFailure = {
-                            illegalState("Søker fagsak feilet: ${it.message}", it)
+                            val clientError = it as? HttpClientErrorException?
+                            if(clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND){
+                                logger.info("Søker fagsak feilet: ${it.message}")
+                                secureLogger.info("Søker fagsak feilet: ${it.message}", it)
+                                ResponseEntity.ok().body(Ressurs.failure("Søk på fagsak feilet: ${it.message}"))
+                            }else{
+                                illegalState("Søker fagsak feilet: ${it.message}", it)
+                            }
                         }
                 )
     }
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 
