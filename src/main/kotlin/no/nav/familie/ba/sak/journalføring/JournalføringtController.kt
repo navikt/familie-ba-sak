@@ -36,7 +36,7 @@ class JournalføringtController(val journalføringService: JournalføringService
                    @RequestBody @Valid oppdaterJournalpostRequest: OppdaterJournalpostRequest)
         : ResponseEntity<Ressurs<String>> {
 
-        journalføringService.ferdigstill(oppdaterJournalpostRequest, journalpostId, journalførendeEnhet, oppgaveId)
-        return ResponseEntity.ok(Ressurs.success("OK", "Journalpost $journalpostId Ferdigstilt"))
+        val fagsakId = journalføringService.ferdigstill(oppdaterJournalpostRequest, journalpostId, journalførendeEnhet, oppgaveId)
+        return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Ferdigstilt"))
     }
 }

@@ -257,8 +257,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    fun ferdigstillJournalpost(journalpostId: String, behandlendeEnhet: String) {
-        val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$behandlendeEnhet")
+    fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String) {
+        val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet")
         exchange(
             networkRequest = {
                 putForEntity<Ressurs<Any>>(uri, "")
@@ -323,7 +323,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    private fun <T> exchange(networkRequest: () -> Ressurs<T>?, onFailure: (Throwable) -> RuntimeException): T {
+    private inline fun <reified T> exchange(networkRequest: () -> Ressurs<T>?, onFailure: (Throwable) -> RuntimeException): T {
         return try {
             val response = networkRequest.invoke()
             validerOgPakkUt(response)
@@ -332,13 +332,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    private fun <T> validerOgPakkUt(ressurs: Ressurs<T>?): T {
-        when {
-            ressurs == null -> error("Finner ikke ressurs")
-            ressurs.data == null -> error("Ressurs mangler data")
-            ressurs.status != Ressurs.Status.SUKSESS -> error("Ressurs returnerer 2xx men har ressurs status failure")
-            else -> return ressurs.data!!
-        }
+    private inline fun <reified T> validerOgPakkUt(ressurs: Ressurs<T>?): T {
+        assertGenerelleSuksessKriterier(ressurs)
+        return ressurs!!.data ?: error("Fikk ressurs med status ${ressurs.status} i respons")
     }
 
     val tilgangUri = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()
