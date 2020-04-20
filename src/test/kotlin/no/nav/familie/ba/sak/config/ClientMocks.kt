@@ -37,6 +37,9 @@ class ClientMocks {
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 success(lagTestOppgaveDTO(1L))
 
+        every { mockIntegrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any()) } returns
+                listOf(lagTestOppgaveDTO(1L))
+
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())
         } returns listOf(Tilgang(true, null))

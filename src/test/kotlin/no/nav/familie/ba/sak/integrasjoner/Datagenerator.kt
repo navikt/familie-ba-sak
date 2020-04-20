@@ -43,7 +43,11 @@ fun lagTestOppgaveDTO(oppgaveId: Long): OppgaveDto {
                       behandlesAvApplikasjon = "FS22",
                       beskrivelse = "Beskrivelse for oppgave",
                       tema = Tema.BAR.name,
-                      oppgavetype = Oppgavetype.BehandleSak.name,
+                      oppgavetype = Oppgavetype.Journalføring.name,
+                      opprettetTidspunkt = LocalDate.of(
+                              2020,
+                              1,
+                              1).toString(),
                       fristFerdigstillelse = LocalDate.of(
                               2020,
                               2,
