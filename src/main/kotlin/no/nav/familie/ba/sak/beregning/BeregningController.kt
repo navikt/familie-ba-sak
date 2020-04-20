@@ -40,23 +40,6 @@ class BeregningController(
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @Deprecated("Erstattes av direkte mapping fra vilkårsvurdering")
-    @PutMapping(path = ["/{vedtakId}/beregning"])
-    fun oppdaterVedtakMedBeregning(@PathVariable @VedtaktilgangConstraint vedtakId: Long,
-                                   @RequestBody nyBeregning: NyBeregning): ResponseEntity<Ressurs<RestFagsak>> {
-
-        val vedtak = vedtakService.hent(vedtakId)
-        return Result.runCatching {
-            fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
-        }
-                .fold(
-                        onSuccess = { ResponseEntity.ok(it) },
-                        onFailure = { e ->
-                            badRequest("Oppdatering av beregning feilet: ${e.cause?.message ?: e.message}", e)
-                        }
-                )
-    }
-
     @GetMapping(path = ["/oversikt/{behandlingId}"])
     fun oversiktOverBeregnetUtbetaling(@PathVariable @BehandlingstilgangConstraint behandlingId: Long)
             : ResponseEntity<Ressurs<List<RestBeregningOversikt>>> {
@@ -114,14 +97,3 @@ class BeregningController(
         )
     }
 }
-
-data class NyBeregning(
-        val personBeregninger: List<PersonBeregning>
-)
-
-data class PersonBeregning(
-        val ident: String,
-        val beløp: Int,
-        val stønadFom: LocalDate,
-        val ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
-)

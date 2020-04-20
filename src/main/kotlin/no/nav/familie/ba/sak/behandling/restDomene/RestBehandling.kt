@@ -18,6 +18,7 @@ data class RestBehandling(val aktiv: Boolean,
                           val opprettetTidspunkt: LocalDateTime,
                           val underkategori: BehandlingUnderkategori,
                           val personResultater: List<RestPersonResultat>,
+                          val samletResultat: BehandlingResultatType,
                           val vedtakForBehandling: List<RestVedtak?>)
 
 data class RestPersonResultat(
