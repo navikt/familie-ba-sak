@@ -23,12 +23,14 @@ fun lagRestVedtakPerson(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, person
         : List<RestVedtakPerson>{
 
     return andelerTilkjentYtelse.groupBy { it.personId }
-            .map {
+            .map { andelerForPerson ->
+                val personId = andelerForPerson.key
+                val andeler = andelerForPerson.value
                 RestVedtakPerson(
-                        personIdent = personopplysningGrunnlag?.personer?.find { person -> person.id == it.key }?.personIdent?.ident,
-                        beløp = it.value.map { it.beløp }.sum(),
-                        stønadFom = it.value.map { it.stønadFom }.min() ?: LocalDate.MIN,
-                        ytelsePerioder = it.value.map { it1->RestYtelsePeriode(it1.beløp, it1.stønadFom, it1.stønadTom, it1.type) }
+                        personIdent = personopplysningGrunnlag?.personer?.find { person -> person.id == personId }?.personIdent?.ident,
+                        beløp = andeler.map { it.beløp }.sum(),
+                        stønadFom = andeler.map { it.stønadFom }.min() ?: LocalDate.MIN,
+                        ytelsePerioder = andeler.map { it1->RestYtelsePeriode(it1.beløp, it1.stønadFom, it1.stønadTom, it1.type) }
                 )
             }
 }
