@@ -9,12 +9,12 @@ data class RestBeregningOversikt(
         val periodeTom: LocalDate?,
         val sakstype: BehandlingKategori,
         val beregningDetaljer: List<RestBeregningDetalj>,
-        val stønadstype: List<Ytelsetype>,
+        val ytelseTyper: List<Ytelsetype>,
         val antallBarn: Int,
         val utbetaltPerMnd: Int)
 
 data class RestBeregningDetalj(
         val person: RestPerson,
-        val stønadstype: Ytelsetype,
+        val ytelsetype: Ytelsetype,
         val utbetaltPerMnd: Int
 )

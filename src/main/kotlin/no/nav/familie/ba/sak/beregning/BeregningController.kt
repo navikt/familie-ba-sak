@@ -92,7 +92,7 @@ class BeregningController(
         return RestBeregningOversikt(
                 periodeFom = segment.fom,
                 periodeTom = segment.tom,
-                stønadstype = andelerForSegment.map(AndelTilkjentYtelse::type),
+                ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
                 utbetaltPerMnd = segment.value,
                 antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.id == andel.personId } },
                 sakstype = behandling.kategori,
@@ -107,7 +107,7 @@ class BeregningController(
                                     fødselsdato = personForAndel.fødselsdato,
                                     personIdent = personForAndel.personIdent.ident
                             ),
-                            stønadstype = andel.type,
+                            ytelsetype = andel.type,
                             utbetaltPerMnd = andel.beløp
                     )
                 }
