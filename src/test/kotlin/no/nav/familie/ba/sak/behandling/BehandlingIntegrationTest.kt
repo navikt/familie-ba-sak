@@ -2,10 +2,7 @@ package no.nav.familie.ba.sak.behandling
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -22,6 +19,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -59,6 +57,12 @@ class BehandlingIntegrationTest {
 
     @Autowired
     lateinit var beregningService: BeregningService
+
+    @Autowired
+    lateinit var behandlingResultatRepository: BehandlingResultatRepository
+
+    @Autowired
+    lateinit var behandlingResultatService: BehandlingResultatService
 
     @Autowired
     lateinit var fagsakService: FagsakService
@@ -144,10 +148,8 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-     fun `Bruk samme behandling hvis nytt barn kommer på fagsak med aktiv behandling`() {
+    fun `Bruk samme behandling hvis nytt barn kommer på fagsak med aktiv behandling`() {
         val morId = randomFnr()
-        val barnId = randomFnr()
-        val barn2Id = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
@@ -171,6 +173,8 @@ class BehandlingIntegrationTest {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
+        val stønadFom = LocalDate.of(2020, 1, 1)
+        val stønadTom = stønadFom.plusYears(17)
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
@@ -179,16 +183,10 @@ class BehandlingIntegrationTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val nyBeregning = NyBeregning(listOf(
-                PersonBeregning(barn1Fnr,
-                              1054,
-                              LocalDate.of(2020, 1, 1),
-                              Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr,
-                              1054,
-                              LocalDate.of(2020, 1, 1),
-                              Ytelsetype.ORDINÆR_BARNETRYGD)
-        ))
+        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        behandlingResultat.personResultater =
+                lagPersonResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, stønadFom, stønadTom)
+        behandlingResultatRepository.save(behandlingResultat)
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
@@ -198,7 +196,7 @@ class BehandlingIntegrationTest {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val task = opprettOpphørVedtakTask(
                 behandling,
@@ -238,6 +236,7 @@ class BehandlingIntegrationTest {
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
         val dato_2020_10_01 = LocalDate.of(2020, 10, 1)
+        val stønadTom = dato_2020_01_01.plusYears(17)
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
@@ -251,29 +250,45 @@ class BehandlingIntegrationTest {
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 ansvarligSaksbehandler = "saksbehandler1")
 
-        val personBeregninger = listOf(
-                PersonBeregning(barn1Fnr, 1054, dato_2020_01_01, Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
+        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        behandlingResultat.personResultater = setOf(
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = søkerFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = dato_2020_01_01.minusMonths(1),
+                                  periodeTom = stønadTom
+                ),
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = barn1Fnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = dato_2020_01_01.minusMonths(1),
+                                  periodeTom = stønadTom
+                ),
+                lagPersonResultat(behandlingResultat = behandlingResultat,
+                                  fnr = barn2Fnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = dato_2020_10_01.minusMonths(1),
+                                  periodeTom = stønadTom
+                )
         )
+        behandlingResultatRepository.save(behandlingResultat)
 
-        val nyBeregning = NyBeregning(personBeregninger)
-
-        val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, nyBeregning)
+        val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
-                .associateBy({it.barn}, {it.ytelsePerioder[0]} )
+                .associateBy({ it.barn }, { it.ytelsePerioder[0] })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
-        Assertions.assertEquals(1054,restVedtakBarnMap[barn1Fnr]!!.beløp)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_01_01, restVedtakBarnMap[barn1Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD,restVedtakBarnMap[barn1Fnr]!!.type)
+        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!!.type)
 
-        Assertions.assertEquals(1354,restVedtakBarnMap[barn2Fnr]!!.beløp)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn2Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_10_01, restVedtakBarnMap[barn2Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2020_10_01 < restVedtakBarnMap[barn2Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD,restVedtakBarnMap[barn2Fnr]!!.type)
+        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!!.type)
     }
 
     @Test
@@ -285,15 +300,14 @@ class BehandlingIntegrationTest {
         val barn3Fnr = randomFnr()
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
-        val dato_2020_10_01 = LocalDate.of(2020, 10, 1)
         val dato_2021_01_01 = LocalDate.of(2021, 1, 1)
-        val dato_2021_10_01 = LocalDate.of(2021, 10, 1)
+        val stønadTom = dato_2020_01_01.plusYears(17)
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
         val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr,barn3Fnr))
+                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         Assertions.assertNotNull(personopplysningGrunnlag)
@@ -303,33 +317,42 @@ class BehandlingIntegrationTest {
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 ansvarligSaksbehandler = "saksbehandler1")
 
-        val førsteBeregning = NyBeregning(listOf(
-                PersonBeregning(barn1Fnr, 1054, dato_2020_01_01, Ytelsetype.ORDINÆR_BARNETRYGD),
-                PersonBeregning(barn2Fnr, 1354, dato_2020_10_01, Ytelsetype.ORDINÆR_BARNETRYGD)
-        ))
+        val behandlingResultat1 = BehandlingResultat(behandling = behandling)
+        behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat1,
+                                                                                   søkerFnr,
+                                                                                   barn1Fnr,
+                                                                                   barn2Fnr,
+                                                                                   dato_2020_01_01.minusMonths(1),
+                                                                                   stønadTom)
+        behandlingResultatRepository.save(behandlingResultat1)
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, førsteBeregning)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val andreBeregning = NyBeregning(listOf(
-                PersonBeregning(barn1Fnr, 970, dato_2021_01_01, Ytelsetype.MANUELL_VURDERING),
-                PersonBeregning(barn3Fnr, 314, dato_2021_10_01, Ytelsetype.EØS)
-        ))
 
-        val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, andreBeregning)
+        val behandlingResultat2 = BehandlingResultat(behandling = behandling)
+        behandlingResultat2.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat2,
+                                                                                   søkerFnr,
+                                                                                   barn1Fnr,
+                                                                                   barn3Fnr,
+                                                                                   dato_2021_01_01.minusMonths(1),
+                                                                                   stønadTom)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat2)
+
+        val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
-                .associateBy({it.barn}, {it.ytelsePerioder[0]} )
+                .associateBy({ it.barn }, { it.ytelsePerioder[0] })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
-        Assertions.assertEquals(970,restVedtakBarnMap[barn1Fnr]!!.beløp)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)
         Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn1Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn1Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.MANUELL_VURDERING,restVedtakBarnMap[barn1Fnr]!!.type)
 
-        Assertions.assertEquals(314,restVedtakBarnMap[barn3Fnr]!!.beløp)
-        Assertions.assertEquals(dato_2021_10_01, restVedtakBarnMap[barn3Fnr]!!.stønadFom)
-        Assertions.assertTrue(dato_2021_10_01 < restVedtakBarnMap[barn3Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.EØS,restVedtakBarnMap[barn3Fnr]!!.type)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn3Fnr]!!.beløp)
+        Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn3Fnr]!!.stønadFom)
+        Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn3Fnr]!!.stønadTom)
+
+        Assertions.assertNull(restVedtakBarnMap[barn2Fnr])
     }
 }

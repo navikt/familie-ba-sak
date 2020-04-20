@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,6 +16,7 @@ class Vilkårsvurdering(
         private val behandlingService: BehandlingService,
         private val vilkårService: VilkårService,
         private val vedtakService: VedtakService,
+        private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService
 ) : BehandlingSteg<RestVilkårsvurdering> {
 
@@ -31,10 +33,13 @@ class Vilkårsvurdering(
         } else {
             vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)
         }
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 vilkårsvurdertBehandling,
                 personopplysningGrunnlag,
                 ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandler())
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
 
         return vilkårsvurdertBehandling
     }

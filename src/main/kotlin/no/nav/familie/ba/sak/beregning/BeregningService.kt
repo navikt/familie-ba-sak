@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
@@ -8,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -20,7 +20,9 @@ import java.time.LocalDate
 class BeregningService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakService: FagsakService,
-        private val tilkjentYtelseRepository: TilkjentYtelseRepository
+        private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+        private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val tilkjentYtelseService: TilkjentYtelseService
 ) {
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
@@ -32,24 +34,16 @@ class BeregningService(
 
     @Transactional
     fun oppdaterBehandlingMedBeregning(behandling: Behandling,
-                                       personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                       nyBeregning: NyBeregning): Ressurs<RestFagsak> {
+                                       personopplysningGrunnlag: PersonopplysningGrunnlag): Ressurs<RestFagsak> {
 
         andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(behandling.id)
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
+        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
+                ?: throw IllegalStateException("Kunne ikke hente behandlingsresultat for behandling med id ${behandling.id}")
 
-        val tilkjentYtelse = TilkjentYtelse(
-                behandling = behandling,
-                opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now()
-        )
-        val andelerTilkjentYtelse = mapNyBeregningTilAndelerTilkjentYtelse(
-                behandling.id,
-                nyBeregning,
-                tilkjentYtelse,
-                personopplysningGrunnlag
-        )
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
+        val tilkjentYtelse = tilkjentYtelseService
+                .beregnTilkjentYtelse(behandlingResultat, personopplysningGrunnlag)
+
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
         return fagsakService.hentRestFagsak(behandling.fagsak.id)
@@ -84,38 +78,3 @@ class BeregningService(
     }
 }
 
-private fun mapNyBeregningTilAndelerTilkjentYtelse(behandlingId: Long,
-                                           nyBeregning: NyBeregning,
-                                           tilkjentYtelse: TilkjentYtelse,
-                                           personopplysningGrunnlag: PersonopplysningGrunnlag)
-        : List<AndelTilkjentYtelse> {
-
-    val identBarnMap = personopplysningGrunnlag.barna
-            .associateBy { it.personIdent.ident }
-
-    return nyBeregning.personBeregninger
-            .filter { identBarnMap.containsKey(it.ident) }
-            .map {
-
-                val person = identBarnMap[it.ident]!!
-
-                if (it.stønadFom.isBefore(person.fødselsdato)) {
-                    error("Ugyldig fra og med dato for barn med fødselsdato ${person.fødselsdato}")
-                }
-
-                val sikkerStønadFom = it.stønadFom.withDayOfMonth(1)
-                val sikkerStønadTom = person.fødselsdato.plusYears(18).sisteDagIForrigeMåned()
-
-                if (sikkerStønadTom.isBefore(sikkerStønadFom)) {
-                    error("Stønadens fra-og-med-dato (${sikkerStønadFom}) er etter til-og-med-dato (${sikkerStønadTom}). ")
-                }
-
-                AndelTilkjentYtelse(personId = person.id,
-                        behandlingId = behandlingId,
-                        tilkjentYtelse = tilkjentYtelse,
-                        beløp = it.beløp,
-                        stønadFom = sikkerStønadFom,
-                        stønadTom = sikkerStønadTom,
-                        type = it.ytelsetype)
-            }
-}
