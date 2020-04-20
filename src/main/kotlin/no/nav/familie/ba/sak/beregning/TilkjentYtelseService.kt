@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
@@ -65,7 +65,7 @@ class TilkjentYtelseService(private val satsService: SatsService) {
                                             stønadFom = beløpsperiode.fraOgMed.atDay(1),
                                             stønadTom = beløpsperiode.tilOgMed.atEndOfMonth(),
                                             beløp = beløpsperiode.beløp,
-                                            type = Ytelsetype.ORDINÆR_BARNETRYGD
+                                            type = YtelseType.ORDINÆR_BARNETRYGD
                                     )
                                 }
                             }

@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
@@ -223,7 +223,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                         stønadFom = stønadPeriode.fraOgMed,
                         stønadTom = stønadPeriode.tilOgMed!!,
                         beløp = beløp.toInt(),
-                        type = Ytelsetype.valueOf(type)
+                        type = YtelseType.valueOf(type)
                 )
         )
 

@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.PersonBeregning
 import no.nav.familie.ba.sak.beregning.NyBeregning

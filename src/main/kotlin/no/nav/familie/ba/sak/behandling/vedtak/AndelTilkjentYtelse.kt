@@ -35,7 +35,7 @@ data class AndelTilkjentYtelse(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "type", nullable = false)
-        val type: Ytelsetype
+        val type: YtelseType
 ) : BaseEntitet() {
 
         override fun equals(other: Any?): Boolean {
@@ -65,7 +65,7 @@ data class AndelTilkjentYtelse(
 }
 
 
-enum class Ytelsetype(val klassifisering: String) {
+enum class YtelseType(val klassifisering: String) {
         ORDINÆR_BARNETRYGD("BATR"),
         UTVIDET_BARNETRYGD("BATR"),
         SMÅBARNSTILLEGG("BATRSMA"),

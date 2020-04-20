@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
@@ -86,8 +86,8 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
 
 fun lagAndelTilkjentYtelse(fom: String,
                            tom: String,
-                           ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD,
-                           beløp: Int = sats(ytelsetype),
+                           ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                           beløp: Int = sats(ytelseType),
                            behandling: Behandling = lagBehandling()): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
             personId = tilfeldigPerson().id,
@@ -96,7 +96,7 @@ fun lagAndelTilkjentYtelse(fom: String,
             beløp = beløp,
             stønadFom = dato(fom),
             stønadTom = dato(tom),
-            type = ytelsetype
+            type = ytelseType
     )
 }
 

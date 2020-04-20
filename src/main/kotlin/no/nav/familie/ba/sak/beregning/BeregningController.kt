@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -107,7 +107,7 @@ class BeregningController(
                                     fødselsdato = personForAndel.fødselsdato,
                                     personIdent = personForAndel.personIdent.ident
                             ),
-                            ytelsetype = andel.type,
+                            ytelseType = andel.type,
                             utbetaltPerMnd = andel.beløp
                     )
                 }
@@ -123,5 +123,5 @@ data class PersonBeregning(
         val ident: String,
         val beløp: Int,
         val stønadFom: LocalDate,
-        val ytelsetype: Ytelsetype = Ytelsetype.ORDINÆR_BARNETRYGD
+        val ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD
 )

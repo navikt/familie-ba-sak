@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.beregning
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonUnwrapped
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -84,7 +84,7 @@ class YtelseKalkulatorController(
         val personligeYtelse = periodeYtelse.personligYtelse!!
 
         val divisor = if (personligeYtelse.halvYtelse) 2 else 1
-        val satsType = YtelseSatsMapper.map(personligeYtelse.ytelsetype, personligeYtelse.alder)
+        val satsType = YtelseSatsMapper.map(personligeYtelse.ytelseType, personligeYtelse.alder)
 
         val beløpsperioder: List<SatsService.BeløpPeriode>? = satsType?.let {
             satsService.hentGyldigSatsFor(it, periodeYtelse.stønadFom, periodeYtelse.stønadTom, YearMonth.now())
@@ -97,7 +97,7 @@ class YtelseKalkulatorController(
 
 data class PersonligYtelse(
         val personident: String,
-        val ytelsetype: Ytelsetype,
+        val ytelseType: YtelseType,
         val alder: Int? = null,
         val halvYtelse: Boolean = false
 )
@@ -113,12 +113,12 @@ data class PersonligYtelseForPeriode(
     val personligYtelse: PersonligYtelse? = _personligYtelse
 
     constructor(personident: String,
-                ytelsetype: Ytelsetype,
+                ytelseType: YtelseType,
                 fullYtelse: Boolean,
                 stønadFraOgMed: YearMonth,
                 stønadTilOgMed: YearMonth,
                 alder: Int?=null) :
-            this(PersonligYtelse(personident, ytelsetype, alder, fullYtelse), null, stønadFraOgMed, stønadTilOgMed)
+            this(PersonligYtelse(personident, ytelseType, alder, fullYtelse), null, stønadFraOgMed, stønadTilOgMed)
 }
 
 data class PersonligYtelseMedBeløp(
@@ -161,7 +161,7 @@ private class HtmlTabell {
             val builder = StringBuilder()
 
             builder.append("<table>")
-            builder.append(header.map { "${it.personident} ${it.ytelsetype} ${tilProsent(!it.halvYtelse)}" }
+            builder.append(header.map { "${it.personident} ${it.ytelseType} ${tilProsent(!it.halvYtelse)}" }
                                    .joinToString("</th><th>", "<tr><th>Periode</th><th>Total</th><th>", "</th></tr>"))
             builder.append(personYtelseSum.joinToString("</td><td>", "<tr><td>Alle</td><td>$totalbeløp</td><td>", "</td></tr>"))
 
