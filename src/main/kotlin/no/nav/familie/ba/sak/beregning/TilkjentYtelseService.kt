@@ -7,9 +7,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
-import no.nav.familie.ba.sak.common.sisteDagIMåned
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -44,7 +41,8 @@ class TilkjentYtelseService(private val satsService: SatsService) {
                     innvilgetPeriodeResultatSøker
                             .filter { it.overlapper(periodeResultatBarn) }
                             .flatMap { overlappendePerioderesultatSøker ->
-                                val person = identBarnMap[periodeResultatBarn.personIdent]!! // TODO: bør vi kaste error her eller?
+                                val person = identBarnMap[periodeResultatBarn.personIdent]
+                                             ?: error("Finner ikke barn på map over barna i behandlingen")
                                 val stønadFom =
                                         maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
                                 val stønadTom =
