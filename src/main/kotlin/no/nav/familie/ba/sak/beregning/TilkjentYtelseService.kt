@@ -44,7 +44,7 @@ class TilkjentYtelseService(private val satsService: SatsService) {
                     innvilgetPeriodeResultatSøker
                             .filter { it.overlapper(periodeResultatBarn) }
                             .flatMap { overlappendePerioderesultatSøker ->
-                                val person = identBarnMap[periodeResultatBarn.personIdent]!!
+                                val person = identBarnMap[periodeResultatBarn.personIdent]!! // TODO: bør vi kaste error her eller?
                                 val stønadFom =
                                         maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
                                 val stønadTom =
