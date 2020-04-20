@@ -4,9 +4,13 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 
 interface BehandlingSteg<T> {
-    fun utførSteg(behandling: Behandling, data: T): Behandling
+    fun utførStegOgAngiNeste(behandling: Behandling, data: T): StegType
 
     fun stegType(): StegType
+
+    fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
+        return behandling.steg.hentNesteSteg(behandlingType = behandling.type)
+    }
 }
 
 fun initSteg(behandlingType: BehandlingType?): StegType {

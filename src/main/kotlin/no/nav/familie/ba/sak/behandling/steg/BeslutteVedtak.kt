@@ -20,7 +20,7 @@ class BeslutteVedtak(
         private val loggService: LoggService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
-    override fun utførSteg(behandling: Behandling, data: RestBeslutningPåVedtak): Behandling {
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: RestBeslutningPåVedtak): StegType {
         if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG ||
             behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
             error("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
@@ -44,7 +44,10 @@ class BeslutteVedtak(
 
         loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, saksbehandlerId)
 
-        return behandling
+        return if (data.beslutning.erGodkjent())
+            hentNesteStegForNormalFlyt(behandling)
+        else
+            StegType.REGISTRERE_SØKNAD
     }
 
     override fun stegType(): StegType {

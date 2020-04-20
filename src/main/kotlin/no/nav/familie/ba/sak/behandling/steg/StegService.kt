@@ -65,7 +65,7 @@ class StegService(
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
 
         val behandlingEtterSøknadshåndtering = håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, søknadDTO)
+            behandlingSteg.utførStegOgAngiNeste(behandling, søknadDTO)
         }
 
         return håndterPersongrunnlag(
@@ -79,7 +79,7 @@ class StegService(
                 hentBehandlingSteg(StegType.REGISTRERE_PERSONGRUNNLAG) as RegistrerPersongrunnlag
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, registrerPersongrunnlagDTO)
+            behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO)
         }
     }
 
@@ -88,7 +88,7 @@ class StegService(
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, restVilkårsvurdering)
+            behandlingSteg.utførStegOgAngiNeste(behandling, restVilkårsvurdering)
         }
     }
 
@@ -96,7 +96,7 @@ class StegService(
         val behandlingSteg: SendTilBeslutter = hentBehandlingSteg(StegType.SEND_TIL_BESLUTTER) as SendTilBeslutter
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, "")
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
     }
 
@@ -104,10 +104,8 @@ class StegService(
         val behandlingSteg: BeslutteVedtak =
                 hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
 
-        return håndterSteg(behandling,
-                           behandlingSteg,
-                           if (!restBeslutningPåVedtak.beslutning.erGodkjent()) StegType.REGISTRERE_SØKNAD else null) {
-            behandlingSteg.utførSteg(behandling, restBeslutningPåVedtak)
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         }
     }
 
@@ -116,17 +114,12 @@ class StegService(
                 hentBehandlingSteg(StegType.FERDIGSTILLE_BEHANDLING) as FerdigstillBehandlingSteg
 
         return håndterSteg(behandling, behandlingStegSteg) {
-            behandlingStegSteg.utførSteg(behandling, "")
+            behandlingStegSteg.utførStegOgAngiNeste(behandling, "")
         }
     }
 
     // Generelle stegmetoder
-    private fun håndterSteg(behandling: Behandling, behandlingSteg: BehandlingSteg<*>, utførendeSteg: () -> Behandling): Behandling {
-        return håndterSteg(behandling, behandlingSteg, null, utførendeSteg)
-    }
-
-    private fun håndterSteg(behandling: Behandling, behandlingSteg: BehandlingSteg<*>, eksplisittNesteSteg: StegType?,
-                            utførendeSteg: () -> Behandling): Behandling {
+    private fun håndterSteg(behandling: Behandling, behandlingSteg: BehandlingSteg<*>, utførendeSteg: () -> StegType): Behandling {
         try {
             if (behandling.steg == sisteSteg) {
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
@@ -145,18 +138,16 @@ class StegService(
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${behandlingSteg.stegType()} pga manglende rolle.")
             }
 
-            val behandlingEtterSteg = utførendeSteg()
+            val nesteSteg = utførendeSteg()
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
-            val nesteSteg = eksplisittNesteSteg ?: behandling.steg.hentNesteSteg(behandlingType = behandling.type)
             if (nesteSteg == sisteSteg) {
                 LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
             }
 
-            return behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id,
-                                                       steg = nesteSteg)
+            return behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
         } catch (exception: Exception) {
             stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
             LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
