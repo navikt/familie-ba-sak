@@ -133,26 +133,26 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().rekkefølge > behandling.steg.rekkefølge) {
-                error("${SikkerhetContext.hentSaksbehandler()} prøver å utføre steg ${behandlingSteg.stegType()}," +
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()}," +
                       " men behandlingen er på steg ${behandling.steg}")
             }
 
             val behandlerRolle =
                     SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minBy { it.nivå })
 
-            LOG.info("${SikkerhetContext.hentSaksbehandler()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+            LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
-                error("${SikkerhetContext.hentSaksbehandler()} kan ikke utføre steg '${behandlingSteg.stegType()}")
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${behandlingSteg.stegType()} pga manglende rolle.")
             }
 
             val behandlingEtterSteg = utførendeSteg()
-            LOG.info("${SikkerhetContext.hentSaksbehandler()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+            LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
             val nesteSteg = eksplisittNesteSteg ?: behandling.steg.hentNesteSteg(behandlingType = behandling.type)
             if (nesteSteg == sisteSteg) {
-                LOG.info("${SikkerhetContext.hentSaksbehandler()} er ferdig med stegprosess på behandling ${behandling.id}")
+                LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
             }
 
             return behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id,
