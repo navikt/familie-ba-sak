@@ -16,7 +16,7 @@ data class RestYtelsePeriode (
         val beløp: Int,
         val stønadFom: LocalDate,
         val stønadTom: LocalDate,
-        val type: Ytelsetype
+        val ytelseType: Ytelsetype
 )
 
 fun lagRestVedtakPerson(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, personopplysningGrunnlag: PersonopplysningGrunnlag?)
