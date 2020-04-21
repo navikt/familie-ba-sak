@@ -88,13 +88,14 @@ class LoggService(
         ))
     }
 
-    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, beslutter: String) {
+    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, beslutter: String, begrunnelse: String?) {
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.GODKJENNE_VEDTAK,
                 tittel = if (beslutning.erGodkjent()) "Godkjent vedtak" else "Underkjent vedtak",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.BESLUTTER),
-                tekst = "Saksbehandler $beslutter satte vedtak til $beslutning"
+                tekst = "Saksbehandler $beslutter satte vedtak til $beslutning" +
+                        if (begrunnelse != null) " med begrunnelse: $begrunnelse" else ""
         ))
     }
 

@@ -42,7 +42,7 @@ class BeslutteVedtak(
             opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
         }
 
-        loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, saksbehandlerId)
+        loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, saksbehandlerId, data.begrunnelse)
 
         return if (data.beslutning.erGodkjent())
             hentNesteStegForNormalFlyt(behandling)
