@@ -25,11 +25,12 @@ class VilkårService(
         val behandling = behandlingService.hent(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
-        val barn = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
-        if (barn.size > 1) {
-            throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse inneholder kan kun inneholde ett barn, men inneholder ${barn.size}")
+        val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
+        if (barna.size != 1) {
+            throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse inneholder kan kun inneholde ett barn, men inneholder ${barna.size}")
         }
 
+        val barnet = barna.first()
 
         val behandlingResultat = BehandlingResultat(
                 behandling = behandlingService.hent(behandlingId),
@@ -43,7 +44,7 @@ class VilkårService(
                     Fakta(personForVurdering = person)
             )
             val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
-            personResultat.vilkårResultater = vilkårResultater(personResultat, barn, evalueringer)
+            personResultat.vilkårResultater = vilkårResultater(personResultat, barnet, evalueringer)
             personResultat
         }.toSet()
 
@@ -127,16 +128,16 @@ class VilkårService(
     }
 
     private fun vilkårResultater(personResultat: PersonResultat,
-                                 barn: List<Person>,
+                                 barnet: Person,
                                  evalueringer: List<Evaluering>): Set<VilkårResultat> {
         return evalueringer.map { child ->
             val tom: LocalDate? =
-                    if (Vilkår.valueOf(child.identifikator) == Vilkår.UNDER_18_ÅR) barn.first().fødselsdato.plusYears(18) else null
+                    if (Vilkår.valueOf(child.identifikator) == Vilkår.UNDER_18_ÅR) barnet.fødselsdato.plusYears(18) else null
 
             VilkårResultat(personResultat = personResultat,
                            resultat = child.resultat,
                            vilkårType = Vilkår.valueOf(child.identifikator),
-                           periodeFom = barn.first().fødselsdato,
+                           periodeFom = barnet.fødselsdato,
                            periodeTom = tom,
                            begrunnelse = "")
         }.toSet()
