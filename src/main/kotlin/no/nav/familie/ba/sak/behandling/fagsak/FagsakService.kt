@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
@@ -13,8 +14,10 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 import java.time.Period
 
@@ -55,8 +58,8 @@ class FagsakService(
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
                 val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-                val restVedtakBarn = lagRestVedtakBarn(andelerTilkjentYtelse, personopplysningGrunnlag)
-                vedtak.toRestVedtak(restVedtakBarn)
+                val restVedtakPerson = lagRestVedtakPerson(andelerTilkjentYtelse, personopplysningGrunnlag)
+                vedtak.toRestVedtak(restVedtakPerson)
             }
 
             RestBehandling(
@@ -69,6 +72,8 @@ class FagsakService(
                     steg = behandling.steg,
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                 ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
+                    samletResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)?.hentSamletResultat()
+                            ?: BehandlingResultatType.IKKE_VURDERT,
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
                     underkategori = behandling.underkategori
@@ -113,7 +118,12 @@ class FagsakService(
         }.fold(
                 onSuccess = { it },
                 onFailure = {
-                    throw IllegalStateException("Feil ved henting av person fra TPS/PDL", it)
+                    val clientError= it as? HttpClientErrorException?
+                    if(clientError!= null && clientError.statusCode == HttpStatus.NOT_FOUND){
+                        throw clientError
+                    }else{
+                        throw IllegalStateException("Feil ved henting av person fra TPS/PDL", it)
+                    }
                 }
 
         )

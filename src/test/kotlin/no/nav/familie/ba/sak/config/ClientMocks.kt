@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.beregning.domene.SatsRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.domene.*
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
@@ -19,7 +20,9 @@ import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 
 @Component
@@ -74,19 +77,17 @@ class ClientMocks {
                                           relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
                                           navn = personInfo.getValue(barnFnr[0]).navn,
                                           fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                        Familierelasjoner(personIdent = Personident(id = barnFnr[1]),
+                                          relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                          navn = personInfo.getValue(barnFnr[1]).navn,
+                                          fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
                         Familierelasjoner(personIdent = Personident(id = søkerFnr[1]),
                                           relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
 
         every {
             mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr[1]))
-        } returns personInfo.getValue(søkerFnr[1]).copy(
-                familierelasjoner = setOf(
-                        Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                          navn = personInfo.getValue(barnFnr[0]).navn,
-                                          fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                        Familierelasjoner(personIdent = Personident(id = søkerFnr[0]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
+        } returns personInfo.getValue(søkerFnr[1])
+
         return mockIntegrasjonClient
     }
 
@@ -129,6 +130,16 @@ class ClientMocks {
         every {
             mockIntegrasjonClient.hentAktørId(barnId)
         } returns AktørId(barnId)
+
+        val ukjentId= "43125678910"
+        every {
+            mockIntegrasjonClient.hentPersoninfoFor(ukjentId)
+        } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "ikke funnet")
+
+        val feilId = "41235678910"
+        every {
+            mockIntegrasjonClient.hentPersoninfoFor(feilId)
+        } throws IntegrasjonException("feil id")
 
         return mockIntegrasjonClient
     }

@@ -105,10 +105,21 @@ fun lagInitiellTilkjentYtelse(behandling: Behandling): TilkjentYtelse {
 }
 
 fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
+                                    vararg personer: Person): PersonopplysningGrunnlag {
+
+    val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
+
+    personopplysningGrunnlag.personer.addAll(
+            personer.map { it.copy(personopplysningGrunnlag = personopplysningGrunnlag) }
+    )
+    return personopplysningGrunnlag
+}
+
+fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                     søkerPersonIdent: String,
                                     barnasIdenter: List<String>): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
-    val søker = Person(aktørId = randomAktørId(),
+    val søker = Person(aktørId = randomAktørId (),
                        personIdent = PersonIdent(søkerPersonIdent),
                        type = PersonType.SØKER,
                        personopplysningGrunnlag = personopplysningGrunnlag,
@@ -118,7 +129,7 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
-        personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
+        personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId (),
                                                      personIdent = PersonIdent(it),
                                                      type = PersonType.BARN,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
