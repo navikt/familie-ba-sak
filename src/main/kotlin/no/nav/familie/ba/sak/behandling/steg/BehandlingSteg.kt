@@ -46,7 +46,8 @@ enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, 
             beskrivelse = "Godkjenne vedtak"),
     FERDIGSTILLE_BEHANDLING(
             rekkefølge = 5,
-            tillattFor = listOf(BehandlerRolle.SYSTEM), beskrivelse = "Ferdigstille behandling"),
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            beskrivelse = "Ferdigstille behandling"),
     BEHANDLING_AVSLUTTET(
             rekkefølge = 6,
             tillattFor = emptyList(),
