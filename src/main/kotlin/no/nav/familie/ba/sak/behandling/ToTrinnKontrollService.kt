@@ -14,6 +14,6 @@ class ToTrinnKontrollService(private val behandlingService: BehandlingService) {
         }
         behandlingService.oppdaterStatusPåBehandling(
                 behandlingId = behandling.id,
-                status = if (beslutning.erGodkjent()) BehandlingStatus.GODKJENT else BehandlingStatus.UNDER_BEHANDLING)
+                status = if (beslutning.erGodkjent()) BehandlingStatus.GODKJENT else BehandlingStatus.UNDERKJENT_AV_BESLUTTER)
     }
 }

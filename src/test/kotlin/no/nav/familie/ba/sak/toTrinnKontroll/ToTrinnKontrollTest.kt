@@ -66,7 +66,7 @@ class ToTrinnKontrollTest {
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hent(behandling.id).status)
 
         toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(behandling, "beslutter", beslutning = Beslutning.UNDERKJENT)
-        Assertions.assertEquals(BehandlingStatus.UNDER_BEHANDLING, behandlingService.hent(behandling.id).status)
+        Assertions.assertEquals(BehandlingStatus.UNDERKJENT_AV_BESLUTTER, behandlingService.hent(behandling.id).status)
     }
 
     @Test
