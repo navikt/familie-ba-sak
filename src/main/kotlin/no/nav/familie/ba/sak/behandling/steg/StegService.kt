@@ -126,8 +126,8 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().rekkefølge > behandling.steg.rekkefølge) {
-                error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()}," +
-                      " men behandlingen er på steg ${behandling.steg}")
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${behandlingSteg.stegType().displayName()}'," +
+                      " men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
             val behandlerRolle =
@@ -135,7 +135,7 @@ class StegService(
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
-                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${behandlingSteg.stegType()} pga manglende rolle.")
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${behandlingSteg.stegType().displayName()} pga manglende rolle.")
             }
 
             val nesteSteg = utførendeSteg()
@@ -167,7 +167,7 @@ class StegService(
                                              "steg",
                                              it.stegType().name,
                                              "beskrivelse",
-                                             it.stegType().beskrivelse)
+                                             it.stegType().displayName())
         }.toMap()
     }
 

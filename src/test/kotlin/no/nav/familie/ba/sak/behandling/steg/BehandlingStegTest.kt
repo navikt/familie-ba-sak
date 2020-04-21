@@ -22,4 +22,9 @@ class BehandlingStegTest {
             steg = it.hentNesteSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
         }
     }
+
+    @Test
+    fun testDisplayName() {
+        Assertions.assertEquals("Send til beslutter", StegType.SEND_TIL_BESLUTTER.displayName())
+    }
 }

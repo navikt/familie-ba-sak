@@ -23,35 +23,32 @@ fun initSteg(behandlingType: BehandlingType?): StegType {
 
 val sisteSteg = StegType.BEHANDLING_AVSLUTTET
 
-enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, val beskrivelse: String) {
+enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>) {
     REGISTRERE_SØKNAD(
             rekkefølge = 1,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            beskrivelse = "Registrere søknad"),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
     REGISTRERE_PERSONGRUNNLAG(
             rekkefølge = 1,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            beskrivelse = "Registrere persongrunnlag"),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
     VILKÅRSVURDERING(
             rekkefølge = 2,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            beskrivelse = "Vilkårsvurdering"),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
     SEND_TIL_BESLUTTER(
             rekkefølge = 3,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            beskrivelse = "Send til beslutter"),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
     BESLUTTE_VEDTAK(
             rekkefølge = 4,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
-            beskrivelse = "Godkjenne vedtak"),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER)),
     FERDIGSTILLE_BEHANDLING(
             rekkefølge = 5,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
-            beskrivelse = "Ferdigstille behandling"),
+            tillattFor = listOf(BehandlerRolle.SYSTEM)),
     BEHANDLING_AVSLUTTET(
             rekkefølge = 6,
-            tillattFor = emptyList(),
-            beskrivelse = "Behandlingen er avsluttet og kan ikke gjenåpnes");
+            tillattFor = emptyList());
+
+    fun displayName(): String {
+        return this.name.replace('_', ' ').toLowerCase().capitalize()
+    }
 
     fun hentNesteSteg(behandlingType: BehandlingType): StegType {
         return when(behandlingType) {
