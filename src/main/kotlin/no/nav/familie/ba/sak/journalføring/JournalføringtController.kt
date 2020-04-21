@@ -14,7 +14,7 @@ import javax.validation.Valid
 @RequestMapping("/api/journalpost")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class JournalføringtController(val journalføringService: JournalføringService) {
+class JournalføringController(val journalføringService: JournalføringService) {
 
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentJournalpost(@PathVariable journalpostId: String)
