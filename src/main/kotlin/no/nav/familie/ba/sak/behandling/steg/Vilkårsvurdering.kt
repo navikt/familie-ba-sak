@@ -21,7 +21,7 @@ class Vilkårsvurdering(
 ) : BehandlingSteg<RestVilkårsvurdering> {
 
     @Transactional
-    override fun utførSteg(behandling: Behandling, data: RestVilkårsvurdering): Behandling {
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: RestVilkårsvurdering): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
@@ -41,7 +41,7 @@ class Vilkårsvurdering(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
 
-        return vilkårsvurdertBehandling
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {

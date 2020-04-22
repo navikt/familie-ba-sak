@@ -14,13 +14,13 @@ class RegistrereSøknad(
         private val loggService: LoggService
 ) : BehandlingSteg<SøknadDTO> {
 
-    override fun utførSteg(behandling: Behandling, data: SøknadDTO): Behandling {
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: SøknadDTO): StegType {
         val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlag != null)
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
                                                                                      søknad = data.writeValueAsString()))
-        return behandling
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {

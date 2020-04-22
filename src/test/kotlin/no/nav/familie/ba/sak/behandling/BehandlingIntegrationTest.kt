@@ -135,7 +135,7 @@ class BehandlingIntegrationTest {
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
-        behandling.steg = StegType.GODKJENNE_VEDTAK
+        behandling.steg = StegType.BESLUTTE_VEDTAK
         behandlingRepository.saveAndFlush(behandling)
 
         Assertions.assertThrows(Exception::class.java) {
