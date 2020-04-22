@@ -31,8 +31,7 @@ class TilkjentYtelseService(private val satsService: SatsService) {
         val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater.filter {
             søkerMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.SØKER,
-                    SakType.valueOfType(behandlingResultat.behandling.kategori
-                    )
+                    SakType.valueOfType(behandlingResultat.behandling.kategori)
             )
         }
         val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater.filter {
@@ -113,4 +112,3 @@ private fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): Lo
 
     return minOf(periodeTomBarn ?: LocalDate.MAX, periodeTomSoker ?: LocalDate.MAX)
 }
-
