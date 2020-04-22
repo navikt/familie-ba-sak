@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.beregning.domene
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -16,19 +17,13 @@ data class PeriodeResultat(
         val personIdent: String,
         val periodeFom: LocalDate?,
         val periodeTom: LocalDate?,
-        val periodeTomKommerFra18ÅrsVilkår: Boolean,
         val vilkårResultater: Set<PeriodeVilkår>
 ) {
 
-    fun hentSamletResultat(): BehandlingResultatType {
-        return when {
-            vilkårResultater.all { it.resultat == Resultat.JA } -> {
-                BehandlingResultatType.INNVILGET
-            }
-            else -> {
-                BehandlingResultatType.AVSLÅTT
-            }
-        }
+    fun allePåkrevdeVilkårErOppfylt(personType: PersonType, sakType: SakType): Boolean {
+        val alleVilkår = Vilkår.hentVilkårFor(personType, sakType)
+        return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
+                && vilkårResultater.all { it.resultat == Resultat.JA }
     }
 
     fun overlapper(annetPeriodeResultat: PeriodeResultat): Boolean {
@@ -42,7 +37,10 @@ data class PeriodeResultat(
 data class PeriodeVilkår(
         val vilkårType: Vilkår,
         val resultat: Resultat,
-        var begrunnelse: String)
+        var begrunnelse: String,
+        val periodeFom: LocalDate?,
+        val periodeTom: LocalDate?
+)
 
 fun BehandlingResultat.personResultaterTilPeriodeResultater(): Set<PeriodeResultat> {
     return this.personResultater.flatMap { it.tilPeriodeResultater() }.toSet()
@@ -75,17 +73,18 @@ fun PersonResultat.tilPeriodeResultater(): List<PeriodeResultat> {
     }
     val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(tidslinjer)
     val periodeResultater = kombinertTidslinje.toSegments().map { segment ->
-        val er18årsVilkår = segment.value.any { vilkårResultat -> gjelderVilkårResultatUnder18År(vilkårResultat, segment) }
         PeriodeResultat(
                 personIdent = this.personIdent,
                 periodeFom = if (segment.fom == TIDENES_BEGYNNELSE) null else segment.fom,
                 periodeTom = if (segment.tom == TIDENES_ENDE) null else segment.tom,
-                periodeTomKommerFra18ÅrsVilkår = er18årsVilkår,
-                vilkårResultater = segment.value.map { PeriodeVilkår(it.vilkårType, it.resultat, it.begrunnelse) }.toSet()
+                vilkårResultater = segment.value.map { PeriodeVilkår(
+                        it.vilkårType,
+                        it.resultat,
+                        it.begrunnelse,
+                        it.periodeFom?.withDayOfMonth(1),
+                        it.periodeTom?.sisteDagIMåned())
+                }.toSet()
         )
     }
     return periodeResultater
 }
-
-private fun gjelderVilkårResultatUnder18År(vilkårResultat: VilkårResultat, segment: LocalDateSegment<List<VilkårResultat>>) =
-        vilkårResultat.resultat == Resultat.JA && vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR && vilkårResultat.periodeTom?.sisteDagIMåned() == segment.tom

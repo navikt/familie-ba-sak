@@ -2,11 +2,16 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vilkår.SakType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.nare.core.evaluations.Resultat
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -24,10 +29,18 @@ class TilkjentYtelseService(private val satsService: SatsService) {
                 .associateBy { it.personIdent.ident }
 
         val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater.filter {
-            søkerMap.containsKey(it.personIdent) && it.hentSamletResultat() == BehandlingResultatType.INNVILGET
+            søkerMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
+                    PersonType.SØKER,
+                    SakType.valueOfType(behandlingResultat.behandling.kategori
+                    )
+            )
         }
         val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater.filter {
-            identBarnMap.containsKey(it.personIdent) && it.hentSamletResultat() == BehandlingResultatType.INNVILGET
+            identBarnMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
+                    PersonType.BARN,
+                    SakType.valueOfType(behandlingResultat.behandling.kategori
+                    )
+            )
         }
 
         val tilkjentYtelse = TilkjentYtelse(
@@ -47,11 +60,11 @@ class TilkjentYtelseService(private val satsService: SatsService) {
                                         maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
                                 val stønadTom =
                                         minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
-
+                                val stønadTomKommerFra18ÅrsVilkår = stønadTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
                                 val beløpsperioder = satsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
                                         stønadFraOgMed = settRiktigStønadFom(stønadFom),
-                                        stønadTilOgMed = settRiktigStønadTom(periodeResultatBarn.periodeTomKommerFra18ÅrsVilkår,
+                                        stønadTilOgMed = settRiktigStønadTom(stønadTomKommerFra18ÅrsVilkår,
                                                                              stønadTom)
                                 )
 

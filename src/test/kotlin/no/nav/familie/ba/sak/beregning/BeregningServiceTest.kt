@@ -4,6 +4,7 @@ import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -57,7 +58,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal mappe perioderesultat til andel ytelser for innvilget vedtak`() {
+    fun `Skal mappe perioderesultat til andel ytelser for innvilget vedtak med 18-års vilkår som sluttdato`() {
         val behandling = lagBehandling()
         val barn1Fnr = randomFnr()
         val søkerFnr = randomFnr()
@@ -69,14 +70,18 @@ class BeregningServiceTest {
                 fnr = barn1Fnr,
                 resultat = Resultat.JA,
                 periodeFom = periodeFom,
-                periodeTom = periodeTom
+                periodeTom = periodeTom,
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.BARN
         )
 
         val personResultatSøker = lagPersonResultat(behandlingResultat = behandlingResultat,
                 fnr = søkerFnr,
                 resultat = Resultat.JA,
                 periodeFom = periodeFom,
-                periodeTom = periodeTom
+                periodeTom = periodeTom,
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.SØKER
         )
         behandlingResultat.personResultater = setOf(personResultatBarn, personResultatSøker)
 
@@ -96,7 +101,7 @@ class BeregningServiceTest {
         Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
         Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().beløp)
         Assertions.assertEquals(periodeFom.plusMonths(1), slot.captured.andelerTilkjentYtelse.first().stønadFom)
-        Assertions.assertEquals(periodeTom.plusMonths(1).sisteDagIMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
+        Assertions.assertEquals(periodeTom.minusMonths(1).sisteDagIMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
     }
 
     @Test
@@ -112,14 +117,18 @@ class BeregningServiceTest {
                 fnr = barn1Fnr,
                 resultat = Resultat.JA,
                 periodeFom = periodeFom,
-                periodeTom = periodeTom
+                periodeTom = periodeTom,
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.BARN
         )
 
         val personResultatSøker = lagPersonResultat(behandlingResultat = behandlingResultat,
                 fnr = søkerFnr,
                 resultat = Resultat.JA,
                 periodeFom = periodeFom,
-                periodeTom = periodeTom
+                periodeTom = periodeTom,
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.SØKER
         )
         behandlingResultat.personResultater = setOf(personResultatBarn, personResultatSøker)
 
@@ -148,51 +157,7 @@ class BeregningServiceTest {
 
         Assertions.assertEquals(1054, andelerTilkjentYtelse.last().beløp)
         Assertions.assertEquals(satsPeriode2Start, andelerTilkjentYtelse.last().stønadFom)
-        Assertions.assertEquals(periodeTom.plusMonths(1).sisteDagIMåned(), andelerTilkjentYtelse.last().stønadTom)
-    }
-
-    @Test
-    fun `Skal mappe perioderesultat til andel ytelser for innvilget vedtak med 18års-vilkår som sluttdato`() {
-        val behandling = lagBehandling()
-        val barn1Fnr = randomFnr()
-        val søkerFnr = randomFnr()
-        val behandlingResultat = BehandlingResultat(behandling = behandling)
-
-        val periodeFom = LocalDate.of(2020, 1, 1)
-        val periodeTom = LocalDate.of(2020, 11, 1)
-        val personResultatBarn = lagPersonResultat(behandlingResultat = behandlingResultat,
-                fnr = barn1Fnr,
-                resultat = Resultat.JA,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom,
-                vilkårType = Vilkår.UNDER_18_ÅR
-        )
-
-        val personResultatSøker = lagPersonResultat(behandlingResultat = behandlingResultat,
-                fnr = søkerFnr,
-                resultat = Resultat.JA,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom
-        )
-        behandlingResultat.personResultater = setOf(personResultatBarn, personResultatSøker)
-
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id,
-                søkerPersonIdent = søkerFnr,
-                barnasIdenter = listOf(barn1Fnr))
-        val slot = slot<TilkjentYtelse>()
-
-        every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
-        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
-
-        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag)
-
-        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
-
-        Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
-        Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().beløp)
-        Assertions.assertEquals(periodeFom.plusMonths(1), slot.captured.andelerTilkjentYtelse.first().stønadFom)
-        Assertions.assertEquals(periodeTom.minusMonths(1).sisteDagIMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
+        Assertions.assertEquals(periodeTom.minusMonths(1).sisteDagIMåned(), andelerTilkjentYtelse.last().stønadTom)
     }
 
     @Test
@@ -261,31 +226,41 @@ class BeregningServiceTest {
                         fnr = søkerFnr,
                         resultat = Resultat.JA,
                         periodeFom = periode1Fom,
-                        periodeTom = periode1Tom
+                        periodeTom = periode1Tom,
+                        lagFullstendigVilkårResultat = true,
+                        personType = PersonType.SØKER
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                         fnr = søkerFnr,
                         resultat = Resultat.NEI,
                         periodeFom = periode2Fom,
-                        periodeTom = periode2Tom
+                        periodeTom = periode2Tom,
+                        lagFullstendigVilkårResultat = true,
+                        personType = PersonType.SØKER
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                         fnr = søkerFnr,
                         resultat = Resultat.JA,
                         periodeFom = periode3Fom,
-                        periodeTom = periode3Tom
+                        periodeTom = periode3Tom,
+                        lagFullstendigVilkårResultat = true,
+                        personType = PersonType.SØKER
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                         fnr = barn1Fnr,
                         resultat = Resultat.JA,
                         periodeFom = periode1Fom.minusYears(1),
-                        periodeTom = periode3Tom.plusYears(1)
+                        periodeTom = periode3Tom.plusYears(1),
+                        lagFullstendigVilkårResultat = true,
+                        personType = PersonType.BARN
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                         fnr = barn2Fnr,
                         resultat = Resultat.JA,
                         periodeFom = periode2Midt,
-                        periodeTom = periode3Midt
+                        periodeTom = periode3Midt,
+                        lagFullstendigVilkårResultat = true,
+                        personType = PersonType.BARN
                 )
         )
 
@@ -314,7 +289,7 @@ class BeregningServiceTest {
         Assertions.assertEquals(1054, andelerTilkjentYtelse[0].beløp)
 
         Assertions.assertEquals(periode3Fom.plusMonths(1).withDayOfMonth(1), andelerTilkjentYtelse[1].stønadFom)
-        Assertions.assertEquals(periode3Midt.plusMonths(1).sisteDagIMåned(), andelerTilkjentYtelse[1].stønadTom)
+        Assertions.assertEquals(periode3Midt.minusMonths(1).sisteDagIMåned(), andelerTilkjentYtelse[1].stønadTom)
         Assertions.assertEquals(1054, andelerTilkjentYtelse[1].beløp)
 
         Assertions.assertEquals(periode3Fom.plusMonths(1).withDayOfMonth(1), andelerTilkjentYtelse[2].stønadFom)
