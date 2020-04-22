@@ -76,7 +76,6 @@ enum class BehandlingUnderkategori {
 
 enum class BehandlingStatus {
     OPPRETTET,
-    UNDER_BEHANDLING,
     UNDERKJENT_AV_BESLUTTER,
     SENDT_TIL_BESLUTTER,
     GODKJENT,

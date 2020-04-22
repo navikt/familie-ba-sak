@@ -125,9 +125,13 @@ class StegService(
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (behandlingSteg.stegType().rekkefølge > behandling.steg.rekkefølge) {
+            if (behandlingSteg.stegType().kommerEtter(behandling.steg)) {
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${behandlingSteg.stegType().displayName()}'," +
                       " men behandlingen er på steg '${behandling.steg.displayName()}'")
+            }
+
+            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
+                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
 
             val behandlerRolle =
@@ -145,6 +149,10 @@ class StegService(
 
             if (nesteSteg == sisteSteg) {
                 LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
+            }
+
+            if (!nesteSteg.erKompatibelMed(behandlingService.hent(behandling.id).status)) {
+                error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandling.status}")
             }
 
             return behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)

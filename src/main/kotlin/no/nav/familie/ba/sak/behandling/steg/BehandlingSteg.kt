@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 
 interface BehandlingSteg<T> {
@@ -23,31 +24,46 @@ fun initSteg(behandlingType: BehandlingType?): StegType {
 
 val sisteSteg = StegType.BEHANDLING_AVSLUTTET
 
-enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>) {
+enum class StegType(private val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, private val kompatibelMed: List<BehandlingStatus>) {
     REGISTRERE_SØKNAD(
             rekkefølge = 1,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     REGISTRERE_PERSONGRUNNLAG(
             rekkefølge = 1,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     VILKÅRSVURDERING(
             rekkefølge = 2,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     SEND_TIL_BESLUTTER(
             rekkefølge = 3,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER)),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     BESLUTTE_VEDTAK(
             rekkefølge = 4,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER)),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
+            kompatibelMed = listOf(BehandlingStatus.SENDT_TIL_BESLUTTER)),
     FERDIGSTILLE_BEHANDLING(
             rekkefølge = 5,
-            tillattFor = listOf(BehandlerRolle.SYSTEM)),
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            kompatibelMed = listOf(BehandlingStatus.IVERKSATT)),
     BEHANDLING_AVSLUTTET(
             rekkefølge = 6,
-            tillattFor = emptyList());
+            tillattFor = emptyList(),
+            kompatibelMed = listOf(BehandlingStatus.FERDIGSTILT));
 
     fun displayName(): String {
         return this.name.replace('_', ' ').toLowerCase().capitalize()
+    }
+
+    fun kommerEtter(steg: StegType): Boolean {
+        return this.rekkefølge > steg.rekkefølge
+    }
+
+    fun erKompatibelMed(behandlingStatus: BehandlingStatus): Boolean {
+        return this.kompatibelMed.contains(behandlingStatus)
     }
 
     fun hentNesteSteg(behandlingType: BehandlingType): StegType {

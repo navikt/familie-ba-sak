@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.steg
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -26,5 +27,13 @@ class BehandlingStegTest {
     @Test
     fun testDisplayName() {
         Assertions.assertEquals("Send til beslutter", StegType.SEND_TIL_BESLUTTER.displayName())
+    }
+
+    @Test
+    fun testErKompatibelMed() {
+        Assertions.assertTrue(StegType.REGISTRERE_SØKNAD.erKompatibelMed(BehandlingStatus.OPPRETTET))
+        Assertions.assertTrue(StegType.REGISTRERE_SØKNAD.erKompatibelMed(BehandlingStatus.UNDERKJENT_AV_BESLUTTER))
+        Assertions.assertFalse(StegType.REGISTRERE_SØKNAD.erKompatibelMed(BehandlingStatus.IVERKSATT))
+        Assertions.assertFalse(StegType.BEHANDLING_AVSLUTTET.erKompatibelMed(BehandlingStatus.OPPRETTET))
     }
 }

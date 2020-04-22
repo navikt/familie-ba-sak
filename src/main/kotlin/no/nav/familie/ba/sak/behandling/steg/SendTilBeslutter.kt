@@ -15,7 +15,7 @@ class SendTilBeslutter(
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
         loggService.opprettSendTilBeslutterLogg(behandling)
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,
-                                                            status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+                                                     status = BehandlingStatus.SENDT_TIL_BESLUTTER)
         return hentNesteStegForNormalFlyt(behandling)
     }
 
