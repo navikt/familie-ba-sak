@@ -37,8 +37,7 @@ class TilkjentYtelseService(private val satsService: SatsService) {
         val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater.filter {
             identBarnMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.BARN,
-                    SakType.valueOfType(behandlingResultat.behandling.kategori
-                    )
+                    SakType.valueOfType(behandlingResultat.behandling.kategori)
             )
         }
 
