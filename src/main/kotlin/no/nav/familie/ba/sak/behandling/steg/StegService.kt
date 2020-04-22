@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
+import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
@@ -64,7 +65,7 @@ class StegService(
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
 
         val behandlingEtterSøknadshåndtering = håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, søknadDTO)
+            behandlingSteg.utførStegOgAngiNeste(behandling, søknadDTO)
         }
 
         return håndterPersongrunnlag(
@@ -78,7 +79,7 @@ class StegService(
                 hentBehandlingSteg(StegType.REGISTRERE_PERSONGRUNNLAG) as RegistrerPersongrunnlag
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, registrerPersongrunnlagDTO)
+            behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO)
         }
     }
 
@@ -87,7 +88,7 @@ class StegService(
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, restVilkårsvurdering)
+            behandlingSteg.utførStegOgAngiNeste(behandling, restVilkårsvurdering)
         }
     }
 
@@ -95,16 +96,16 @@ class StegService(
         val behandlingSteg: SendTilBeslutter = hentBehandlingSteg(StegType.SEND_TIL_BESLUTTER) as SendTilBeslutter
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, "")
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
     }
 
-    fun håndterGodkjenneVedtak(behandling: Behandling): Behandling {
-        val behandlingSteg: GodkjenneVedtakOgStartIverksetting =
-                hentBehandlingSteg(StegType.GODKJENNE_VEDTAK) as GodkjenneVedtakOgStartIverksetting
+    fun håndterBeslutningForVedtak(behandling: Behandling, restBeslutningPåVedtak: RestBeslutningPåVedtak): Behandling {
+        val behandlingSteg: BeslutteVedtak =
+                hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførSteg(behandling, "")
+            behandlingSteg.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         }
     }
 
@@ -113,42 +114,48 @@ class StegService(
                 hentBehandlingSteg(StegType.FERDIGSTILLE_BEHANDLING) as FerdigstillBehandlingSteg
 
         return håndterSteg(behandling, behandlingStegSteg) {
-            behandlingStegSteg.utførSteg(behandling, "")
+            behandlingStegSteg.utførStegOgAngiNeste(behandling, "")
         }
     }
 
     // Generelle stegmetoder
-    fun håndterSteg(behandling: Behandling, behandlingSteg: BehandlingSteg<*>, uførendeSteg: () -> Behandling): Behandling {
+    private fun håndterSteg(behandling: Behandling, behandlingSteg: BehandlingSteg<*>, utførendeSteg: () -> StegType): Behandling {
         try {
             if (behandling.steg == sisteSteg) {
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (behandlingSteg.stegType().rekkefølge > behandling.steg.rekkefølge) {
-                error("${SikkerhetContext.hentSaksbehandler()} prøver å utføre steg ${behandlingSteg.stegType()}," +
-                      " men behandlingen er på steg ${behandling.steg}")
+            if (behandlingSteg.stegType().kommerEtter(behandling.steg)) {
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${behandlingSteg.stegType().displayName()}'," +
+                      " men behandlingen er på steg '${behandling.steg.displayName()}'")
+            }
+
+            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
+                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
 
             val behandlerRolle =
                     SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minBy { it.nivå })
 
-            LOG.info("${SikkerhetContext.hentSaksbehandler()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+            LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
-                error("${SikkerhetContext.hentSaksbehandler()} kan ikke utføre steg '${behandlingSteg.stegType()}")
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${behandlingSteg.stegType().displayName()} pga manglende rolle.")
             }
 
-            val behandlingEtterSteg = uførendeSteg()
-            LOG.info("${SikkerhetContext.hentSaksbehandler()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+            val nesteSteg = utførendeSteg()
+            LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
-            val nesteSteg = behandling.steg.hentNesteSteg(behandlingType = behandling.type)
             if (nesteSteg == sisteSteg) {
-                LOG.info("${SikkerhetContext.hentSaksbehandler()} er ferdig med stegprosess på behandling ${behandling.id}")
+                LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
             }
 
-            return behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingEtterSteg.id,
-                                                       steg = nesteSteg)
+            if (!nesteSteg.erKompatibelMed(behandlingService.hent(behandling.id).status)) {
+                error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandling.status}")
+            }
+
+            return behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
         } catch (exception: Exception) {
             stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
             LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
@@ -168,7 +175,7 @@ class StegService(
                                              "steg",
                                              it.stegType().name,
                                              "beskrivelse",
-                                             it.stegType().beskrivelse)
+                                             it.stegType().displayName())
         }.toMap()
     }
 
