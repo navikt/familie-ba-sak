@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class BehandlingStegTest {
@@ -19,21 +19,39 @@ class BehandlingStegTest {
 
         var steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
         riktigRekkefølge.forEach {
-            Assertions.assertEquals(steg, it)
+            assertEquals(steg, it)
+            steg = it.hentNesteSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        }
+        steg = StegType.REGISTRERE_PERSONGRUNNLAG
+        val riktigRekkefølgeForInfotrygd = listOf(
+                StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.VILKÅRSVURDERING,
+                StegType.SEND_TIL_BESLUTTER,
+                StegType.BESLUTTE_VEDTAK,
+                StegType.FERDIGSTILLE_BEHANDLING,
+                StegType.BEHANDLING_AVSLUTTET)
+        riktigRekkefølgeForInfotrygd.forEach {
+            assertEquals(steg, it)
             steg = it.hentNesteSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
         }
     }
 
     @Test
     fun testDisplayName() {
-        Assertions.assertEquals("Send til beslutter", StegType.SEND_TIL_BESLUTTER.displayName())
+        assertEquals("Send til beslutter", StegType.SEND_TIL_BESLUTTER.displayName())
     }
 
     @Test
     fun testErKompatibelMed() {
-        Assertions.assertTrue(StegType.REGISTRERE_SØKNAD.erKompatibelMed(BehandlingStatus.OPPRETTET))
-        Assertions.assertTrue(StegType.REGISTRERE_SØKNAD.erKompatibelMed(BehandlingStatus.UNDERKJENT_AV_BESLUTTER))
-        Assertions.assertFalse(StegType.REGISTRERE_SØKNAD.erKompatibelMed(BehandlingStatus.IVERKSATT))
-        Assertions.assertFalse(StegType.BEHANDLING_AVSLUTTET.erKompatibelMed(BehandlingStatus.OPPRETTET))
+        assertTrue(StegType.REGISTRERE_SØKNAD.erKompatibelMed(BehandlingStatus.OPPRETTET))
+        assertTrue(StegType.REGISTRERE_SØKNAD.erKompatibelMed(BehandlingStatus.UNDERKJENT_AV_BESLUTTER))
+        assertFalse(StegType.REGISTRERE_SØKNAD.erKompatibelMed(BehandlingStatus.IVERKSATT))
+        assertFalse(StegType.BEHANDLING_AVSLUTTET.erKompatibelMed(BehandlingStatus.OPPRETTET))
+    }
+
+    @Test
+    fun testInitSteg(){
+        assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG, initSteg(BehandlingType.MIGRERING_FRA_INFOTRYGD))
+        assertEquals(StegType.REGISTRERE_SØKNAD, initSteg(null))
     }
 }

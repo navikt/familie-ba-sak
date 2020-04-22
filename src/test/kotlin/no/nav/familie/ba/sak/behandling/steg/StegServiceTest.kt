@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
+import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingInnvilget
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -101,7 +103,43 @@ class StegServiceTest(
         behandling.steg = StegType.BESLUTTE_VEDTAK
         behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
         assertThrows<IllegalStateException> {
-            stegService.håndterFerdigstillBehandling(behandling)
+            stegService.håndterSendTilBeslutter(behandling)
         }
+    }
+
+    @Test
+    fun `Skal feile når man prøver å kalle beslutnin-steget med feil status på behandling`() {
+        val søkerFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandling.steg = StegType.BESLUTTE_VEDTAK
+        behandling.status = BehandlingStatus.SENDT_TIL_IVERKSETTING
+        assertThrows<IllegalStateException> {
+            stegService.håndterBeslutningForVedtak(behandling,
+                                                   RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT, begrunnelse = null))
+        }
+    }
+
+    @Test
+    fun `Håndter underkjent beslutning`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
+
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandling.endretAv = "1234"
+        Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
+
+        behandling.steg = StegType.BESLUTTE_VEDTAK
+        behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
+        stegService.håndterBeslutningForVedtak(behandling,
+                                               RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil"))
+
+        val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
+        Assertions.assertEquals(StegType.REGISTRERE_SØKNAD, behandlingEtterPersongrunnlagSteg.steg)
     }
 }
