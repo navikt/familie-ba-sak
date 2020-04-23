@@ -20,7 +20,7 @@ class RegistrerPersongrunnlag(
 ) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
 
     @Transactional
-    override fun utførSteg(behandling: Behandling, data: RegistrerPersongrunnlagDTO): Behandling {
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: RegistrerPersongrunnlagDTO): StegType {
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident, data.barnasIdenter, behandling)
         vilkårService.initierVilkårvurderingForBehandling(behandling.id)
         if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
@@ -30,7 +30,7 @@ class RegistrerPersongrunnlag(
             BehandlingService.LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
         }
 
-        return behandling
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {

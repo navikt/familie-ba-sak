@@ -20,7 +20,7 @@ class SendTilBeslutter(
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
 
-    override fun utførSteg(behandling: Behandling, data: String): Behandling {
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
         loggService.opprettSendTilBeslutterLogg(behandling)
         val godkjenneVedtakTask = Task.nyTask(OpprettGodkjenneVedtakOppgaveTilBeslutter.TASK_STEP_TYPE, behandling.id.toString())
         taskRepository.save(godkjenneVedtakTask)
@@ -36,8 +36,9 @@ class SendTilBeslutter(
             val ferdigstillBehandleUnderkjentVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
             taskRepository.save(ferdigstillBehandleUnderkjentVedtakTask)
         }
-        return behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,
                                                             status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {

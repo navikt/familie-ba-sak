@@ -23,7 +23,7 @@ class FerdigstillBehandlingSteg(
                               it.visningsnavn)
     }.toMap()
 
-    override fun utførSteg(behandling: Behandling, data: String): Behandling {
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
         val fagsak = behandling.fagsak
         val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
 
@@ -39,7 +39,8 @@ class FerdigstillBehandlingSteg(
 
         antallBehandlingerFerdigstilt[behandling.type]?.increment()
         loggService.opprettFerdigstillBehandling(behandling)
-        return behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {
