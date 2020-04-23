@@ -5,6 +5,7 @@ import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
@@ -79,21 +80,21 @@ class BehandlingIntegrationTest {
                 fagsakService)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
-                        .willReturn(aResponse()
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
-                        .willReturn(aResponse()
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019,
-                                                                                                                              1,
-                                                                                                                              1)))))))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019,
+                                1,
+                                1)))))))
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
-                        .willReturn(aResponse()
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019,
-                                                                                                                              1,
-                                                                                                                              1)))))))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019,
+                                1,
+                                1)))))))
     }
 
     @Test
@@ -114,7 +115,7 @@ class BehandlingIntegrationTest {
         behandlingService.opprettBehandling(nyOrdinærBehandling(
                 fnr))
         Assertions.assertEquals(1,
-                                behandlingService.hentBehandlinger(fagsak.id).size)
+                behandlingService.hentBehandlinger(fagsak.id).size)
     }
 
     @Test
@@ -134,7 +135,7 @@ class BehandlingIntegrationTest {
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
-        behandling.steg = StegType.GODKJENNE_VEDTAK
+        behandling.steg = StegType.BESLUTTE_VEDTAK
         behandlingRepository.saveAndFlush(behandling)
 
         Assertions.assertThrows(Exception::class.java) {
@@ -253,22 +254,28 @@ class BehandlingIntegrationTest {
         val behandlingResultat = BehandlingResultat(behandling = behandling)
         behandlingResultat.personResultater = setOf(
                 lagPersonResultat(behandlingResultat = behandlingResultat,
-                                  fnr = søkerFnr,
-                                  resultat = Resultat.JA,
-                                  periodeFom = dato_2020_01_01.minusMonths(1),
-                                  periodeTom = stønadTom
+                        fnr = søkerFnr,
+                        resultat = Resultat.JA,
+                        periodeFom = dato_2020_01_01.minusMonths(1),
+                        periodeTom = stønadTom,
+                        lagFullstendigVilkårResultat = true,
+                        personType = PersonType.SØKER
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
-                                  fnr = barn1Fnr,
-                                  resultat = Resultat.JA,
-                                  periodeFom = dato_2020_01_01.minusMonths(1),
-                                  periodeTom = stønadTom
+                        fnr = barn1Fnr,
+                        resultat = Resultat.JA,
+                        periodeFom = dato_2020_01_01.minusMonths(1),
+                        periodeTom = stønadTom,
+                        lagFullstendigVilkårResultat = true,
+                        personType = PersonType.BARN
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
-                                  fnr = barn2Fnr,
-                                  resultat = Resultat.JA,
-                                  periodeFom = dato_2020_10_01.minusMonths(1),
-                                  periodeTom = stønadTom
+                        fnr = barn2Fnr,
+                        resultat = Resultat.JA,
+                        periodeFom = dato_2020_10_01.minusMonths(1),
+                        periodeTom = stønadTom,
+                        lagFullstendigVilkårResultat = true,
+                        personType = PersonType.BARN
                 )
         )
         behandlingResultatRepository.save(behandlingResultat)
@@ -277,17 +284,19 @@ class BehandlingIntegrationTest {
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
-                .associateBy({ it.barn }, { it.ytelsePerioder[0] })
+                .associateBy({ it.personIdent }, { it.ytelsePerioder[0] })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_01_01, restVedtakBarnMap[barn1Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!!.stønadTom)
+        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!!.ytelseType)
         Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!!.type)
 
         Assertions.assertEquals(1054, restVedtakBarnMap[barn2Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_10_01, restVedtakBarnMap[barn2Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2020_10_01 < restVedtakBarnMap[barn2Fnr]!!.stønadTom)
+        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!!.ytelseType)
         Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!!.type)
     }
 
@@ -319,11 +328,11 @@ class BehandlingIntegrationTest {
 
         val behandlingResultat1 = BehandlingResultat(behandling = behandling)
         behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat1,
-                                                                                   søkerFnr,
-                                                                                   barn1Fnr,
-                                                                                   barn2Fnr,
-                                                                                   dato_2020_01_01.minusMonths(1),
-                                                                                   stønadTom)
+                søkerFnr,
+                barn1Fnr,
+                barn2Fnr,
+                dato_2020_01_01.minusMonths(1),
+                stønadTom)
         behandlingResultatRepository.save(behandlingResultat1)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -331,18 +340,18 @@ class BehandlingIntegrationTest {
 
         val behandlingResultat2 = BehandlingResultat(behandling = behandling)
         behandlingResultat2.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat2,
-                                                                                   søkerFnr,
-                                                                                   barn1Fnr,
-                                                                                   barn3Fnr,
-                                                                                   dato_2021_01_01.minusMonths(1),
-                                                                                   stønadTom)
+                søkerFnr,
+                barn1Fnr,
+                barn3Fnr,
+                dato_2021_01_01.minusMonths(1),
+                stønadTom)
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat2)
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it!!.personBeregninger }
-                .associateBy({ it.barn }, { it.ytelsePerioder[0] })
+                .associateBy({ it.personIdent }, { it.ytelsePerioder[0] })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)

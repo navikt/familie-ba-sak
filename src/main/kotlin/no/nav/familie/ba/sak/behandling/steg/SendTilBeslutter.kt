@@ -12,10 +12,11 @@ class SendTilBeslutter(
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
 
-    override fun utførSteg(behandling: Behandling, data: String): Behandling {
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
         loggService.opprettSendTilBeslutterLogg(behandling)
-        return behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,
-                                                            status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,
+                                                     status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {

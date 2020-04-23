@@ -1,12 +1,17 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 
 interface BehandlingSteg<T> {
-    fun utførSteg(behandling: Behandling, data: T): Behandling
+    fun utførStegOgAngiNeste(behandling: Behandling, data: T): StegType
 
     fun stegType(): StegType
+
+    fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
+        return behandling.steg.hentNesteSteg(behandlingType = behandling.type)
+    }
 }
 
 fun initSteg(behandlingType: BehandlingType?): StegType {
@@ -19,42 +24,55 @@ fun initSteg(behandlingType: BehandlingType?): StegType {
 
 val sisteSteg = StegType.BEHANDLING_AVSLUTTET
 
-enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, val beskrivelse: String) {
+enum class StegType(private val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, private val kompatibelMed: List<BehandlingStatus>) {
     REGISTRERE_SØKNAD(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            beskrivelse = "Registrere søknad"),
+            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     REGISTRERE_PERSONGRUNNLAG(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            beskrivelse = "Registrere persongrunnlag"),
+            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     VILKÅRSVURDERING(
             rekkefølge = 2,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            beskrivelse = "Vilkårsvurdering"),
+            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     SEND_TIL_BESLUTTER(
             rekkefølge = 3,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            beskrivelse = "Send til beslutter"),
-    GODKJENNE_VEDTAK(
+            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
+    BESLUTTE_VEDTAK(
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
-            beskrivelse = "Godkjenne vedtak"),
+            kompatibelMed = listOf(BehandlingStatus.SENDT_TIL_BESLUTTER)),
     FERDIGSTILLE_BEHANDLING(
             rekkefølge = 5,
-            tillattFor = listOf(BehandlerRolle.SYSTEM), beskrivelse = "Ferdigstille behandling"),
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            kompatibelMed = listOf(BehandlingStatus.IVERKSATT)),
     BEHANDLING_AVSLUTTET(
             rekkefølge = 6,
             tillattFor = emptyList(),
-            beskrivelse = "Behandlingen er avsluttet og kan ikke gjenåpnes");
+            kompatibelMed = listOf(BehandlingStatus.FERDIGSTILT));
+
+    fun displayName(): String {
+        return this.name.replace('_', ' ').toLowerCase().capitalize()
+    }
+
+    fun kommerEtter(steg: StegType): Boolean {
+        return this.rekkefølge > steg.rekkefølge
+    }
+
+    fun erKompatibelMed(behandlingStatus: BehandlingStatus): Boolean {
+        return this.kompatibelMed.contains(behandlingStatus)
+    }
 
     fun hentNesteSteg(behandlingType: BehandlingType): StegType {
         return when(behandlingType) {
             BehandlingType.MIGRERING_FRA_INFOTRYGD -> when (this) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK
-                GODKJENNE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                 else -> error("Ikke godkjent steg for behandlingstype")
@@ -63,8 +81,8 @@ enum class StegType(val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, 
                 REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> GODKJENNE_VEDTAK
-                GODKJENNE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
             }

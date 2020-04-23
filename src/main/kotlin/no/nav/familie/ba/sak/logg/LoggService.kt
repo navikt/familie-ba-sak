@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
+import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
@@ -87,13 +88,14 @@ class LoggService(
         ))
     }
 
-    fun opprettGodkjentVedtakLogg(behandling: Behandling) {
+    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, beslutter: String, begrunnelse: String?) {
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.GODKJENNE_VEDTAK,
-                tittel = "Godkjent vedtak",
+                tittel = if (beslutning.erGodkjent()) "Godkjent vedtak" else "Underkjent vedtak",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.BESLUTTER),
-                tekst = ""
+                tekst = "Saksbehandler $beslutter satte vedtak til $beslutning" +
+                        if (begrunnelse != null) " med begrunnelse: $begrunnelse" else ""
         ))
     }
 
