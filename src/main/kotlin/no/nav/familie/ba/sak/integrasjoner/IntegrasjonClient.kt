@@ -334,7 +334,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     private inline fun <reified T> validerOgPakkUt(ressurs: Ressurs<T>?): T {
         assertGenerelleSuksessKriterier(ressurs)
-        return ressurs!!.data ?: error("Fikk ressurs med status ${ressurs.status} i respons")
+        return ressurs!!.data ?: error("Henting av ressurs feilet med status ${ressurs.status} i response")
     }
 
     val tilgangUri = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()

@@ -59,6 +59,9 @@ class ClientMocks {
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns
             listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
 
+        every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
+            "mock data".toByteArray()
+
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())
         } returns listOf(Tilgang(true, null))

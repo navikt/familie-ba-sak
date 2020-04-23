@@ -6,12 +6,11 @@ import no.nav.familie.ba.sak.integrasjoner.domene.DokumentInfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Sak
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class OppdaterJournalpostRequest(@JsonProperty("avsender")
-                                      val avsenderMottaker: AvsenderMottaker? = null,
+data class OppdaterJournalpostRequest(val avsender: AvsenderMottaker? = null,
+                                      val avsenderMottaker: AvsenderMottaker? = avsender,  // annerledes navngivning i backend, tilpasset både inngående og utgående journalposter
                                       val bruker: Bruker,
-                                      val tema: String? = null,
+                                      val tema: String? = "BAR",
                                       val behandlingstema: String? = null,
-                                      val tittel: String? = null,
                                       val journalfoerendeEnhet: String? = null,
                                       val sak: Sak? = null,
                                       val dokumenter: List<DokumentInfo>? = null,
