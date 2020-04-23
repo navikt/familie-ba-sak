@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.lagTidslinjeMedOverlappendePerioder
@@ -15,6 +17,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.nare.core.evaluations.Resultat
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -32,7 +35,8 @@ class PeriodeMapperTest {
 
     private lateinit var behandlingResultat: BehandlingResultat
 
-    @BeforeEach fun initEach() {
+    @BeforeEach
+    fun initEach() {
         val fagsak = Fagsak(aktørId = AktørId("123"),
                             personIdent = PersonIdent("123"),
                             status = FagsakStatus.OPPRETTET)
@@ -178,5 +182,50 @@ class PeriodeMapperTest {
         val periodeResultat = behandlingResultat.periodeResultater.toList()[0]
         assert(periodeResultat.periodeFom!! == LocalDate.of(2020,5,1))
         assert(periodeResultat.periodeTom!! == LocalDate.of(2020,6,30))
+    }
+
+    @Test
+    fun `Perioderesultat skal gi riktig svar for samlet vilkårsresultat for barn`() {
+        val barnFnr = randomFnr()
+        val periodeFom = LocalDate.of(2020, 4, 8)
+        val periodeFom18ÅrsVilkår = LocalDate.of(2020, 5, 15)
+        val periodeTom18ÅrsVilkår = LocalDate.of(2038, 5, 15)
+
+        val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = barnFnr)
+        personResultat.vilkårResultater = setOf(
+                VilkårResultat(personResultat = personResultat,
+                        vilkårType = Vilkår.UNDER_18_ÅR,
+                        resultat = Resultat.JA,
+                        periodeFom = periodeFom18ÅrsVilkår,
+                        periodeTom = periodeTom18ÅrsVilkår,
+                        begrunnelse = ""),
+                VilkårResultat(personResultat = personResultat,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = Resultat.JA,
+                        periodeFom = periodeFom,
+                        periodeTom = null,
+                        begrunnelse = ""),
+                VilkårResultat(personResultat = personResultat,
+                        vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                        resultat = Resultat.JA,
+                        periodeFom = periodeFom,
+                        periodeTom = null,
+                        begrunnelse = ""),
+                VilkårResultat(personResultat = personResultat,
+                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        resultat = Resultat.JA,
+                        periodeFom = periodeFom,
+                        periodeTom = null,
+                        begrunnelse = "")
+        )
+
+        behandlingResultat.personResultater = setOf(personResultat)
+        val periodeResultater = behandlingResultat.periodeResultater.sortedBy { periodeFom }
+
+        Assertions.assertEquals(3, periodeResultater.size)
+
+        Assertions.assertFalse(periodeResultater.first().allePåkrevdeVilkårErOppfylt(PersonType.BARN, SakType.NASJONAL))
+        Assertions.assertFalse(periodeResultater.last().allePåkrevdeVilkårErOppfylt(PersonType.BARN, SakType.NASJONAL))
+        Assertions.assertTrue(periodeResultater[1].allePåkrevdeVilkårErOppfylt(PersonType.BARN, SakType.NASJONAL))
     }
 }

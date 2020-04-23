@@ -3,11 +3,12 @@ package no.nav.familie.ba.sak.beregning
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
@@ -60,6 +61,7 @@ class VilkårTilTilkjentYtelseTest {
                    numLinesToSkip = 1,
                    delimiter = ';')
     fun `test søker med ett barn, inntil to perioder`(
+            sakType: String,
             søkerPeriode1: String?,
             søkerVilkår1: String?,
             søkerPeriode2: String?,
@@ -79,7 +81,7 @@ class VilkårTilTilkjentYtelseTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
 
-        val behandlingResultat = TestBehandlingResultatBuilder()
+        val behandlingResultat = TestBehandlingResultatBuilder(sakType)
                 .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
                 .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2)
                 .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
@@ -137,7 +139,7 @@ class VilkårTilTilkjentYtelseTest {
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
 
-        val behandlingResultat = TestBehandlingResultatBuilder()
+        val behandlingResultat = TestBehandlingResultatBuilder("NASJONAL")
                 .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
                 .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2)
                 .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
@@ -166,9 +168,9 @@ class VilkårTilTilkjentYtelseTest {
 
 }
 
-class TestBehandlingResultatBuilder {
+class TestBehandlingResultatBuilder(val sakType: String) {
     private val identPersonResultatMap = mutableMapOf<String, PersonResultat>()
-    private val behandlingResultat = BehandlingResultat(behandling = lagBehandling())
+    private val behandlingResultat = BehandlingResultat(behandling = lagBehandling(behandlingKategori = BehandlingKategori.valueOf(sakType)))
 
     fun medPersonVilkårPeriode(person: Person, vilkår: String?, periode: String?): TestBehandlingResultatBuilder {
 
@@ -223,7 +225,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                         stønadFom = stønadPeriode.fraOgMed,
                         stønadTom = stønadPeriode.tilOgMed!!,
                         beløp = beløp.toInt(),
-                        type = Ytelsetype.valueOf(type)
+                        type = YtelseType.valueOf(type)
                 )
         )
 
