@@ -155,7 +155,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId/ferdigstill")
 
         Result.runCatching {
-            val response = patchForEntity<Ressurs<String>>(uri, "")
+            val response = patchForEntity<Ressurs<OppgaveResponse>>(uri, "")
             assertGenerelleSuksessKriterier(response)
         }.onFailure {
             throw IntegrasjonException("Kan ikke ferdigstille $oppgaveId. response=${responseBody(it)}", it, uri)
