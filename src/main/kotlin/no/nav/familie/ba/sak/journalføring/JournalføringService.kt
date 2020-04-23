@@ -7,8 +7,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.Sak
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.ba.sak.journalføring.domene.Sak
+import no.nav.familie.ba.sak.journalføring.domene.Sakstype.*
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema.*
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -30,20 +31,21 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
     }
 
     fun ferdigstill(request: OppdaterJournalpostRequest, journalpostId: String, behandlendeEnhet: String, oppgaveId: String): String {
-        if (request.knyttTilFagsak) {
-            val fagsakId = request.sak?.fagsakId ?:
-                           fagsakService.hentEllerOpprettFagsakForPersonIdent(request.bruker.id).id.toString()
-            val oppdaterRequest = fagsakId.takeIf{ it != request.sak?.fagsakId }?.let{
-                                  request.copy(sak = Sak(fagsakId = it, fagsaksystem = "BA")) }
-            oppdaterOgFerdigstillJournalpostPlusOppgave(oppdaterRequest ?: request, journalpostId, behandlendeEnhet, oppgaveId)
-
-            oppgaveService.opprettOppgaveForNyBehandling(opprettNyBehandling(request, journalpostId))
-
-            return fagsakId
-        } else {
-            oppdaterOgFerdigstillJournalpostPlusOppgave(request, journalpostId, behandlendeEnhet, oppgaveId)
-            return ""
+        val sak = when (request.knyttTilFagsak) {
+            false -> Sak(sakstype = GENERELL_SAK.type)
+            true -> {
+                val fagsakId = request.sak?.fagsakId ?: fagsakService.hentEllerOpprettFagsakForPersonIdent(request.bruker.id).id.toString()
+                Sak(fagsakId = fagsakId, fagsaksystem = "BA", sakstype = FAGSAK.type)
+            }
         }
+
+        oppdaterOgFerdigstillJournalpostPlusOppgave(request.copy(sak = sak) , journalpostId, behandlendeEnhet, oppgaveId)
+
+        if (sak.sakstype == FAGSAK.type) {
+            oppgaveService.opprettOppgaveForNyBehandling(opprettNyBehandling(request, journalpostId), enhetsId = request.tildeltEnhetsnr)
+        }
+
+        return sak.fagsakId ?: ""
     }
 
     private fun oppdaterOgFerdigstillJournalpostPlusOppgave(request: OppdaterJournalpostRequest, journalpostId: String, behandlendeEnhet: String, oppgaveId: String) {
