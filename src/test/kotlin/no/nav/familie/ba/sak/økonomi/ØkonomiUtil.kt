@@ -1,16 +1,16 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.common.dato
 import no.nav.fpsak.tidsserie.LocalDateSegment
 
-fun sats(ytelsetype: Ytelsetype) =
-        when (ytelsetype) {
-            Ytelsetype.ORDINÆR_BARNETRYGD -> 1054
-            Ytelsetype.UTVIDET_BARNETRYGD -> 1054
-            Ytelsetype.SMÅBARNSTILLEGG -> 660
-            Ytelsetype.MANUELL_VURDERING->0
-            Ytelsetype.EØS->0
+fun sats(ytelseType: YtelseType) =
+        when (ytelseType) {
+            YtelseType.ORDINÆR_BARNETRYGD -> 1054
+            YtelseType.UTVIDET_BARNETRYGD -> 1054
+            YtelseType.SMÅBARNSTILLEGG -> 660
+            YtelseType.MANUELL_VURDERING->0
+            YtelseType.EØS->0
         }
 
 fun lagSegmentBeløp(fom: String, tom: String, beløp: Int): LocalDateSegment<Int> =

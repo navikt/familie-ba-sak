@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -75,7 +75,7 @@ class BeregningController(
         return RestBeregningOversikt(
                 periodeFom = segment.fom,
                 periodeTom = segment.tom,
-                stønadstype = andelerForSegment.map(AndelTilkjentYtelse::type),
+                ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
                 utbetaltPerMnd = segment.value,
                 antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.id == andel.personId } },
                 sakstype = behandling.kategori,
@@ -90,10 +90,21 @@ class BeregningController(
                                     fødselsdato = personForAndel.fødselsdato,
                                     personIdent = personForAndel.personIdent.ident
                             ),
-                            stønadstype = andel.type,
+                            ytelseType = andel.type,
                             utbetaltPerMnd = andel.beløp
                     )
                 }
         )
     }
 }
+
+data class NyBeregning(
+        val personBeregninger: List<PersonBeregning>
+)
+
+data class PersonBeregning(
+        val ident: String,
+        val beløp: Int,
+        val stønadFom: LocalDate,
+        val ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD
+)

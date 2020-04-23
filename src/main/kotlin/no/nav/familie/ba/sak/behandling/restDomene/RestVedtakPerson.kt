@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import java.time.LocalDate
 
 data class RestVedtakPerson(
@@ -16,7 +16,7 @@ data class RestYtelsePeriode (
         val beløp: Int,
         val stønadFom: LocalDate,
         val stønadTom: LocalDate,
-        val ytelseType: Ytelsetype
+        val ytelseType: YtelseType
 )
 
 fun lagRestVedtakPerson(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, personopplysningGrunnlag: PersonopplysningGrunnlag?)
