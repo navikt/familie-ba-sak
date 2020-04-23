@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -56,7 +57,8 @@ class IverksettMotOppdrag(
         taskRepository.save(nyTask)
 
         if (!behandling.oppgaveId.isNullOrBlank()) {
-            val ferdigstillTask = FerdigstillOppgave.opprettTask(iverksettingTask.behandlingsId, task.metadata)
+            //TODO gjør denne if-sjekken bedre
+            val ferdigstillTask = FerdigstillOppgave.opprettTask(iverksettingTask.behandlingsId, Oppgavetype.GodkjenneVedtak)
             taskRepository.save(ferdigstillTask)
         }
     }
