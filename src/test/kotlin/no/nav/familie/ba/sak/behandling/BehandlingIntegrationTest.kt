@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vedtak.Ytelsetype
+import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.beregning.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -290,12 +290,12 @@ class BehandlingIntegrationTest {
         Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_01_01, restVedtakBarnMap[barn1Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!!.ytelseType)
+        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!!.ytelseType)
 
         Assertions.assertEquals(1054, restVedtakBarnMap[barn2Fnr]!!.beløp)
         Assertions.assertEquals(dato_2020_10_01, restVedtakBarnMap[barn2Fnr]!!.stønadFom)
         Assertions.assertTrue(dato_2020_10_01 < restVedtakBarnMap[barn2Fnr]!!.stønadTom)
-        Assertions.assertEquals(Ytelsetype.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!!.ytelseType)
+        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!!.ytelseType)
     }
 
     @Test
