@@ -11,10 +11,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakter.felles.oppgave.IdentType
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdent
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
-import no.nav.familie.kontrakter.felles.oppgave.Tema
+import no.nav.familie.kontrakter.felles.oppgave.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -102,7 +99,7 @@ class OppgaveServiceTest {
         val slot = slot<Long>()
         every { integrasjonClient.ferdigstillOppgave(capture(slot)) } just runs
 
-        oppgaveService.ferdigstillOppgave(BEHANDLING_ID)
+        oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
         assertThat(slot.captured).isEqualTo(OPPGAVE_ID.toLong())
     }
 
@@ -112,7 +109,7 @@ class OppgaveServiceTest {
             every { oppgaveId } returns null
         }
 
-        assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID) }
+        assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
                 .hasMessage("Kan ikke finne oppgave for behandlingId $BEHANDLING_ID")
                 .isInstanceOf(java.lang.IllegalStateException::class.java)
     }

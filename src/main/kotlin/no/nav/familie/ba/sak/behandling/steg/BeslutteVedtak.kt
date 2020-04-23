@@ -7,8 +7,11 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 
@@ -16,13 +19,13 @@ import org.springframework.stereotype.Service
 class BeslutteVedtak(
         private val toTrinnKontrollService: ToTrinnKontrollService,
         private val vedtakService: VedtakService,
+        private val oppgaveService: OppgaveService,
         private val taskRepository: TaskRepository,
         private val loggService: LoggService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestBeslutningPåVedtak): StegType {
-        if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG ||
-            behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
+        if (behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
             error("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandling.status == BehandlingStatus.IVERKSATT ||
                    behandling.status == BehandlingStatus.FERDIGSTILT) {
@@ -43,11 +46,15 @@ class BeslutteVedtak(
         }
 
         loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, saksbehandlerId, data.begrunnelse)
+        val ferdigstillGodkjenneVedtakOppgaveTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
+        taskRepository.save(ferdigstillGodkjenneVedtakOppgaveTask)
 
-        return if (data.beslutning.erGodkjent())
+        return if (data.beslutning.erGodkjent()) {
             hentNesteStegForNormalFlyt(behandling)
-        else
+        } else {
+            oppgaveService.opprettOppgaveForBehandleUnderkjentVedtak(behandling.id)
             StegType.REGISTRERE_SØKNAD
+        }
     }
 
     override fun stegType(): StegType {

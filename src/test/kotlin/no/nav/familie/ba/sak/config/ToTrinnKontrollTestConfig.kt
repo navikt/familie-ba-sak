@@ -27,7 +27,8 @@ class ToTrinnKontrollTestConfig {
         val toTrinnKontrollService: ToTrinnKontrollService = mockk()
         every { toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(any<Behandling>(), any<String>(), any<Beslutning>()) } answers {
             val behandling = firstArg<Behandling>()
-            behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.GODKJENT)
+            val beslutning = lastArg<Beslutning>()
+            behandlingService.oppdaterStatusPåBehandling(behandling.id, if(beslutning.erGodkjent()) BehandlingStatus.GODKJENT else BehandlingStatus.UNDERKJENT_AV_BESLUTTER )
         }
         return toTrinnKontrollService
     }

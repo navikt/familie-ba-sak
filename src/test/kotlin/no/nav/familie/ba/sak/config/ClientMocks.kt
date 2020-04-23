@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
@@ -37,11 +39,18 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.hentJournalpost(any()) } returns success(lagTestJournalpost(søkerFnr[0], "1234"))
 
+        every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns
+                listOf(Arbeidsfordelingsenhet("4820", "Drammen"))
+
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 success(lagTestOppgaveDTO(1L))
 
         every { mockIntegrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any()) } returns
                 listOf(lagTestOppgaveDTO(1L))
+
+        every { mockIntegrasjonClient.opprettOppgave(any()) } returns "1"
+
+        every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just Runs
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())

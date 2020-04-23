@@ -12,6 +12,6 @@ interface OppgaveRepository: JpaRepository<Oppgave, Long> {
     @Query(value = "SELECT o FROM Oppgave o WHERE o.type = :oppgavetype")
     fun findByOppgavetype(oppgavetype: Oppgavetype): List<Oppgave>
 
-    @Query(value = "SELECT o FROM Oppgave o WHERE o.erFerdigstilt = false AND o.behandling = behandling AND o.type = :oppgavetype")
+    @Query(value = "SELECT o FROM Oppgave o WHERE o.erFerdigstilt = false AND o.behandling = :behandling AND o.type = :oppgavetype")
     fun findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): Oppgave?
 }

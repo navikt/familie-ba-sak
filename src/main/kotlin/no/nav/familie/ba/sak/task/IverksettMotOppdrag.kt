@@ -55,12 +55,6 @@ class IverksettMotOppdrag(
                 properties = task.metadata
         )
         taskRepository.save(nyTask)
-
-        if (!behandling.oppgaveId.isNullOrBlank()) {
-            //TODO gjør denne if-sjekken bedre
-            val ferdigstillTask = FerdigstillOppgave.opprettTask(iverksettingTask.behandlingsId, Oppgavetype.GodkjenneVedtak)
-            taskRepository.save(ferdigstillTask)
-        }
     }
 
     companion object {

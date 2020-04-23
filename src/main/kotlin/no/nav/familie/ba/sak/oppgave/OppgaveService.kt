@@ -8,8 +8,7 @@ import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.*
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.*
 
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -35,7 +34,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                                             oppgavetype = BehandleSak,
                                             fristFerdigstillelse = LocalDate.now()
                                                     .plusDays(1), //TODO få denne til å funke på helg og eventuellle andre helligdager
-                                            beskrivelse = lagOppgaveTekst(fagsakId, "sak om behandling"),
+                                            beskrivelse = lagOppgaveTekst(fagsakId, BehandleSak.toString()),
                                             enhetsnummer = enhetsnummer?.enhetId,
                                             behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode)
 
@@ -48,6 +47,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     }
 
     fun opprettOppgaveForGodkjenneVedtak(behandlingId: Long): String {
+        print("Oppretter Godkjenne Vedtak-oppgave")
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
@@ -60,7 +60,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                 tema = Tema.BAR,
                 oppgavetype = GodkjenneVedtak,
                 fristFerdigstillelse = LocalDate.now(),
-                beskrivelse = lagOppgaveTekst(fagsakId, "godkjenning av vedtak"),
+                beskrivelse = lagOppgaveTekst(fagsakId, GodkjenneVedtak.toString()),
                 enhetsnummer = enhetsnummer?.enhetId,
                 behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode
         )
@@ -71,11 +71,37 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return opprettetOppgaveId
     }
 
+    fun opprettOppgaveForBehandleUnderkjentVedtak(behandlingId: Long): String {
+        print("Oppretter behandle underkjent vedtak-oppgave")
+        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        val fagsakId = behandling.fagsak.id
+
+        val aktørId = integrasjonClient.hentAktørId(behandling.fagsak.personIdent.ident).id
+        val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
+
+        val opprettOppgave = OpprettOppgave(
+                ident = OppgaveIdent(ident = aktørId, type = IdentType.Aktør),
+                saksId = fagsakId.toString(),
+                tema = Tema.BAR,
+                oppgavetype = BehandleUnderkjentVedtak,
+                fristFerdigstillelse = LocalDate.now().plusDays(1),
+                beskrivelse = lagOppgaveTekst(fagsakId, BehandleUnderkjentVedtak.toString()),
+                enhetsnummer = enhetsnummer?.enhetId,
+                behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode
+        )
+
+        val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
+        val oppgave = Oppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = BehandleUnderkjentVedtak)
+        oppgaveRepository.save(oppgave)
+        return opprettetOppgaveId
+    }
+
     fun hentOppgave(oppgaveId: Long): Ressurs<OppgaveDto> {
         return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }
 
     fun ferdigstillOppgave(behandlingsId: Long, oppgavetype: Oppgavetype) {
+        print("Ferdigstiller $oppgavetype oppgave")
         val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandlingRepository.finnBehandling(behandlingsId))
                 ?: error("Finner ikke oppgave for behandling $behandlingsId")
         integrasjonClient.ferdigstillOppgave(oppgave.gsakId.toLong())
@@ -88,7 +114,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         //TODO Tekst skal oppdateres når man får et forslag
         var oppgaveTekst =
                 "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n"
-        oppgaveTekst += "Ny $oppgavetype for ordinær barnetrygd \n"
+        oppgaveTekst += "Ny $oppgavetype-oppgave for ordinær barnetrygd \n"
         oppgaveTekst += "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
         return oppgaveTekst
     }
