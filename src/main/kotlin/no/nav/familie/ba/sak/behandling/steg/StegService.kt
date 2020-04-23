@@ -151,7 +151,7 @@ class StegService(
                 LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
             }
 
-            if (!nesteSteg.erKompatibelMed(behandlingService.hent(behandling.id).status)) {
+            if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hent(behandling.id).status)) {
                 error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandling.status}")
             }
 
