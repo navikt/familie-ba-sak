@@ -6,11 +6,11 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
-import no.nav.familie.ba.sak.task.OpprettGodkjenneVedtakOppgaveTilBeslutter
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class SendTilBeslutter(
@@ -22,7 +22,11 @@ class SendTilBeslutter(
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
         loggService.opprettSendTilBeslutterLogg(behandling)
-        val godkjenneVedtakTask = Task.nyTask(OpprettGodkjenneVedtakOppgaveTilBeslutter.TASK_STEP_TYPE, behandling.id.toString())
+        val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
+                behandlingId = behandling.id,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                fristForFerdigstillelse = LocalDate.now()
+        )
         taskRepository.save(godkjenneVedtakTask)
 
         val behandleSakOppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)

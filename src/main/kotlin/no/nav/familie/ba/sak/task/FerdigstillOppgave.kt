@@ -8,7 +8,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = FerdigstillOppgave.TASK_STEP_TYPE,
@@ -20,7 +19,7 @@ class FerdigstillOppgave(
     override fun doTask(task: Task) {
         val ferdigstillOppgave = objectMapper.readValue(task.payload, FerdigstillOppgaveDTO::class.java)
         oppgaveService.ferdigstillOppgave(
-                behandlingsId = ferdigstillOppgave.behandlingsId, oppgavetype = ferdigstillOppgave.oppgavetype
+                behandlingsId = ferdigstillOppgave.behandlingId, oppgavetype = ferdigstillOppgave.oppgavetype
         )
     }
 
@@ -29,7 +28,7 @@ class FerdigstillOppgave(
 
         fun opprettTask(behandlingId: Long, oppgavetype: Oppgavetype): Task {
             return Task.nyTask(type = TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(FerdigstillOppgaveDTO(behandlingsId = behandlingId, oppgavetype = oppgavetype))
+                               payload = objectMapper.writeValueAsString(FerdigstillOppgaveDTO(behandlingId = behandlingId, oppgavetype = oppgavetype))
             )
         }
     }

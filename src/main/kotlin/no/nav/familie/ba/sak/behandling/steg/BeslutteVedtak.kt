@@ -7,19 +7,19 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class BeslutteVedtak(
         private val toTrinnKontrollService: ToTrinnKontrollService,
         private val vedtakService: VedtakService,
-        private val oppgaveService: OppgaveService,
         private val taskRepository: TaskRepository,
         private val loggService: LoggService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
@@ -52,7 +52,12 @@ class BeslutteVedtak(
         return if (data.beslutning.erGodkjent()) {
             hentNesteStegForNormalFlyt(behandling)
         } else {
-            oppgaveService.opprettOppgaveForBehandleUnderkjentVedtak(behandling.id)
+            val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(
+                    behandlingId = behandling.id,
+                    oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                    fristForFerdigstillelse = LocalDate.now()
+            )
+            taskRepository.save(behandleUnderkjentVedtakTask)
             StegType.REGISTRERE_SØKNAD
         }
     }

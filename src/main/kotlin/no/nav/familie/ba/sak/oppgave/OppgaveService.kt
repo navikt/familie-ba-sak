@@ -21,33 +21,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService) {
 
-    fun opprettOppgaveForNyBehandling(behandlingsId: Long): String {
-        val behandling = behandlingRepository.finnBehandling(behandlingsId)
-        val fagsakId = behandling.fagsak.id
-
-        val aktørId = integrasjonClient.hentAktørId(behandling.fagsak.personIdent.ident).id
-        val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
-
-        val opprettOppgave = OpprettOppgave(ident = OppgaveIdent(ident = aktørId, type = IdentType.Aktør),
-                                            saksId = fagsakId.toString(),
-                                            tema = Tema.BAR,
-                                            oppgavetype = BehandleSak,
-                                            fristFerdigstillelse = LocalDate.now()
-                                                    .plusDays(1), //TODO få denne til å funke på helg og eventuellle andre helligdager
-                                            beskrivelse = lagOppgaveTekst(fagsakId, BehandleSak.toString()),
-                                            enhetsnummer = enhetsnummer?.enhetId,
-                                            behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode)
-
-        val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
-
-        val oppgave = Oppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = BehandleSak)
-        oppgaveRepository.save(oppgave)
-        behandlingRepository.save(behandling.copy(oppgaveId = opprettetOppgaveId))
-        return opprettetOppgaveId
-    }
-
-    fun opprettOppgaveForGodkjenneVedtak(behandlingId: Long): String {
-        print("Oppretter Godkjenne Vedtak-oppgave")
+    fun opprettOppgave(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate): String {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
@@ -58,40 +32,16 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                 ident = OppgaveIdent(ident = aktørId, type = IdentType.Aktør),
                 saksId = fagsakId.toString(),
                 tema = Tema.BAR,
-                oppgavetype = GodkjenneVedtak,
-                fristFerdigstillelse = LocalDate.now(),
-                beskrivelse = lagOppgaveTekst(fagsakId, GodkjenneVedtak.toString()),
+                oppgavetype = oppgavetype,
+                fristFerdigstillelse = fristForFerdigstillelse,
+                beskrivelse = lagOppgaveTekst(fagsakId, oppgavetype.toString()),
                 enhetsnummer = enhetsnummer?.enhetId,
                 behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode
         )
 
         val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
-        val oppgave = Oppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = GodkjenneVedtak)
-        oppgaveRepository.save(oppgave)
-        return opprettetOppgaveId
-    }
 
-    fun opprettOppgaveForBehandleUnderkjentVedtak(behandlingId: Long): String {
-        print("Oppretter behandle underkjent vedtak-oppgave")
-        val behandling = behandlingRepository.finnBehandling(behandlingId)
-        val fagsakId = behandling.fagsak.id
-
-        val aktørId = integrasjonClient.hentAktørId(behandling.fagsak.personIdent.ident).id
-        val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
-
-        val opprettOppgave = OpprettOppgave(
-                ident = OppgaveIdent(ident = aktørId, type = IdentType.Aktør),
-                saksId = fagsakId.toString(),
-                tema = Tema.BAR,
-                oppgavetype = BehandleUnderkjentVedtak,
-                fristFerdigstillelse = LocalDate.now().plusDays(1),
-                beskrivelse = lagOppgaveTekst(fagsakId, BehandleUnderkjentVedtak.toString()),
-                enhetsnummer = enhetsnummer?.enhetId,
-                behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode
-        )
-
-        val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
-        val oppgave = Oppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = BehandleUnderkjentVedtak)
+        val oppgave = Oppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = oppgavetype)
         oppgaveRepository.save(oppgave)
         return opprettetOppgaveId
     }
