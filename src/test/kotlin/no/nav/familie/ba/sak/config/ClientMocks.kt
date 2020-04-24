@@ -4,10 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.beregning.SatsService
-import no.nav.familie.ba.sak.beregning.domene.Sats
-import no.nav.familie.ba.sak.beregning.domene.SatsRepository
-import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException

@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.beregning
 
 import io.mockk.every
-import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.beregning.domene.Sats
-import no.nav.familie.ba.sak.beregning.domene.SatsRegister
-import no.nav.familie.ba.sak.beregning.domene.SatsRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.dato
 import no.nav.familie.ba.sak.common.årMnd
@@ -15,7 +12,7 @@ import java.time.LocalDate
 
 class SatsServiceTest {
 
-    val satsService = spyk(SatsService(SatsRegister))
+    val satsService = spyk(SatsService())
 
     val MAX_GYLDIG_FRA_OG_MED = årMnd("2020-05")
 

@@ -29,7 +29,7 @@ class BeregningServiceTest {
         val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
         val fagsakService = mockk<FagsakService>()
 
-        satsService = SatsService(SatsRegister)
+        satsService = SatsService()
         beregningService = BeregningService(andelTilkjentYtelseRepository,
                 fagsakService,
                 tilkjentYtelseRepository,

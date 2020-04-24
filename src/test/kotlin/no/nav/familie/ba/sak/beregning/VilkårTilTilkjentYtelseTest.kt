@@ -30,7 +30,7 @@ class VilkårTilTilkjentYtelseTest {
 
     @BeforeEach
     fun setUp() {
-        satsService = SatsService(SatsRegister)
+        satsService = SatsService()
         tilkjentYtelseService = TilkjentYtelseService(satsService)
     }
 
