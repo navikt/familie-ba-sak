@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.*
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.*
 
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -24,6 +23,10 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     fun opprettOppgave(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate): String {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
+
+        if(oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling) !== null) {
+            error("Det finnes allerede en oppgave av typen $oppgavetype på behandling ${behandling.id} som ikke er ferdigstilt. Kan ikke opprette ny oppgave")
+        }
 
         val aktørId = integrasjonClient.hentAktørId(behandling.fagsak.personIdent.ident).id
         val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()

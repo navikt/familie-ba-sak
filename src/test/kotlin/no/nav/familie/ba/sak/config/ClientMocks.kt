@@ -40,7 +40,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.hentJournalpost(any()) } returns success(lagTestJournalpost(søkerFnr[0], "1234"))
 
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns
-                listOf(Arbeidsfordelingsenhet("4820", "Drammen"))
+                listOf(Arbeidsfordelingsenhet("4820", "Vadsø"))
 
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 success(lagTestOppgaveDTO(1L))
