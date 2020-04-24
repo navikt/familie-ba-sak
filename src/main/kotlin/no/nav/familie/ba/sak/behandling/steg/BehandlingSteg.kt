@@ -24,35 +24,39 @@ fun initSteg(behandlingType: BehandlingType?): StegType {
 
 val sisteSteg = StegType.BEHANDLING_AVSLUTTET
 
-enum class StegType(private val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, private val kompatibelMed: List<BehandlingStatus>) {
+enum class StegType(private val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
     REGISTRERE_SØKNAD(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     REGISTRERE_PERSONGRUNNLAG(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     VILKÅRSVURDERING(
             rekkefølge = 2,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     SEND_TIL_BESLUTTER(
             rekkefølge = 3,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            kompatibelMed = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     BESLUTTE_VEDTAK(
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
-            kompatibelMed = listOf(BehandlingStatus.SENDT_TIL_BESLUTTER)),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.SENDT_TIL_BESLUTTER)),
     FERDIGSTILLE_BEHANDLING(
             rekkefølge = 5,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
-            kompatibelMed = listOf(BehandlingStatus.IVERKSATT)),
+            gyldigIKombinasjonMedStatus = listOf(
+                    BehandlingStatus.GODKJENT,
+                    BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG,
+                    BehandlingStatus.SENDT_TIL_IVERKSETTING,
+                    BehandlingStatus.IVERKSATT)),
     BEHANDLING_AVSLUTTET(
             rekkefølge = 6,
             tillattFor = emptyList(),
-            kompatibelMed = listOf(BehandlingStatus.FERDIGSTILT));
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT));
 
     fun displayName(): String {
         return this.name.replace('_', ' ').toLowerCase().capitalize()
@@ -62,8 +66,8 @@ enum class StegType(private val rekkefølge: Int, val tillattFor: List<Behandler
         return this.rekkefølge > steg.rekkefølge
     }
 
-    fun erKompatibelMed(behandlingStatus: BehandlingStatus): Boolean {
-        return this.kompatibelMed.contains(behandlingStatus)
+    fun erGyldigIKombinasjonMedStatus(behandlingStatus: BehandlingStatus): Boolean {
+        return this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
     }
 
     fun hentNesteSteg(behandlingType: BehandlingType): StegType {
