@@ -53,17 +53,33 @@ class DokGenKlient(
 
     private fun mapTilInnvilgetBrevFelter(behandling: Behandling,
                                           ansvarligSaksbehandler: String): String {
-        val startDato = "februar 2020" // TODO hent fra beregningen
+        val startDato = "februar 2020" // TODO hent fra beregningen --virkningstidspunkt
+        val vilkarDato = "februar 2020" // Dato for når alle nye vilkår er innfridd (virkningstidspunkt -1M)
+        val antallBarn ="2"
+        val flereBarn = "barna" //if antallBarn >1 = barna else barnet
+        val etterbetaling = false //hentes fra simulering
+        val etterbetalingBelop = 123 //hentes fra simulering
+        val belop = 123 //Hent beløp som gjelder på vedtakstidspunktet
+        val fodselsdato ="24.12.19 og 12.12.18" //Trenger logikk for å kunne liste opp flere fødselsnummer ved antallBarn>1, i format "24.12.19 og 25.12.19" eller "12.11.15, 25.10.17 og 31.03.20"
+        val hjemmel = "§2, 4 og 11" //Må utledes fra aksjonspunkt
+        val enhet = "enhet"
+        val beslutter = "Test Beslutter"
 
         // TODO hent fra dokgen (/template/{templateName}/schema)
         // TODO Bytt ut hardkodede felter med faktiske verdier
-        return "{\"belop\": 123,\n" +
+        return "{\"belop\": $belop,\n" +
                "\"startDato\": \"$startDato\",\n" +
-               "\"etterbetaling\": false,\n" +
-               "\"enhet\": \"enhet\",\n" +
+               "\"vilkarDato\": \"$vilkarDato\",\n" +
+               "\"antallBarn\": $antallBarn,\n" +
+               "\"flereBarn\": \"$flereBarn\",\n" +
+               "\"etterbetaling\": $etterbetaling,\n" +
+               "\"etterbetalingBelop\": $etterbetalingBelop,\n" +
+               "\"enhet\": \"$enhet\",\n" +
                "\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
-               "\"fodselsdato\": \"24.12.19\",\n" +
+               "\"fodselsdato\": \"$fodselsdato\",\n" +
                "\"saksbehandler\": \"${ansvarligSaksbehandler}\", \n" +
+               "\"beslutter\": \"$beslutter\", \n" +
+               "\"hjemmel\": \"$hjemmel\",\n" +
                "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
     }
 
