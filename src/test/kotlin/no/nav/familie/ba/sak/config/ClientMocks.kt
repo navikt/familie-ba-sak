@@ -155,34 +155,6 @@ class ClientMocks {
         )
     }
 
-    @Profile("dev")
-    @Bean
-    @Primary
-    fun mockSatsService(): SatsService {
-        val satsRepository = mockk<SatsRepository>()
-
-        every { satsRepository.finnAlleSatserFor(SatsType.SMA) } returns listOf(Sats(SatsType.SMA, 660, LocalDate.MIN, LocalDate.MAX))
-        every { satsRepository.finnAlleSatserFor(SatsType.TILLEGG_ORBA) } returns listOf(Sats(SatsType.TILLEGG_ORBA,
-                                                                                              1354,
-                                                                                              LocalDate.of(2020, 9, 1),
-                                                                                              LocalDate.MAX))
-        every { satsRepository.finnAlleSatserFor(SatsType.FINN_SVAL) } returns listOf(Sats(SatsType.FINN_SVAL,
-                                                                                           330,
-                                                                                           LocalDate.MIN,
-                                                                                           LocalDate.of(2014, 3, 31)))
-        every { satsRepository.finnAlleSatserFor(SatsType.ORBA) } returns listOf(
-                Sats(SatsType.ORBA,
-                     1054,
-                     LocalDate.of(2019, 3, 1),
-                     LocalDate.MAX),
-                Sats(SatsType.ORBA,
-                     970,
-                     LocalDate.MIN,
-                     LocalDate.of(2019, 2, 28))
-        )
-        return SatsService(satsRepository)
-    }
-
 }
 
 fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, søkerFnr: String, barnFnr: String) {

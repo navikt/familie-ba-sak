@@ -28,9 +28,8 @@ class BeregningServiceTest {
     fun setUp() {
         val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
         val fagsakService = mockk<FagsakService>()
-        val satsRepository = mockk<SatsRepository>()
 
-        satsService = SatsService(satsRepository)
+        satsService = SatsService(SatsRegister)
         beregningService = BeregningService(andelTilkjentYtelseRepository,
                 fagsakService,
                 tilkjentYtelseRepository,
@@ -40,20 +39,6 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers { Ressurs.success(defaultFagsak.toRestFagsak(emptyList())) }
-        every { satsRepository.finnAlleSatserFor(any()) } answers {
-            listOf(
-                    Sats(type = SatsType.ORBA,
-                            beløp = 1054,
-                            gyldigFom = LocalDate.of(2019, 3, 1),
-                            gyldigTom = LocalDate.MAX
-                    ),
-                    Sats(type = SatsType.ORBA,
-                         beløp = 970,
-                         gyldigFom = LocalDate.MIN,
-                         gyldigTom = LocalDate.of(2019, 2, 28)
-                    )
-            )
-        }
     }
 
     @Test

@@ -7,15 +7,10 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.beregning.domene.Sats
-import no.nav.familie.ba.sak.beregning.domene.SatsRepository
-import no.nav.familie.ba.sak.beregning.domene.SatsType
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.*
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -35,24 +30,7 @@ class VilkårTilTilkjentYtelseTest {
 
     @BeforeEach
     fun setUp() {
-        val satsRepository = mockk<SatsRepository>()
-
-        satsService = SatsService(satsRepository)
-        every { satsRepository.finnAlleSatserFor(any()) } answers {
-            listOf(
-                    Sats(type = SatsType.ORBA,
-                         beløp = 1054,
-                         gyldigFom = LocalDate.of(2019, 3, 1),
-                         gyldigTom = LocalDate.MAX
-                    ),
-                    Sats(type = SatsType.ORBA,
-                         beløp = 970,
-                         gyldigFom = LocalDate.MIN,
-                         gyldigTom = LocalDate.of(2019, 2, 28)
-                    )
-            )
-        }
-
+        satsService = SatsService(SatsRegister)
         tilkjentYtelseService = TilkjentYtelseService(satsService)
     }
 
