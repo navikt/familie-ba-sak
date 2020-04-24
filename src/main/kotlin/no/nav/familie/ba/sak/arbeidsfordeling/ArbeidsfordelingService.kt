@@ -18,14 +18,12 @@ class ArbeidsfordelingService(private val behandlingRepository: BehandlingReposi
         val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsak.id)
                               ?: error("Kunne ikke finne en aktiv behandling på fagsak med ID: ${fagsak.id}")
 
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)
-                                       ?: error("Kunne ikke finne et aktivt personopplysningsgrunnlag på behandling med ID: ${aktivBehandling.id}")
-
-        val personinfoliste = personopplysningGrunnlag.barna.map { barn ->
-            integrasjonClient.hentPersoninfoFor(barn.personIdent.ident)
-        }.plus(søker)
-
-        val strengesteDiskresjonskode =
+        val personinfoliste = when (val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(aktivBehandling.id)) {
+              null -> listOf(søker)
+              else -> personopplysningGrunnlag.barna.map { barn ->
+                integrasjonClient.hentPersoninfoFor(barn.personIdent.ident) }.plus(søker)
+        }
+                val strengesteDiskresjonskode =
                 finnStrengesteDiskresjonskode(personinfoliste)
 
         return integrasjonClient.hentBehandlendeEnhet(søker.geografiskTilknytning, strengesteDiskresjonskode)

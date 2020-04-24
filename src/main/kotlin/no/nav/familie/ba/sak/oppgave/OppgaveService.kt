@@ -20,7 +20,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                      private val behandlingRepository: BehandlingRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService) {
 
-    fun opprettOppgaveForNyBehandling(behandlingsId: Long): String {
+    fun opprettOppgaveForNyBehandling(behandlingsId: Long, enhetsId: String? = null): String {
         val behandling = behandlingRepository.finnBehandling(behandlingsId)
         val fagsakId = behandling.fagsak.id
 
@@ -34,7 +34,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                                             fristFerdigstillelse = LocalDate.now()
                                                     .plusDays(1), //TODO få denne til å funke på helg og eventuellle andre helligdager
                                             beskrivelse = lagOppgaveTekst(fagsakId),
-                                            enhetsnummer = enhetsnummer?.enhetId,
+                                            enhetsnummer = enhetsId ?: enhetsnummer?.enhetId,
                                             behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode)
 
         val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)

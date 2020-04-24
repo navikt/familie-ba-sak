@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Journalpost
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -33,6 +35,7 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
+import java.lang.RuntimeException
 import java.net.URI
 
 @Component
@@ -152,12 +155,15 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId/ferdigstill")
 
         Result.runCatching {
-            val response = patchForEntity<Ressurs<String>>(uri, "")
+            val response = patchForEntity<Ressurs<OppgaveResponse>>(uri, "")
             assertGenerelleSuksessKriterier(response)
         }.onFailure {
-            val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
-            throw IntegrasjonException("Kan ikke ferdigstille $oppgaveId. response=$message", it, uri)
+            throw IntegrasjonException("Kan ikke ferdigstille $oppgaveId. response=${responseBody(it)}", it, uri)
         }
+    }
+
+    private fun responseBody(it: Throwable): String? {
+        return if (it is RestClientResponseException) it.responseBodyAsString else ""
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgave): String {
@@ -251,6 +257,43 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
+    fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String) {
+        val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet")
+        exchange(
+            networkRequest = {
+                putForEntity<Ressurs<Any>>(uri, "")
+            },
+            onFailure = {
+                IntegrasjonException("Kall mot integrasjon feilet ved ferdigstillJournalpost. response=${responseBody(it)}", it, uri)
+            }
+        )
+    }
+
+    fun oppdaterJournalpost(request: OppdaterJournalpostRequest, journalpostId: String): OppdaterJournalpostResponse {
+        val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId")
+        return exchange(
+            networkRequest = {
+                putForEntity<Ressurs<OppdaterJournalpostResponse>>(uri, request)
+            },
+            onFailure = {
+                IntegrasjonException("Kall mot integrasjon feilet ved oppdaterJournalpost", it, uri, request.bruker?.id)
+            }
+        )
+    }
+
+    fun hentDokument(dokumentInfoId: String, journalpostId: String): ByteArray {
+        val uri = URI.create("$integrasjonUri/journalpost/hentdokument/$journalpostId/$dokumentInfoId")
+        return exchange(
+            networkRequest = {
+                getForEntity<Ressurs<ByteArray>>(uri)
+            },
+            onFailure = {
+                throw IntegrasjonException("Kall mot integrasjon feilet ved hentDokument", it, uri, null)
+            }
+        )
+    }
+
+
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun journalFørVedtaksbrev(fnr: String, fagsakId: String, pdf: ByteArray): String {
         return lagJournalpostForVedtaksbrev(fnr, fagsakId, pdf)
@@ -278,6 +321,20 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                     throw IntegrasjonException("Kall mot integrasjon feilet ved lag journalpost.", it, uri, fnr)
                 }
         )
+    }
+
+    private inline fun <reified T> exchange(networkRequest: () -> Ressurs<T>?, onFailure: (Throwable) -> RuntimeException): T {
+        return try {
+            val response = networkRequest.invoke()
+            validerOgPakkUt(response)
+        } catch (e: Exception) {
+            throw onFailure(e)
+        }
+    }
+
+    private inline fun <reified T> validerOgPakkUt(ressurs: Ressurs<T>?): T {
+        assertGenerelleSuksessKriterier(ressurs)
+        return ressurs!!.data ?: error("Henting av ressurs feilet med status ${ressurs.status} i response")
     }
 
     val tilgangUri = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()
