@@ -2,11 +2,9 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.beregning.domene.Sats
 import no.nav.familie.ba.sak.beregning.domene.SatsType
-import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
 
-@Service
 object SatsService {
 
     private val satser = listOf(

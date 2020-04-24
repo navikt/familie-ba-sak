@@ -3,18 +3,16 @@ package no.nav.familie.ba.sak.beregning
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
-import org.springframework.stereotype.Service
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import java.time.LocalDate
 import java.time.YearMonth
 
-@Service
-class TilkjentYtelseService {
+object TilkjentYtelseService {
 
     fun beregnTilkjentYtelse(behandlingResultat: BehandlingResultat,
                              personopplysningGrunnlag: PersonopplysningGrunnlag): TilkjentYtelse {

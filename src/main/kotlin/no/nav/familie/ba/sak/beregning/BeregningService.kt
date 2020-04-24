@@ -21,8 +21,7 @@ class BeregningService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakService: FagsakService,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-        private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val tilkjentYtelseService: TilkjentYtelseService
+        private val behandlingResultatRepository: BehandlingResultatRepository
 ) {
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
@@ -41,7 +40,7 @@ class BeregningService(
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
                 ?: throw IllegalStateException("Kunne ikke hente behandlingsresultat for behandling med id ${behandling.id}")
 
-        val tilkjentYtelse = tilkjentYtelseService
+        val tilkjentYtelse = TilkjentYtelseService
                 .beregnTilkjentYtelse(behandlingResultat, personopplysningGrunnlag)
 
         tilkjentYtelseRepository.save(tilkjentYtelse)

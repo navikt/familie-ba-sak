@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.beregning
 
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
@@ -23,13 +21,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
-
-    lateinit var tilkjentYtelseService: TilkjentYtelseService
-
-    @BeforeEach
-    fun setUp() {
-        tilkjentYtelseService = TilkjentYtelseService()
-    }
 
     @ParameterizedTest
     @CsvFileSource(resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_to_perioder.csv"],
@@ -70,7 +61,7 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingResultat.behandling.id, søker, barn1)
 
-        val faktiskTilkjentYtelse = tilkjentYtelseService.beregnTilkjentYtelse(
+        val faktiskTilkjentYtelse = TilkjentYtelseService.beregnTilkjentYtelse(
                 behandlingResultat = behandlingResultat,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
@@ -132,7 +123,7 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingResultat.behandling.id, søker, barn1, barn2)
 
-        val faktiskTilkjentYtelse = tilkjentYtelseService.beregnTilkjentYtelse(
+        val faktiskTilkjentYtelse = TilkjentYtelseService.beregnTilkjentYtelse(
                 behandlingResultat = behandlingResultat,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )

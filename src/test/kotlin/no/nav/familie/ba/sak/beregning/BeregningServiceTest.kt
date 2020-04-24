@@ -31,8 +31,7 @@ class BeregningServiceTest {
          beregningService = BeregningService(andelTilkjentYtelseRepository,
                 fagsakService,
                 tilkjentYtelseRepository,
-                behandlingResultatRepository,
-                TilkjentYtelseService())
+                behandlingResultatRepository)
 
         every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
