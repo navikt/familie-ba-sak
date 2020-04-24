@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.kontrakter.felles.Ressurs

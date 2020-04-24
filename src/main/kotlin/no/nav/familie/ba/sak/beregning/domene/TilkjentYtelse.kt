@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.beregning.domene
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import org.hibernate.annotations.Type
 import java.time.LocalDate
 import javax.persistence.*
 

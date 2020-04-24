@@ -1,30 +1,25 @@
 package no.nav.familie.ba.sak.beregning.domene
 
+import org.springframework.stereotype.Service
 import java.time.LocalDate
 import javax.persistence.*
 
-@Entity(name = "Sats")
-@Table(name = "SATS")
-data class Sats(
+data class Sats(val type: SatsType, val beløp:Int, val gyldigFom:LocalDate = LocalDate.MIN, val gyldigTom: LocalDate = LocalDate.MAX)
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sats_seq_generator")
-        @SequenceGenerator(name = "sats_seq_generator", sequenceName = "sats_seq", allocationSize = 50)
-        val id: Long = 0,
+@Service
+object SatsRegister : SatsRepository {
 
-        @Enumerated(EnumType.STRING)
-        @Column(nullable = false, updatable = false)
-        val type: SatsType,
+    val satser = listOf(
+            Sats(SatsType.ORBA, 1054, LocalDate.of(2019,3,1), LocalDate.MAX),
+            Sats(SatsType.ORBA, 970, LocalDate.MIN, LocalDate.of(2019,2,28)),
+            Sats(SatsType.SMA, 660,LocalDate.MIN,LocalDate.MAX),
+            Sats(SatsType.TILLEGG_ORBA, 1354, LocalDate.of(2020,9,1),LocalDate.MAX),
+            Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014,3,31))
+    )
 
-        @Column(name = "belop", nullable = false, updatable = false)
-        val beløp: Int,
-
-        @Column(name = "gyldig_fom", updatable = false)
-        val gyldigFom: LocalDate?,
-
-        @Column(name = "gyldig_tom", updatable = false)
-        val gyldigTom: LocalDate?
-)
+    override fun finnAlleSatserFor(type: SatsType): List<Sats> =
+            satser.filter { it.type==type }
+}
 
 enum class SatsType(val beskrivelse: String) {
     ORBA("Ordinær barnetrygd"),

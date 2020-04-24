@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
@@ -43,11 +43,11 @@ class VilkårTilTilkjentYtelseTest {
                     Sats(type = SatsType.ORBA,
                          beløp = 1054,
                          gyldigFom = LocalDate.of(2019, 3, 1),
-                         gyldigTom = null
+                         gyldigTom = LocalDate.MAX
                     ),
                     Sats(type = SatsType.ORBA,
                          beløp = 970,
-                         gyldigFom = null,
+                         gyldigFom = LocalDate.MIN,
                          gyldigTom = LocalDate.of(2019, 2, 28)
                     )
             )

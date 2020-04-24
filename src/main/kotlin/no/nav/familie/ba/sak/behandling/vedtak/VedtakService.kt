@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext

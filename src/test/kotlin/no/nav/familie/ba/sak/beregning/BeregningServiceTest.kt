@@ -6,8 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -46,12 +45,12 @@ class BeregningServiceTest {
                     Sats(type = SatsType.ORBA,
                             beløp = 1054,
                             gyldigFom = LocalDate.of(2019, 3, 1),
-                            gyldigTom = null
+                            gyldigTom = LocalDate.MAX
                     ),
                     Sats(type = SatsType.ORBA,
-                            beløp = 970,
-                            gyldigFom = null,
-                            gyldigTom = LocalDate.of(2019, 2, 28)
+                         beløp = 970,
+                         gyldigFom = LocalDate.MIN,
+                         gyldigTom = LocalDate.of(2019, 2, 28)
                     )
             )
         }

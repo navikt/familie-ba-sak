@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.dato
 import no.nav.fpsak.tidsserie.LocalDateSegment
 

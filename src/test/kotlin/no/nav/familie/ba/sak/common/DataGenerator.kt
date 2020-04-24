@@ -11,9 +11,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår

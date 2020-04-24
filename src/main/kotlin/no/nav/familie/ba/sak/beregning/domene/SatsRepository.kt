@@ -4,8 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
-interface SatsRepository : JpaRepository<Sats, Long> {
-
-    @Query("SELECT s FROM Sats s WHERE s.type = :type")
+interface SatsRepository  {
     fun finnAlleSatserFor(type: SatsType): List<Sats>
 }
