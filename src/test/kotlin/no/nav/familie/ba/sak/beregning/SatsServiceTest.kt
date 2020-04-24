@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 class SatsServiceTest {
 
-    val satsService = spyk(SatsService())
+    val satsService = spyk(SatsService)
 
     val MAX_GYLDIG_FRA_OG_MED = årMnd("2020-05")
 

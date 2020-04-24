@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
-class TilkjentYtelseService(private val satsService: SatsService) {
+class TilkjentYtelseService {
 
     fun beregnTilkjentYtelse(behandlingResultat: BehandlingResultat,
                              personopplysningGrunnlag: PersonopplysningGrunnlag): TilkjentYtelse {
@@ -56,7 +56,7 @@ class TilkjentYtelseService(private val satsService: SatsService) {
                                 val stønadTom =
                                         minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
                                 val stønadTomKommerFra18ÅrsVilkår = stønadTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
-                                val beløpsperioder = satsService.hentGyldigSatsFor(
+                                val beløpsperioder = SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
                                         stønadFraOgMed = settRiktigStønadFom(stønadFom),
                                         stønadTilOgMed = settRiktigStønadTom(stønadTomKommerFra18ÅrsVilkår,

@@ -21,7 +21,6 @@ class BeregningServiceTest {
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     val behandlingResultatRepository = mockk<BehandlingResultatRepository>()
 
-    lateinit var satsService: SatsService
     lateinit var beregningService: BeregningService
 
     @BeforeEach
@@ -29,12 +28,11 @@ class BeregningServiceTest {
         val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
         val fagsakService = mockk<FagsakService>()
 
-        satsService = SatsService()
-        beregningService = BeregningService(andelTilkjentYtelseRepository,
+         beregningService = BeregningService(andelTilkjentYtelseRepository,
                 fagsakService,
                 tilkjentYtelseRepository,
                 behandlingResultatRepository,
-                TilkjentYtelseService(satsService))
+                TilkjentYtelseService())
 
         every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs

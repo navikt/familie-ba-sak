@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
-class SatsService {
+object SatsService {
 
     private val satser = listOf(
             Sats(SatsType.ORBA, 1054, LocalDate.of(2019,3,1), LocalDate.MAX),

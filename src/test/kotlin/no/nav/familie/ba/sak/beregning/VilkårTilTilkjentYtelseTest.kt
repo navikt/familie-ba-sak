@@ -24,14 +24,11 @@ import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
 
-
-    lateinit var satsService: SatsService
     lateinit var tilkjentYtelseService: TilkjentYtelseService
 
     @BeforeEach
     fun setUp() {
-        satsService = SatsService()
-        tilkjentYtelseService = TilkjentYtelseService(satsService)
+        tilkjentYtelseService = TilkjentYtelseService()
     }
 
     @ParameterizedTest
