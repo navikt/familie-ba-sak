@@ -54,7 +54,7 @@ class DokGenKlient(
     private fun mapTilInnvilgetBrevFelter(behandling: Behandling,
                                           ansvarligSaksbehandler: String): String {
         val startDato = "februar 2020" // TODO hent fra beregningen --virkningstidspunkt
-        val vilkarDato = "februar 2020" // Dato for når alle nye vilkår er innfridd (virkningstidspunkt -1M)
+        val vilkarDato = "01.02.20" // Dato for når alle nye vilkår er innfridd (virkningstidspunkt -1M)
         val antallBarn =2
         val flereBarn = "barna" //if antallBarn >1 = barna else barnet
         val etterbetaling = false //hentes fra simulering
