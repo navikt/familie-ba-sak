@@ -266,7 +266,7 @@ class BeregningServiceTest {
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
 
         Assertions.assertEquals(periode1Fom.plusMonths(1).withDayOfMonth(1), andelerTilkjentYtelse[0].stønadFom)
-        Assertions.assertEquals(periode1Tom.plusMonths(1).sisteDagIMåned(), andelerTilkjentYtelse[0].stønadTom)
+        Assertions.assertEquals(periode1Tom.sisteDagIMåned(), andelerTilkjentYtelse[0].stønadTom)
         Assertions.assertEquals(1054, andelerTilkjentYtelse[0].beløp)
 
         Assertions.assertEquals(periode3Fom.plusMonths(1).withDayOfMonth(1), andelerTilkjentYtelse[1].stønadFom)
@@ -274,7 +274,7 @@ class BeregningServiceTest {
         Assertions.assertEquals(1054, andelerTilkjentYtelse[1].beløp)
 
         Assertions.assertEquals(periode3Fom.plusMonths(1).withDayOfMonth(1), andelerTilkjentYtelse[2].stønadFom)
-        Assertions.assertEquals(periode3Tom.plusMonths(1).sisteDagIMåned(), andelerTilkjentYtelse[2].stønadTom)
+        Assertions.assertEquals(periode3Tom.sisteDagIMåned(), andelerTilkjentYtelse[2].stønadTom)
         Assertions.assertEquals(1054, andelerTilkjentYtelse[2].beløp)
     }
 }

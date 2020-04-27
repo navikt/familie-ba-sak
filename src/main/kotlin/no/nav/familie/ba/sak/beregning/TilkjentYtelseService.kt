@@ -87,7 +87,7 @@ object TilkjentYtelseService {
         return if (erBarnetrygdTil18ÅrsDag)
             YearMonth.from(tilOgMed.minusMonths(1))
         else
-            YearMonth.from(tilOgMed.plusMonths(1))
+            YearMonth.from(tilOgMed)
     }
 }
 
