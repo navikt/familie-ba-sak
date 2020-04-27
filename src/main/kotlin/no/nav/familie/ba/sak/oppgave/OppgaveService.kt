@@ -20,7 +20,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService) {
 
-    fun opprettOppgave(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate, enhetsId: String? = null): String {
+    fun opprettOppgave(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate, enhetId: String? = null): String {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
@@ -38,7 +38,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                 oppgavetype = oppgavetype,
                 fristFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = lagOppgaveTekst(fagsakId, oppgavetype.toString()),
-                enhetsnummer = enhetsId ?: enhetsnummer?.enhetId,
+                enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
                 behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode
         )
 
@@ -53,10 +53,9 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }
 
-    fun ferdigstillOppgave(behandlingsId: Long, oppgavetype: Oppgavetype) {
-        print("Ferdigstiller $oppgavetype oppgave")
-        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandlingRepository.finnBehandling(behandlingsId))
-                ?: error("Finner ikke oppgave for behandling $behandlingsId")
+    fun ferdigstillOppgave(behandlingId: Long, oppgavetype: Oppgavetype) {
+        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandlingRepository.finnBehandling(behandlingId))
+                ?: error("Finner ikke oppgave for behandling $behandlingId")
         integrasjonClient.ferdigstillOppgave(oppgave.gsakId.toLong())
 
         oppgave.erFerdigstilt = true

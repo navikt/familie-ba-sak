@@ -48,7 +48,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                     behandlingId = opprettNyBehandling(request, journalpostId),
                     oppgavetype = Oppgavetype.BehandleSak,
                     fristForFerdigstillelse = LocalDate.now(),
-                    enhetsId = request.tildeltEnhetsnr
+                    enhetId = request.tildeltEnhetsnr
             )
         }
 

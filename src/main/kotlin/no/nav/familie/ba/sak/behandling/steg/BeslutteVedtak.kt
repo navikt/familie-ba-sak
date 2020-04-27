@@ -46,8 +46,8 @@ class BeslutteVedtak(
         }
 
         loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, saksbehandlerId, data.begrunnelse)
-        val ferdigstillGodkjenneVedtakOppgaveTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
-        taskRepository.save(ferdigstillGodkjenneVedtakOppgaveTask)
+        val ferdigstillGodkjenneVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
+        taskRepository.save(ferdigstillGodkjenneVedtakTask)
 
         return if (data.beslutning.erGodkjent()) {
             hentNesteStegForNormalFlyt(behandling)
