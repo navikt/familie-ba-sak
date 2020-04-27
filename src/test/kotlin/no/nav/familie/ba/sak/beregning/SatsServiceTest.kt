@@ -1,20 +1,18 @@
 package no.nav.familie.ba.sak.beregning
 
 import io.mockk.every
-import io.mockk.mockk
+import io.mockk.spyk
 import no.nav.familie.ba.sak.beregning.domene.Sats
-import no.nav.familie.ba.sak.beregning.domene.SatsRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.dato
 import no.nav.familie.ba.sak.common.årMnd
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class SatsServiceTest {
 
-
-    val satsRepository = mockk<SatsRepository>()
-    val satsService = SatsService(satsRepository)
+    val satsService = spyk(SatsService)
 
     val MAX_GYLDIG_FRA_OG_MED = årMnd("2020-05")
 
@@ -173,8 +171,8 @@ class SatsServiceTest {
     }
 
     private fun stubSatsRepo(type: SatsType, vararg satser: TestKrPeriode): Unit {
-        every { satsRepository.finnAlleSatserFor(type) } returns
-                satser.asList().map { Sats(0, type, it.beløp, it.fom?.let { s -> dato(s) }, it.tom?.let { s -> dato(s) }) }
+        every { satsService["finnAlleSatserFor"](type) } returns
+                satser.asList().map { Sats(type, it.beløp, it.fom?.let { s -> dato(s) } ?: LocalDate.MIN, it.tom?.let { s -> dato(s)} ?: LocalDate.MAX ) }
     }
 
     private data class TestKrPeriode(

@@ -6,8 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -22,39 +21,21 @@ class BeregningServiceTest {
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     val behandlingResultatRepository = mockk<BehandlingResultatRepository>()
 
-    lateinit var satsService: SatsService
     lateinit var beregningService: BeregningService
 
     @BeforeEach
     fun setUp() {
         val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
         val fagsakService = mockk<FagsakService>()
-        val satsRepository = mockk<SatsRepository>()
 
-        satsService = SatsService(satsRepository)
-        beregningService = BeregningService(andelTilkjentYtelseRepository,
+         beregningService = BeregningService(andelTilkjentYtelseRepository,
                 fagsakService,
                 tilkjentYtelseRepository,
-                behandlingResultatRepository,
-                TilkjentYtelseService(satsService))
+                behandlingResultatRepository)
 
         every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers { Ressurs.success(defaultFagsak.toRestFagsak(emptyList())) }
-        every { satsRepository.finnAlleSatserFor(any()) } answers {
-            listOf(
-                    Sats(type = SatsType.ORBA,
-                            beløp = 1054,
-                            gyldigFom = LocalDate.of(2019, 3, 1),
-                            gyldigTom = null
-                    ),
-                    Sats(type = SatsType.ORBA,
-                            beløp = 970,
-                            gyldigFom = null,
-                            gyldigTom = LocalDate.of(2019, 2, 28)
-                    )
-            )
-        }
     }
 
     @Test

@@ -1,21 +1,14 @@
 package no.nav.familie.ba.sak.beregning
 
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.beregning.domene.Sats
-import no.nav.familie.ba.sak.beregning.domene.SatsRepository
-import no.nav.familie.ba.sak.beregning.domene.SatsType
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.*
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -28,33 +21,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
-
-
-    lateinit var satsService: SatsService
-    lateinit var tilkjentYtelseService: TilkjentYtelseService
-
-    @BeforeEach
-    fun setUp() {
-        val satsRepository = mockk<SatsRepository>()
-
-        satsService = SatsService(satsRepository)
-        every { satsRepository.finnAlleSatserFor(any()) } answers {
-            listOf(
-                    Sats(type = SatsType.ORBA,
-                         beløp = 1054,
-                         gyldigFom = LocalDate.of(2019, 3, 1),
-                         gyldigTom = null
-                    ),
-                    Sats(type = SatsType.ORBA,
-                         beløp = 970,
-                         gyldigFom = null,
-                         gyldigTom = LocalDate.of(2019, 2, 28)
-                    )
-            )
-        }
-
-        tilkjentYtelseService = TilkjentYtelseService(satsService)
-    }
 
     @ParameterizedTest
     @CsvFileSource(resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_to_perioder.csv"],
@@ -95,7 +61,7 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingResultat.behandling.id, søker, barn1)
 
-        val faktiskTilkjentYtelse = tilkjentYtelseService.beregnTilkjentYtelse(
+        val faktiskTilkjentYtelse = TilkjentYtelseService.beregnTilkjentYtelse(
                 behandlingResultat = behandlingResultat,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
@@ -157,7 +123,7 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingResultat.behandling.id, søker, barn1, barn2)
 
-        val faktiskTilkjentYtelse = tilkjentYtelseService.beregnTilkjentYtelse(
+        val faktiskTilkjentYtelse = TilkjentYtelseService.beregnTilkjentYtelse(
                 behandlingResultat = behandlingResultat,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )

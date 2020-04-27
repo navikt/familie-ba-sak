@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -21,8 +21,7 @@ class BeregningService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakService: FagsakService,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-        private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val tilkjentYtelseService: TilkjentYtelseService
+        private val behandlingResultatRepository: BehandlingResultatRepository
 ) {
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
@@ -41,7 +40,7 @@ class BeregningService(
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
                 ?: throw IllegalStateException("Kunne ikke hente behandlingsresultat for behandling med id ${behandling.id}")
 
-        val tilkjentYtelse = tilkjentYtelseService
+        val tilkjentYtelse = TilkjentYtelseService
                 .beregnTilkjentYtelse(behandlingResultat, personopplysningGrunnlag)
 
         tilkjentYtelseRepository.save(tilkjentYtelse)
