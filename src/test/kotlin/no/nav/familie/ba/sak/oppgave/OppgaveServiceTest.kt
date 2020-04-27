@@ -43,6 +43,7 @@ class OppgaveServiceTest {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
+        every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns listOf(
                 mockk {
                     every { enhetId } returns ENHETSNUMMER
@@ -70,6 +71,7 @@ class OppgaveServiceTest {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
+        every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { integrasjonClient.hentAktørId(FNR) } returns AktørId(
                 AKTØR_ID_INTEGRASJONER)
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
@@ -92,6 +94,7 @@ class OppgaveServiceTest {
     @Test
     fun `Opprett oppgave skal kaste Exception hvis det ikke finner en aktør`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
+        every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { integrasjonClient.hentAktørId(FNR) } throws RuntimeException("aktør")
         assertThatThrownBy { oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK) }
                 .hasMessage("aktør")

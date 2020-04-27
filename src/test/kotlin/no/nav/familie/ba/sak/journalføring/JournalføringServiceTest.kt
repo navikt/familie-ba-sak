@@ -41,7 +41,7 @@ class JournalføringServiceTest {
         every { integrasjonClient.oppdaterJournalpost(capture(slot), any()) } returns OppdaterJournalpostResponse(journalpostId)
         every { integrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
         every { integrasjonClient.ferdigstillOppgave(any()) } just runs
-        every { oppgaveService.opprettOppgaveForNyBehandling(any()) } returns ""
+        every { oppgaveService.opprettOppgave(any(), any(), any()) } returns ""
         every { stegService.håndterNyBehandling(any()) } returns lagBehandling()
 
         val request = OppdaterJournalpostRequest(knyttTilFagsak = true,
@@ -63,7 +63,7 @@ class JournalføringServiceTest {
         every { integrasjonClient.oppdaterJournalpost(capture(slot), any()) } returns OppdaterJournalpostResponse(journalpostId)
         every { integrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
         every { integrasjonClient.ferdigstillOppgave(any()) } just runs
-        every { oppgaveService.opprettOppgaveForNyBehandling(any()) } returns ""
+        every { oppgaveService.opprettOppgave(any(), any(), any()) } returns ""
         every { stegService.håndterNyBehandling(any()) } returns lagBehandling()
 
         val request = OppdaterJournalpostRequest(knyttTilFagsak = false,

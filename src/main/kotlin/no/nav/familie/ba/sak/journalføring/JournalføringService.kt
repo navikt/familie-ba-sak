@@ -13,8 +13,10 @@ import no.nav.familie.ba.sak.journalføring.domene.Sakstype.*
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema.*
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class JournalføringService(private val integrasjonClient: IntegrasjonClient,
@@ -42,7 +44,12 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         oppdaterOgFerdigstillJournalpostPlusOppgave(request.copy(sak = sak) , journalpostId, behandlendeEnhet, oppgaveId)
 
         if (sak.sakstype == FAGSAK.type) {
-            oppgaveService.opprettOppgaveForNyBehandling(opprettNyBehandling(request, journalpostId), enhetsId = request.tildeltEnhetsnr)
+            oppgaveService.opprettOppgave(
+                    behandlingId = opprettNyBehandling(request, journalpostId),
+                    oppgavetype = Oppgavetype.BehandleSak,
+                    fristForFerdigstillelse = LocalDate.now(),
+                    enhetsId = request.tildeltEnhetsnr
+            )
         }
 
         return sak.fagsakId ?: ""
