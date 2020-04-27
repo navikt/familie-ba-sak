@@ -49,8 +49,6 @@ class OppgaveServiceTest {
                     every { enhetId } returns ENHETSNUMMER
                 }
         )
-        every { integrasjonClient.hentAktørId(FNR) } returns AktørId(
-                AKTØR_ID_INTEGRASJONER)
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
@@ -58,7 +56,7 @@ class OppgaveServiceTest {
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdent(ident = AKTØR_ID_INTEGRASJONER, type = IdentType.Aktør))
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdent(ident = AKTØR_ID_FAGSAK, type = IdentType.Aktør))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.ORDINÆR_BARNETRYGD.kode)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -72,8 +70,6 @@ class OppgaveServiceTest {
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
         every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
-        every { integrasjonClient.hentAktørId(FNR) } returns AktørId(
-                AKTØR_ID_INTEGRASJONER)
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
@@ -82,23 +78,12 @@ class OppgaveServiceTest {
 
         assertThat(slot.captured.enhetsnummer).isNull()
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdent(ident = AKTØR_ID_INTEGRASJONER, type = IdentType.Aktør))
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdent(ident = AKTØR_ID_FAGSAK, type = IdentType.Aktør))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.ORDINÆR_BARNETRYGD.kode)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.BAR)
         assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/$FAGSAK_ID")
-    }
-
-
-    @Test
-    fun `Opprett oppgave skal kaste Exception hvis det ikke finner en aktør`() {
-        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
-        every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
-        every { integrasjonClient.hentAktørId(FNR) } throws RuntimeException("aktør")
-        assertThatThrownBy { oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK) }
-                .hasMessage("aktør")
-                .isInstanceOf(java.lang.RuntimeException::class.java)
     }
 
     @Test
@@ -151,7 +136,6 @@ class OppgaveServiceTest {
         private const val FNR = "fnr"
         private const val ENHETSNUMMER = "enhet"
         private const val AKTØR_ID_FAGSAK = "0123456789"
-        private const val AKTØR_ID_INTEGRASJONER = "987654321"
         private val FRIST_FERDIGSTILLELSE_BEH_SAK = LocalDate.now().plusDays(1)
     }
 }

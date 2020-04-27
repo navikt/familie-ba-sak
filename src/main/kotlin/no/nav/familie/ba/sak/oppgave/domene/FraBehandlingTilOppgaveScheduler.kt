@@ -17,9 +17,19 @@ class FraBehandlingTilOppgaveScheduler(private val behandlingRepository: Behandl
         val behandlinger = behandlingRepository.findByOppgaveNotNull()
         val oppgaver = behandlinger.map { behandling ->
             if (behandling.status == BehandlingStatus.OPPRETTET) {
-                Oppgave(behandling = behandling, gsakId = behandling.oppgaveId!!, type = Oppgavetype.BehandleSak, erFerdigstilt = false, opprettetTidspunkt = behandling.endretTidspunkt)
+                Oppgave(behandling = behandling,
+                        gsakId = behandling.oppgaveId!!,
+                        type = Oppgavetype.BehandleSak,
+                        erFerdigstilt = false,
+                        opprettetTidspunkt = behandling.endretTidspunkt
+                )
             } else {
-                Oppgave(behandling = behandling, gsakId = behandling.oppgaveId!!, type = Oppgavetype.BehandleSak, erFerdigstilt = true, opprettetTidspunkt = behandling.endretTidspunkt)
+                Oppgave(behandling = behandling,
+                        gsakId = behandling.oppgaveId!!,
+                        type = Oppgavetype.BehandleSak,
+                        erFerdigstilt = true,
+                        opprettetTidspunkt = behandling.endretTidspunkt
+                )
             }
         }
         oppgaveRepository.saveAll(oppgaver)

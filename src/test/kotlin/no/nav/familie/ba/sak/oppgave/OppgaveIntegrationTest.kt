@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
@@ -46,12 +47,10 @@ class OppgaveIntegrationTest {
 
     @Test
     fun `Skal opprette oppgave og ferdigstille oppgave for behandling`() {
-        val søkerFnr = "12345678910"
-        val barnFnr = "01101800033"
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr))
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, SØKER_FNR, listOf(BARN_FNR))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val godkjenneVedtakOppgaveId = oppgaveService.opprettOppgave(behandling.id, Oppgavetype.GodkjenneVedtak, LocalDate.now())
@@ -71,12 +70,10 @@ class OppgaveIntegrationTest {
 
     @Test
     fun `Skal kaste feil ved opprettelse av oppgave på type som ikke er ferdigstilt`() {
-        val søkerFnr = "12345678910"
-        val barnFnr = "01101800033"
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr))
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, SØKER_FNR, listOf(BARN_FNR))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         oppgaveService.opprettOppgave(behandling.id, Oppgavetype.GodkjenneVedtak, LocalDate.now())
@@ -84,5 +81,10 @@ class OppgaveIntegrationTest {
         assertThatExceptionOfType(IllegalStateException::class.java)
                 .isThrownBy { oppgaveService.opprettOppgave(behandling.id, Oppgavetype.GodkjenneVedtak, LocalDate.now()) }
                 .withMessageStartingWith("Det finnes allerede en oppgave av typen ${Oppgavetype.GodkjenneVedtak} på behandling")
+    }
+
+    companion object {
+        private val SØKER_FNR = ClientMocks.søkerFnr[0]
+        private val BARN_FNR = ClientMocks.barnFnr[0]
     }
 }

@@ -24,15 +24,14 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
-        if(oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling) !== null) {
+        if (oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling) !== null
+                && oppgavetype !== Oppgavetype.Journalføring) {
             error("Det finnes allerede en oppgave av typen $oppgavetype på behandling ${behandling.id} som ikke er ferdigstilt. Kan ikke opprette ny oppgave")
         }
-
-        val aktørId = integrasjonClient.hentAktørId(behandling.fagsak.personIdent.ident).id
         val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
 
         val opprettOppgave = OpprettOppgave(
-                ident = OppgaveIdent(ident = aktørId, type = IdentType.Aktør),
+                ident = OppgaveIdent(ident = behandling.fagsak.aktørId.id, type = IdentType.Aktør),
                 saksId = fagsakId.toString(),
                 tema = Tema.BAR,
                 oppgavetype = oppgavetype,
