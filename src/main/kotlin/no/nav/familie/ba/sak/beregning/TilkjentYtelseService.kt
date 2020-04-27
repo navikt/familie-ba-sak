@@ -1,23 +1,18 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.vedtak.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.YtelseType
 import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
-import no.nav.nare.core.evaluations.Resultat
-import org.springframework.stereotype.Service
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import java.time.LocalDate
 import java.time.YearMonth
 
-@Service
-class TilkjentYtelseService(private val satsService: SatsService) {
+object TilkjentYtelseService {
 
     fun beregnTilkjentYtelse(behandlingResultat: BehandlingResultat,
                              personopplysningGrunnlag: PersonopplysningGrunnlag): TilkjentYtelse {
@@ -59,7 +54,7 @@ class TilkjentYtelseService(private val satsService: SatsService) {
                                 val stønadTom =
                                         minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
                                 val stønadTomKommerFra18ÅrsVilkår = stønadTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
-                                val beløpsperioder = satsService.hentGyldigSatsFor(
+                                val beløpsperioder = SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
                                         stønadFraOgMed = settRiktigStønadFom(stønadFom),
                                         stønadTilOgMed = settRiktigStønadTom(stønadTomKommerFra18ÅrsVilkår,
