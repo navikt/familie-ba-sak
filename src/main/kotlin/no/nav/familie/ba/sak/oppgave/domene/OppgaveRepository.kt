@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository
 @Repository
 interface OppgaveRepository: JpaRepository<Oppgave, Long> {
 
+    @Query(value = "SELECT o FROM Oppgave o WHERE o.behandling = :behandling AND o.type = :oppgavetype")
+    fun findByOppgavetypeAndBehandling(behandling: Behandling, oppgavetype: Oppgavetype): Oppgave?
+
     @Query(value = "SELECT o FROM Oppgave o WHERE o.erFerdigstilt = false AND o.behandling = :behandling AND o.type = :oppgavetype")
     fun findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): Oppgave?
 }

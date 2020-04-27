@@ -31,7 +31,8 @@ class FraBehandlingTilOppgaveScheduler(private val behandlingRepository: Behandl
                         opprettetTidspunkt = behandling.endretTidspunkt
                 )
             }
-        }
+        }.filter { oppgaveRepository.findByOppgavetypeAndBehandling(it.behandling, it.type) == null }
+
         oppgaveRepository.saveAll(oppgaver)
     }
 
