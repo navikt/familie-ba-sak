@@ -20,7 +20,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService) {
 
-    fun opprettOppgave(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate): String {
+    fun opprettOppgave(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate, enhetsId: String? = null): String {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
@@ -38,7 +38,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                 oppgavetype = oppgavetype,
                 fristFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = lagOppgaveTekst(fagsakId, oppgavetype.toString()),
-                enhetsnummer = enhetsnummer?.enhetId,
+                enhetsnummer = enhetsId ?: enhetsnummer?.enhetId,
                 behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode
         )
 

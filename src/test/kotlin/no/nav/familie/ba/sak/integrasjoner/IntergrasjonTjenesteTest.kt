@@ -171,7 +171,7 @@ class IntergrasjonTjenesteTest {
         MDC.put("callId", "ferdigstillOppgave")
         stubFor(patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
                         .withHeader("Accept", containing("json"))
-                        .willReturn(okJson(objectMapper.writeValueAsString(success("")))))
+                        .willReturn(okJson(objectMapper.writeValueAsString(success(OppgaveResponse(1))))))
 
         integrasjonClient.ferdigstillOppgave(123)
 

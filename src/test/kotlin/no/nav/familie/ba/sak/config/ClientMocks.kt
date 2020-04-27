@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.beregning.SatsService
@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.domene.*
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -39,18 +40,27 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.hentJournalpost(any()) } returns success(lagTestJournalpost(søkerFnr[0], "1234"))
 
-        every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns
-                listOf(Arbeidsfordelingsenhet("4820", "Vadsø"))
-
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 success(lagTestOppgaveDTO(1L))
 
         every { mockIntegrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any()) } returns
                 listOf(lagTestOppgaveDTO(1L))
 
-        every { mockIntegrasjonClient.opprettOppgave(any()) } returns "1"
+        every { mockIntegrasjonClient.opprettOppgave(any()) } returns
+            "12345678"
 
-        every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just Runs
+        every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
+                OppdaterJournalpostResponse("1234567")
+
+        every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
+
+        every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just runs
+
+        every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns
+            listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
+
+        every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
+            "mock data".toByteArray()
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())
