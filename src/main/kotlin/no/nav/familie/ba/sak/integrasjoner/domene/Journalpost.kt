@@ -11,10 +11,10 @@ data class Journalpost(val journalpostId: String,
                        val kanal: String? = null,
                        val dokumenter: List<DokumentInfo>? = null)
 
-data class Sak(val arkivsaksnummer: String?,
-               var arkivsaksystem: String?,
-               val fagsakId: String?,
-               val fagsaksystem: String?)
+data class Sak(val arkivsaksnummer: String? = null,
+               var arkivsaksystem: String? = null,
+               val fagsakId: String? = null,
+               val fagsaksystem: String? = null)
 
 data class Bruker(val id: String,
                   val type: BrukerIdType)
