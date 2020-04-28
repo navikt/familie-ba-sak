@@ -5,10 +5,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
@@ -31,9 +29,7 @@ import java.time.LocalDate
 @Validated
 class BeregningController(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val beregningService: BeregningService,
-        private val fagsakService: FagsakService,
-        private val vedtakService: VedtakService
+        private val beregningService: BeregningService
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -45,6 +41,8 @@ class BeregningController(
         logger.info("{} henter oversikt over beregnet utbetaling for behandlingId={}", saksbehandlerId, behandlingId)
 
         val tilkjentYtelseForBehandling = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+        if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return ResponseEntity.ok(Ressurs.success(data = emptyList()))
+
         val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
                 ?: return notFound("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
