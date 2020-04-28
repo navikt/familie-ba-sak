@@ -13,14 +13,11 @@ data class OppdaterJournalpostRequest(val avsender: AvsenderMottaker? = null,
                                       val avsenderMottaker: AvsenderMottaker? = avsender,  // annerledes navngivning i backend, tilpasset både inngående og utgående journalposter
                                       val bruker: Bruker,
                                       val tema: String? = "BAR",
-                                      val behandlingstema: String? = null,
-                                      val tildeltEnhetsnr: String? = null,
-                                      val journalfoerendeEnhet: String? = null,
                                       val sak: Sak? = null,
                                       val dokumenter: List<DokumentInfo>? = null,
                                       val dokumentType: String? = null,
-                                      val mottattDato: LocalDateTime,
-                                      val annentInnhold: String? = null,
+                                      val datoMottatt: String,
+                                      val logiskeVedlegg: List<String>,
                                       val knyttTilFagsak: Boolean)
 
 data class AvsenderMottaker(val id: String,
