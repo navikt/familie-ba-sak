@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner
 
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype
-import no.nav.familie.ba.sak.oppgave.domene.PrioritetEnum
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.kontrakter.felles.oppgave.*
@@ -59,7 +58,7 @@ fun lagTestOppgaveDTO(oppgaveId: Long): Oppgave {
                            2020,
                            2,
                            1).toString(),
-                   prioritet = PrioritetEnum.NORM.name,
+                   prioritet = PrioritetEnum.NORM,
                    status = StatusEnum.OPPRETTET
     )
 }

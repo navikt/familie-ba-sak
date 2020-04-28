@@ -9,9 +9,3 @@ data class DataForManuellJournalføring(
         val person: RestPersonInfo?,
         val journalpost: Journalpost?
 )
-
-enum class PrioritetEnum(private val value: String) {
-    HOY("HOY"),
-    NORM("NORM"),
-    LAV("LAV");
-}
