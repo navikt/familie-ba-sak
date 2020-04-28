@@ -93,7 +93,7 @@ object TilkjentYtelseService {
 
 private fun maksimum(periodeFomSoker: LocalDate?, periodeFomBarn: LocalDate?): LocalDate {
     if (periodeFomSoker == null && periodeFomBarn == null) {
-        throw error("Både søker og barn kan ikke ha null i periodeFom-dato")
+        error("Både søker og barn kan ikke ha null i periodeFom-dato")
     }
 
     return maxOf(periodeFomSoker ?: LocalDate.MIN, periodeFomBarn ?: LocalDate.MIN)
@@ -101,7 +101,7 @@ private fun maksimum(periodeFomSoker: LocalDate?, periodeFomBarn: LocalDate?): L
 
 private fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): LocalDate {
     if (periodeTomSoker == null && periodeTomBarn == null) {
-        throw error("Både søker og barn kan ikke ha null i periodeTom-dato")
+        error("Både søker og barn kan ikke ha null i periodeTom-dato")
     }
 
     return minOf(periodeTomBarn ?: LocalDate.MAX, periodeTomSoker ?: LocalDate.MAX)
