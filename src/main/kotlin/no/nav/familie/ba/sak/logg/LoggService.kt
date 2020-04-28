@@ -24,6 +24,17 @@ class LoggService(
                               it.visningsnavn)
     }.toMap()
 
+    // TODO skriv om til generell logg for mottatte dokumenter når vi får inn liste av journalposter med dokument type enum
+    fun opprettJournalførtSøknad(behandling: Behandling) {
+        lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.DOKUMENT_JOURNALFØRT,
+                tittel = "Søknad ble journalført",
+                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = ""
+        ))
+    }
+
     fun opprettRegistrertSøknadLogg(behandling: Behandling, søknadFinnesFraFør: Boolean) {
         val tittel = if (!søknadFinnesFraFør) "Søknaden ble registrert" else "Søknaden ble endret"
         lagre(Logg(

@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.oppgave.domene.Oppgave
+import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -42,7 +42,7 @@ class OppgaveServiceTest {
     fun `Opprett oppgave skal lage oppgave med enhetsnummer fra norg2`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
-        every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
+        every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
         every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns listOf(
                 mockk {
@@ -68,7 +68,7 @@ class OppgaveServiceTest {
     fun `Opprett oppgave skal kalle oppretteOppgave selv om den ikke finner en enhetsnummer, men da med uten tildeltEnhetsnummer`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
-        every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
+        every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
         every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
         val slot = slot<OpprettOppgave>()
@@ -92,7 +92,7 @@ class OppgaveServiceTest {
             every { oppgaveId } returns OPPGAVE_ID
         }
         every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns lagTestOppgave()
-        every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
+        every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
         val slot = slot<Long>()
         every { integrasjonClient.ferdigstillOppgave(capture(slot)) } just runs
 
@@ -103,7 +103,7 @@ class OppgaveServiceTest {
     @Test
     fun `Ferdigstill oppgave feiler fordi den ikke finner oppgave på behandlingen`() {
         every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
-        every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
+        every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {
             every { oppgaveId } returns null
         }
@@ -125,8 +125,8 @@ class OppgaveServiceTest {
                 underkategori = BehandlingUnderkategori.ORDINÆR)
     }
 
-    private fun lagTestOppgave(): Oppgave {
-        return Oppgave(behandling = lagTestBehandling(), type = Oppgavetype.BehandleSak, gsakId = OPPGAVE_ID)
+    private fun lagTestOppgave(): DbOppgave {
+        return DbOppgave(behandling = lagTestBehandling(), type = Oppgavetype.BehandleSak, gsakId = OPPGAVE_ID)
     }
 
     companion object {

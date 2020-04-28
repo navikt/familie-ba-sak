@@ -5,8 +5,9 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.Tema
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,11 +29,11 @@ class OppgaveControllerTest {
     fun `finnOppgaverKnyttetTilSaksbehandlerOgEnhet via OppgaveController skal fungere`() {
         every {
             oppgaveService.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any())
-        } returns listOf(OppgaveDto(tema = "BAR"))
+        } returns listOf(Oppgave(tema = Tema.BAR))
         val response = oppgaveController.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(null, null, null, null)
-        val oppgaver = response.body?.data as List<OppgaveDto>
+        val oppgaver = response.body?.data as List<Oppgave>
         Assertions.assertThat(oppgaver).hasSize(1)
-        Assertions.assertThat(oppgaver.first().tema).isEqualTo("BAR")
+        Assertions.assertThat(oppgaver.first().tema).isEqualTo(Tema.BAR)
     }
 
     @Test
