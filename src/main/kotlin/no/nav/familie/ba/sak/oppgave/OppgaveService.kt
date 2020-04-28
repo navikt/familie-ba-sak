@@ -38,7 +38,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                 tema = Tema.BAR,
                 oppgavetype = oppgavetype,
                 fristFerdigstillelse = fristForFerdigstillelse,
-                beskrivelse = lagOppgaveTekst(fagsakId, oppgavetype.toString()),
+                beskrivelse = lagOppgaveTekst(fagsakId),
                 enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
                 behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode
         )
@@ -72,13 +72,9 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         oppgaveRepository.save(oppgave)
     }
 
-    private fun lagOppgaveTekst(fagsakId: Long, oppgavetype: String): String {
-        //TODO Tekst skal oppdateres når man får et forslag
-        var oppgaveTekst =
-                "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n"
-        oppgaveTekst += "Ny $oppgavetype-oppgave for ordinær barnetrygd \n"
-        oppgaveTekst += "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
-        return oppgaveTekst
+    private fun lagOppgaveTekst(fagsakId: Long): String {
+        return "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
+               "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
     }
 
     fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?,
