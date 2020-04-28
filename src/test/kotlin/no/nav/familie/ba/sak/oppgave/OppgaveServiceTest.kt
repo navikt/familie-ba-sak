@@ -9,12 +9,11 @@ import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.oppgave.domene.Oppgave
+import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakter.felles.oppgave.IdentType
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdent
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
-import no.nav.familie.kontrakter.felles.oppgave.Tema
+import no.nav.familie.kontrakter.felles.oppgave.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -33,6 +32,9 @@ class OppgaveServiceTest {
     @MockK
     lateinit var behandlingRepository: BehandlingRepository
 
+    @MockK
+    lateinit var oppgaveRepository: OppgaveRepository
+
     @InjectMockKs
     lateinit var oppgaveService: OppgaveService
 
@@ -40,21 +42,21 @@ class OppgaveServiceTest {
     fun `Opprett oppgave skal lage oppgave med enhetsnummer fra norg2`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
+        every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
+        every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns listOf(
                 mockk {
                     every { enhetId } returns ENHETSNUMMER
                 }
         )
-        every { integrasjonClient.hentAktørId(FNR) } returns AktørId(
-                AKTØR_ID_INTEGRASJONER)
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
-        oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID)
+        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdent(ident = AKTØR_ID_INTEGRASJONER, type = IdentType.Aktør))
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdent(ident = AKTØR_ID_FAGSAK, type = IdentType.Aktør))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.ORDINÆR_BARNETRYGD.kode)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -66,17 +68,17 @@ class OppgaveServiceTest {
     fun `Opprett oppgave skal kalle oppretteOppgave selv om den ikke finner en enhetsnummer, men da med uten tildeltEnhetsnummer`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
-        every { integrasjonClient.hentAktørId(FNR) } returns AktørId(
-                AKTØR_ID_INTEGRASJONER)
+        every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
+        every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
-        oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID)
+        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
         assertThat(slot.captured.enhetsnummer).isNull()
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdent(ident = AKTØR_ID_INTEGRASJONER, type = IdentType.Aktør))
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdent(ident = AKTØR_ID_FAGSAK, type = IdentType.Aktør))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.ORDINÆR_BARNETRYGD.kode)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -84,36 +86,30 @@ class OppgaveServiceTest {
         assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.nais.adeo.no/fagsak/$FAGSAK_ID")
     }
 
-
-    @Test
-    fun `Opprett oppgave skal kaste Exception hvis det ikke finner en aktør`() {
-        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
-        every { integrasjonClient.hentAktørId(FNR) } throws RuntimeException("aktør")
-        assertThatThrownBy { oppgaveService.opprettOppgaveForNyBehandling(BEHANDLING_ID) }
-                .hasMessage("aktør")
-                .isInstanceOf(java.lang.RuntimeException::class.java)
-    }
-
     @Test
     fun `Ferdigstill oppgave`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {
             every { oppgaveId } returns OPPGAVE_ID
         }
+        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns lagTestOppgave()
+        every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
         val slot = slot<Long>()
         every { integrasjonClient.ferdigstillOppgave(capture(slot)) } just runs
 
-        oppgaveService.ferdigstillOppgave(BEHANDLING_ID)
+        oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
         assertThat(slot.captured).isEqualTo(OPPGAVE_ID.toLong())
     }
 
     @Test
     fun `Ferdigstill oppgave feiler fordi den ikke finner oppgave på behandlingen`() {
+        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
+        every { oppgaveRepository.save(any<Oppgave>()) } returns lagTestOppgave()
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {
             every { oppgaveId } returns null
         }
 
-        assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID) }
-                .hasMessage("Kan ikke finne oppgave for behandlingId $BEHANDLING_ID")
+        assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
+                .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
                 .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
 
@@ -129,6 +125,10 @@ class OppgaveServiceTest {
                 underkategori = BehandlingUnderkategori.ORDINÆR)
     }
 
+    private fun lagTestOppgave(): Oppgave {
+        return Oppgave(behandling = lagTestBehandling(), type = Oppgavetype.BehandleSak, gsakId = OPPGAVE_ID)
+    }
+
     companion object {
         private const val FAGSAK_ID = 10000000L
         private const val BEHANDLING_ID = 20000000L
@@ -136,6 +136,6 @@ class OppgaveServiceTest {
         private const val FNR = "fnr"
         private const val ENHETSNUMMER = "enhet"
         private const val AKTØR_ID_FAGSAK = "0123456789"
-        private const val AKTØR_ID_INTEGRASJONER = "987654321"
+        private val FRIST_FERDIGSTILLELSE_BEH_SAK = LocalDate.now().plusDays(1)
     }
 }

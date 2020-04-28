@@ -8,9 +8,13 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.IverksettMotOppdrag
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class BeslutteVedtak(
@@ -21,8 +25,7 @@ class BeslutteVedtak(
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestBeslutningPåVedtak): StegType {
-        if (behandling.status == BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG ||
-            behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
+        if (behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
             error("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandling.status == BehandlingStatus.IVERKSATT ||
                    behandling.status == BehandlingStatus.FERDIGSTILT) {
@@ -43,11 +46,20 @@ class BeslutteVedtak(
         }
 
         loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, saksbehandlerId, data.begrunnelse)
+        val ferdigstillGodkjenneVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
+        taskRepository.save(ferdigstillGodkjenneVedtakTask)
 
-        return if (data.beslutning.erGodkjent())
+        return if (data.beslutning.erGodkjent()) {
             hentNesteStegForNormalFlyt(behandling)
-        else
+        } else {
+            val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(
+                    behandlingId = behandling.id,
+                    oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                    fristForFerdigstillelse = LocalDate.now()
+            )
+            taskRepository.save(behandleUnderkjentVedtakTask)
             StegType.REGISTRERE_SØKNAD
+        }
     }
 
     override fun stegType(): StegType {

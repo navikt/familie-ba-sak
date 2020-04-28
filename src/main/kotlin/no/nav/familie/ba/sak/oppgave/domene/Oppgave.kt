@@ -1,52 +1,33 @@
 package no.nav.familie.ba.sak.oppgave.domene
 
-import com.fasterxml.jackson.annotation.JsonInclude
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import java.time.LocalDateTime
+import javax.persistence.*
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class OppgaveDto(val id: Long? = null,
-                      val tildeltEnhetsnr: String? = null,
-                      val endretAvEnhetsnr: String? = null,
-                      val opprettetAvEnhetsnr: String? = null,
-                      val journalpostId: String? = null,
-                      val journalpostkilde: String? = null,
-                      val behandlesAvApplikasjon: String? = null,
-                      val saksreferanse: String? = null,
-                      val bnr: String? = null,
-                      val samhandlernr: String? = null,
-                      val aktoerId: String? = null,
-                      val orgnr: String? = null,
-                      val tilordnetRessurs: String? = null,
-                      val beskrivelse: String? = null,
-                      val temagruppe: String? = null,
-                      val tema: String? = null,
-                      val behandlingstema: String? = null,
-                      val oppgavetype: String? = null,
-                      val behandlingstype: String? = null,
-                      val versjon: Int? = null,
-                      val mappeId: Long? = null,
-                      val fristFerdigstillelse: String? = null,
-                      val aktivDato: String? = null,
-                      val opprettetTidspunkt: String? = null,
-                      val opprettetAv: String? = null,
-                      val endretAv: String? = null,
-                      val ferdigstiltTidspunkt: String? = null,
-                      val endretTidspunkt: String? = null,
-                      val prioritet: PrioritetEnum? = null,
-                      val status: StatusEnum? = null,
-                      private var metadata: MutableMap<String, String>? = null)
+@Entity(name = "Oppgave")
+@Table(name = "OPPGAVE")
+data class Oppgave(
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "oppgave_seq_generator")
+        @SequenceGenerator(name = "oppgave_seq_generator", sequenceName = "oppgave_seq", allocationSize = 50)
+        val id: Long = 0,
 
+        @ManyToOne
+        @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
+        val behandling: Behandling,
 
-enum class StatusEnum(private val value: String) {
-    OPPRETTET("OPPRETTET"),
-    AAPNET("AAPNET"),
-    UNDER_BEHANDLING("UNDER_BEHANDLING"),
-    FERDIGSTILT("FERDIGSTILT"),
-    FEILREGISTRERT("FEILREGISTRERT");
+        @Column(name = "gsak_id", nullable = false, updatable = false)
+        val gsakId: String,
 
-}
+        @Enumerated(EnumType.STRING)
+        @Column(name = "type", nullable = false, updatable = false)
+        val type: Oppgavetype,
 
-enum class PrioritetEnum(private val value: String) {
-    HOY("HOY"),
-    NORM("NORM"),
-    LAV("LAV");
-}
+        @Column(name = "opprettet_tid", nullable = false, updatable = false)
+        val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
+
+        @Column(name = "ferdigstilt", nullable = false, updatable = true)
+        var erFerdigstilt: Boolean = false
+)
+

@@ -54,11 +54,6 @@ class IverksettMotOppdrag(
                 properties = task.metadata
         )
         taskRepository.save(nyTask)
-
-        if (!behandling.oppgaveId.isNullOrBlank()) {
-            val ferdigstillTask = FerdigstillOppgave.opprettTask(iverksettingTask.behandlingsId, task.metadata)
-            taskRepository.save(ferdigstillTask)
-        }
     }
 
     companion object {

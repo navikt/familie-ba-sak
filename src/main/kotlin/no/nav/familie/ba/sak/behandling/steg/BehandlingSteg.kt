@@ -50,7 +50,6 @@ enum class StegType(private val rekkefølge: Int, val tillattFor: List<Behandler
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(
                     BehandlingStatus.GODKJENT,
-                    BehandlingStatus.LAGT_PA_KO_FOR_SENDING_MOT_OPPDRAG,
                     BehandlingStatus.SENDT_TIL_IVERKSETTING,
                     BehandlingStatus.IVERKSATT)),
     BEHANDLING_AVSLUTTET(
