@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
+import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
+import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.http.client.AbstractRestClient
@@ -322,6 +324,30 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 onFailure = {
                     IntegrasjonException("Kall mot integrasjon feilet ved oppdaterJournalpost", it, uri, request.bruker.id)
                 }
+        )
+    }
+
+    fun leggTilLogiskVedlegg(request: LogiskVedleggRequest, dokumentinfoId: String): LogiskVedleggResponse {
+       val uri = URI.create("$integrasjonUri/arkiv/v2/dokument/$dokumentinfoId/logiskVedlegg")
+       return exchange(
+           networkRequest = {
+               postForEntity<Ressurs<LogiskVedleggResponse>>(uri, request)
+           },
+           onFailure = {
+               IntegrasjonException("Kall mot integrasjon feilet ved leggTilLogiskVedlegg", it, uri, null)
+           }
+       )
+    }
+
+    fun slettLogiskVedlegg(logiskVedleggId: String, dokumentinfoId: String): LogiskVedleggResponse {
+        val uri = URI.create("$integrasjonUri/arkiv/v2/dokument/$dokumentinfoId/logiskVedlegg/$logiskVedleggId")
+        return exchange(
+            networkRequest = {
+                deleteForEntity<Ressurs<LogiskVedleggResponse>>(uri)
+            },
+            onFailure = {
+                IntegrasjonException("Kall mot integrasjon feilet ved slettLogiskVedlegg", it, uri, null)
+            }
         )
     }
 
