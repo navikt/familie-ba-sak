@@ -131,7 +131,6 @@ class BehandlingIntegrationTest {
     @Test
     fun `Kast feil om man lager ny behandling på fagsak som har behandling som skal godkjennes`() {
         val morId = randomFnr()
-        val barnId = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId))

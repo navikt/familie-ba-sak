@@ -3,8 +3,7 @@ package no.nav.familie.ba.sak.oppgave
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.oppgave.domene.Oppgave
-import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
+import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.*
@@ -20,12 +19,15 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService) {
 
-    fun opprettOppgave(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate, enhetId: String? = null): String {
+    fun opprettOppgave(behandlingId: Long,
+                       oppgavetype: Oppgavetype,
+                       fristForFerdigstillelse: LocalDate,
+                       enhetId: String? = null): String {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
         if (oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling) !== null
-                && oppgavetype !== Oppgavetype.Journalføring) {
+            && oppgavetype !== Oppgavetype.Journalføring) {
             error("Det finnes allerede en oppgave av typen $oppgavetype på behandling ${behandling.id} som ikke er ferdigstilt. Kan ikke opprette ny oppgave")
         }
         val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
@@ -43,18 +45,20 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
         val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
 
-        val oppgave = Oppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = oppgavetype)
+        val oppgave = DbOppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = oppgavetype)
         oppgaveRepository.save(oppgave)
         return opprettetOppgaveId
     }
 
-    fun hentOppgave(oppgaveId: Long): Ressurs<OppgaveDto> {
+    fun hentOppgave(oppgaveId: Long): Ressurs<Oppgave> {
         return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }
 
     fun ferdigstillOppgave(behandlingId: Long, oppgavetype: Oppgavetype) {
-        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandlingRepository.finnBehandling(behandlingId))
-                ?: error("Finner ikke oppgave for behandling $behandlingId")
+        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype,
+                                                                                         behandlingRepository.finnBehandling(
+                                                                                                 behandlingId))
+                      ?: error("Finner ikke oppgave for behandling $behandlingId")
         integrasjonClient.ferdigstillOppgave(oppgave.gsakId.toLong())
 
         oppgave.erFerdigstilt = true
@@ -74,7 +78,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                                                    oppgavetype: String?,
                                                    enhet: String?,
                                                    saksbehandler: String?)
-            : List<OppgaveDto> {
+            : List<Oppgave> {
 
         return integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)
     }

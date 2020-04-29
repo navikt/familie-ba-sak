@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import no.nav.familie.ba.sak.integrasjoner.domene.*
-import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
-import no.nav.familie.ba.sak.oppgave.domene.PrioritetEnum
-import no.nav.familie.ba.sak.oppgave.domene.StatusEnum
+import no.nav.familie.ba.sak.journalføring.domene.Sakstype
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.kontrakter.felles.oppgave.*
 import java.time.LocalDate
 
@@ -20,7 +19,14 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
             dokumenter = listOf(DokumentInfo(tittel = "Søknad om barnetrygd",
                                              brevkode = "mock",
                                              dokumentstatus = null,
-                                             dokumentvarianter = emptyList()))
+                                             dokumentvarianter = emptyList(),
+                                             dokumentInfoId = "1",
+                                             logiskeVedlegg = emptyList())),
+            sak = Sak(arkivsaksnummer = "",
+                      arkivsaksystem = "GSAK",
+                      sakstype = Sakstype.FAGSAK.name,
+                      fagsakId = null,
+                      fagsaksystem = FAGSYSTEM)
     )
 }
 
@@ -35,24 +41,24 @@ fun lagTestOppgave(): OpprettOppgave {
                           behandlingstema = "behandlingstema")
 }
 
-fun lagTestOppgaveDTO(oppgaveId: Long): OppgaveDto {
-    return OppgaveDto(id = oppgaveId,
-                      aktoerId = "1234",
-                      journalpostId = "1234",
-                      tildeltEnhetsnr = "4820",
-                      behandlesAvApplikasjon = "FS22",
-                      beskrivelse = "Beskrivelse for oppgave",
-                      tema = Tema.BAR.name,
-                      oppgavetype = Oppgavetype.Journalføring.name,
-                      opprettetTidspunkt = LocalDate.of(
-                              2020,
-                              1,
-                              1).toString(),
-                      fristFerdigstillelse = LocalDate.of(
-                              2020,
-                              2,
-                              1).toString(),
-                      prioritet = PrioritetEnum.NORM,
-                      status = StatusEnum.OPPRETTET
+fun lagTestOppgaveDTO(oppgaveId: Long): Oppgave {
+    return Oppgave(id = oppgaveId,
+                   aktoerId = "1234",
+                   journalpostId = "1234",
+                   tildeltEnhetsnr = "4820",
+                   behandlesAvApplikasjon = "FS22",
+                   beskrivelse = "Beskrivelse for oppgave",
+                   tema = Tema.BAR,
+                   oppgavetype = Oppgavetype.Journalføring.name,
+                   opprettetTidspunkt = LocalDate.of(
+                           2020,
+                           1,
+                           1).toString(),
+                   fristFerdigstillelse = LocalDate.of(
+                           2020,
+                           2,
+                           1).toString(),
+                   prioritet = PrioritetEnum.NORM,
+                   status = StatusEnum.OPPRETTET
     )
 }
