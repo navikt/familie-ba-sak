@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDLEGG_DOKUMENT_TYPE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_DOKUMENT_TYPE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
@@ -322,7 +323,8 @@ class IntergrasjonTjenesteTest {
                                                                    dokumentType = VEDTAK_DOKUMENT_TYPE),
                                                           Dokument(dokument = vedleggPdf!!,
                                                                    filType = FilType.PDFA,
-                                                                   dokumentType = VEDLEGG_DOKUMENT_TYPE)))
+                                                                   dokumentType = VEDLEGG_DOKUMENT_TYPE,
+                                                                   tittel = VEDTAK_VEDLEGG_TITTEL)))
     }
 
     companion object {

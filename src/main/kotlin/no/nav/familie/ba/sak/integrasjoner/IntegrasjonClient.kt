@@ -308,7 +308,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         return Result.runCatching {
             val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
             val dokumenter = listOf(Dokument(pdfByteArray, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE),
-                                    Dokument(vedleggPdf, FilType.PDFA, dokumentType = VEDLEGG_DOKUMENT_TYPE))
+                                    Dokument(vedleggPdf, FilType.PDFA, dokumentType = VEDLEGG_DOKUMENT_TYPE, tittel = VEDTAK_VEDLEGG_TITTEL))
             val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, "9999")
             val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
@@ -369,6 +369,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
         const val VEDLEGG_DOKUMENT_TYPE = "BARNETRYGD_VEDLEGG"
         const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
+        const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"
         private const val PATH_TILGANGER = "tilgang/personer"
 
         fun hentVedlegg(vedleggsnavn: String) : ByteArray? {
