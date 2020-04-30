@@ -43,7 +43,7 @@ class SøknadGrunnlagController(
                 .fold(
                         onSuccess = {
                             when (it) {
-                                null -> return notFound("Fant kke søknadsgrunnlag å behandling")
+                                null -> return notFound("Fant ikke søknadsgrunnlag å behandling")
                                 else -> ResponseEntity.ok(Ressurs.success(it.hentSøknadDto()))
                             }
                         },
