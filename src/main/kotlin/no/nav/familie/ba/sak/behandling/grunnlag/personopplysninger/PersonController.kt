@@ -25,7 +25,6 @@ class PersonController(private val integrasjonClient: IntegrasjonClient) {
     @GetMapping
     @PersontilgangConstraint
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
-        print("HEEEE")
         return Result.runCatching {
             integrasjonClient.hentPersoninfoFor(personIdent)
         }
