@@ -35,7 +35,7 @@ fun lagTestOppgave(): OpprettOppgave {
                           behandlingstema = "behandlingstema")
 }
 
-fun lagTestOppgaveDTO(oppgaveId: Long): OppgaveDto {
+fun lagTestOppgaveDTO(oppgaveId: Long, oppgavetype: Oppgavetype = Oppgavetype.Journalføring): OppgaveDto {
     return OppgaveDto(id = oppgaveId,
                       aktoerId = "1234",
                       journalpostId = "1234",
@@ -43,7 +43,7 @@ fun lagTestOppgaveDTO(oppgaveId: Long): OppgaveDto {
                       behandlesAvApplikasjon = "FS22",
                       beskrivelse = "Beskrivelse for oppgave",
                       tema = Tema.BAR.name,
-                      oppgavetype = Oppgavetype.Journalføring.name,
+                      oppgavetype = oppgavetype.value,
                       opprettetTidspunkt = LocalDate.of(
                               2020,
                               1,

@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -40,10 +41,13 @@ class ClientMocks {
                 success(lagTestOppgaveDTO(1L))
 
         every { mockIntegrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any()) } returns
-                listOf(lagTestOppgaveDTO(1L))
+                listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak))
 
         every { mockIntegrasjonClient.opprettOppgave(any()) } returns
             "12345678"
+
+        every { mockIntegrasjonClient.fordelOppgave(any(), any()) } returns
+                "12345678"
 
         every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")

@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -34,10 +35,20 @@ class FagsakService(
 
     @Transactional
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
-        val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(fagsakRequest.personIdent))
-                     ?: Fagsak(aktørId = integrasjonClient.hentAktørId(fagsakRequest.personIdent),
-                               personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
-
+        val fagsak: Fagsak
+        if (fagsakRequest.personIdent !== null) {
+            fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(fagsakRequest.personIdent))
+                    ?: Fagsak(aktørId = integrasjonClient.hentAktørId(fagsakRequest.personIdent),
+                            personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
+        } else if (fagsakRequest.aktørId !== null) {
+            fagsak = fagsakRepository.finnFagsakForAktørId(aktørId = AktørId(fagsakRequest.aktørId))
+                    ?: Fagsak(aktørId = AktørId(fagsakRequest.aktørId),
+                            personIdent = integrasjonClient.hentPersonIdent(fagsakRequest.aktørId)
+                                    ?: error("Kunne ikke opprette fagsak. Finner ikke personident for gitt aktørid")
+                    ).also { lagre(it) }
+        } else {
+            error("Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak")
+        }
         return hentRestFagsak(fagsakId = fagsak.id)
     }
 
