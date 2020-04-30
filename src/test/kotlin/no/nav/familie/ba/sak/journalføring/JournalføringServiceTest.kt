@@ -22,6 +22,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Sak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDateTime
 
 @ExtendWith(MockKExtension::class)
 class JournalføringServiceTest {
@@ -59,7 +60,8 @@ class JournalføringServiceTest {
                                                            arkivsaksnummer = null,
                                                            arkivsaksystem = "GSAK",
                                                            fagsaksystem = FAGSYSTEM,
-                                                           sakstype = Sakstype.FAGSAK.name))
+                                                           sakstype = Sakstype.FAGSAK.name),
+                                                 mottattDato = LocalDateTime.now())
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
 
         assertThat(slot.captured.sak?.fagsakId).isEqualTo(fagsakId)
@@ -80,7 +82,8 @@ class JournalføringServiceTest {
         every { stegService.håndterNyBehandling(any()) } returns lagBehandling()
 
         val request = OppdaterJournalpostRequest(knyttTilFagsak = false,
-                                                 bruker = Bruker(id = "12345678910", type = BrukerIdType.FNR))
+                                                 bruker = Bruker(id = "12345678910", type = BrukerIdType.FNR),
+                                                 mottattDato = LocalDateTime.now())
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
 
         assertThat(slot.captured.sak?.fagsakId).isEqualTo(null)

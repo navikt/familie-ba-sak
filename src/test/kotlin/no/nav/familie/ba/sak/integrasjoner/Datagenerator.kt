@@ -21,7 +21,7 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
                                              dokumentstatus = null,
                                              dokumentvarianter = emptyList(),
                                              dokumentInfoId = "1",
-                                             logiskeVedlegg = emptyList())),
+                                             logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")))),
             sak = Sak(arkivsaksnummer = "",
                       arkivsaksystem = "GSAK",
                       sakstype = Sakstype.FAGSAK.name,
