@@ -36,6 +36,7 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
+import java.io.IOException
 import java.net.URI
 
 @Component
@@ -306,7 +307,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
 
         return Result.runCatching {
-            val dokumenter = listOf(Dokument(pdfByteArray, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE))
+            val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
+            val dokumenter = listOf(Dokument(pdfByteArray, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE),
+                                    Dokument(vedleggPdf, FilType.PDFA, dokumentType = VEDLEGG_DOKUMENT_TYPE))
             val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, "9999")
             val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
@@ -365,6 +368,13 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)
         const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
+        const val VEDLEGG_DOKUMENT_TYPE = "BARNETRYGD_VEDLEGG"
+        const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
         private const val PATH_TILGANGER = "tilgang/personer"
+
+        fun hentVedlegg(vedleggsnavn: String) : ByteArray? {
+            val inputStream = this::class.java.classLoader.getResourceAsStream("dokumenter/$vedleggsnavn")
+            return inputStream?.readAllBytes()
+        }
     }
 }
