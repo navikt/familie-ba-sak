@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.oppgave.domene
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.RestPersonInfo
-import no.nav.familie.ba.sak.integrasjoner.domene.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 
 data class DataForManuellJournalføring(
-        val oppgave: OppgaveDto,
+        val oppgave: Oppgave,
         val person: RestPersonInfo?,
         val journalpost: Journalpost?
 )

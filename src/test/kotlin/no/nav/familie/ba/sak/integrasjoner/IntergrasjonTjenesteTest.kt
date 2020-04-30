@@ -3,10 +3,13 @@ package no.nav.familie.ba.sak.integrasjoner
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDLEGG_DOKUMENT_TYPE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_DOKUMENT_TYPE
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -15,6 +18,7 @@ import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.arkivering.Dokument
 import no.nav.familie.kontrakter.felles.arkivering.FilType
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
@@ -84,9 +88,9 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `finnOppgaverKnyttetTilSaksbehandlerOgEnhet skal returnere en liste av oppgaver`() {
-        val oppgave = OppgaveDto()
+        val oppgave = Oppgave()
         stubFor(get("/api/oppgave?tema=BAR&enhet=4820&saksbehandler=Z012345").willReturn(okJson(objectMapper.writeValueAsString(
-                success(listOf<OppgaveDto>(oppgave))))))
+                success(listOf(oppgave))))))
 
         val oppgaver = integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(null, null, "4820", "Z012345")
         assertThat(oppgaver).hasSize(1)
@@ -309,13 +313,18 @@ class IntergrasjonTjenesteTest {
     }
 
     private fun forventetRequestArkiverDokument(): ArkiverDokumentRequest {
+        val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
         return ArkiverDokumentRequest(fnr = mockFnr,
                                       forsøkFerdigstill = true,
                                       fagsakId = mockFagsakId,
                                       journalførendeEnhet = "9999",
                                       dokumenter = listOf(Dokument(dokument = mockPdf,
                                                                    filType = FilType.PDFA,
-                                                                   dokumentType = VEDTAK_DOKUMENT_TYPE)))
+                                                                   dokumentType = VEDTAK_DOKUMENT_TYPE),
+                                                          Dokument(dokument = vedleggPdf!!,
+                                                                   filType = FilType.PDFA,
+                                                                   dokumentType = VEDLEGG_DOKUMENT_TYPE,
+                                                                   tittel = VEDTAK_VEDLEGG_TITTEL)))
     }
 
     companion object {

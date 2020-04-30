@@ -119,14 +119,17 @@ class StegService(
     }
 
     // Generelle stegmetoder
-    private fun håndterSteg(behandling: Behandling, behandlingSteg: BehandlingSteg<*>, utførendeSteg: () -> StegType): Behandling {
+    private fun håndterSteg(behandling: Behandling,
+                            behandlingSteg: BehandlingSteg<*>,
+                            utførendeSteg: () -> StegType): Behandling {
         try {
             if (behandling.steg == sisteSteg) {
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
             if (behandlingSteg.stegType().kommerEtter(behandling.steg)) {
-                error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${behandlingSteg.stegType().displayName()}'," +
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${behandlingSteg.stegType()
+                        .displayName()}'," +
                       " men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
@@ -139,7 +142,8 @@ class StegService(
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
-                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${behandlingSteg.stegType().displayName()} pga manglende rolle.")
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${behandlingSteg.stegType()
+                        .displayName()} pga manglende rolle.")
             }
 
             val nesteSteg = utførendeSteg()

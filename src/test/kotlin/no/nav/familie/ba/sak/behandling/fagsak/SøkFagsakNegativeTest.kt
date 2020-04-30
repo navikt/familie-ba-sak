@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
-import io.mockk.every
-import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -17,7 +15,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.HttpClientErrorException
-import java.util.*
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -36,29 +33,29 @@ class SøkFagsakNegativeTest {
 
     @Test
     fun `test å søke fagsak deltager med ugyldig fnr`() {
-        val ukjentId= "43125678910"
-        val feilId= "41235678910"
+        val ukjentId = "43125678910"
+        val feilId = "41235678910"
 
         assertThrows<HttpClientErrorException> {
             fagsakService.hentFagsakDeltager(ukjentId)
         }
 
-        assertThrows<IllegalStateException>{
+        assertThrows<IllegalStateException> {
             fagsakService.hentFagsakDeltager(feilId)
         }
     }
 
     @Test
-    fun `test generer riktig ressur ved feil`(){
-        val ukjentId= "43125678910"
-        val feilId= "41235678910"
+    fun `test generer riktig ressur ved feil`() {
+        val ukjentId = "43125678910"
+        val feilId = "41235678910"
 
-        val resEntity1= fagsakController.søkFagsak(RestSøkParam(ukjentId))
-        assertEquals(HttpStatus.OK, resEntity1.statusCode)
-        val ress= resEntity1.body as Ressurs<List<RestFagsakDeltager>>
-        assertEquals(Ressurs.Status.FEILET, ress.status)
+        val resEntity1 = fagsakController.søkFagsak(RestSøkParam(ukjentId))
+        assertThat(HttpStatus.OK).isEqualTo(resEntity1.statusCode)
+        val ress = resEntity1.body as Ressurs<List<RestFagsakDeltager>>
+        assertThat(Ressurs.Status.FEILET).isEqualTo(ress.status)
 
-        val resEntity2= fagsakController.søkFagsak(RestSøkParam(feilId))
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, resEntity2.statusCode)
+        val resEntity2 = fagsakController.søkFagsak(RestSøkParam(feilId))
+        assertThat(HttpStatus.INTERNAL_SERVER_ERROR).isEqualTo(resEntity2.statusCode)
     }
 }

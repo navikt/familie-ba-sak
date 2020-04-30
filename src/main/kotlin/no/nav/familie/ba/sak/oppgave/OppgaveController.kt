@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
-import no.nav.familie.ba.sak.oppgave.domene.OppgaveDto
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -24,14 +24,14 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
                                                    @RequestParam("oppgavetype", required = false) oppgavetype: String?,
                                                    @RequestParam("enhet", required = false) enhet: String?,
                                                    @RequestParam("saksbehandler", required = false) saksbehandler: String?)
-            : ResponseEntity<Ressurs<List<OppgaveDto>>> {
+            : ResponseEntity<Ressurs<List<Oppgave>>> {
 
         if (!behandlingstema.isNullOrEmpty() && OppgaveService.Behandlingstema.values().all { it.kode != behandlingstema }) {
             return badRequest("Ugyldig behandlingstema", null)
         }
 
         return try {
-            val oppgaver: List<OppgaveDto> =
+            val oppgaver: List<Oppgave> =
                     oppgaveService.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)
             ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
         } catch (e: Throwable) {
@@ -72,7 +72,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
 
             Ressurs.success(DataForManuellJournalføring(
                     oppgave = oppgave,
-                    journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId).data
+                    journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!).data
                                                                                ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
                     person = if (oppgave.aktoerId == null) null else {
                         val personIdent = integrasjonClient.hentPersonIdent(oppgave.aktoerId)?.ident
@@ -83,7 +83,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
             ))
         }.fold(
                 onSuccess = { return ResponseEntity.ok().body(it) },
-                onFailure = { illegalState("Ukjent feil ved henting av oppgave", it) }
+                onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
         )
     }
 }

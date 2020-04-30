@@ -1,18 +1,29 @@
 package no.nav.familie.ba.sak.journalføring
 
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.just
+import io.mockk.runs
+import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.journalføring.domene.*
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
+import no.nav.familie.ba.sak.journalføring.domene.Sakstype
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.kontrakter.felles.journalpost.Bruker
+import no.nav.familie.kontrakter.felles.journalpost.BrukerIdType
+import no.nav.familie.kontrakter.felles.journalpost.Sak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDateTime
 
 @ExtendWith(MockKExtension::class)
 class JournalføringServiceTest {
@@ -29,6 +40,9 @@ class JournalføringServiceTest {
     @MockK
     lateinit var oppgaveService: OppgaveService
 
+    @MockK
+    lateinit var loggService: LoggService
+
     @InjectMockKs
     lateinit var journalføringService: JournalføringService
 
@@ -43,10 +57,16 @@ class JournalføringServiceTest {
         every { integrasjonClient.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any()) } returns ""
         every { stegService.håndterNyBehandling(any()) } returns lagBehandling()
+        every { loggService.opprettMottattDokument(any(), any(), any()) } just runs
 
         val request = OppdaterJournalpostRequest(knyttTilFagsak = true,
-                                                 bruker = Bruker(id = "12345678910"),
-                                                 sak = Sak(fagsakId = fagsakId))
+                                                 bruker = Bruker(id = "12345678910", type = BrukerIdType.FNR),
+                                                 sak = Sak(fagsakId = fagsakId,
+                                                           arkivsaksnummer = null,
+                                                           arkivsaksystem = "GSAK",
+                                                           fagsaksystem = FAGSYSTEM,
+                                                           sakstype = Sakstype.FAGSAK.name),
+                                                 mottattDato = LocalDateTime.now())
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
 
         assertThat(slot.captured.sak?.fagsakId).isEqualTo(fagsakId)
@@ -67,7 +87,8 @@ class JournalføringServiceTest {
         every { stegService.håndterNyBehandling(any()) } returns lagBehandling()
 
         val request = OppdaterJournalpostRequest(knyttTilFagsak = false,
-            bruker = Bruker(id = "12345678910"))
+                                                 bruker = Bruker(id = "12345678910", type = BrukerIdType.FNR),
+                                                 mottattDato = LocalDateTime.now())
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
 
         assertThat(slot.captured.sak?.fagsakId).isEqualTo(null)
