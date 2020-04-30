@@ -2,23 +2,17 @@ package no.nav.familie.ba.sak.journalføring.domene
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
-import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 import java.time.LocalDateTime
 
-
-// TODO vurdere å fjerne denne og lage en for oppdatering mot familie-integrasjoner og en mellom frontend og backend
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class OppdaterJournalpostRequest(val avsender: AvsenderMottaker? = null,
-                                      val avsenderMottaker: AvsenderMottaker? = avsender,  // annerledes navngivning i backend, tilpasset både inngående og utgående journalposter
+data class OppdaterJournalpostRequest(val avsenderMottaker: AvsenderMottaker?,
                                       val bruker: Bruker,
                                       val tema: String? = "BAR",
                                       val sak: Sak? = null,
                                       val dokumenter: List<DokumentInfo>? = null,
                                       val dokumentType: String? = null,
-                                      val datoMottatt: String,
-                                      val logiskeVedlegg: List<String>,
-                                      val knyttTilFagsak: Boolean)
+                                      val datoMottatt: String)
 
 data class AvsenderMottaker(val id: String,
                             val idType: IdType? = IdType.FNR,
