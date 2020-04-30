@@ -68,7 +68,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                 null -> opprettOppgaveUtenBehandling(fagsak, request, behandlendeEnhet)
                 else -> {
                     loggService.opprettMottattDokument(behandling = behandling,
-                                                       datoMottatt = request.mottattDato,
+                                                       datoMottatt = request.datoMottatt,
                                                        dokumentType = DokumentType.SØKNAD)
                     opprettOppgaveFor(behandling, request.navIdent)
                 }
