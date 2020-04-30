@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.dokument
 
-import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import io.mockk.mockk
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
+import no.nav.familie.ba.sak.common.lagVedtak
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -23,7 +22,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
 @Tag("integration")
 class DokGenKlientIntegrationTest {
 
-    class DokGenTestKlient : DokGenKlient("mock_dokgen_uri", RestTemplate()) {
+    class DokGenTestKlient : DokGenKlient("mock_dokgen_uri", RestTemplate(), mockk()) {
         override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
             if (request.url.path.matches(Regex(".+create-markdown"))) {
                 assert(request.body is String)
@@ -50,7 +49,7 @@ class DokGenKlientIntegrationTest {
         }
     }
 
-    class DokGenTestNullBodyKlient : DokGenKlient("mock_dokgen_uri", RestTemplate()) {
+    class DokGenTestNullBodyKlient : DokGenKlient("mock_dokgen_uri", RestTemplate(), mockk()) {
         override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
             return ResponseEntity<T>(null, HttpStatus.OK)
         }
@@ -60,16 +59,8 @@ class DokGenKlientIntegrationTest {
     @Tag("integration")
     fun `Test generer markdown`() {
         val dokgen = DokGenTestKlient()
-        val markdown = dokgen.hentStønadBrevMarkdown(Behandling(
-                id = 1,
-                fagsak = Fagsak(personIdent = PersonIdent(""),
-                                aktørId = AktørId("1")),
-                journalpostID = "invalid",
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                aktiv = true,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR
-        ), behandlingResultatType = BehandlingResultatType.INNVILGET, ansvarligSaksbehandler = "whoknows")
+        val markdown = dokgen.hentStønadBrevMarkdown(vedtak = lagVedtak(),
+                                                     behandlingResultatType = BehandlingResultatType.INNVILGET)
         assert(markdown == "mockup_response")
     }
 
@@ -96,16 +87,8 @@ class DokGenKlientIntegrationTest {
         val html = dokgen.lagHtmlFraMarkdown("Innvilget", "markdown")
         assert(html.isEmpty())
 
-        val markdown = dokgen.hentStønadBrevMarkdown(Behandling(
-                id = 1,
-                fagsak = Fagsak(personIdent = PersonIdent(""),
-                                aktørId = AktørId("1")),
-                journalpostID = "invalid",
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                aktiv = true,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR
-        ), behandlingResultatType = BehandlingResultatType.INNVILGET, ansvarligSaksbehandler = "whoknows")
+        val markdown =
+                dokgen.hentStønadBrevMarkdown(vedtak = lagVedtak(), behandlingResultatType = BehandlingResultatType.INNVILGET)
         assert(markdown.isEmpty())
     }
 }

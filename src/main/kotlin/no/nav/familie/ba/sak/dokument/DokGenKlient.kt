@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.dokument
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
-import no.nav.familie.ba.sak.behandling.restDomene.DokumentRequest
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.dokument.domene.DokumentRequest
+import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
@@ -24,62 +26,26 @@ import java.net.URI
 @Profile("!mock-dokgen-java")
 class DokGenKlient(
         @Value("\${FAMILIE_BA_DOKGEN_API_URL}") private val dokgenServiceUri: String,
-        private val restTemplate: RestTemplate
+        private val restTemplate: RestTemplate,
+        private val malerService: MalerService
 ) {
 
-    fun hentStønadBrevMarkdown(behandling: Behandling,
-                               behandlingResultatType: BehandlingResultatType,
-                               ansvarligSaksbehandler: String): String {
-        val fletteFelter = mapTilBrevfelter(behandling, behandlingResultatType, ansvarligSaksbehandler)
-        return hentMarkdownForMal(behandlingResultatType.brevMal, fletteFelter)
+    fun hentStønadBrevMarkdown(
+            vedtak: Vedtak,
+            søknad: SøknadDTO? = null,
+            behandlingResultatType: BehandlingResultatType): String {
+
+        val malMedData = malerService.mapTilBrevfelter(vedtak,
+                                                       søknad,
+                                                       behandlingResultatType
+        )
+        return hentMarkdownForMal(malMedData)
     }
 
-    private fun mapTilBrevfelter(behandling: Behandling,
-                                 behandlingResultatType: BehandlingResultatType,
-                                 ansvarligSaksbehandler: String): String = when (behandlingResultatType) {
-        BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(behandling, ansvarligSaksbehandler)
-        BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(behandling)
-        BehandlingResultatType.OPPHØRT -> mapTilOpphørtBrevFelter(behandling)
-        else -> error("Invalid/unsupported behandling resultat type")
-    }
-
-    private fun mapTilOpphørtBrevFelter(behandling: Behandling): String {
-        return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
-               "\"navn\": \"No Name\",\n" +
-               "\"tdato\": \"01.01.01\",\n" +
-               "\"hjemmel\": \"\",\n" +
-               "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
-    }
-
-    private fun mapTilInnvilgetBrevFelter(behandling: Behandling,
-                                          ansvarligSaksbehandler: String): String {
-        val startDato = "februar 2020" // TODO hent fra beregningen
-
-        // TODO hent fra dokgen (/template/{templateName}/schema)
-        // TODO Bytt ut hardkodede felter med faktiske verdier
-        return "{\"belop\": 123,\n" +
-               "\"startDato\": \"$startDato\",\n" +
-               "\"etterbetaling\": false,\n" +
-               "\"enhet\": \"enhet\",\n" +
-               "\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
-               "\"fodselsdato\": \"24.12.19\",\n" +
-               "\"saksbehandler\": \"${ansvarligSaksbehandler}\", \n" +
-               "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
-    }
-
-    private fun mapTilAvslagBrevFelter(behandling: Behandling): String {
-
-        //TODO: sett navn, hjemmel og firtekst
-        return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
-               "\"navn\": \"No Name\",\n" +
-               "\"hjemmel\": \"\",\n" +
-               "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
-    }
-
-    private fun hentMarkdownForMal(malNavn: String, fletteFelter: String): String {
-        val url = URI.create("$dokgenServiceUri/template/$malNavn/create-markdown")
-        LOG.info("hent markdown fra: "+ url)
-        val response = utførRequest(lagPostRequest(url, fletteFelter), String::class.java)
+    private fun hentMarkdownForMal(malMedData: MalMedData): String {
+        val url = URI.create("$dokgenServiceUri/template/${malMedData.mal}/create-markdown")
+        LOG.info("hent markdown fra: " + url)
+        val response = utførRequest(lagPostRequest(url, malMedData.fletteFelter), String::class.java)
         return response.body.orEmpty()
     }
 

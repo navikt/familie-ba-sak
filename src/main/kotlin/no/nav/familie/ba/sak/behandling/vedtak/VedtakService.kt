@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
@@ -19,6 +21,7 @@ import java.time.LocalDate
 class VedtakService(private val behandlingService: BehandlingService,
                     private val behandlingRepository: BehandlingRepository,
                     private val behandlingResultatService: BehandlingResultatService,
+                    private val søknadGrunnlagService: SøknadGrunnlagService,
                     private val vedtakRepository: VedtakRepository,
                     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokGenKlient: DokGenKlient,
@@ -34,7 +37,8 @@ class VedtakService(private val behandlingService: BehandlingService,
         val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
                               ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling $gjeldendeBehandlingsId")
 
-        val gjeldendeAndelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(gjeldendeBehandlingsId)
+        val gjeldendeAndelerTilkjentYtelse =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(gjeldendeBehandlingsId)
         if (gjeldendeAndelerTilkjentYtelse.isEmpty()) {
             return Ressurs.failure(
                     "Fant ikke andeler tilkjent ytelse tilknyttet behandling $gjeldendeBehandlingsId")
@@ -85,20 +89,22 @@ class VedtakService(private val behandlingService: BehandlingService,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = forrigeVedtak?.id,
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) LocalDate.now()
-                        .førsteDagINesteMåned() else null,
-                stønadBrevMarkdown = if (behandlingResultatType != BehandlingResultatType.INNVILGET) Result.runCatching {
-                    dokGenKlient.hentStønadBrevMarkdown(behandling,
-                                                        behandlingResultatType,
-                                                        ansvarligSaksbehandler)
-                }
-                        .fold(
-                                onSuccess = { it },
-                                onFailure = {
-                                    LOG.error("dokgen feil: ", it as Exception)
-                                    error("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.")
-                                }
-                        ) else ""
+                        .førsteDagINesteMåned() else null
+
         )
+
+        vedtak.stønadBrevMarkdown = if (behandlingResultatType != BehandlingResultatType.INNVILGET) Result.runCatching {
+            dokGenKlient.hentStønadBrevMarkdown(
+                    behandlingResultatType = behandlingResultatType,
+                    vedtak = vedtak)
+        }
+                .fold(
+                        onSuccess = { it },
+                        onFailure = {
+                            LOG.error("dokgen feil: ", it as Exception)
+                            error("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.")
+                        }
+                ) else ""
 
         return lagreOgDeaktiverGammel(vedtak)
     }
@@ -109,16 +115,19 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(vedtak.behandling.id)
         vedtak.stønadBrevMarkdown = Result.runCatching {
-            dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
+            val søknad: SøknadDTO = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
+                                    ?: error("Finner ikke søknad på behandling")
+
+            dokGenKlient.hentStønadBrevMarkdown(
+                    vedtak = vedtak,
                     behandlingResultatType = behandlingResultatType,
-                    ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler
+                    søknad = søknad
             )
         }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
-                            return Ressurs.failure("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.",
-                                    e)
+                            error("Klart ikke å oppdatere vedtak med vedtaksbrev på grunn av feil fra dokumentgenerering.")
                         }
                 )
 
@@ -154,6 +163,18 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter vedtak $vedtak")
         return vedtakRepository.save(vedtak)
+    }
+
+    fun lagreEllerOppdater(vedtak: Vedtak): Vedtak {
+        return vedtakRepository.save(vedtak)
+    }
+
+    fun godkjennVedtak(vedtak: Vedtak) {
+        vedtak.ansvarligBeslutter = SikkerhetContext.hentSaksbehandlerNavn()
+        vedtak.vedtaksdato = LocalDate.now()
+
+        LOG.info("${SikkerhetContext.hentSaksbehandler()} godkjenner vedtak $vedtak")
+        lagreEllerOppdater(vedtak)
     }
 
     companion object {

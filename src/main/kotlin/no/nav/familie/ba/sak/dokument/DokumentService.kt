@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class DokumentService(
         private val vedtakService: VedtakService,
+        private val søknadGrunnlagService: SøknadGrunnlagService,
         private val behandlingResultatService: BehandlingResultatService,
         private val dokGenKlient: DokGenKlient
 ) {

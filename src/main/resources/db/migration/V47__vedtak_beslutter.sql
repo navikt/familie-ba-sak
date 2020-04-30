@@ -1,0 +1,1 @@
+ALTER TABLE VEDTAK ADD COLUMN beslutter varchar;

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
@@ -20,6 +21,20 @@ class VilkårService(
         private val behandlingResultatService: BehandlingResultatService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
+
+    fun hentVilkårsdato(behandling: Behandling): LocalDate? {
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
+                                 ?: error("Finner ikke behandlingsresultat på behandling ${behandling.id}")
+
+        val periodeResultater = behandlingResultat.periodeResultater(false)
+        return periodeResultater.first {
+            it.allePåkrevdeVilkårErOppfylt(PersonType.SØKER,
+                                           SakType.valueOfType(behandling.kategori)) &&
+            it.allePåkrevdeVilkårErOppfylt(PersonType.BARN,
+                                           SakType.valueOfType(
+                                                   behandling.kategori))
+        }.periodeFom
+    }
 
     fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
         val behandling = behandlingService.hent(behandlingId)

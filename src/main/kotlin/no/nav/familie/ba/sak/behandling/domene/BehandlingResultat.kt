@@ -49,7 +49,7 @@ data class BehandlingResultat(
         }
     }
 
-    val periodeResultater: Set<PeriodeResultat> get() = this.personResultaterTilPeriodeResultater()
+    fun periodeResultater(brukMåned: Boolean): Set<PeriodeResultat> = this.personResultaterTilPeriodeResultater(brukMåned)
 }
 
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {
