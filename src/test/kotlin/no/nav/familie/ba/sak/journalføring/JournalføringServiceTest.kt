@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
@@ -39,6 +40,9 @@ class JournalføringServiceTest {
     @MockK
     lateinit var oppgaveService: OppgaveService
 
+    @MockK
+    lateinit var loggService: LoggService
+
     @InjectMockKs
     lateinit var journalføringService: JournalføringService
 
@@ -53,6 +57,7 @@ class JournalføringServiceTest {
         every { integrasjonClient.ferdigstillOppgave(any()) } just runs
         every { oppgaveService.opprettOppgave(any(), any(), any()) } returns ""
         every { stegService.håndterNyBehandling(any()) } returns lagBehandling()
+        every { loggService.opprettMottattDokument(any(), any(), any()) } just runs
 
         val request = OppdaterJournalpostRequest(knyttTilFagsak = true,
                                                  bruker = Bruker(id = "12345678910", type = BrukerIdType.FNR),
