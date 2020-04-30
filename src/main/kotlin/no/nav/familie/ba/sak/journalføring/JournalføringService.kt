@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.AvsenderMottaker
 import no.nav.familie.ba.sak.journalføring.domene.DokumentType
+import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
@@ -58,6 +59,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                       arkivsaksystem = null,
                       arkivsaksnummer = null)
 
+        håndterLogiskeVedlegg(request, journalpostId)
+
         oppdaterOgFerdigstill(request = mapTilOppdaterJournalpostRequest(request, sak),
                               journalpostId = journalpostId,
                               behandlendeEnhet = behandlendeEnhet,
@@ -76,6 +79,21 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         }
 
         return sak.fagsakId ?: ""
+    }
+
+    private fun håndterLogiskeVedlegg(request: RestOppdaterJournalpost, journalpostId: String) {
+        val fjernedeVedlegg = request.eksisterendeLogiskeVedlegg.partition { request.logiskeVedlegg.contains(it) }.second
+        val nyeVedlegg = request.logiskeVedlegg.partition { request.eksisterendeLogiskeVedlegg.contains(it) }.second
+
+        val dokumentInfoId = hentJournalpost(journalpostId).data?.dokumenter?.first()?.dokumentInfoId ?:
+            error("Fant ikke dokumentInfoId på journalpost") // TODO Frontend kan sende med dokumentInfoId'en i requesten
+
+        fjernedeVedlegg.forEach {
+            integrasjonClient.slettLogiskVedlegg(it.logiskVedleggId, dokumentInfoId)
+        }
+        nyeVedlegg.forEach {
+            integrasjonClient.leggTilLogiskVedlegg(LogiskVedleggRequest(it.tittel), dokumentInfoId)
+        }
     }
 
     private fun opprettNyBehandling(søkersIdent: String, journalpostId: String): Behandling {
