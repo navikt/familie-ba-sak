@@ -7,8 +7,10 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.config.RolleConfig
+import no.nav.familie.ba.sak.journalføring.domene.DokumentType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class LoggService(
@@ -24,12 +26,12 @@ class LoggService(
                               it.visningsnavn)
     }.toMap()
 
-    // TODO skriv om til generell logg for mottatte dokumenter når vi får inn liste av journalposter med dokument type enum
-    fun opprettJournalførtSøknad(behandling: Behandling) {
+    fun opprettMottattDokument(behandling: Behandling, datoMottatt: LocalDateTime, dokumentType: DokumentType) {
         lagre(Logg(
+                opprettetTidspunkt = datoMottatt,
                 behandlingId = behandling.id,
-                type = LoggType.DOKUMENT_JOURNALFØRT,
-                tittel = "Søknad ble journalført",
+                type = LoggType.DOKUMENT_MOTTATT,
+                tittel = "${dokumentType.navn} ble mottatt",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = ""
         ))
@@ -140,3 +142,5 @@ class LoggService(
         return loggRepository.hentLoggForBehandling(behandlingId)
     }
 }
+
+

@@ -1,15 +1,18 @@
 package no.nav.familie.ba.sak.journalføring
 
 import no.nav.familie.ba.sak.behandling.NyBehandling
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.journalføring.domene.DokumentType
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema.BARNETRYGD_EØS
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema.UTVIDET_BARNETRYGD
@@ -24,6 +27,7 @@ import java.time.LocalDate
 class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                            private val fagsakService: FagsakService,
                            private val stegService: StegService,
+                           private val loggService: LoggService,
                            private val oppgaveService: OppgaveService) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
@@ -55,11 +59,17 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
             }
         }
 
+
         oppdaterOgFerdigstillJournalpostPlusOppgave(request.copy(sak = sak), journalpostId, behandlendeEnhet, oppgaveId)
 
         if (sak.sakstype == FAGSAK.type) {
+            val behandling = opprettNyBehandling(request, journalpostId)
+            loggService.opprettMottattDokument(behandling = behandling,
+                                               datoMottatt = request.mottattDato,
+                                               dokumentType = DokumentType.SØKNAD)
+
             oppgaveService.opprettOppgave(
-                    behandlingId = opprettNyBehandling(request, journalpostId),
+                    behandlingId = opprettNyBehandling(request, journalpostId).id,
                     oppgavetype = Oppgavetype.BehandleSak,
                     fristForFerdigstillelse = LocalDate.now(),
                     enhetId = request.tildeltEnhetsnr
@@ -78,7 +88,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
     }
 
-    private fun opprettNyBehandling(request: OppdaterJournalpostRequest, journalpostId: String): Long {
+    private fun opprettNyBehandling(request: OppdaterJournalpostRequest, journalpostId: String): Behandling {
         val kategori = when (request.behandlingstema) {
             BARNETRYGD_EØS.kode -> BehandlingKategori.EØS
             else -> BehandlingKategori.NASJONAL
@@ -95,6 +105,6 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                                         BehandlingType.FØRSTEGANGSBEHANDLING,
                                         journalpostId)
 
-        return stegService.håndterNyBehandling(nyBehandling).id
+        return stegService.håndterNyBehandling(nyBehandling)
     }
 }

@@ -36,11 +36,6 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
-
-        // TODO flytt til egen metode når vi kan legge til og fjerne dokumenter/journalposter fra en behandling
-        if (nyBehandling.journalpostID != null) {
-            loggService.opprettJournalførtSøknad(behandling)
-        }
         loggService.opprettBehandlingLogg(behandling)
 
         return behandling

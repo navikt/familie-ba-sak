@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Sak
+import java.time.LocalDateTime
 
 
 // TODO vurdere å fjerne denne og lage en for oppdatering mot familie-integrasjoner og en mellom frontend og backend
@@ -18,7 +19,7 @@ data class OppdaterJournalpostRequest(val avsender: AvsenderMottaker? = null,
                                       val sak: Sak? = null,
                                       val dokumenter: List<DokumentInfo>? = null,
                                       val dokumentType: String? = null,
-                                      val mottattDato: String? = null,
+                                      val mottattDato: LocalDateTime,
                                       val annentInnhold: String? = null,
                                       val knyttTilFagsak: Boolean)
 
