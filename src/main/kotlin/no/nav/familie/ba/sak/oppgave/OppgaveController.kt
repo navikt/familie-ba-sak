@@ -47,7 +47,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
         return Result.runCatching {
             oppgaveService.fordelOppgave(oppgaveId, saksbehandler)
         }.fold(
-                onSuccess = { return ResponseEntity.ok().body(Ressurs.Companion.success(it)) },
+                onSuccess = { return ResponseEntity.ok().body(Ressurs.success(it)) },
                 onFailure = { return illegalState("Feil ved fordeling av oppgave", it) }
         )
     }
