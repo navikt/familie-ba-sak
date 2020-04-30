@@ -41,7 +41,7 @@ class ClientMocks {
                 success(lagTestOppgaveDTO(1L))
 
         every { mockIntegrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any()) } returns
-                listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak))
+                listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "E148211"))
 
         every { mockIntegrasjonClient.opprettOppgave(any()) } returns
             "12345678"

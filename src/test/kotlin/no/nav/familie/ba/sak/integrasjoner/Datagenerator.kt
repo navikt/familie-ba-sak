@@ -35,24 +35,27 @@ fun lagTestOppgave(): OpprettOppgave {
                           behandlingstema = "behandlingstema")
 }
 
-fun lagTestOppgaveDTO(oppgaveId: Long, oppgavetype: Oppgavetype = Oppgavetype.Journalføring): OppgaveDto {
+fun lagTestOppgaveDTO(oppgaveId: Long,
+                      oppgavetype: Oppgavetype = Oppgavetype.Journalføring,
+                      tildeltRessurs: String? = null): OppgaveDto {
     return OppgaveDto(id = oppgaveId,
-                      aktoerId = "1234",
-                      journalpostId = "1234",
-                      tildeltEnhetsnr = "4820",
-                      behandlesAvApplikasjon = "FS22",
-                      beskrivelse = "Beskrivelse for oppgave",
-                      tema = Tema.BAR.name,
-                      oppgavetype = oppgavetype.value,
-                      opprettetTidspunkt = LocalDate.of(
-                              2020,
-                              1,
-                              1).toString(),
-                      fristFerdigstillelse = LocalDate.of(
-                              2020,
-                              2,
-                              1).toString(),
-                      prioritet = PrioritetEnum.NORM,
-                      status = StatusEnum.OPPRETTET
+            aktoerId = "1234",
+            journalpostId = "1234",
+            tildeltEnhetsnr = "4820",
+            tilordnetRessurs = tildeltRessurs,
+            behandlesAvApplikasjon = "FS22",
+            beskrivelse = "Beskrivelse for oppgave",
+            tema = Tema.BAR.name,
+            oppgavetype = oppgavetype.value,
+            opprettetTidspunkt = LocalDate.of(
+                    2020,
+                    1,
+                    1).toString(),
+            fristFerdigstillelse = LocalDate.of(
+                    2020,
+                    2,
+                    1).toString(),
+            prioritet = PrioritetEnum.NORM,
+            status = StatusEnum.OPPRETTET
     )
 }
