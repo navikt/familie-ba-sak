@@ -12,6 +12,8 @@ import java.time.LocalDate
 @JsonIgnoreProperties
 data class Personinfo(
         var fødselsdato: LocalDate,
+        val geografiskTilknytning: String? = null,
+        val diskresjonskode: String? = null,
         val navn: String? = null,
         @JsonDeserialize(using = KjonnDeserializer::class)
         val kjønn: Kjønn? = null,
@@ -20,7 +22,9 @@ data class Personinfo(
 
 data class Familierelasjoner(
         val personIdent: Personident,
-        val relasjonsrolle: FAMILIERELASJONSROLLE
+        val relasjonsrolle: FAMILIERELASJONSROLLE,
+        val navn: String? = null,
+        val fødselsdato: LocalDate? = null
 )
 
 data class Personident(
