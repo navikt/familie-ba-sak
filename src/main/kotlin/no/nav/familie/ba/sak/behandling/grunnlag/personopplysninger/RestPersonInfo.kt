@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
+import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjon
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import java.time.LocalDate
 
@@ -20,7 +20,7 @@ data class RestFamilierelasjon(
         val fødselsdato: LocalDate?
 )
 
-fun Familierelasjoner.toRestFamilieRelasjon() = RestFamilierelasjon(
+fun Familierelasjon.toRestFamilieRelasjon() = RestFamilierelasjon(
         personIdent = this.personIdent.id,
         relasjonRolle = this.relasjonsrolle,
         navn = this.navn ?: "",
