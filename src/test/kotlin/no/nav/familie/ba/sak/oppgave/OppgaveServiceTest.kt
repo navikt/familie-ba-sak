@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.oppgave.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
@@ -113,6 +114,29 @@ class OppgaveServiceTest {
                 .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
 
+    @Test
+    fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
+        val oppgaveSlot = slot<Long>()
+        val saksbehandlerSlot = slot<String>()
+        every { integrasjonClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns OPPGAVE_ID
+
+        oppgaveService.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
+
+        Assertions.assertEquals(OPPGAVE_ID.toLong(), oppgaveSlot.captured)
+        Assertions.assertEquals(SAKSBEHANDLER_ID, saksbehandlerSlot.captured)
+    }
+
+    @Test
+    fun `Tilbakestill oppgave skal nullstille tildeling på oppgave`() {
+        val oppgaveSlot = slot<Long>()
+        every { integrasjonClient.fordelOppgave(capture(oppgaveSlot), any()) } returns OPPGAVE_ID
+
+        oppgaveService.tilbakestillFordelingPåOppgave(OPPGAVE_ID.toLong())
+
+        Assertions.assertEquals(OPPGAVE_ID.toLong(), oppgaveSlot.captured)
+        verify(exactly = 1) { integrasjonClient.fordelOppgave(any(), null) }
+    }
+
     private fun lagTestBehandling(): Behandling {
         return Behandling(
                 fagsak = Fagsak(
@@ -136,6 +160,7 @@ class OppgaveServiceTest {
         private const val FNR = "fnr"
         private const val ENHETSNUMMER = "enhet"
         private const val AKTØR_ID_FAGSAK = "0123456789"
+        private const val SAKSBEHANDLER_ID = "Z999999"
         private val FRIST_FERDIGSTILLELSE_BEH_SAK = LocalDate.now().plusDays(1)
     }
 }

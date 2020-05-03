@@ -5,6 +5,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Tema
@@ -65,5 +66,17 @@ class OppgaveControllerTest {
 
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(OPPGAVE_ID, respons.body?.data)
+    }
+
+    @Test
+    fun `Tildeling av oppgave skal returnere feil ved feil fra integrasjonsklienten`() {
+        val OPPGAVE_ID = "1234"
+        val SAKSBEHANDLER_ID = "Z999999"
+        every { oppgaveService.fordelOppgave(any(), any()) } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
+
+        val respons = oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
+
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respons.statusCode)
+        Assertions.assertEquals("Feil ved tildeling av oppgave", respons.body?.melding)
     }
 }
