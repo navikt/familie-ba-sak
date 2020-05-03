@@ -48,7 +48,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
             oppgaveService.fordelOppgave(oppgaveId, saksbehandler)
         }.fold(
                 onSuccess = { return ResponseEntity.ok().body(Ressurs.success(it)) },
-                onFailure = { return illegalState("Feil ved fordeling av oppgave", it) }
+                onFailure = { return illegalState("Feil ved tildeling av oppgave", it) }
         )
     }
 
@@ -58,7 +58,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
             oppgaveService.tilbakestillFordelingPåOppgave(oppgaveId)
         }.fold(
                 onSuccess = { return ResponseEntity.ok().body(Ressurs.Companion.success(it)) },
-                onFailure = { return illegalState("Feil ved tilbakestilling av oppgave", it) }
+                onFailure = { return illegalState("Feil ved tilbakestilling av tildeling på oppgave", it) }
         )
     }
 
