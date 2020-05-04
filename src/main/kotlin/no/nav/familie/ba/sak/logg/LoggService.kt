@@ -108,7 +108,7 @@ class LoggService(
                 tittel = if (beslutning.erGodkjent()) "Godkjent vedtak" else "Underkjent vedtak",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = "Saksbehandler $beslutter satte vedtak til $beslutning" +
-                        if (begrunnelse != null) " med begrunnelse: $begrunnelse" else ""
+                        if (begrunnelse != null && !beslutning.erGodkjent()) " med begrunnelse: $begrunnelse" else ""
         ))
     }
 
