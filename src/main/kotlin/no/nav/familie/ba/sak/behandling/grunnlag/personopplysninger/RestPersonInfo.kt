@@ -20,7 +20,7 @@ data class RestFamilierelasjon(
         val fødselsdato: LocalDate?
 )
 
-fun Familierelasjon.toRestFamilieRelasjon() = RestFamilierelasjon(
+fun Familierelasjoner.toRestFamilieRelasjon() = RestFamilierelasjon(
         personIdent = this.personIdent.id,
         relasjonRolle = this.relasjonsrolle,
         navn = this.navn ?: "",
