@@ -78,9 +78,10 @@ class VilkårService(
                                                 personIdent = person.personIdent.ident)
 
             val sakType =
-                    if (behandling.kategori == BehandlingKategori.NASJONAL && søknadDTO?.typeSøker == TypeSøker.TREDJELANDSBORGER)
+                    if (behandling.kategori == BehandlingKategori.NASJONAL &&
+                        (søknadDTO?.typeSøker == TypeSøker.TREDJELANDSBORGER || søknadDTO?.typeSøker == TypeSøker.EØS_BORGER)) {
                         SakType.TREDJELANDSBORGER
-                    else SakType.valueOfType(behandling.kategori)
+                    } else SakType.valueOfType(behandling.kategori)
 
             val relevanteVilkår = Vilkår.hentVilkårFor(person.type, sakType)
             personResultat.vilkårResultater = relevanteVilkår.map { vilkår ->
