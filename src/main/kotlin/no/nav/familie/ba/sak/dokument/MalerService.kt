@@ -65,6 +65,7 @@ class MalerService(
         val barnasFødselsdatoer = Utils.slåSammen(barna.map { it.fødselsdato.tilKortString() })
 
         val innvilget = Innvilget(
+                enhet = "enhet",
                 saksbehandler = vedtak.ansvarligSaksbehandler,
                 beslutter = vedtak.ansvarligBeslutter
                             ?: SikkerhetContext.hentSaksbehandlerNavn(),
