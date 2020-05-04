@@ -4,7 +4,7 @@ import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjon
+import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
@@ -94,10 +94,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val personinfo = hentPersoninfoMedRelasjonerFor(personIdent)
         val familierelasjoner = personinfo.familierelasjoner.map {
             val relasjonsinfo = hentPersoninfoFor(it.personIdent.id)
-            Familierelasjon(personIdent = it.personIdent,
-                            relasjonsrolle = it.relasjonsrolle,
-                            fødselsdato = relasjonsinfo.fødselsdato,
-                            navn = relasjonsinfo.navn)
+            Familierelasjoner(personIdent = it.personIdent,
+                              relasjonsrolle = it.relasjonsrolle,
+                              fødselsdato = relasjonsinfo.fødselsdato,
+                              navn = relasjonsinfo.navn)
         }.toSet()
         return personinfo.copy(familierelasjoner = familierelasjoner)
     }

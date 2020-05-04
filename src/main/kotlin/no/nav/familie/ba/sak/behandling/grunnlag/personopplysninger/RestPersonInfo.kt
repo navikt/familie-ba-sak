@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjon
+import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import java.time.LocalDate
 

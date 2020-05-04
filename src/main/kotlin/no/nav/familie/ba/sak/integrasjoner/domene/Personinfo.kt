@@ -17,10 +17,10 @@ data class Personinfo(
         val navn: String? = null,
         @JsonDeserialize(using = KjonnDeserializer::class)
         val kjønn: Kjønn? = null,
-        val familierelasjoner: Set<Familierelasjon> = emptySet()
+        val familierelasjoner: Set<Familierelasjoner> = emptySet()
 )
 
-data class Familierelasjon(
+data class Familierelasjoner(
         val personIdent: Personident,
         val relasjonsrolle: FAMILIERELASJONSROLLE,
         val navn: String? = null,

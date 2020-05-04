@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.behandling.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjon
+import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
 import no.nav.familie.ba.sak.integrasjoner.domene.Personident
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import org.junit.jupiter.api.Assertions
@@ -76,8 +76,8 @@ class FagsakServiceTest(
         every {
             integrasjonClient.hentPersoninfoFor(eq(barn2Fnr))
         } returns Personinfo(fødselsdato = LocalDate.of(2019, 5, 1), kjønn = Kjønn.MANN, navn = "barn2"
-                             , familierelasjoner = setOf(Familierelasjon(Personident(søker1Fnr), FAMILIERELASJONSROLLE.MEDMOR, "søker1", LocalDate.of(1990, 2, 19))
-                                                         , Familierelasjon(Personident(søker3Fnr), FAMILIERELASJONSROLLE.MEDMOR, "søker3", LocalDate.of(1990, 1, 10))))
+                             , familierelasjoner = setOf(Familierelasjoner(Personident(søker1Fnr), FAMILIERELASJONSROLLE.MEDMOR, "søker1", LocalDate.of(1990, 2, 19))
+                                                         , Familierelasjoner(Personident(søker3Fnr), FAMILIERELASJONSROLLE.MEDMOR, "søker3", LocalDate.of(1990, 1, 10))))
 
         every {
             integrasjonClient.hentPersoninfoFor(eq(barn3Fnr))
