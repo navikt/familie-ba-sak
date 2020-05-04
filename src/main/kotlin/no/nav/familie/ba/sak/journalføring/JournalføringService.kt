@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.*
+import no.nav.familie.ba.sak.journalføring.domene.Bruker
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
 import no.nav.familie.ba.sak.journalføring.restDomene.RestOppdaterJournalpost
@@ -129,7 +130,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                                     logiskeVedlegg = null)
 
         return OppdaterJournalpostRequest(avsenderMottaker = AvsenderMottaker(rest.avsender.id, navn = rest.avsender.navn),
-                                          bruker = Bruker(rest.bruker.id, BrukerIdType.FNR),
+                                          bruker = Bruker(rest.bruker.id, navn = rest.bruker.navn),
                                           sak = sak,
                                           dokumenter = listOf(dokument),
                                           datoMottatt = rest.datoMottatt)
