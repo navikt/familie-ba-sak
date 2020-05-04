@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
+import no.nav.familie.ba.sak.journalføring.metadata.DokarkivMetadata
 import no.nav.familie.ba.sak.journalføring.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -30,7 +31,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                            private val fagsakService: FagsakService,
                            private val stegService: StegService,
                            private val loggService: LoggService,
-                           private val oppgaveService: OppgaveService) {
+                           private val oppgaveService: OppgaveService,
+                           private val dokarkivMetadata: DokarkivMetadata) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
         return integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
@@ -85,8 +87,9 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         val fjernedeVedlegg = request.eksisterendeLogiskeVedlegg.partition { request.logiskeVedlegg.contains(it) }.second
         val nyeVedlegg = request.logiskeVedlegg.partition { request.eksisterendeLogiskeVedlegg.contains(it) }.second
 
-        val dokumentInfoId = hentJournalpost(journalpostId).data?.dokumenter?.first()?.dokumentInfoId ?:
-            error("Fant ikke dokumentInfoId på journalpost") // TODO Frontend kan sende med dokumentInfoId'en i requesten
+        val dokumentInfoId = request.dokumenttype.takeIf { !it.isEmpty() }
+            ?: hentJournalpost(journalpostId).data?.dokumenter?.first()?.dokumentInfoId
+            ?: error("Fant ikke dokumentInfoId på journalpost")
 
         fjernedeVedlegg.forEach {
             integrasjonClient.slettLogiskVedlegg(it.logiskVedleggId, dokumentInfoId)
@@ -123,10 +126,17 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
     }
 
     private fun mapTilOppdaterJournalpostRequest(rest: RestOppdaterJournalpost, sak: Sak): OppdaterJournalpostRequest {
+        val metadata = dokarkivMetadata.getMetadata(rest.dokumenttype)
+        val dokument = DokumentInfo(dokumentInfoId = rest.dokumentInfoId,
+                                    tittel = metadata.tittel,
+                                    brevkode = null,
+                                    dokumentstatus = Dokumentstatus.FERDIGSTILT,
+                                    dokumentvarianter = null,
+                                    logiskeVedlegg = null)
         return OppdaterJournalpostRequest(avsenderMottaker = AvsenderMottaker(rest.avsender.id, navn = rest.avsender.navn),
                                           bruker = Bruker(rest.bruker.id, BrukerIdType.FNR),
                                           sak = sak,
-                                          dokumentType = rest.dokumenttype,
+                                          dokumenter = listOf(dokument),
                                           datoMottatt = rest.datoMottatt)
     }
 

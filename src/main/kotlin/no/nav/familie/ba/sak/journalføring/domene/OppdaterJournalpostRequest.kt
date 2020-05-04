@@ -12,7 +12,6 @@ data class OppdaterJournalpostRequest(val avsenderMottaker: AvsenderMottaker?,
                                       val tema: String? = "BAR",
                                       val sak: Sak? = null,
                                       val dokumenter: List<DokumentInfo>? = null,
-                                      val dokumentType: String? = null,
                                       val datoMottatt: LocalDateTime)
 
 data class AvsenderMottaker(val id: String,
