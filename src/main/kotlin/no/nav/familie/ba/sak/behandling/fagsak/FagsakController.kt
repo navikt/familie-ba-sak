@@ -104,5 +104,6 @@ class FagsakController(
 }
 
 data class FagsakRequest(
-        val personIdent: String
+        val personIdent: String?,
+        val aktørId: String? = null
 )

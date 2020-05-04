@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.dokument
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
@@ -25,7 +27,9 @@ class DokumentControllerTest(
     @Tag("integration")
     fun `Test hent html vedtak`() {
         val mockDokumentService: DokumentService = mockk()
-        val mockDokumentController = DokumentController(mockDokumentService)
+        val vedtakService: VedtakService = mockk()
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService)
+        every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.hentHtmlForVedtak(any()) } returns Ressurs.success("mock_html")
 
         val response = mockDokumentController.hentHtmlVedtak(1)
@@ -35,7 +39,7 @@ class DokumentControllerTest(
     @Test
     @Tag("integration")
     fun `Hent HTML vedtaksbrev Negative'`() {
-        val failRess = dokumentService.hentHtmlForVedtak(100)
+        val failRess = dokumentService.hentHtmlForVedtak(lagVedtak())
         Assertions.assertEquals(Ressurs.Status.FEILET, failRess.status)
     }
 }

@@ -3,6 +3,12 @@ package no.nav.familie.ba.sak.config
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.dokument.DokGenKlient
+import no.nav.familie.ba.sak.dokument.DokumentService
+import no.nav.familie.ba.sak.dokument.testDokumentHeaderFelter
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Ressurs.Companion
+import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
+import no.nav.familie.kontrakter.felles.arkivering.Dokument
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -14,13 +20,11 @@ class DokgenTestConfig {
     @Bean
     @Profile("mock-dokgen")
     @Primary
-    fun mockDokGenService(): DokGenKlient {
-        val dokgenService: DokGenKlient = mockk()
-        every { dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP") } returns "<HTML>HTML_MOCKUP</HTML>"
-        every { dokgenService.lagHtmlFraMarkdown("Avslag", "TEST_MARKDOWN_MOCKUP") } returns "<HTML>HTML_MOCKUP</HTML>"
-        every { dokgenService.lagHtmlFraMarkdown("Opphørt", "TEST_MARKDOWN_MOCKUP") } returns "<HTML>HTML_MOCKUP</HTML>"
-        every { dokgenService.hentStønadBrevMarkdown(any(), any(), any()) } returns "TEST_MARKDOWN_MOCKUP"
-        return dokgenService
+    fun mockDokumentService(): DokumentService {
+        val dokumentService: DokumentService = mockk()
+        every { dokumentService.hentHtmlForVedtak(any()) } returns success("<HTML>HTML_MOCKUP</HTML>")
+        every { dokumentService.hentStønadBrevMarkdown(any(), any(), any()) } returns "Markdown mock"
+        return dokumentService
     }
 
     @Bean
@@ -28,8 +32,7 @@ class DokgenTestConfig {
     @Primary
     fun mockDokGenNegativeService(): DokGenKlient {
         val dokgenService: DokGenKlient = mockk()
-        every { dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP") } throws IllegalStateException()
-        every { dokgenService.hentStønadBrevMarkdown(any(), any(), any()) } returns "TEST_MARKDOWN_MOCKUP"
+        every { dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP", testDokumentHeaderFelter) } throws IllegalStateException()
         return dokgenService
     }
 }

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
@@ -23,17 +24,21 @@ class BeslutteVedtakTest {
     private lateinit var beslutteVedtak: BeslutteVedtak
     private lateinit var vedtakService: VedtakService
     private lateinit var taskRepository: TaskRepository
+    private lateinit var dokumentService: DokumentService
 
     @BeforeEach
     fun setUp() {
         val toTrinnKontrollService = mockk<ToTrinnKontrollService>()
-        vedtakService = mockk<VedtakService>()
+        vedtakService = mockk()
         taskRepository = mockk()
+        dokumentService = mockk()
         val loggService = mockk<LoggService>()
 
-        every { taskRepository.save(any<Task>()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+        every { taskRepository.save(any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every { toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(any(), any(), any()) } just Runs
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just Runs
+        every { dokumentService.hentStønadBrevMarkdown(any(), any(), any()) } returns "mock markdown"
+        every { vedtakService.godkjennVedtak(any()) } just runs
 
         beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, taskRepository, loggService)
     }
