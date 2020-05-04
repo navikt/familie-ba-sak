@@ -53,7 +53,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
             else -> null to null
         }
 
-        val sak = Sak(fagsakId = fagsak?.id.toString(),
+        val sak = Sak(fagsakId = fagsak?.id?.toString(),
                       fagsaksystem = fagsak?.let { "BA" },
                       sakstype = fagsak?.let { FAGSAK.type } ?: GENERELL_SAK.type,
                       arkivsaksystem = null,
