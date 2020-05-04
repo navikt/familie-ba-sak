@@ -96,21 +96,30 @@ class VilkårService(
                     } else SakType.valueOfType(behandling.kategori)
 
             val relevanteVilkår = Vilkår.hentVilkårFor(person.type, sakType)
-            personResultat.vilkårResultater = relevanteVilkår.map { vilkår ->
+            personResultat.vilkårResultater = relevanteVilkår.flatMap { vilkår ->
+                val vilkårListe = mutableListOf<VilkårResultat>()
                 if (vilkår == Vilkår.UNDER_18_ÅR) {
                     val evaluering = vilkår.spesifikasjon.evaluer(Fakta(personForVurdering = person))
-                    VilkårResultat(personResultat = personResultat,
-                                   resultat = evaluering.resultat,
+                    if (evaluering.resultat == Resultat.NEI) {
+                        vilkårListe.add(VilkårResultat(personResultat = personResultat,
+                                resultat = Resultat.NEI,
+                                vilkårType = vilkår,
+                                periodeFom = person.fødselsdato.plusYears(18).plusDays(1),
+                                begrunnelse = "Vurdert og satt automatisk"))
+                    }
+                    vilkårListe.add(VilkårResultat(personResultat = personResultat,
+                                   resultat = Resultat.JA,
                                    vilkårType = vilkår,
                                    periodeFom = person.fødselsdato,
                                    periodeTom = person.fødselsdato.plusYears(18),
-                                   begrunnelse = "Vurdert og satt automatisk")
+                                   begrunnelse = "Vurdert og satt automatisk"))
                 } else {
-                    VilkårResultat(personResultat = personResultat,
+                    vilkårListe.add(VilkårResultat(personResultat = personResultat,
                                    resultat = Resultat.KANSKJE,
                                    vilkårType = vilkår,
-                                   begrunnelse = "")
+                                   begrunnelse = ""))
                 }
+                vilkårListe
             }.toSet()
             personResultat
         }.toSet()
