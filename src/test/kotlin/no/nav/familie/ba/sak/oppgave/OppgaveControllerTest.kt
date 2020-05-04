@@ -5,12 +5,14 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Tema
-import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.http.HttpStatus
 
 @ExtendWith(MockKExtension::class)
 class OppgaveControllerTest {
@@ -32,14 +34,49 @@ class OppgaveControllerTest {
         } returns listOf(Oppgave(tema = Tema.BAR))
         val response = oppgaveController.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(null, null, null, null)
         val oppgaver = response.body?.data as List<Oppgave>
-        Assertions.assertThat(oppgaver).hasSize(1)
-        Assertions.assertThat(oppgaver.first().tema).isEqualTo(Tema.BAR)
+        Assertions.assertEquals(1, oppgaver.size)
+        Assertions.assertEquals(Tema.BAR, oppgaver.first().tema)
     }
 
     @Test
     fun `finnOppgaverKnyttetTilSaksbehandlerOgEnhet skal feile ved ukjent behandlingstema`() {
         val oppgaver = oppgaveController.finnOppgaverKnyttetTilSaksbehandlerOgEnhet("ab1000", null, null, null)
-        Assertions.assertThat(oppgaver.body?.status).isEqualTo(Ressurs.Status.FEILET)
-        Assertions.assertThat(oppgaver.body?.melding).isEqualTo("Ugyldig behandlingstema")
+        Assertions.assertEquals(Ressurs.Status.FEILET, oppgaver.body?.status)
+        Assertions.assertEquals("Ugyldig behandlingstema", oppgaver.body?.melding)
+    }
+
+    @Test
+    fun `Tildeling av oppgave til saksbehandler skal returnere OK og sende med OppgaveId i respons`() {
+        val OPPGAVE_ID = "1234"
+        val SAKSBEHANDLER_ID = "Z999999"
+        every { oppgaveService.fordelOppgave(any(), any()) } returns OPPGAVE_ID
+
+        val respons = oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
+
+        Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
+        Assertions.assertEquals(OPPGAVE_ID, respons.body?.data)
+    }
+
+    @Test
+    fun `Tilbakestilling av tildeling på oppgave skal returnere OK og sende med OppgaveId i respons`() {
+        val OPPGAVE_ID = "1234"
+        every { oppgaveService.tilbakestillFordelingPåOppgave(any()) } returns OPPGAVE_ID
+
+        val respons = oppgaveController.tilbakestillFordelingPåOppgave(OPPGAVE_ID.toLong())
+
+        Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
+        Assertions.assertEquals(OPPGAVE_ID, respons.body?.data)
+    }
+
+    @Test
+    fun `Tildeling av oppgave skal returnere feil ved feil fra integrasjonsklienten`() {
+        val OPPGAVE_ID = "1234"
+        val SAKSBEHANDLER_ID = "Z999998"
+        every { oppgaveService.fordelOppgave(any(), any()) } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
+
+        val respons = oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
+
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respons.statusCode)
+        Assertions.assertEquals("Feil ved tildeling av oppgave", respons.body?.melding)
     }
 }

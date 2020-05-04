@@ -50,6 +50,13 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return opprettetOppgaveId
     }
 
+    fun fordelOppgave(oppgaveId: Long, saksbehandler: String): String {
+        return integrasjonClient.fordelOppgave(oppgaveId, saksbehandler)
+    }
+    fun tilbakestillFordelingPåOppgave(oppgaveId: Long): String {
+        return integrasjonClient.fordelOppgave(oppgaveId, null)
+    }
+
     fun hentOppgave(oppgaveId: Long): Ressurs<Oppgave> {
         return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }

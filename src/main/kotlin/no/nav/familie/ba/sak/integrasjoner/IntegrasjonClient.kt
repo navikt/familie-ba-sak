@@ -204,6 +204,34 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
+    fun fordelOppgave(oppgaveId: Long, saksbehandler: String?): String {
+        val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/fordel")
+        val uri = if (saksbehandler == null)
+            baseUri
+        else
+            UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
+
+        return Result.runCatching {
+            postForEntity<Ressurs<OppgaveResponse>>(uri, HttpHeaders().medContentTypeJsonUTF8())
+        }.fold(
+                onSuccess = {
+                    assertGenerelleSuksessKriterier(it)
+
+                    it?.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId.",
+                            null,
+                            uri
+                    )
+                },
+                onFailure = {
+                    val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+                    throw IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave. response=$message",
+                            it,
+                            uri
+                    )
+                }
+        )
+    }
+
     fun finnOppgaveMedId(oppgaveId: Long): Ressurs<Oppgave> {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
 
