@@ -126,6 +126,8 @@ class VedtakService(private val behandlingService: BehandlingService,
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
+                            secureLogger.info("Klart ikke å oppdatere vedtak med vedtaksbrev på grunn av feil fra dokumentgenerering.",
+                                              e)
                             error("Klart ikke å oppdatere vedtak med vedtaksbrev på grunn av feil fra dokumentgenerering.")
                         }
                 )
