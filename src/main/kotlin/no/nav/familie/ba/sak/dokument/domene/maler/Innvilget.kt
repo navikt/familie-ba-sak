@@ -9,6 +9,6 @@ data class Innvilget(
         val vilkårsdato: String, // "24.12.19"
         val vedtaksdato: String, // "24.12.19"
         val antallBarn: Int,
-        val hjemmel: String, // "§2, 4 og 11"
-        val fritekst: String
+        val flereBarn: Boolean,
+        val hjemmel: String // "§2, 4 og 11"
 )

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
@@ -62,9 +63,9 @@ class MalerService(
         val vilkårsdato = vilkårService.hentVilkårsdato(behandling = behandling)
                           ?: error("Finner ikke vilkårsdato for vedtaksbrev")
 
-        val barnasFødselsdatoer = barna.joinToString(", ") { it.fødselsdato.tilKortString() }
+        val barnasFødselsdatoer = Utils.slåSammen(barna.map { it.fødselsdato.tilKortString() })
 
-        val innvilget =  Innvilget(
+        val innvilget = Innvilget(
                 saksbehandler = vedtak.ansvarligSaksbehandler,
                 beslutter = vedtak.ansvarligBeslutter
                             ?: SikkerhetContext.hentSaksbehandlerNavn(),
@@ -74,8 +75,8 @@ class MalerService(
                 vedtaksdato = vedtak.vedtaksdato.tilKortString(),
                 belop = beløp,
                 antallBarn = barna.size,
-                fritekst = "",
-                hjemmel = "§2, §4 og §11"
+                flereBarn = barna.size > 1,
+                hjemmel = Utils.slåSammen(listOf("§2", "§4", "§11"))
         )
 
         return innvilget.toString()
