@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
@@ -25,6 +26,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f FROM Fagsak f WHERE f.personIdent = :personIdent")
     fun finnFagsakForPersonIdent(personIdent: PersonIdent): Fagsak?
+
+    @Lock(LockModeType.NONE)
+    @Query(value = "SELECT f FROM Fagsak f WHERE f.aktørId = :aktørId")
+    fun finnFagsakForAktørId(aktørId: AktørId): Fagsak?
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f from Fagsak f WHERE f.status = 'LØPENDE'")
