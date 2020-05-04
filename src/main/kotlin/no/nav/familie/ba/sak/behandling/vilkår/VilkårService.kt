@@ -7,11 +7,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
@@ -66,8 +64,7 @@ class VilkårService(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
 
-        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
-        val søknadDTO: SøknadDTO? = søknadGrunnlag?.let { objectMapper.readValue(it.søknad, SøknadDTO::class.java) }
+        val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
 
         val behandlingResultat = BehandlingResultat(
                 behandling = behandlingService.hent(behandlingId),
