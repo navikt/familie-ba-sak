@@ -7,9 +7,11 @@ import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.fpsak.tidsserie.*
 import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_BEGYNNELSE
 import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE
+import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.fpsak.tidsserie.LocalDateTimeline
+import no.nav.fpsak.tidsserie.StandardCombinators
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 
@@ -23,7 +25,7 @@ data class PeriodeResultat(
     fun allePåkrevdeVilkårErOppfylt(personType: PersonType, sakType: SakType): Boolean {
         val alleVilkår = Vilkår.hentVilkårFor(personType, sakType)
         return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
-                && vilkårResultater.all { it.resultat == Resultat.JA }
+               && vilkårResultater.all { it.resultat == Resultat.JA }
     }
 
     fun overlapper(annetPeriodeResultat: PeriodeResultat): Boolean {
@@ -35,7 +37,7 @@ data class PeriodeResultat(
         }
 
         return (periodeFom == null || annetPeriodeResultat.periodeTom == null || periodeFom <= annetPeriodeResultat.periodeTom)
-                && (periodeTom == null || annetPeriodeResultat.periodeFom == null || periodeTom >= annetPeriodeResultat.periodeFom)
+               && (periodeTom == null || annetPeriodeResultat.periodeFom == null || periodeTom >= annetPeriodeResultat.periodeFom)
     }
 }
 
@@ -47,8 +49,8 @@ data class PeriodeVilkår(
         val periodeTom: LocalDate?
 )
 
-fun BehandlingResultat.personResultaterTilPeriodeResultater(): Set<PeriodeResultat> {
-    return this.personResultater.flatMap { it.tilPeriodeResultater() }.toSet()
+fun BehandlingResultat.personResultaterTilPeriodeResultater(brukMåned: Boolean): Set<PeriodeResultat> {
+    return this.personResultater.flatMap { it.tilPeriodeResultater(brukMåned) }.toSet()
 }
 
 private fun kombinerVerdier(lhs: LocalDateTimeline<List<VilkårResultat>>,
@@ -70,26 +72,26 @@ fun lagTidslinjeMedOverlappendePerioder(tidslinjer: List<LocalDateTimeline<Vilk�
     return resterende.fold(initiellSammenlagt) { sammenlagt, neste -> (kombinerVerdier(sammenlagt, neste)) }
 }
 
-fun PersonResultat.tilPeriodeResultater(): List<PeriodeResultat> {
+fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean): List<PeriodeResultat> {
     val tidslinjer = this.vilkårResultater.map { vilkårResultat ->
-        LocalDateTimeline(listOf(LocalDateSegment(vilkårResultat.periodeFom?.withDayOfMonth(1),
-                                                  vilkårResultat.periodeTom?.sisteDagIMåned(),
+        LocalDateTimeline(listOf(LocalDateSegment(if (brukMåned) vilkårResultat.periodeFom?.withDayOfMonth(1) else vilkårResultat.periodeFom,
+                                                  if (brukMåned) vilkårResultat.periodeTom?.sisteDagIMåned() else vilkårResultat.periodeTom,
                                                   vilkårResultat)))
     }
     val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(tidslinjer)
-    val periodeResultater = kombinertTidslinje.toSegments().map { segment ->
+    return kombinertTidslinje.toSegments().map { segment ->
         PeriodeResultat(
-                personIdent = this.personIdent,
+                personIdent = personIdent,
                 periodeFom = if (segment.fom == TIDENES_BEGYNNELSE) null else segment.fom,
                 periodeTom = if (segment.tom == TIDENES_ENDE) null else segment.tom,
-                vilkårResultater = segment.value.map { PeriodeVilkår(
-                        it.vilkårType,
-                        it.resultat,
-                        it.begrunnelse,
-                        it.periodeFom?.withDayOfMonth(1),
-                        it.periodeTom?.sisteDagIMåned())
+                vilkårResultater = segment.value.map {
+                    PeriodeVilkår(
+                            it.vilkårType,
+                            it.resultat,
+                            it.begrunnelse,
+                            it.periodeFom?.withDayOfMonth(1),
+                            it.periodeTom?.sisteDagIMåned())
                 }.toSet()
         )
     }
-    return periodeResultater
 }

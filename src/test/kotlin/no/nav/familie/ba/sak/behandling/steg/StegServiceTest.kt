@@ -22,7 +22,7 @@ import org.springframework.test.context.ActiveProfiles
 
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("dev", "mock-dokgen")
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,

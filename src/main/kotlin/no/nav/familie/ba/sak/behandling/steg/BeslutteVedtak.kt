@@ -42,6 +42,9 @@ class BeslutteVedtak(
         if (data.beslutning.erGodkjent()) {
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                          ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+
+            vedtakService.godkjennVedtak(vedtak)
+
             opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
         }
 
