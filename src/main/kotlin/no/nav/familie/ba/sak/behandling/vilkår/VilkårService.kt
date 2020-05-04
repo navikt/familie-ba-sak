@@ -7,7 +7,11 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
@@ -18,7 +22,8 @@ import java.time.LocalDate
 class VilkårService(
         private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
     fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
@@ -61,6 +66,9 @@ class VilkårService(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
 
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
+        val søknadDTO: SøknadDTO? = søknadGrunnlag?.let { objectMapper.readValue(it.søknad, SøknadDTO::class.java) }
+
         val behandlingResultat = BehandlingResultat(
                 behandling = behandlingService.hent(behandlingId),
                 aktiv = true)
@@ -69,7 +77,12 @@ class VilkårService(
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
-            val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.valueOfType(behandling.kategori))
+            val sakType =
+                    if (behandling.kategori == BehandlingKategori.NASJONAL && søknadDTO?.typeSøker == TypeSøker.TREDJELANDSBORGER)
+                        SakType.TREDJELANDSBORGER
+                    else SakType.valueOfType(behandling.kategori)
+
+            val relevanteVilkår = Vilkår.hentVilkårFor(person.type, sakType)
             personResultat.vilkårResultater = relevanteVilkår.map { vilkår ->
                 if (vilkår == Vilkår.UNDER_18_ÅR) {
                     val evaluering = vilkår.spesifikasjon.evaluer(Fakta(personForVurdering = person))

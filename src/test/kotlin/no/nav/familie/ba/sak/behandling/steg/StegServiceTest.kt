@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingInnvilget
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
@@ -34,7 +37,10 @@ class StegServiceTest(
         private val fagsakService: FagsakService,
 
         @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient
+        private val mockIntegrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val behandlingResultatService: BehandlingResultatService
 ) {
 
     @Test
@@ -64,6 +70,29 @@ class StegServiceTest(
 
         val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
+    }
+
+    @Test
+    fun `Skal initiere vilkår for lovlig opphold når søkertype er tredjelandsborger`() {
+        val søkerFnr = randomFnr()
+        val annenPartIdent = randomFnr()
+        val barnFnr = randomFnr()
+
+        mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
+
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
+
+        stegService.håndterSøknad(behandling,
+                                  lagSøknadDTO(annenPartIdent = annenPartIdent,
+                                               søkerIdent = søkerFnr,
+                                               barnasIdenter = listOf(barnFnr)).copy(typeSøker = TypeSøker.TREDJELANDSBORGER))
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)!!
+        behandlingResultat.personResultater.forEach { personresultat ->
+            Assertions.assertTrue(personresultat.vilkårResultater.any { vilkårResultat ->
+                vilkårResultat.vilkårType == Vilkår.LOVLIG_OPPHOLD }) }
     }
 
     @Test
