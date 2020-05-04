@@ -3,7 +3,11 @@ package no.nav.familie.ba.sak.integrasjoner
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDLEGG_DOKUMENT_TYPE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_DOKUMENT_TYPE
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -309,13 +313,18 @@ class IntergrasjonTjenesteTest {
     }
 
     private fun forventetRequestArkiverDokument(): ArkiverDokumentRequest {
+        val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
         return ArkiverDokumentRequest(fnr = mockFnr,
                                       forsøkFerdigstill = true,
                                       fagsakId = mockFagsakId,
                                       journalførendeEnhet = "9999",
                                       dokumenter = listOf(Dokument(dokument = mockPdf,
                                                                    filType = FilType.PDFA,
-                                                                   dokumentType = VEDTAK_DOKUMENT_TYPE)))
+                                                                   dokumentType = VEDTAK_DOKUMENT_TYPE),
+                                                          Dokument(dokument = vedleggPdf!!,
+                                                                   filType = FilType.PDFA,
+                                                                   dokumentType = VEDLEGG_DOKUMENT_TYPE,
+                                                                   tittel = VEDTAK_VEDLEGG_TITTEL)))
     }
 
     companion object {
