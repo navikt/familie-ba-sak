@@ -23,13 +23,13 @@ object TilkjentYtelseService {
         val søkerMap = personopplysningGrunnlag.søker
                 .associateBy { it.personIdent.ident }
 
-        val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater(true).filter {
+        val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater(brukMåned = true).filter {
             søkerMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.SØKER,
                     SakType.valueOfType(behandlingResultat.behandling.kategori)
             )
         }
-        val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater(true).filter {
+        val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater(brukMåned = true).filter {
             identBarnMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.BARN,
                     SakType.valueOfType(behandlingResultat.behandling.kategori)

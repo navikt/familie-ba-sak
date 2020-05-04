@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
-
 @Service
 class MalerService(
         private val vilkårService: VilkårService,

@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.dokument.DokGenKlient
+import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
@@ -24,7 +24,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     private val søknadGrunnlagService: SøknadGrunnlagService,
                     private val vedtakRepository: VedtakRepository,
                     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-                    private val dokGenKlient: DokGenKlient,
+                    private val dokumentService: DokumentService,
                     private val fagsakService: FagsakService) {
 
     @Transactional
@@ -94,14 +94,14 @@ class VedtakService(private val behandlingService: BehandlingService,
         )
 
         vedtak.stønadBrevMarkdown = if (behandlingResultatType != BehandlingResultatType.INNVILGET) Result.runCatching {
-            dokGenKlient.hentStønadBrevMarkdown(
+            dokumentService.hentStønadBrevMarkdown(
                     behandlingResultatType = behandlingResultatType,
                     vedtak = vedtak)
         }
                 .fold(
                         onSuccess = { it },
                         onFailure = {
-                            LOG.error("dokgen feil: ", it as Exception)
+                            secureLogger.info("dokgen feil: ", it as Exception)
                             error("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.")
                         }
                 ) else ""
@@ -115,10 +115,9 @@ class VedtakService(private val behandlingService: BehandlingService,
 
         val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(vedtak.behandling.id)
         vedtak.stønadBrevMarkdown = Result.runCatching {
-            val søknad: SøknadDTO = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
-                                    ?: error("Finner ikke søknad på behandling")
+            val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
 
-            dokGenKlient.hentStønadBrevMarkdown(
+            dokumentService.hentStønadBrevMarkdown(
                     vedtak = vedtak,
                     behandlingResultatType = behandlingResultatType,
                     søknad = søknad
@@ -180,6 +179,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     companion object {
         val LOG = LoggerFactory.getLogger(this::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 

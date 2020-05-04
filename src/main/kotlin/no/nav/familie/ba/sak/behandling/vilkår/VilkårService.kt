@@ -26,7 +26,7 @@ class VilkårService(
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                  ?: error("Finner ikke behandlingsresultat på behandling ${behandling.id}")
 
-        val periodeResultater = behandlingResultat.periodeResultater(false)
+        val periodeResultater = behandlingResultat.periodeResultater(brukMåned = false)
         return periodeResultater.first {
             it.allePåkrevdeVilkårErOppfylt(PersonType.SØKER,
                                            SakType.valueOfType(behandling.kategori)) &&

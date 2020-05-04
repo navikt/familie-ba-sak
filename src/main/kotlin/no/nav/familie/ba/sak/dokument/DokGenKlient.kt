@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.dokument
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.dokument.domene.DokumentRequest
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -14,7 +11,6 @@ import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
@@ -23,28 +19,14 @@ import org.springframework.web.client.RestTemplate
 import java.net.URI
 
 @Service
-@Profile("!mock-dokgen-java")
 class DokGenKlient(
         @Value("\${FAMILIE_BA_DOKGEN_API_URL}") private val dokgenServiceUri: String,
-        private val restTemplate: RestTemplate,
-        private val malerService: MalerService
+        private val restTemplate: RestTemplate
 ) {
 
-    fun hentStønadBrevMarkdown(
-            vedtak: Vedtak,
-            søknad: SøknadDTO? = null,
-            behandlingResultatType: BehandlingResultatType): String {
-
-        val malMedData = malerService.mapTilBrevfelter(vedtak,
-                                                       søknad,
-                                                       behandlingResultatType
-        )
-        return hentMarkdownForMal(malMedData)
-    }
-
-    private fun hentMarkdownForMal(malMedData: MalMedData): String {
+    fun hentMarkdownForMal(malMedData: MalMedData): String {
         val url = URI.create("$dokgenServiceUri/template/${malMedData.mal}/create-markdown")
-        LOG.info("hent markdown fra: " + url)
+        LOG.info("hent markdown fra: $url")
         val response = utførRequest(lagPostRequest(url, malMedData.fletteFelter), String::class.java)
         return response.body.orEmpty()
     }
@@ -82,7 +64,7 @@ class DokGenKlient(
                 .body(body)
     }
 
-    protected fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
+    fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
         return restTemplate.exchange(request, responseType)
     }
 

@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.dokument
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.lagVedtak
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -14,7 +17,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -22,7 +24,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
 @Tag("integration")
 class DokGenKlientIntegrationTest {
 
-    class DokGenTestKlient : DokGenKlient("mock_dokgen_uri", RestTemplate(), mockk()) {
+    class DokGenTestKlient : DokGenKlient("mock_dokgen_uri", RestTemplate()) {
         override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
             if (request.url.path.matches(Regex(".+create-markdown"))) {
                 assert(request.body is String)
@@ -49,18 +51,20 @@ class DokGenKlientIntegrationTest {
         }
     }
 
-    class DokGenTestNullBodyKlient : DokGenKlient("mock_dokgen_uri", RestTemplate(), mockk()) {
-        override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
-            return ResponseEntity<T>(null, HttpStatus.OK)
+    class DokumentServiceTest : DokumentService(mockk(), mockk(), mockk()) {
+        override fun hentStønadBrevMarkdown(vedtak: Vedtak,
+                                            søknad: SøknadDTO?,
+                                            behandlingResultatType: BehandlingResultatType): String {
+            return "mockup_response"
         }
     }
 
     @Test
     @Tag("integration")
     fun `Test generer markdown`() {
-        val dokgen = DokGenTestKlient()
-        val markdown = dokgen.hentStønadBrevMarkdown(vedtak = lagVedtak(),
-                                                     behandlingResultatType = BehandlingResultatType.INNVILGET)
+        val dokumentService = DokumentServiceTest()
+        val markdown = dokumentService.hentStønadBrevMarkdown(vedtak = lagVedtak(),
+                                                              behandlingResultatType = BehandlingResultatType.INNVILGET)
         assert(markdown == "mockup_response")
     }
 
@@ -78,17 +82,5 @@ class DokGenKlientIntegrationTest {
         val dokgen = DokGenTestKlient()
         val pdf = dokgen.lagPdfFraMarkdown("Innvilget", "markdown")
         assert(pdf.contentEquals("Vedtaksbrev PDF".toByteArray()))
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Test null response`() {
-        val dokgen = DokGenTestNullBodyKlient()
-        val html = dokgen.lagHtmlFraMarkdown("Innvilget", "markdown")
-        assert(html.isEmpty())
-
-        val markdown =
-                dokgen.hentStønadBrevMarkdown(vedtak = lagVedtak(), behandlingResultatType = BehandlingResultatType.INNVILGET)
-        assert(markdown.isEmpty())
     }
 }

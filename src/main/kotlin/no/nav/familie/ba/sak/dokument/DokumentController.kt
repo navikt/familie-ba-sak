@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.dokument
 
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.validering.BehandlingstilgangConstraint
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class DokumentController(
-        private val dokumentService: DokumentService
+        private val dokumentService: DokumentService,
+        private val vedtakService: VedtakService
 ) {
 
     @GetMapping(path = ["vedtak-html/{vedtakId}"])
@@ -26,7 +27,7 @@ class DokumentController(
 
         LOG.info("{} henter vedtaksbrev", saksbehandlerId)
 
-        return dokumentService.hentHtmlForVedtak(vedtakId)
+        return dokumentService.hentHtmlForVedtak(vedtak = vedtakService.hent(vedtakId))
     }
 
     companion object {
