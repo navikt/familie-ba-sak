@@ -91,9 +91,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun hentPersoninfoFor(personIdent: String): Personinfo {
-        val personinfo = hentPersoninfoMedRelasjonerFor(personIdent)
+        val personinfo = hentPersoninfo(personIdent, medRelasjoner = true)
         val familierelasjoner = personinfo.familierelasjoner.map {
-            val relasjonsinfo = hentEnkelPersoninfoFor(it.personIdent.id)
+            val relasjonsinfo = hentPersoninfo(it.personIdent.id, medRelasjoner = false)
             Familierelasjoner(personIdent = it.personIdent,
                               relasjonsrolle = it.relasjonsrolle,
                               fødselsdato = relasjonsinfo.fødselsdato,
@@ -103,10 +103,11 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun hentPersoninfoMedRelasjonerFor(personIdent: String): Personinfo {
+    private fun hentPersoninfo(personIdent: String, medRelasjoner: Boolean): Personinfo {
         logger.info("Henter personinfo fra $integrasjonUri")
 
-        val uri = URI.create("$integrasjonUri/personopplysning/v1/info/BAR")
+        val uri = if (medRelasjoner) URI.create("$integrasjonUri/personopplysning/v1/info/BAR")
+                    else URI.create("$integrasjonUri/personopplysning/v1/infoEnkel/BAR")
 
         return try {
             val response = getForEntity<Ressurs<Personinfo>>(uri, HttpHeaders().medPersonident(personIdent))
@@ -122,29 +123,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
             }
         } catch (e: Exception) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
-        }
-    }
-
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun hentEnkelPersoninfoFor(personIdent: String): Personinfo {
-        logger.info("Henter enkel personinfo fra $integrasjonUri")
-
-        val uri = URI.create("$integrasjonUri/personopplysning/v1/infoEnkel/BAR")
-
-        return try {
-            val response = getForEntity<Ressurs<Personinfo>>(uri, HttpHeaders().medPersonident(personIdent))
-            assertGenerelleSuksessKriterier(response)
-
-            secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.data)
-            response.data!!
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode === HttpStatus.NOT_FOUND) {
-                throw e
-            } else {
-                throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av enkel personinfo", e, uri, personIdent)
-            }
-        } catch (e: Exception) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av enkel personinfo", e, uri, personIdent)
         }
     }
 
