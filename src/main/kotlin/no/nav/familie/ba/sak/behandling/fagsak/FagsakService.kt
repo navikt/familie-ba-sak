@@ -41,11 +41,17 @@ class FagsakService(
                     ?: Fagsak(aktørId = integrasjonClient.hentAktørId(fagsakRequest.personIdent),
                             personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
         } else if (fagsakRequest.aktørId !== null) {
-            fagsak = fagsakRepository.finnFagsakForAktørId(aktørId = AktørId(fagsakRequest.aktørId))
-                    ?: Fagsak(aktørId = AktørId(fagsakRequest.aktørId),
-                            personIdent = integrasjonClient.hentPersonIdent(fagsakRequest.aktørId)
-                                    ?: error("Kunne ikke opprette fagsak. Finner ikke personident for gitt aktørid")
-                    ).also { lagre(it) }
+            var muligFagsak = fagsakRepository.finnFagsakForAktørId(aktørId = AktørId(fagsakRequest.aktørId))
+
+            if (muligFagsak == null) {
+                val personIdent = integrasjonClient.hentPersonIdent(fagsakRequest.aktørId)
+                        ?: error("Kunne ikke hente fagsak. Finner ikke personident for gitt aktørid")
+                muligFagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = personIdent)
+                        ?: Fagsak(aktørId = AktørId(fagsakRequest.aktørId),
+                                personIdent = personIdent
+                        ).also { lagre(it) }
+            }
+            fagsak = muligFagsak
         } else {
             error("Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak")
         }
