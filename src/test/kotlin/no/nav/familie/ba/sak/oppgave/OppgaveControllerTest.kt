@@ -71,7 +71,7 @@ class OppgaveControllerTest {
     @Test
     fun `Tildeling av oppgave skal returnere feil ved feil fra integrasjonsklienten`() {
         val OPPGAVE_ID = "1234"
-        val SAKSBEHANDLER_ID = "Z999999"
+        val SAKSBEHANDLER_ID = "Z999998"
         every { oppgaveService.fordelOppgave(any(), any()) } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
 
         val respons = oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
