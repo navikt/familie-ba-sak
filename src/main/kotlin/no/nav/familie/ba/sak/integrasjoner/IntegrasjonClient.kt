@@ -295,8 +295,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun journalFørVedtaksbrev(fnr: String, fagsakId: String, pdf: ByteArray): String {
         return lagJournalpostForVedtaksbrev(fnr, fagsakId, pdf)
     }
