@@ -26,3 +26,7 @@ enum class Sakstype(val type: String) {
     FAGSAK("FAGSAK"),
     GENERELL_SAK("GENERELL_SAK")
 }
+
+enum class FagsakSystem {
+    BA
+}

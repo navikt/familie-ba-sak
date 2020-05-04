@@ -9,13 +9,9 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.journalføring.domene.AvsenderMottaker
-import no.nav.familie.ba.sak.journalføring.domene.DokumentType
-import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
-import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.ba.sak.journalføring.domene.*
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
-import no.nav.familie.ba.sak.journalføring.metadata.FagsakSystem
 import no.nav.familie.ba.sak.journalføring.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
