@@ -172,6 +172,7 @@ class VedtakService(private val behandlingService: BehandlingService,
     fun godkjennVedtak(vedtak: Vedtak) {
         vedtak.ansvarligBeslutter = SikkerhetContext.hentSaksbehandlerNavn()
         vedtak.vedtaksdato = LocalDate.now()
+        oppdaterVedtakMedStønadsbrev(vedtak)
 
         LOG.info("${SikkerhetContext.hentSaksbehandler()} godkjenner vedtak $vedtak")
         lagreEllerOppdater(vedtak)
