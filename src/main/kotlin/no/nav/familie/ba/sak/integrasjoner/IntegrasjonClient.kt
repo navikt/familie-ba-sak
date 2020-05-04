@@ -328,7 +328,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun leggTilLogiskVedlegg(request: LogiskVedleggRequest, dokumentinfoId: String): LogiskVedleggResponse {
-       val uri = URI.create("$integrasjonUri/arkiv/v2/dokument/$dokumentinfoId/logiskVedlegg")
+       val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg")
        return exchange(
            networkRequest = {
                postForEntity<Ressurs<LogiskVedleggResponse>>(uri, request)
@@ -340,7 +340,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun slettLogiskVedlegg(logiskVedleggId: String, dokumentinfoId: String): LogiskVedleggResponse {
-        val uri = URI.create("$integrasjonUri/arkiv/v2/dokument/$dokumentinfoId/logiskVedlegg/$logiskVedleggId")
+        val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg/$logiskVedleggId")
         return exchange(
             networkRequest = {
                 deleteForEntity<Ressurs<LogiskVedleggResponse>>(uri)
