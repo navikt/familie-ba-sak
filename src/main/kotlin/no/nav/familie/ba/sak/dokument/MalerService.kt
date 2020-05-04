@@ -84,7 +84,7 @@ class MalerService(
     private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
         val behandling = vedtak.behandling
 
-        //TODO: sett navn, hjemmel og firtekst
+        //TODO: sett navn, hjemmel og fritekst
         return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
                "\"navn\": \"No Name\",\n" +
                "\"hjemmel\": \"\",\n" +
