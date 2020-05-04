@@ -190,8 +190,8 @@ class FagsakService(
         }
 
         if(erBarn){
-            personInfo.familierelasjoner.filter { it.relasjonsrolle== FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle== FAMILIERELASJONSROLLE.MOR
-                    || it.relasjonsrolle== FAMILIERELASJONSROLLE.MEDMOR }.forEach{
+            personInfo.familierelasjoner.filter { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MOR
+                                                  || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }.forEach{
                 if(assosierteFagsakDeltager.find({d-> d.ident == it.personIdent.id})== null){
                     val forelderInfo = runCatching {
                             integrasjonClient.hentPersoninfoFor(it.personIdent.id)

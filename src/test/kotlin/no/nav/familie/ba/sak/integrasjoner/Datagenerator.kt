@@ -61,7 +61,7 @@ fun lagTestOppgaveDTO(oppgaveId: Long,
                     2020,
                     2,
                     1).toString(),
-            prioritet = PrioritetEnum.NORM,
+            prioritet = OppgavePrioritet.NORM,
             status = StatusEnum.OPPRETTET
     )
 }

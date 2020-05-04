@@ -76,8 +76,8 @@ class FagsakServiceTest(
         every {
             integrasjonClient.hentPersoninfoFor(eq(barn2Fnr))
         } returns Personinfo(fødselsdato = LocalDate.of(2019, 5, 1), kjønn = Kjønn.MANN, navn = "barn2"
-        , familierelasjoner = setOf(Familierelasjoner(Personident(søker1Fnr), FAMILIERELASJONSROLLE.MEDMOR, "søker1", LocalDate.of(1990, 2, 19))
-        , Familierelasjoner(Personident(søker3Fnr), FAMILIERELASJONSROLLE.MEDMOR, "søker3", LocalDate.of(1990, 1, 10))))
+                             , familierelasjoner = setOf(Familierelasjoner(Personident(søker1Fnr), FAMILIERELASJONSROLLE.MEDMOR, "søker1", LocalDate.of(1990, 2, 19))
+                                                         , Familierelasjoner(Personident(søker3Fnr), FAMILIERELASJONSROLLE.MEDMOR, "søker3", LocalDate.of(1990, 1, 10))))
 
         every {
             integrasjonClient.hentPersoninfoFor(eq(barn3Fnr))

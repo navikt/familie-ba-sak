@@ -4,6 +4,7 @@ import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
@@ -89,11 +90,24 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentPersoninfoFor(personIdent: String): Personinfo {
+        val personinfo = hentPersoninfo(personIdent, medRelasjoner = true)
+        val familierelasjoner = personinfo.familierelasjoner.map {
+            val relasjonsinfo = hentPersoninfo(it.personIdent.id, medRelasjoner = false)
+            Familierelasjoner(personIdent = it.personIdent,
+                              relasjonsrolle = it.relasjonsrolle,
+                              fødselsdato = relasjonsinfo.fødselsdato,
+                              navn = relasjonsinfo.navn)
+        }.toSet()
+        return personinfo.copy(familierelasjoner = familierelasjoner)
+    }
+
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    private fun hentPersoninfo(personIdent: String, medRelasjoner: Boolean): Personinfo {
         logger.info("Henter personinfo fra $integrasjonUri")
 
-        val uri = URI.create("$integrasjonUri/personopplysning/v1/info/BAR")
+        val uri = if (medRelasjoner) URI.create("$integrasjonUri/personopplysning/v1/info/BAR")
+                    else URI.create("$integrasjonUri/personopplysning/v1/infoEnkel/BAR")
 
         return try {
             val response = getForEntity<Ressurs<Personinfo>>(uri, HttpHeaders().medPersonident(personIdent))
@@ -323,8 +337,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun journalFørVedtaksbrev(fnr: String, fagsakId: String, pdf: ByteArray): String {
         return lagJournalpostForVedtaksbrev(fnr, fagsakId, pdf)
     }
