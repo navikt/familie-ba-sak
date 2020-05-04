@@ -10,7 +10,7 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
-        return behandling.steg.hentNesteSteg(behandlingType = behandling.type)
+        return behandling.steg.hentNesteSteg(behandlingType = behandling.type, utførendeStegType = this.stegType())
     }
 }
 
@@ -24,7 +24,10 @@ fun initSteg(behandlingType: BehandlingType?): StegType {
 
 val sisteSteg = StegType.BEHANDLING_AVSLUTTET
 
-enum class StegType(private val rekkefølge: Int, val tillattFor: List<BehandlerRolle>, private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
+enum class StegType(private val rekkefølge: Int,
+                    val tillattFor: List<BehandlerRolle>,
+                    private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
+
     REGISTRERE_SØKNAD(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
@@ -69,27 +72,32 @@ enum class StegType(private val rekkefølge: Int, val tillattFor: List<Behandler
         return this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
     }
 
-    fun hentNesteSteg(behandlingType: BehandlingType): StegType {
-        return when(behandlingType) {
-            BehandlingType.MIGRERING_FRA_INFOTRYGD -> when (this) {
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> error("Ikke godkjent steg for behandlingstype")
-            }
-            else -> when (this) {
-                REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+    fun hentNesteSteg(behandlingType: BehandlingType, utførendeStegType: StegType): StegType {
+        if (utførendeStegType < this) {
+            return this
+        } else {
+            return when (behandlingType) {
+                BehandlingType.MIGRERING_FRA_INFOTRYGD -> when (this) {
+                    REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                    VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                    BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                    else -> error("Ikke godkjent steg for behandlingstype")
+                }
+                else -> when (this) {
+                    REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
+                    REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                    VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                    BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                }
             }
         }
+
     }
 }
 
