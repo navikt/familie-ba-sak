@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 data class RestOppdaterJournalpost(val avsender: INavnOgIdent,
                                    val bruker: INavnOgIdent,
                                    val datoMottatt: LocalDateTime,
-                                   val dokumenttype: String,
+                                   val dokumentTittel: String,
                                    val dokumentInfoId: String,
                                    val knyttTilFagsak: Boolean,
                                    val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>,

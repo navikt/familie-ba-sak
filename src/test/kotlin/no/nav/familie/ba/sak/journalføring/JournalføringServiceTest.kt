@@ -68,11 +68,13 @@ class JournalføringServiceTest {
         val request = RestOppdaterJournalpost(knyttTilFagsak = true,
                                               avsender = INavnOgIdent(id = "12345678910", navn = "navn"),
                                               bruker = INavnOgIdent(id = "12345678910", navn = "navn"),
-                                              dokumenttype = "SØKNAD",
+                                              dokumentTittel = "Søknad om ordinær barnetrygd",
+                                              dokumentInfoId = "123",
                                               eksisterendeLogiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
                                               logiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
                                               datoMottatt = LocalDateTime.now(),
                                               navIdent = "Z111111")
+
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
 
         assertThat(slot.captured.sak?.fagsakId).isEqualTo(fagsakId)
@@ -96,11 +98,13 @@ class JournalføringServiceTest {
         val request = RestOppdaterJournalpost(knyttTilFagsak = false,
                                               avsender = INavnOgIdent(id = "12345678910", navn = "navn"),
                                               bruker = INavnOgIdent(id = "12345678910", navn = "navn"),
-                                              dokumenttype = "SØKNAD",
+                                              dokumentTittel = "Søknad om ordinær barnetrygd",
+                                              dokumentInfoId = "123",
                                               eksisterendeLogiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
                                               logiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
                                               datoMottatt = LocalDateTime.now(),
                                               navIdent = "Z111111")
+
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
 
         assertThat(slot.captured.sak?.fagsakId).isEqualTo(null)

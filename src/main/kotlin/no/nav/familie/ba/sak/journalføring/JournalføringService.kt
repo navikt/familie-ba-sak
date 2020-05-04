@@ -87,7 +87,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         val fjernedeVedlegg = request.eksisterendeLogiskeVedlegg.partition { request.logiskeVedlegg.contains(it) }.second
         val nyeVedlegg = request.logiskeVedlegg.partition { request.eksisterendeLogiskeVedlegg.contains(it) }.second
 
-        val dokumentInfoId = request.dokumenttype.takeIf { !it.isEmpty() }
+        val dokumentInfoId = request.dokumentInfoId.takeIf { !it.isEmpty() }
             ?: hentJournalpost(journalpostId).data?.dokumenter?.first()?.dokumentInfoId
             ?: error("Fant ikke dokumentInfoId på journalpost")
 
@@ -126,13 +126,13 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
     }
 
     private fun mapTilOppdaterJournalpostRequest(rest: RestOppdaterJournalpost, sak: Sak): OppdaterJournalpostRequest {
-        val metadata = dokarkivMetadata.getMetadata(rest.dokumenttype)
         val dokument = DokumentInfo(dokumentInfoId = rest.dokumentInfoId,
-                                    tittel = metadata.tittel,
+                                    tittel = rest.dokumentTittel,
                                     brevkode = null,
                                     dokumentstatus = Dokumentstatus.FERDIGSTILT,
                                     dokumentvarianter = null,
                                     logiskeVedlegg = null)
+
         return OppdaterJournalpostRequest(avsenderMottaker = AvsenderMottaker(rest.avsender.id, navn = rest.avsender.navn),
                                           bruker = Bruker(rest.bruker.id, BrukerIdType.FNR),
                                           sak = sak,
