@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Sak
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class OppdaterJournalpostRequest(val avsenderMottaker: AvsenderMottaker?,
@@ -12,7 +12,7 @@ data class OppdaterJournalpostRequest(val avsenderMottaker: AvsenderMottaker?,
                                       val tema: String? = "BAR",
                                       val sak: Sak? = null,
                                       val dokumenter: List<DokumentInfo>? = null,
-                                      val datoMottatt: LocalDateTime)
+                                      val datoMottatt: LocalDate)
 
 data class AvsenderMottaker(val id: String,
                             val idType: IdType? = IdType.FNR,

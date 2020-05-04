@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
-import no.nav.familie.ba.sak.journalføring.metadata.DokarkivMetadata
+import no.nav.familie.ba.sak.journalføring.metadata.FagsakSystem
 import no.nav.familie.ba.sak.journalføring.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -31,8 +31,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                            private val fagsakService: FagsakService,
                            private val stegService: StegService,
                            private val loggService: LoggService,
-                           private val oppgaveService: OppgaveService,
-                           private val dokarkivMetadata: DokarkivMetadata) {
+                           private val oppgaveService: OppgaveService) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
         return integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
@@ -56,7 +55,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         }
 
         val sak = Sak(fagsakId = fagsak?.id?.toString(),
-                      fagsaksystem = fagsak?.let { "BA" },
+                      fagsaksystem = fagsak?.let { FagsakSystem.BA.name },
                       sakstype = fagsak?.let { FAGSAK.type } ?: GENERELL_SAK.type,
                       arkivsaksystem = null,
                       arkivsaksnummer = null)
@@ -73,7 +72,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                 null -> opprettOppgaveUtenBehandling(fagsak, request, behandlendeEnhet)
                 else -> {
                     loggService.opprettMottattDokument(behandling = behandling,
-                                                       datoMottatt = request.datoMottatt,
+                                                       datoMottatt = request.datoMottatt.atStartOfDay(),
                                                        dokumentType = DokumentType.SØKNAD)
                     opprettOppgaveFor(behandling, request.navIdent)
                 }

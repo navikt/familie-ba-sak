@@ -27,7 +27,7 @@ import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class JournalføringServiceTest {
@@ -72,7 +72,7 @@ class JournalføringServiceTest {
                                               dokumentInfoId = "123",
                                               eksisterendeLogiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
                                               logiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
-                                              datoMottatt = LocalDateTime.now(),
+                                              datoMottatt = LocalDate.now(),
                                               navIdent = "Z111111")
 
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
@@ -102,7 +102,7 @@ class JournalføringServiceTest {
                                               dokumentInfoId = "123",
                                               eksisterendeLogiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
                                               logiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
-                                              datoMottatt = LocalDateTime.now(),
+                                              datoMottatt = LocalDate.now(),
                                               navIdent = "Z111111")
 
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
