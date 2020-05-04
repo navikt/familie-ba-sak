@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
+import java.time.LocalDate
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -51,7 +53,7 @@ class DokGenKlientIntegrationTest {
         }
     }
 
-    class DokumentServiceTest : DokumentService(mockk(), mockk(), mockk()) {
+    class DokumentServiceTest : DokumentService(mockk(), mockk(), mockk(), mockk()) {
         override fun hentStønadBrevMarkdown(vedtak: Vedtak,
                                             søknad: SøknadDTO?,
                                             behandlingResultatType: BehandlingResultatType): String {
@@ -72,7 +74,7 @@ class DokGenKlientIntegrationTest {
     @Tag("integration")
     fun `Test generer html`() {
         val dokgen = DokGenTestKlient()
-        val html = dokgen.lagHtmlFraMarkdown("Innvilget", "markdown")
+        val html = dokgen.lagHtmlFraMarkdown("Innvilget", "markdown", testDokumentHeaderFelter)
         assert(html == "<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>")
     }
 
@@ -80,7 +82,12 @@ class DokGenKlientIntegrationTest {
     @Tag("integration")
     fun `Test generer pdf`() {
         val dokgen = DokGenTestKlient()
-        val pdf = dokgen.lagPdfFraMarkdown("Innvilget", "markdown")
+        val pdf = dokgen.lagPdfFraMarkdown("Innvilget", "markdown", testDokumentHeaderFelter)
         assert(pdf.contentEquals("Vedtaksbrev PDF".toByteArray()))
     }
 }
+
+val testDokumentHeaderFelter = DokumentHeaderFelter(navn = "Mockersen",
+                                                    dokumentDato = LocalDate.now().toString(),
+                                                    fodselsnummer = "1234",
+                                                    returadresse = "retur")

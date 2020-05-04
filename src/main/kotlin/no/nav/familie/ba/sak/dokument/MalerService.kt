@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -79,7 +80,7 @@ class MalerService(
                 hjemmel = Utils.slåSammen(listOf("§2", "§4", "§11"))
         )
 
-        return innvilget.toString()
+        return objectMapper.writeValueAsString(innvilget)
     }
 
     private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {

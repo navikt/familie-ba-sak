@@ -61,7 +61,7 @@ class DokGenKlientTest(@Autowired
         val markdown = dokumentService.hentStønadBrevMarkdown(vedtak = vedtak,
                                                               behandlingResultatType = BehandlingResultatType.INNVILGET
         )
-        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(BehandlingResultatType.INNVILGET.brevMal, markdown)
+        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(BehandlingResultatType.INNVILGET.brevMal, markdown, testDokumentHeaderFelter)
         assert(htmlResponse.startsWith("<html>"))
     }
 

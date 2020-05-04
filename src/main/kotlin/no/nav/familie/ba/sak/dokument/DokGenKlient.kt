@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
+import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.dokument.domene.DokumentRequest
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -31,28 +32,29 @@ class DokGenKlient(
         return response.body.orEmpty()
     }
 
-    fun lagHtmlFraMarkdown(template: String, markdown: String): String {
-        val request = lagDokumentRequestForMarkdown(HTML, template, markdown)
+    fun lagHtmlFraMarkdown(template: String, markdown: String, dokumentHeaderFelter: DokumentHeaderFelter): String {
+        val request = lagDokumentRequestForMarkdown(HTML, template, markdown, dokumentHeaderFelter)
         val response = utførRequest(request, String::class.java)
         return response.body.orEmpty()
     }
 
-    fun lagPdfFraMarkdown(template: String, markdown: String): ByteArray {
-        val request = lagDokumentRequestForMarkdown(PDF, template, markdown)
+    fun lagPdfFraMarkdown(template: String, markdown: String, dokumentHeaderFelter: DokumentHeaderFelter): ByteArray {
+        val request = lagDokumentRequestForMarkdown(PDF, template, markdown, dokumentHeaderFelter)
         val response = utførRequest(request, ByteArray::class.java)
         return response.body!!
     }
 
-    fun lagDokumentRequestForMarkdown(format: DocFormat, template: String, markdown: String): RequestEntity<String> {
+    fun lagDokumentRequestForMarkdown(format: DocFormat,
+                                      template: String,
+                                      markdown: String,
+                                      dokumentHeaderFelter: DokumentHeaderFelter): RequestEntity<String> {
         val url = URI.create("$dokgenServiceUri/template/${template}/create-doc")
         val body = DokumentRequest(format,
                                    markdown,
                                    true,
                                    null,
                                    true,
-                                   "{\"fodselsnummer\":\"12345678910\",\"navn\": \"navn\",\"adresse\": \"adresse\"," +
-                                   "\"postnr\": \"1626\",\"returadresse\": \"returadresse\"," +
-                                   "\"dokumentDato\": \"3. september 2019\"}")
+                                   objectMapper.writeValueAsString(dokumentHeaderFelter))
         return lagPostRequest(url, objectMapper.writeValueAsString(body))
     }
 

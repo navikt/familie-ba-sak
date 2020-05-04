@@ -9,6 +9,7 @@ import java.util.*
 val nbLocale = Locale("nb", "Norway")
 
 fun LocalDate.tilKortString() = this.format(DateTimeFormatter.ofPattern("dd.MM.YY", nbLocale))
+fun LocalDate.tilDagMånedÅr() = this.format(DateTimeFormatter.ofPattern("dd. MMMM YYYY", nbLocale))
 fun LocalDate.tilMånedÅr() = this.format(DateTimeFormatter.ofPattern("MMMM YYYY", nbLocale))
 
 fun LocalDate.sisteDagIForrigeMåned(): LocalDate {

@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.dokument.DokumentService
+import no.nav.familie.ba.sak.dokument.testDokumentHeaderFelter
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -31,7 +32,7 @@ class DokgenTestConfig {
     @Primary
     fun mockDokGenNegativeService(): DokGenKlient {
         val dokgenService: DokGenKlient = mockk()
-        every { dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP") } throws IllegalStateException()
+        every { dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP", testDokumentHeaderFelter) } throws IllegalStateException()
         return dokgenService
     }
 }
