@@ -93,7 +93,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     fun hentPersoninfoFor(personIdent: String): Personinfo {
         val personinfo = hentPersoninfoMedRelasjonerFor(personIdent)
         val familierelasjoner = personinfo.familierelasjoner.map {
-            val relasjonsinfo = hentPersoninfoFor(it.personIdent.id)
+            val relasjonsinfo = hentEnkelPersoninfoFor(it.personIdent.id)
             Familierelasjoner(personIdent = it.personIdent,
                               relasjonsrolle = it.relasjonsrolle,
                               fødselsdato = relasjonsinfo.fødselsdato,
