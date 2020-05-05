@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
 
 data class SøknadDTO(
+        val versjon: String = "1",
         val kategori: BehandlingKategori,
         val underkategori: BehandlingUnderkategori,
         val typeSøker: TypeSøker = TypeSøker.ORDINÆR,
