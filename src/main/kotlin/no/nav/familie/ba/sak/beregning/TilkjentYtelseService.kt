@@ -15,6 +15,7 @@ import java.time.YearMonth
 object TilkjentYtelseService {
 
     fun beregnTilkjentYtelse(behandlingResultat: BehandlingResultat,
+                             sakType: SakType,
                              personopplysningGrunnlag: PersonopplysningGrunnlag): TilkjentYtelse {
 
         val identBarnMap = personopplysningGrunnlag.barna
@@ -26,13 +27,13 @@ object TilkjentYtelseService {
         val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater(brukMåned = true).filter {
             søkerMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.SØKER,
-                    SakType.valueOfType(behandlingResultat.behandling.kategori)
+                    sakType
             )
         }
         val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater(brukMåned = true).filter {
             identBarnMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.BARN,
-                    SakType.valueOfType(behandlingResultat.behandling.kategori)
+                    sakType
             )
         }
 
