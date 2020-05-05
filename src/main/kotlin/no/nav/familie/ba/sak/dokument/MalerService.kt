@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
@@ -72,7 +73,7 @@ class MalerService(
                             ?: SikkerhetContext.hentSaksbehandlerNavn(),
                 barnasFodselsdatoer = barnasFødselsdatoer,
                 virkningsdato = utbetalingsperioder.minLocalDate.tilMånedÅr(),
-                vilkårsdato = vilkårsdato.tilKortString(),
+                vilkårsdato = vilkårsdato.tilDagMånedÅr(),
                 vedtaksdato = vedtak.vedtaksdato.tilKortString(),
                 belop = beløp,
                 antallBarn = barna.size,
