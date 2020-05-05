@@ -45,7 +45,7 @@ class MalerService(
         val behandling = vedtak.behandling
         return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
                "\"navn\": \"No Name\",\n" +
-               "\"tdato\": \"01.01.01\",\n" +
+               "\"tdato\": \"01.01.01\",\n" +//123
                "\"hjemmel\": \"\",\n" +
                "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
     }
