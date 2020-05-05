@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.journalføring
 
-import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.ba.sak.journalføring.restDomene.RestOppdaterJournalpost
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -33,10 +33,10 @@ class JournalføringController(val journalføringService: JournalføringService)
     fun journalfør(@PathVariable journalpostId: String,
                    @PathVariable oppgaveId: String,
                    @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
-                   @RequestBody @Valid oppdaterJournalpostRequest: OppdaterJournalpostRequest)
+                   @RequestBody @Valid request: RestOppdaterJournalpost)
         : ResponseEntity<Ressurs<String>> {
 
-        val fagsakId = journalføringService.ferdigstill(oppdaterJournalpostRequest, journalpostId, journalførendeEnhet, oppgaveId)
+        val fagsakId = journalføringService.ferdigstill(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Ferdigstilt"))
     }
 }
