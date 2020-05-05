@@ -10,15 +10,17 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.*
-import no.nav.familie.ba.sak.journalføring.domene.Bruker
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
 import no.nav.familie.ba.sak.journalføring.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.journalpost.*
+import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentstatus
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
+import no.nav.familie.kontrakter.felles.journalpost.Sak
 import no.nav.familie.kontrakter.felles.oppgave.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -47,7 +49,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         val (fagsak, behandling) = when (request.knyttTilFagsak) {
             true -> {
                 fagsakService.hentEllerOpprettFagsakForPersonIdent(request.bruker.id) to
-                    runCatching { opprettNyBehandling(request.bruker.id, journalpostId) }.getOrNull()
+                        runCatching { opprettNyBehandling(request.bruker.id, journalpostId) }.getOrNull()
             }
             else -> null to null
         }
@@ -71,12 +73,14 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                 else -> {
                     if (request.datoMottatt != null) {
                         loggService.opprettMottattDokument(behandling = behandling,
-                            datoMottatt = request.datoMottatt,
-                            dokumentType = DokumentType.SØKNAD)
-                        opprettOppgaveFor(behandling, request.navIdent)
+                                                           datoMottatt = request.datoMottatt,
+                                                           dokumentType = DokumentType.SØKNAD)
                     } else {
-                        LOG.info("datoMottat mangler på journalpost $journalpostId")
+                        LOG.warn("datoMottat mangler på journalpost $journalpostId " +
+                                 "så oppretter ikke logginnslag på historikken for behandling ${behandling.id}")
                     }
+
+                    opprettOppgaveFor(behandling, request.navIdent)
                 }
             }
         }
@@ -89,8 +93,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         val nyeVedlegg = request.logiskeVedlegg.partition { request.eksisterendeLogiskeVedlegg.contains(it) }.second
 
         val dokumentInfoId = request.dokumentInfoId.takeIf { !it.isEmpty() }
-            ?: hentJournalpost(journalpostId).data?.dokumenter?.first()?.dokumentInfoId
-            ?: error("Fant ikke dokumentInfoId på journalpost")
+                             ?: hentJournalpost(journalpostId).data?.dokumenter?.first()?.dokumentInfoId
+                             ?: error("Fant ikke dokumentInfoId på journalpost")
 
         fjernedeVedlegg.forEach {
             integrasjonClient.slettLogiskVedlegg(it.logiskVedleggId, dokumentInfoId)
