@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.*
@@ -20,6 +21,7 @@ class BeregningServiceTest {
 
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     val behandlingResultatRepository = mockk<BehandlingResultatRepository>()
+    val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
 
     lateinit var beregningService: BeregningService
 
@@ -30,7 +32,8 @@ class BeregningServiceTest {
 
          beregningService = BeregningService(andelTilkjentYtelseRepository,
                 fagsakService,
-                tilkjentYtelseRepository,
+                 søknadGrunnlagService,
+                 tilkjentYtelseRepository,
                 behandlingResultatRepository)
 
         every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
@@ -73,6 +76,7 @@ class BeregningServiceTest {
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(søkerFnr, randomFnr(), listOf(barn1Fnr))
 
         beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag)
@@ -120,6 +124,7 @@ class BeregningServiceTest {
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(søkerFnr, randomFnr(), listOf(barn1Fnr))
 
         beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag)
@@ -172,6 +177,7 @@ class BeregningServiceTest {
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(søkerFnr, randomFnr(), listOf(barn1Fnr))
 
         beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag)
@@ -256,6 +262,7 @@ class BeregningServiceTest {
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(søkerFnr, randomFnr(), listOf(barn1Fnr, barn2Fnr))
 
         beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag)

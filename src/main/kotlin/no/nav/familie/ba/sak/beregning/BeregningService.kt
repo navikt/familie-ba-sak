@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -20,6 +24,7 @@ import java.time.LocalDate
 class BeregningService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakService: FagsakService,
+        private val søknadGrunnlagService: SøknadGrunnlagService,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val behandlingResultatRepository: BehandlingResultatRepository
 ) {
@@ -40,8 +45,15 @@ class BeregningService(
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
                 ?: throw IllegalStateException("Kunne ikke hente behandlingsresultat for behandling med id ${behandling.id}")
 
+        val søknadDTO = søknadGrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.hentSøknadDto()
+        val sakType =
+                if (behandlingResultat.behandling.kategori == BehandlingKategori.NASJONAL &&
+                        (søknadDTO?.typeSøker == TypeSøker.TREDJELANDSBORGER || søknadDTO?.typeSøker == TypeSøker.EØS_BORGER)) {
+                    SakType.TREDJELANDSBORGER
+                } else SakType.valueOfType(behandlingResultat.behandling.kategori)
+
         val tilkjentYtelse = TilkjentYtelseService
-                .beregnTilkjentYtelse(behandlingResultat, personopplysningGrunnlag)
+                .beregnTilkjentYtelse(behandlingResultat, sakType, personopplysningGrunnlag)
 
         tilkjentYtelseRepository.save(tilkjentYtelse)
 

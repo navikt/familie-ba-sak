@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.*
@@ -14,7 +15,6 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
 import java.time.LocalDate
@@ -63,6 +63,7 @@ class VilkårTilTilkjentYtelseTest {
 
         val faktiskTilkjentYtelse = TilkjentYtelseService.beregnTilkjentYtelse(
                 behandlingResultat = behandlingResultat,
+                sakType = SakType.valueOf(sakType),
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
 
@@ -125,6 +126,7 @@ class VilkårTilTilkjentYtelseTest {
 
         val faktiskTilkjentYtelse = TilkjentYtelseService.beregnTilkjentYtelse(
                 behandlingResultat = behandlingResultat,
+                sakType = SakType.NASJONAL,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
 
