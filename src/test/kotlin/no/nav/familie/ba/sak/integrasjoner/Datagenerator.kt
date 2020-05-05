@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.kontrakter.felles.oppgave.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost {
     return Journalpost(
@@ -26,7 +27,8 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
                       arkivsaksystem = "GSAK",
                       sakstype = Sakstype.FAGSAK.name,
                       fagsakId = null,
-                      fagsaksystem = FAGSYSTEM)
+                      fagsaksystem = FAGSYSTEM),
+            datoMottatt = LocalDateTime.now()
     )
 }
 
