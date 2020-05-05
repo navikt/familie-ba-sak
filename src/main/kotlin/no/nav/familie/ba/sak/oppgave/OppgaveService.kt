@@ -83,6 +83,14 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)
     }
 
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): List<Oppgave> {
+        val oppgaver = integrasjonClient.hentOppgaver(finnOppgaveRequest)
+        return when {
+            finnOppgaveRequest.prioritet != null -> oppgaver.filter { finnOppgaveRequest.prioritet == it.prioritet }
+            else -> oppgaver
+        }
+    }
+
     enum class Behandlingstema(val kode: String) {
         ORDINÆR_BARNETRYGD("ab0180"),
         BARNETRYGD_EØS("ab0058"),

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -39,6 +40,22 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
         }
     }
 
+    @PostMapping(path = ["/hentOppgaver"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequest)
+            : ResponseEntity<Ressurs<List<Oppgave>>> {
+
+        if (!finnOppgaveRequest.behandlingstema.isNullOrEmpty() && OppgaveService.Behandlingstema.values().all { it.kode != finnOppgaveRequest.behandlingstema }) {
+            return badRequest("Ugyldig behandlingstema", null)
+        }
+
+        return try {
+            val oppgaver: List<Oppgave> = oppgaveService.hentOppgaver(finnOppgaveRequest)
+            ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
+        } catch (e: Throwable) {
+            badRequest("Henting av oppgaver feilet", e)
+        }
+    }
+
     @GetMapping(path = ["/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long)
             : ResponseEntity<Ressurs<DataForManuellJournalføring>> {
@@ -64,3 +81,19 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
         )
     }
 }
+
+class FinnOppgaveRequest(val tema: String? = null,
+                         val behandlingstema: String? = null,
+                         val oppgavetype: String? = null,
+                         val enhet: String? = null,
+                         val saksbehandler: String? = null,
+                         val journalpostId: String? = null,
+                         val prioritet: OppgavePrioritet? = null,
+                         val opprettetFomTidspunkt: String? = null,
+                         val opprettetTomTidspunkt: String? = null,
+                         val fristFomDato: String? = null,
+                         val fristTomDato: String? = null,
+                         val aktivFomDato: String? = null,
+                         val aktivTomDato: String? = null,
+                         val limit: Long? = null,
+                         val offset: Long? = null)

@@ -42,4 +42,22 @@ class OppgaveControllerTest {
         Assertions.assertThat(oppgaver.body?.status).isEqualTo(Ressurs.Status.FEILET)
         Assertions.assertThat(oppgaver.body?.melding).isEqualTo("Ugyldig behandlingstema")
     }
+
+    @Test
+    fun `hentOppgaver via OppgaveController skal fungere`() {
+        every {
+            oppgaveService.hentOppgaver(any())
+        } returns listOf(Oppgave(tema = Tema.BAR))
+        val response = oppgaveController.hentOppgaver(FinnOppgaveRequest())
+        val oppgaver = response.body?.data as List<Oppgave>
+        Assertions.assertThat(oppgaver).hasSize(1)
+        Assertions.assertThat(oppgaver.first().tema).isEqualTo(Tema.BAR)
+    }
+
+    @Test
+    fun `hentOppgaver skal feile ved ukjent behandlingstema`() {
+        val oppgaver = oppgaveController.hentOppgaver(FinnOppgaveRequest(behandlingstema = "ab1000"))
+        Assertions.assertThat(oppgaver.body?.status).isEqualTo(Ressurs.Status.FEILET)
+        Assertions.assertThat(oppgaver.body?.melding).isEqualTo("Ugyldig behandlingstema")
+    }
 }
