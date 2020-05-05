@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker.TREDJELANDSBORGER
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -31,7 +32,7 @@ class MalerService(
                          behandlingResultatType: BehandlingResultatType): MalMedData {
 
         return MalMedData(
-                mal = "${behandlingResultatType.brevMal}${if (søknad?.typeSøker == TypeSøker.TREDJELANDSBORGER) "-Tredjelandsborger" else ""}",
+                mal = malNavnForTypeSøkerOgResultatType(søknad?.typeSøker, behandlingResultatType),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
                     BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
@@ -92,5 +93,15 @@ class MalerService(
                "\"navn\": \"No Name\",\n" +
                "\"hjemmel\": \"\",\n" +
                "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
+    }
+
+    companion object {
+        fun malNavnForTypeSøkerOgResultatType(typeSøker: TypeSøker?,
+                                              resultatType: BehandlingResultatType): String {
+            return when (typeSøker) {
+                TREDJELANDSBORGER -> "${resultatType.brevMal}-Tredjelandsborger"
+                else -> resultatType.brevMal
+            }
+        }
     }
 }
