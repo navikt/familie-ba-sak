@@ -20,6 +20,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
 import no.nav.familie.kontrakter.felles.oppgave.*
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -68,10 +69,14 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
             when (behandling) {
                 null -> opprettOppgaveUtenBehandling(fagsak, request, behandlendeEnhet)
                 else -> {
-                    loggService.opprettMottattDokument(behandling = behandling,
-                                                       datoMottatt = request.datoMottatt.atStartOfDay(),
-                                                       dokumentType = DokumentType.SØKNAD)
-                    opprettOppgaveFor(behandling, request.navIdent)
+                    if (request.datoMottatt != null) {
+                        loggService.opprettMottattDokument(behandling = behandling,
+                            datoMottatt = request.datoMottatt,
+                            dokumentType = DokumentType.SØKNAD)
+                        opprettOppgaveFor(behandling, request.navIdent)
+                    } else {
+                        LOG.info("datoMottat mangler på journalpost $journalpostId")
+                    }
                 }
             }
         }
@@ -116,6 +121,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
             hentJournalpost(journalpostId).data?.journalstatus.apply {
                 if (this == FERDIGSTILT) {
                     integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
+                } else {
+                    throw it
                 }
             }
         }
@@ -132,8 +139,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         return OppdaterJournalpostRequest(avsenderMottaker = AvsenderMottaker(rest.avsender.id, navn = rest.avsender.navn),
                                           bruker = Bruker(rest.bruker.id, navn = rest.bruker.navn),
                                           sak = sak,
-                                          dokumenter = listOf(dokument),
-                                          datoMottatt = rest.datoMottatt)
+                                          dokumenter = listOf(dokument))
     }
 
     private fun opprettOppgaveFor(behandling: Behandling, navIdent: String) {
@@ -153,5 +159,9 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                                                      enhetsnummer = behandlendeEnhet,
                                                      behandlingstema = OppgaveService.Behandlingstema.ORDINÆR_BARNETRYGD.kode,
                                                      tilordnetRessurs = request.navIdent))
+    }
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

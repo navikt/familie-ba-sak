@@ -66,14 +66,14 @@ class JournalføringServiceTest {
         every { loggService.opprettMottattDokument(any(), any(), any()) } just runs
 
         val request = RestOppdaterJournalpost(knyttTilFagsak = true,
-                                              avsender = INavnOgIdent(id = "12345678910", navn = "navn"),
-                                              bruker = INavnOgIdent(id = "12345678910", navn = "navn"),
+                                              avsender = INavnOgIdent(id = "09089121008", navn = "LUNKEN VEPS"),
+                                              bruker = INavnOgIdent(id = "09089121008", navn = "LUNKEN VEPS"),
                                               dokumentTittel = "Søknad om ordinær barnetrygd",
-                                              dokumentInfoId = "123",
-                                              eksisterendeLogiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
-                                              logiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
-                                              datoMottatt = LocalDate.now(),
-                                              navIdent = "Z111111")
+                                              dokumentInfoId = "453883904",
+                                              eksisterendeLogiskeVedlegg = listOf(LogiskVedlegg("318554361", "Test")),
+                                              logiskeVedlegg = listOf(LogiskVedlegg("318554361", "Test")),
+                                              datoMottatt = LocalDate.of(2020, 5, 4).atStartOfDay(),
+                                              navIdent = "Z992691")
 
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
 
@@ -102,7 +102,7 @@ class JournalføringServiceTest {
                                               dokumentInfoId = "123",
                                               eksisterendeLogiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
                                               logiskeVedlegg = listOf(LogiskVedlegg("1", "tittel")),
-                                              datoMottatt = LocalDate.now(),
+                                              datoMottatt = LocalDate.now().atStartOfDay(),
                                               navIdent = "Z111111")
 
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
