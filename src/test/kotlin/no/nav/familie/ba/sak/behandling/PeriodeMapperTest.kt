@@ -26,12 +26,12 @@ import java.time.LocalDate
 class PeriodeMapperTest {
 
     private val datoer = listOf(
-            LocalDate.of(2020,1,1),
-            LocalDate.of(2020,2,1),
-            LocalDate.of(2020,3,1),
-            LocalDate.of(2020,4,1),
-            LocalDate.of(2020,5,1),
-            LocalDate.of(2020,6,1))
+            LocalDate.of(2020, 1, 1),
+            LocalDate.of(2020, 2, 1),
+            LocalDate.of(2020, 3, 1),
+            LocalDate.of(2020, 4, 1),
+            LocalDate.of(2020, 5, 1),
+            LocalDate.of(2020, 6, 1))
 
     private lateinit var behandlingResultat: BehandlingResultat
 
@@ -112,7 +112,7 @@ class PeriodeMapperTest {
                                                                 periodeTom = datoer[4].minusDays(1),
                                                                 begrunnelse = ""))
         behandlingResultat.personResultater = setOf(personResultat1, personResultat2)
-        val periodeResultater = behandlingResultat.periodeResultater.toList()
+        val periodeResultater = behandlingResultat.periodeResultater(true).toList()
 
         /*
         Person 1 med tre overlappende perioder som skal splittes til fem
@@ -173,15 +173,15 @@ class PeriodeMapperTest {
 
         val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = randomFnr())
         personResultat.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat,
-                                                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                                                resultat = Resultat.JA,
-                                                                periodeFom = LocalDate.of(2020,5,15),
-                                                                periodeTom = LocalDate.of(2020,6,15),
-                                                                begrunnelse = ""))
+                                                               vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                                               resultat = Resultat.JA,
+                                                               periodeFom = LocalDate.of(2020, 5, 15),
+                                                               periodeTom = LocalDate.of(2020, 6, 15),
+                                                               begrunnelse = ""))
         behandlingResultat.personResultater = setOf(personResultat)
-        val periodeResultat = behandlingResultat.periodeResultater.toList()[0]
-        assert(periodeResultat.periodeFom!! == LocalDate.of(2020,5,1))
-        assert(periodeResultat.periodeTom!! == LocalDate.of(2020,6,30))
+        val periodeResultat = behandlingResultat.periodeResultater(true).toList()[0]
+        assert(periodeResultat.periodeFom!! == LocalDate.of(2020, 5, 1))
+        assert(periodeResultat.periodeTom!! == LocalDate.of(2020, 6, 30))
     }
 
     @Test
@@ -194,33 +194,33 @@ class PeriodeMapperTest {
         val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = barnFnr)
         personResultat.vilkårResultater = setOf(
                 VilkårResultat(personResultat = personResultat,
-                        vilkårType = Vilkår.UNDER_18_ÅR,
-                        resultat = Resultat.JA,
-                        periodeFom = periodeFom18ÅrsVilkår,
-                        periodeTom = periodeTom18ÅrsVilkår,
-                        begrunnelse = ""),
+                               vilkårType = Vilkår.UNDER_18_ÅR,
+                               resultat = Resultat.JA,
+                               periodeFom = periodeFom18ÅrsVilkår,
+                               periodeTom = periodeTom18ÅrsVilkår,
+                               begrunnelse = ""),
                 VilkårResultat(personResultat = personResultat,
-                        vilkårType = Vilkår.BOSATT_I_RIKET,
-                        resultat = Resultat.JA,
-                        periodeFom = periodeFom,
-                        periodeTom = null,
-                        begrunnelse = ""),
+                               vilkårType = Vilkår.BOSATT_I_RIKET,
+                               resultat = Resultat.JA,
+                               periodeFom = periodeFom,
+                               periodeTom = null,
+                               begrunnelse = ""),
                 VilkårResultat(personResultat = personResultat,
-                        vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                        resultat = Resultat.JA,
-                        periodeFom = periodeFom,
-                        periodeTom = null,
-                        begrunnelse = ""),
+                               vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                               resultat = Resultat.JA,
+                               periodeFom = periodeFom,
+                               periodeTom = null,
+                               begrunnelse = ""),
                 VilkårResultat(personResultat = personResultat,
-                        vilkårType = Vilkår.BOR_MED_SØKER,
-                        resultat = Resultat.JA,
-                        periodeFom = periodeFom,
-                        periodeTom = null,
-                        begrunnelse = "")
+                               vilkårType = Vilkår.BOR_MED_SØKER,
+                               resultat = Resultat.JA,
+                               periodeFom = periodeFom,
+                               periodeTom = null,
+                               begrunnelse = "")
         )
 
         behandlingResultat.personResultater = setOf(personResultat)
-        val periodeResultater = behandlingResultat.periodeResultater.sortedBy { periodeFom }
+        val periodeResultater = behandlingResultat.periodeResultater(true).sortedBy { periodeFom }
 
         Assertions.assertEquals(3, periodeResultater.size)
 

@@ -19,8 +19,11 @@ data class Vedtak(
         @Column(name = "ansvarlig_saksbehandler", nullable = false)
         val ansvarligSaksbehandler: String,
 
+        @Column(name = "ansvarlig_beslutter", nullable = true)
+        var ansvarligBeslutter: String? = null,
+
         @Column(name = "vedtaksdato", nullable = false)
-        val vedtaksdato: LocalDate,
+        var vedtaksdato: LocalDate,
 
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
         var stønadBrevMarkdown: String = "",

@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingInnvilget
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
@@ -22,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles
 
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("dev", "mock-dokgen")
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,
@@ -34,7 +37,10 @@ class StegServiceTest(
         private val fagsakService: FagsakService,
 
         @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient
+        private val mockIntegrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val behandlingResultatService: BehandlingResultatService
 ) {
 
     @Test
@@ -64,6 +70,13 @@ class StegServiceTest(
 
         val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
+    }
+
+    @Test
+    fun `Skal initiere vilkår for lovlig opphold basert på søkertype`() {
+        assertLovligOppholdForTypeSøker(TypeSøker.TREDJELANDSBORGER, true)
+        assertLovligOppholdForTypeSøker(TypeSøker.EØS_BORGER, true)
+        assertLovligOppholdForTypeSøker(TypeSøker.ORDINÆR, false)
     }
 
     @Test
@@ -141,5 +154,27 @@ class StegServiceTest(
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.REGISTRERE_SØKNAD, behandlingEtterPersongrunnlagSteg.steg)
+    }
+
+    private fun assertLovligOppholdForTypeSøker(typeSøker: TypeSøker, skalInkludereLovligOpphold: Boolean) {
+        val søkerFnr = randomFnr()
+        val annenPartIdent = randomFnr()
+        val barnFnr = randomFnr()
+
+        mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
+
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
+
+        stegService.håndterSøknad(behandling,
+                                  lagSøknadDTO(annenPartIdent = annenPartIdent,
+                                               søkerIdent = søkerFnr,
+                                               barnasIdenter = listOf(barnFnr)).copy(typeSøker = typeSøker))
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)!!
+        behandlingResultat.personResultater.forEach { personresultat ->
+            Assertions.assertEquals(skalInkludereLovligOpphold, personresultat.vilkårResultater.any { vilkårResultat ->
+                vilkårResultat.vilkårType == Vilkår.LOVLIG_OPPHOLD }) }
     }
 }

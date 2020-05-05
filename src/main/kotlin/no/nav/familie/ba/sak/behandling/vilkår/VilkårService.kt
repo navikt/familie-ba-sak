@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
@@ -18,8 +21,23 @@ import java.time.LocalDate
 class VilkårService(
         private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
+
+    fun hentVilkårsdato(behandling: Behandling): LocalDate? {
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
+                                 ?: error("Finner ikke behandlingsresultat på behandling ${behandling.id}")
+
+        val periodeResultater = behandlingResultat.periodeResultater(brukMåned = false)
+        return periodeResultater.first {
+            it.allePåkrevdeVilkårErOppfylt(PersonType.SØKER,
+                                           SakType.valueOfType(behandling.kategori)) &&
+            it.allePåkrevdeVilkårErOppfylt(PersonType.BARN,
+                                           SakType.valueOfType(
+                                                   behandling.kategori))
+        }.periodeFom
+    }
 
     fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
         val behandling = behandlingService.hent(behandlingId)
@@ -61,6 +79,8 @@ class VilkårService(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
 
+        val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
+
         val behandlingResultat = BehandlingResultat(
                 behandling = behandlingService.hent(behandlingId),
                 aktiv = true)
@@ -69,22 +89,37 @@ class VilkårService(
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
-            val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.valueOfType(behandling.kategori))
-            personResultat.vilkårResultater = relevanteVilkår.map { vilkår ->
+            val sakType =
+                    if (behandling.kategori == BehandlingKategori.NASJONAL &&
+                        (søknadDTO?.typeSøker == TypeSøker.TREDJELANDSBORGER || søknadDTO?.typeSøker == TypeSøker.EØS_BORGER)) {
+                        SakType.TREDJELANDSBORGER
+                    } else SakType.valueOfType(behandling.kategori)
+
+            val relevanteVilkår = Vilkår.hentVilkårFor(person.type, sakType)
+            personResultat.vilkårResultater = relevanteVilkår.flatMap { vilkår ->
+                val vilkårListe = mutableListOf<VilkårResultat>()
                 if (vilkår == Vilkår.UNDER_18_ÅR) {
                     val evaluering = vilkår.spesifikasjon.evaluer(Fakta(personForVurdering = person))
-                    VilkårResultat(personResultat = personResultat,
-                                   resultat = evaluering.resultat,
+                    if (evaluering.resultat == Resultat.NEI) {
+                        vilkårListe.add(VilkårResultat(personResultat = personResultat,
+                                resultat = Resultat.NEI,
+                                vilkårType = vilkår,
+                                periodeFom = person.fødselsdato.plusYears(18).plusDays(1),
+                                begrunnelse = "Vurdert og satt automatisk"))
+                    }
+                    vilkårListe.add(VilkårResultat(personResultat = personResultat,
+                                   resultat = Resultat.JA,
                                    vilkårType = vilkår,
                                    periodeFom = person.fødselsdato,
                                    periodeTom = person.fødselsdato.plusYears(18),
-                                   begrunnelse = "Vurdert og satt automatisk")
+                                   begrunnelse = "Vurdert og satt automatisk"))
                 } else {
-                    VilkårResultat(personResultat = personResultat,
+                    vilkårListe.add(VilkårResultat(personResultat = personResultat,
                                    resultat = Resultat.KANSKJE,
                                    vilkårType = vilkår,
-                                   begrunnelse = "")
+                                   begrunnelse = ""))
                 }
+                vilkårListe
             }.toSet()
             personResultat
         }.toSet()

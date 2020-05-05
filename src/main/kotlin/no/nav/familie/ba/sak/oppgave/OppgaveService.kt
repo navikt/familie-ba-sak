@@ -22,7 +22,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     fun opprettOppgave(behandlingId: Long,
                        oppgavetype: Oppgavetype,
                        fristForFerdigstillelse: LocalDate,
-                       enhetId: String? = null): String {
+                       enhetId: String? = null,
+                       tilordnetNavIdent: String? = null): String {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
@@ -38,9 +39,10 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                 tema = Tema.BAR,
                 oppgavetype = oppgavetype,
                 fristFerdigstillelse = fristForFerdigstillelse,
-                beskrivelse = lagOppgaveTekst(fagsakId, oppgavetype.toString()),
+                beskrivelse = lagOppgaveTekst(fagsakId),
                 enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
-                behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode
+                behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode,
+                tilordnetRessurs = tilordnetNavIdent
         )
 
         val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
@@ -48,6 +50,17 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         val oppgave = DbOppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = oppgavetype)
         oppgaveRepository.save(oppgave)
         return opprettetOppgaveId
+    }
+
+    fun opprettOppgave(request: OpprettOppgave): String {
+        return integrasjonClient.opprettOppgave(request)
+    }
+
+    fun fordelOppgave(oppgaveId: Long, saksbehandler: String): String {
+        return integrasjonClient.fordelOppgave(oppgaveId, saksbehandler)
+    }
+    fun tilbakestillFordelingPåOppgave(oppgaveId: Long): String {
+        return integrasjonClient.fordelOppgave(oppgaveId, null)
     }
 
     fun hentOppgave(oppgaveId: Long): Ressurs<Oppgave> {
@@ -65,13 +78,9 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         oppgaveRepository.save(oppgave)
     }
 
-    private fun lagOppgaveTekst(fagsakId: Long, oppgavetype: String): String {
-        //TODO Tekst skal oppdateres når man får et forslag
-        var oppgaveTekst =
-                "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n"
-        oppgaveTekst += "Ny $oppgavetype-oppgave for ordinær barnetrygd \n"
-        oppgaveTekst += "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
-        return oppgaveTekst
+    fun lagOppgaveTekst(fagsakId: Long): String {
+        return "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
+               "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
     }
 
     fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?,

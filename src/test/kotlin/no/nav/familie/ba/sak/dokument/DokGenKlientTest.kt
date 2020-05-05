@@ -19,6 +19,8 @@ import java.time.LocalDate
 @ActiveProfiles("dev")
 @Disabled("DokGen must be available")
 class DokGenKlientTest(@Autowired
+                       private val dokumentService: DokumentService,
+                       @Autowired
                        private val dokGenKlient: DokGenKlient) {
 
     private val vedtak = Vedtak(
@@ -56,26 +58,24 @@ class DokGenKlientTest(@Autowired
 
     @Test
     fun `Test å hente Markdown og konvertere til html når dokgen kjører lokalt`() {
-        val markdown = dokGenKlient.hentStønadBrevMarkdown(behandling = vedtak.behandling,
-                                                           behandlingResultatType = BehandlingResultatType.INNVILGET,
-                                                           ansvarligSaksbehandler = vedtak.ansvarligSaksbehandler)
-        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(BehandlingResultatType.INNVILGET.brevMal, markdown)
+        val markdown = dokumentService.hentStønadBrevMarkdown(vedtak = vedtak,
+                                                              behandlingResultatType = BehandlingResultatType.INNVILGET
+        )
+        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(BehandlingResultatType.INNVILGET.brevMal, markdown, testDokumentHeaderFelter)
         assert(htmlResponse.startsWith("<html>"))
     }
 
     @Test
     fun `Test å generer Markdown for avslag brev`() {
-        val markdown = dokGenKlient.hentStønadBrevMarkdown(behandling = avslagVedtak.behandling,
-                                                           behandlingResultatType = BehandlingResultatType.AVSLÅTT,
-                                                           ansvarligSaksbehandler = avslagVedtak.ansvarligSaksbehandler)
+        val markdown = dokumentService.hentStønadBrevMarkdown(vedtak = avslagVedtak,
+                                                              behandlingResultatType = BehandlingResultatType.AVSLÅTT)
         assert(markdown.startsWith("<br>Du har ikke rett til barnetrygd fordi ."))
     }
 
     @Test
     fun `Test å generer Markdown for opphørt brev`() {
-        val markdown = dokGenKlient.hentStønadBrevMarkdown(behandling = opphørtVedtak.behandling,
-                                                           behandlingResultatType = BehandlingResultatType.OPPHØRT,
-                                                           ansvarligSaksbehandler = opphørtVedtak.ansvarligSaksbehandler)
+        val markdown = dokumentService.hentStønadBrevMarkdown(vedtak = opphørtVedtak,
+                                                              behandlingResultatType = BehandlingResultatType.OPPHØRT)
         assert(markdown.startsWith("<br>Barnetrygden din stanses fra"))
     }
 }

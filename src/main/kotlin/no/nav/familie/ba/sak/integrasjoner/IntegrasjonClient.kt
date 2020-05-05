@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
+import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
+import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.http.client.AbstractRestClient
@@ -205,6 +207,34 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
+    fun fordelOppgave(oppgaveId: Long, saksbehandler: String?): String {
+        val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/fordel")
+        val uri = if (saksbehandler == null)
+            baseUri
+        else
+            UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
+
+        return Result.runCatching {
+            postForEntity<Ressurs<OppgaveResponse>>(uri, HttpHeaders().medContentTypeJsonUTF8())
+        }.fold(
+                onSuccess = {
+                    assertGenerelleSuksessKriterier(it)
+
+                    it?.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId.",
+                            null,
+                            uri
+                    )
+                },
+                onFailure = {
+                    val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+                    throw IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave. response=$message",
+                            it,
+                            uri
+                    )
+                }
+        )
+    }
+
     fun finnOppgaveMedId(oppgaveId: Long): Ressurs<Oppgave> {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
 
@@ -313,6 +343,30 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 onFailure = {
                     IntegrasjonException("Kall mot integrasjon feilet ved oppdaterJournalpost", it, uri, request.bruker.id)
                 }
+        )
+    }
+
+    fun leggTilLogiskVedlegg(request: LogiskVedleggRequest, dokumentinfoId: String): LogiskVedleggResponse {
+       val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg")
+       return exchange(
+           networkRequest = {
+               postForEntity<Ressurs<LogiskVedleggResponse>>(uri, request)
+           },
+           onFailure = {
+               IntegrasjonException("Kall mot integrasjon feilet ved leggTilLogiskVedlegg", it, uri, null)
+           }
+       )
+    }
+
+    fun slettLogiskVedlegg(logiskVedleggId: String, dokumentinfoId: String): LogiskVedleggResponse {
+        val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg/$logiskVedleggId")
+        return exchange(
+            networkRequest = {
+                deleteForEntity<Ressurs<LogiskVedleggResponse>>(uri)
+            },
+            onFailure = {
+                IntegrasjonException("Kall mot integrasjon feilet ved slettLogiskVedlegg", it, uri, null)
+            }
         )
     }
 

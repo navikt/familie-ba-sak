@@ -20,7 +20,7 @@ class BehandlingStegTest {
         var steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
         riktigRekkefølge.forEach {
             assertEquals(steg, it)
-            steg = it.hentNesteSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+            steg = it.hentNesteSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, utførendeStegType = steg)
         }
         steg = StegType.REGISTRERE_PERSONGRUNNLAG
         val riktigRekkefølgeForInfotrygd = listOf(
@@ -32,7 +32,7 @@ class BehandlingStegTest {
                 StegType.BEHANDLING_AVSLUTTET)
         riktigRekkefølgeForInfotrygd.forEach {
             assertEquals(steg, it)
-            steg = it.hentNesteSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+            steg = it.hentNesteSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, utførendeStegType = steg)
         }
     }
 

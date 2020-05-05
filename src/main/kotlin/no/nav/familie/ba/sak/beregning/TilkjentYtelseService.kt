@@ -23,13 +23,13 @@ object TilkjentYtelseService {
         val søkerMap = personopplysningGrunnlag.søker
                 .associateBy { it.personIdent.ident }
 
-        val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater.filter {
+        val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater(brukMåned = true).filter {
             søkerMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.SØKER,
                     SakType.valueOfType(behandlingResultat.behandling.kategori)
             )
         }
-        val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater.filter {
+        val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater(brukMåned = true).filter {
             identBarnMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.BARN,
                     SakType.valueOfType(behandlingResultat.behandling.kategori)
@@ -53,7 +53,8 @@ object TilkjentYtelseService {
                                         maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
                                 val stønadTom =
                                         minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
-                                val stønadTomKommerFra18ÅrsVilkår = stønadTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
+                                val stønadTomKommerFra18ÅrsVilkår =
+                                        stønadTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
                                 val beløpsperioder = SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
                                         stønadFraOgMed = settRiktigStønadFom(stønadFom),

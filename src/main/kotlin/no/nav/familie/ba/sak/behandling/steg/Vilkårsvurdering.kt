@@ -36,7 +36,7 @@ class Vilkårsvurdering(
         val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 vilkårsvurdertBehandling,
                 personopplysningGrunnlag,
-                ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandler())
+                ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn())
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)

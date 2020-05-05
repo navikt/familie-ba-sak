@@ -56,6 +56,29 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
         }
     }
 
+    @PostMapping(path = ["/{oppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun fordelOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long,
+                                      @RequestParam("saksbehandler") saksbehandler: String
+    ): ResponseEntity<Ressurs<String>> {
+
+        return Result.runCatching {
+            oppgaveService.fordelOppgave(oppgaveId, saksbehandler)
+        }.fold(
+                onSuccess = { return ResponseEntity.ok().body(Ressurs.success(it)) },
+                onFailure = { return illegalState("Feil ved tildeling av oppgave", it) }
+        )
+    }
+
+    @PostMapping(path = ["/{oppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun tilbakestillFordelingPåOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<String>> {
+        return Result.runCatching {
+            oppgaveService.tilbakestillFordelingPåOppgave(oppgaveId)
+        }.fold(
+                onSuccess = { return ResponseEntity.ok().body(Ressurs.Companion.success(it)) },
+                onFailure = { return illegalState("Feil ved tilbakestilling av tildeling på oppgave", it) }
+        )
+    }
+
     @GetMapping(path = ["/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long)
             : ResponseEntity<Ressurs<DataForManuellJournalføring>> {

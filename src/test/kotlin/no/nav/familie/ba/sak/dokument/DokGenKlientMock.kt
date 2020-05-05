@@ -1,13 +1,16 @@
 package no.nav.familie.ba.sak.dokument
 
+import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 
+
 @Service
 @Profile("mock-dokgen-java")
+@Primary
 class DokGenKlientMock : DokGenKlient(
         dokgenServiceUri = "dokgen_uri_mock",
         restTemplate = RestTemplate()

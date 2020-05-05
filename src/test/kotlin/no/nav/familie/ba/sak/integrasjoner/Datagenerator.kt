@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.kontrakter.felles.oppgave.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost {
     return Journalpost(
@@ -26,7 +27,8 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
                       arkivsaksystem = "GSAK",
                       sakstype = Sakstype.FAGSAK.name,
                       fagsakId = null,
-                      fagsaksystem = FAGSYSTEM)
+                      fagsaksystem = FAGSYSTEM),
+            datoMottatt = LocalDateTime.now()
     )
 }
 
@@ -41,24 +43,27 @@ fun lagTestOppgave(): OpprettOppgave {
                           behandlingstema = "behandlingstema")
 }
 
-fun lagTestOppgaveDTO(oppgaveId: Long): Oppgave {
+fun lagTestOppgaveDTO(oppgaveId: Long,
+                      oppgavetype: Oppgavetype = Oppgavetype.Journalføring,
+                      tildeltRessurs: String? = null): Oppgave {
     return Oppgave(id = oppgaveId,
-                   aktoerId = "1234",
-                   journalpostId = "1234",
-                   tildeltEnhetsnr = "4820",
-                   behandlesAvApplikasjon = "FS22",
-                   beskrivelse = "Beskrivelse for oppgave",
-                   tema = Tema.BAR,
-                   oppgavetype = Oppgavetype.Journalføring.name,
-                   opprettetTidspunkt = LocalDate.of(
-                           2020,
-                           1,
-                           1).toString(),
-                   fristFerdigstillelse = LocalDate.of(
-                           2020,
-                           2,
-                           1).toString(),
-                   prioritet = OppgavePrioritet.NORM,
-                   status = StatusEnum.OPPRETTET
+            aktoerId = "1234",
+            journalpostId = "1234",
+            tildeltEnhetsnr = "4820",
+            tilordnetRessurs = tildeltRessurs,
+            behandlesAvApplikasjon = "FS22",
+            beskrivelse = "Beskrivelse for oppgave",
+            tema = Tema.BAR,
+            oppgavetype = oppgavetype.value,
+            opprettetTidspunkt = LocalDate.of(
+                    2020,
+                    1,
+                    1).toString(),
+            fristFerdigstillelse = LocalDate.of(
+                    2020,
+                    2,
+                    1).toString(),
+            prioritet = OppgavePrioritet.NORM,
+            status = StatusEnum.OPPRETTET
     )
 }

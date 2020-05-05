@@ -42,7 +42,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     LOVLIG_OPPHOLD(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
-            gjelderKunFor = listOf<SakType>(SakType.EØS),
+            gjelderKunFor = listOf<SakType>(SakType.EØS, SakType.TREDJELANDSBORGER),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "§4-2 - Lovlig opphold",
                     identifikator = "LOVLIG_OPPHOLD",
@@ -81,7 +81,7 @@ data class GyldigVilkårsperiode (
 }
 
 enum class SakType {
-    EØS, NASJONAL;
+    EØS, NASJONAL, TREDJELANDSBORGER;
 
     companion object {
         fun valueOfType(type: Any): SakType {
