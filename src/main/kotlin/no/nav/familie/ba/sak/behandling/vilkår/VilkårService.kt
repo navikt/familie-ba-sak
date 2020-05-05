@@ -99,14 +99,6 @@ class VilkårService(
             personResultat.vilkårResultater = relevanteVilkår.flatMap { vilkår ->
                 val vilkårListe = mutableListOf<VilkårResultat>()
                 if (vilkår == Vilkår.UNDER_18_ÅR) {
-                    val evaluering = vilkår.spesifikasjon.evaluer(Fakta(personForVurdering = person))
-                    if (evaluering.resultat == Resultat.NEI) {
-                        vilkårListe.add(VilkårResultat(personResultat = personResultat,
-                                resultat = Resultat.NEI,
-                                vilkårType = vilkår,
-                                periodeFom = person.fødselsdato.plusYears(18).plusDays(1),
-                                begrunnelse = "Vurdert og satt automatisk"))
-                    }
                     vilkårListe.add(VilkårResultat(personResultat = personResultat,
                                    resultat = Resultat.JA,
                                    vilkårType = vilkår,
