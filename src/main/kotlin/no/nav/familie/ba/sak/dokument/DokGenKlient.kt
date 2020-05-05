@@ -16,6 +16,8 @@ import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import java.net.URI
 
@@ -67,7 +69,13 @@ class DokGenKlient(
     }
 
     fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
-        return restTemplate.exchange(request, responseType)
+        try {
+            return restTemplate.exchange(request, responseType)
+        } catch (e: HttpClientErrorException.NotFound) {
+            error("Ugyldig mal.")
+        } catch (e: RestClientException) {
+            error("Ukjent feil ved dokumentgenerering.")
+        }
     }
 
     companion object {
