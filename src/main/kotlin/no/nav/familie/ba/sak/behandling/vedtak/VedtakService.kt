@@ -7,7 +7,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -23,6 +26,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     private val behandlingResultatService: BehandlingResultatService,
                     private val søknadGrunnlagService: SøknadGrunnlagService,
                     private val vedtakRepository: VedtakRepository,
+                    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
                     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokumentService: DokumentService,
                     private val fagsakService: FagsakService) {
@@ -70,6 +74,14 @@ class VedtakService(private val behandlingService: BehandlingService,
         // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
         vedtakRepository.save(gjeldendeVedtak.also { it.aktiv = false })
         vedtakRepository.save(nyttVedtak)
+
+        val nyTilkjentYtelse = TilkjentYtelse(
+                behandling = nyBehandling,
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now()
+        )
+        tilkjentYtelseRepository.save(nyTilkjentYtelse)
+        behandlingRepository.save(nyBehandling.also { it.steg = StegType.FERDIGSTILLE_BEHANDLING })
 
         postProsessor(nyttVedtak)
 
