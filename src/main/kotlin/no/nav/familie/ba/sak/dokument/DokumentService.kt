@@ -44,7 +44,6 @@ class DokumentService(
                                             markdown = vedtak.stønadBrevMarkdown,
                                             dokumentHeaderFelter = DokumentHeaderFelter(
                                                     fodselsnummer = søker.personIdent.ident,
-                                                    navn = søker.navn,
                                                     returadresse = "",
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr()
                                             )
@@ -73,7 +72,6 @@ class DokumentService(
                     behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
             dokGenKlient.lagPdfFraMarkdown(behandlingResultatType.brevMal, markdown, DokumentHeaderFelter(
                     fodselsnummer = søker.personIdent.ident,
-                    navn = søker.navn,
                     returadresse = "",
                     dokumentDato = LocalDate.now().tilDagMånedÅr()
             ))

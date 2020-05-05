@@ -87,7 +87,6 @@ class DokGenKlientIntegrationTest {
     }
 }
 
-val testDokumentHeaderFelter = DokumentHeaderFelter(navn = "Mockersen",
-                                                    dokumentDato = LocalDate.now().toString(),
+val testDokumentHeaderFelter = DokumentHeaderFelter(dokumentDato = LocalDate.now().toString(),
                                                     fodselsnummer = "1234",
                                                     returadresse = "retur")
