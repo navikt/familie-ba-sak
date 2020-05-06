@@ -53,7 +53,7 @@ class DokGenKlientIntegrationTest {
         }
     }
 
-    class DokumentServiceTest : DokumentService(mockk(), mockk(), mockk(), mockk()) {
+    class DokumentServiceTest : DokumentService(mockk(), mockk(), mockk(), mockk(), mockk()) {
         override fun hentStønadBrevMarkdown(vedtak: Vedtak,
                                             søknad: SøknadDTO?,
                                             behandlingResultatType: BehandlingResultatType): String {
