@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
+import javax.persistence.EntityManager
 
 
 @SpringBootTest
@@ -42,7 +43,10 @@ class StegServiceTest(
         private val mockIntegrasjonClient: IntegrasjonClient,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService
+        private val behandlingResultatService: BehandlingResultatService,
+
+        @Autowired
+        private val entityManager: EntityManager
 ) {
 
     @Test
@@ -65,7 +69,7 @@ class StegServiceTest(
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
-
+        entityManager.clear()
         stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg, RestVilkårsvurdering(
                 personResultater = vilkårsvurderingInnvilget(søkerFnr))
         )
