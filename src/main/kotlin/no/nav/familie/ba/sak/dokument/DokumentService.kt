@@ -45,7 +45,7 @@ class DokumentService(
                                             dokumentHeaderFelter = DokumentHeaderFelter(
                                                     fodselsnummer = søker.personIdent.ident,
                                                     navn = søker.navn,
-                                                    returadresse = "",
+                                                    returadresse = "NAV Averøy, postboks 54, 6538 Averøy",
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr()
                                             )
             )
