@@ -69,23 +69,29 @@ class VilkårService(
         return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
     }
 
-    fun initierVilkårvurderingForBehandling(behandlingId: Long): BehandlingResultat {
-        val behandling = behandlingService.hent(behandlingId)
-        val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
+    fun initierVilkårvurderingForBehandling(behandlingId: Long): BehandlingResultat {val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
         if (aktivBehandlingResultat != null) {
             return aktivBehandlingResultat
         }
-
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
-                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
-
-        val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
 
         val behandlingResultat = BehandlingResultat(
                 behandling = behandlingService.hent(behandlingId),
                 aktiv = true)
 
-        behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
+        behandlingResultat.personResultater = minimalPersonResultaterForBehandling(behandlingId, behandlingResultat)
+
+        return behandlingResultatService.lagreInitiert(behandlingResultat)
+    }
+
+    fun minimalPersonResultaterForBehandling(behandlingId: Long, behandlingResultat: BehandlingResultat) : Set<PersonResultat> {
+        val behandling = behandlingService.hent(behandlingId)
+
+
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
+                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
+
+        val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
+        val personResultater = personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
@@ -100,23 +106,22 @@ class VilkårService(
                 val vilkårListe = mutableListOf<VilkårResultat>()
                 if (vilkår == Vilkår.UNDER_18_ÅR) {
                     vilkårListe.add(VilkårResultat(personResultat = personResultat,
-                                   resultat = Resultat.JA,
-                                   vilkårType = vilkår,
-                                   periodeFom = person.fødselsdato,
-                                   periodeTom = person.fødselsdato.plusYears(18),
-                                   begrunnelse = "Vurdert og satt automatisk"))
+                                                   resultat = Resultat.JA,
+                                                   vilkårType = vilkår,
+                                                   periodeFom = person.fødselsdato,
+                                                   periodeTom = person.fødselsdato.plusYears(18),
+                                                   begrunnelse = "Vurdert og satt automatisk"))
                 } else {
                     vilkårListe.add(VilkårResultat(personResultat = personResultat,
-                                   resultat = Resultat.KANSKJE,
-                                   vilkårType = vilkår,
-                                   begrunnelse = ""))
+                                                   resultat = Resultat.KANSKJE,
+                                                   vilkårType = vilkår,
+                                                   begrunnelse = ""))
                 }
                 vilkårListe
             }.toSet()
             personResultat
         }.toSet()
-
-        return behandlingResultatService.lagreInitiert(behandlingResultat)
+        return personResultater
     }
 
     fun kontrollerVurderteVilkårOgLagResultat(personResultater: List<RestPersonResultat>,
