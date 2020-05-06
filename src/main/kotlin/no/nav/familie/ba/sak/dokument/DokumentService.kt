@@ -50,7 +50,7 @@ class DokumentService(
                                             dokumentHeaderFelter = DokumentHeaderFelter(
                                                     fodselsnummer = søker.personIdent.ident,
                                                     navn = søker.navn,
-                                                    returadresse = "",
+                                                    returadresse = "NAV Voss",
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr()
                                             )
             )
@@ -84,7 +84,7 @@ class DokumentService(
                                            dokumentHeaderFelter = DokumentHeaderFelter(
                                                    fodselsnummer = søker.personIdent.ident,
                                                    navn = søker.navn,
-                                                   returadresse = "",
+                                                   returadresse = "NAV Voss",
                                                    dokumentDato = LocalDate.now().tilDagMånedÅr()
             ))
         }
