@@ -64,7 +64,7 @@ class MalerService(
         val vilkårsdato = vilkårService.hentVilkårsdato(behandling = behandling)
                           ?: error("Finner ikke vilkårsdato for vedtaksbrev")
 
-        val barnasFødselsdatoer = Utils.slåSammen(barna.map { it.fødselsdato.tilKortString() })
+        val barnasFødselsdatoer = Utils.slåSammen(barna.sortedBy { it.fødselsdato }.map { it.fødselsdato.tilKortString() })
 
         val innvilget = Innvilget(
                 enhet = "enhet",
@@ -78,7 +78,7 @@ class MalerService(
                 belop = beløp,
                 antallBarn = barna.size,
                 flereBarn = barna.size > 1,
-                hjemmel = Utils.slåSammen(listOf("§2", "§4", "§11"))
+                hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11"))
         )
 
         return objectMapper.writeValueAsString(innvilget)
