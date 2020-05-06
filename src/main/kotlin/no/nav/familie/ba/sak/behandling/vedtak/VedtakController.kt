@@ -97,13 +97,6 @@ class VedtakController(
                 )
     }
 
-    @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak"])
-    fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<String>> {
-        val førsteNesteMåned = LocalDate.now().førsteDagINesteMåned()
-        return opphørMigrertVedtak(fagsakId,
-                Opphørsvedtak(førsteNesteMåned))
-    }
-
     @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
     fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long, @RequestBody
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
@@ -117,10 +110,6 @@ class VedtakController(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                 ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
-            return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er migrering")
-        }
-
         if (behandling.status != BehandlingStatus.IVERKSATT && behandling.status != BehandlingStatus.FERDIGSTILT) {
             return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt/ferdigstilt")
         }
@@ -128,7 +117,9 @@ class VedtakController(
         val task = OpphørVedtakTask.opprettOpphørVedtakTask(behandling,
                 vedtak,
                 saksbehandlerId,
-                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+                if (behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD)
+                    BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+                else BehandlingType.TEKNISK_OPPHØR,
                 opphørsvedtak.opphørsdato)
         taskRepository.save(task)
 
