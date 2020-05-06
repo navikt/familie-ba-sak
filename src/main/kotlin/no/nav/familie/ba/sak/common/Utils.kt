@@ -6,7 +6,7 @@ import java.util.*
 val nbLocale = Locale("nb", "Norway")
 
 object Utils {
-    fun slåSammen(values: List<String>) = Regex("(.*),").replace(values.joinToString(", "), "$1 og")
+    fun slåSammen(values: List<String>): String = Regex("(.*),").replace(values.joinToString(", "), "$1 og")
 
-    fun formaterBeløp(beløp: Int) = NumberFormat.getInstance().format(beløp)
+    fun formaterBeløp(beløp: Int): String = NumberFormat.getNumberInstance(nbLocale).format(beløp)
 }
