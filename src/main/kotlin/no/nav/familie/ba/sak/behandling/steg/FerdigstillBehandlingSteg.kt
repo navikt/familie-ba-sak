@@ -38,8 +38,7 @@ class FerdigstillBehandlingSteg(
         }
 
         antallBehandlingerFerdigstilt[behandling.type]?.increment()
-        if (behandling.type == BehandlingType.TEKNISK_OPPHØR) loggService.tekniskOpphørFerdigstilt(behandling)
-        else loggService.opprettFerdigstillBehandling(behandling)
+        loggService.opprettFerdigstillBehandling(behandling)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
         return hentNesteStegForNormalFlyt(behandling)
     }

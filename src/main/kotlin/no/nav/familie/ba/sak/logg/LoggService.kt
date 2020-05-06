@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -126,7 +127,8 @@ class LoggService(
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.FERDIGSTILLE_BEHANDLING,
-                tittel = "Ferdigstilt behandling",
+                tittel = if (behandling.type == BehandlingType.TEKNISK_OPPHØR) "Teknisk opphør ferdigstilt"
+                else "Ferdigstilt behandling",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SYSTEM),
                 tekst = ""
         ))
@@ -138,16 +140,6 @@ class LoggService(
                 type = LoggType.BEHANDLING_OPPRETTET,
                 tittel = "Teknisk opphør opprettet",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                tekst = ""
-        ))
-    }
-
-    fun tekniskOpphørFerdigstilt(behandling: Behandling) {
-        lagre(Logg(
-                behandlingId = behandling.id,
-                type = LoggType.FERDIGSTILLE_BEHANDLING,
-                tittel = "Teknisk opphør ferdigstilt",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SYSTEM),
                 tekst = ""
         ))
     }
