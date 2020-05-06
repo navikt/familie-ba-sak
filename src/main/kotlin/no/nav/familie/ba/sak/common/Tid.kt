@@ -20,5 +20,6 @@ fun LocalDate.sisteDagIMåned(): LocalDate {
 }
 
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
+fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
 
 private fun LocalDate.toDate(): Date = Date.from(this.atStartOfDay(ZoneId.systemDefault()).toInstant())
