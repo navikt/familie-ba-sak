@@ -45,7 +45,7 @@ class DokumentService(
                                             dokumentHeaderFelter = DokumentHeaderFelter(
                                                     fodselsnummer = søker.personIdent.ident,
                                                     navn = søker.navn,
-                                                    returadresse = "NAV Averøy, postboks 54, 6538 Averøy",
+                                                    returadresse = "NAV Averøy",
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr()
                                             )
             )
@@ -74,7 +74,7 @@ class DokumentService(
             dokGenKlient.lagPdfFraMarkdown(behandlingResultatType.brevMal, markdown, DokumentHeaderFelter(
                     fodselsnummer = søker.personIdent.ident,
                     navn = søker.navn,
-                    returadresse = "",
+                    returadresse = "NAV Averøy",
                     dokumentDato = LocalDate.now().tilDagMånedÅr()
             ))
         }
