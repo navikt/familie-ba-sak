@@ -75,7 +75,7 @@ class MalerService(
                 virkningsdato = utbetalingsperioder.minLocalDate.tilMånedÅr(),
                 vilkårsdato = vilkårsdato.tilDagMånedÅr(),
                 vedtaksdato = vedtak.vedtaksdato.tilKortString(),
-                belop = beløp,
+                belop = Utils.formaterBeløp(beløp),
                 antallBarn = barna.size,
                 flereBarn = barna.size > 1,
                 hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11"))
