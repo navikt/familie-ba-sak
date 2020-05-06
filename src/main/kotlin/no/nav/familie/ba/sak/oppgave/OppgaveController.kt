@@ -40,7 +40,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
         }
     }
 
-    @PostMapping(path = ["/hentOppgaver"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(path = ["/hent-oppgaver"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequest)
             : ResponseEntity<Ressurs<List<Oppgave>>> {
 
@@ -52,7 +52,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
             val oppgaver: List<Oppgave> = oppgaveService.hentOppgaver(finnOppgaveRequest)
             ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
         } catch (e: Throwable) {
-            badRequest("Henting av oppgaver feilet", e)
+            illegalState("Henting av oppgaver feilet", e)
         }
     }
 
