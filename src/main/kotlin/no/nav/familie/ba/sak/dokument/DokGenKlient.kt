@@ -29,7 +29,6 @@ class DokGenKlient(
 
     fun hentMarkdownForMal(malMedData: MalMedData): String {
         val url = URI.create("$dokgenServiceUri/template/${malMedData.mal}/create-markdown")
-        LOG.info("hent markdown fra: $url")
         val response = utførRequest(lagPostRequest(url, malMedData.fletteFelter), String::class.java)
         return response.body.orEmpty()
     }
@@ -61,6 +60,8 @@ class DokGenKlient(
     }
 
     private fun lagPostRequest(url: URI, body: String): RequestEntity<String> {
+        LOG.info("\"Gjør POST request mot $url")
+        secureLogger.info("Gjør POST request mot $url med body $body")
         return RequestEntity.post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .acceptCharset(Charsets.UTF_8)
@@ -80,5 +81,6 @@ class DokGenKlient(
 
     companion object {
         val LOG = LoggerFactory.getLogger(this::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
