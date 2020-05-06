@@ -69,29 +69,55 @@ class VilkårService(
         return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
     }
 
-    fun initierVilkårvurderingForBehandling(behandlingId: Long): BehandlingResultat {val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
+    fun initierVilkårvurderingForBehandling(behandlingId: Long): BehandlingResultat {
+
+        val initiertBehandlingResultat = initierMinimaltBehandlingResultatForBehandling(behandlingId)
+
+        val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
         if (aktivBehandlingResultat != null) {
-            return aktivBehandlingResultat
+            val oppdatert =  lagOppdatertBehandlingResultat(aktivtResultat = aktivBehandlingResultat, initiertResultat = initiertBehandlingResultat)
+            return behandlingResultatService.lagreInitiert(oppdatert)
+        } else {
+            return behandlingResultatService.lagreInitiert(initiertBehandlingResultat)
         }
-
-        val behandlingResultat = BehandlingResultat(
-                behandling = behandlingService.hent(behandlingId),
-                aktiv = true)
-
-        behandlingResultat.personResultater = minimalPersonResultaterForBehandling(behandlingId, behandlingResultat)
-
-        return behandlingResultatService.lagreInitiert(behandlingResultat)
     }
 
-    fun minimalPersonResultaterForBehandling(behandlingId: Long, behandlingResultat: BehandlingResultat) : Set<PersonResultat> {
-        val behandling = behandlingService.hent(behandlingId)
+    fun lagOppdatertBehandlingResultat(aktivtResultat: BehandlingResultat, initiertResultat: BehandlingResultat): BehandlingResultat {
+        // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
+        val oppdatertePersonResultater = mutableSetOf<PersonResultat>()
+        initiertResultat.personResultater.forEach { personFraInitiert ->
+            val personFraAktivt = aktivtResultat.personResultater.filter { it.personIdent == personFraInitiert.personIdent }.firstOrNull()
+            if (personFraAktivt != null) { // Fyll inn den initierte med person fra aktiv
+                val personsOppdaterteVilkårResultater = mutableSetOf<VilkårResultat>()
+                personFraInitiert.vilkårResultater.forEach { initiertVilkårResultat ->
+                    val vilkårResultaterFraAktivt = personFraAktivt.vilkårResultater.filter { it.vilkårType == initiertVilkårResultat.vilkårType }
+                    if (vilkårResultaterFraAktivt.isEmpty()) {
+                        personsOppdaterteVilkårResultater.addAll(vilkårResultaterFraAktivt)
+                    } else {
+                        personsOppdaterteVilkårResultater.add(initiertVilkårResultat)
+                    }
+                }
+                personFraAktivt.vilkårResultater = personsOppdaterteVilkårResultater
+                oppdatertePersonResultater.add(personFraAktivt)
+            } else { // Legg til ny person som den er
+                oppdatertePersonResultater.add(personFraInitiert)
+            }
+        }
+        aktivtResultat.personResultater = oppdatertePersonResultater
+        return aktivtResultat // TODO: Heller returnere en ny kopi?
+    }
 
+    fun initierMinimaltBehandlingResultatForBehandling(behandlingId: Long) : BehandlingResultat { // TODO: Bedre navn
+        val behandling = behandlingService.hent(behandlingId)
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
 
         val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
-        val personResultater = personopplysningGrunnlag.personer.map { person ->
+
+        val behandlingResultat = BehandlingResultat(behandling = behandlingService.hent(behandlingId),
+                                                    aktiv = true)
+        behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
@@ -121,7 +147,7 @@ class VilkårService(
             }.toSet()
             personResultat
         }.toSet()
-        return personResultater
+        return behandlingResultat
     }
 
     fun kontrollerVurderteVilkårOgLagResultat(personResultater: List<RestPersonResultat>,

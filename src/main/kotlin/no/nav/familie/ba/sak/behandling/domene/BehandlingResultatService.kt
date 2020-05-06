@@ -41,10 +41,13 @@ class BehandlingResultatService(
     }
 
     fun lagreInitiert(behandlingResultat: BehandlingResultat): BehandlingResultat {
+        /*
+        TODO: Oppdater navn på denne funksjonen?
         val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
         if (aktivBehandlingResultat != null) {
             error("Det finnes allerede et aktivt behandlingsresultat for behandling ${behandlingResultat.behandling.id}")
         }
+         */
         LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling resultat $behandlingResultat")
         return behandlingResultatRepository.save(behandlingResultat)
     }
