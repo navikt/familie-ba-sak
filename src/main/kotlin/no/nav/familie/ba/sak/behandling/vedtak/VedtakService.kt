@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.dokument.DokumentService
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
@@ -25,6 +26,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     private val behandlingRepository: BehandlingRepository,
                     private val behandlingResultatService: BehandlingResultatService,
                     private val søknadGrunnlagService: SøknadGrunnlagService,
+                    private val loggService: LoggService,
                     private val vedtakRepository: VedtakRepository,
                     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
                     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
@@ -62,6 +64,7 @@ class VedtakService(private val behandlingService: BehandlingService,
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
         behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
         behandlingRepository.save(nyBehandling)
+        loggService.opprettTekniskOpphørLogg(nyBehandling)
 
         val nyttVedtak = Vedtak(
                 ansvarligSaksbehandler = saksbehandler,

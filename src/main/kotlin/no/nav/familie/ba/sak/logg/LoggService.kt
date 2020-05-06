@@ -132,6 +132,26 @@ class LoggService(
         ))
     }
 
+    fun opprettTekniskOpphørLogg(behandling: Behandling) {
+        lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Teknisk opphør opprettet",
+                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = ""
+        ))
+    }
+
+    fun tekniskOpphørFerdigstilt(behandling: Behandling) {
+        lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.FERDIGSTILLE_BEHANDLING,
+                tittel = "Teknisk opphør ferdigstilt",
+                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SYSTEM),
+                tekst = ""
+        ))
+    }
+
     fun lagre(logg: Logg): Logg {
         metrikkPerLoggType[logg.type]?.increment()
 
