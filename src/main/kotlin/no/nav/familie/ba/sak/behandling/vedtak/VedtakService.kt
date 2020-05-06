@@ -7,7 +7,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -23,6 +26,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                     private val behandlingResultatService: BehandlingResultatService,
                     private val søknadGrunnlagService: SøknadGrunnlagService,
                     private val vedtakRepository: VedtakRepository,
+                    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
                     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokumentService: DokumentService,
                     private val fagsakService: FagsakService) {
@@ -71,6 +75,14 @@ class VedtakService(private val behandlingService: BehandlingService,
         vedtakRepository.save(gjeldendeVedtak.also { it.aktiv = false })
         vedtakRepository.save(nyttVedtak)
 
+        val nyTilkjentYtelse = TilkjentYtelse(
+                behandling = nyBehandling,
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now()
+        )
+        tilkjentYtelseRepository.save(nyTilkjentYtelse)
+        behandlingRepository.save(nyBehandling.also { it.steg = StegType.FERDIGSTILLE_BEHANDLING })
+
         postProsessor(nyttVedtak)
 
         return Ressurs.success(nyttVedtak)
@@ -90,21 +102,10 @@ class VedtakService(private val behandlingService: BehandlingService,
                 forrigeVedtakId = forrigeVedtak?.id,
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) LocalDate.now()
                         .førsteDagINesteMåned() else null
-
         )
 
-        vedtak.stønadBrevMarkdown = if (behandlingResultatType != BehandlingResultatType.INNVILGET) Result.runCatching {
-            dokumentService.hentStønadBrevMarkdown(
-                    behandlingResultatType = behandlingResultatType,
-                    vedtak = vedtak)
-        }
-                .fold(
-                        onSuccess = { it },
-                        onFailure = {
-                            secureLogger.info("dokgen feil: ", it as Exception)
-                            error("Klart ikke å opprette vedtak på grunn av feil fra dokumentgenerering.")
-                        }
-                ) else ""
+        vedtak.stønadBrevMarkdown =
+                if (behandlingResultatType != BehandlingResultatType.INNVILGET) hentVedtaksbrevMarkdown(vedtak) else ""
 
         return lagreOgDeaktiverGammel(vedtak)
     }
@@ -112,9 +113,17 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Ressurs<RestFagsak> {
+        vedtak.stønadBrevMarkdown = hentVedtaksbrevMarkdown(vedtak)
 
+        lagreOgDeaktiverGammel(vedtak)
+
+        return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
+    }
+
+    fun hentVedtaksbrevMarkdown(vedtak: Vedtak): String {
         val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(vedtak.behandling.id)
-        vedtak.stønadBrevMarkdown = Result.runCatching {
+
+        return Result.runCatching {
             val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
 
             dokumentService.hentStønadBrevMarkdown(
@@ -126,15 +135,10 @@ class VedtakService(private val behandlingService: BehandlingService,
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
-                            secureLogger.info("Klart ikke å oppdatere vedtak med vedtaksbrev på grunn av feil fra dokumentgenerering.",
-                                              e)
-                            error("Klart ikke å oppdatere vedtak med vedtaksbrev på grunn av feil fra dokumentgenerering.")
+                            secureLogger.info("Klart ikke å oppdatere vedtak med vedtaksbrev: ${e.message}", e)
+                            error("Klart ikke å oppdatere vedtak med vedtaksbrev: ${e.message}")
                         }
                 )
-
-        lagreOgDeaktiverGammel(vedtak)
-
-        return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
 
     fun hentForrigeVedtak(behandling: Behandling): Vedtak? {

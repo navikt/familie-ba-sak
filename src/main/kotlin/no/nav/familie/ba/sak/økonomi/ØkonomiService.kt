@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
@@ -23,7 +24,10 @@ class ØkonomiService(
     fun oppdaterTilkjentYtelseOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
         val vedtak = vedtakService.hent(vedtakId)
         val behandlingResultatType =
-                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+                if (vedtak.behandling.type == BehandlingType.TEKNISK_OPPHØR
+                        || vedtak.behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
+                    BehandlingResultatType.OPPHØRT
+                else behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
         val andelerTilkjentYtelse = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) {
             val forrigeVedtak = vedtakService.hent(vedtak.forrigeVedtakId!!)
