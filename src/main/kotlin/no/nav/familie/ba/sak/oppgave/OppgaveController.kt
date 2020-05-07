@@ -44,7 +44,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
                                       @RequestParam("saksbehandler") saksbehandler: String
     ): ResponseEntity<Ressurs<String>> {
 
-        return Result.runCatching {
+        Result.runCatching {
             oppgaveService.fordelOppgave(oppgaveId, saksbehandler)
         }.fold(
                 onSuccess = { return ResponseEntity.ok().body(Ressurs.success(it)) },
@@ -54,7 +54,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
 
     @PostMapping(path = ["/{oppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun tilbakestillFordelingPåOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<String>> {
-        return Result.runCatching {
+        Result.runCatching {
             oppgaveService.tilbakestillFordelingPåOppgave(oppgaveId)
         }.fold(
                 onSuccess = { return ResponseEntity.ok().body(Ressurs.Companion.success(it)) },

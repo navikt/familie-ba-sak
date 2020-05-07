@@ -14,13 +14,18 @@ class BehandlingStegTest {
                 StegType.VILKÅRSVURDERING,
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.BESLUTTE_VEDTAK,
+                StegType.FERDIGSTILLE_OPPGAVE,
+                StegType.IVERKSETT_MOT_OPPDRAG,
+                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                StegType.JOURNALFØR_VEDTAKSBREV,
+                StegType.DISTRIBUER_VEDTAKSBREV,
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_AVSLUTTET)
 
         var steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
         riktigRekkefølge.forEach {
             assertEquals(steg, it)
-            steg = it.hentNesteSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, utførendeStegType = steg)
+            steg = it.hentNesteSteg(utførendeStegType = steg)
         }
         steg = StegType.REGISTRERE_PERSONGRUNNLAG
         val riktigRekkefølgeForInfotrygd = listOf(
@@ -28,11 +33,16 @@ class BehandlingStegTest {
                 StegType.VILKÅRSVURDERING,
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.BESLUTTE_VEDTAK,
+                StegType.FERDIGSTILLE_OPPGAVE,
+                StegType.IVERKSETT_MOT_OPPDRAG,
+                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                StegType.JOURNALFØR_VEDTAKSBREV,
+                StegType.DISTRIBUER_VEDTAKSBREV,
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_AVSLUTTET)
         riktigRekkefølgeForInfotrygd.forEach {
             assertEquals(steg, it)
-            steg = it.hentNesteSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, utførendeStegType = steg)
+            steg = it.hentNesteSteg(utførendeStegType = steg)
         }
     }
 

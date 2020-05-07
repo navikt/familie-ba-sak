@@ -16,6 +16,9 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.dto.FerdigstillOppgaveDTO
+import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -110,12 +113,62 @@ class StegService(
         }
     }
 
-    fun håndterFerdigstillBehandling(behandling: Behandling): Behandling {
-        val behandlingStegSteg: FerdigstillBehandlingSteg =
-                hentBehandlingSteg(StegType.FERDIGSTILLE_BEHANDLING) as FerdigstillBehandlingSteg
+    fun håndterFerdigstillBehandleSakOppgave(ferdigstillOppgave: FerdigstillOppgaveDTO): Behandling {
+        val behandling = behandlingService.hent(behandlingId = ferdigstillOppgave.behandlingId)
+        val behandlingSteg: FerdigstillOppgave =
+                hentBehandlingSteg(StegType.FERDIGSTILLE_OPPGAVE) as FerdigstillOppgave
 
-        return håndterSteg(behandling, behandlingStegSteg) {
-            behandlingStegSteg.utførStegOgAngiNeste(behandling, "")
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, ferdigstillOppgave)
+        }
+    }
+
+    fun håndterIverksettMotØkonomi(iverksettingTaskDTO: IverksettingTaskDTO): Behandling {
+        val behandling = behandlingService.hent(behandlingId = iverksettingTaskDTO.behandlingsId)
+        val behandlingSteg: IverksettMotOppdrag =
+                hentBehandlingSteg(StegType.IVERKSETT_MOT_OPPDRAG) as IverksettMotOppdrag
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, iverksettingTaskDTO)
+        }
+    }
+
+    fun håndterStatusFraØkonomi(statusFraOppdragMedTask: StatusFraOppdragMedTask): Behandling {
+        val behandling = behandlingService.hent(behandlingId = statusFraOppdragMedTask.statusFraOppdragDTO.behandlingsId)
+        val behandlingSteg: StatusFraOppdrag =
+                hentBehandlingSteg(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) as StatusFraOppdrag
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, statusFraOppdragMedTask)
+        }
+    }
+
+    fun håndterJournalførVedtaksbrev(behandling: Behandling, journalførVedtaksbrevDTO: JournalførVedtaksbrevDTO): Behandling {
+        val behandlingSteg: JournalførVedtaksbrev =
+                hentBehandlingSteg(StegType.JOURNALFØR_VEDTAKSBREV) as JournalførVedtaksbrev
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, journalførVedtaksbrevDTO)
+        }
+    }
+
+    fun håndterDistribuerVedtaksbrev(distribuerVedtaksbrevDTO: DistribuerVedtaksbrevDTO): Behandling {
+        val behandling = behandlingService.hent(behandlingId = distribuerVedtaksbrevDTO.behandlingId)
+        val behandlingSteg: DistribuerVedtaksbrev =
+                hentBehandlingSteg(StegType.DISTRIBUER_VEDTAKSBREV) as DistribuerVedtaksbrev
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, distribuerVedtaksbrevDTO)
+        }
+    }
+
+    fun håndterFerdigstillBehandling(behandlingId: Long): Behandling {
+        val behandling = behandlingService.hent(behandlingId)
+        val behandlingSteg: FerdigstillBehandling =
+                hentBehandlingSteg(StegType.FERDIGSTILLE_BEHANDLING) as FerdigstillBehandling
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
     }
 
@@ -170,7 +223,7 @@ class StegService(
         }
     }
 
-    private fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
+    fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
         return steg.firstOrNull { it.stegType() == stegType }
     }
 

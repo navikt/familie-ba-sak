@@ -39,6 +39,10 @@ class VilkårService(
         }.periodeFom
     }
 
+    fun hentVilkårsvurdering(behandlingId: Long): BehandlingResultat? {
+        return behandlingResultatService.hentAktivForBehandling(behandlingId = behandlingId)
+    }
+
     fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
         val behandling = behandlingService.hent(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)

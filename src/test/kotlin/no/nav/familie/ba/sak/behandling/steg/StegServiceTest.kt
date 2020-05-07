@@ -65,7 +65,7 @@ class StegServiceTest(
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
 
         stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg, RestVilkårsvurdering(
-                personResultater = vilkårsvurderingInnvilget(søkerFnr))
+                personResultater = vilkårsvurderingInnvilget(søkerFnr, barnFnr))
         )
 
         val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
@@ -82,6 +82,7 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å håndtere feil steg`() {
         val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -89,7 +90,7 @@ class StegServiceTest(
 
         assertThrows<IllegalStateException> {
             stegService.håndterVilkårsvurdering(behandling, RestVilkårsvurdering(
-                    personResultater = vilkårsvurderingInnvilget(søkerFnr))
+                    personResultater = vilkårsvurderingInnvilget(søkerFnr, barnFnr))
             )
         }
     }

@@ -26,7 +26,7 @@ class BehandlingResultatService(
         val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
         val alleBehandlingsresultat = behandlingResultatRepository.finnBehandlingResultater(behandlingResultat.behandling.id)
         val forrigeBehandlingResultatSomIkkeErAutogenerert: BehandlingResultat? =
-                if (alleBehandlingsresultat != null && alleBehandlingsresultat.size > 1)
+                if (alleBehandlingsresultat.size > 1)
                     aktivBehandlingResultat
                 else null
 

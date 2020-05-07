@@ -28,6 +28,12 @@ data class PeriodeResultat(
                && vilkårResultater.all { it.resultat == Resultat.JA }
     }
 
+    fun allePåkrevdeVilkårVurdert(personType: PersonType, sakType: SakType): Boolean {
+        val alleVilkår = Vilkår.hentVilkårFor(personType, sakType)
+        return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
+               && vilkårResultater.all { it.resultat != Resultat.KANSKJE }
+    }
+
     fun overlapper(annetPeriodeResultat: PeriodeResultat): Boolean {
         if (periodeFom == null && annetPeriodeResultat.periodeFom == null) {
             error("Enten søker eller barn må ha fom-dato på vilkårsresultatet")

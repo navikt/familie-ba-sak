@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.FerdigstillOppgave
-import no.nav.familie.ba.sak.task.IverksettMotOppdrag
+import no.nav.familie.ba.sak.task.FerdigstillOppgaveTask
+import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -49,7 +49,7 @@ class BeslutteVedtak(
         }
 
         loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, saksbehandlerId, data.begrunnelse)
-        val ferdigstillGodkjenneVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
+        val ferdigstillGodkjenneVedtakTask = FerdigstillOppgaveTask.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
         taskRepository.save(ferdigstillGodkjenneVedtakTask)
 
         return if (data.beslutning.erGodkjent()) {
@@ -70,7 +70,7 @@ class BeslutteVedtak(
     }
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
-        val task = IverksettMotOppdrag.opprettTask(behandling, vedtak, saksbehandlerId)
+        val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, saksbehandlerId)
         taskRepository.save(task)
     }
 }

@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.task.FerdigstillOppgave
+import no.nav.familie.ba.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -52,13 +52,13 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        mockkObject(FerdigstillOppgave.Companion)
-        every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task.nyTask(FerdigstillOppgave.TASK_STEP_TYPE, "")
+        mockkObject(FerdigstillOppgaveTask.Companion)
+        every { FerdigstillOppgaveTask.opprettTask(any(), any()) } returns Task.nyTask(FerdigstillOppgaveTask.TASK_STEP_TYPE, "")
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        verify(exactly = 1) { FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
-        Assertions.assertEquals(StegType.FERDIGSTILLE_BEHANDLING, nesteSteg)
+        verify(exactly = 1) { FerdigstillOppgaveTask.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
+        Assertions.assertEquals(StegType.FERDIGSTILLE_OPPGAVE, nesteSteg)
     }
 
     @Test
@@ -69,14 +69,14 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        mockkObject(FerdigstillOppgave.Companion)
+        mockkObject(FerdigstillOppgaveTask.Companion)
         mockkObject(OpprettOppgaveTask.Companion)
-        every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task.nyTask(FerdigstillOppgave.TASK_STEP_TYPE, "")
+        every { FerdigstillOppgaveTask.opprettTask(any(), any()) } returns Task.nyTask(FerdigstillOppgaveTask.TASK_STEP_TYPE, "")
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        verify(exactly = 1) { FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
+        verify(exactly = 1) { FerdigstillOppgaveTask.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak, any()) }
         Assertions.assertEquals(StegType.REGISTRERE_SØKNAD, nesteSteg)
     }

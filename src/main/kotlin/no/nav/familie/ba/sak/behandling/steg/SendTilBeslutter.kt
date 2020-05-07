@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
-import no.nav.familie.ba.sak.task.FerdigstillOppgave
+import no.nav.familie.ba.sak.task.FerdigstillOppgaveTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -31,13 +31,13 @@ class SendTilBeslutter(
 
         val behandleSakOppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)
         if (behandleSakOppgave !== null) {
-            val ferdigstillBehandleSakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleSak)
+            val ferdigstillBehandleSakTask = FerdigstillOppgaveTask.opprettTask(behandling.id, Oppgavetype.BehandleSak)
             taskRepository.save(ferdigstillBehandleSakTask)
         }
 
         val behandleUnderkjentVedtakOppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleUnderkjentVedtak, behandling)
         if (behandleUnderkjentVedtakOppgave !== null) {
-            val ferdigstillBehandleUnderkjentVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
+            val ferdigstillBehandleUnderkjentVedtakTask = FerdigstillOppgaveTask.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
             taskRepository.save(ferdigstillBehandleUnderkjentVedtakTask)
         }
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,

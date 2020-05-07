@@ -7,10 +7,11 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.logg.LoggService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class FerdigstillBehandlingSteg(
+class FerdigstillBehandling(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
@@ -24,6 +25,8 @@ class FerdigstillBehandlingSteg(
     }.toMap()
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
+        LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
+
         val fagsak = behandling.fagsak
         val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
 
@@ -45,5 +48,9 @@ class FerdigstillBehandlingSteg(
 
     override fun stegType(): StegType {
         return StegType.FERDIGSTILLE_BEHANDLING
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

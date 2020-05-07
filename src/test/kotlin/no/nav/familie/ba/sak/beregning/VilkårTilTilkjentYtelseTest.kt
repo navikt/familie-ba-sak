@@ -9,7 +9,9 @@ import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
-import no.nav.familie.ba.sak.beregning.domene.*
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -138,7 +140,8 @@ class VilkårTilTilkjentYtelseTest {
 
 class TestBehandlingResultatBuilder(val sakType: String) {
     private val identPersonResultatMap = mutableMapOf<String, PersonResultat>()
-    private val behandlingResultat = BehandlingResultat(behandling = lagBehandling(behandlingKategori = BehandlingKategori.valueOf(sakType)))
+    private val behandlingResultat =
+            BehandlingResultat(behandling = lagBehandling(behandlingKategori = BehandlingKategori.valueOf(sakType)))
 
     fun medPersonVilkårPeriode(person: Person, vilkår: String?, periode: String?): TestBehandlingResultatBuilder {
 
@@ -180,7 +183,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
             endretDato = LocalDate.now())
 
     fun medAndelTilkjentYtelse(person: Person, beløp: Int?, periode: String?, type: String?): TestTilkjentYtelseBuilder {
-        if (beløp==null || periode.isNullOrEmpty() || type.isNullOrEmpty())
+        if (beløp == null || periode.isNullOrEmpty() || type.isNullOrEmpty())
             return this
 
         val stønadPeriode = TestPeriode.parse(periode);
@@ -212,15 +215,15 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
         val localDateRegex = """^(\d{4}-\d{2}-\d{2}).*?(\d{4}-\d{2}-\d{2})?$""".toRegex()
 
         fun parse(s: String): TestPeriode {
-            return prøvLocalDate(s) ?: prøvYearMonth(s)  ?: throw IllegalArgumentException("Kunne ikke parse periode '$s'")
+            return prøvLocalDate(s) ?: prøvYearMonth(s) ?: throw IllegalArgumentException("Kunne ikke parse periode '$s'")
         }
 
         private fun prøvLocalDate(s: String): TestPeriode? {
             val localDateMatch = localDateRegex.find(s)
 
             if (localDateMatch != null && localDateMatch.groupValues.size == 3) {
-                val fom = localDateMatch.groupValues.get(1).let { LocalDate.parse(it) }
-                val tom = localDateMatch.groupValues.get(2).let { if(it.length==10) LocalDate.parse(it) else LocalDate.MAX }
+                val fom = localDateMatch.groupValues[1].let { LocalDate.parse(it) }
+                val tom = localDateMatch.groupValues[2].let { if (it.length == 10) LocalDate.parse(it) else LocalDate.MAX }
 
                 return TestPeriode(fom!!, tom)
             }
@@ -231,8 +234,9 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
             val yearMonthMatch = yearMonthRegex.find(s)
 
             if (yearMonthMatch != null && yearMonthMatch.groupValues.size == 3) {
-                val fom = yearMonthMatch.groupValues.get(1).let { YearMonth.parse(it) }
-                val tom = yearMonthMatch.groupValues.get(2).let { if(it.length==7) YearMonth.parse(it) else YearMonth.from(LocalDate.MAX) }
+                val fom = yearMonthMatch.groupValues[1].let { YearMonth.parse(it) }
+                val tom =
+                        yearMonthMatch.groupValues[2].let { if (it.length == 7) YearMonth.parse(it) else YearMonth.from(LocalDate.MAX) }
 
                 return TestPeriode(fom!!.atDay(1), tom?.atEndOfMonth())
             }
@@ -246,7 +250,7 @@ object TestVilkårParser {
 
         return s.split(',')
                 .map {
-                    when (it.replace("""\s*""".toRegex(),"").toLowerCase()) {
+                    when (it.replace("""\s*""".toRegex(), "").toLowerCase()) {
                         "opphold" -> Vilkår.LOVLIG_OPPHOLD
                         "<18" -> Vilkår.UNDER_18_ÅR
                         "<18år" -> Vilkår.UNDER_18_ÅR
