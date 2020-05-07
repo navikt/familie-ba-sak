@@ -7,10 +7,10 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
-import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
-import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.http.client.AbstractRestClient
@@ -109,7 +109,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         logger.info("Henter personinfo fra $integrasjonUri")
 
         val uri = if (medRelasjoner) URI.create("$integrasjonUri/personopplysning/v1/info/BAR")
-                    else URI.create("$integrasjonUri/personopplysning/v1/infoEnkel/BAR")
+        else URI.create("$integrasjonUri/personopplysning/v1/infoEnkel/BAR")
 
         return try {
             val response = getForEntity<Ressurs<Personinfo>>(uri, HttpHeaders().medPersonident(personIdent))
@@ -159,7 +159,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
                     if (it?.data?.isBlank() != false) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
-                    logger.info("Distribusjon av vedtaksbrev bestilt. BestillingsId:  $it")
+                    logger.info("Distribusjon av vedtaksbrev bestilt")
+                    secureLogger.info("Distribusjon av vedtaksbrev bestilt med data i responsen: ${it.data}")
                 },
                 onFailure = {
                     throw IntegrasjonException("Kall mot integrasjon feilet ved distribusjon av vedtaksbrev", it, uri, "")
@@ -220,15 +221,15 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                     assertGenerelleSuksessKriterier(it)
 
                     it?.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId.",
-                            null,
-                            uri
+                                                                                  null,
+                                                                                  uri
                     )
                 },
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
                     throw IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave. response=$message",
-                            it,
-                            uri
+                                               it,
+                                               uri
                     )
                 }
         )
@@ -328,26 +329,26 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun leggTilLogiskVedlegg(request: LogiskVedleggRequest, dokumentinfoId: String): LogiskVedleggResponse {
-       val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg")
-       return exchange(
-           networkRequest = {
-               postForEntity<Ressurs<LogiskVedleggResponse>>(uri, request)
-           },
-           onFailure = {
-               IntegrasjonException("Kall mot integrasjon feilet ved leggTilLogiskVedlegg", it, uri, null)
-           }
-       )
+        val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg")
+        return exchange(
+                networkRequest = {
+                    postForEntity<Ressurs<LogiskVedleggResponse>>(uri, request)
+                },
+                onFailure = {
+                    IntegrasjonException("Kall mot integrasjon feilet ved leggTilLogiskVedlegg", it, uri, null)
+                }
+        )
     }
 
     fun slettLogiskVedlegg(logiskVedleggId: String, dokumentinfoId: String): LogiskVedleggResponse {
         val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg/$logiskVedleggId")
         return exchange(
-            networkRequest = {
-                deleteForEntity<Ressurs<LogiskVedleggResponse>>(uri)
-            },
-            onFailure = {
-                IntegrasjonException("Kall mot integrasjon feilet ved slettLogiskVedlegg", it, uri, null)
-            }
+                networkRequest = {
+                    deleteForEntity<Ressurs<LogiskVedleggResponse>>(uri)
+                },
+                onFailure = {
+                    IntegrasjonException("Kall mot integrasjon feilet ved slettLogiskVedlegg", it, uri, null)
+                }
         )
     }
 
@@ -374,7 +375,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         return Result.runCatching {
             val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
             val dokumenter = listOf(Dokument(pdfByteArray, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE),
-                                    Dokument(vedleggPdf, FilType.PDFA, dokumentType = VEDLEGG_DOKUMENT_TYPE, tittel = VEDTAK_VEDLEGG_TITTEL))
+                                    Dokument(vedleggPdf,
+                                             FilType.PDFA,
+                                             dokumentType = VEDLEGG_DOKUMENT_TYPE,
+                                             tittel = VEDTAK_VEDLEGG_TITTEL))
             val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, "9999")
             val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
@@ -438,7 +442,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"
         private const val PATH_TILGANGER = "tilgang/personer"
 
-        fun hentVedlegg(vedleggsnavn: String) : ByteArray? {
+        fun hentVedlegg(vedleggsnavn: String): ByteArray? {
             val inputStream = this::class.java.classLoader.getResourceAsStream("dokumenter/$vedleggsnavn")
             return inputStream?.readAllBytes()
         }
