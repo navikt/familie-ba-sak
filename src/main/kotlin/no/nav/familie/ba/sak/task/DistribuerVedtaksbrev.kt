@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrev.Companion.TASK_STEP_TYPE
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send vedtaksbrev til Dokdist", maxAntallFeil = 3)
 class DistribuerVedtaksbrev(
         private val integrasjonClient: IntegrasjonClient,
-        private val featureToggleService: FeatureToggleService,
         private val taskRepository: TaskRepository,
         private val loggService: LoggService
 ) : AsyncTaskStep {
@@ -25,15 +23,10 @@ class DistribuerVedtaksbrev(
     override fun doTask(task: Task) {
         val distribuerVedtaksbrevDTO = objectMapper.readValue(task.payload, DistribuerVedtaksbrevDTO::class.java)
 
-        if (featureToggleService.isEnabled("familie-ba-sak.distribuer-vedtaksbrev")) {
-            LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${distribuerVedtaksbrevDTO.journalpostId}")
-            integrasjonClient.distribuerVedtaksbrev(distribuerVedtaksbrevDTO.journalpostId)
-
-            loggService.opprettDistribuertBrevLogg(behandlingId = distribuerVedtaksbrevDTO.behandlingId,
-                                                   tekst = "Vedtaksbrev er sendt til bruker")
-        } else {
-            LOG.info("Hopper over distribusjon av vedtaksbrev. Funksjonen er skrudd av")
-        }
+        LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${distribuerVedtaksbrevDTO.journalpostId}")
+        integrasjonClient.distribuerVedtaksbrev(distribuerVedtaksbrevDTO.journalpostId)
+        loggService.opprettDistribuertBrevLogg(behandlingId = distribuerVedtaksbrevDTO.behandlingId,
+                                               tekst = "Vedtaksbrev er sendt til bruker")
 
         val ferdigstillBehandlingTask = FerdigstillBehandling.opprettTask(
                 personIdent = distribuerVedtaksbrevDTO.personIdent,
