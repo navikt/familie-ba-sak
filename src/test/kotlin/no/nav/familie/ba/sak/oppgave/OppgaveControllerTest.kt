@@ -84,11 +84,11 @@ class OppgaveControllerTest {
     fun `hentOppgaver via OppgaveController skal fungere`() {
         every {
             oppgaveService.hentOppgaver(any())
-        } returns listOf(Oppgave(tema = Tema.BAR))
+        } returns OppgaverOgAntall(1, listOf(Oppgave(tema = Tema.BAR)))
         val response = oppgaveController.hentOppgaver(FinnOppgaveRequest())
-        val oppgaver = response.body?.data as List<Oppgave>
-        Assertions.assertEquals(1, oppgaver.size)
-        Assertions.assertEquals(Tema.BAR, oppgaver.first().tema)
+        val oppgaverOgAntall = response.body?.data as OppgaverOgAntall
+        Assertions.assertEquals(1, oppgaverOgAntall.antallTreffTotalt)
+        Assertions.assertEquals(Tema.BAR, oppgaverOgAntall.oppgaver.first().tema)
     }
 
     @Test

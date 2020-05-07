@@ -92,11 +92,14 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)
     }
 
-    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): List<Oppgave> {
-        val oppgaver = integrasjonClient.hentOppgaver(finnOppgaveRequest)
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): OppgaverOgAntall {
+        val oppgaverOgAntall = integrasjonClient.hentOppgaver(finnOppgaveRequest)
         return when {
-            finnOppgaveRequest.prioritet != null -> oppgaver.filter { finnOppgaveRequest.prioritet == it.prioritet }
-            else -> oppgaver
+            finnOppgaveRequest.prioritet != null -> OppgaverOgAntall(
+                    oppgaverOgAntall.antallTreffTotalt,
+                    oppgaverOgAntall.oppgaver.filter { finnOppgaveRequest.prioritet == it.prioritet }
+            )
+            else -> oppgaverOgAntall
         }
     }
 

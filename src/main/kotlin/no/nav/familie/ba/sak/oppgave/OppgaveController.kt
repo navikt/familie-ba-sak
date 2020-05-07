@@ -42,14 +42,14 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
 
     @PostMapping(path = ["/hent-oppgaver"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequest)
-            : ResponseEntity<Ressurs<List<Oppgave>>> {
+            : ResponseEntity<Ressurs<OppgaverOgAntall>> {
 
         if (!finnOppgaveRequest.behandlingstema.isNullOrEmpty() && OppgaveService.Behandlingstema.values().all { it.kode != finnOppgaveRequest.behandlingstema }) {
             return badRequest("Ugyldig behandlingstema", null)
         }
 
         return try {
-            val oppgaver: List<Oppgave> = oppgaveService.hentOppgaver(finnOppgaveRequest)
+            val oppgaver: OppgaverOgAntall = oppgaveService.hentOppgaver(finnOppgaveRequest)
             ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
         } catch (e: Throwable) {
             illegalState("Henting av oppgaver feilet", e)
@@ -120,3 +120,5 @@ class FinnOppgaveRequest(val tema: String? = null,
                          val aktivTomDato: String? = null,
                          val limit: Long? = null,
                          val offset: Long? = null)
+
+class OppgaverOgAntall(val antallTreffTotalt: Long, val oppgaver: List<Oppgave>)

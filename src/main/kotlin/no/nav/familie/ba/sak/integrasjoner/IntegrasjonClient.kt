@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
+import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.http.client.AbstractRestClient
@@ -302,12 +303,12 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): List<Oppgave> {
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): OppgaverOgAntall {
         return finnOppgaveRequest.run {
             val uri = URI.create("$integrasjonUri/oppgave/v2")
 
             try {
-                val ressurs = postForEntity<Ressurs<List<Oppgave>>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
+                val ressurs = postForEntity<Ressurs<OppgaverOgAntall>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
                 assertGenerelleSuksessKriterier(ressurs)
                 ressurs?.data ?: throw IntegrasjonException("Ressurs mangler.", null, uri, null)
             } catch (e: Exception) {
