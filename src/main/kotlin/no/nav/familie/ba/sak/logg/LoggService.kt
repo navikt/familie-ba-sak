@@ -127,19 +127,8 @@ class LoggService(
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.FERDIGSTILLE_BEHANDLING,
-                tittel = if (behandling.type == BehandlingType.TEKNISK_OPPHØR) "Teknisk opphør ferdigstilt"
-                else "Ferdigstilt behandling",
+                tittel = "Ferdigstilt behandling",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SYSTEM),
-                tekst = ""
-        ))
-    }
-
-    fun opprettTekniskOpphørLogg(behandling: Behandling) {
-        lagre(Logg(
-                behandlingId = behandling.id,
-                type = LoggType.BEHANDLING_OPPRETTET,
-                tittel = "Teknisk opphør opprettet",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = ""
         ))
     }

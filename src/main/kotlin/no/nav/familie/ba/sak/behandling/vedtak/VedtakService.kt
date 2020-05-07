@@ -64,7 +64,7 @@ class VedtakService(private val behandlingService: BehandlingService,
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
         behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
         behandlingRepository.save(nyBehandling)
-        loggService.opprettTekniskOpphørLogg(nyBehandling)
+        loggService.opprettBehandlingLogg(nyBehandling)
 
         val nyttVedtak = Vedtak(
                 ansvarligSaksbehandler = saksbehandler,
