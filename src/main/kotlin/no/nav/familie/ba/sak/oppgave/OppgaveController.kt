@@ -105,8 +105,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
     }
 }
 
-class FinnOppgaveRequest(val tema: String? = null,
-                         val behandlingstema: String? = null,
+class FinnOppgaveRequest(val behandlingstema: String? = null,
                          val oppgavetype: String? = null,
                          val enhet: String? = null,
                          val saksbehandler: String? = null,
@@ -119,6 +118,8 @@ class FinnOppgaveRequest(val tema: String? = null,
                          val aktivFomDato: String? = null,
                          val aktivTomDato: String? = null,
                          val limit: Long? = null,
-                         val offset: Long? = null)
+                         val offset: Long? = null) {
+    val tema = "BAR"
+}
 
 class OppgaverOgAntall(val antallTreffTotalt: Long, val oppgaver: List<Oppgave>)
