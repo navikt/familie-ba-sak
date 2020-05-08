@@ -101,7 +101,7 @@ class VilkårVurderingTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
 
         personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
-                                                     personIdent = PersonIdent("11111111111"),
+                                                     personIdent = PersonIdent(barnFnr),
                                                      type = PersonType.BARN,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
                                                      fødselsdato = LocalDate.now(),

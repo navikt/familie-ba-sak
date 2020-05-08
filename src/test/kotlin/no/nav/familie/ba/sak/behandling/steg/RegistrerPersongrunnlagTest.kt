@@ -44,13 +44,6 @@ class RegistrerPersongrunnlagTest(
         val barn1Id = randomFnr()
         val barn2Id = randomFnr()
 
-        listOf(morId, barn1Id, barn2Id).map {
-            every {
-                integrasjonClient.hentAktørId(it)
-            } returns randomAktørId()
-        }
-
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -73,12 +66,6 @@ class RegistrerPersongrunnlagTest(
         val morId = randomFnr()
         val barn1Id = randomFnr()
         val barn2Id = randomFnr()
-
-        listOf(morId, barn1Id, barn2Id).map {
-            every {
-                integrasjonClient.hentAktørId(it)
-            } returns randomAktørId()
-        }
 
         every {
             integrasjonClient.hentPersoninfoFor(any())

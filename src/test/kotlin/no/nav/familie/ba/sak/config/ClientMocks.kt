@@ -152,12 +152,10 @@ class ClientMocks {
                              ))
 
         every {
-            mockIntegrasjonClient.hentAktørId(farId)
-        } returns AktørId(farId)
-
-        every {
-            mockIntegrasjonClient.hentAktørId(barnId)
-        } returns AktørId(barnId)
+            mockIntegrasjonClient.hentAktørId(any())
+        } answers {
+            randomAktørId()
+        }
 
         val ukjentId = "43125678910"
         every {

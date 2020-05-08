@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
@@ -62,12 +63,12 @@ class FagsakServiceTest(
      */
     @Test
     fun `test å søke fagsak med fnr`() {
-        val søker1Fnr = UUID.randomUUID().toString()
-        val søker2Fnr = UUID.randomUUID().toString()
-        val søker3Fnr = UUID.randomUUID().toString()
-        val barn1Fnr = UUID.randomUUID().toString()
-        val barn2Fnr = UUID.randomUUID().toString()
-        val barn3Fnr = UUID.randomUUID().toString()
+        val søker1Fnr = randomFnr()
+        val søker2Fnr = randomFnr()
+        val søker3Fnr = randomFnr()
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
+        val barn3Fnr = randomFnr()
 
         every {
             integrasjonClient.hentPersoninfoFor(eq(barn1Fnr))
