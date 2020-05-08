@@ -276,34 +276,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?,
-                                                   oppgavetype: String?,
-                                                   enhet: String?,
-                                                   saksbehandler: String?): List<Oppgave> {
-
-        val uriBuilder = UriComponentsBuilder.fromUriString("$integrasjonUri/oppgave")
-
-        uriBuilder.queryParam("tema", Tema.BAR.name)
-        behandlingstema?.apply { uriBuilder.queryParam("behandlingstema", this) }
-        oppgavetype?.apply { uriBuilder.queryParam("oppgavetype", this) }
-        enhet?.apply { uriBuilder.queryParam("enhet", this) }
-        saksbehandler?.apply { uriBuilder.queryParam("saksbehandler", this) }
-
-        val uri = uriBuilder.build().toUri()
-
-        return try {
-            val ressurs = getForEntity<Ressurs<List<Oppgave>>>(uri, HttpHeaders().medContentTypeJsonUTF8())
-            assertGenerelleSuksessKriterier(ressurs)
-            ressurs.data ?: throw IntegrasjonException("Ressurs mangler.", null, uri, null)
-        } catch (e: Exception) {
-            val message = if (e is RestClientResponseException) e.responseBodyAsString else ""
-            throw IntegrasjonException("Kall mot integrasjon feilet ved finnOppgaverKnyttetTilSaksbehandlerOgEnhet. response=$message",
-                                       e,
-                                       uri,
-                                       "behandlingstema: ${behandlingstema}, oppgavetype: ${oppgavetype}, enhet: ${enhet}, saksbehandler: ${saksbehandler}")
-        }
-    }
-
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): OppgaverOgAntall {
         return finnOppgaveRequest.run {
             val uri = URI.create("$integrasjonUri/oppgave/v2")
