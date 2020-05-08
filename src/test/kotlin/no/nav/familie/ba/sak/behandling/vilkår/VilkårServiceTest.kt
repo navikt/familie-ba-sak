@@ -92,8 +92,8 @@ class VilkårServiceTest {
             )
         }
 
-        vilkårService.kontrollerVurderteVilkårOgLagResultat(personResultater = vurdertPersonResultater,
-                                                            behandlingId = behandling.id)
+        vilkårService.lagBehandlingResultatFraRestPersonResultater(personResultater = vurdertPersonResultater,
+                                                                   behandlingId = behandling.id)
 
         val skalVæreGyldig = behandlingSteg.validerSteg(behandling)
         Assertions.assertTrue(skalVæreGyldig)

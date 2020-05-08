@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
@@ -93,27 +93,23 @@ class VilkårService(
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
-            val sakType =
-                    if (behandling.kategori == BehandlingKategori.NASJONAL &&
-                        (søknadDTO?.typeSøker == TypeSøker.TREDJELANDSBORGER || søknadDTO?.typeSøker == TypeSøker.EØS_BORGER)) {
-                        SakType.TREDJELANDSBORGER
-                    } else SakType.valueOfType(behandling.kategori)
+            val sakType = hentSakType(behandlingKategori = behandling.kategori, søknadDTO = søknadDTO)
 
             val relevanteVilkår = Vilkår.hentVilkårFor(person.type, sakType)
             personResultat.vilkårResultater = relevanteVilkår.flatMap { vilkår ->
                 val vilkårListe = mutableListOf<VilkårResultat>()
                 if (vilkår == Vilkår.UNDER_18_ÅR) {
                     vilkårListe.add(VilkårResultat(personResultat = personResultat,
-                                   resultat = Resultat.JA,
-                                   vilkårType = vilkår,
-                                   periodeFom = person.fødselsdato,
-                                   periodeTom = person.fødselsdato.plusYears(18),
-                                   begrunnelse = "Vurdert og satt automatisk"))
+                                                   resultat = Resultat.JA,
+                                                   vilkårType = vilkår,
+                                                   periodeFom = person.fødselsdato,
+                                                   periodeTom = person.fødselsdato.plusYears(18),
+                                                   begrunnelse = "Vurdert og satt automatisk"))
                 } else {
                     vilkårListe.add(VilkårResultat(personResultat = personResultat,
-                                   resultat = Resultat.KANSKJE,
-                                   vilkårType = vilkår,
-                                   begrunnelse = ""))
+                                                   resultat = Resultat.KANSKJE,
+                                                   vilkårType = vilkår,
+                                                   begrunnelse = ""))
                 }
                 vilkårListe
             }.toSet()
@@ -123,8 +119,8 @@ class VilkårService(
         return behandlingResultatService.lagreInitiert(behandlingResultat)
     }
 
-    fun kontrollerVurderteVilkårOgLagResultat(personResultater: List<RestPersonResultat>,
-                                              behandlingId: Long): BehandlingResultat {
+    fun lagBehandlingResultatFraRestPersonResultater(personResultater: List<RestPersonResultat>,
+                                                     behandlingId: Long): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(
                 behandling = behandlingService.hent(behandlingId),
                 aktiv = true)

@@ -4,9 +4,10 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.SakType
+import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class Vilkårsvurdering(
         private val behandlingService: BehandlingService,
+        private val søknadGrunnlagService: SøknadGrunnlagService,
         private val vilkårService: VilkårService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
@@ -36,8 +38,8 @@ class Vilkårsvurdering(
         val vilkårsvurdertBehandling = behandlingService.hent(behandlingId = behandling.id)
 
         if (data.personResultater.isNotEmpty()) {
-            vilkårService.kontrollerVurderteVilkårOgLagResultat(data.personResultater,
-                                                                vilkårsvurdertBehandling.id)
+            vilkårService.lagBehandlingResultatFraRestPersonResultater(data.personResultater,
+                                                                       vilkårsvurdertBehandling.id)
         } else {
             vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)
         }
@@ -45,6 +47,10 @@ class Vilkårsvurdering(
                 vilkårsvurdertBehandling,
                 personopplysningGrunnlag,
                 ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn())
+
+        if (!validerSteg(behandling)) {
+            error("Vilkårsvurderingen er ikke gyldig.")
+        }
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
@@ -63,12 +69,17 @@ class Vilkårsvurdering(
         val listeAvFeil = mutableListOf<String>()
 
         val periodeResultater = behandlingResultat.periodeResultater(brukMåned = false)
+
+        val søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()
+        val sakType = hentSakType(behandlingKategori = behandling.kategori, søknadDTO = søknadDTO)
+
+
+
         val harGyldigePerioder = periodeResultater.any { periodeResultat ->
             periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER,
-                                                      SakType.valueOfType(behandling.kategori)) &&
+                                                      sakType) &&
             periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN,
-                                                      SakType.valueOfType(
-                                                              behandling.kategori))
+                                                      sakType)
         }
 
         when {
