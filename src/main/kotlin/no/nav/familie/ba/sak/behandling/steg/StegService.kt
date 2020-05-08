@@ -196,6 +196,10 @@ class StegService(
 
             val nesteSteg = utførendeSteg()
 
+            if (!behandlingSteg.validerSteg(behandling)) {
+                error("Validering for steg '${behandlingSteg.stegType().displayName()}' feilet.")
+            }
+
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 

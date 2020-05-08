@@ -129,21 +129,39 @@ class VilkårServiceTest {
     }
 }
 
-fun vilkårsvurderingInnvilget(søkerIdent: String, barnIdent: String): List<RestPersonResultat> = listOf(
+fun vilkårsvurderingInnvilget(søkerIdent: String,
+                              barnIdent: String,
+                              barnFødselsdato: LocalDate): List<RestPersonResultat> = listOf(
         RestPersonResultat(
                 personIdent = søkerIdent,
                 vilkårResultater = listOf(RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
                                                              resultat = Resultat.JA,
-                                                             periodeFom = LocalDate.now(),
-                                                             periodeTom = LocalDate.now(),
+                                                             periodeFom = LocalDate.of(2018, 5, 8),
+                                                             periodeTom = null,
                                                              begrunnelse = ""))),
         RestPersonResultat(
                 personIdent = barnIdent,
-                vilkårResultater = listOf(RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                             resultat = Resultat.JA,
-                                                             periodeFom = LocalDate.now(),
-                                                             periodeTom = LocalDate.now(),
-                                                             begrunnelse = "")
+                vilkårResultater = listOf(
+                        RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
+                                           resultat = Resultat.JA,
+                                           periodeFom = LocalDate.of(2018, 5, 8),
+                                           periodeTom = null,
+                                           begrunnelse = ""),
+                        RestVilkårResultat(vilkårType = Vilkår.UNDER_18_ÅR,
+                                           resultat = Resultat.JA,
+                                           periodeFom = barnFødselsdato,
+                                           periodeTom = barnFødselsdato.plusYears(18),
+                                           begrunnelse = ""),
+                        RestVilkårResultat(vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                                           resultat = Resultat.JA,
+                                           periodeFom = LocalDate.of(2018, 5, 8),
+                                           periodeTom = null,
+                                           begrunnelse = ""),
+                        RestVilkårResultat(vilkårType = Vilkår.BOR_MED_SØKER,
+                                           resultat = Resultat.JA,
+                                           periodeFom = LocalDate.of(2018, 5, 8),
+                                           periodeTom = null,
+                                           begrunnelse = "")
                 )))
 
 fun vilkårsvurderingAvslått(

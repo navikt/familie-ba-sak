@@ -22,6 +22,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 
 
 @SpringBootTest
@@ -51,7 +52,6 @@ class StegServiceTest(
 
         mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
 
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
@@ -65,7 +65,7 @@ class StegServiceTest(
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
 
         stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg, RestVilkårsvurdering(
-                personResultater = vilkårsvurderingInnvilget(søkerFnr, barnFnr))
+                personResultater = vilkårsvurderingInnvilget(søkerFnr, barnFnr, LocalDate.of(2018, 5, 1)))
         )
 
         val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
@@ -90,7 +90,7 @@ class StegServiceTest(
 
         assertThrows<IllegalStateException> {
             stegService.håndterVilkårsvurdering(behandling, RestVilkårsvurdering(
-                    personResultater = vilkårsvurderingInnvilget(søkerFnr, barnFnr))
+                    personResultater = vilkårsvurderingInnvilget(søkerFnr, barnFnr, LocalDate.of(2019, 1, 1)))
             )
         }
     }
@@ -176,6 +176,8 @@ class StegServiceTest(
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)!!
         behandlingResultat.personResultater.forEach { personresultat ->
             Assertions.assertEquals(skalInkludereLovligOpphold, personresultat.vilkårResultater.any { vilkårResultat ->
-                vilkårResultat.vilkårType == Vilkår.LOVLIG_OPPHOLD }) }
+                vilkårResultat.vilkårType == Vilkår.LOVLIG_OPPHOLD
+            })
+        }
     }
 }
