@@ -22,7 +22,7 @@ class FerdigstillBehandlingTask(
 
     override fun doTask(task: Task) {
         val ferdigstillBehandling = objectMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
-        stegService.håndterFerdigstillBehandling(behandlingId = ferdigstillBehandling.behandlingsId)
+        stegService.håndterFerdigstillBehandling(behandling = behandlingService.hent(ferdigstillBehandling.behandlingsId))
     }
 
     companion object {

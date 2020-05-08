@@ -21,7 +21,9 @@ class RegistrerPersongrunnlag(
 ) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
 
     @Transactional
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: RegistrerPersongrunnlagDTO): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: RegistrerPersongrunnlagDTO,
+                                      stegService: StegService?): StegType {
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident, data.barnasIdenter, behandling)
         vilkårService.initierVilkårvurderingForBehandling(behandling.id)
         if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {

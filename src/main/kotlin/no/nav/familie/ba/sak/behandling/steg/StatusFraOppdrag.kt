@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.OppdragProtokollStatus
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -30,7 +29,9 @@ class StatusFraOppdrag(
 
     private val LOG = LoggerFactory.getLogger(this.javaClass)
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: StatusFraOppdragMedTask): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: StatusFraOppdragMedTask,
+                                      stegService: StegService?): StegType {
         val statusFraOppdragDTO = data.statusFraOppdragDTO
         val task = data.task
 
@@ -76,13 +77,12 @@ class StatusFraOppdrag(
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
         val task = Task.nyTask(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-                               objectMapper.writeValueAsString(JournalførVedtaksbrevDTO(vedtakId = vedtakId,
-                                                                                        task = gammelTask)),
+                               "$vedtakId",
                                gammelTask.metadata)
         taskRepository.save(task)
     }
 
     override fun stegType(): StegType {
-        return StegType.FERDIGSTILLE_OPPGAVE
+        return StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
     }
 }

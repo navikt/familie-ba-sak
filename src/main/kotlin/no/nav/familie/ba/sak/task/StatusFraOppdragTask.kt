@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask.Companion.TASK_STEP_TYPE
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Service
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Henter status fra oppdrag", maxAntallFeil = 100)
 class StatusFraOppdragTask(
-        private val stegService: StegService
+        private val stegService: StegService,
+        private val behandlingService: BehandlingService
 ) : AsyncTaskStep {
 
     /**
@@ -25,7 +27,10 @@ class StatusFraOppdragTask(
     override fun doTask(task: Task) {
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
 
-        stegService.håndterStatusFraØkonomi(StatusFraOppdragMedTask(statusFraOppdragDTO = statusFraOppdragDTO, task = task))
+        stegService.håndterStatusFraØkonomi(
+                behandling = behandlingService.hent(behandlingId = statusFraOppdragDTO.behandlingsId),
+                statusFraOppdragMedTask = StatusFraOppdragMedTask(statusFraOppdragDTO = statusFraOppdragDTO, task = task)
+        )
     }
 
     companion object {

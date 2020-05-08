@@ -8,10 +8,21 @@ import org.springframework.stereotype.Service
 @Service
 class IverksettMotOppdrag(private val økonomiService: ØkonomiService) : BehandlingSteg<IverksettingTaskDTO> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettingTaskDTO): StegType {
-        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(data.behandlingsId,
-                                                               data.vedtaksId,
-                                                               data.saksbehandlerId)
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: IverksettingTaskDTO,
+                                      stegService: StegService?): StegType {
+        val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
+
+        when {
+            vilkårsvurdering.validerSteg(behandling) -> {
+                økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(data.behandlingsId,
+                                                                       data.vedtaksId,
+                                                                       data.saksbehandlerId)
+            }
+            else -> {
+                error("Vilkårsvurdering er ikke gyldig ved iverksetting")
+            }
+        }
 
         return hentNesteStegForNormalFlyt(behandling)
     }

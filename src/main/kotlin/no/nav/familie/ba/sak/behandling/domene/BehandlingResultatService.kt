@@ -34,7 +34,7 @@ class BehandlingResultatService(
             behandlingResultatRepository.saveAndFlush(aktivBehandlingResultat.also { it.aktiv = false })
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling resultat $behandlingResultat")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling resultat $behandlingResultat")
         loggService.opprettVilkårsvurderingLogg(
                 behandlingResultat.behandling, forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)
         return behandlingResultatRepository.save(behandlingResultat)
@@ -45,7 +45,7 @@ class BehandlingResultatService(
         if (aktivBehandlingResultat != null) {
             error("Det finnes allerede et aktivt behandlingsresultat for behandling ${behandlingResultat.behandling.id}")
         }
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling resultat $behandlingResultat")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling resultat $behandlingResultat")
         return behandlingResultatRepository.save(behandlingResultat)
     }
 

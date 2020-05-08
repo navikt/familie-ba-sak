@@ -52,6 +52,8 @@ class ClientMocks {
         every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")
 
+        every { mockIntegrasjonClient.distribuerVedtaksbrev(any()) } just runs
+
         every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
 
         every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just runs

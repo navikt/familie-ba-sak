@@ -23,7 +23,9 @@ class JournalførVedtaksbrev(
         private val integrasjonClient: IntegrasjonClient,
         private val taskRepository: TaskRepository) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: JournalførVedtaksbrevDTO): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: JournalførVedtaksbrevDTO,
+                                      stegService: StegService?): StegType {
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
 
         val pdf = dokumentService.hentPdfForVedtak(vedtak)
@@ -47,6 +49,6 @@ class JournalførVedtaksbrev(
     }
 
     override fun stegType(): StegType {
-        return StegType.FERDIGSTILLE_OPPGAVE
+        return StegType.JOURNALFØR_VEDTAKSBREV
     }
 }

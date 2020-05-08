@@ -5,7 +5,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 
 interface BehandlingSteg<T> {
-    fun utførStegOgAngiNeste(behandling: Behandling, data: T): StegType
+    fun utførStegOgAngiNeste(behandling: Behandling,
+                             data: T,
+                             stegService: StegService? = null): StegType
 
     fun stegType(): StegType
 
@@ -52,11 +54,6 @@ enum class StegType(private val rekkefølge: Int,
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.SENDT_TIL_BESLUTTER)),
-    FERDIGSTILLE_OPPGAVE(
-            rekkefølge = 5,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.GODKJENT)
-    ),
     IVERKSETT_MOT_OPPDRAG(
             rekkefølge = 5,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
@@ -107,8 +104,7 @@ enum class StegType(private val rekkefølge: Int,
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> FERDIGSTILLE_OPPGAVE
-                FERDIGSTILLE_OPPGAVE -> IVERKSETT_MOT_OPPDRAG
+                BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV

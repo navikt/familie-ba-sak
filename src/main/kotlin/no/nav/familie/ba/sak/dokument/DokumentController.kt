@@ -23,9 +23,7 @@ class DokumentController(
 
     @GetMapping(path = ["vedtak-html/{vedtakId}"])
     fun hentHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<String> {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-
-        LOG.info("{} henter vedtaksbrev", saksbehandlerId)
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
 
         return dokumentService.hentHtmlForVedtak(vedtak = vedtakService.hent(vedtakId))
     }

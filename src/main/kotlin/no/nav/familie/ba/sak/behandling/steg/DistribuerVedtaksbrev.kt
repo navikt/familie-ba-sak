@@ -15,7 +15,9 @@ class DistribuerVedtaksbrev(
         private val taskRepository: TaskRepository,
         private val loggService: LoggService) : BehandlingSteg<DistribuerVedtaksbrevDTO> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: DistribuerVedtaksbrevDTO): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: DistribuerVedtaksbrevDTO,
+                                      stegService: StegService?): StegType {
         DistribuerVedtaksbrevTask.LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
         integrasjonClient.distribuerVedtaksbrev(data.journalpostId)
         loggService.opprettDistribuertBrevLogg(behandlingId = data.behandlingId,
@@ -30,6 +32,6 @@ class DistribuerVedtaksbrev(
     }
 
     override fun stegType(): StegType {
-        return StegType.FERDIGSTILLE_OPPGAVE
+        return StegType.DISTRIBUER_VEDTAKSBREV
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -13,12 +14,14 @@ import org.springframework.stereotype.Service
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send vedtaksbrev til Dokdist", maxAntallFeil = 3)
 class DistribuerVedtaksbrevTask(
-        private val stegService: StegService
+        private val stegService: StegService,
+        private val behandlingService: BehandlingService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val distribuerVedtaksbrevDTO = objectMapper.readValue(task.payload, DistribuerVedtaksbrevDTO::class.java)
-        stegService.håndterDistribuerVedtaksbrev(distribuerVedtaksbrevDTO)
+        stegService.håndterDistribuerVedtaksbrev(behandling = behandlingService.hent(distribuerVedtaksbrevDTO.behandlingId),
+                                                 distribuerVedtaksbrevDTO = distribuerVedtaksbrevDTO)
     }
 
     companion object {

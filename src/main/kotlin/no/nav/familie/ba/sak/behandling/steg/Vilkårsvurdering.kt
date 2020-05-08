@@ -27,7 +27,9 @@ class Vilkårsvurdering(
     private val LOG = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: RestVilkårsvurdering): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: RestVilkårsvurdering,
+                                      stegService: StegService?): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 

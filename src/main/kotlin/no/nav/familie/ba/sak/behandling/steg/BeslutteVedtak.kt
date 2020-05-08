@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.FerdigstillOppgaveTask
+import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -24,7 +24,9 @@ class BeslutteVedtak(
         private val loggService: LoggService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: RestBeslutningPåVedtak): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: RestBeslutningPåVedtak,
+                                      stegService: StegService?): StegType {
         if (behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
             error("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandling.status == BehandlingStatus.IVERKSATT ||
@@ -49,7 +51,7 @@ class BeslutteVedtak(
         }
 
         loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, saksbehandlerId, data.begrunnelse)
-        val ferdigstillGodkjenneVedtakTask = FerdigstillOppgaveTask.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
+        val ferdigstillGodkjenneVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
         taskRepository.save(ferdigstillGodkjenneVedtakTask)
 
         return if (data.beslutning.erGodkjent()) {

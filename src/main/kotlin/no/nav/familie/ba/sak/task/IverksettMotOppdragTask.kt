@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -20,12 +21,14 @@ import java.util.*
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Iverksett vedtak mot oppdrag", maxAntallFeil = 3)
 class IverksettMotOppdragTask(
         private val stegService: StegService,
+        private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        stegService.håndterIverksettMotØkonomi(iverksettingTask)
+        stegService.håndterIverksettMotØkonomi(behandling = behandlingService.hent(iverksettingTask.behandlingsId),
+                                               iverksettingTaskDTO = iverksettingTask)
     }
 
     override fun onCompletion(task: Task) {
