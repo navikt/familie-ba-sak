@@ -35,7 +35,7 @@ import java.time.LocalDate
 
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-dokgen", "mock-iverksett")
+@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-iverksett")
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,
