@@ -5,10 +5,12 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingInnvilget
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -16,6 +18,13 @@ import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
+import no.nav.familie.ba.sak.task.StatusFraOppdragTask
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -26,10 +35,13 @@ import java.time.LocalDate
 
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-dokgen")
+@ActiveProfiles("dev", "mock-dokgen", "mock-iverksett")
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,
+
+        @Autowired
+        private val vedtakService: VedtakService,
 
         @Autowired
         private val behandlingService: BehandlingService,
@@ -70,6 +82,62 @@ class StegServiceTest(
 
         val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
+
+        stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg)
+
+        val behandlingEtterSendTilBeslutter = behandlingService.hent(behandlingId = behandling.id)
+        Assertions.assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
+
+        stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
+                                               RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
+
+        val behandlingEtterBeslutteVedtak = behandlingService.hent(behandlingId = behandling.id)
+        Assertions.assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBeslutteVedtak.steg)
+
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.id)
+        stegService.håndterIverksettMotØkonomi(behandlingEtterBeslutteVedtak, IverksettingTaskDTO(
+                behandlingsId = behandlingEtterBeslutteVedtak.id,
+                vedtaksId = vedtak!!.id,
+                saksbehandlerId = "System",
+                personIdent = søkerFnr
+        ))
+
+        val behandlingEtterIverksetteVedtak = behandlingService.hent(behandlingId = behandling.id)
+        Assertions.assertEquals(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI, behandlingEtterIverksetteVedtak.steg)
+
+        stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
+                statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
+                                                          personIdent = søkerFnr,
+                                                          behandlingsId = behandlingEtterIverksetteVedtak.id,
+                                                          vedtaksId = vedtak.id),
+                task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+        ))
+
+        val behandlingEtterStatusFraOppdrag = behandlingService.hent(behandlingId = behandling.id)
+        Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, behandlingEtterStatusFraOppdrag.steg)
+
+        stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
+                vedtakId = vedtak.id,
+                task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+        ))
+
+        val behandlingEtterJournalførtVedtak = behandlingService.hent(behandlingId = behandling.id)
+        Assertions.assertEquals(StegType.DISTRIBUER_VEDTAKSBREV, behandlingEtterJournalførtVedtak.steg)
+
+        stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
+                                                 DistribuerVedtaksbrevDTO(behandlingId = behandling.id,
+                                                                          journalpostId = "1234",
+                                                                          personIdent = søkerFnr))
+
+        val behandlingEtterDistribuertVedtak = behandlingService.hent(behandlingId = behandling.id)
+        Assertions.assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterDistribuertVedtak.steg)
+
+        stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
+
+        val behandlingEtterFerdigstiltBehandling = behandlingService.hent(behandlingId = behandling.id)
+        Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.steg)
+        Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, behandlingEtterFerdigstiltBehandling.status)
+        Assertions.assertEquals(FagsakStatus.LØPENDE, behandlingEtterFerdigstiltBehandling.fagsak.status)
     }
 
     @Test

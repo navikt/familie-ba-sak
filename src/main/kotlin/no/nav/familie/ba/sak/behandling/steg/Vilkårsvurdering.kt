@@ -63,12 +63,12 @@ class Vilkårsvurdering(
         val listeAvFeil = mutableListOf<String>()
 
         val periodeResultater = behandlingResultat.periodeResultater(brukMåned = false)
-        val harGyldigePerioder = periodeResultater.any {
-            it.allePåkrevdeVilkårVurdert(PersonType.SØKER,
-                                         SakType.valueOfType(behandling.kategori)) &&
-            it.allePåkrevdeVilkårVurdert(PersonType.BARN,
-                                         SakType.valueOfType(
-                                                 behandling.kategori))
+        val harGyldigePerioder = periodeResultater.any { periodeResultat ->
+            periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER,
+                                                      SakType.valueOfType(behandling.kategori)) &&
+            periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN,
+                                                      SakType.valueOfType(
+                                                              behandling.kategori))
         }
 
         when {
@@ -81,24 +81,24 @@ class Vilkårsvurdering(
                 behandlingResultat.personResultater
                         .flatMap { it.vilkårResultater }
                         .filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
-        
+
         val barna = persongrunnlagService.hentBarna(behandling)
         barna.map { barn ->
             under18ÅrVilkår.forEach {
-                when {
-                    it.periodeFom == null && it.periodeTom == null -> {
-                        listeAvFeil.add("18 års vilkår for barn med fødselsdato ${barn.fødselsdato} mangler fom og tom dato")
-                    }
-                    it.periodeFom == null -> {
-                        listeAvFeil.add("18 års vilkår for barn med fødselsdato ${barn.fødselsdato} mangler fom")
-                    }
-                    it.periodeTom == null -> {
-                        listeAvFeil.add("18 års vilkår for barn med fødselsdato ${barn.fødselsdato} mangler tom")
-                    }
-                    it.periodeFom.isBefore(barn.fødselsdato) || it.periodeFom.isAfter(barn.fødselsdato.plusYears(18)) -> {
+                if (it.periodeFom == null && it.periodeTom == null) {
+                    listeAvFeil.add("18 års vilkår for barn med fødselsdato ${barn.fødselsdato} mangler fom og tom dato")
+                }
+                if (it.periodeFom == null) {
+                    listeAvFeil.add("18 års vilkår for barn med fødselsdato ${barn.fødselsdato} mangler fom")
+                }
+                if (it.periodeTom == null) {
+                    listeAvFeil.add("18 års vilkår for barn med fødselsdato ${barn.fødselsdato} mangler tom")
+                }
+                if (it.periodeFom != null && it.periodeTom != null) {
+                    if (it.periodeFom.isBefore(barn.fødselsdato) || it.periodeFom.isAfter(barn.fødselsdato.plusYears(18))) {
                         listeAvFeil.add("18 års vilkår for barn med fødselsdato ${barn.fødselsdato} har ugyldig fom(${it.periodeFom})")
                     }
-                    it.periodeTom.isBefore(barn.fødselsdato) || it.periodeTom.isAfter(barn.fødselsdato.plusYears(18)) -> {
+                    if (it.periodeTom.isBefore(barn.fødselsdato) || it.periodeTom.isAfter(barn.fødselsdato.plusYears(18))) {
                         listeAvFeil.add("18 års vilkår for barn med fødselsdato ${barn.fødselsdato} har ugyldig tom(${it.periodeTom})")
                     }
                 }

@@ -38,8 +38,10 @@ class BeslutteVedtak(
             error("Kan ikke beslutte et vedtak som ikke er foreslått av en saksbehandler")
         }
 
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-        toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(behandling, saksbehandlerId, data.beslutning)
+        val beslutterId = SikkerhetContext.hentSaksbehandler()
+        toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(behandling = behandling,
+                                                                        beslutter = beslutterId,
+                                                                        beslutning = data.beslutning)
 
         if (data.beslutning.erGodkjent()) {
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
@@ -47,10 +49,10 @@ class BeslutteVedtak(
 
             vedtakService.godkjennVedtak(vedtak)
 
-            opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
+            opprettTaskIverksettMotOppdrag(behandling, vedtak, beslutterId)
         }
 
-        loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, saksbehandlerId, data.begrunnelse)
+        loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, beslutterId, data.begrunnelse)
         val ferdigstillGodkjenneVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
         taskRepository.save(ferdigstillGodkjenneVedtakTask)
 

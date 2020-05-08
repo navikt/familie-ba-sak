@@ -24,6 +24,7 @@ class DokgenTestConfig {
         val dokumentService: DokumentService = mockk()
         every { dokumentService.hentHtmlForVedtak(any()) } returns success("<HTML>HTML_MOCKUP</HTML>")
         every { dokumentService.hentStønadBrevMarkdown(any(), any(), any()) } returns "Markdown mock"
+        every { dokumentService.hentPdfForVedtak(any()) } returns TEST_PDF
         return dokumentService
     }
 

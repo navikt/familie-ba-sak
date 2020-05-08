@@ -46,7 +46,7 @@ class FagsakController(
 
     @GetMapping(path = ["fagsaker/{fagsakId}"])
     fun hentFagsak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id {}", fagsakId)
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id $fagsakId")
 
         return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
