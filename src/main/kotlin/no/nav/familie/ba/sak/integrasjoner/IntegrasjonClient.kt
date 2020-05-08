@@ -7,10 +7,12 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
-import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
-import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
+import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
+import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
+import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
+import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.http.client.AbstractRestClient
@@ -299,6 +301,24 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                        e,
                                        uri,
                                        "behandlingstema: ${behandlingstema}, oppgavetype: ${oppgavetype}, enhet: ${enhet}, saksbehandler: ${saksbehandler}")
+        }
+    }
+
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): OppgaverOgAntall {
+        return finnOppgaveRequest.run {
+            val uri = URI.create("$integrasjonUri/oppgave/v2")
+
+            try {
+                val ressurs = postForEntity<Ressurs<OppgaverOgAntall>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
+                assertGenerelleSuksessKriterier(ressurs)
+                ressurs?.data ?: throw IntegrasjonException("Ressurs mangler.", null, uri, null)
+            } catch (e: Exception) {
+                val message = if (e is RestClientResponseException) e.responseBodyAsString else ""
+                throw IntegrasjonException("Kall mot integrasjon feilet ved hentOppgaver. response=$message",
+                        e,
+                        uri,
+                        "behandlingstema: ${behandlingstema}, oppgavetype: ${oppgavetype}, enhet: ${enhet}, saksbehandler: ${saksbehandler}")
+            }
         }
     }
 
