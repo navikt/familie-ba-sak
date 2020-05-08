@@ -79,4 +79,22 @@ class OppgaveControllerTest {
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respons.statusCode)
         Assertions.assertEquals("Feil ved tildeling av oppgave", respons.body?.melding)
     }
+
+    @Test
+    fun `hentOppgaver via OppgaveController skal fungere`() {
+        every {
+            oppgaveService.hentOppgaver(any())
+        } returns OppgaverOgAntall(1, listOf(Oppgave(tema = Tema.BAR)))
+        val response = oppgaveController.hentOppgaver(FinnOppgaveRequest())
+        val oppgaverOgAntall = response.body?.data as OppgaverOgAntall
+        Assertions.assertEquals(1, oppgaverOgAntall.antallTreffTotalt)
+        Assertions.assertEquals(Tema.BAR, oppgaverOgAntall.oppgaver.first().tema)
+    }
+
+    @Test
+    fun `hentOppgaver skal feile ved ukjent behandlingstema`() {
+        val oppgaver = oppgaveController.hentOppgaver(FinnOppgaveRequest(behandlingstema = "ab1000"))
+        Assertions.assertEquals(Ressurs.Status.FEILET, oppgaver.body?.status)
+        Assertions.assertEquals("Ugyldig behandlingstema", oppgaver.body?.melding)
+    }
 }
