@@ -11,13 +11,17 @@ import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import javax.persistence.EntityManager
 
 @SpringBootTest
 @ActiveProfiles("dev")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LoggServiceTest(
         @Autowired
         private val loggService: LoggService,
@@ -27,7 +31,6 @@ class LoggServiceTest(
 
         @Autowired
         private val mockIntegrasjonClient: IntegrasjonClient
-
 ) {
 
     @Test
@@ -101,7 +104,8 @@ class LoggServiceTest(
 
 
         val nyttBehandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.NEI)
-        val nyVilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, behandlingResultat, nyttBehandlingResultat)
+        val nyVilkårsvurderingLogg =
+                loggService.opprettVilkårsvurderingLogg(behandling, behandlingResultat, nyttBehandlingResultat)
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)
         Assertions.assertEquals("Endring på vilkårsvurdering", nyVilkårsvurderingLogg.tittel)

@@ -25,17 +25,18 @@ import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.prosessering.domene.Task
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.TestInstance.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
+import javax.persistence.EntityManager
 
 
 @SpringBootTest
 @ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-iverksett")
+@TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,
