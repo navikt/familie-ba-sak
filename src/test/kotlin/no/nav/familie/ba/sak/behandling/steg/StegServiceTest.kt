@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.prosessering.domene.Task
+import org.junit.BeforeClass
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.*
 import org.springframework.beans.factory.annotation.Autowired

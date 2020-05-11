@@ -44,7 +44,7 @@ class DatabaseCleanupService(private val entityManager: EntityManager) : Initial
         entityManager.flush()
         entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO FALSE").executeUpdate()
         tableNames.forEach { tableName ->
-            entityManager.createNativeQuery("TRUNCATE TABLE " + tableName).executeUpdate()
+            entityManager.createNativeQuery("TRUNCATE TABLE $tableName").executeUpdate()
         }
         entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO TRUE").executeUpdate()
     }

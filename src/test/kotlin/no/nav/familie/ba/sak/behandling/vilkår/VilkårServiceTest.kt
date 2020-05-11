@@ -10,39 +10,49 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
+import no.nav.familie.ba.sak.common.DatabaseCleanupService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
 
 @SpringBootTest
-@ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
-class VilkårServiceTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class VilkårServiceTest(
+        @Autowired
+        private val behandlingService: BehandlingService,
 
-    @Autowired
-    private lateinit var behandlingService: BehandlingService
+        @Autowired
+        private val fagsakService: FagsakService,
 
-    @Autowired
-    private lateinit var fagsakService: FagsakService
+        @Autowired
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
-    @Autowired
-    private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+        @Autowired
+        private val vilkårService: VilkårService,
 
-    @Autowired
-    private lateinit var vilkårService: VilkårService
+        @Autowired
+        private val stegService: StegService,
 
-    @Autowired
-    private lateinit var stegService: StegService
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
+) {
+
+
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `vilkårsvurdering med kun JA blir innvilget`() {
