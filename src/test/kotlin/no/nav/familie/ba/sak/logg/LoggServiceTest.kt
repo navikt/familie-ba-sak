@@ -11,18 +11,16 @@ import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.*
 import org.springframework.test.context.ActiveProfiles
-import javax.persistence.EntityManager
 
 @SpringBootTest
 @ActiveProfiles("dev")
-@TestInstance(Lifecycle.PER_CLASS)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class LoggServiceTest(
         @Autowired
         private val loggService: LoggService,
@@ -31,16 +29,8 @@ class LoggServiceTest(
         private val stegService: StegService,
 
         @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient,
-
-        @Autowired
-        private val entityManager: EntityManager
+        private val mockIntegrasjonClient: IntegrasjonClient
 ) {
-
-    @BeforeAll
-    fun init() {
-        entityManager.clear()
-    }
 
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {

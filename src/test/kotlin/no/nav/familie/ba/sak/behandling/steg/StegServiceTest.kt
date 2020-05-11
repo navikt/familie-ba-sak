@@ -29,6 +29,8 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import javax.persistence.EntityManager
@@ -36,7 +38,7 @@ import javax.persistence.EntityManager
 
 @SpringBootTest
 @ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-iverksett")
-@TestInstance(Lifecycle.PER_CLASS)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,
@@ -54,16 +56,8 @@ class StegServiceTest(
         private val mockIntegrasjonClient: IntegrasjonClient,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService,
-
-        @Autowired
-        private val entityManager: EntityManager
+        private val behandlingResultatService: BehandlingResultatService
 ) {
-
-    @BeforeAll
-    fun init() {
-        entityManager.clear()
-    }
 
     @Test
     fun `Skal håndtere steg for ordinær behandling`() {
