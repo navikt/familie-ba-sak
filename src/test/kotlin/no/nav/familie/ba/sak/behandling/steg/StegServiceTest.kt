@@ -54,8 +54,16 @@ class StegServiceTest(
         private val mockIntegrasjonClient: IntegrasjonClient,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService
+        private val behandlingResultatService: BehandlingResultatService,
+
+        @Autowired
+        private val entityManager: EntityManager
 ) {
+
+    @BeforeAll
+    fun init() {
+        entityManager.clear()
+    }
 
     @Test
     fun `Skal håndtere steg for ordinær behandling`() {

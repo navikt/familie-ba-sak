@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -21,7 +22,7 @@ import javax.persistence.EntityManager
 
 @SpringBootTest
 @ActiveProfiles("dev")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(Lifecycle.PER_CLASS)
 class LoggServiceTest(
         @Autowired
         private val loggService: LoggService,
@@ -30,8 +31,16 @@ class LoggServiceTest(
         private val stegService: StegService,
 
         @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient
+        private val mockIntegrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val entityManager: EntityManager
 ) {
+
+    @BeforeAll
+    fun init() {
+        entityManager.clear()
+    }
 
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {
