@@ -93,7 +93,8 @@ class FagsakService(
                             ?: BehandlingResultatType.IKKE_VURDERT,
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
-                    underkategori = behandling.underkategori
+                    underkategori = behandling.underkategori,
+                    endretAv = behandling.endretAv
             )
         }
 
