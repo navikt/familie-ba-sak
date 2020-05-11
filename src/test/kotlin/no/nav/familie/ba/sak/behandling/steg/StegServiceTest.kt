@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingInnvilget
+import no.nav.familie.ba.sak.common.DatabaseCleanupService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
@@ -38,7 +39,7 @@ import javax.persistence.EntityManager
 
 @SpringBootTest
 @ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-iverksett")
-@DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+@TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,
@@ -56,8 +57,16 @@ class StegServiceTest(
         private val mockIntegrasjonClient: IntegrasjonClient,
 
         @Autowired
-        private val behandlingResultatService: BehandlingResultatService
+        private val behandlingResultatService: BehandlingResultatService,
+
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
 ) {
+
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `Skal håndtere steg for ordinær behandling`() {

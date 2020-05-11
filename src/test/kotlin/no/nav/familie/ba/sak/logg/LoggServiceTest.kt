@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.DatabaseCleanupService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.randomFnr
@@ -11,16 +12,16 @@ import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.*
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
 @ActiveProfiles("dev")
-@DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LoggServiceTest(
         @Autowired
         private val loggService: LoggService,
@@ -29,8 +30,16 @@ class LoggServiceTest(
         private val stegService: StegService,
 
         @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient
+        private val mockIntegrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
 ) {
+
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {
