@@ -9,7 +9,7 @@ import javax.persistence.*
 
 @Entity(name = "PersonResultat")
 @Table(name = "PERSON_RESULTAT")
-class PersonResultat(
+data class PersonResultat(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "periode_resultat_seq_generator")
         @SequenceGenerator(name = "periode_resultat_seq_generator",
@@ -40,5 +40,18 @@ class PersonResultat(
                 BehandlingResultatType.AVSLÅTT
             }
         }
+    }
+
+    fun disjunkteVilkårTyper(sammenligning: PersonResultat): Pair<Set<VilkårResultat>, Set<VilkårResultat>>{
+        val venstre = mutableSetOf<VilkårResultat>()
+        val høyre = mutableSetOf<VilkårResultat>()
+
+        vilkårResultater.forEach { A ->
+            sammenligning.vilkårResultater.forEach { B ->
+                if (vilkårResultater.none{ it.vilkårType == B.vilkårType }) høyre.add(B)
+                else if (sammenligning.vilkårResultater.none{ it.vilkårType == A.vilkårType }) venstre.add(A)
+            }
+        }
+        return Pair(venstre, høyre)
     }
 }

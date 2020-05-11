@@ -42,7 +42,7 @@ class BehandlingResultatService(
 
     fun lagreInitiert(behandlingResultat: BehandlingResultat): BehandlingResultat {
         /*
-        TODO: Oppdater navn på denne funksjonen?
+        fun lagreInitiert(behandlingResultat: BehandlingResultat): BehandlingResultat {
         val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
         if (aktivBehandlingResultat != null) {
             error("Det finnes allerede et aktivt behandlingsresultat for behandling ${behandlingResultat.behandling.id}")
@@ -51,6 +51,14 @@ class BehandlingResultatService(
         LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling resultat $behandlingResultat")
         return behandlingResultatRepository.save(behandlingResultat)
     }
+
+/*
+    fun lagreOppatertPersonResultat(behandlingResultat: BehandlingResultat): BehandlingResultat {
+        // TODO: Fiks query i behandlingresultatrepository som updater nye personresultater i eksisterende behandlingres
+        return behandlingResultatRepository.updatePersonResultater(behandlingResultat.id, behandlingResultat)
+    }*/
+
+
 
     companion object {
         private val LOG = LoggerFactory.getLogger(this::class.java)

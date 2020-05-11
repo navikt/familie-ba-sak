@@ -50,6 +50,19 @@ data class BehandlingResultat(
     }
 
     fun periodeResultater(brukMåned: Boolean): Set<PeriodeResultat> = this.personResultaterTilPeriodeResultater(brukMåned)
+
+    fun disjunktePersoner(sammenligning: BehandlingResultat): Pair<Set<PersonResultat>, Set<PersonResultat>>{
+        val venstre = mutableSetOf<PersonResultat>()
+        val høyre = mutableSetOf<PersonResultat>()
+
+        personResultater.forEach { A ->
+            sammenligning.personResultater.forEach { B ->
+                if (personResultater.none{ it.personIdent == B.personIdent }) høyre.add(B)
+                else if (sammenligning.personResultater.none{ it.personIdent == A.personIdent }) venstre.add(A)
+            }
+        }
+        return Pair(venstre, høyre)
+    }
 }
 
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {

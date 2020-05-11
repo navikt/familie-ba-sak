@@ -74,19 +74,87 @@ class VilkårService(
         val initiertBehandlingResultat = initierMinimaltBehandlingResultatForBehandling(behandlingId)
 
         val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
-        if (aktivBehandlingResultat != null) {
-            val oppdatert =  lagOppdatertBehandlingResultat(aktivtResultat = aktivBehandlingResultat, initiertResultat = initiertBehandlingResultat)
-            return behandlingResultatService.lagreInitiert(oppdatert)
+        return if (aktivBehandlingResultat != null) {
+            /*
+            val nytt = aktivBehandlingResultat.personResultater.toMutableSet()
+            val personRes = aktivBehandlingResultat.personResultater.first()
+            val vilkårRes = VilkårResultat(personResultat =  personRes,
+                                           vilkårType = Vilkår.BOSATT_I_RIKET,
+                                           resultat = Resultat.NEI,
+                                           periodeFom = LocalDate.now(),
+                                           periodeTom = LocalDate.now(),
+                                           begrunnelse = "")
+            personRes.vilkårResultater = setOf(vilkårRes)
+            nytt.add(personRes)
+            aktivBehandlingResultat.personResultater = nytt
+            return aktivBehandlingResultat
+            */
+            /*
+            val oppdatertAktivt =  lagOppdatertBehandlingResultat(aktivtResultat = aktivBehandlingResultat, initiertResultat = initiertBehandlingResultat)
+            behandlingResultatService.lagreInitiert(oppdatertAktivt)
+            */
+
+
+            /*
+            val nytt = mutableSetOf<PersonResultat>()
+            val personRes = PersonResultat(behandlingResultat = aktivBehandlingResultat, personIdent = "12345678910")
+            val vilkårRes = VilkårResultat(personResultat =  personRes,
+                                           vilkårType = Vilkår.BOSATT_I_RIKET,
+                                           resultat = Resultat.NEI,
+                                           periodeFom = null,
+                                           periodeTom = null,
+                                           begrunnelse = "")
+            personRes.vilkårResultater = setOf(vilkårRes)
+            nytt.add(personRes)
+            aktivBehandlingResultat.personResultater.forEach { nytt.add(it) }
+            aktivBehandlingResultat.personResultater = nytt
+            */
+            //aktivBehandlingResultat.personResultater = finnDiff(aktivBehandlingResultat, initiertBehandlingResultat).first
+            //behandlingResultatService.lagreInitiert(aktivBehandlingResultat)
+            return aktivBehandlingResultat
         } else {
-            return behandlingResultatService.lagreInitiert(initiertBehandlingResultat)
+            behandlingResultatService.lagreInitiert(initiertBehandlingResultat)
         }
     }
+
+    /*
+    fun finnDiff(aktivtResultat: BehandlingResultat, initiertResultat: BehandlingResultat): Pair<Set<PersonResultat>, Set<PersonResultat>> {
+        val oppdatertePersonResultater = mutableSetOf<PersonResultat>()
+        val personResultaterSomFjernes = mutableSetOf<PersonResultat>()
+
+        val (personerFjernes, personerNye) = aktivtResultat.disjunktePersoner(initiertResultat)
+
+        // Legg til nye personer i oppdatert-liste og legg til fjernede i fjernet-liste
+        personResultaterSomFjernes.addAll(personerFjernes)
+        personerNye.forEach { oppdatertePersonResultater.add( it.copy( behandlingResultat=  aktivtResultat )) }
+
+        // Reduser lister personresultater til de personene som finnes i begge
+        val resterendeIAktivt = aktivtResultat.personResultater.toMutableList()
+        val resterendeIInit = initiertResultat.personResultater.toMutableList()
+        resterendeIAktivt.removeAll(personerFjernes)
+        resterendeIInit.removeAll(personerNye)
+
+        // Gå gjennom personer som finnes i begge
+        resterendeIAktivt.forEach { fraaktivtfinnesibegge ->
+            val initiertVersjon = resterendeIInit.filter { it.personIdent == fraaktivtfinnesibegge.personIdent }.first()
+            val (utgåttVilkårForPerson, nyttVilkårForPerson) = fraaktivtfinnesibegge.disjunkteVilkårTyper(initiertVersjon)
+
+            val personsOppdaterteVilkårResultater = fraaktivtfinnesibegge.vilkårResultater.toMutableSet()
+            personsOppdaterteVilkårResultater.removeAll(utgåttVilkårForPerson)
+            nyttVilkårForPerson.forEach { personsOppdaterteVilkårResultater.add( it.copy( personResultat = fraaktivtfinnesibegge) ) }
+
+            personResultaterSomFjernes.add(fraaktivtfinnesibegge.copy(vilkårResultater = utgåttVilkårForPerson))
+            oppdatertePersonResultater.add(fraaktivtfinnesibegge.copy(vilkårResultater = personsOppdaterteVilkårResultater))
+        }
+        return Pair(oppdatertePersonResultater, personResultaterSomFjernes)
+    }
+    */
 
     fun lagOppdatertBehandlingResultat(aktivtResultat: BehandlingResultat, initiertResultat: BehandlingResultat): BehandlingResultat {
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
         val oppdatertePersonResultater = mutableSetOf<PersonResultat>()
         initiertResultat.personResultater.forEach { personFraInitiert ->
-            val personFraAktivt = aktivtResultat.personResultater.filter { it.personIdent == personFraInitiert.personIdent }.firstOrNull()
+            val personFraAktivt = aktivtResultat.personResultater.filter { it.personIdent === personFraInitiert.personIdent }.firstOrNull()
             if (personFraAktivt != null) { // Fyll inn den initierte med person fra aktiv
                 val personsOppdaterteVilkårResultater = mutableSetOf<VilkårResultat>()
                 personFraInitiert.vilkårResultater.forEach { initiertVilkårResultat ->
