@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
 @ActiveProfiles("dev")
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
 class LoggServiceTest(
         @Autowired
         private val loggService: LoggService,

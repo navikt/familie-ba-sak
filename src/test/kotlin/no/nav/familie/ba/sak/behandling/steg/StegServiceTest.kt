@@ -30,7 +30,7 @@ import org.junit.jupiter.api.TestInstance.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode
+import org.springframework.test.annotation.DirtiesContext.*
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import javax.persistence.EntityManager
@@ -38,7 +38,7 @@ import javax.persistence.EntityManager
 
 @SpringBootTest
 @ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-iverksett")
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,
