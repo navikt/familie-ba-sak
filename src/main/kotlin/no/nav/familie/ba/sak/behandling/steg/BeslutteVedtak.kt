@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
-import no.nav.familie.ba.sak.task.IverksettMotOppdrag
+import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -24,7 +24,9 @@ class BeslutteVedtak(
         private val loggService: LoggService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: RestBeslutningPåVedtak): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: RestBeslutningPåVedtak,
+                                      stegService: StegService?): StegType {
         if (behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
             error("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandling.status == BehandlingStatus.IVERKSATT ||
@@ -36,8 +38,10 @@ class BeslutteVedtak(
             error("Kan ikke beslutte et vedtak som ikke er foreslått av en saksbehandler")
         }
 
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-        toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(behandling, saksbehandlerId, data.beslutning)
+        val beslutterId = SikkerhetContext.hentSaksbehandler()
+        toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(behandling = behandling,
+                                                                        beslutter = beslutterId,
+                                                                        beslutning = data.beslutning)
 
         if (data.beslutning.erGodkjent()) {
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
@@ -45,10 +49,10 @@ class BeslutteVedtak(
 
             vedtakService.godkjennVedtak(vedtak)
 
-            opprettTaskIverksettMotOppdrag(behandling, vedtak, saksbehandlerId)
+            opprettTaskIverksettMotOppdrag(behandling, vedtak, beslutterId)
         }
 
-        loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, saksbehandlerId, data.begrunnelse)
+        loggService.opprettBeslutningOmVedtakLogg(behandling, data.beslutning, beslutterId, data.begrunnelse)
         val ferdigstillGodkjenneVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
         taskRepository.save(ferdigstillGodkjenneVedtakTask)
 
@@ -70,7 +74,7 @@ class BeslutteVedtak(
     }
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String) {
-        val task = IverksettMotOppdrag.opprettTask(behandling, vedtak, saksbehandlerId)
+        val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, saksbehandlerId)
         taskRepository.save(task)
     }
 }

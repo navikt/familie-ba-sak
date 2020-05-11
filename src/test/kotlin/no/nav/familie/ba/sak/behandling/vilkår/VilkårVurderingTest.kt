@@ -8,37 +8,40 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import java.lang.IllegalStateException
 import java.time.LocalDate
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class VilkårVurderingTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class VilkårVurderingTest(
+        @Autowired
+        private val behandlingService: BehandlingService,
 
-    @Autowired
-    private lateinit var behandlingService: BehandlingService
+        @Autowired
+        private val fagsakService: FagsakService,
 
-    @Autowired
-    private lateinit var fagsakService: FagsakService
+        @Autowired
+        private val vilkårService: VilkårService,
 
-    @Autowired
-    private lateinit var vilkårService: VilkårService
+        @Autowired
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
-    @Autowired
-    private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
+) {
+
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `Hent relevante vilkår for persontype BARN`() {
@@ -101,7 +104,7 @@ class VilkårVurderingTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
 
         personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
-                                                     personIdent = PersonIdent("11111111111"),
+                                                     personIdent = PersonIdent(barnFnr),
                                                      type = PersonType.BARN,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
                                                      fødselsdato = LocalDate.now(),

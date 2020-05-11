@@ -26,7 +26,7 @@ class BehandlingResultatService(
         val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
         val alleBehandlingsresultat = behandlingResultatRepository.finnBehandlingResultater(behandlingResultat.behandling.id)
         val forrigeBehandlingResultatSomIkkeErAutogenerert: BehandlingResultat? =
-                if (alleBehandlingsresultat != null && alleBehandlingsresultat.size > 1)
+                if (alleBehandlingsresultat.size > 1)
                     aktivBehandlingResultat
                 else null
 
@@ -34,7 +34,7 @@ class BehandlingResultatService(
             behandlingResultatRepository.saveAndFlush(aktivBehandlingResultat.also { it.aktiv = false })
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling resultat $behandlingResultat")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling resultat $behandlingResultat")
         loggService.opprettVilkårsvurderingLogg(
                 behandlingResultat.behandling, forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)
         return behandlingResultatRepository.save(behandlingResultat)
@@ -45,7 +45,7 @@ class BehandlingResultatService(
         if (aktivBehandlingResultat != null) {
             error("Det finnes allerede et aktivt behandlingsresultat for behandling ${behandlingResultat.behandling.id}")
         }
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling resultat $behandlingResultat")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling resultat $behandlingResultat")
         return behandlingResultatRepository.save(behandlingResultat)
     }
 

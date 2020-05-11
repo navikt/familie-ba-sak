@@ -28,10 +28,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-dokgen")
 @Tag("integration")
-class FerdigstillBehandlingTest {
+class FerdigstillBehandlingTaskTest {
 
     @Autowired
-    private lateinit var ferdigstillBehandling: FerdigstillBehandling
+    private lateinit var ferdigstillBehandlingTask: FerdigstillBehandlingTask
 
     @Autowired
     private lateinit var vedtakService: VedtakService
@@ -73,7 +73,7 @@ class FerdigstillBehandlingTest {
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
         behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = StegType.FERDIGSTILLE_BEHANDLING)
 
-        return FerdigstillBehandling.opprettTask(personIdent = fnr, behandlingsId = behandling.id)
+        return FerdigstillBehandlingTask.opprettTask(personIdent = fnr, behandlingsId = behandling.id)
     }
 
     @Test
@@ -81,8 +81,8 @@ class FerdigstillBehandlingTest {
         val testTask = lagTestTask(Resultat.JA)
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
-        ferdigstillBehandling.doTask(testTask)
-        ferdigstillBehandling.onCompletion(testTask)
+        ferdigstillBehandlingTask.doTask(testTask)
+        ferdigstillBehandlingTask.onCompletion(testTask)
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
         Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling.status)
@@ -96,8 +96,8 @@ class FerdigstillBehandlingTest {
         val testTask = lagTestTask(Resultat.NEI)
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
-        ferdigstillBehandling.doTask(testTask)
-        ferdigstillBehandling.onCompletion(testTask)
+        ferdigstillBehandlingTask.doTask(testTask)
+        ferdigstillBehandlingTask.onCompletion(testTask)
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
         Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling.status)

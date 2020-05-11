@@ -10,23 +10,24 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.DatabaseCleanupService
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
 import no.nav.familie.ba.sak.integrasjoner.domene.Personident
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
-import java.util.*
 
 @SpringBootTest
 @ActiveProfiles("dev")
 @Tag("integration")
+@TestInstance(Lifecycle.PER_CLASS)
 class FagsakServiceTest(
         @Autowired
         private val fagsakService: FagsakService,
@@ -38,8 +39,16 @@ class FagsakServiceTest(
         private val stegService: StegService,
 
         @Autowired
-        private val integrasjonClient: IntegrasjonClient
+        private val integrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
 ) {
+
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     /*
     This is a complicated test against following family relationship:
@@ -62,12 +71,12 @@ class FagsakServiceTest(
      */
     @Test
     fun `test å søke fagsak med fnr`() {
-        val søker1Fnr = UUID.randomUUID().toString()
-        val søker2Fnr = UUID.randomUUID().toString()
-        val søker3Fnr = UUID.randomUUID().toString()
-        val barn1Fnr = UUID.randomUUID().toString()
-        val barn2Fnr = UUID.randomUUID().toString()
-        val barn3Fnr = UUID.randomUUID().toString()
+        val søker1Fnr = randomFnr()
+        val søker2Fnr = randomFnr()
+        val søker3Fnr = randomFnr()
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
+        val barn3Fnr = randomFnr()
 
         every {
             integrasjonClient.hentPersoninfoFor(eq(barn1Fnr))
@@ -75,9 +84,19 @@ class FagsakServiceTest(
 
         every {
             integrasjonClient.hentPersoninfoFor(eq(barn2Fnr))
-        } returns Personinfo(fødselsdato = LocalDate.of(2019, 5, 1), kjønn = Kjønn.MANN, navn = "barn2"
-                             , familierelasjoner = setOf(Familierelasjoner(Personident(søker1Fnr), FAMILIERELASJONSROLLE.MEDMOR, "søker1", LocalDate.of(1990, 2, 19))
-                                                         , Familierelasjoner(Personident(søker3Fnr), FAMILIERELASJONSROLLE.MEDMOR, "søker3", LocalDate.of(1990, 1, 10))))
+        } returns Personinfo(fødselsdato = LocalDate.of(2019, 5, 1),
+                             kjønn = Kjønn.MANN,
+                             navn = "barn2"
+                             ,
+                             familierelasjoner = setOf(Familierelasjoner(Personident(søker1Fnr),
+                                                                         FAMILIERELASJONSROLLE.MEDMOR,
+                                                                         "søker1",
+                                                                         LocalDate.of(1990, 2, 19))
+                                                       ,
+                                                       Familierelasjoner(Personident(søker3Fnr),
+                                                                         FAMILIERELASJONSROLLE.MEDMOR,
+                                                                         "søker3",
+                                                                         LocalDate.of(1990, 1, 10))))
 
         every {
             integrasjonClient.hentPersoninfoFor(eq(barn3Fnr))
@@ -121,8 +140,8 @@ class FagsakServiceTest(
                 BehandlingType.FØRSTEGANGSBEHANDLING
         ))
         stegService.håndterPersongrunnlag(andreBehandling,
-                                          RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr, barn2Fnr)))
-
+                                          RegistrerPersongrunnlagDTO(ident = søker1Fnr,
+                                                                     barnasIdenter = listOf(barn1Fnr, barn2Fnr)))
 
 
         val tredjeBehandling = stegService.håndterNyBehandling(NyBehandling(
@@ -147,15 +166,15 @@ class FagsakServiceTest(
             matching += if (it.fagsakId == fagsak0.data!!.id) 1 else if (it.fagsakId == fagsak1.data!!.id) 10 else 0
         }
         Assertions.assertEquals(11, matching)
-        Assertions.assertEquals(1, søkeresultat2.filter { it.ident== barn1Fnr }.size)
+        Assertions.assertEquals(1, søkeresultat2.filter { it.ident == barn1Fnr }.size)
 
         val søkeresultat3 = fagsakService.hentFagsakDeltager(barn2Fnr)
         Assertions.assertEquals(3, søkeresultat3.size)
-        Assertions.assertEquals(1, søkeresultat3.filter { it.ident== barn2Fnr }.size)
-        Assertions.assertNull(søkeresultat3.find{ it.ident== barn2Fnr }!!.fagsakId)
-        Assertions.assertEquals(fagsak0.data!!.id, søkeresultat3.find{it.ident== søker1Fnr}!!.fagsakId)
-        Assertions.assertEquals(1, søkeresultat3.filter { it.ident== søker3Fnr }.size)
-        Assertions.assertEquals("søker3", søkeresultat3.filter { it.ident== søker3Fnr }[0].navn)
-        Assertions.assertNull(søkeresultat3.find { it.ident== søker3Fnr }!!.fagsakId)
+        Assertions.assertEquals(1, søkeresultat3.filter { it.ident == barn2Fnr }.size)
+        Assertions.assertNull(søkeresultat3.find { it.ident == barn2Fnr }!!.fagsakId)
+        Assertions.assertEquals(fagsak0.data!!.id, søkeresultat3.find { it.ident == søker1Fnr }!!.fagsakId)
+        Assertions.assertEquals(1, søkeresultat3.filter { it.ident == søker3Fnr }.size)
+        Assertions.assertEquals("søker3", søkeresultat3.filter { it.ident == søker3Fnr }[0].navn)
+        Assertions.assertNull(søkeresultat3.find { it.ident == søker3Fnr }!!.fagsakId)
     }
 }

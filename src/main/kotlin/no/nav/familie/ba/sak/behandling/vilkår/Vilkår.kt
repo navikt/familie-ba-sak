@@ -2,8 +2,9 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
 import no.nav.nare.core.specifications.Spesifikasjon
-import java.lang.IllegalArgumentException
 import java.time.LocalDate
 
 
@@ -71,10 +72,11 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     }
 }
 
-data class GyldigVilkårsperiode (
+data class GyldigVilkårsperiode(
         val gyldigFom: LocalDate = LocalDate.MIN,
         val gyldigTom: LocalDate = LocalDate.MAX
 ) {
+
     fun gyldigFor(dato: LocalDate): Boolean {
         return !(dato.isBefore(gyldigFom) || dato.isAfter(gyldigTom))
     }
@@ -85,11 +87,18 @@ enum class SakType {
 
     companion object {
         fun valueOfType(type: Any): SakType {
-            return when(type) {
+            return when (type) {
                 BehandlingKategori.EØS -> EØS
                 BehandlingKategori.NASJONAL -> NASJONAL
                 else -> throw IllegalArgumentException("Finner ingen mapping til SakType for $type")
             }
+        }
+
+        fun hentSakType(behandlingKategori: BehandlingKategori, søknadDTO: SøknadDTO?): SakType {
+            return if (behandlingKategori == BehandlingKategori.NASJONAL &&
+                       (søknadDTO?.typeSøker == TypeSøker.TREDJELANDSBORGER || søknadDTO?.typeSøker == TypeSøker.EØS_BORGER)) {
+                TREDJELANDSBORGER
+            } else valueOfType(behandlingKategori)
         }
     }
 }
