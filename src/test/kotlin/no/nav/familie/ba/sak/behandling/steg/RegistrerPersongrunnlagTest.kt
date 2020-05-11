@@ -5,14 +5,14 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.common.DatabaseCleanupService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.TestInstance.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -20,6 +20,7 @@ import java.time.LocalDate
 
 @SpringBootTest
 @ActiveProfiles("dev")
+@TestInstance(Lifecycle.PER_CLASS)
 class RegistrerPersongrunnlagTest(
         @Autowired
         private val stegService: StegService,
@@ -34,8 +35,16 @@ class RegistrerPersongrunnlagTest(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
         @Autowired
-        private val integrasjonClient: IntegrasjonClient
+        private val integrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
 ) {
+
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     @Tag("integration")
