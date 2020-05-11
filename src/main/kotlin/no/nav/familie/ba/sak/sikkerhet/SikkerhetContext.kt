@@ -6,11 +6,13 @@ import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import org.slf4j.LoggerFactory
 
 object SikkerhetContext {
+    val SYSTEM_FORKORTELSE = "VL"
+
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
                 .fold(
-                        onSuccess = { it.getClaims("azuread")?.get("preferred_username")?.toString() ?: "VL" },
-                        onFailure = { "VL" }
+                        onSuccess = { it.getClaims("azuread")?.get("preferred_username")?.toString() ?: SYSTEM_FORKORTELSE },
+                        onFailure = { SYSTEM_FORKORTELSE }
                 )
     }
 
@@ -34,7 +36,7 @@ object SikkerhetContext {
     }
 
     fun hentBehandlerRolleForSteg(rolleConfig: RolleConfig, lavesteSikkerhetsnivå: BehandlerRolle?): BehandlerRolle {
-        if (hentSaksbehandler() == "VL") return BehandlerRolle.SYSTEM
+        if (hentSaksbehandler() == SYSTEM_FORKORTELSE) return BehandlerRolle.SYSTEM
 
         val grupper = hentGrupper()
         val høyesteSikkerhetsnivåForInnloggetBruker: BehandlerRolle =

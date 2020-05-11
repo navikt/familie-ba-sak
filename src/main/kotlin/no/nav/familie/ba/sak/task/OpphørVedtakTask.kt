@@ -35,7 +35,7 @@ class OpphørVedtakTask(
     }
 
     fun opprettIverksettMotOppdragTask(vedtak: Vedtak) {
-        val nyTask = IverksettMotOppdrag.opprettTask(
+        val nyTask = IverksettMotOppdragTask.opprettTask(
                 vedtak.behandling.fagsak.personIdent.ident,
                 vedtak.behandling.id,
                 vedtak.id,

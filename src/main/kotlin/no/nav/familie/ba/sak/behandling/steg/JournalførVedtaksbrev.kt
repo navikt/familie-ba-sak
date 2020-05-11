@@ -1,31 +1,32 @@
-package no.nav.familie.ba.sak.task
+package no.nav.familie.ba.sak.behandling.steg
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.task.JournalførVedtaksbrev.Companion.TASK_STEP_TYPE
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.AsyncTaskStep
-import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
+data class JournalførVedtaksbrevDTO(
+        val vedtakId: Long,
+        val task: Task
+)
+
 @Service
-@TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Journalfør brev i Joark", maxAntallFeil = 3)
 class JournalførVedtaksbrev(
-        private val integrasjonClient: IntegrasjonClient,
         private val vedtakService: VedtakService,
         private val dokumentService: DokumentService,
-        private val taskRepository: TaskRepository
-) : AsyncTaskStep {
+        private val integrasjonClient: IntegrasjonClient,
+        private val taskRepository: TaskRepository) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
-    override fun doTask(task: Task) {
-        val vedtakId = task.payload.toLong()
-        val vedtak = vedtakService.hent(vedtakId)
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: JournalførVedtaksbrevDTO,
+                                      stegService: StegService?): StegType {
+        val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
 
         val pdf = dokumentService.hentPdfForVedtak(vedtak)
         val fnr = vedtak.behandling.fagsak.personIdent.ident
@@ -34,19 +35,20 @@ class JournalførVedtaksbrev(
         val journalpostId = integrasjonClient.journalFørVedtaksbrev(fnr, fagsakId, pdf)
 
         val nyTask = Task.nyTask(
-                type = DistribuerVedtaksbrev.TASK_STEP_TYPE,
+                type = DistribuerVedtaksbrevTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                         DistribuerVedtaksbrevDTO(
                                 personIdent = vedtak.behandling.fagsak.personIdent.ident,
                                 behandlingId = vedtak.behandling.id,
                                 journalpostId = journalpostId
                         )),
-                properties = task.metadata)
+                properties = data.task.metadata)
         taskRepository.save(nyTask)
+
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
-    companion object {
-        const val TASK_STEP_TYPE = "journalførTilJoark"
-        val LOG: Logger = LoggerFactory.getLogger(JournalførVedtaksbrev::class.java)
+    override fun stegType(): StegType {
+        return StegType.JOURNALFØR_VEDTAKSBREV
     }
 }

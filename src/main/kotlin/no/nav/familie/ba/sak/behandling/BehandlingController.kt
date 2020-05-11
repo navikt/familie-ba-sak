@@ -34,17 +34,13 @@ class BehandlingController(private val fagsakService: FagsakService,
 
     @PostMapping(path = ["behandlinger"])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-
-        logger.info("{} oppretter ny behandling", saksbehandlerId)
-
         if (nyBehandling.søkersIdent.isBlank()) {
             return badRequest("Søkers ident kan ikke være blank", null)
         }
 
         return Result.runCatching {
-                    stegService.håndterNyBehandling(nyBehandling)
-                }
+            stegService.håndterNyBehandling(nyBehandling)
+        }
                 .fold(
                         onFailure = {
                             badRequest("Opprettelse av behandling feilet: ${it.cause?.message ?: it.message}", it)
@@ -60,10 +56,6 @@ class BehandlingController(private val fagsakService: FagsakService,
     @PutMapping(path = ["behandlinger"])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-
-        logger.info("{} oppretter ny behandling fra hendelse", saksbehandlerId)
-
         return Result.runCatching { stegService.håndterNyBehandlingFraHendelse(nyBehandling) }
                 .fold(
                         onFailure = {

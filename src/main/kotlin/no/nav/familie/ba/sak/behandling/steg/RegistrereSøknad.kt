@@ -14,7 +14,9 @@ class RegistrereSøknad(
         private val loggService: LoggService
 ) : BehandlingSteg<SøknadDTO> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: SøknadDTO): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: SøknadDTO,
+                                      stegService: StegService?): StegType {
         val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlag != null)
 

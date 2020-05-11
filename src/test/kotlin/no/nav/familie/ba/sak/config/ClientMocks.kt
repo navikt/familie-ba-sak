@@ -52,6 +52,13 @@ class ClientMocks {
         every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")
 
+        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), TEST_PDF) } returns "journalpostId"
+
+        every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns listOf(Arbeidsfordelingsenhet("9999",
+                                                                                                                 "Ukjent"))
+
+        every { mockIntegrasjonClient.distribuerVedtaksbrev(any()) } just runs
+
         every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
 
         every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just runs
@@ -145,12 +152,10 @@ class ClientMocks {
                              ))
 
         every {
-            mockIntegrasjonClient.hentAktørId(farId)
-        } returns AktørId(farId)
-
-        every {
-            mockIntegrasjonClient.hentAktørId(barnId)
-        } returns AktørId(barnId)
+            mockIntegrasjonClient.hentAktørId(any())
+        } answers {
+            randomAktørId()
+        }
 
         val ukjentId = "43125678910"
         every {
@@ -187,3 +192,5 @@ fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, s�
         mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr))
     } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 }
+
+val TEST_PDF = "TEST PDF".toByteArray()

@@ -58,7 +58,7 @@ class BeslutteVedtakTest {
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
         verify(exactly = 1) { FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
-        Assertions.assertEquals(StegType.FERDIGSTILLE_BEHANDLING, nesteSteg)
+        Assertions.assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, nesteSteg)
     }
 
     @Test
