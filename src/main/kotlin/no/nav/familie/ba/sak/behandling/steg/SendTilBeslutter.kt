@@ -20,7 +20,17 @@ class SendTilBeslutter(
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: String,
+                                      stegService: StegService?): StegType {
+        val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
+
+        when {
+            !vilkårsvurdering.validerSteg(behandling) -> {
+                error("Validering av vilkårsvurdering feilet. For å kunne sende vedtaket til beslutter må du oppdatere vilkårsvurderingen.")
+            }
+        }
+
         loggService.opprettSendTilBeslutterLogg(behandling)
         val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,
@@ -29,19 +39,23 @@ class SendTilBeslutter(
         )
         taskRepository.save(godkjenneVedtakTask)
 
-        val behandleSakOppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)
+        val behandleSakOppgave =
+                oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)
         if (behandleSakOppgave !== null) {
             val ferdigstillBehandleSakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleSak)
             taskRepository.save(ferdigstillBehandleSakTask)
         }
 
-        val behandleUnderkjentVedtakOppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleUnderkjentVedtak, behandling)
+        val behandleUnderkjentVedtakOppgave =
+                oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleUnderkjentVedtak,
+                                                                                   behandling)
         if (behandleUnderkjentVedtakOppgave !== null) {
-            val ferdigstillBehandleUnderkjentVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
+            val ferdigstillBehandleUnderkjentVedtakTask =
+                    FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
             taskRepository.save(ferdigstillBehandleUnderkjentVedtakTask)
         }
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,
-                                                            status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+                                                     status = BehandlingStatus.SENDT_TIL_BESLUTTER)
         return hentNesteStegForNormalFlyt(behandling)
     }
 

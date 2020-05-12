@@ -5,7 +5,7 @@ data class Innvilget(
         val saksbehandler: String,
         val beslutter: String,
         val barnasFodselsdatoer: String, // "24.12.19, 24.12.18 og 24.12.17"
-        val belop: Int,
+        val belop: String, // 1 054
         val virkningsdato: String, // "februar 2020"
         val vilkårsdato: String, // "24.12.19"
         val vedtaksdato: String, // "24.12.19"

@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.hentSaksbehandler
+import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
@@ -19,10 +21,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDateTime
-import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
-import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import org.springframework.web.client.HttpClientErrorException
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api")
@@ -35,9 +35,7 @@ class FagsakController(
 
     @PostMapping(path = ["fagsaker"])
     fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = hentSaksbehandler()
-
-        logger.info("{} henter eller oppretter ny fagsak", saksbehandlerId)
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
 
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
                 .fold(
@@ -48,9 +46,7 @@ class FagsakController(
 
     @GetMapping(path = ["fagsaker/{fagsakId}"])
     fun hentFagsak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = hentSaksbehandler()
-
-        logger.info("{} henter fagsak med id {}", saksbehandlerId, fagsakId)
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id $fagsakId")
 
         return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
                 .fold(
@@ -77,20 +73,18 @@ class FagsakController(
 
     @PostMapping(path = ["fagsaker/sok"])
     fun søkFagsak(@RequestBody søkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
-        val saksbehandlerId = hentSaksbehandler()
-
-        logger.info("{} søker fagsak", saksbehandlerId)
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} søker fagsak")
 
         return Result.runCatching { fagsakService.hentFagsakDeltager(søkParam.personIdent) }
                 .fold(
                         onSuccess = { ResponseEntity.ok().body(Ressurs.success(it)) },
                         onFailure = {
                             val clientError = it as? HttpClientErrorException?
-                            if(clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND){
+                            if (clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) {
                                 logger.info("Søker fagsak feilet: ${it.message}")
                                 secureLogger.info("Søker fagsak feilet: ${it.message}", it)
                                 ResponseEntity.ok().body(Ressurs.failure("Søk på fagsak feilet: ${it.message}"))
-                            }else{
+                            } else {
                                 illegalState("Søker fagsak feilet: ${it.message}", it)
                             }
                         }

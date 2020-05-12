@@ -24,7 +24,7 @@ class VilkårResultat(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "resultat")
-        val resultat: Resultat,
+        var resultat: Resultat,
 
         @Column(name = "periode_fom")
         val periodeFom: LocalDate? = null,

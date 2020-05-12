@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vilkår.SakType
+import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -46,11 +47,7 @@ class BeregningService(
                 ?: throw IllegalStateException("Kunne ikke hente behandlingsresultat for behandling med id ${behandling.id}")
 
         val søknadDTO = søknadGrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.hentSøknadDto()
-        val sakType =
-                if (behandlingResultat.behandling.kategori == BehandlingKategori.NASJONAL &&
-                        (søknadDTO?.typeSøker == TypeSøker.TREDJELANDSBORGER || søknadDTO?.typeSøker == TypeSøker.EØS_BORGER)) {
-                    SakType.TREDJELANDSBORGER
-                } else SakType.valueOfType(behandlingResultat.behandling.kategori)
+        val sakType = hentSakType(behandlingKategori = behandling.kategori, søknadDTO = søknadDTO)
 
         val tilkjentYtelse = TilkjentYtelseService
                 .beregnTilkjentYtelse(behandlingResultat, sakType, personopplysningGrunnlag)

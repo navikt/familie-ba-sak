@@ -4,14 +4,12 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker.TREDJELANDSBORGER
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
-import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -31,7 +29,7 @@ class MalerService(
                          behandlingResultatType: BehandlingResultatType): MalMedData {
 
         return MalMedData(
-                mal = "${behandlingResultatType.brevMal}${if (søknad?.typeSøker == TypeSøker.TREDJELANDSBORGER) "-Tredjelandsborger" else ""}",
+                mal = malNavnForTypeSøkerOgResultatType(søknad?.typeSøker, behandlingResultatType),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
                     BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
@@ -64,21 +62,21 @@ class MalerService(
         val vilkårsdato = vilkårService.hentVilkårsdato(behandling = behandling)
                           ?: error("Finner ikke vilkårsdato for vedtaksbrev")
 
-        val barnasFødselsdatoer = Utils.slåSammen(barna.map { it.fødselsdato.tilKortString() })
+        val barnasFødselsdatoer = Utils.slåSammen(barna.sortedBy { it.fødselsdato }.map { it.fødselsdato.tilKortString() })
 
         val innvilget = Innvilget(
-                enhet = "enhet",
+                enhet = "1235",
                 saksbehandler = vedtak.ansvarligSaksbehandler,
                 beslutter = vedtak.ansvarligBeslutter
                             ?: SikkerhetContext.hentSaksbehandlerNavn(),
                 barnasFodselsdatoer = barnasFødselsdatoer,
-                virkningsdato = utbetalingsperioder.minLocalDate.tilMånedÅr(),
+                virkningsdato = utbetalingsperioder.minLocalDate.førsteDagIInneværendeMåned().tilDagMånedÅr(),
                 vilkårsdato = vilkårsdato.tilDagMånedÅr(),
                 vedtaksdato = vedtak.vedtaksdato.tilKortString(),
-                belop = beløp,
+                belop = Utils.formaterBeløp(beløp),
                 antallBarn = barna.size,
                 flereBarn = barna.size > 1,
-                hjemmel = Utils.slåSammen(listOf("§2", "§4", "§11"))
+                hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11"))
         )
 
         return objectMapper.writeValueAsString(innvilget)
@@ -92,5 +90,15 @@ class MalerService(
                "\"navn\": \"No Name\",\n" +
                "\"hjemmel\": \"\",\n" +
                "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
+    }
+
+    companion object {
+        fun malNavnForTypeSøkerOgResultatType(typeSøker: TypeSøker?,
+                                              resultatType: BehandlingResultatType): String {
+            return when (typeSøker) {
+                TREDJELANDSBORGER -> "${resultatType.brevMal}-Tredjelandsborger"
+                else -> resultatType.brevMal
+            }
+        }
     }
 }

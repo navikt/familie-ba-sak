@@ -39,10 +39,6 @@ class VedtakController(
     @PutMapping(path = ["/{fagsakId}/vedtak"])
     fun opprettEllerOppdaterVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
                                    @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-
-        LOG.info("$saksbehandlerId lager nytt vedtak for fagsak med id $fagsakId")
-
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                 ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
@@ -60,10 +56,6 @@ class VedtakController(
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"])
     fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-
-        LOG.info("$saksbehandlerId sender behandling til beslutter for fagsak med id $fagsakId")
-
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                 ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
@@ -102,7 +94,7 @@ class VedtakController(
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
 
-        LOG.info("$saksbehandlerId oppretter task for opphør av migrert vedtak for fagsak med id $fagsakId")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter task for opphør av migrert vedtak for fagsak med id $fagsakId")
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                 ?: return notFound("Fant ikke behandling på fagsak $fagsakId")

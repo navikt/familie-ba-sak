@@ -1,40 +1,41 @@
-package no.nav.familie.ba.sak.task
+package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.task.StatusFraOppdrag.Companion.TASK_STEP_TYPE
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.OppdragProtokollStatus
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.AsyncTaskStep
-import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
+data class StatusFraOppdragMedTask(
+        val statusFraOppdragDTO: StatusFraOppdragDTO,
+        val task: Task
+)
+
 @Service
-@TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Henter status fra oppdrag", maxAntallFeil = 100)
 class StatusFraOppdrag(
-        private val økonomiService: ØkonomiService,
         private val behandlingService: BehandlingService,
-        private val taskRepository: TaskRepository
-) : AsyncTaskStep {
+        private val økonomiService: ØkonomiService,
+        private val taskRepository: TaskRepository) : BehandlingSteg<StatusFraOppdragMedTask> {
 
-    /**
-     * Metoden prøver å hente kvittering i ét døgn.
-     * Får tasken kvittering som ikke er OK feiler vi tasken.
-     */
-    override fun doTask(task: Task) {
-        val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
-        val behandling = behandlingService.hent(statusFraOppdragDTO.behandlingsId)
+    private val LOG = LoggerFactory.getLogger(this.javaClass)
 
-        Result.runCatching { økonomiService.hentStatus(statusFraOppdragDTO) }
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: StatusFraOppdragMedTask,
+                                      stegService: StegService?): StegType {
+        val statusFraOppdragDTO = data.statusFraOppdragDTO
+        val task = data.task
+
+        Result.runCatching { økonomiService.hentStatus(data.statusFraOppdragDTO) }
                 .onFailure { throw it }
                 .onSuccess {
                     LOG.debug("Mottok status '$it' fra oppdrag")
@@ -47,7 +48,7 @@ class StatusFraOppdrag(
                             taskRepository.save(task)
                         }
 
-                        throw Exception("Mottok status '$it' fra oppdrag")
+                        error("Mottok status '$it' fra oppdrag")
                     } else {
                         behandlingService.oppdaterStatusPåBehandling(
                                 statusFraOppdragDTO.behandlingsId,
@@ -55,29 +56,33 @@ class StatusFraOppdrag(
                         )
 
                         if (behandling.type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
-                                && behandling.type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
-                                && behandling.type !== BehandlingType.TEKNISK_OPPHØR) {
-                            opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId, task)
+                            && behandling.type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+                            && behandling.type !== BehandlingType.TEKNISK_OPPHØR) {
+                            opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
+                                                             task)
                         } else {
                             opprettFerdigstillBehandling(statusFraOppdragDTO)
                         }
                     }
                 }
+
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
-        val ferdigstillBehandling = FerdigstillBehandling.opprettTask(personIdent = statusFraOppdragDTO.personIdent,
-                                                                      behandlingsId = statusFraOppdragDTO.behandlingsId)
+        val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(personIdent = statusFraOppdragDTO.personIdent,
+                                                                          behandlingsId = statusFraOppdragDTO.behandlingsId)
         taskRepository.save(ferdigstillBehandling)
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
-        val task = Task.nyTask(JournalførVedtaksbrev.TASK_STEP_TYPE, "$vedtakId", gammelTask.metadata)
+        val task = Task.nyTask(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+                               "$vedtakId",
+                               gammelTask.metadata)
         taskRepository.save(task)
     }
 
-    companion object {
-        const val TASK_STEP_TYPE = "statusFraOppdrag"
-        val LOG: Logger = LoggerFactory.getLogger(StatusFraOppdrag::class.java)
+    override fun stegType(): StegType {
+        return StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
     }
 }

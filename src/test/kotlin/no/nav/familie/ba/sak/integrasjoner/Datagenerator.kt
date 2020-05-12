@@ -28,7 +28,7 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
                       sakstype = Sakstype.FAGSAK.name,
                       fagsakId = null,
                       fagsaksystem = FAGSYSTEM),
-            datoMottatt = LocalDateTime.now()
+            relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT"))
     )
 }
 

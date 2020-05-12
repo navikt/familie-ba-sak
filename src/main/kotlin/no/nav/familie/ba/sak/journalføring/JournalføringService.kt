@@ -71,15 +71,6 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
             when (behandling) {
                 null -> opprettOppgaveUtenBehandling(fagsak, request, behandlendeEnhet)
                 else -> {
-                    if (request.datoMottatt != null) {
-                        loggService.opprettMottattDokument(behandling = behandling,
-                                                           datoMottatt = request.datoMottatt,
-                                                           dokumentType = DokumentType.SØKNAD)
-                    } else {
-                        LOG.warn("datoMottat mangler på journalpost $journalpostId " +
-                                 "så oppretter ikke logginnslag på historikken for behandling ${behandling.id}")
-                    }
-
                     opprettOppgaveFor(behandling, request.navIdent)
                 }
             }

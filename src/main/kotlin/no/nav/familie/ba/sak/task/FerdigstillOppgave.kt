@@ -28,7 +28,8 @@ class FerdigstillOppgave(
 
         fun opprettTask(behandlingId: Long, oppgavetype: Oppgavetype): Task {
             return Task.nyTask(type = TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(FerdigstillOppgaveDTO(behandlingId = behandlingId, oppgavetype = oppgavetype))
+                               payload = objectMapper.writeValueAsString(FerdigstillOppgaveDTO(behandlingId = behandlingId,
+                                                                                               oppgavetype = oppgavetype))
             )
         }
     }

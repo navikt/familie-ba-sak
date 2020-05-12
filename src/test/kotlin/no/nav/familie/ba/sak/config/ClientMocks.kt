@@ -44,7 +44,7 @@ class ClientMocks {
                 listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "Z999999"))
 
         every { mockIntegrasjonClient.opprettOppgave(any()) } returns
-            "12345678"
+                "12345678"
 
         every { mockIntegrasjonClient.fordelOppgave(any(), any()) } returns
                 "12345678"
@@ -52,15 +52,22 @@ class ClientMocks {
         every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")
 
+        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), TEST_PDF) } returns "journalpostId"
+
+        every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns listOf(Arbeidsfordelingsenhet("9999",
+                                                                                                                 "Ukjent"))
+
+        every { mockIntegrasjonClient.distribuerVedtaksbrev(any()) } just runs
+
         every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
 
         every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just runs
 
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns
-            listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
+                listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
 
         every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
-            "mock data".toByteArray()
+                "mock data".toByteArray()
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())
@@ -74,7 +81,9 @@ class ClientMocks {
 
         every {
             mockIntegrasjonClient.hentAktørId(any())
-        } returns randomAktørId()
+        } answers {
+            randomAktørId()
+        }
 
         every {
             mockIntegrasjonClient.journalFørVedtaksbrev(eq(søkerFnr[0]), any(), any())
@@ -86,7 +95,7 @@ class ClientMocks {
 
         every {
             mockIntegrasjonClient.hentPersoninfoFor(eq(barnFnr[1]))
-        } returns personInfo.getValue(barnFnr[0])
+        } returns personInfo.getValue(barnFnr[1])
 
         every {
             mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr[0]))
@@ -143,14 +152,12 @@ class ClientMocks {
                              ))
 
         every {
-            mockIntegrasjonClient.hentAktørId(farId)
-        } returns AktørId(farId)
+            mockIntegrasjonClient.hentAktørId(any())
+        } answers {
+            randomAktørId()
+        }
 
-        every {
-            mockIntegrasjonClient.hentAktørId(barnId)
-        } returns AktørId(barnId)
-
-        val ukjentId= "43125678910"
+        val ukjentId = "43125678910"
         every {
             mockIntegrasjonClient.hentPersoninfoFor(ukjentId)
         } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "ikke funnet")
@@ -185,3 +192,5 @@ fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, s�
         mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr))
     } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 }
+
+val TEST_PDF = "TEST PDF".toByteArray()

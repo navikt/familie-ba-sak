@@ -12,26 +12,22 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-@TaskStepBeskrivelse(taskStepType = FerdigstillBehandling.TASK_STEP_TYPE,
+@TaskStepBeskrivelse(taskStepType = FerdigstillBehandlingTask.TASK_STEP_TYPE,
                      beskrivelse = "Ferdigstill behandling",
                      maxAntallFeil = 3)
-class FerdigstillBehandling(
+class FerdigstillBehandlingTask(
         val behandlingService: BehandlingService,
         val stegService: StegService
 ) : AsyncTaskStep {
 
-
     override fun doTask(task: Task) {
         val ferdigstillBehandling = objectMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
-        LOG.info("Forsøker å ferdigstille behandling ${ferdigstillBehandling.behandlingsId}")
-
-        val behandling = behandlingService.hent(ferdigstillBehandling.behandlingsId)
-        stegService.håndterFerdigstillBehandling(behandling = behandling)
+        stegService.håndterFerdigstillBehandling(behandling = behandlingService.hent(ferdigstillBehandling.behandlingsId))
     }
 
     companion object {
         const val TASK_STEP_TYPE = "ferdigstillBehandling"
-        val LOG = LoggerFactory.getLogger(FerdigstillBehandling::class.java)
+        val LOG = LoggerFactory.getLogger(FerdigstillBehandlingTask::class.java)
 
 
         fun opprettTask(personIdent: String, behandlingsId: Long): Task {
