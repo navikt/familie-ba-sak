@@ -26,10 +26,16 @@ class PersonResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "personResultat",
-                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
+                   cascade = [CascadeType.ALL])
         var vilkårResultater: Set<VilkårResultat> = setOf()
 
 ) : BaseEntitet() {
+
+    fun kopier(): PersonResultat = PersonResultat(
+            behandlingResultat = behandlingResultat,
+            personIdent = personIdent,
+            vilkårResultater = emptySet()
+    )
 
     fun hentSamletResultat(): BehandlingResultatType {
         return when {
@@ -40,18 +46,5 @@ class PersonResultat(
                 BehandlingResultatType.AVSLÅTT
             }
         }
-    }
-
-    fun disjunkteVilkårTyper(sammenligning: PersonResultat): Pair<Set<VilkårResultat>, Set<VilkårResultat>>{
-        val venstre = mutableSetOf<VilkårResultat>()
-        val høyre = mutableSetOf<VilkårResultat>()
-
-        vilkårResultater.forEach { A ->
-            sammenligning.vilkårResultater.forEach { B ->
-                if (vilkårResultater.none{ it.vilkårType == B.vilkårType }) høyre.add(B)
-                else if (sammenligning.vilkårResultater.none{ it.vilkårType == A.vilkårType }) venstre.add(A)
-            }
-        }
-        return Pair(venstre, høyre)
     }
 }

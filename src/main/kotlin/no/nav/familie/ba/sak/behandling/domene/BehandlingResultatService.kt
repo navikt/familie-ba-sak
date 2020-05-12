@@ -22,7 +22,8 @@ class BehandlingResultatService(
         return behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun lagreNyOgDeaktiverGammel(behandlingResultat: BehandlingResultat): BehandlingResultat {
+    fun lagreNyOgDeaktiverGammel(behandlingResultat: BehandlingResultat,
+                                 loggHendelse: Boolean): BehandlingResultat {
         val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
         val alleBehandlingsresultat = behandlingResultatRepository.finnBehandlingResultater(behandlingResultat.behandling.id)
         val forrigeBehandlingResultatSomIkkeErAutogenerert: BehandlingResultat? =
@@ -35,18 +36,20 @@ class BehandlingResultatService(
         }
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling resultat $behandlingResultat")
-        loggService.opprettVilkårsvurderingLogg(
-                behandlingResultat.behandling, forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)
+        if (loggHendelse) {
+            loggService.opprettVilkårsvurderingLogg(
+                    behandlingResultat.behandling, forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)
+        }
+
         return behandlingResultatRepository.save(behandlingResultat)
     }
 
     fun lagreInitiert(behandlingResultat: BehandlingResultat): BehandlingResultat {
-        /*
         val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
         if (aktivBehandlingResultat != null) {
             error("Det finnes allerede et aktivt behandlingsresultat for behandling ${behandlingResultat.behandling.id}")
         }
-        */
+
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling resultat $behandlingResultat")
         return behandlingResultatRepository.save(behandlingResultat)
     }

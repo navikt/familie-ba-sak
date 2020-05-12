@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
@@ -36,7 +37,7 @@ class VilkårServiceTest(
         private val fagsakService: FagsakService,
 
         @Autowired
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
         private val vilkårService: VilkårService,
@@ -64,7 +65,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id)
         Assertions.assertEquals(2, behandlingResultat.personResultater.size)
@@ -110,6 +111,30 @@ class VilkårServiceTest(
     }
 
     @Test
+    fun `Skal automatisk lagre ny vilkårsvurdering over den gamle`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val barnFnr2 = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id)
+        Assertions.assertEquals(2, behandlingResultat.personResultater.size)
+
+        val personopplysningGrunnlagMedEkstraBarn =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr, barnFnr2))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagMedEkstraBarn)
+
+        val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id)
+        Assertions.assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
+    }
+
+    @Test
     fun `vurder ugyldig vilkårsvurdering`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -119,7 +144,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
     }
 
     @Test

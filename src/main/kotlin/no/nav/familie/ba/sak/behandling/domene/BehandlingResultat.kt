@@ -25,7 +25,7 @@ data class BehandlingResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "behandlingResultat",
-                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE]
+                   cascade = [CascadeType.ALL]
         )
         var personResultater: Set<PersonResultat> = setOf()
 
@@ -34,6 +34,12 @@ data class BehandlingResultat(
     override fun toString(): String {
         return "BehandlingResultat(id=$id, behandling=${behandling.id})"
     }
+
+    fun kopier(): BehandlingResultat = BehandlingResultat(
+            personResultater = personResultater.map { personResultat -> personResultat.kopier() }.toSet(),
+            behandling = behandling,
+            aktiv = aktiv
+    )
 
     fun hentSamletResultat(): BehandlingResultatType {
         if (personResultater.isEmpty()) {
@@ -51,14 +57,14 @@ data class BehandlingResultat(
 
     fun periodeResultater(brukMåned: Boolean): Set<PeriodeResultat> = this.personResultaterTilPeriodeResultater(brukMåned)
 
-    fun disjunktePersoner(sammenligning: BehandlingResultat): Pair<Set<PersonResultat>, Set<PersonResultat>>{
+    fun disjunktePersoner(sammenligning: BehandlingResultat): Pair<Set<PersonResultat>, Set<PersonResultat>> {
         val venstre = mutableSetOf<PersonResultat>()
         val høyre = mutableSetOf<PersonResultat>()
 
         personResultater.forEach { A ->
             sammenligning.personResultater.forEach { B ->
-                if (personResultater.none{ it.personIdent == B.personIdent }) høyre.add(B)
-                else if (sammenligning.personResultater.none{ it.personIdent == A.personIdent }) venstre.add(A)
+                if (personResultater.none { it.personIdent == B.personIdent }) høyre.add(B)
+                else if (sammenligning.personResultater.none { it.personIdent == A.personIdent }) venstre.add(A)
             }
         }
         return Pair(venstre, høyre)

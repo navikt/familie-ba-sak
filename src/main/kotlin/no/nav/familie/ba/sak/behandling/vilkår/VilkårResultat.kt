@@ -34,4 +34,16 @@ class VilkårResultat(
 
         @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
         var begrunnelse: String
-) : BaseEntitet()
+) : BaseEntitet() {
+
+    fun kopier(nyPersonResultat: PersonResultat? = null): VilkårResultat {
+        return VilkårResultat(
+                personResultat = nyPersonResultat ?: personResultat,
+                vilkårType = vilkårType,
+                resultat = resultat,
+                periodeFom = if (periodeFom != null) LocalDate.from(periodeFom) else null,
+                periodeTom = if (periodeTom != null) LocalDate.from(periodeTom) else null,
+                begrunnelse = begrunnelse
+        )
+    }
+}

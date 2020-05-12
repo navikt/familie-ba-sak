@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårDiff.lagFjernAdvarsel
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårDiff.oppdaterteBehandlingsresultater
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
@@ -71,16 +72,22 @@ class VilkårService(
             personResultat
         }.toSet()
 
-        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
+        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
     }
 
     fun initierVilkårvurderingForBehandling(behandlingId: Long): BehandlingResultat {
         val initiertBehandlingResultat = initierMinimaltBehandlingResultatForBehandling(behandlingId)
         val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
         return if (aktivBehandlingResultat != null) {
-            val (oppdatert, gammel) = oppdaterteBehandlingsresultater(aktivBehandlingResultat!!, initiertBehandlingResultat)
-            return behandlingResultatService.lagreNyOgDeaktiverGammel(oppdatert)
-            //return aktivBehandlingResultat
+            val (oppdatert, gammel) = oppdaterteBehandlingsresultater(behandling = behandlingService.hent(behandlingId),
+                                                                      aktivtResultat = aktivBehandlingResultat,
+                                                                      initiertResultat = initiertBehandlingResultat)
+
+            if (gammel.personResultater.isNotEmpty()) {
+                error(lagFjernAdvarsel(gammel.personResultater))
+            }
+
+            return behandlingResultatService.lagreNyOgDeaktiverGammel(oppdatert, false)
         } else {
             behandlingResultatService.lagreInitiert(initiertBehandlingResultat)
         }
@@ -89,7 +96,7 @@ class VilkårService(
     fun initierMinimaltBehandlingResultatForBehandling(behandlingId: Long): BehandlingResultat { // TODO: Bedre navn
         val behandling = behandlingService.hent(behandlingId)
 
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
 
         val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
@@ -149,7 +156,7 @@ class VilkårService(
             personResultat
         }.toSet()
 
-        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
+        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
     }
 
     private fun spesifikasjonerForPerson(person: Person, behandlingKategori: BehandlingKategori): Spesifikasjon<Fakta> {

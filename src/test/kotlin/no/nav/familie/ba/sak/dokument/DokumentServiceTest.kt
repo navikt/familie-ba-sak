@@ -90,7 +90,7 @@ class DokumentServiceTest(
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
 
         Assertions.assertNotNull(behandling.fagsak.id)
         Assertions.assertNotNull(behandling.id)
