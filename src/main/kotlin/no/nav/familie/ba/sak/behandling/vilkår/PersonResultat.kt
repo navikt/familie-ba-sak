@@ -31,12 +31,6 @@ class PersonResultat(
 
 ) : BaseEntitet() {
 
-    fun kopier(): PersonResultat = PersonResultat(
-            behandlingResultat = behandlingResultat,
-            personIdent = personIdent,
-            vilkårResultater = emptySet()
-    )
-
     fun hentSamletResultat(): BehandlingResultatType {
         return when {
             vilkårResultater.all { it.resultat == Resultat.JA } -> {
