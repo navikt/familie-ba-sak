@@ -21,7 +21,7 @@ class OppdaterBehandlingGrunnlagTest {
     fun `Skal legge til nytt vilkår`() {
         val fnr1 = randomFnr()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultatA(behandling = behandling, fnr = listOf(fnr1))
+        val resA = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
         val resB = lagBehandlingResultatB(behandling = behandling, fnr = listOf(fnr1))
 
         val (oppdatert, gammelt) = oppdaterteBehandlingsresultater(behandling, resA, resB)
@@ -38,7 +38,7 @@ class OppdaterBehandlingGrunnlagTest {
         val fnr1 = randomFnr()
         val behandling = lagBehandling()
         val resA = lagBehandlingResultatB(behandling = behandling, fnr = listOf(fnr1))
-        val resB = lagBehandlingResultatA(behandling = behandling, fnr = listOf(fnr1))
+        val resB = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
 
         val (oppdatert, gammelt) = oppdaterteBehandlingsresultater(behandling, resA, resB)
         Assertions.assertEquals(2, oppdatert.personResultater.first().vilkårResultater.size)
@@ -55,8 +55,8 @@ class OppdaterBehandlingGrunnlagTest {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultatA(behandling = behandling, fnr = listOf(fnr1))
-        val resB = lagBehandlingResultatA(behandling = behandling, fnr = listOf(fnr1, fnr2))
+        val resA = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
+        val resB = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1, fnr2))
 
         val (oppdatert, gammelt) = oppdaterteBehandlingsresultater(behandling, resA, resB)
         Assertions.assertEquals(2, oppdatert.personResultater.size)
@@ -68,8 +68,8 @@ class OppdaterBehandlingGrunnlagTest {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultatA(behandling = behandling, fnr = listOf(fnr1, fnr2))
-        val resB = lagBehandlingResultatA(behandling = behandling, fnr = listOf(fnr1))
+        val resA = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1, fnr2))
+        val resB = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
 
         val (oppdatert, gammelt) = oppdaterteBehandlingsresultater(behandling, resA, resB)
         Assertions.assertEquals(1, oppdatert.personResultater.size)
@@ -81,15 +81,20 @@ class OppdaterBehandlingGrunnlagTest {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultatA(behandling = behandling, fnr = listOf(fnr1, fnr2))
-        val resB = lagBehandlingResultatA(behandling = behandling, fnr = listOf(fnr1))
+        val resultat1 = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1, fnr2))
+        val resultat2 = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr2))
 
-        val (oppdatert, gammelt) = oppdaterteBehandlingsresultater(behandling, resA, resB)
-        val a = lagFjernAdvarsel(gammelt.personResultater)
-        Assertions.assertEquals("", a)
+        val resterende = oppdaterteBehandlingsresultater(behandling, resultat1, resultat2).second
+        val fjernedeVilkår = resultat1.personResultater.first().vilkårResultater.toList()
+        val generertAdvarsel = lagFjernAdvarsel(resterende.personResultater)
+
+        Assertions.assertEquals("Følgende personer og vilkår fjernes:\n" +
+                                fnr1+":\n" +
+                                "   - "+fjernedeVilkår[0].vilkårType.spesifikasjon.beskrivelse+"\n" +
+                                "   - "+fjernedeVilkår[1].vilkårType.spesifikasjon.beskrivelse+"\n", generertAdvarsel)
     }
 
-    fun lagBehandlingResultatA(fnr: List<String>, behandling: Behandling): BehandlingResultat {
+    fun lagBehandlingResultat(fnr: List<String>, behandling: Behandling): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(
                 behandling = behandling
         )
