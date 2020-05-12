@@ -82,13 +82,9 @@ class VilkårService(
             val (oppdatert, gammel) = oppdaterteBehandlingsresultater(behandling = behandlingService.hent(behandlingId),
                                                                       aktivtResultat = aktivBehandlingResultat,
                                                                       initiertResultat = initiertBehandlingResultat)
-
-            /*
             if (gammel.personResultater.isNotEmpty()) {
                 error(lagFjernAdvarsel(gammel.personResultater))
             }
-            */
-
             return behandlingResultatService.lagreNyOgDeaktiverGammel(oppdatert, false)
         } else {
             behandlingResultatService.lagreInitiert(initiertBehandlingResultat)
