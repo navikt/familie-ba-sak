@@ -9,63 +9,48 @@ object VilkårDiff {
                                         aktivtResultat: BehandlingResultat,
                                         initiertResultat: BehandlingResultat): Pair<BehandlingResultat, BehandlingResultat> {
 
-        val nyttBehandlingResultat = BehandlingResultat(
-                behandling = behandling,
-                aktiv = true
-        )
-
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
         val personResultaterGammel = aktivtResultat.personResultater.toMutableSet()
         val personResultaterNy = mutableSetOf<PersonResultat>()
         initiertResultat.personResultater.forEach { personFraInitiert ->
-            val nyttPersonResultat = PersonResultat(
-                    behandlingResultat = nyttBehandlingResultat,
-                    personIdent = behandling.fagsak.personIdent.ident
-            )
+            val nyttPersonResultat = PersonResultat(behandlingResultat = initiertResultat,
+                                                    personIdent = behandling.fagsak.personIdent.ident)
+            val personenSomFinnes = personResultaterGammel.firstOrNull { it.personIdent == personFraInitiert.personIdent }
 
-            val personSomFinnes = personResultaterGammel.firstOrNull { it.personIdent == personFraInitiert.personIdent }
-            if (personSomFinnes == null) {
+            if (personenSomFinnes == null) {
                 // Legg til ny person
-                personResultaterNy.add(PersonResultat(
-                        behandlingResultat = nyttBehandlingResultat,
-                        vilkårResultater = personFraInitiert.vilkårResultater.map { it.kopier(nyttPersonResultat) }.toSet(),
-                        personIdent = behandling.fagsak.personIdent.ident
-                ))
+                nyttPersonResultat.vilkårResultater = personFraInitiert.vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSet()
             } else {
                 // Fyll inn den initierte med person fra aktiv
-                val personsVilkårResultaterGammel = personSomFinnes.vilkårResultater.toMutableSet()
+                val personsVilkårResultaterGammel = personenSomFinnes.vilkårResultater.toMutableSet()
                 val personsVilkårResultaterNy = mutableSetOf<VilkårResultat>()
                 personFraInitiert.vilkårResultater.forEach { initiertVilkårResultat ->
                     val vilkårResultaterFraGammel =
-                            personSomFinnes.vilkårResultater.filter { it.vilkårType == initiertVilkårResultat.vilkårType }
-
+                            personenSomFinnes.vilkårResultater.filter { it.vilkårType == initiertVilkårResultat.vilkårType }
                     if (vilkårResultaterFraGammel.isEmpty()) {
-                        personsVilkårResultaterNy.add(initiertVilkårResultat.kopier(nyttPersonResultat))
+                        personsVilkårResultaterNy.add(initiertVilkårResultat.kopierMedParent(nyttPersonResultat))
                     } else {
-                        personsVilkårResultaterNy.addAll(vilkårResultaterFraGammel.map {
-                            it.kopier(nyttPersonResultat)
-                        })
+                        personsVilkårResultaterNy.addAll(vilkårResultaterFraGammel.map { it.kopierMedParent(nyttPersonResultat) })
                         personsVilkårResultaterGammel.removeAll(vilkårResultaterFraGammel)
                     }
                 }
-                personResultaterNy.add(
-                        PersonResultat(
-                                personIdent = personFraInitiert.personIdent,
-                                behandlingResultat = nyttBehandlingResultat,
-                                vilkårResultater = personsVilkårResultaterNy))
+                nyttPersonResultat.vilkårResultater = personsVilkårResultaterNy
 
                 if (personsVilkårResultaterGammel.isEmpty()) {
-                    personResultaterGammel.remove(personSomFinnes)
+                    personResultaterGammel.remove(personenSomFinnes)
                 } else {
-                    personSomFinnes.vilkårResultater = personsVilkårResultaterGammel
+                    personenSomFinnes.vilkårResultater = personsVilkårResultaterGammel
                 }
+
             }
+            personResultaterNy.add(nyttPersonResultat)
         }
 
         aktivtResultat.personResultater = personResultaterGammel
-        nyttBehandlingResultat.personResultater = personResultaterNy
+        initiertResultat.personResultater = personResultaterNy
 
-        return Pair(nyttBehandlingResultat, aktivtResultat)
+        return Pair(initiertResultat, aktivtResultat)
+
     }
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {
@@ -81,3 +66,15 @@ object VilkårDiff {
         return advarsel
     }
 }
+
+/*
+// TODO: Årsak
+personResultaterNy.add(
+        PersonResultat(
+                personIdent = personFraInitiert.personIdent,
+                behandlingResultat = initiertResultat,
+                vilkårResultater = personsVilkårResultaterNy))
+
+                blir problematisk fordi vi prøver å lagre et personresultat med kobling til vilkårresultater som har kobling til noe som ikke finnes?
+                Må lage personresultatet først og deretter legge til vilkårresultat som refererer til dette?
+ */

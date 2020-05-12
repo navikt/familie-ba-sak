@@ -36,7 +36,7 @@ class VilkårResultat(
         var begrunnelse: String
 ) : BaseEntitet() {
 
-    fun kopier(nyPersonResultat: PersonResultat? = null): VilkårResultat {
+    fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
         return VilkårResultat(
                 personResultat = nyPersonResultat ?: personResultat,
                 vilkårType = vilkårType,

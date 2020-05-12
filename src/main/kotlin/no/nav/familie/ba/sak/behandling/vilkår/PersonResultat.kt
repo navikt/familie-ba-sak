@@ -26,7 +26,7 @@ class PersonResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "personResultat",
-                   cascade = [CascadeType.ALL])
+                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
         var vilkårResultater: Set<VilkårResultat> = setOf()
 
 ) : BaseEntitet() {
