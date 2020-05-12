@@ -5,10 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.dokument.testDokumentHeaderFelter
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.Ressurs.Companion
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
-import no.nav.familie.kontrakter.felles.arkivering.Dokument
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -22,7 +19,7 @@ class DokgenTestConfig {
     @Primary
     fun mockDokumentService(): DokumentService {
         val dokumentService: DokumentService = mockk()
-        every { dokumentService.hentHtmlForVedtak(any()) } returns success("<HTML>HTML_MOCKUP</HTML>")
+        every { dokumentService.hentHtmlFor(null, null, null) } returns success("<HTML>HTML_MOCKUP</HTML>")
         every { dokumentService.hentStønadBrevMarkdown(any(), any(), any()) } returns "Markdown mock"
         every { dokumentService.hentPdfForVedtak(any()) } returns TEST_PDF
         return dokumentService

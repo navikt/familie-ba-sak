@@ -27,10 +27,8 @@ class DokumentController(
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
 
         val vedtak = vedtakService.hent(vedtakId)
-        val vedtakHtml = dokumentService.hentHtmlForVedtak(vedtak)
-        val vedtakPdf = dokumentService.hentPdfForVedtak(vedtak)
 
-        return Ressurs.success(RestDokument(vedtakPdf, vedtakHtml.data))
+        return dokumentService.hentBrevForVedtak(vedtak)
     }
 
     companion object {
