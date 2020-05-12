@@ -86,6 +86,15 @@ class IntergrasjonTjenesteTest {
 
     @Test
     @Tag("integration")
+    fun `Hent indenter skal feile ved kall uten ident`() {
+        assertThatThrownBy {
+            integrasjonClient.hentIdenter("")
+        }.isInstanceOf(IntegrasjonException::class.java)
+                .hasMessageContaining("Ved henting av identer er ident null eller tom")
+    }
+
+    @Test
+    @Tag("integration")
     fun `Opprett oppgave skal kaste feil hvis response er ugyldig`() {
         stubFor(post("/api/oppgave/").willReturn(aResponse()
                                                          .withStatus(500)
