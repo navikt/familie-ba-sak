@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.dokument
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
@@ -22,17 +23,21 @@ class DokumentController(
 ) {
 
     @GetMapping(path = ["vedtak-html/{vedtakId}"])
-    fun hentHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
+    fun hentHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<RestDokument> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
 
         val vedtak = vedtakService.hent(vedtakId)
         val vedtakHtml = dokumentService.hentHtmlForVedtak(vedtak)
         val vedtakPdf = dokumentService.hentPdfForVedtak(vedtak)
 
-        return Ressurs.success(vedtakPdf, vedtakHtml.data)
+        return Ressurs.success(RestDokument(vedtakPdf, vedtakHtml.data))
     }
 
     companion object {
         val LOG = LoggerFactory.getLogger(DokumentController::class.java)
     }
 }
+
+class RestDokument(@JsonProperty("pdfBase64")
+                   val pdf: ByteArray,
+                   val html: String?)

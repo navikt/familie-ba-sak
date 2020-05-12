@@ -45,7 +45,7 @@ class Vilkårsvurdering(
         } else {
             vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)
         }
-        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 vilkårsvurdertBehandling,
                 personopplysningGrunnlag,
                 ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn())
