@@ -9,13 +9,13 @@ import javax.persistence.*
 
 @Entity(name = "PersonResultat")
 @Table(name = "PERSON_RESULTAT")
-data class PersonResultat(
+class PersonResultat(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "periode_resultat_seq_generator")
         @SequenceGenerator(name = "periode_resultat_seq_generator",
                            sequenceName = "periode_resultat_seq",
                            allocationSize = 50)
-        private val id: Long = 0,
+        val id: Long = 0,
 
         @JsonIgnore
         @ManyToOne @JoinColumn(name = "fk_behandling_resultat_id", nullable = false, updatable = false)
