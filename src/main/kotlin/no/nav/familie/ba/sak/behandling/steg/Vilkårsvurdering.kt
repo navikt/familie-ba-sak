@@ -53,7 +53,6 @@ class Vilkårsvurdering(
         validerSteg(behandling)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

@@ -22,10 +22,14 @@ class DokumentController(
 ) {
 
     @GetMapping(path = ["vedtak-html/{vedtakId}"])
-    fun hentHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<String> {
+    fun hentHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
 
-        return dokumentService.hentHtmlForVedtak(vedtak = vedtakService.hent(vedtakId))
+        val vedtak = vedtakService.hent(vedtakId)
+        val vedtakHtml = dokumentService.hentHtmlForVedtak(vedtak)
+        val vedtakPdf = dokumentService.hentPdfForVedtak(vedtak)
+
+        return Ressurs.success(vedtakPdf, vedtakHtml.data)
     }
 
     companion object {
