@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -65,7 +67,7 @@ class StegService(
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
 
         val behandlingEtterSøknadshåndtering = håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, søknadDTO)
+            behandlingSteg.utførStegOgAngiNeste(behandling, søknadDTO, this)
         }
 
         return håndterPersongrunnlag(
@@ -75,47 +77,92 @@ class StegService(
                                                    .map { barn -> barn.ident }))
     }
 
+    @Transactional
     fun håndterPersongrunnlag(behandling: Behandling, registrerPersongrunnlagDTO: RegistrerPersongrunnlagDTO): Behandling {
         val behandlingSteg: RegistrerPersongrunnlag =
                 hentBehandlingSteg(StegType.REGISTRERE_PERSONGRUNNLAG) as RegistrerPersongrunnlag
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO)
+            behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO, this)
         }
     }
 
+    @Transactional
     fun håndterVilkårsvurdering(behandling: Behandling, restVilkårsvurdering: RestVilkårsvurdering): Behandling {
         val behandlingSteg: Vilkårsvurdering =
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, restVilkårsvurdering)
+            behandlingSteg.utførStegOgAngiNeste(behandling, restVilkårsvurdering, this)
         }
     }
 
+    @Transactional
     fun håndterSendTilBeslutter(behandling: Behandling): Behandling {
         val behandlingSteg: SendTilBeslutter = hentBehandlingSteg(StegType.SEND_TIL_BESLUTTER) as SendTilBeslutter
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+            behandlingSteg.utførStegOgAngiNeste(behandling, "", this)
         }
     }
 
+    @Transactional
     fun håndterBeslutningForVedtak(behandling: Behandling, restBeslutningPåVedtak: RestBeslutningPåVedtak): Behandling {
         val behandlingSteg: BeslutteVedtak =
                 hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            behandlingSteg.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak, this)
         }
     }
 
-    fun håndterFerdigstillBehandling(behandling: Behandling): Behandling {
-        val behandlingStegSteg: FerdigstillBehandlingSteg =
-                hentBehandlingSteg(StegType.FERDIGSTILLE_BEHANDLING) as FerdigstillBehandlingSteg
+    @Transactional
+    fun håndterIverksettMotØkonomi(behandling: Behandling, iverksettingTaskDTO: IverksettingTaskDTO): Behandling {
+        val behandlingSteg: IverksettMotOppdrag =
+                hentBehandlingSteg(StegType.IVERKSETT_MOT_OPPDRAG) as IverksettMotOppdrag
 
-        return håndterSteg(behandling, behandlingStegSteg) {
-            behandlingStegSteg.utførStegOgAngiNeste(behandling, "")
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, iverksettingTaskDTO, this)
+        }
+    }
+
+    @Transactional
+    fun håndterStatusFraØkonomi(behandling: Behandling, statusFraOppdragMedTask: StatusFraOppdragMedTask): Behandling {
+        val behandlingSteg: StatusFraOppdrag =
+                hentBehandlingSteg(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) as StatusFraOppdrag
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, statusFraOppdragMedTask, this)
+        }
+    }
+
+    @Transactional
+    fun håndterJournalførVedtaksbrev(behandling: Behandling, journalførVedtaksbrevDTO: JournalførVedtaksbrevDTO): Behandling {
+        val behandlingSteg: JournalførVedtaksbrev =
+                hentBehandlingSteg(StegType.JOURNALFØR_VEDTAKSBREV) as JournalførVedtaksbrev
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, journalførVedtaksbrevDTO, this)
+        }
+    }
+
+    @Transactional
+    fun håndterDistribuerVedtaksbrev(behandling: Behandling, distribuerVedtaksbrevDTO: DistribuerVedtaksbrevDTO): Behandling {
+        val behandlingSteg: DistribuerVedtaksbrev =
+                hentBehandlingSteg(StegType.DISTRIBUER_VEDTAKSBREV) as DistribuerVedtaksbrev
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, distribuerVedtaksbrevDTO, this)
+        }
+    }
+
+    @Transactional
+    fun håndterFerdigstillBehandling(behandling: Behandling): Behandling {
+        val behandlingSteg: FerdigstillBehandling =
+                hentBehandlingSteg(StegType.FERDIGSTILLE_BEHANDLING) as FerdigstillBehandling
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, "", this)
         }
     }
 
@@ -148,7 +195,11 @@ class StegService(
             }
 
             val nesteSteg = utførendeSteg()
-            LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+
+            if (!behandlingSteg.validerSteg(behandling)) {
+                error("Validering for steg '${behandlingSteg.stegType().displayName()}' feilet.")
+            }
+
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
@@ -160,7 +211,10 @@ class StegService(
                 error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandling.status}")
             }
 
-            return behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
+            val returBehandling = behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
+
+            LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+            return returBehandling
         } catch (exception: Exception) {
             stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
             LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
@@ -170,7 +224,7 @@ class StegService(
         }
     }
 
-    private fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
+    fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
         return steg.firstOrNull { it.stegType() == stegType }
     }
 

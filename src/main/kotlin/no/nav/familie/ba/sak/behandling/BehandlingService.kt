@@ -80,7 +80,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             behandlingRepository.saveAndFlush(aktivBehandling.also { it.aktiv = false })
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter behandling $behandling")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
         return behandlingRepository.save(behandling)
     }
 
@@ -90,7 +90,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterStatusPåBehandling(behandlingId: Long, status: BehandlingStatus): Behandling {
         val behandling = hent(behandlingId)
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
         behandling.status = status
         return behandlingRepository.save(behandling)
@@ -98,7 +98,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterStegPåBehandling(behandlingId: Long, steg: StegType): Behandling {
         val behandling = hent(behandlingId)
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId fra ${behandling.steg} til $steg")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer steg på behandling $behandlingId fra ${behandling.steg} til $steg")
 
         behandling.steg = steg
         return behandlingRepository.save(behandling)

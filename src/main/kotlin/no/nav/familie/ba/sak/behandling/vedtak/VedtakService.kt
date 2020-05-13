@@ -169,7 +169,7 @@ class VedtakService(private val behandlingService: BehandlingService,
             vedtakRepository.saveAndFlush(aktivVedtak.also { it.aktiv = false })
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter vedtak $vedtak")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vedtak $vedtak")
         return vedtakRepository.save(vedtak)
     }
 
@@ -182,7 +182,7 @@ class VedtakService(private val behandlingService: BehandlingService,
         vedtak.vedtaksdato = LocalDate.now()
         oppdaterVedtakMedStønadsbrev(vedtak)
 
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} godkjenner vedtak $vedtak")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} godkjenner vedtak $vedtak")
         lagreEllerOppdater(vedtak)
     }
 

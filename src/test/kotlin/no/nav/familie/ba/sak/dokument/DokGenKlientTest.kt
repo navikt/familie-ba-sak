@@ -3,7 +3,8 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -25,7 +26,7 @@ class DokGenKlientTest(@Autowired
 
     private val vedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
-                    "12345678910"), aktørId = AktørId("1")),
+                    randomFnr()), aktørId = randomAktørId()),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
@@ -36,7 +37,7 @@ class DokGenKlientTest(@Autowired
 
     private val avslagVedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
-                    "12345678910"), aktørId = AktørId("1")),
+                    randomFnr()), aktørId = randomAktørId()),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
@@ -47,7 +48,7 @@ class DokGenKlientTest(@Autowired
 
     private val opphørtVedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
-                    "12345678910"), aktørId = AktørId("1")),
+                    randomFnr()), aktørId = randomAktørId()),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
@@ -61,7 +62,8 @@ class DokGenKlientTest(@Autowired
         val markdown = dokumentService.hentStønadBrevMarkdown(vedtak = vedtak,
                                                               behandlingResultatType = BehandlingResultatType.INNVILGET
         )
-        val htmlResponse = dokGenKlient.lagHtmlFraMarkdown(BehandlingResultatType.INNVILGET.brevMal, markdown, testDokumentHeaderFelter)
+        val htmlResponse =
+                dokGenKlient.lagHtmlFraMarkdown(BehandlingResultatType.INNVILGET.brevMal, markdown, testDokumentHeaderFelter)
         assert(htmlResponse.startsWith("<html>"))
     }
 

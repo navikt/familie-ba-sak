@@ -21,7 +21,7 @@ class PersongrunnlagService(
             personopplysningGrunnlagRepository.saveAndFlush(aktivPersongrunnlag.also { it.aktiv = false })
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter persongrunnlag $personopplysningGrunnlag")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 

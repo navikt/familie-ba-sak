@@ -2,13 +2,12 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.task.IverksettMotOppdrag.Companion.TASK_STEP_TYPE
+import no.nav.familie.ba.sak.task.IverksettMotOppdragTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -20,31 +19,22 @@ import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Iverksett vedtak mot oppdrag", maxAntallFeil = 3)
-class IverksettMotOppdrag(
+class IverksettMotOppdragTask(
+        private val stegService: StegService,
         private val behandlingService: BehandlingService,
-        private val økonomiService: ØkonomiService,
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        LOG.debug("Iverksetter vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag")
-        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(iverksettingTask.behandlingsId,
-                                       iverksettingTask.vedtaksId,
-                                       iverksettingTask.saksbehandlerId)
+        stegService.håndterIverksettMotØkonomi(behandling = behandlingService.hent(iverksettingTask.behandlingsId),
+                                               iverksettingTaskDTO = iverksettingTask)
     }
 
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        val behandling = behandlingService.hent(iverksettingTask.behandlingsId)
-        check(behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
-            "Skal iverksette mot økonomi, men behandlingen har status ${behandling.status}."
-        }
-
-        LOG.debug("Iverksetting av vedtak med ID ${iverksettingTask.vedtaksId} mot oppdrag gikk OK.")
-
         val nyTask = Task.nyTask(
-                type = StatusFraOppdrag.TASK_STEP_TYPE,
+                type = StatusFraOppdragTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(StatusFraOppdragDTO(
                         personIdent = iverksettingTask.personIdent,
                         fagsystem = FAGSYSTEM,
@@ -58,7 +48,7 @@ class IverksettMotOppdrag(
 
     companion object {
         const val TASK_STEP_TYPE = "iverksettMotOppdrag"
-        val LOG = LoggerFactory.getLogger(IverksettMotOppdrag::class.java)
+        val LOG = LoggerFactory.getLogger(IverksettMotOppdragTask::class.java)
 
 
         fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String): Task {

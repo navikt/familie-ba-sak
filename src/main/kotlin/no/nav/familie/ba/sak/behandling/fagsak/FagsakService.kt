@@ -60,7 +60,7 @@ class FagsakService(
 
     @Transactional
     fun lagre(fagsak: Fagsak): Fagsak {
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} oppretter fagsak $fagsak")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter fagsak $fagsak")
         return fagsakRepository.save(fagsak)
     }
 
@@ -93,7 +93,8 @@ class FagsakService(
                             ?: BehandlingResultatType.IKKE_VURDERT,
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
-                    underkategori = behandling.underkategori
+                    underkategori = behandling.underkategori,
+                    endretAv = behandling.endretAv
             )
         }
 
@@ -101,7 +102,7 @@ class FagsakService(
     }
 
     fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
-        LOG.info("${SikkerhetContext.hentSaksbehandler()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
         fagsak.status = nyStatus
 
         lagre(fagsak)
