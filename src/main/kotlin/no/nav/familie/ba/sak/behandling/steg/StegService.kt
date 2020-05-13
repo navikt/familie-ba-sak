@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
@@ -59,12 +60,14 @@ class StegService(
 
         return håndterPersongrunnlag(behandling,
                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
-                                                                barnasIdenter = nyBehandling.barnasIdenter))
+                                                                barnasIdenter = nyBehandling.barnasIdenter,
+                                                                bekreftEndringerViaFrontend = true))
     }
 
     @Transactional
-    fun håndterSøknad(behandling: Behandling, søknadDTO: SøknadDTO): Behandling {
+    fun håndterSøknad(behandling: Behandling, restRegistrerSøknad: RestRegistrerSøknad): Behandling {
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
+        val søknadDTO = restRegistrerSøknad.søknad
 
         val behandlingEtterSøknadshåndtering = håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, søknadDTO, this)
@@ -74,7 +77,8 @@ class StegService(
                 behandlingEtterSøknadshåndtering,
                 RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
                                            barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
-                                                   .map { barn -> barn.ident }))
+                                                   .map { barn -> barn.ident },
+                                           bekreftEndringerViaFrontend = restRegistrerSøknad.bekreftEndringerViaFrontend))
     }
 
     @Transactional

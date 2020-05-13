@@ -25,7 +25,7 @@ class RegistrerPersongrunnlag(
                                       data: RegistrerPersongrunnlagDTO,
                                       stegService: StegService?): StegType {
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident, data.barnasIdenter, behandling)
-        vilkårService.initierVilkårvurderingForBehandling(behandling.id)
+        vilkårService.initierVilkårvurderingForBehandling(behandling.id, data.bekreftEndringerViaFrontend)
         if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
             val nyTask = OpprettOppgaveTask.opprettTask(
                     behandlingId = behandling.id,
@@ -47,4 +47,5 @@ class RegistrerPersongrunnlag(
 
 data class RegistrerPersongrunnlagDTO(
         val ident: String,
+        val bekreftEndringerViaFrontend: Boolean = false,
         val barnasIdenter: List<String>)

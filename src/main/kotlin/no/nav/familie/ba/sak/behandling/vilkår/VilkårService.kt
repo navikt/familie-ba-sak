@@ -76,18 +76,17 @@ class VilkårService(
         return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
     }
 
-    fun initierVilkårvurderingForBehandling(behandlingId: Long): BehandlingResultat {
+    fun initierVilkårvurderingForBehandling(behandlingId: Long, bekreftEndringerViaFrontend: Boolean): BehandlingResultat {
         val initiertBehandlingResultat = lagInitieltBehandlingResultat(behandlingId)
         val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
         return if (aktivBehandlingResultat != null) {
-            val (oppdatert, gammel) = flyttResultaterTilInitielt(aktivtBehandlingResultat = aktivBehandlingResultat,
+            val (oppdatert, aktivt) = flyttResultaterTilInitielt(aktivtBehandlingResultat = aktivBehandlingResultat,
                                                                  initieltBehandlingResultat = initiertBehandlingResultat)
-            if (gammel.personResultater.isNotEmpty()) {
+            if (aktivt.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
                 throw FunksjonellFeil(message = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
-                                      funksjonellFeilmelding = lagFjernAdvarsel(gammel.personResultater)
+                                      funksjonellFeilmelding = lagFjernAdvarsel(aktivt.personResultater)
                 )
             }
-
             return behandlingResultatService.lagreNyOgDeaktiverGammel(oppdatert, false)
         } else {
             behandlingResultatService.lagreInitiert(initiertBehandlingResultat)

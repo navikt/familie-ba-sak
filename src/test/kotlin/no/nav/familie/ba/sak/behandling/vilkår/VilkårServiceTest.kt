@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -67,7 +66,8 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id)
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+                                                                                   bekreftEndringerViaFrontend = true)
         Assertions.assertEquals(2, behandlingResultat.personResultater.size)
 
         val behandlingSteg: Vilkårsvurdering = stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
@@ -123,14 +123,16 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id)
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+                                                                                   bekreftEndringerViaFrontend = true)
         Assertions.assertEquals(2, behandlingResultat.personResultater.size)
 
         val personopplysningGrunnlagMedEkstraBarn =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr, barnFnr2))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagMedEkstraBarn)
 
-        val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id)
+        val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+                                                                                                bekreftEndringerViaFrontend = true)
         Assertions.assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
     }
 

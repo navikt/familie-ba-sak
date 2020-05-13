@@ -27,8 +27,24 @@ class SøknadGrunnlagController(
         val behandling = behandlingService.hent(behandlingId = behandlingId)
 
         return Result.runCatching {
-                    stegService.håndterSøknad(behandling, søknadDTO)
-                }
+                    stegService.håndterSøknad(behandling, RestRegistrerSøknad(søknad = søknadDTO, bekreftEndringerViaFrontend = true))
+        }
+                .fold(
+                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
+                        onFailure = {
+                            throw it
+                        }
+                )
+    }
+
+    @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag/v2"])
+    fun registrereSøknadOgHentPersongrunnlagV2(@PathVariable behandlingId: Long,
+                                             @RequestBody restRegistrerSøknad: RestRegistrerSøknad): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingService.hent(behandlingId = behandlingId)
+
+        return Result.runCatching {
+            stegService.håndterSøknad(behandling, restRegistrerSøknad)
+        }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
                         onFailure = {
