@@ -46,6 +46,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     : AbstractRestClient(restOperations, "integrasjon") {
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    @Deprecated("Bytt over til api/personopplysning/aktorid/BAR")
     fun hentAktørId(personident: String): AktørId {
         if (personident.isEmpty()) {
             throw IntegrasjonException("Ved henting av aktør id er personident null eller tom")
@@ -91,7 +92,19 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    fun hentIdenter(ident: String): List<IdentInformasjon>? {
+    fun hentAktivAktørId(ident: String): AktørId {
+        val identer = hentIdenter(ident = ident).filter { !it.historisk && it.gruppe == "AKTORID" }.map { it.ident }
+        if (identer.isEmpty()) error("Finner ingen aktiv aktørId for ident")
+        return AktørId(identer.first())
+    }
+
+    fun hentAktivPersonIdent(ident: String): PersonIdent {
+        val identer = hentIdenter(ident = ident).filter { !it.historisk && it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
+        if (identer.isEmpty()) error("Finner ingen aktiv personIdent for ident")
+        return PersonIdent(identer.first())
+    }
+
+    fun hentIdenter(ident: String): List<IdentInformasjon> {
         if (ident.isNullOrEmpty()) {
             throw IntegrasjonException("Ved henting av identer er ident null eller tom")
         }
@@ -99,7 +112,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         log.info("Henter identhistorikk fra $uri")
         return try {
             val response = postForEntity<Ressurs<List<IdentInformasjon>>>(uri, ident)
-            response?.getDataOrThrow()
+            response?.getDataOrThrow() ?: error("Finner ingen identer for ident")
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av identer", e, uri, ident)
         }

@@ -41,9 +41,7 @@ class FagsakService(
                      ?: Fagsak(aktørId = integrasjonClient.hentAktørId(fagsakRequest.personIdent),
                                personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
         } else if (fagsakRequest.aktørId !== null) {
-            val identer = integrasjonClient.hentIdenter(ident = fagsakRequest.aktørId)
-            val personIdent = identer?.filter { !it.historisk && it.gruppe == "AKTORID" }?.map { PersonIdent(it.ident) }?.first()
-                              ?: error("Kunne ikke hente fagsak. Finner ikke personident for gitt aktørid")
+            val personIdent = integrasjonClient.hentAktivPersonIdent(ident = fagsakRequest.aktørId)
 
             var muligFagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = personIdent)
 
