@@ -31,6 +31,10 @@ data class Personident(
         val id: String
 )
 
+data class IdentInformasjon(val ident: String,
+                            val historisk: Boolean,
+                            val gruppe: String)
+
 enum class FAMILIERELASJONSROLLE { BARN, FAR, MEDMOR, MOR }
 
 class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {

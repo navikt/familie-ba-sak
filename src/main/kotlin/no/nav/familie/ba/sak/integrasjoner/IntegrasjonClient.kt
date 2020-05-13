@@ -3,10 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner
 import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
-import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
+import no.nav.familie.ba.sak.integrasjoner.domene.*
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
@@ -91,6 +88,20 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
             }
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personIdent", e, uri, aktørId)
+        }
+    }
+
+    fun hentIdenter(ident: String): List<IdentInformasjon>? {
+        if (ident.isNullOrEmpty()) {
+            throw IntegrasjonException("Ved henting av identer er ident null eller tom")
+        }
+        val uri = URI.create("$integrasjonUri/identer/BAR/historikk")
+        log.info("Henter identhistorikk fra $uri")
+        return try {
+            val response = postForEntity<Ressurs<List<IdentInformasjon>>>(uri, ident)
+            response?.getDataOrThrow()
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av identer", e, uri, ident)
         }
     }
 

@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
 import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
@@ -70,6 +71,28 @@ class IntergrasjonTjenesteTest {
                        .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("opprettOppgave"))
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
                        .withRequestBody(equalToJson(objectMapper.writeValueAsString(request))))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Hent indenter skal returnere liste av identer`() {
+        stubFor(post("/api/identer/BAR/historikk").willReturn(
+                okJson(objectMapper.writeValueAsString(success(listOf(IdentInformasjon("1234", false, "AKTORID")))))))
+
+        val identerResponse = integrasjonClient.hentIdenter("12345678910")
+
+        assertThat(identerResponse!!.first().ident).isEqualTo("1234")
+        verify(anyRequestedFor(anyUrl())
+                       .withRequestBody(equalTo("\"12345678910\"")))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Hent indenter skal feile ved kall uten ident`() {
+        assertThatThrownBy {
+            integrasjonClient.hentIdenter("")
+        }.isInstanceOf(IntegrasjonException::class.java)
+                .hasMessageContaining("Ved henting av identer er ident null eller tom")
     }
 
     @Test
