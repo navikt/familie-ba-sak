@@ -15,6 +15,7 @@ data class Fagsak(
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+        @Deprecated("fjernes")
         val aktørId: AktørId,
 
         @Embedded
