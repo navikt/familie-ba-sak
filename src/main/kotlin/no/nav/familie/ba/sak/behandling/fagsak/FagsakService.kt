@@ -38,8 +38,7 @@ class FagsakService(
         val fagsak: Fagsak
         if (fagsakRequest.personIdent !== null) {
             fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(fagsakRequest.personIdent))
-                     ?: Fagsak(aktørId = integrasjonClient.hentAktørId(fagsakRequest.personIdent),
-                               personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
+                     ?: Fagsak(personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
         } else if (fagsakRequest.aktørId !== null) {
             val personIdent = integrasjonClient.hentAktivPersonIdent(ident = fagsakRequest.aktørId)
 
@@ -47,8 +46,7 @@ class FagsakService(
 
             if (muligFagsak == null) {
                 muligFagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = personIdent)
-                              ?: Fagsak(aktørId = AktørId(fagsakRequest.aktørId),
-                                        personIdent = personIdent
+                              ?: Fagsak(personIdent = personIdent
                               ).also { lagre(it) }
             }
             fagsak = muligFagsak
@@ -108,18 +106,13 @@ class FagsakService(
         lagre(fagsak)
     }
 
-    private fun opprettFagsak(personIdent: PersonIdent): Fagsak {
-        val aktørId = integrasjonClient.hentAktørId(personIdent.ident)
-        val nyFagsak =
-                Fagsak(aktørId = aktørId, personIdent = personIdent)
-        return lagre(nyFagsak)
-    }
+
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak =
             hentEllerOpprettFagsak(PersonIdent(fødselsnummer))
 
     private fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak =
-            hent(personIdent) ?: opprettFagsak(personIdent)
+            hent(personIdent) ?: lagre(Fagsak(personIdent = personIdent))
 
     fun hent(personIdent: PersonIdent): Fagsak? {
         return fagsakRepository.finnFagsakForPersonIdent(personIdent)

@@ -26,7 +26,7 @@ class DokGenKlientTest(@Autowired
 
     private val vedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
-                    randomFnr()), aktørId = randomAktørId()),
+                    randomFnr())),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
@@ -37,7 +37,7 @@ class DokGenKlientTest(@Autowired
 
     private val avslagVedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
-                    randomFnr()), aktørId = randomAktørId()),
+                    randomFnr())),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
@@ -48,7 +48,7 @@ class DokGenKlientTest(@Autowired
 
     private val opphørtVedtak = Vedtak(
             behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
-                    randomFnr()), aktørId = randomAktørId()),
+                    randomFnr())),
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,

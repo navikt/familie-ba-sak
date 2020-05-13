@@ -37,8 +37,7 @@ class PeriodeMapperTest {
 
     @BeforeEach
     fun initEach() {
-        val fagsak = Fagsak(aktørId = AktørId("123"),
-                            personIdent = PersonIdent("123"),
+        val fagsak = Fagsak(personIdent = PersonIdent("123"),
                             status = FagsakStatus.OPPRETTET)
         val behandling = Behandling(fagsak = fagsak,
                                     kategori = BehandlingKategori.NASJONAL,

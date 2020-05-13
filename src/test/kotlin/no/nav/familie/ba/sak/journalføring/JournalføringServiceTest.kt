@@ -59,7 +59,7 @@ class JournalføringServiceTest {
         every { integrasjonClient.oppdaterJournalpost(capture(slot), any()) } returns OppdaterJournalpostResponse(journalpostId)
         every { integrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
         every { integrasjonClient.ferdigstillOppgave(any()) } just runs
-        every { fagsakService.hentEllerOpprettFagsakForPersonIdent(any()) } returns Fagsak(fagsakId.toLong(), AktørId("1"), PersonIdent("1"))
+        every { fagsakService.hentEllerOpprettFagsakForPersonIdent(any()) } returns Fagsak(fagsakId.toLong(), PersonIdent("1"))
         every { integrasjonClient.hentJournalpost(any()) } returns Ressurs.Companion.success(lagTestJournalpost("1", "1234567"))
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns ""
         every { stegService.håndterNyBehandling(any()) } returns lagBehandling()

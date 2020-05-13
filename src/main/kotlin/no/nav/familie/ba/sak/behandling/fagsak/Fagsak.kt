@@ -14,11 +14,6 @@ data class Fagsak(
         val id: Long = 0,
 
         @Embedded
-        @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
-        @Deprecated("fjernes")
-        val aktørId: AktørId?,
-
-        @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))
         val personIdent: PersonIdent,
 
@@ -28,7 +23,7 @@ data class Fagsak(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "Fagsak(id=$id, aktørId=$aktørId)"
+        return "Fagsak(id=$id)"
     }
 }
 

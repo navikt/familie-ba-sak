@@ -52,7 +52,6 @@ fun nestePersonId(): Long {
 }
 
 val defaultFagsak = Fagsak(1,
-        AktørId("1"),
         PersonIdent("12345"),
         FagsakStatus.OPPRETTET)
 

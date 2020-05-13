@@ -47,11 +47,12 @@ class PersongrunnlagService(
 
         if (personopplysningGrunnlag.personer.none { it.personIdent == behandling.fagsak.personIdent }) {
             val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
+            val aktørId = integrasjonClient.hentAktivAktørId(fødselsnummer)
             val søker = Person(personIdent = behandling.fagsak.personIdent,
                                type = PersonType.SØKER,
                                personopplysningGrunnlag = personopplysningGrunnlag,
                                fødselsdato = personinfo.fødselsdato,
-                               aktørId = behandling.fagsak.aktørId,
+                               aktørId = aktørId,
                                navn = personinfo.navn ?: "",
                                kjønn = personinfo.kjønn ?: Kjønn.UKJENT
             )

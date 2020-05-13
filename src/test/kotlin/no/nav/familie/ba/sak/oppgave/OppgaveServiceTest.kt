@@ -141,8 +141,7 @@ class OppgaveServiceTest {
         return Behandling(
                 fagsak = Fagsak(
                         id = FAGSAK_ID,
-                        personIdent = PersonIdent(ident = FNR),
-                        aktørId = AktørId(id = AKTØR_ID_FAGSAK)
+                        personIdent = PersonIdent(ident = FNR)
                 ),
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
