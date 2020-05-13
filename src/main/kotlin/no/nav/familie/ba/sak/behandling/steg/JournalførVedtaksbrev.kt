@@ -28,11 +28,11 @@ class JournalførVedtaksbrev(
                                       stegService: StegService?): StegType {
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
 
-        val pdf = dokumentService.hentPdfForVedtak(vedtak)
+        val pdf = dokumentService.hentBrevForVedtak(vedtak).data!!.pdf
         val fnr = vedtak.behandling.fagsak.personIdent.ident
         val fagsakId = "${vedtak.behandling.fagsak.id}"
 
-        val journalpostId = integrasjonClient.journalFørVedtaksbrev(fnr, fagsakId, pdf)
+        val journalpostId = integrasjonClient.journalFørVedtaksbrev(fnr, fagsakId, pdf) // TODO Tenker vi kan opprette journalposten utenfor task, og bare ferdigstille den her
 
         val nyTask = Task.nyTask(
                 type = DistribuerVedtaksbrevTask.TASK_STEP_TYPE,

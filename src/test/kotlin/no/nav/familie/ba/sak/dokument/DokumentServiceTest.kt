@@ -111,8 +111,8 @@ class DokumentServiceTest(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
-        val htmlvedtaksbrevRess = dokumentService.hentHtmlFor(null, null, null)
+        val htmlvedtaksbrevRess = dokumentService.hentBrevForVedtak(vedtak)
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
-        assert(htmlvedtaksbrevRess.data!! == "<HTML>HTML_MOCKUP</HTML>")
+        assert(htmlvedtaksbrevRess.data!!.html == "<HTML>HTML_MOCKUP</HTML>")
     }
 }

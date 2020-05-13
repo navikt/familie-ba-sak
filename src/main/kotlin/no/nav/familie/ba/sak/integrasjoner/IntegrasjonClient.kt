@@ -382,7 +382,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                              FilType.PDFA,
                                              dokumentType = VEDLEGG_DOKUMENT_TYPE,
                                              tittel = VEDTAK_VEDLEGG_TITTEL))
-            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, "9999")
+            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, false, dokumenter, fagsakId, "9999") // TODO bruk sakbehandlers enhet
             val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(
