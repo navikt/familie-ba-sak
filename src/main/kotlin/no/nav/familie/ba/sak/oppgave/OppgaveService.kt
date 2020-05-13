@@ -83,24 +83,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
     }
 
-    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema: String?,
-                                                   oppgavetype: String?,
-                                                   enhet: String?,
-                                                   saksbehandler: String?)
-            : List<Oppgave> {
-
-        return integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)
-    }
-
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): OppgaverOgAntall {
-        val oppgaverOgAntall = integrasjonClient.hentOppgaver(finnOppgaveRequest)
-        return when {
-            finnOppgaveRequest.prioritet != null -> OppgaverOgAntall(
-                    oppgaverOgAntall.antallTreffTotalt,
-                    oppgaverOgAntall.oppgaver.filter { finnOppgaveRequest.prioritet == it.prioritet }
-            )
-            else -> oppgaverOgAntall
-        }
+        return integrasjonClient.hentOppgaver(finnOppgaveRequest)
     }
 
     enum class Behandlingstema(val kode: String) {
