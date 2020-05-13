@@ -58,7 +58,7 @@ class DokumentService(
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
-                            return Ressurs.failure("Klarte ikke å hent vedtaksbrev", e)
+                            return Ressurs.failure(errorMessage = "Klarte ikke å hent vedtaksbrev", error = e)
                         }
                 )
 

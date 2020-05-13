@@ -32,7 +32,7 @@ class SøknadGrunnlagController(
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
                         onFailure = {
-                            return illegalState((it.cause?.message ?: it.message).toString(), it)
+                            throw it
                         }
                 )
     }

@@ -24,11 +24,11 @@ class ØkonomiTestConfig {
         val økonomiKlient: ØkonomiKlient = mockk()
 
         val iverksettRespons =
-                ResponseEntity.ok().body(Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", ""))
+                ResponseEntity.ok().body(Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null))
         every { økonomiKlient.iverksettOppdrag(any<Utbetalingsoppdrag>()) } returns iverksettRespons
 
         val hentStatusRespons =
-                ResponseEntity.ok().body(Ressurs(OppdragProtokollStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", ""))
+                ResponseEntity.ok().body(Ressurs(OppdragProtokollStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null))
         every { økonomiKlient.hentStatus(any<StatusFraOppdragDTO>()) } returns hentStatusRespons
 
         return økonomiKlient

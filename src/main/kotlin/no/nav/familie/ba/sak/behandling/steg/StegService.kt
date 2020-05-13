@@ -220,7 +220,7 @@ class StegService(
             LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
             secureLogger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.",
                               exception)
-            error(exception.message!!)
+            throw exception
         }
     }
 

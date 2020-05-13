@@ -11,8 +11,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
@@ -82,8 +83,11 @@ class VilkårService(
             val (oppdatert, gammel) = flyttResultaterTilInitielt(aktivtBehandlingResultat = aktivBehandlingResultat,
                                                                  initieltBehandlingResultat = initiertBehandlingResultat)
             if (gammel.personResultater.isNotEmpty()) {
-                error(lagFjernAdvarsel(gammel.personResultater))
+                throw FunksjonellFeil(message = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
+                                      funksjonellFeilmelding = lagFjernAdvarsel(gammel.personResultater)
+                )
             }
+
             return behandlingResultatService.lagreNyOgDeaktiverGammel(oppdatert, false)
         } else {
             behandlingResultatService.lagreInitiert(initiertBehandlingResultat)
