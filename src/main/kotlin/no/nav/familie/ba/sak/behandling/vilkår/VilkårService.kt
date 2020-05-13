@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårDiff.lagFjernAdvarsel
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårDiff.oppdaterteBehandlingsresultater
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
@@ -76,12 +76,11 @@ class VilkårService(
     }
 
     fun initierVilkårvurderingForBehandling(behandlingId: Long): BehandlingResultat {
-        val initiertBehandlingResultat = initierMinimaltBehandlingResultatForBehandling(behandlingId)
+        val initiertBehandlingResultat = lagInitieltBehandlingResultat(behandlingId)
         val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
         return if (aktivBehandlingResultat != null) {
-            val (oppdatert, gammel) = oppdaterteBehandlingsresultater(behandling = behandlingService.hent(behandlingId),
-                                                                      aktivtResultat = aktivBehandlingResultat,
-                                                                      initiertResultat = initiertBehandlingResultat)
+            val (oppdatert, gammel) = flyttResultaterTilInitielt(aktivtBehandlingResultat = aktivBehandlingResultat,
+                                                                 initieltBehandlingResultat = initiertBehandlingResultat)
             if (gammel.personResultater.isNotEmpty()) {
                 error(lagFjernAdvarsel(gammel.personResultater))
             }
@@ -91,7 +90,7 @@ class VilkårService(
         }
     }
 
-    fun initierMinimaltBehandlingResultatForBehandling(behandlingId: Long): BehandlingResultat { // TODO: Bedre navn
+    fun lagInitieltBehandlingResultat(behandlingId: Long): BehandlingResultat {
         val behandling = behandlingService.hent(behandlingId)
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)

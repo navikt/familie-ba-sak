@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårDiff.lagFjernAdvarsel
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårDiff.oppdaterteBehandlingsresultater
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
@@ -24,7 +24,7 @@ class OppdaterBehandlingGrunnlagTest {
         val resA = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
         val resB = lagBehandlingResultatB(behandling = behandling, fnr = listOf(fnr1))
 
-        val (oppdatert, gammelt) = oppdaterteBehandlingsresultater(behandling, resA, resB)
+        val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(3, oppdatert.personResultater.first().vilkårResultater.size)
         Assertions.assertEquals(Resultat.JA,
                                 oppdatert.personResultater.first()
@@ -40,7 +40,7 @@ class OppdaterBehandlingGrunnlagTest {
         val resA = lagBehandlingResultatB(behandling = behandling, fnr = listOf(fnr1))
         val resB = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
 
-        val (oppdatert, gammelt) = oppdaterteBehandlingsresultater(behandling, resA, resB)
+        val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.first().vilkårResultater.size)
         Assertions.assertEquals(Resultat.JA,
                                 oppdatert.personResultater.first()
@@ -58,7 +58,7 @@ class OppdaterBehandlingGrunnlagTest {
         val resA = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
         val resB = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1, fnr2))
 
-        val (oppdatert, gammelt) = oppdaterteBehandlingsresultater(behandling, resA, resB)
+        val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.size)
         Assertions.assertEquals(0, gammelt.personResultater.size)
     }
@@ -71,7 +71,7 @@ class OppdaterBehandlingGrunnlagTest {
         val resA = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1, fnr2))
         val resB = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
 
-        val (oppdatert, gammelt) = oppdaterteBehandlingsresultater(behandling, resA, resB)
+        val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(1, oppdatert.personResultater.size)
         Assertions.assertEquals(1, gammelt.personResultater.size)
     }
@@ -84,7 +84,7 @@ class OppdaterBehandlingGrunnlagTest {
         val resultat1 = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1, fnr2))
         val resultat2 = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr2))
 
-        val resterende = oppdaterteBehandlingsresultater(behandling, resultat1, resultat2).second
+        val resterende = flyttResultaterTilInitielt(resultat2, resultat1).second
         val fjernedeVilkår = resultat1.personResultater.first().vilkårResultater.toList()
         val generertAdvarsel = lagFjernAdvarsel(resterende.personResultater)
 
