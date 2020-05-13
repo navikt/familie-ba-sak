@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
+import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -87,13 +89,13 @@ class IntergrasjonTjenesteTest {
 
     @Test
     @Tag("integration")
-    fun `finnOppgaverKnyttetTilSaksbehandlerOgEnhet skal returnere en liste av oppgaver`() {
+    fun `hentOppgaver skal returnere en liste av oppgaver og antallet oppgaver`() {
         val oppgave = Oppgave()
-        stubFor(get("/api/oppgave?tema=BAR&enhet=4820&saksbehandler=Z012345").willReturn(okJson(objectMapper.writeValueAsString(
-                success(listOf(oppgave))))))
+        stubFor(post("/api/oppgave/v2").willReturn(okJson(objectMapper.writeValueAsString(
+                success(OppgaverOgAntall(1, listOf(oppgave)))))))
 
-        val oppgaver = integrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(null, null, "4820", "Z012345")
-        assertThat(oppgaver).hasSize(1)
+        val oppgaverOgAntall = integrasjonClient.hentOppgaver(FinnOppgaveRequest())
+        assertThat(oppgaverOgAntall.oppgaver).hasSize(1)
     }
 
     @Test

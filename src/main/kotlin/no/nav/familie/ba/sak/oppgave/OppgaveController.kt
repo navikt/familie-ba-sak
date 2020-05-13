@@ -20,26 +20,6 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClient: IntegrasjonClient) {
 
-    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun finnOppgaverKnyttetTilSaksbehandlerOgEnhet(@RequestParam("behandlingstema", required = false) behandlingstema: String?,
-                                                   @RequestParam("oppgavetype", required = false) oppgavetype: String?,
-                                                   @RequestParam("enhet", required = false) enhet: String?,
-                                                   @RequestParam("saksbehandler", required = false) saksbehandler: String?)
-            : ResponseEntity<Ressurs<List<Oppgave>>> {
-
-        if (!behandlingstema.isNullOrEmpty() && OppgaveService.Behandlingstema.values().all { it.kode != behandlingstema }) {
-            return badRequest("Ugyldig behandlingstema", null)
-        }
-
-        return try {
-            val oppgaver: List<Oppgave> =
-                    oppgaveService.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(behandlingstema, oppgavetype, enhet, saksbehandler)
-            ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
-        } catch (e: Throwable) {
-            badRequest("Henting av oppgaver feilet", e)
-        }
-    }
-
     @PostMapping(path = ["/hent-oppgaver"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequest)
             : ResponseEntity<Ressurs<OppgaverOgAntall>> {
@@ -110,7 +90,6 @@ class FinnOppgaveRequest(val behandlingstema: String? = null,
                          val enhet: String? = null,
                          val saksbehandler: String? = null,
                          val journalpostId: String? = null,
-                         val prioritet: OppgavePrioritet? = null,
                          val opprettetFomTidspunkt: String? = null,
                          val opprettetTomTidspunkt: String? = null,
                          val fristFomDato: String? = null,
