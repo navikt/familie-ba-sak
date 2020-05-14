@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
-import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
@@ -48,7 +48,7 @@ class VilkårService(
 
     fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
         val behandling = behandlingService.hent(behandlingId)
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
         val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
         if (barna.size != 1) {
@@ -83,8 +83,8 @@ class VilkårService(
             val (oppdatert, aktivt) = flyttResultaterTilInitielt(aktivtBehandlingResultat = aktivBehandlingResultat,
                                                                  initieltBehandlingResultat = initiertBehandlingResultat)
             if (aktivt.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
-                throw FunksjonellFeil(message = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
-                                      funksjonellFeilmelding = lagFjernAdvarsel(aktivt.personResultater)
+                throw Feil(message = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
+                           frontendFeilmelding = lagFjernAdvarsel(aktivt.personResultater)
                 )
             }
             return behandlingResultatService.lagreNyOgDeaktiverGammel(oppdatert, false)

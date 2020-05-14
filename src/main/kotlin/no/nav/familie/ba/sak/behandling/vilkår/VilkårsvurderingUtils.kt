@@ -62,7 +62,8 @@ object VilkårsvurderingUtils {
     }
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {
-        var advarsel = "Følgende personer og vilkår fjernes:"
+        var advarsel =
+                "Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:"
         personResultater.forEach {
             advarsel = advarsel.plus("\n${it.personIdent}:")
             it.vilkårResultater.forEach { vilkårResultat ->

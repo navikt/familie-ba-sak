@@ -44,7 +44,7 @@ class BeregningController(
         if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return ResponseEntity.ok(Ressurs.success(data = emptyList()))
 
         val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
                 ?: return notFound("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
 
         return Result.runCatching {
