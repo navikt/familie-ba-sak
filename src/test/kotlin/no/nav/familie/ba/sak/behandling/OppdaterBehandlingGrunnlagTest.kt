@@ -88,7 +88,7 @@ class OppdaterBehandlingGrunnlagTest {
         val fjernedeVilkår = resultat1.personResultater.first().vilkårResultater.toList()
         val generertAdvarsel = lagFjernAdvarsel(resterende.personResultater)
 
-        Assertions.assertEquals("Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes::\n" +
+        Assertions.assertEquals("Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:\n" +
                                 fnr1 + ":\n" +
                                 "   - " + fjernedeVilkår[0].vilkårType.spesifikasjon.beskrivelse + "\n" +
                                 "   - " + fjernedeVilkår[1].vilkårType.spesifikasjon.beskrivelse + "\n", generertAdvarsel)

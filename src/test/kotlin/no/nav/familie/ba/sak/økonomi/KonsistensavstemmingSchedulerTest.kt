@@ -81,7 +81,7 @@ class KonsistensavstemmingSchedulerTest {
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 
-        val tasks = taskRepository.finnTasksTilFrontend(listOf(Status.UBEHANDLET), Pageable.unpaged())
+        val tasks = taskRepository.finnTasksTilFrontend(Status.UBEHANDLET, Pageable.unpaged())
 
         Assertions.assertEquals(1, tasks.size)
 
