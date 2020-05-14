@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.domene.*
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
+import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -40,8 +41,8 @@ class ClientMocks {
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 success(lagTestOppgaveDTO(1L))
 
-        every { mockIntegrasjonClient.finnOppgaverKnyttetTilSaksbehandlerOgEnhet(any(), any(), any(), any()) } returns
-                listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "Z999999"))
+        every { mockIntegrasjonClient.hentOppgaver(any()) } returns
+                OppgaverOgAntall(2, listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "Z999999")))
 
         every { mockIntegrasjonClient.opprettOppgave(any()) } returns
                 "12345678"

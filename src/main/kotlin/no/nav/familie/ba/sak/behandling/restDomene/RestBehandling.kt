@@ -19,7 +19,8 @@ data class RestBehandling(val aktiv: Boolean,
                           val underkategori: BehandlingUnderkategori,
                           val personResultater: List<RestPersonResultat>,
                           val samletResultat: BehandlingResultatType,
-                          val vedtakForBehandling: List<RestVedtak?>)
+                          val vedtakForBehandling: List<RestVedtak?>,
+                          val endretAv: String)
 
 data class RestPersonResultat(
         val personIdent: String,
@@ -35,11 +36,11 @@ data class RestVilkårResultat(
 )
 
 fun PersonResultat.tilRestPersonResultat() = RestPersonResultat(personIdent = this.personIdent,
-                                                                vilkårResultater = this.vilkårResultater.map { resultat ->
-                                                                       RestVilkårResultat(resultat = resultat.resultat,
-                                                                                          vilkårType = resultat.vilkårType,
-                                                                                          periodeFom = resultat.periodeFom,
-                                                                                          periodeTom = resultat.periodeTom,
-                                                                                          begrunnelse = resultat.begrunnelse
-                                                                                          )
-                                                                   })
+        vilkårResultater = this.vilkårResultater.map { resultat ->
+            RestVilkårResultat(resultat = resultat.resultat,
+                    vilkårType = resultat.vilkårType,
+                    periodeFom = resultat.periodeFom,
+                    periodeTom = resultat.periodeTom,
+                    begrunnelse = resultat.begrunnelse
+            )
+        })
