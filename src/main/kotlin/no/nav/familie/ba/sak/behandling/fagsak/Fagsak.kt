@@ -24,7 +24,7 @@ data class Fagsak(
                    mappedBy = "fagsak",
                    cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE]
         )
-        var søkerIdenter: Set<FagsakPerson> = emptySet()
+        var søkerIdenter: Set<FagsakPerson> = setOf()
 ) : BaseEntitet() {
 
     override fun toString(): String {

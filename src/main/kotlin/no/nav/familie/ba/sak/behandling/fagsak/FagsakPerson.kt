@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.LocalDateTime
@@ -13,7 +14,8 @@ data class FagsakPerson (
     @SequenceGenerator(name = "fagsak_person_seq_generator", sequenceName = "fagsak_person_seq", allocationSize = 50)
     val id: Long = 0,
 
-    @ManyToOne(optional = false)
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
     @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
     val fagsak: Fagsak,
 

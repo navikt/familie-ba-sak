@@ -31,29 +31,43 @@ class FagsakService(
         private val behandlingRepository: BehandlingRepository,
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakRepository: VedtakRepository,
-        private val integrasjonClient: IntegrasjonClient) {
+        private val integrasjonClient: IntegrasjonClient,
+        private val fagsakPersonRepository: FagsakPersonRepository) {
 
     @Transactional
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
-        val fagsak: Fagsak
-        if (fagsakRequest.personIdent !== null) {
-            fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(fagsakRequest.personIdent))
-                     ?: Fagsak(personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
+
+        val personIdent = if (fagsakRequest.personIdent !== null) {
+            PersonIdent(fagsakRequest.personIdent)
         } else if (fagsakRequest.aktørId !== null) {
-            val personIdent = integrasjonClient.hentAktivPersonIdent(ident = fagsakRequest.aktørId)
-
-            var muligFagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = personIdent)
-
-            if (muligFagsak == null) {
-                muligFagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = personIdent)
-                              ?: Fagsak(personIdent = personIdent
-                              ).also { lagre(it) }
-            }
-            fagsak = muligFagsak
+            integrasjonClient.hentAktivPersonIdent(ident = fagsakRequest.aktørId)
         } else {
             error("Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak")
         }
+
+        var fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = personIdent)
+        if (fagsak == null) {
+            val nyFagsak = Fagsak(personIdent = personIdent)
+            lagre(nyFagsak)
+            val fagsakPerson = FagsakPerson(personIdent = personIdent, fagsak = nyFagsak)
+
+            fagsakPersonRepository.save(fagsakPerson)
+            fagsak = nyFagsak
+        }
         return hentRestFagsak(fagsakId = fagsak.id)
+
+
+//        val fagsak = if (fagsakRequest.personIdent !== null) {
+//            fagsakRepository.finnFagsakForPersonIdent(personIdent = PersonIdent(fagsakRequest.personIdent))
+//            ?:Fagsak(personIdent = PersonIdent(fagsakRequest.personIdent)).also { lagre(it) }
+//        } else if (fagsakRequest.aktørId !== null) {
+//            val personIdent = integrasjonClient.hentAktivPersonIdent(ident = fagsakRequest.aktørId)
+//            fagsakRepository.finnFagsakForPersonIdent(personIdent = personIdent)
+//            ?: Fagsak(personIdent = PersonIdent(personIdent.ident)).also { lagre(it) }
+//        } else {
+//            error("Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak")
+//        }
+//        return hentRestFagsak(fagsakId = fagsak.id)
     }
 
     @Transactional
@@ -105,7 +119,6 @@ class FagsakService(
 
         lagre(fagsak)
     }
-
 
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak =
