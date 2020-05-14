@@ -21,7 +21,7 @@ data class Fagsak(
         var status: FagsakStatus = FagsakStatus.OPPRETTET,
 
         @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "fagsak",
+                   mappedBy = "fagsakId",
                    cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE]
         )
         var søkerIdenter: Set<FagsakPerson> = setOf()

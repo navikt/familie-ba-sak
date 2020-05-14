@@ -49,7 +49,7 @@ class FagsakService(
         if (fagsak == null) {
             val nyFagsak = Fagsak(personIdent = personIdent)
             lagre(nyFagsak)
-            val fagsakPerson = FagsakPerson(personIdent = personIdent, fagsak = nyFagsak)
+            val fagsakPerson = FagsakPerson(personIdent = personIdent, fagsakId = nyFagsak.id)
 
             fagsakPersonRepository.save(fagsakPerson)
             fagsak = nyFagsak
