@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -18,7 +19,8 @@ class DokumentService(
         private val dokGenKlient: DokGenKlient,
         private val malerService: MalerService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val søknadGrunnlagService: SøknadGrunnlagRepository
+        private val søknadGrunnlagService: SøknadGrunnlagRepository,
+        private val vedtakService: VedtakService
 ) {
 
     @Deprecated("Gjøres i hentBrevForVedtak")
@@ -36,42 +38,11 @@ class DokumentService(
     }
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<RestDokument> {
-
-        return Result.runCatching {
-            val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
-                ?: error("Finner ikke søker på vedtaket")
-            val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
-
-            val behandlingResultatType =
-                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
-
-            val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
-                                                    navn = søker.navn,
-                                                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
-                                                    dokumentDato = LocalDate.now().tilDagMånedÅr())
-
-            val malMedData = malerService.mapTilBrevfelter(vedtak,
-                                                           søknad,
-                                                           behandlingResultatType
-            )
-            val markdown = dokGenKlient.hentMarkdownForMal(malMedData)
-
-            Ressurs.success(RestDokument(html = hentHtmlFor(mal = malMedData.mal,
-                                                            markdown = markdown,
-                                                            headerFelter = headerFelter),
-                                         pdf = hentPdfFor(mal = malMedData.mal,
-                                                          markdown = markdown,
-                                                          headerFelter = headerFelter)))
-        }
-            .fold(
-                onSuccess = { it },
-                onFailure = { e ->
-                            return Ressurs.failure(errorMessage = "Klarte ikke å hente vedtaksbrev", error = e)
-                }
-            )
+        return Ressurs.success(RestDokument(html = vedtak.stønadBrevHtml,
+                                            pdf = vedtak.stønadBrevPdF))
     }
 
-    fun hentHtmlFor(mal: String,
+    private fun hentHtmlFor(mal: String,
                     markdown: String,
                     headerFelter: DokumentHeaderFelter): String {
 
@@ -83,6 +54,7 @@ class DokumentService(
             throw Exception("Klarte ikke å hente HTML-utgave av vedtaksbrev", it)
         }
     }
+
     private fun hentPdfFor(mal: String,
                     markdown: String,
                     headerFelter: DokumentHeaderFelter): ByteArray {
@@ -94,5 +66,46 @@ class DokumentService(
         }.getOrElse {
             throw Exception("Klarte ikke å hente PDF-utgave av vedtaksbrev", it)
         }
+    }
+
+    fun genererBrevForVedtak(vedtak: Vedtak): Ressurs<RestDokument> {
+        return Result.runCatching {
+            val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
+                ?: error("Finner ikke søker på vedtaket")
+            val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
+
+            val behandlingResultatType =
+                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+
+            val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
+                navn = søker.navn,
+                returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
+                dokumentDato = LocalDate.now().tilDagMånedÅr())
+
+            val malMedData = malerService.mapTilBrevfelter(vedtak,
+                søknad,
+                behandlingResultatType
+            )
+            val markdown = dokGenKlient.hentMarkdownForMal(malMedData)
+
+            vedtak.stønadBrevHtml = hentHtmlFor(mal = malMedData.mal,
+                markdown = markdown,
+                headerFelter = headerFelter)
+
+            vedtak.stønadBrevPdF = hentPdfFor(mal = malMedData.mal,
+                markdown = markdown,
+                headerFelter = headerFelter)
+
+            vedtakService.lagreEllerOppdater(vedtak)
+
+            Ressurs.success(RestDokument(html = vedtak.stønadBrevHtml,
+                                         pdf = vedtak.stønadBrevPdF!!))
+        }
+            .fold(
+                onSuccess = { it },
+                onFailure = { e ->
+                    return Ressurs.failure(errorMessage = "Klarte ikke å hente vedtaksbrev", error = e)
+                }
+            )
     }
 }

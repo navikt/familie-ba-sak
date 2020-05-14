@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.dokument.RestDokument
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
@@ -56,11 +56,20 @@ class VedtakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+    fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long,
+                                   @RequestParam behandlendeEnhet: String,
+                                   @RequestBody restDokument: RestDokument): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                 ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
-        return Result.runCatching { stegService.håndterSendTilBeslutter(behandling) }.fold(
+        return Result.runCatching {
+            val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+                    ?: error("Fant ikke forslag til vedtak på behandling ${behandling.id}")
+            vedtak.ansvarligEnhet = behandlendeEnhet
+            vedtak.stønadBrevPdF = restDokument.pdf
+            vedtakService.oppdaterVedtakMedStønadsbrev(vedtak, restDokument.html)
+            stegService.håndterSendTilBeslutter(behandling)
+        }.fold(
                 onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
                 onFailure = {
                     illegalState((it.cause?.message ?: it.message).toString(), it)

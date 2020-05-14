@@ -32,7 +32,7 @@ class JournalførVedtaksbrev(
         val fnr = vedtak.behandling.fagsak.personIdent.ident
         val fagsakId = "${vedtak.behandling.fagsak.id}"
 
-        val journalpostId = integrasjonClient.journalFørVedtaksbrev(fnr, fagsakId, pdf) // TODO Tenker vi kan opprette journalposten utenfor task, og bare ferdigstille den her
+        val journalpostId = integrasjonClient.journalFørVedtaksbrev(fnr, fagsakId, pdf)
 
         val nyTask = Task.nyTask(
                 type = DistribuerVedtaksbrevTask.TASK_STEP_TYPE,

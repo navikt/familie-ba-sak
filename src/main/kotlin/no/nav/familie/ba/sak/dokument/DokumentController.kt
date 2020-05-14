@@ -8,10 +8,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/dokument")
@@ -22,8 +19,17 @@ class DokumentController(
         private val vedtakService: VedtakService
 ) {
 
-    @GetMapping(path = ["vedtak-html/{vedtakId}"])
-    fun hentHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<RestDokument> {
+    @PostMapping(path = ["genere_vedtaksbrev/{vedtakId}"])
+    fun genererHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<RestDokument> {
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
+
+        val vedtak = vedtakService.hent(vedtakId)
+
+        return dokumentService.genererBrevForVedtak(vedtak)
+    }
+
+    @GetMapping(path = ["vedtaksbrev/{vedtakId}"])
+    fun HentHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<RestDokument> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
 
         val vedtak = vedtakService.hent(vedtakId)
@@ -37,5 +43,5 @@ class DokumentController(
 }
 
 class RestDokument(@JsonProperty("pdfBase64")
-                   val pdf: ByteArray,
+                   val pdf: ByteArray?,
                    val html: String?)

@@ -109,7 +109,7 @@ class DokumentServiceTest(
         Assertions.assertNotNull(vedtak)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
+        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!, null)
 
         val htmlvedtaksbrevRess = dokumentService.hentBrevForVedtak(vedtak)
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)

@@ -340,7 +340,7 @@ class IntergrasjonTjenesteTest {
     private fun forventetRequestArkiverDokument(): ArkiverDokumentRequest {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
         return ArkiverDokumentRequest(fnr = mockFnr,
-                                      forsøkFerdigstill = true,
+                                      forsøkFerdigstill = false,
                                       fagsakId = mockFagsakId,
                                       journalførendeEnhet = "9999",
                                       dokumenter = listOf(Dokument(dokument = mockPdf,
