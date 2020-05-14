@@ -44,12 +44,13 @@ class OppgaveServiceTest {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
-        every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
+        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns listOf(
                 mockk {
                     every { enhetId } returns ENHETSNUMMER
                 }
         )
+        every { integrasjonClient.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
@@ -70,10 +71,11 @@ class OppgaveServiceTest {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
-        every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
+        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
+        every { integrasjonClient.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 

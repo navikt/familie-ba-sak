@@ -7,6 +7,7 @@ import io.mockk.runs
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.domene.*
@@ -87,6 +88,24 @@ class ClientMocks {
         }
 
         every {
+            mockIntegrasjonClient.hentAktivAktørId(any())
+        } answers {
+            randomAktørId()
+        }
+
+        every {
+            mockIntegrasjonClient.hentAktivPersonIdent(any())
+        } answers {
+            PersonIdent(randomFnr())
+        }
+
+        every {
+            mockIntegrasjonClient.hentIdenter(any())
+        } answers {
+            listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
+        }
+
+        every {
             mockIntegrasjonClient.journalFørVedtaksbrev(eq(søkerFnr[0]), any(), any())
         } returns "Testrespons"
 
@@ -158,6 +177,12 @@ class ClientMocks {
             randomAktørId()
         }
 
+        every {
+            mockIntegrasjonClient.hentAktivAktørId(any())
+        } answers {
+            randomAktørId()
+        }
+
         val ukjentId = "43125678910"
         every {
             mockIntegrasjonClient.hentPersoninfoFor(ukjentId)
@@ -192,6 +217,10 @@ fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, s�
     every {
         mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr))
     } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+
+    every {
+        mockIntegrasjonClient.hentAktivAktørId(any())
+    } returns AktørId("1")
 }
 
 val TEST_PDF = "TEST PDF".toByteArray()
