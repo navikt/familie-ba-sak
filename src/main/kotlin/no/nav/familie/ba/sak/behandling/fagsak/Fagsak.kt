@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import javax.persistence.*
 
@@ -19,11 +18,21 @@ data class Fagsak(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
-        var status: FagsakStatus = FagsakStatus.OPPRETTET
+        var status: FagsakStatus = FagsakStatus.OPPRETTET,
+
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "fagsak",
+                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE]
+        )
+        var søkerIdenter: Set<FagsakPerson> = emptySet()
 ) : BaseEntitet() {
 
     override fun toString(): String {
         return "Fagsak(id=$id)"
+    }
+
+    fun hentAktivIdent(): PersonIdent {
+        return søkerIdenter.maxBy { it.opprettetTidspunkt }?.personIdent ?: error("Fant ingen ident på fagsak $id")
     }
 }
 
