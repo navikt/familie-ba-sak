@@ -10,10 +10,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
-import no.nav.familie.ba.sak.common.DatabaseCleanupService
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.*
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -73,8 +70,7 @@ class VilkårServiceTest(
         val behandlingSteg: Vilkårsvurdering = stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         Assertions.assertNotNull(behandlingSteg)
 
-        val skalVæreUgyldig = behandlingSteg.validerSteg(behandling)
-        Assertions.assertFalse(skalVæreUgyldig)
+        Assertions.assertThrows(Feil::class.java) { behandlingSteg.validerSteg(behandling) }
 
         val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
 
@@ -95,7 +91,7 @@ class VilkårServiceTest(
                                     vilkårType = it.vilkårType,
                                     resultat = Resultat.JA,
                                     begrunnelse = "",
-                                    periodeFom = LocalDate.now().minusYears(2),
+                                    periodeFom = LocalDate.now(),
                                     periodeTom = null
                             )
                         }
@@ -106,8 +102,7 @@ class VilkårServiceTest(
         vilkårService.lagBehandlingResultatFraRestPersonResultater(personResultater = vurdertPersonResultater,
                                                                    behandlingId = behandling.id)
 
-        val skalVæreGyldig = behandlingSteg.validerSteg(behandling)
-        Assertions.assertTrue(skalVæreGyldig)
+        Assertions.assertDoesNotThrow { behandlingSteg.validerSteg(behandling) }
     }
 
     @Test

@@ -15,9 +15,7 @@ interface BehandlingSteg<T> {
         return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType())
     }
 
-    fun validerSteg(behandling: Behandling): Boolean {
-        return true
-    }
+    fun validerSteg(behandling: Behandling) {}
 }
 
 fun initSteg(behandlingType: BehandlingType?): StegType {

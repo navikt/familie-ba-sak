@@ -50,6 +50,9 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     implementasjon = { lovligOpphold(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode());
 
+    override fun toString(): String {
+        return this.spesifikasjon.beskrivelse
+    }
     companion object {
         fun hentVilkårForPart(personType: PersonType) = values()
                 .filter { personType in it.parterDetteGjelderFor }.toSet()

@@ -49,7 +49,7 @@ class VedtakController(
                     ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
                 },
                 onFailure = {
-                    badRequest((it.cause?.message ?: it.message).toString(), null)
+                    throw it
                 }
         )
     }
