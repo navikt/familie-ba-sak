@@ -23,7 +23,9 @@ object RessursUtils {
 
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
 
-    private fun <T> errorResponse(httpStatus: HttpStatus, errorMessage: String, throwable: Throwable?): ResponseEntity<Ressurs<T>> {
+    private fun <T> errorResponse(httpStatus: HttpStatus,
+                                  errorMessage: String,
+                                  throwable: Throwable?): ResponseEntity<Ressurs<T>> {
         secureLogger.info(errorMessage, throwable)
         LOG.error(errorMessage)
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
@@ -32,5 +34,13 @@ object RessursUtils {
     inline fun <reified T> assertGenerelleSuksessKriterier(it: Ressurs<T>?) {
         val status = it?.status ?: error("Finner ikke ressurs")
         if (status == Ressurs.Status.SUKSESS && it.data == null) error("Ressurs har status suksess, men mangler data")
+    }
+
+    fun lagFrontendMelding(tittel: String, feilmeldinger: List<String>): String {
+        var melding = tittel
+        feilmeldinger.forEach {
+            melding = melding.plus("\n${it}")
+        }
+        return melding
     }
 }

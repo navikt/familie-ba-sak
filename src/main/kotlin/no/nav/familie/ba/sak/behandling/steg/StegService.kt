@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.RestRegistrerSøknad
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -200,10 +199,7 @@ class StegService(
 
             val nesteSteg = utførendeSteg()
 
-            if (!behandlingSteg.validerSteg(behandling)) {
-                error("Validering for steg '${behandlingSteg.stegType().displayName()}' feilet.")
-            }
-
+            behandlingSteg.validerSteg(behandling)
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
