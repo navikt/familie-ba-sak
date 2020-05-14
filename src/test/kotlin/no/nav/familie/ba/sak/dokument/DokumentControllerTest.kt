@@ -30,9 +30,9 @@ class DokumentControllerTest(
         val vedtakService: VedtakService = mockk()
         val mockDokumentController = DokumentController(mockDokumentService, vedtakService)
         every { vedtakService.hent(any()) } returns lagVedtak()
-        every { mockDokumentService.hentBrevForVedtak(any()) } returns Ressurs.success(RestDokument("pdf".toByteArray(),"mock_html"))
+        every { mockDokumentService.hentBrevForVedtak(any()) } returns Ressurs.success("pdf".toByteArray())
 
-        val response = mockDokumentController.genererEllerHentHtmlVedtak(1)
+        val response = mockDokumentController.hentVedtaksbrev(1)
         assert(response.status == Ressurs.Status.SUKSESS)
     }
 

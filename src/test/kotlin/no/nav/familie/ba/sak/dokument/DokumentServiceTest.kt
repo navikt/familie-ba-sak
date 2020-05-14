@@ -109,10 +109,10 @@ class DokumentServiceTest(
         Assertions.assertNotNull(vedtak)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!, null)
+        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
         val htmlvedtaksbrevRess = dokumentService.hentBrevForVedtak(vedtak)
         Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
-        assert(htmlvedtaksbrevRess.data!!.html == "<HTML>HTML_MOCKUP</HTML>")
+        assert(htmlvedtaksbrevRess.data!!.contentEquals("pdf".toByteArray()))
     }
 }

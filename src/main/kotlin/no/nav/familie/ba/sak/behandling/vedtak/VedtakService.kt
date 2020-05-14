@@ -113,8 +113,8 @@ class VedtakService(private val behandlingService: BehandlingService,
 
 
     @Transactional
-    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak, stønadsbrev: String?): Ressurs<RestFagsak> {
-        vedtak.stønadBrevHtml = stønadsbrev ?: hentVedtaksbrevMarkdown(vedtak)
+    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Ressurs<RestFagsak> {
+        vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak).data
 
         lagreOgDeaktiverGammel(vedtak)
 
@@ -178,7 +178,7 @@ class VedtakService(private val behandlingService: BehandlingService,
     fun godkjennVedtak(vedtak: Vedtak) {
         vedtak.ansvarligBeslutter = SikkerhetContext.hentSaksbehandlerNavn()
         vedtak.vedtaksdato = LocalDate.now()
-        oppdaterVedtakMedStønadsbrev(vedtak, null)
+        oppdaterVedtakMedStønadsbrev(vedtak)
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} godkjenner vedtak $vedtak")
         lagreEllerOppdater(vedtak)

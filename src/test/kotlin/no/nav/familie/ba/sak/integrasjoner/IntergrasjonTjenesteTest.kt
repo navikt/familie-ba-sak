@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDLEGG_DOKUMENT_TYPE
@@ -132,7 +134,10 @@ class IntergrasjonTjenesteTest {
                                             .withHeader("Content-Type", "application/json")
                                             .withBody(objectMapper.writeValueAsString(journalpostOkResponse()))))
 
-        val journalPostId = integrasjonClient.lagJournalpostForVedtaksbrev(mockFnr, mockFagsakId, mockPdf)
+        val vedtak = lagVedtak(lagBehandling())
+        vedtak.stønadBrevPdF = mockPdf
+
+        val journalPostId = integrasjonClient.lagJournalpostForVedtaksbrev(mockFnr, mockFagsakId, vedtak)
 
         assertThat(journalPostId).isEqualTo(mockJournalpostForVedtakId)
         verify(anyRequestedFor(anyUrl())

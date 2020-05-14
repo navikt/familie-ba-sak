@@ -19,8 +19,8 @@ class DokumentController(
         private val vedtakService: VedtakService
 ) {
 
-    @PostMapping(path = ["genere_vedtaksbrev/{vedtakId}"])
-    fun genererHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<RestDokument> {
+    @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
+    fun genererVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
 
         val vedtak = vedtakService.hent(vedtakId)
@@ -29,7 +29,7 @@ class DokumentController(
     }
 
     @GetMapping(path = ["vedtaksbrev/{vedtakId}"])
-    fun HentHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<RestDokument> {
+    fun hentVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
 
         val vedtak = vedtakService.hent(vedtakId)
@@ -41,7 +41,3 @@ class DokumentController(
         val LOG = LoggerFactory.getLogger(DokumentController::class.java)
     }
 }
-
-class RestDokument(@JsonProperty("pdfBase64")
-                   val pdf: ByteArray?,
-                   val html: String?)

@@ -37,22 +37,10 @@ class DokumentService(
         return markdown
     }
 
-    fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<RestDokument> {
-        return Ressurs.success(RestDokument(html = vedtak.stønadBrevHtml,
-                                            pdf = vedtak.stønadBrevPdF))
-    }
-
-    private fun hentHtmlFor(mal: String,
-                    markdown: String,
-                    headerFelter: DokumentHeaderFelter): String {
-
-        return Result.runCatching {
-             dokGenKlient.lagHtmlFraMarkdown(template = mal,
-                                             markdown = markdown,
-                                             dokumentHeaderFelter = headerFelter)
-        }.getOrElse {
-            throw Exception("Klarte ikke å hente HTML-utgave av vedtaksbrev", it)
-        }
+    fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
+        val pdf = vedtak.stønadBrevPdF
+            ?: error("Klarte ikke finne brev for vetak med id ${vedtak.id}")
+        return Ressurs.success(pdf)
     }
 
     private fun hentPdfFor(mal: String,
@@ -68,7 +56,7 @@ class DokumentService(
         }
     }
 
-    fun genererBrevForVedtak(vedtak: Vedtak): Ressurs<RestDokument> {
+    fun genererBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         return Result.runCatching {
             val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
                 ?: error("Finner ikke søker på vedtaket")
@@ -88,18 +76,13 @@ class DokumentService(
             )
             val markdown = dokGenKlient.hentMarkdownForMal(malMedData)
 
-            vedtak.stønadBrevHtml = hentHtmlFor(mal = malMedData.mal,
-                markdown = markdown,
-                headerFelter = headerFelter)
-
             vedtak.stønadBrevPdF = hentPdfFor(mal = malMedData.mal,
                 markdown = markdown,
                 headerFelter = headerFelter)
 
             vedtakService.lagreEllerOppdater(vedtak)
 
-            Ressurs.success(RestDokument(html = vedtak.stønadBrevHtml,
-                                         pdf = vedtak.stønadBrevPdF!!))
+            Ressurs.success(vedtak.stønadBrevPdF!!)
         }
             .fold(
                 onSuccess = { it },

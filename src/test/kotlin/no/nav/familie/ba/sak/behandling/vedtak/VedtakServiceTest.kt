@@ -113,7 +113,7 @@ class VedtakServiceTest {
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
-        Assertions.assertEquals("", hentetVedtak?.stønadBrevHtml)
+        Assertions.assertEquals(null, hentetVedtak?.stønadBrevPdF)
     }
 
     @Test

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
@@ -19,7 +18,6 @@ data class JournalførVedtaksbrevDTO(
 @Service
 class JournalførVedtaksbrev(
         private val vedtakService: VedtakService,
-        private val dokumentService: DokumentService,
         private val integrasjonClient: IntegrasjonClient,
         private val taskRepository: TaskRepository) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
@@ -28,11 +26,10 @@ class JournalførVedtaksbrev(
                                       stegService: StegService?): StegType {
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
 
-        val pdf = dokumentService.hentBrevForVedtak(vedtak).data!!.pdf
         val fnr = vedtak.behandling.fagsak.personIdent.ident
         val fagsakId = "${vedtak.behandling.fagsak.id}"
 
-        val journalpostId = integrasjonClient.journalFørVedtaksbrev(fnr, fagsakId, pdf)
+        val journalpostId = integrasjonClient.journalFørVedtaksbrev(fnr, fagsakId, vedtak)
 
         val nyTask = Task.nyTask(
                 type = DistribuerVedtaksbrevTask.TASK_STEP_TYPE,
