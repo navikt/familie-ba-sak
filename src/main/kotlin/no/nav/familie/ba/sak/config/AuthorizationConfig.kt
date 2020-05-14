@@ -19,8 +19,6 @@ class AuthorizationConfig(
     fun authorizationFilter(): AuthorizationFilter {
         return AuthorizationFilter(oidcUtil = oidcUtil,
                                    acceptedClients = acceptedClients,
-                                   disabled = environment.activeProfiles.any {
-                                       listOf("e2e").contains(it.trim(' '))
-                                   })
+                                   disabled = environment.activeProfiles.any { it.contains("e2e") })
     }
 }
