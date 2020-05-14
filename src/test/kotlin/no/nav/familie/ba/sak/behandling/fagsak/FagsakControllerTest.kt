@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -37,7 +39,7 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        Assertions.assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
+        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
     }
 
     @Test
@@ -47,9 +49,9 @@ class FagsakControllerTest(
 
         val response = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = null, aktørId = aktørId.id))
         val restFagsak = response.body?.data
-        Assertions.assertEquals(HttpStatus.CREATED, response.statusCode)
-        Assertions.assertEquals(FagsakStatus.OPPRETTET, restFagsak?.status)
-        Assertions.assertNotNull(restFagsak?.søkerFødselsnummer)
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        assertEquals(FagsakStatus.OPPRETTET, restFagsak?.status)
+        assertNotNull(restFagsak?.søkerFødselsnummer)
     }
 
     @Test
@@ -58,13 +60,13 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        Assertions.assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        Assertions.assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
+        assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
+        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(
                 personIdent = fnr))
-        Assertions.assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
-        Assertions.assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
+        assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
+        assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
     }
 
     @Test
@@ -79,13 +81,13 @@ class FagsakControllerTest(
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
                 FagsakRequest(personIdent = null, aktørId = aktørId.id)
         )
-        Assertions.assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
+        assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
 //        Assertions.assertEquals(aktørId,
 //                fagsakService.hent(PersonIdent(nyRestFagsak.body?.data!!.søkerFødselsnummer))?.aktørId) //TODO bytte til å teste med fnr
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(
                 personIdent = null, aktørId = aktørId.id))
-        Assertions.assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
-        Assertions.assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
+        assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
+        assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
     }
 }
