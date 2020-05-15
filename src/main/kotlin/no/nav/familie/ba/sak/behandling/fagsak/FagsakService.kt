@@ -25,6 +25,7 @@ import java.time.Period
 class FagsakService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakRepository: FagsakRepository,
+        private val fagsakPersonRepository: FagsakPersonRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val personRepository: PersonRepository,
         private val behandlingRepository: BehandlingRepository,
@@ -39,7 +40,11 @@ class FagsakService(
             fagsakRequest.aktørId !== null -> integrasjonClient.hentAktivPersonIdent(ident = fagsakRequest.aktørId)
             else -> error("Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak")
         }
-        var fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent = personIdent)
+
+        val identer = integrasjonClient.hentIdenter(personIdent.ident).map { PersonIdent(it.ident) }.toSet()
+
+        //var fagsak = fagsakRepository.finnFagsakForPersonIdenter(personIdenter = identer)
+        var fagsak = fagsakPersonRepository.finnFagsak(personIdenter = identer)
         if (fagsak == null) {
             fagsak = Fagsak(
                     personIdent = personIdent
@@ -105,11 +110,13 @@ class FagsakService(
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak =
             hentEllerOpprettFagsak(PersonIdent(fødselsnummer))
 
+    //TODO: Må legge til søkerident når det opprettes ny fagsak
     private fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak =
             hent(personIdent) ?: lagre(Fagsak(personIdent = personIdent))
 
     fun hent(personIdent: PersonIdent): Fagsak? {
-        return fagsakRepository.finnFagsakForPersonIdent(personIdent)
+        val identer = integrasjonClient.hentIdenter(personIdent.ident).map { PersonIdent(it.ident) }.toSet()
+        return fagsakPersonRepository.finnFagsak(identer)
     }
 
     fun hentLøpendeFagsaker(): List<Fagsak> {
