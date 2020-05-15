@@ -5,6 +5,11 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
 
+data class RestRegistrerSøknad(
+        val søknad: SøknadDTO,
+        val bekreftEndringerViaFrontend: Boolean
+)
+
 data class SøknadDTO(
         val versjon: String = "1",
         val kategori: BehandlingKategori,

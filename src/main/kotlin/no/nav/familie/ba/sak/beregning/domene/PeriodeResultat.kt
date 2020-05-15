@@ -31,7 +31,7 @@ data class PeriodeResultat(
     fun allePåkrevdeVilkårVurdert(personType: PersonType, sakType: SakType): Boolean {
         val alleVilkår = Vilkår.hentVilkårFor(personType, sakType)
         return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
-               && vilkårResultater.all { it.resultat != Resultat.KANSKJE }
+               && vilkårResultater.all { it.resultat != Resultat.KANSKJE && it.periodeFom != null }
     }
 
     fun overlapper(annetPeriodeResultat: PeriodeResultat): Boolean {

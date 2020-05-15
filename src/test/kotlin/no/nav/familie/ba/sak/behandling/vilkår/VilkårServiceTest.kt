@@ -4,16 +4,14 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -36,7 +34,7 @@ class VilkårServiceTest(
         private val fagsakService: FagsakService,
 
         @Autowired
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
         private val vilkårService: VilkårService,
@@ -64,16 +62,16 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id)
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+                                                                                   bekreftEndringerViaFrontend = true)
         Assertions.assertEquals(2, behandlingResultat.personResultater.size)
 
         val behandlingSteg: Vilkårsvurdering = stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         Assertions.assertNotNull(behandlingSteg)
 
-        val skalVæreUgyldig = behandlingSteg.validerSteg(behandling)
-        Assertions.assertFalse(skalVæreUgyldig)
+        Assertions.assertThrows(Feil::class.java) { behandlingSteg.validerSteg(behandling) }
 
         val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
 
@@ -94,7 +92,7 @@ class VilkårServiceTest(
                                     vilkårType = it.vilkårType,
                                     resultat = Resultat.JA,
                                     begrunnelse = "",
-                                    periodeFom = LocalDate.now().minusYears(2),
+                                    periodeFom = LocalDate.now(),
                                     periodeTom = null
                             )
                         }
@@ -105,8 +103,33 @@ class VilkårServiceTest(
         vilkårService.lagBehandlingResultatFraRestPersonResultater(personResultater = vurdertPersonResultater,
                                                                    behandlingId = behandling.id)
 
-        val skalVæreGyldig = behandlingSteg.validerSteg(behandling)
-        Assertions.assertTrue(skalVæreGyldig)
+        Assertions.assertDoesNotThrow { behandlingSteg.validerSteg(behandling) }
+    }
+
+    @Test
+    fun `Skal automatisk lagre ny vilkårsvurdering over den gamle`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val barnFnr2 = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+                                                                                   bekreftEndringerViaFrontend = true)
+        Assertions.assertEquals(2, behandlingResultat.personResultater.size)
+
+        val personopplysningGrunnlagMedEkstraBarn =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr, barnFnr2))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagMedEkstraBarn)
+
+        val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+                                                                                                bekreftEndringerViaFrontend = true)
+        Assertions.assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
     }
 
     @Test
@@ -119,7 +142,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
     }
 
     @Test
