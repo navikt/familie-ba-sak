@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.validering
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.RestFamilierelasjon
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.RestPersonInfo
+import no.nav.familie.ba.sak.behandling.restDomene.RestFamilierelasjon
+import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
@@ -53,9 +53,19 @@ class PersontilgangTest {
 
     private fun restPersonInfo(): RestPersonInfo {
         val familierelasjoner = listOf(
-                RestFamilierelasjon(personIdent = "123", navn = "", relasjonRolle = FAMILIERELASJONSROLLE.BARN, fødselsdato = null),
-                RestFamilierelasjon(personIdent = "456", navn = "", relasjonRolle = FAMILIERELASJONSROLLE.BARN, fødselsdato = null)
+                RestFamilierelasjon(personIdent = "123",
+                                                                                                   navn = "",
+                                                                                                   relasjonRolle = FAMILIERELASJONSROLLE.BARN,
+                                                                                                   fødselsdato = null),
+                RestFamilierelasjon(personIdent = "456",
+                                                                                                   navn = "",
+                                                                                                   relasjonRolle = FAMILIERELASJONSROLLE.BARN,
+                                                                                                   fødselsdato = null)
         )
-        return RestPersonInfo(personIdent = "789", navn = "", kjønn = null, fødselsdato = LocalDate.now(), familierelasjoner = familierelasjoner)
+        return RestPersonInfo(personIdent = "789",
+                                                                                             navn = "",
+                                                                                             kjønn = null,
+                                                                                             fødselsdato = LocalDate.now(),
+                                                                                             familierelasjoner = familierelasjoner)
     }
 }

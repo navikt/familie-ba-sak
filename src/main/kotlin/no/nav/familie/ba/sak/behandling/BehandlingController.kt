@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -32,7 +33,7 @@ class BehandlingController(private val fagsakService: FagsakService,
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @PostMapping(path = ["behandlinger"])
+    @PostMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         if (nyBehandling.søkersIdent.isBlank()) {
             return badRequest("Søkers ident kan ikke være blank", null)
@@ -53,7 +54,7 @@ class BehandlingController(private val fagsakService: FagsakService,
                 )
     }
 
-    @PutMapping(path = ["behandlinger"])
+    @PutMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<RestFagsak>> {
         return Result.runCatching { stegService.håndterNyBehandlingFraHendelse(nyBehandling) }

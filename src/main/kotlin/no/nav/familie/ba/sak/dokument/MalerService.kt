@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker.TREDJELANDSBORGER
+import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
+import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker.TREDJELANDSBORGER
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
