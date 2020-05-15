@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -20,7 +20,7 @@ class DokumentService(
         private val malerService: MalerService,
         private val persongrunnlagService: PersongrunnlagService,
         private val søknadGrunnlagService: SøknadGrunnlagRepository,
-        private val vedtakService: VedtakService
+        private val vedtakRepository: VedtakRepository
 ) {
 
     @Deprecated("Gjøres i hentBrevForVedtak")
@@ -76,13 +76,14 @@ class DokumentService(
             )
             val markdown = dokGenKlient.hentMarkdownForMal(malMedData)
 
-            vedtak.stønadBrevPdF = hentPdfFor(mal = malMedData.mal,
-                markdown = markdown,
-                headerFelter = headerFelter)
-
-            vedtakService.lagreEllerOppdater(vedtak)
-
-            Ressurs.success(vedtak.stønadBrevPdF!!)
+            hentPdfFor(mal = malMedData.mal,
+                       markdown = markdown,
+                       headerFelter = headerFelter)
+                .let {
+                    vedtak.stønadBrevPdF = it
+                    vedtakRepository.save(vedtak)
+                    Ressurs.success(it)
+                }
         }
             .fold(
                 onSuccess = { it },
