@@ -27,6 +27,19 @@ class DokumentControllerTest(
 
     @Test
     @Tag("integration")
+    fun `Test generer vedtaksbrev`() {
+        val mockDokumentService: DokumentService = mockk()
+        val vedtakService: VedtakService = mockk(relaxed = true)
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService)
+        every { vedtakService.hent(any()) } returns lagVedtak()
+        every { mockDokumentService.genererBrevForVedtak(any()) } returns "pdf".toByteArray()
+
+        val response = mockDokumentController.genererVedtaksbrev(1)
+        assert(response.status == Ressurs.Status.SUKSESS)
+    }
+
+    @Test
+    @Tag("integration")
     fun `Test hent pdf vedtak`() {
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk()

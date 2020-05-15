@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -81,7 +82,7 @@ class DokumentServiceTest(
 
     @Test
     @Tag("integration")
-    fun `Hent HTML vedtaksbrev`() {
+    fun `Hent vedtaksbrev`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -111,8 +112,44 @@ class DokumentServiceTest(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
-        val htmlvedtaksbrevRess = dokumentService.hentBrevForVedtak(vedtak)
-        Assertions.assertEquals(Ressurs.Status.SUKSESS, htmlvedtaksbrevRess.status)
-        assert(htmlvedtaksbrevRess.data!!.contentEquals("pdf".toByteArray()))
+        val pdfvedtaksbrevRess = dokumentService.hentBrevForVedtak(vedtak)
+        Assertions.assertEquals(Ressurs.Status.SUKSESS, pdfvedtaksbrevRess.status)
+        assert(pdfvedtaksbrevRess.data!!.contentEquals("pdf".toByteArray()))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `generer vedtaksbrev`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
+
+        Assertions.assertNotNull(behandling.fagsak.id)
+        Assertions.assertNotNull(behandling.id)
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            behandling = behandling,
+            ansvarligSaksbehandler = "ansvarligSaksbehandler"
+        )
+
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+        Assertions.assertNotNull(vedtak)
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
+
+        val pdfvedtaksbrev = dokumentService.genererBrevForVedtak(vedtak)
+        assert(pdfvedtaksbrev.contentEquals(TEST_PDF))
     }
 }
