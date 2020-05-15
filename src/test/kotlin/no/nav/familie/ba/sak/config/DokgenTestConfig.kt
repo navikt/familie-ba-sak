@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.dokument.testDokumentHeaderFelter
@@ -21,7 +23,7 @@ class DokgenTestConfig {
         val dokumentService: DokumentService = mockk()
         every { dokumentService.hentBrevForVedtak(any()) } returns success("pdf".toByteArray())
         every { dokumentService.hentStønadBrevMarkdown(any(), any(), any()) } returns "Markdown mock"
-        every { dokumentService.hentPdfForVedtak(any()) } returns TEST_PDF
+        every { dokumentService.genererBrevForVedtak(any()) } returns success(TEST_PDF)
         return dokumentService
     }
 

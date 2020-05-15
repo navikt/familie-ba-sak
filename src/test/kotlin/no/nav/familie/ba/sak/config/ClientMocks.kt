@@ -6,6 +6,8 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
@@ -53,7 +55,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")
 
-        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), TEST_PDF) } returns "journalpostId"
+        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), VEDTAK_MOCK) } returns "journalpostId"
 
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns listOf(Arbeidsfordelingsenhet("9999",
                                                                                                                  "Ukjent"))
@@ -205,3 +207,4 @@ fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, s�
 }
 
 val TEST_PDF = "TEST PDF".toByteArray()
+val VEDTAK_MOCK = lagVedtak(lagBehandling()).apply { this.stønadBrevPdF = TEST_PDF }
