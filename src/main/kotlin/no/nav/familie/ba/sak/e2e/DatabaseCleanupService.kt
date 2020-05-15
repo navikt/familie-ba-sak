@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.e2e
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import javax.persistence.EntityManager
 import javax.persistence.Table
@@ -17,7 +18,10 @@ import kotlin.reflect.full.findAnnotation
  */
 @Service
 @Profile("dev", "e2e")
-class DatabaseCleanupService(private val entityManager: EntityManager) : InitializingBean {
+class DatabaseCleanupService(
+        private val entityManager: EntityManager,
+        private val environment: Environment
+) : InitializingBean {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private lateinit var tableNames: List<String>
@@ -45,10 +49,16 @@ class DatabaseCleanupService(private val entityManager: EntityManager) : Initial
     fun truncate() {
         logger.info("Truncating tables: $tableNames")
         entityManager.flush()
-        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO FALSE").executeUpdate()
-        tableNames.forEach { tableName ->
-            entityManager.createNativeQuery("TRUNCATE TABLE $tableName").executeUpdate()
+        if (environment.activeProfiles.contains("e2e")) {
+            tableNames.forEach { tableName ->
+                entityManager.createNativeQuery("TRUNCATE TABLE $tableName CASCADE").executeUpdate()
+            }
+        } else {
+            entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO FALSE").executeUpdate()
+            tableNames.forEach { tableName ->
+                entityManager.createNativeQuery("TRUNCATE TABLE $tableName").executeUpdate()
+            }
+            entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO TRUE").executeUpdate()
         }
-        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO TRUE").executeUpdate()
     }
 }

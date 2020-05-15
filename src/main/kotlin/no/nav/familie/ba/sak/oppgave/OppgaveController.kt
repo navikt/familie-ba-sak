@@ -1,13 +1,12 @@
 package no.nav.familie.ba.sak.oppgave
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.toRestPersonInfo
+import no.nav.familie.ba.sak.behandling.restDomene.toRestPersonInfo
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity

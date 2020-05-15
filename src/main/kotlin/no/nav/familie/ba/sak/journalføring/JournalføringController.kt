@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.journalføring
 
-import no.nav.familie.ba.sak.journalføring.restDomene.RestOppdaterJournalpost
+import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims

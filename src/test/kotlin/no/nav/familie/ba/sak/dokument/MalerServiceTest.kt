@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.dokument
 import org.junit.jupiter.api.Assertions.*
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
+import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
 
 import org.junit.jupiter.api.Test
 
@@ -23,7 +23,7 @@ class MalerServiceTest {
     fun `Skal returnere malnavn Innvilget for typeSøker ORDINÆR og resultat INNVILGET`() {
 
         val malNavn = MalerService.malNavnForTypeSøkerOgResultatType(TypeSøker.ORDINÆR,
-            BehandlingResultatType.INNVILGET)
+                                                                     BehandlingResultatType.INNVILGET)
 
         assertEquals(malNavn, "Innvilget")
     }

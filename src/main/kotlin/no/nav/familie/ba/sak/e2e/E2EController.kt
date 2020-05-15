@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.e2e
 
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
@@ -16,9 +17,9 @@ class E2EController(
 ) {
 
     @GetMapping(path = ["/truncate"])
-    fun truncate(): ResponseEntity<String> {
+    fun truncate(): ResponseEntity<Ressurs<String>> {
         databaseCleanupService.truncate()
 
-        return ResponseEntity.ok("Truncate fullført")
+        return ResponseEntity.ok(Ressurs.success("Truncate fullført"))
     }
 }
