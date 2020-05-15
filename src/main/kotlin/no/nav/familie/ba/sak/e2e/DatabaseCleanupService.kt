@@ -1,5 +1,6 @@
-package no.nav.familie.ba.sak.common
+package no.nav.familie.ba.sak.e2e
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -15,9 +16,10 @@ import kotlin.reflect.full.findAnnotation
  * @author Sebastien Dubois
  */
 @Service
-@Profile("dev")
+@Profile("dev", "e2e")
 class DatabaseCleanupService(private val entityManager: EntityManager) : InitializingBean {
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
     private lateinit var tableNames: List<String>
 
     /**
@@ -41,6 +43,7 @@ class DatabaseCleanupService(private val entityManager: EntityManager) : Initial
      */
     @Transactional
     fun truncate() {
+        logger.info("Truncating tables: $tableNames")
         entityManager.flush()
         entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TO FALSE").executeUpdate()
         tableNames.forEach { tableName ->
