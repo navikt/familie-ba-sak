@@ -55,7 +55,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")
 
-        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), VEDTAK_MOCK) } returns "journalpostId"
+        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), any()) } returns "journalpostId"
 
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns listOf(Arbeidsfordelingsenhet("9999",
                                                                                                                  "Ukjent"))
@@ -207,4 +207,3 @@ fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, s�
 }
 
 val TEST_PDF = "TEST PDF".toByteArray()
-val VEDTAK_MOCK = lagVedtak(lagBehandling()).apply { this.stønadBrevPdF = TEST_PDF }

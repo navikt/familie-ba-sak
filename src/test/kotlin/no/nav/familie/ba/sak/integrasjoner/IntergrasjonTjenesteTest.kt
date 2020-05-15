@@ -136,6 +136,7 @@ class IntergrasjonTjenesteTest {
 
         val vedtak = lagVedtak(lagBehandling())
         vedtak.stønadBrevPdF = mockPdf
+        vedtak.ansvarligEnhet = "1"
 
         val journalPostId = integrasjonClient.lagJournalpostForVedtaksbrev(mockFnr, mockFagsakId, vedtak)
 
@@ -345,9 +346,9 @@ class IntergrasjonTjenesteTest {
     private fun forventetRequestArkiverDokument(): ArkiverDokumentRequest {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
         return ArkiverDokumentRequest(fnr = mockFnr,
-                                      forsøkFerdigstill = false,
+                                      forsøkFerdigstill = true,
                                       fagsakId = mockFagsakId,
-                                      journalførendeEnhet = "9999",
+                                      journalførendeEnhet = "1",
                                       dokumenter = listOf(Dokument(dokument = mockPdf,
                                                                    filType = FilType.PDFA,
                                                                    dokumentType = VEDTAK_DOKUMENT_TYPE),
