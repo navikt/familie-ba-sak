@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.validering
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.RestPersonInfo
+import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory

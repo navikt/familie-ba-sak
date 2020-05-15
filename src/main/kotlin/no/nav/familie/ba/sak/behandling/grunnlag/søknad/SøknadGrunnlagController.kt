@@ -3,11 +3,14 @@ package no.nav.familie.ba.sak.behandling.grunnlag.søknad
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -21,7 +24,8 @@ class SøknadGrunnlagController(
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
-    @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag"])
+    @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag"],
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registrereSøknadOgHentPersongrunnlag(@PathVariable behandlingId: Long,
                                              @RequestBody søknadDTO: SøknadDTO): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hent(behandlingId = behandlingId)
@@ -37,7 +41,8 @@ class SøknadGrunnlagController(
                 )
     }
 
-    @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag/v2"])
+    @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag/v2"],
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registrereSøknadOgHentPersongrunnlagV2(@PathVariable behandlingId: Long,
                                              @RequestBody restRegistrerSøknad: RestRegistrerSøknad): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hent(behandlingId = behandlingId)
@@ -53,7 +58,7 @@ class SøknadGrunnlagController(
                 )
     }
 
-    @GetMapping(path = ["/{behandlingId}/søknad"])
+    @GetMapping(path = ["/{behandlingId}/søknad"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentSøknad(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<SøknadDTO>> {
         return Result.runCatching { søknadGrunnlagService.hentAktiv(behandlingId) }
                 .fold(

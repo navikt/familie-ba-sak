@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.TypeSøker
+import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
 import no.nav.nare.core.specifications.Spesifikasjon
 import java.time.LocalDate
 

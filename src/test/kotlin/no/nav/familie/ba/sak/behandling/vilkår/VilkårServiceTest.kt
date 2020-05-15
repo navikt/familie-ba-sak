@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll

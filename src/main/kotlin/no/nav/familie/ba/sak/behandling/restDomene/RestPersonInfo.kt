@@ -1,5 +1,6 @@
-package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
+package no.nav.familie.ba.sak.behandling.restDomene
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
