@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.dokument
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
@@ -25,7 +24,11 @@ class DokumentController(
 
         val vedtak = vedtakService.hent(vedtakId)
 
-        return dokumentService.genererBrevForVedtak(vedtak)
+        return dokumentService.genererBrevForVedtak(vedtak).let {
+            vedtak.stønadBrevPdF = it
+            vedtakService.lagreEllerOppdater(vedtak)
+            Ressurs.success(it)
+        }
     }
 
     @GetMapping(path = ["vedtaksbrev/{vedtakId}"])

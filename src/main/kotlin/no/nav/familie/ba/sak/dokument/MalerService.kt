@@ -70,13 +70,15 @@ class MalerService(
                 beslutter = vedtak.ansvarligBeslutter
                             ?: SikkerhetContext.hentSaksbehandlerNavn(),
                 barnasFodselsdatoer = barnasFødselsdatoer,
-                virkningsdato = utbetalingsperioder.minLocalDate.førsteDagIInneværendeMåned().tilDagMånedÅr(),
+                virkningsdato = utbetalingsperioder.minLocalDate.førsteDagIInneværendeMåned().tilMånedÅr(),
                 vilkårsdato = vilkårsdato.tilDagMånedÅr(),
                 vedtaksdato = vedtak.vedtaksdato.tilKortString(),
-                belop = Utils.formaterBeløp(beløp),
+                //belop = Utils.formaterBeløp(beløp),
+                belop= beløp,
                 antallBarn = barna.size,
                 flereBarn = barna.size > 1,
-                hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11"))
+                hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11")),
+                etterbetaling = false
         )
 
         return objectMapper.writeValueAsString(innvilget)

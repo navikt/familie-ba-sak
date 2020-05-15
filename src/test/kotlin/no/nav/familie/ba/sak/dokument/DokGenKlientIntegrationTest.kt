@@ -53,31 +53,6 @@ class DokGenKlientIntegrationTest {
         }
     }
 
-    class DokumentServiceTest : DokumentService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk()) {
-        override fun hentStønadBrevMarkdown(vedtak: Vedtak,
-                                            søknad: SøknadDTO?,
-                                            behandlingResultatType: BehandlingResultatType): String {
-            return "mockup_response"
-        }
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Test generer markdown`() {
-        val dokumentService = DokumentServiceTest()
-        val markdown = dokumentService.hentStønadBrevMarkdown(vedtak = lagVedtak(),
-                                                              behandlingResultatType = BehandlingResultatType.INNVILGET)
-        assert(markdown == "mockup_response")
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Test generer html`() {
-        val dokgen = DokGenTestKlient()
-        val html = dokgen.lagHtmlFraMarkdown("Innvilget", "markdown", testDokumentHeaderFelter)
-        assert(html == "<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>")
-    }
-
     @Test
     @Tag("integration")
     fun `Test generer pdf`() {

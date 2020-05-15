@@ -114,7 +114,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Ressurs<RestFagsak> {
-        vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak).data
+        vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak)
 
         lagreOgDeaktiverGammel(vedtak)
 

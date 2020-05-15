@@ -8,11 +8,13 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.lang.IllegalStateException
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -25,7 +27,7 @@ class DokumentControllerTest(
 
     @Test
     @Tag("integration")
-    fun `Test hent html vedtak`() {
+    fun `Test hent pdf vedtak`() {
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk()
         val mockDokumentController = DokumentController(mockDokumentService, vedtakService)
@@ -38,8 +40,9 @@ class DokumentControllerTest(
 
     @Test
     @Tag("integration")
-    fun `Hent HTML vedtaksbrev Negative'`() {
-        val failRess = dokumentService.hentBrevForVedtak(lagVedtak())
-        Assertions.assertEquals(Ressurs.Status.FEILET, failRess.status)
+    fun `Hent pdf vedtaksbrev Negative'`() {
+        assertThrows<IllegalStateException> {
+            val failRess = dokumentService.hentBrevForVedtak(lagVedtak())
+        }
     }
 }

@@ -3,10 +3,9 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -19,8 +18,7 @@ class DokumentService(
         private val dokGenKlient: DokGenKlient,
         private val malerService: MalerService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val søknadGrunnlagService: SøknadGrunnlagRepository,
-        private val vedtakRepository: VedtakRepository
+        private val søknadGrunnlagService: SøknadGrunnlagRepository
 ) {
 
     @Deprecated("Gjøres i hentBrevForVedtak")
@@ -39,13 +37,13 @@ class DokumentService(
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         val pdf = vedtak.stønadBrevPdF
-            ?: error("Klarte ikke finne brev for vetak med id ${vedtak.id}")
+                ?: error("Klarte ikke finne brev for vetak med id ${vedtak.id}")
         return Ressurs.success(pdf)
     }
 
     private fun hentPdfFor(mal: String,
-                    markdown: String,
-                    headerFelter: DokumentHeaderFelter): ByteArray {
+                           markdown: String,
+                           headerFelter: DokumentHeaderFelter): ByteArray {
 
         return Result.runCatching {
              dokGenKlient.lagPdfFraMarkdown(template = mal,
@@ -56,40 +54,35 @@ class DokumentService(
         }
     }
 
-    fun genererBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
+    fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
         return Result.runCatching {
             val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
-                ?: error("Finner ikke søker på vedtaket")
+                    ?: error("Finner ikke søker på vedtaket")
             val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
 
             val behandlingResultatType =
-                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+                    behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
             val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
-                navn = søker.navn,
-                returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
-                dokumentDato = LocalDate.now().tilDagMånedÅr())
+                    navn = søker.navn,
+                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
+                    dokumentDato = LocalDate.now().tilDagMånedÅr())
 
             val malMedData = malerService.mapTilBrevfelter(vedtak,
-                søknad,
-                behandlingResultatType
+                    søknad,
+                    behandlingResultatType
             )
             val markdown = dokGenKlient.hentMarkdownForMal(malMedData)
 
             hentPdfFor(mal = malMedData.mal,
-                       markdown = markdown,
-                       headerFelter = headerFelter)
-                .let {
-                    vedtak.stønadBrevPdF = it
-                    vedtakRepository.save(vedtak)
-                    Ressurs.success(it)
-                }
+                    markdown = markdown,
+                    headerFelter = headerFelter)
         }
-            .fold(
-                onSuccess = { it },
-                onFailure = { e ->
-                    return Ressurs.failure(errorMessage = "Klarte ikke å hente vedtaksbrev", error = e)
-                }
-            )
+                .fold(
+                        onSuccess = { it },
+                        onFailure = { e ->
+                            error("Klarte ikke å hente vedtaksbrev")
+                        }
+                )
     }
 }
