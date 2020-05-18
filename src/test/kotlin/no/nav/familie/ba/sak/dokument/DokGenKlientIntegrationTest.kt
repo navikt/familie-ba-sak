@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.dokument
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
+import no.nav.familie.ba.sak.dokument.domene.DokumentRequest
+import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,7 +25,7 @@ import java.time.LocalDate
 class DokGenKlientIntegrationTest {
 
     class DokGenTestKlient : DokGenKlient("mock_dokgen_uri", RestTemplate()) {
-        override fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
+        override fun <T : Any> utførRequest(request: RequestEntity<Any>, responseType: Class<T>): ResponseEntity<T> {
             if (request.url.path.matches(Regex(".+create-markdown"))) {
                 assert(request.body is String)
                 val mapper = ObjectMapper()
@@ -40,10 +38,10 @@ class DokGenKlientIntegrationTest {
                 assert(felter.contains("enhet"))
                 assert(felter.contains("saksbehandler"))
             } else if (request.url.path.matches(Regex(".+create-doc"))) {
-                if (request.body!!.matches(Regex(".+HTML.+"))) {
-                    return ResponseEntity.ok(responseType.cast("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
-                } else if (request.body!!.matches(Regex(".+PDF.+"))) {
-                    return ResponseEntity.ok(responseType.cast("Vedtaksbrev PDF".toByteArray()))
+                return when ((request.body!! as DokumentRequest).docFormat) {
+                    DocFormat.HTML -> ResponseEntity.ok(responseType.cast("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
+                    DocFormat.PDF -> ResponseEntity.ok(responseType.cast("Vedtaksbrev PDF".toByteArray()))
+                    else -> ResponseEntity(responseType.cast("mockup_response"), HttpStatus.OK)
                 }
             } else {
                 fail("Invalid URI")
@@ -57,7 +55,7 @@ class DokGenKlientIntegrationTest {
     @Tag("integration")
     fun `Test generer pdf`() {
         val dokgen = DokGenTestKlient()
-        val pdf = dokgen.lagPdfFraMarkdown("Innvilget", "markdown", testDokumentHeaderFelter)
+        val pdf = dokgen.lagPdfForMal(MalMedData("Innvilget", "fletteFelter"), testDokumentHeaderFelter)
         assert(pdf.contentEquals("Vedtaksbrev PDF".toByteArray()))
     }
 }

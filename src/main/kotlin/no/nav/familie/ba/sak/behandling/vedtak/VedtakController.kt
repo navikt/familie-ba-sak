@@ -7,11 +7,9 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
-import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
@@ -64,11 +62,7 @@ class VedtakController(
                 ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         return Result.runCatching {
-            val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                    ?: error("Fant ikke forslag til vedtak på behandling ${behandling.id}")
-            vedtak.ansvarligEnhet = behandlendeEnhet
-            vedtakService.lagreEllerOppdater(vedtak)
-            stegService.håndterSendTilBeslutter(behandling)
+            stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
         }.fold(
                 onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
                 onFailure = {

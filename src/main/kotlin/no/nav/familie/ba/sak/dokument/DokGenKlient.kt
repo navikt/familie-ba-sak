@@ -39,16 +39,22 @@ class DokGenKlient(
         return response.body.orEmpty()
     }
 
-    fun lagPdfFraMarkdown(template: String, markdown: String, dokumentHeaderFelter: DokumentHeaderFelter): ByteArray {
-        val request = lagDokumentRequestForMarkdown(PDF, template, markdown, dokumentHeaderFelter)
-        val response = utførRequest(request, ByteArray::class.java)
+    fun lagPdfForMal(malMedData: MalMedData, dokumentHeaderFelter: DokumentHeaderFelter): ByteArray {
+        val url = URI.create("$dokgenServiceUri/template/${malMedData.mal}/create-doc")
+        val request = lagPostRequest(url, DokumentRequest(docFormat = PDF,
+                                                          templateContent = null,
+                                                          precompiled = false,
+                                                          mergeFields = malMedData.fletteFelter,
+                                                          includeHeader = true,
+                                                          headerFields = objectMapper.writeValueAsString(dokumentHeaderFelter)))
+        val response = utførRequest(request ,ByteArray::class.java)
         return response.body!!
     }
 
     fun lagDokumentRequestForMarkdown(format: DocFormat,
                                       template: String,
                                       markdown: String,
-                                      dokumentHeaderFelter: DokumentHeaderFelter): RequestEntity<String> {
+                                      dokumentHeaderFelter: DokumentHeaderFelter): RequestEntity<Any> {
         val url = URI.create("$dokgenServiceUri/template/${template}/create-doc")
         val body = DokumentRequest(format,
                                    markdown,
@@ -56,12 +62,12 @@ class DokGenKlient(
                                    null,
                                    true,
                                    objectMapper.writeValueAsString(dokumentHeaderFelter))
-        return lagPostRequest(url, objectMapper.writeValueAsString(body))
+        return lagPostRequest(url, body)
     }
 
-    private fun lagPostRequest(url: URI, body: String): RequestEntity<String> {
+    private fun lagPostRequest(url: URI, body: Any): RequestEntity<Any> {
         LOG.info("\"Gjør POST request mot $url")
-        secureLogger.info("Gjør POST request mot $url med body $body")
+        secureLogger.info("Gjør POST request mot $url med body ${objectMapper.writeValueAsString(body)}")
         return RequestEntity.post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .acceptCharset(Charsets.UTF_8)
@@ -69,7 +75,7 @@ class DokGenKlient(
                 .body(body)
     }
 
-    fun <T : Any> utførRequest(request: RequestEntity<String>, responseType: Class<T>): ResponseEntity<T> {
+    fun <T : Any> utførRequest(request: RequestEntity<Any>, responseType: Class<T>): ResponseEntity<T> {
         try {
             return restTemplate.exchange(request, responseType)
         } catch (e: HttpClientErrorException.NotFound) {

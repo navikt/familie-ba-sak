@@ -6,9 +6,11 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -21,7 +23,7 @@ class DokumentService(
         private val søknadGrunnlagService: SøknadGrunnlagRepository
 ) {
 
-    @Deprecated("Gjøres i hentBrevForVedtak")
+    @Deprecated("Brevflyt endret til å hente og lagre PDF direkte")
     fun hentStønadBrevMarkdown(
             vedtak: Vedtak,
             søknad: SøknadDTO? = null,
@@ -35,23 +37,44 @@ class DokumentService(
         return markdown
     }
 
+    @Deprecated("henter og viser PDF istedet")
+    fun hentHtmlForVedtak(vedtak: Vedtak): Ressurs<String> {
+
+        val html = Result.runCatching {
+            val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
+                ?: error("Finner ikke søker på vedtaket")
+            val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
+
+            val behandlingResultatType =
+                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+
+            dokGenKlient.lagHtmlFraMarkdown(template = MalerService.malNavnForTypeSøkerOgResultatType(
+                typeSøker = søknad?.typeSøker,
+                resultatType = behandlingResultatType),
+                markdown = vedtak.stønadBrevMarkdown.takeIf { it.isNotEmpty() }
+                        ?: hentStønadBrevMarkdown(vedtak, søknad, behandlingResultatType),
+                dokumentHeaderFelter = DokumentHeaderFelter(
+                    fodselsnummer = søker.personIdent.ident,
+                    navn = søker.navn,
+                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
+                    dokumentDato = LocalDate.now().tilDagMånedÅr()
+                )
+            )
+        }
+            .fold(
+                onSuccess = { it },
+                onFailure = { e ->
+                    return Ressurs.failure(errorMessage = "Klarte ikke å hent vedtaksbrev", error = e)
+                }
+            )
+
+        return Ressurs.success(html)
+    }
+
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         val pdf = vedtak.stønadBrevPdF
                 ?: error("Klarte ikke finne brev for vetak med id ${vedtak.id}")
         return Ressurs.success(pdf)
-    }
-
-    private fun hentPdfFor(mal: String,
-                           markdown: String,
-                           headerFelter: DokumentHeaderFelter): ByteArray {
-
-        return Result.runCatching {
-             dokGenKlient.lagPdfFraMarkdown(template = mal,
-                                             markdown = markdown,
-                                             dokumentHeaderFelter = headerFelter)
-        }.getOrElse {
-            throw Exception("Klarte ikke å hente PDF-utgave av vedtaksbrev", it)
-        }
     }
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
@@ -72,16 +95,14 @@ class DokumentService(
                     søknad,
                     behandlingResultatType
             )
-            val markdown = dokGenKlient.hentMarkdownForMal(malMedData)
-
-            hentPdfFor(mal = malMedData.mal,
-                    markdown = markdown,
-                    headerFelter = headerFelter)
+            dokGenKlient.lagPdfForMal(malMedData, headerFelter)
         }
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
-                            error("Klarte ikke å hente vedtaksbrev")
+                            throw Feil(message = "Klarte ikke generere vedtaksbrev",
+                                       frontendFeilmelding = "",
+                                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
                         }
                 )
     }
