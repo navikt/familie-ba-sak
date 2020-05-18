@@ -42,14 +42,17 @@ class FagsakService(
         }
 
         val identer = integrasjonClient.hentIdenter(personIdent.ident).map { PersonIdent(it.ident) }.toSet()
-
-        //var fagsak = fagsakRepository.finnFagsakForPersonIdenter(personIdenter = identer)
         var fagsak = fagsakPersonRepository.finnFagsak(personIdenter = identer)
         if (fagsak == null) {
             fagsak = Fagsak(
                     personIdent = personIdent
             ).also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
+                lagre(it)
+            }
+        } else {
+            fagsak.also {
+                it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
                 lagre(it)
             }
         }

@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -51,6 +52,9 @@ class VedtakServiceTest {
     @Autowired
     lateinit var fagsakService: FagsakService
 
+    @Autowired
+    lateinit var fagsakPersonRepository: FagsakPersonRepository
+
     lateinit var behandlingService: BehandlingService
 
     @BeforeEach
@@ -58,6 +62,7 @@ class VedtakServiceTest {
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
+                fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,
                 fagsakService)

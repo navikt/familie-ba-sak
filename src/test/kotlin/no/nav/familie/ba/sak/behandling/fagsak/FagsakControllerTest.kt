@@ -105,6 +105,8 @@ class FagsakControllerTest(
                 personIdent = nyttFnr))
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
+        assertEquals(nyttFnr, eksisterendeRestFagsak.body!!.data?.søkerFødselsnummer)
+
     }
 
     @Test

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
@@ -66,6 +67,9 @@ class BehandlingIntegrationTest {
     lateinit var behandlingResultatService: BehandlingResultatService
 
     @Autowired
+    lateinit var fagsakPersonRepository: FagsakPersonRepository
+
+    @Autowired
     lateinit var fagsakService: FagsakService
 
     lateinit var behandlingService: BehandlingService
@@ -75,6 +79,7 @@ class BehandlingIntegrationTest {
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
+                fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,
                 fagsakService)
