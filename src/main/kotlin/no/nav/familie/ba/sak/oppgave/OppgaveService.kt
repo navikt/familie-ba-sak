@@ -32,7 +32,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
             error("Det finnes allerede en oppgave av typen $oppgavetype på behandling ${behandling.id} som ikke er ferdigstilt. Kan ikke opprette ny oppgave")
         }
         val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
-        val aktorId = integrasjonClient.hentAktivAktørId(behandling.fagsak.personIdent.ident).id
+        val aktorId = integrasjonClient.hentAktivAktørId(behandling.fagsak.hentAktivIdent().ident).id
         val opprettOppgave = OpprettOppgave(
                 ident = OppgaveIdent(ident = aktorId, type = IdentType.Aktør),
                 saksId = fagsakId.toString(),

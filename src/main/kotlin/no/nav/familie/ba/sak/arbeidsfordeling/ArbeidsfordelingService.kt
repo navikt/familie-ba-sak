@@ -13,7 +13,7 @@ class ArbeidsfordelingService(private val behandlingRepository: BehandlingReposi
                               private val integrasjonClient: IntegrasjonClient) {
 
     fun hentBehandlendeEnhet(fagsak: Fagsak): List<Arbeidsfordelingsenhet> {
-        val søker = integrasjonClient.hentPersoninfoFor(fagsak.personIdent.ident)
+        val søker = integrasjonClient.hentPersoninfoFor(fagsak.hentAktivIdent().ident)
 
         val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsak.id)
                               ?: error("Kunne ikke finne en aktiv behandling på fagsak med ID: ${fagsak.id}")

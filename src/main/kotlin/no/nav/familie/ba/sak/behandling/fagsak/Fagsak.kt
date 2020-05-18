@@ -12,10 +12,6 @@ data class Fagsak(
         @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
         val id: Long = 0,
 
-        @Embedded
-        @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))
-        val personIdent: PersonIdent,
-
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
         var status: FagsakStatus = FagsakStatus.OPPRETTET,

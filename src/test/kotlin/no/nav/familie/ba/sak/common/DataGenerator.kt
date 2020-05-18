@@ -53,7 +53,6 @@ fun nestePersonId(): Long {
 }
 
 val defaultFagsak = Fagsak(1,
-        PersonIdent("12345"),
         FagsakStatus.OPPRETTET).also {
     it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent("12345")))
 }

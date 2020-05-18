@@ -29,7 +29,7 @@ class JournalførVedtaksbrev(
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
 
         val pdf = dokumentService.hentPdfForVedtak(vedtak)
-        val fnr = vedtak.behandling.fagsak.personIdent.ident
+        val fnr = vedtak.behandling.fagsak.hentAktivIdent().ident
         val fagsakId = "${vedtak.behandling.fagsak.id}"
 
         val journalpostId = integrasjonClient.journalFørVedtaksbrev(fnr, fagsakId, pdf)
@@ -38,7 +38,7 @@ class JournalførVedtaksbrev(
                 type = DistribuerVedtaksbrevTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                         DistribuerVedtaksbrevDTO(
-                                personIdent = vedtak.behandling.fagsak.personIdent.ident,
+                                personIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
                                 behandlingId = vedtak.behandling.id,
                                 journalpostId = journalpostId
                         )),

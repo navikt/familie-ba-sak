@@ -51,9 +51,7 @@ class FagsakService(
         val identer = integrasjonClient.hentIdenter(personIdent.ident).map { PersonIdent(it.ident) }.toSet()
         var fagsak = fagsakPersonRepository.finnFagsak(personIdenter = identer)
         if (fagsak == null) {
-            fagsak = Fagsak(
-                    personIdent = personIdent
-            ).also {
+            fagsak = Fagsak().also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
@@ -156,9 +154,9 @@ class FagsakService(
                 val behandling = behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId)
                 if (behandling.aktiv && !assosierteFagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
                     //get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
-                    val søkerInfo = if (behandling.fagsak.personIdent.ident == personIdent) personInfo else
+                    val søkerInfo = if (behandling.fagsak.hentAktivIdent().ident == personIdent) personInfo else
                         runCatching {
-                            integrasjonClient.hentPersoninfoFor(behandling.fagsak.personIdent.ident)
+                            integrasjonClient.hentPersoninfoFor(behandling.fagsak.hentAktivIdent().ident)
                         }.fold(
                                 onSuccess = { it },
                                 onFailure = {
@@ -169,7 +167,7 @@ class FagsakService(
 
                     assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
                             navn = søkerInfo.navn,
-                            ident = behandling.fagsak.personIdent.ident,
+                            ident = behandling.fagsak.hentAktivIdent().ident,
                             rolle = FagsakDeltagerRolle.FORELDER,
                             kjønn = søkerInfo.kjønn,
                             fagsakId = behandling.fagsak.id

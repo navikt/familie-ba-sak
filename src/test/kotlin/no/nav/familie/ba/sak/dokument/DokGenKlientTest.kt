@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.common.defaultFagsak
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,8 +22,7 @@ class DokGenKlientTest(@Autowired
                        private val dokGenKlient: DokGenKlient) {
 
     private val vedtak = Vedtak(
-            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
-                    randomFnr())),
+            behandling = Behandling(fagsak = defaultFagsak,
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
@@ -36,8 +32,7 @@ class DokGenKlientTest(@Autowired
     )
 
     private val avslagVedtak = Vedtak(
-            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
-                    randomFnr())),
+            behandling = Behandling(fagsak = defaultFagsak,
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
@@ -47,8 +42,7 @@ class DokGenKlientTest(@Autowired
     )
 
     private val opphørtVedtak = Vedtak(
-            behandling = Behandling(fagsak = Fagsak(personIdent = PersonIdent(
-                    randomFnr())),
+            behandling = Behandling(fagsak = defaultFagsak,
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,

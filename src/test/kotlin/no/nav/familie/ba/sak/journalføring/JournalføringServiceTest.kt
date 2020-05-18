@@ -20,8 +20,6 @@ import no.nav.familie.ba.sak.journalføring.restDomene.INavnOgIdent
 import no.nav.familie.ba.sak.journalføring.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import org.assertj.core.api.Assertions.assertThat
@@ -59,7 +57,7 @@ class JournalføringServiceTest {
         every { integrasjonClient.oppdaterJournalpost(capture(slot), any()) } returns OppdaterJournalpostResponse(journalpostId)
         every { integrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
         every { integrasjonClient.ferdigstillOppgave(any()) } just runs
-        every { fagsakService.hentEllerOpprettFagsakForPersonIdent(any()) } returns Fagsak(fagsakId.toLong(), PersonIdent("1"))
+        every { fagsakService.hentEllerOpprettFagsakForPersonIdent(any()) } returns Fagsak(id = fagsakId.toLong())
         every { integrasjonClient.hentJournalpost(any()) } returns Ressurs.Companion.success(lagTestJournalpost("1", "1234567"))
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns ""
         every { stegService.håndterNyBehandling(any()) } returns lagBehandling()

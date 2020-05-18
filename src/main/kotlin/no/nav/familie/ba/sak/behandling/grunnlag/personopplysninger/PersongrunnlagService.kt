@@ -45,10 +45,10 @@ class PersongrunnlagService(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: personopplysningGrunnlagRepository.save(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        if (personopplysningGrunnlag.personer.none { it.personIdent == behandling.fagsak.personIdent }) {
+        if (personopplysningGrunnlag.personer.none { it.personIdent == behandling.fagsak.hentAktivIdent() }) {
             val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
             val aktørId = integrasjonClient.hentAktivAktørId(fødselsnummer)
-            val søker = Person(personIdent = behandling.fagsak.personIdent,
+            val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
                                type = PersonType.SØKER,
                                personopplysningGrunnlag = personopplysningGrunnlag,
                                fødselsdato = personinfo.fødselsdato,

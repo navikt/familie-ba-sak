@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.IdentInformasjon
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Tag
@@ -41,11 +40,10 @@ class FagsakControllerTest(
 
         every {
             mockIntegrasjonClient.hentIdenter(fnr)
-        } returns listOf(
-                IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
+        } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
+        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.hentAktivIdent()?.ident)
     }
 
     @Test
@@ -72,7 +70,7 @@ class FagsakControllerTest(
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
+        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.hentAktivIdent()?.ident)
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(
                 personIdent = fnr))
@@ -93,7 +91,7 @@ class FagsakControllerTest(
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.personIdent?.ident)
+        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.hentAktivIdent()?.ident)
 
         every {
             mockIntegrasjonClient.hentIdenter(nyttFnr)

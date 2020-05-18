@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
@@ -141,10 +142,9 @@ class OppgaveServiceTest {
 
     private fun lagTestBehandling(): Behandling {
         return Behandling(
-                fagsak = Fagsak(
-                        id = FAGSAK_ID,
-                        personIdent = PersonIdent(ident = FNR)
-                ),
+                fagsak = Fagsak(id = FAGSAK_ID).also {
+                    it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
+                },
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR)

@@ -36,7 +36,7 @@ class OpphørVedtakTask(
 
     fun opprettIverksettMotOppdragTask(vedtak: Vedtak) {
         val nyTask = IverksettMotOppdragTask.opprettTask(
-                vedtak.behandling.fagsak.personIdent.ident,
+                vedtak.behandling.fagsak.hentAktivIdent().ident,
                 vedtak.behandling.id,
                 vedtak.id,
                 vedtak.ansvarligSaksbehandler)
@@ -56,7 +56,7 @@ class OpphørVedtakTask(
 
             return Task.nyTask(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(OpphørVedtakTaskDTO(
-                                       personIdent = gjeldendeBehandling.fagsak.personIdent.ident,
+                                       personIdent = gjeldendeBehandling.fagsak.hentAktivIdent().ident,
                                        gjeldendeBehandlingsId = gjeldendeBehandling.id,
                                        gjeldendeVedtaksId = gjeldendeVedtak.id,
                                        saksbehandlerId = saksbehandlerId,
@@ -64,7 +64,7 @@ class OpphørVedtakTask(
                                        opphørsdato = opphørsdato
                                )),
                                properties = Properties().apply {
-                                   this["personIdent"] = gjeldendeBehandling.fagsak.personIdent.ident
+                                   this["personIdent"] = gjeldendeBehandling.fagsak.hentAktivIdent().ident
                                    this["behandlingsId"] = gjeldendeBehandling.id.toString()
                                }
             )

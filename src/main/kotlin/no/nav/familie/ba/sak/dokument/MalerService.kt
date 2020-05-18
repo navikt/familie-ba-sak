@@ -41,7 +41,7 @@ class MalerService(
 
     private fun mapTilOpphørtBrevFelter(vedtak: Vedtak): String {
         val behandling = vedtak.behandling
-        return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
+        return "{\"fodselsnummer\": \"${behandling.fagsak.hentAktivIdent().ident}\",\n" +
                "\"navn\": \"No Name\",\n" +
                "\"tdato\": \"01.01.01\",\n" +
                "\"hjemmel\": \"\",\n" +
@@ -86,7 +86,7 @@ class MalerService(
         val behandling = vedtak.behandling
 
         //TODO: sett navn, hjemmel og fritekst
-        return "{\"fodselsnummer\": \"${behandling.fagsak.personIdent.ident}\",\n" +
+        return "{\"fodselsnummer\": \"${behandling.fagsak.hentAktivIdent().ident}\",\n" +
                "\"navn\": \"No Name\",\n" +
                "\"hjemmel\": \"\",\n" +
                "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
