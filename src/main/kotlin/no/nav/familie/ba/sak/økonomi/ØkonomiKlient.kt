@@ -43,7 +43,10 @@ class ØkonomiKlient(
         headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
-        return ResponseEntity.ok().body(Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null))
+        return restOperations.exchange(
+                URI.create("$familieOppdragUri/oppdrag"),
+                HttpMethod.POST,
+                HttpEntity(utbetalingsoppdrag, headers))
     }
 
     fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): ResponseEntity<Ressurs<OppdragProtokollStatus>> {
@@ -51,8 +54,10 @@ class ØkonomiKlient(
                 .medContentTypeJsonUTF8()
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
-        return ResponseEntity.ok().body(Ressurs(OppdragProtokollStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null))
-
+        return restOperations.exchange(
+                URI.create("$familieOppdragUri/status"),
+                HttpMethod.POST,
+                HttpEntity(statusFraOppdragDTO, headers))
     }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
