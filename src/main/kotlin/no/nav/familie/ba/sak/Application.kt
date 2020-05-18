@@ -12,6 +12,7 @@ class FamilieBaSakApplication
 fun main(args: Array<String>) {
     val app = SpringApplication(ApplicationConfig::class.java)
     app.setRegisterShutdownHook(false)
+    app.setAdditionalProfiles("mock-iverksett")
     val applicationContext: ConfigurableApplicationContext = app.run(*args)
     Runtime.getRuntime().addShutdownHook(DelayedShutdownHook(applicationContext))
 }
