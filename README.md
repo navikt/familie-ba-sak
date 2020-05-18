@@ -32,5 +32,6 @@ Hvis den siste tagen er `v0.5`, vil `tag.sh -M` pushe tagen `v1.0`, og `tag.sh -
 
 Ved push av en tag på formen `v*` vil Github Action-workflowen `Build-Deploy-Prod` trigges, som bygger en ny versjon av appen, lagrer imaget i Github Packages, og deployer appen til prod-fss.
 
+
 ## Kontaktinformasjon
 For NAV-interne kan henvendelser om applikasjonen rettes til #team-familie på slack. Ellers kan man opprette et issue her på github.
