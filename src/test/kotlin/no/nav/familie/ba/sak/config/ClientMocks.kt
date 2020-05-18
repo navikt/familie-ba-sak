@@ -172,6 +172,12 @@ class ClientMocks {
                              ))
 
         every {
+            mockIntegrasjonClient.hentIdenter(any())
+        } answers {
+            listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
+        }
+
+        every {
             mockIntegrasjonClient.hentAktørId(any())
         } answers {
             randomAktørId()

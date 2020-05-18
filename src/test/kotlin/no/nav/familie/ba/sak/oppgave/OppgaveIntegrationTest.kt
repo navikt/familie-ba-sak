@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.transaction.annotation.Transactional
 import java.lang.IllegalStateException
 import java.time.LocalDate
 
@@ -46,6 +47,7 @@ class OppgaveIntegrationTest {
     private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Test
+    @Transactional
     fun `Skal opprette oppgave og ferdigstille oppgave for behandling`() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
@@ -69,6 +71,7 @@ class OppgaveIntegrationTest {
     }
 
     @Test
+    @Transactional
     fun `Skal kaste feil ved opprettelse av oppgave på type som ikke er ferdigstilt`() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
