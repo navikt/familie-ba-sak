@@ -16,10 +16,7 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.nare.core.evaluations.Resultat
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -145,6 +142,17 @@ class DokumentServiceTest(
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                behandling = behandling,
+                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+        )
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+        Assertions.assertNotNull(vedtak)
+
+        assertThrows<Feil> {
+            dokumentService.genererBrevForVedtak(vedtak!!)
+        }
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
         val stønadTom = dato_2020_01_01.plusYears(17)
@@ -158,14 +166,6 @@ class DokumentServiceTest(
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat1, true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandling,
-                ansvarligSaksbehandler = "ansvarligSaksbehandler"
-        )
-
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-        Assertions.assertNotNull(vedtak)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
