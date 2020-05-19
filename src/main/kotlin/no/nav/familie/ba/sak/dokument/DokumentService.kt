@@ -101,7 +101,7 @@ class DokumentService(
                         onSuccess = { it },
                         onFailure = { e ->
                             throw Feil(message = "Klarte ikke generere vedtaksbrev",
-                                       frontendFeilmelding = "",
+                                       frontendFeilmelding = "Noe gikk galt ved generering av vedtaksbrev og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
                                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
                         }
                 )
