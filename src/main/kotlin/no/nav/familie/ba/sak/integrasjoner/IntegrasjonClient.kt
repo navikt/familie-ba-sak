@@ -376,7 +376,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/arkiv/v2")
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
         if (vedtak.ansvarligEnhet == "9999") {
-            logger.warn("Informasjon om enhet mangler på bruker ${vedtak.ansvarligSaksbehandler} og er satt til fallback-verdi, 9999")
+            logger.error("Informasjon om enhet mangler på bruker ${vedtak.ansvarligSaksbehandler} og er satt til fallback-verdi, 9999")
         }
 
         return Result.runCatching {
