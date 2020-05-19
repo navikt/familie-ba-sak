@@ -18,6 +18,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -33,18 +34,18 @@ class FagsakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PostMapping(path = ["fagsaker"])
+    @PostMapping(path = ["fagsaker"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
 
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
                 .fold(
                         onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
-                        onFailure = { ResponseEntity.ok(Ressurs.failure("Opprettelse eller henting av fagsak feilet", error = it)) }
+                        onFailure = { ResponseEntity.ok(Ressurs.failure(errorMessage = "Opprettelse eller henting av fagsak feilet", error = it)) }
                 )
     }
 
-    @GetMapping(path = ["fagsaker/{fagsakId}"])
+    @GetMapping(path = ["fagsaker/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentFagsak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id $fagsakId")
 

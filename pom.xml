@@ -22,8 +22,8 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>2.2.0.RELEASE</spring.cloud.version>
-        <felles-kontrakter.version>2.0_20200512090938_8ae5c9c</felles-kontrakter.version>
-        <felles.version>1.20200511201614_685f629</felles.version>
+        <felles-kontrakter.version>2.0_20200514084206_4b65325</felles-kontrakter.version>
+        <felles.version>1.20200514152201_7054ead</felles.version>
         <mockk.version>1.9.3</mockk.version>
         <token-validation-spring.version>1.1.4</token-validation-spring.version>
 

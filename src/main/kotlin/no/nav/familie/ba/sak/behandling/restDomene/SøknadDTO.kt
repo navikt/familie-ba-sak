@@ -1,9 +1,14 @@
-package no.nav.familie.ba.sak.behandling.grunnlag.søknad
+package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
+
+data class RestRegistrerSøknad(
+        val søknad: SøknadDTO,
+        val bekreftEndringerViaFrontend: Boolean
+)
 
 data class SøknadDTO(
         val versjon: String = "1",

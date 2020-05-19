@@ -131,10 +131,20 @@ class ClientMocks {
                                           fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
                         Familierelasjoner(personIdent = Personident(id = søkerFnr[1]),
                                           relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
-
         every {
             mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr[1]))
-        } returns personInfo.getValue(søkerFnr[1])
+        } returns personInfo.getValue(søkerFnr[1]).copy(
+                familierelasjoner = setOf(
+                        Familierelasjoner(personIdent = Personident(id = barnFnr[0]),
+                                          relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                          navn = personInfo.getValue(barnFnr[0]).navn,
+                                          fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                        Familierelasjoner(personIdent = Personident(id = barnFnr[1]),
+                                          relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                          navn = personInfo.getValue(barnFnr[1]).navn,
+                                          fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                        Familierelasjoner(personIdent = Personident(id = søkerFnr[0]),
+                                          relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
 
         return mockIntegrasjonClient
     }

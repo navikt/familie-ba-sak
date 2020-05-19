@@ -13,16 +13,10 @@ class IverksettMotOppdrag(private val økonomiService: ØkonomiService) : Behand
                                       stegService: StegService?): StegType {
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
 
-        when {
-            vilkårsvurdering.validerSteg(behandling) -> {
-                økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(data.behandlingsId,
-                                                                       data.vedtaksId,
-                                                                       data.saksbehandlerId)
-            }
-            else -> {
-                error("Vilkårsvurdering er ikke gyldig ved iverksetting")
-            }
-        }
+        vilkårsvurdering.validerSteg(behandling)
+        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(data.behandlingsId,
+                                                               data.vedtaksId,
+                                                               data.saksbehandlerId)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

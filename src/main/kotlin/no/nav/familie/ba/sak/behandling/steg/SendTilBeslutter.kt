@@ -24,12 +24,7 @@ class SendTilBeslutter(
                                       data: String,
                                       stegService: StegService?): StegType {
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
-
-        when {
-            !vilkårsvurdering.validerSteg(behandling) -> {
-                error("Validering av vilkårsvurdering feilet. For å kunne sende vedtaket til beslutter må du oppdatere vilkårsvurderingen.")
-            }
-        }
+        vilkårsvurdering.validerSteg(behandling)
 
         loggService.opprettSendTilBeslutterLogg(behandling)
         val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(

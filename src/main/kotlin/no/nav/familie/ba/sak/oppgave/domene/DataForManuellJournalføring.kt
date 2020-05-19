@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.oppgave.domene
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.RestPersonInfo
+import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 

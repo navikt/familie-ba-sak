@@ -19,6 +19,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -36,7 +37,7 @@ class VedtakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PutMapping(path = ["/{fagsakId}/vedtak"])
+    @PutMapping(path = ["/{fagsakId}/vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
                                    @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
@@ -49,12 +50,12 @@ class VedtakController(
                     ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
                 },
                 onFailure = {
-                    badRequest((it.cause?.message ?: it.message).toString(), null)
+                    throw it
                 }
         )
     }
 
-    @PostMapping(path = ["/{fagsakId}/send-til-beslutter"])
+    @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                 ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
@@ -67,7 +68,7 @@ class VedtakController(
         )
     }
 
-    @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"])
+    @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun iverksettVedtak(@PathVariable fagsakId: Long,
                         @RequestBody restBeslutningPåVedtak: RestBeslutningPåVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
@@ -89,7 +90,7 @@ class VedtakController(
                 )
     }
 
-    @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"])
+    @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long, @RequestBody
     opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()

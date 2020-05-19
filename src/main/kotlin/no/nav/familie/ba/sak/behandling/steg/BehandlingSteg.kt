@@ -15,9 +15,7 @@ interface BehandlingSteg<T> {
         return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType())
     }
 
-    fun validerSteg(behandling: Behandling): Boolean {
-        return true
-    }
+    fun validerSteg(behandling: Behandling) {}
 }
 
 fun initSteg(behandlingType: BehandlingType?): StegType {
@@ -96,22 +94,18 @@ enum class StegType(private val rekkefølge: Int,
     }
 
     fun hentNesteSteg(utførendeStegType: StegType): StegType {
-        if (utførendeStegType < this) {
-            return this
-        } else {
-            return when (this) {
-                REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
-                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-            }
+        return when (utførendeStegType) {
+            REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
+            REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+            VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+            SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+            BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+            IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+            VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+            JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+            DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+            FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+            BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
         }
     }
 }

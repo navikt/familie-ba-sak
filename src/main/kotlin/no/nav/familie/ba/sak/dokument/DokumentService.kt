@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadDTO
+import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
@@ -58,7 +58,7 @@ class DokumentService(
                 .fold(
                         onSuccess = { it },
                         onFailure = { e ->
-                            return Ressurs.failure("Klarte ikke å hent vedtaksbrev", error = e)
+                            return Ressurs.failure(errorMessage = "Klarte ikke å hent vedtaksbrev", error = e)
                         }
                 )
 

@@ -18,6 +18,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -34,7 +35,7 @@ class BeregningController(
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @GetMapping(path = ["/oversikt/{behandlingId}"])
+    @GetMapping(path = ["/oversikt/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oversiktOverBeregnetUtbetaling(@PathVariable @BehandlingstilgangConstraint behandlingId: Long)
             : ResponseEntity<Ressurs<List<RestBeregningOversikt>>> {
         val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
@@ -44,7 +45,7 @@ class BeregningController(
         if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return ResponseEntity.ok(Ressurs.success(data = emptyList()))
 
         val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandling(behandlingId)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
                 ?: return notFound("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
 
         return Result.runCatching {

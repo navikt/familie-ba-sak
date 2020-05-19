@@ -42,33 +42,26 @@ class PersongrunnlagService(
     fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
                                                      barnasFødselsnummer: List<String>,
                                                      behandling: Behandling) {
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                                       ?: personopplysningGrunnlagRepository.save(PersonopplysningGrunnlag(behandlingId = behandling.id))
+        val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        if (personopplysningGrunnlag.personer.none { it.personIdent == behandling.fagsak.hentAktivIdent() }) {
-            val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
-            val aktørId = integrasjonClient.hentAktivAktørId(fødselsnummer)
-            val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
-                               type = PersonType.SØKER,
-                               personopplysningGrunnlag = personopplysningGrunnlag,
-                               fødselsdato = personinfo.fødselsdato,
-                               aktørId = aktørId,
-                               navn = personinfo.navn ?: "",
-                               kjønn = personinfo.kjønn ?: Kjønn.UKJENT
-            )
-
-            personopplysningGrunnlag.personer.add(søker)
-        }
-
-        personopplysningGrunnlag.personer.addAll(hentNyeBarn(barnasFødselsnummer, personopplysningGrunnlag))
+        val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
+        val aktørId = integrasjonClient.hentAktivAktørId(fødselsnummer)
+        val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
+                           type = PersonType.SØKER,
+                           personopplysningGrunnlag = personopplysningGrunnlag,
+                           fødselsdato = personinfo.fødselsdato,
+                           aktørId = aktørId,
+                           navn = personinfo.navn ?: "",
+                           kjønn = personinfo.kjønn ?: Kjønn.UKJENT
+        )
+        personopplysningGrunnlag.personer.add(søker)
+        personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    private fun hentNyeBarn(barnasFødselsnummer: List<String>,
-                            personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
-        return barnasFødselsnummer.filter { barn ->
-            personopplysningGrunnlag.barna.none { eksisterendeBarn -> barn == eksisterendeBarn.personIdent.ident }
-        }.map { nyttBarn ->
+    private fun hentBarn(barnasFødselsnummer: List<String>,
+                         personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
+        return barnasFødselsnummer.map { nyttBarn ->
             val personinfo = integrasjonClient.hentPersoninfoFor(nyttBarn)
             personRepository.save(Person(personIdent = PersonIdent(nyttBarn),
                                          type = PersonType.BARN,

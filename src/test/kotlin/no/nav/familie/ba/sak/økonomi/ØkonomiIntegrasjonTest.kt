@@ -90,7 +90,7 @@ class ØkonomiIntegrasjonTest {
 
         val behandlingResultat = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag =
@@ -144,7 +144,7 @@ class ØkonomiIntegrasjonTest {
         vedtakService.lagreOgDeaktiverGammel(vedtak)
 
         val behandlingResultat = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
