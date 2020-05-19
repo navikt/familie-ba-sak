@@ -33,6 +33,9 @@ no.nav.security.jwt:
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
 
+prosessering:
+  fixedDelayString.in.milliseconds: 3000
+
 ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILIE_PROSESSERING_CLIENT_ID}
 
 logging:
