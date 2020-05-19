@@ -28,6 +28,15 @@ class DokgenTestConfig {
     }
 
     @Bean
+    @Profile("mock-dokgen-klient")
+    @Primary
+    fun mockDokGenKlient(): DokGenKlient {
+        val dokGenKlient: DokGenKlient = mockk()
+        every { dokGenKlient.lagPdfForMal(any(), any()) } returns TEST_PDF
+        return dokGenKlient
+    }
+
+    @Bean
     @Profile("mock-dokgen-negative")
     @Primary
     fun mockDokGenNegativeService(): DokGenKlient {

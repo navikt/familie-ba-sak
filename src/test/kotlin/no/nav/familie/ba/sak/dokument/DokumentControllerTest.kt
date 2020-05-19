@@ -55,7 +55,7 @@ class DokumentControllerTest(
     @Tag("integration")
     fun `Hent pdf vedtaksbrev Negative'`() {
         assertThrows<IllegalStateException> {
-            val failRess = dokumentService.hentBrevForVedtak(lagVedtak())
+            dokumentService.hentBrevForVedtak(lagVedtak())
         }
     }
 }
