@@ -67,7 +67,7 @@ class PersongrunnlagService(
                                          type = PersonType.BARN,
                                          personopplysningGrunnlag = personopplysningGrunnlag,
                                          fødselsdato = personinfo.fødselsdato,
-                                         aktørId = integrasjonClient.hentAktørId(nyttBarn),
+                                         aktørId = integrasjonClient.hentAktivAktørId(nyttBarn),
                                          navn = personinfo.navn ?: "",
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT
             ))

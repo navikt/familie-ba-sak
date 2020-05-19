@@ -82,12 +82,6 @@ class ClientMocks {
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
         every {
-            mockIntegrasjonClient.hentAktørId(any())
-        } answers {
-            randomAktørId()
-        }
-
-        every {
             mockIntegrasjonClient.hentAktivAktørId(any())
         } answers {
             randomAktørId()
@@ -185,12 +179,6 @@ class ClientMocks {
             mockIntegrasjonClient.hentIdenter(any())
         } answers {
             listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
-        }
-
-        every {
-            mockIntegrasjonClient.hentAktørId(any())
-        } answers {
-            randomAktørId()
         }
 
         every {

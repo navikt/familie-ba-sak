@@ -44,28 +44,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                         @Qualifier("jwtBearer") restOperations: RestOperations)
     : AbstractRestClient(restOperations, "integrasjon") {
 
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    @Deprecated("Bytt over til api/personopplysning/aktorid/BAR")
-    fun hentAktørId(personident: String): AktørId {
-        if (personident.isEmpty()) {
-            throw IntegrasjonException("Ved henting av aktør id er personident null eller tom")
-        }
-        val uri = URI.create("$integrasjonUri/aktoer/v1")
-        logger.info("Henter aktørId fra $uri")
-        return try {
-            val response = getForEntity<Ressurs<MutableMap<*, *>>>(uri, HttpHeaders().medPersonident(personident))
-            secureLogger.info("Vekslet inn fnr: {} til aktørId: {}", personident, response)
-            val aktørId = response.data?.get("aktørId").toString()
-            if (aktørId.isEmpty()) {
-                throw IntegrasjonException(msg = "Kan ikke finne aktørId for ident", ident = personident)
-            } else {
-                AktørId(aktørId)
-            }
-        } catch (e: RestClientException) {
-            throw IntegrasjonException("Ukjent feil ved henting av aktørId", e, uri, personident)
-        }
-    }
-
     fun hentPersonIdent(aktørId: String?): PersonIdent? {
         if (aktørId == null || aktørId.isEmpty()) {
             throw IntegrasjonException("Ved henting av personident er aktørId null eller tom")
@@ -104,7 +82,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun hentIdenter(ident: String): List<IdentInformasjon> {
-        if (ident.isNullOrEmpty()) {
+        if (ident.isEmpty()) {
             throw IntegrasjonException("Ved henting av identer er ident null eller tom")
         }
         val uri = URI.create("$integrasjonUri/identer/BAR/historikk")
