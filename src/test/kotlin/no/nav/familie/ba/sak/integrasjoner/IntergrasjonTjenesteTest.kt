@@ -236,7 +236,7 @@ class IntergrasjonTjenesteTest {
                         .willReturn(okJson(objectMapper.writeValueAsString(success(listOf(
                                 Arbeidsfordelingsenhet("2", "foo")))))))
 
-        val enhet = integrasjonClient.hentBehandlendeEnhet("1", null)
+        val enhet = integrasjonClient.hentBehandlendeEnhet("1")
         assertThat(enhet).isNotEmpty
         assertThat(enhet.first().enhetId).isEqualTo("2")
     }

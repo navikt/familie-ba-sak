@@ -12,8 +12,7 @@ import java.time.LocalDate
 @JsonIgnoreProperties
 data class Personinfo(
         var fødselsdato: LocalDate,
-        val geografiskTilknytning: String? = null,
-        val diskresjonskode: String? = null,
+        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         val navn: String? = null,
         @JsonDeserialize(using = KjonnDeserializer::class)
         val kjønn: Kjønn? = null,
@@ -30,6 +29,13 @@ data class Familierelasjoner(
 data class Personident(
         val id: String
 )
+
+enum class ADRESSEBESKYTTELSEGRADERING {
+    STRENGT_FORTROLIG_UTLAND, // Kode 19
+    FORTROLIG, // Kode 7
+    STRENGT_FORTROLIG, // Kode 6
+    UGRADERT
+}
 
 data class IdentInformasjon(val ident: String,
                             val historisk: Boolean,

@@ -1,22 +1,27 @@
 package no.nav.familie.ba.sak.arbeidsfordeling
 
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.integrasjoner.domene.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService.IdentMedAdressebeskyttelse
 
-fun finnStrengesteDiskresjonskode(personer: List<Personinfo>): String? {
-    return personer.fold(null, fun(kode: String?, personinfo: Personinfo): String? {
-        return when {
-            kode == Diskresjonskode.KODE6.kode || personinfo.diskresjonskode == Diskresjonskode.KODE6.kode -> {
-                Diskresjonskode.KODE6.kode
-            }
-            kode == Diskresjonskode.KODE7.kode || personinfo.diskresjonskode == Diskresjonskode.KODE7.kode -> {
-                Diskresjonskode.KODE7.kode
-            }
-            else -> null
-        }
-    })
-}
-
-enum class Diskresjonskode(val kode: String) {
-    KODE6("SPSF"),
-    KODE7("SPFO")
+fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebeskyttelse>): String? {
+    return personer.fold(null,
+                         fun(person: IdentMedAdressebeskyttelse?,
+                             neste: IdentMedAdressebeskyttelse): IdentMedAdressebeskyttelse? {
+                             return when {
+                                 person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG -> {
+                                     person
+                                 }
+                                 neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG -> {
+                                     neste
+                                 }
+                                 person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.FORTROLIG -> {
+                                     person
+                                 }
+                                 neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.FORTROLIG
+                                 -> {
+                                     neste
+                                 }
+                                 else -> null
+                             }
+                         })?.ident
 }
