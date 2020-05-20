@@ -39,6 +39,12 @@ class DokGenKlient(
         return response.body.orEmpty()
     }
 
+    fun lagPdfFraMarkdown(template: String, markdown: String, dokumentHeaderFelter: DokumentHeaderFelter): ByteArray {
+        val request = lagDokumentRequestForMarkdown(PDF, template, markdown, dokumentHeaderFelter)
+        val response = utførRequest(request, ByteArray::class.java)
+        return response.body!!
+    }
+
     fun lagPdfForMal(malMedData: MalMedData, dokumentHeaderFelter: DokumentHeaderFelter): ByteArray {
         val url = URI.create("$dokgenServiceUri/template/${malMedData.mal}/create-doc")
         val request = lagPostRequest(url, DokumentRequest(docFormat = PDF,

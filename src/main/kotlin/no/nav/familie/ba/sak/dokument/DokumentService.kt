@@ -71,6 +71,36 @@ class DokumentService(
         return Ressurs.success(html)
     }
 
+    @Deprecated("Kun midlertidig brakt tilbake for å brukes til å konvertere vedtaksbrev lagret som markdown til PDF")
+    fun hentPdfForVedtak(vedtak: Vedtak): ByteArray {
+        return Result.runCatching {
+            val markdown = vedtak.stønadBrevMarkdown
+
+            val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
+                ?: error("Finner ikke søker på vedtaket")
+            val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
+
+            val behandlingResultatType =
+                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+            dokGenKlient.lagPdfFraMarkdown(template = MalerService.malNavnForTypeSøkerOgResultatType(
+                typeSøker = søknad?.typeSøker,
+                resultatType = behandlingResultatType),
+                markdown = markdown,
+                dokumentHeaderFelter = DokumentHeaderFelter(
+                    fodselsnummer = søker.personIdent.ident,
+                    navn = søker.navn,
+                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
+                    dokumentDato = LocalDate.now().tilDagMånedÅr()
+                ))
+        }
+            .fold(
+                onSuccess = { it },
+                onFailure = {
+                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${vedtak.id}", it)
+                }
+            )
+    }
+
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         val pdf = vedtak.stønadBrevPdF
                 ?: error("Klarte ikke finne brev for vetak med id ${vedtak.id}")
