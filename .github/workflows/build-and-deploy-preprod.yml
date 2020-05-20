@@ -28,6 +28,36 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -B --no-transfer-progress package verify sonar:sonar --settings .m2/maven-settings.xml --file pom.xml
+      - name: Checkout e2e tests
+          if: "!contains(github.event.head_commit.message, 'e2e skip')"
+          uses: actions/checkout@v2
+          with:
+            repository: navikt/familie-ba-e2e
+            token: ${{ secrets.GITHUB_TOKEN }}
+            path: ba-e2e
+      - name: Setter riktig ba-mottak versjon i e2e tester
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        run: sed -i 's/familie-ba-mottak:latest/familie-ba-sak:'$GITHUB_SHA'/g' ba-e2e/e2e/docker-compose.yml
+      - name: Start alle apper (e2e)
+        env:
+          INTEGRASJONER_CLIENT_ID: ${{ secrets.INTEGRASJONER_CLIENT_ID }}
+          INTEGRASJONER_CLIENT_SECRET: ${{ secrets.INTEGRASJONER_CLIENT_SECRET }}
+          INTEGRASJONER_INFOTRYGD_KS_SCOPE: ${{ secrets.INTEGRASJONER_INFOTRYGD_KS_SCOPE }}
+          INTEGRASJONER_AAD_GRAPH_SCOPE: ${{ secrets.INTEGRASJONER_AAD_GRAPH_SCOPE }}
+          SAK_CLIENT_ID: ${{ secrets.SAK_CLIENT_ID }}
+          SAK_CLIENT_SECRET: ${{ secrets.SAK_CLIENT_SECRET }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          SAK_FRONTEND_CLIENT_ID: ${{ secrets.SAK_FRONTEND_CLIENT_ID }}
+          SAK_FRONTEND_CLIENT_SECRET: ${{ secrets.SAK_FRONTEND_CLIENT_SECRET }}
+          OPPDRAG_CLIENT_ID: ${{ secrets.OPPDRAG_CLIENT_ID }}
+          INTEGRASJONER_SCOPE: ${{ secrets.INTEGRASJONER_SCOPE }}
+          OPPDRAG_SCOPE: ${{ secrets.OPPDRAG_SCOPE }}
+          BA_SAK_SCOPE: ${{ secrets.BA_SAK_SCOPE }}
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        run: cd ba-e2e/e2e; docker-compose up --force-recreate
+      - name: Kjør tester (e2e)
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        run: cd ba-e2e/autotest; mvn -Dtest="**" test
       - name: Bygg Docker image
         run: |
           docker build -t $IMAGE .
