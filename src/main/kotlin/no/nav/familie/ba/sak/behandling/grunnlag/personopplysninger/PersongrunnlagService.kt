@@ -44,8 +44,6 @@ class PersongrunnlagService(
                                                      behandling: Behandling) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        LOG.info("*** Søker: $fødselsnummer")
-        barnasFødselsnummer.forEach { LOG.info("*** Barn: $it") }
         val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
         val aktørId = integrasjonClient.hentAktivAktørId(fødselsnummer)
         val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),

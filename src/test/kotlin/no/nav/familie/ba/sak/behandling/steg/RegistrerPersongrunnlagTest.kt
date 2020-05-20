@@ -49,21 +49,13 @@ class RegistrerPersongrunnlagTest(
     @Test
     @Tag("integration")
     fun `Legg til personer på behandling`() {
-        val morId = "12345678910" //randomFnr()
-        val barn1Id = "12345678911" //randomFnr()
-        val barn2Id = "12345678912" //randomFnr()
-
-
+        val morId = randomFnr()
+        val barn1Id = randomFnr()
+        val barn2Id = randomFnr()
 
         every {
-            integrasjonClient.hentPersoninfoFor(morId)
+            integrasjonClient.hentPersoninfoFor(any())
         } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
-        every {
-            integrasjonClient.hentPersoninfoFor(barn1Id)
-        } returns Personinfo(fødselsdato = LocalDate.of(2015, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
-        every {
-            integrasjonClient.hentPersoninfoFor(barn2Id)
-        } returns Personinfo(fødselsdato = LocalDate.of(2016, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
@@ -75,9 +67,6 @@ class RegistrerPersongrunnlagTest(
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
-        grunnlag1!!.personer.forEach { println("**** ${it.personIdent.ident}") }
-
-
         Assertions.assertEquals(3, grunnlag1!!.personer.size)
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
@@ -87,20 +76,13 @@ class RegistrerPersongrunnlagTest(
     @Test
     @Tag("integration")
     fun `Legg til barn på eksisterende behandling`() {
-        val morId = "12345678913" //randomFnr()
-        val barn1Id = "12345678914" //randomFnr()
-        val barn2Id = "12345678915" //randomFnr()
+        val morId = randomFnr()
+        val barn1Id = randomFnr()
+        val barn2Id = randomFnr()
 
         every {
-            integrasjonClient.hentPersoninfoFor(morId)
+            integrasjonClient.hentPersoninfoFor(any())
         } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
-        every {
-            integrasjonClient.hentPersoninfoFor(barn1Id)
-        } returns Personinfo(fødselsdato = LocalDate.of(2015, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
-        every {
-            integrasjonClient.hentPersoninfoFor(barn2Id)
-        } returns Personinfo(fødselsdato = LocalDate.of(2016, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
-
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
@@ -120,7 +102,6 @@ class RegistrerPersongrunnlagTest(
                                           registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(ident = morId,
                                                                                                   barnasIdenter = listOf(barn1Id,
                                                                                                                          barn2Id)))
-
         val grunnlag2 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
         Assertions.assertEquals(3, grunnlag2!!.personer.size)
