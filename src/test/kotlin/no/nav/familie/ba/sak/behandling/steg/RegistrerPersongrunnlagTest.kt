@@ -69,6 +69,9 @@ class RegistrerPersongrunnlagTest(
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
+        grunnlag1!!.personer.forEach { println("**** ${it.personIdent.ident}") }
+        
+
         Assertions.assertEquals(3, grunnlag1!!.personer.size)
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
