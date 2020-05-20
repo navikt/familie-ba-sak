@@ -49,9 +49,11 @@ class RegistrerPersongrunnlagTest(
     @Test
     @Tag("integration")
     fun `Legg til personer på behandling`() {
-        val morId = randomFnr()
-        val barn1Id = randomFnr()
-        val barn2Id = randomFnr()
+        val morId = "12345678910" //randomFnr()
+        val barn1Id = "12345678911" //randomFnr()
+        val barn2Id = "12345678912" //randomFnr()
+
+
 
         every {
             integrasjonClient.hentPersoninfoFor(any())
@@ -76,9 +78,9 @@ class RegistrerPersongrunnlagTest(
     @Test
     @Tag("integration")
     fun `Legg til barn på eksisterende behandling`() {
-        val morId = randomFnr()
-        val barn1Id = randomFnr()
-        val barn2Id = randomFnr()
+        val morId = "12345678913" //randomFnr()
+        val barn1Id = "12345678914" //randomFnr()
+        val barn2Id = "12345678915" //randomFnr()
 
         every {
             integrasjonClient.hentPersoninfoFor(any())
