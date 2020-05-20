@@ -21,7 +21,6 @@ import java.time.LocalDate
 @SpringBootTest
 @ActiveProfiles("dev")
 @TestInstance(Lifecycle.PER_CLASS)
-@DirtiesContext
 class RegistrerPersongrunnlagTest(
         @Autowired
         private val stegService: StegService,
@@ -53,6 +52,10 @@ class RegistrerPersongrunnlagTest(
         val morId = randomFnr()
         val barn1Id = randomFnr()
         val barn2Id = randomFnr()
+
+        every {
+            integrasjonClient.hentPersoninfoFor(any())
+        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
