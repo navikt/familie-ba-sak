@@ -56,13 +56,16 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), TEST_PDF) } returns "journalpostId"
 
+        every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("9999",
+                                                                                                                 "Ukjent"))
+
         every { mockIntegrasjonClient.distribuerVedtaksbrev(any()) } just runs
 
         every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
 
         every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just runs
 
-        every { mockIntegrasjonClient.hentBehandlendeEnhet(any(), any()) } returns
+        every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns
                 listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
 
         every { mockIntegrasjonClient.hentDokument(any(), any()) } returns

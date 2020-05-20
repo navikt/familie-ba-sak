@@ -134,20 +134,16 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun hentBehandlendeEnhet(geografiskTilknytning: String?, diskresjonskode: String?): List<Arbeidsfordelingsenhet> {
+    fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
         if (environment.activeProfiles.contains("e2e")) {
             return listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
         }
-
         val uri = UriComponentsBuilder.fromUri(integrasjonUri)
-                .pathSegment("arbeidsfordeling", "enhet")
-                .queryParam("tema", "BAR")
-                .queryParam("geografi", geografiskTilknytning)
-                .queryParam("diskresjonskode", diskresjonskode)
+                .pathSegment("arbeidsfordeling", "enhet", "BAR")
                 .build().toUri()
 
         return try {
-            val response = getForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri)
+            val response = getForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, httpHeaders = HttpHeaders().medPersonident(ident))
             response.data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
                                                         null,
                                                         uri)
