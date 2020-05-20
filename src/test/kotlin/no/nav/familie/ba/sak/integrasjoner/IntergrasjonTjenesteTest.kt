@@ -237,12 +237,12 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `hentBehandlendeEnhet returnerer OK`() {
-        stubFor(get("/api/arbeidsfordeling/enhet?tema=BAR&geografi=1&diskresjonskode")
+        stubFor(get("/api/arbeidsfordeling/enhet/BAR")
                         .withHeader("Accept", containing("json"))
                         .willReturn(okJson(objectMapper.writeValueAsString(success(listOf(
                                 Arbeidsfordelingsenhet("2", "foo")))))))
 
-        val enhet = integrasjonClient.hentBehandlendeEnhet("1", null)
+        val enhet = integrasjonClient.hentBehandlendeEnhet("1")
         assertThat(enhet).isNotEmpty
         assertThat(enhet.first().enhetId).isEqualTo("2")
     }
