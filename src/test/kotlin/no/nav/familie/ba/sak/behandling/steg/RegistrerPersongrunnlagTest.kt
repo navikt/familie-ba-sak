@@ -56,8 +56,14 @@ class RegistrerPersongrunnlagTest(
 
 
         every {
-            integrasjonClient.hentPersoninfoFor(any())
+            integrasjonClient.hentPersoninfoFor(morId)
         } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+        every {
+            integrasjonClient.hentPersoninfoFor(barn1Id)
+        } returns Personinfo(fødselsdato = LocalDate.of(2015, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+        every {
+            integrasjonClient.hentPersoninfoFor(barn2Id)
+        } returns Personinfo(fødselsdato = LocalDate.of(2016, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
@@ -70,7 +76,7 @@ class RegistrerPersongrunnlagTest(
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
         grunnlag1!!.personer.forEach { println("**** ${it.personIdent.ident}") }
-        
+
 
         Assertions.assertEquals(3, grunnlag1!!.personer.size)
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == morId })
@@ -86,8 +92,14 @@ class RegistrerPersongrunnlagTest(
         val barn2Id = "12345678915" //randomFnr()
 
         every {
-            integrasjonClient.hentPersoninfoFor(any())
+            integrasjonClient.hentPersoninfoFor(morId)
         } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+        every {
+            integrasjonClient.hentPersoninfoFor(barn1Id)
+        } returns Personinfo(fødselsdato = LocalDate.of(2015, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+        every {
+            integrasjonClient.hentPersoninfoFor(barn2Id)
+        } returns Personinfo(fødselsdato = LocalDate.of(2016, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
