@@ -41,7 +41,8 @@ import java.net.URI
 
 @Component
 class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
-                        @Qualifier("jwtBearer") restOperations: RestOperations)
+                        @Qualifier("jwtBearer") restOperations: RestOperations,
+                        private val environment: Environment)
     : AbstractRestClient(restOperations, "integrasjon") {
 
     fun hentPersonIdent(aktørId: String?): PersonIdent? {
@@ -133,6 +134,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentBehandlendeEnhet(geografiskTilknytning: String?, diskresjonskode: String?): List<Arbeidsfordelingsenhet> {
+        if (environment.activeProfiles.contains("e2e")) {
+            return listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
+        }
+
         val uri = UriComponentsBuilder.fromUri(integrasjonUri)
                 .pathSegment("arbeidsfordeling", "enhet")
                 .queryParam("tema", "BAR")
