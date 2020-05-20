@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.toTrinnKontroll
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
@@ -12,7 +11,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -32,9 +30,6 @@ class ToTrinnKontrollTest {
 
     @Autowired
     lateinit var toTrinnKontrollService: ToTrinnKontrollService
-
-    @Autowired
-    lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
     lateinit var fagsakService: FagsakService
@@ -67,23 +62,5 @@ class ToTrinnKontrollTest {
 
         toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(behandling, "beslutter", beslutning = Beslutning.UNDERKJENT)
         Assertions.assertEquals(BehandlingStatus.UNDERKJENT_AV_BESLUTTER, behandlingService.hent(behandling.id).status)
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Skal kaste feil ved lik fatter og beslutter`() {
-        val fnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
-        behandlingRepository.saveAndFlush(behandling)
-
-        val endretBehandling = behandlingService.hent(behandling.id)
-        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, endretBehandling.status)
-        Assertions.assertNotNull(endretBehandling.endretAv)
-
-        assertThrows<IllegalStateException> { toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(endretBehandling, "VL", beslutning = Beslutning.GODKJENT) }
     }
 }
