@@ -16,8 +16,10 @@ class FraMarkdownTilPdfScheduler(private val vedtakRepository: VedtakRepository,
         vedtakRepository.findAll().filter { vedtak ->
             vedtak.stønadBrevMarkdown.isNotEmpty() && vedtak.stønadBrevPdF == null
         }.forEach {
-            it.stønadBrevPdF = dokumentService.hentPdfForVedtak(vedtak = it)
-            vedtakRepository.save(it)
+            runCatching {
+                it.stønadBrevPdF = dokumentService.hentPdfForVedtak(vedtak = it)
+                vedtakRepository.save(it)
+            }
         }
     }
 
