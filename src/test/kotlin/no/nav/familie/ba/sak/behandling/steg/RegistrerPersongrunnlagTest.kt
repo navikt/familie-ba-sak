@@ -67,10 +67,10 @@ class RegistrerPersongrunnlagTest(
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
-        Assertions.assertTrue(grunnlag1!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertEquals(3, grunnlag1!!.personer.size)
+        Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn2Id })
-        Assertions.assertEquals(3, grunnlag1.personer.size)
     }
 
     @Test
@@ -94,9 +94,10 @@ class RegistrerPersongrunnlagTest(
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
-        Assertions.assertTrue(grunnlag1!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertEquals(2, grunnlag1!!.personer.size)
+        Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
-        Assertions.assertEquals(2, grunnlag1.personer.size)
+
 
         stegService.håndterPersongrunnlag(behandling = behandling1,
                                           registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(ident = morId,
@@ -105,10 +106,11 @@ class RegistrerPersongrunnlagTest(
 
         val grunnlag2 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
-        Assertions.assertTrue(grunnlag2!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertEquals(3, grunnlag2!!.personer.size)
+        Assertions.assertTrue(grunnlag2.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag2.personer.any { it.personIdent.ident == barn1Id })
         Assertions.assertTrue(grunnlag2.personer.any { it.personIdent.ident == barn2Id })
-        Assertions.assertEquals(3, grunnlag2.personer.size)
+
 
         // Skal ikke føre til flere personer på persongrunnlaget
         stegService.håndterPersongrunnlag(behandling = behandling1,
@@ -118,9 +120,10 @@ class RegistrerPersongrunnlagTest(
 
         val grunnlag3 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
-        Assertions.assertTrue(grunnlag3!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertEquals(3, grunnlag3!!.personer.size)
+        Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == barn1Id })
         Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == barn2Id })
-        Assertions.assertEquals(3, grunnlag3.personer.size)
+
     }
 }
