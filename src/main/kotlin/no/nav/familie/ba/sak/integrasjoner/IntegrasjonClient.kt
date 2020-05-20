@@ -27,6 +27,7 @@ import no.nav.familie.log.NavHttpHeaders
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.retry.annotation.Backoff
@@ -41,7 +42,8 @@ import java.net.URI
 
 @Component
 class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
-                        @Qualifier("jwtBearer") restOperations: RestOperations)
+                        @Qualifier("jwtBearer") restOperations: RestOperations,
+                        private val environment: Environment)
     : AbstractRestClient(restOperations, "integrasjon") {
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
@@ -91,7 +93,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun hentIdenter(ident: String): List<IdentInformasjon>? {
-        if (ident.isNullOrEmpty()) {
+        if (ident.isEmpty()) {
             throw IntegrasjonException("Ved henting av identer er ident null eller tom")
         }
         val uri = URI.create("$integrasjonUri/identer/BAR/historikk")
@@ -142,6 +144,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
+        if (environment.activeProfiles.contains("e2e")) {
+            return listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
+        }
         val uri = UriComponentsBuilder.fromUri(integrasjonUri)
                 .pathSegment("arbeidsfordeling", "enhet", "BAR")
                 .build().toUri()

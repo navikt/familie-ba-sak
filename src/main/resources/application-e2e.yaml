@@ -1,13 +1,13 @@
 no.nav.security.jwt:
   issuer.azuread:
-    discoveryurl: http://host.docker.internal:1111/v2.0/.well-known/openid-configuration
+    discoveryurl: http://mock-oauth2-server:1111/v2.0/.well-known/openid-configuration
     accepted_audience: api://${BA_SAK_CLIENT_ID}/.default
     cookie_name: azure_token
   client:
     registration:
       familie-integrasjoner-onbehalfof:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
-        token-endpoint-url: http://host.docker.internal:1111/v2.0/token
+        token-endpoint-url: http://mock-oauth2-server:1111/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
@@ -16,7 +16,7 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
       familie-integrasjoner-clientcredentials:
         resource-url: ${FAMILIE_INTEGRASJONER_API_URL}
-        token-endpoint-url: http://host.docker.internal:1111/v2.0/token
+        token-endpoint-url: http://mock-oauth2-server:1111/v2.0/token
         grant-type: client_credentials
         scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
@@ -25,13 +25,16 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
       familie-oppdrag-clientcredentials:
         resource-url: ${FAMILIE_OPPDRAG_API_URL}
-        token-endpoint-url: http://host.docker.internal:1111/v2.0/token
+        token-endpoint-url: http://mock-oauth2-server:1111/v2.0/token
         grant-type: client_credentials
         scope: ${FAMILIE_OPPDRAG_SCOPE}
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
+
+prosessering:
+  fixedDelayString.in.milliseconds: 3000
 
 ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILIE_PROSESSERING_CLIENT_ID}
 
