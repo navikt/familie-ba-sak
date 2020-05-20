@@ -2,13 +2,12 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.dokument.testDokumentHeaderFelter
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.Ressurs.Companion
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
-import no.nav.familie.kontrakter.felles.arkivering.Dokument
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -22,10 +21,19 @@ class DokgenTestConfig {
     @Primary
     fun mockDokumentService(): DokumentService {
         val dokumentService: DokumentService = mockk()
-        every { dokumentService.hentHtmlForVedtak(any()) } returns success("<HTML>HTML_MOCKUP</HTML>")
+        every { dokumentService.hentBrevForVedtak(any()) } returns success("pdf".toByteArray())
         every { dokumentService.hentStønadBrevMarkdown(any(), any(), any()) } returns "Markdown mock"
-        every { dokumentService.hentPdfForVedtak(any()) } returns TEST_PDF
+        every { dokumentService.genererBrevForVedtak(any()) } returns TEST_PDF
         return dokumentService
+    }
+
+    @Bean
+    @Profile("mock-dokgen-klient")
+    @Primary
+    fun mockDokGenKlient(): DokGenKlient {
+        val dokGenKlient: DokGenKlient = mockk()
+        every { dokGenKlient.lagPdfForMal(any(), any()) } returns TEST_PDF
+        return dokGenKlient
     }
 
     @Bean

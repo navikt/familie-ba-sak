@@ -45,7 +45,7 @@ class Vilkårsvurdering(
         } else {
             vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)
         }
-        val vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 vilkårsvurdertBehandling,
                 personopplysningGrunnlag,
                 ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn())
@@ -53,7 +53,6 @@ class Vilkårsvurdering(
         validerSteg(behandling)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

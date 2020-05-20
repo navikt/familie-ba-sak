@@ -22,11 +22,17 @@ data class Vedtak(
         @Column(name = "ansvarlig_beslutter", nullable = true)
         var ansvarligBeslutter: String? = null,
 
+        @Column(name = "ansvarlig_enhet", nullable = true)
+        var ansvarligEnhet: String? = null,
+
         @Column(name = "vedtaksdato", nullable = false)
         var vedtaksdato: LocalDate,
 
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
         var stønadBrevMarkdown: String = "",
+
+        @Column(name = "stonad_brev_pdf", nullable = true)
+        var stønadBrevPdF: ByteArray? = null,
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
