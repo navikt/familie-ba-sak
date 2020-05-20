@@ -54,12 +54,10 @@ class ØkonomiKlient(
                 .medContentTypeJsonUTF8()
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
-        //TODO fjern hardkodet respons
-        return ResponseEntity.ok().body(Ressurs(OppdragProtokollStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null))
-        /*return restOperations.exchange(
+        return restOperations.exchange(
                 URI.create("$familieOppdragUri/status"),
                 HttpMethod.POST,
-                HttpEntity(statusFraOppdragDTO, headers))*/
+                HttpEntity(statusFraOppdragDTO, headers))
     }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
