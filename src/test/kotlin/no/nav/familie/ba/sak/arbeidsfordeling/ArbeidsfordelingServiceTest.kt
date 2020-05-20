@@ -34,7 +34,7 @@ class ArbeidsfordelingServiceTest {
     @Test
     fun `hentBehandlendeEnhet skal kjøre uten feil`() {
         val fagsak = Fagsak(personIdent = PersonIdent(""),
-                                                                                       aktørId = AktørId("1"))
+                            aktørId = AktørId("1"))
 
         every { integrasjonClient.hentBehandlendeEnhet(any(), any()) } returns listOf()
         every { integrasjonClient.hentPersoninfoFor(any()) } returns Personinfo(LocalDate.now())

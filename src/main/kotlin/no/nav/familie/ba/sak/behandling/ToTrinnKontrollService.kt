@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 class ToTrinnKontrollService(private val behandlingService: BehandlingService) {
 
     fun valider2trinnVedBeslutningOmIverksetting(behandling: Behandling, beslutter: String, beslutning: Beslutning) {
-        if (behandling.endretAv == beslutter) {
+        if (behandling.endretAv == beslutter && !(behandling.endretAv == SYSTEM_FORKORTELSE && beslutter == SYSTEM_FORKORTELSE)) {
             error("Samme saksbehandler kan ikke foreslå og beslutte om iverksetting på samme vedtak")
         }
         behandlingService.oppdaterStatusPåBehandling(
