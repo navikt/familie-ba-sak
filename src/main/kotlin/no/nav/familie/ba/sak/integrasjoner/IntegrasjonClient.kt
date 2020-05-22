@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner
 
 import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.domene.*
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
@@ -360,22 +361,25 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun journalFørVedtaksbrev(fnr: String, fagsakId: String, pdf: ByteArray): String {
-        return lagJournalpostForVedtaksbrev(fnr, fagsakId, pdf)
+    fun journalFørVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak): String {
+        return lagJournalpostForVedtaksbrev(fnr, fagsakId, vedtak)
     }
 
-    fun lagJournalpostForVedtaksbrev(fnr: String, fagsakId: String, pdfByteArray: ByteArray): String {
+    fun lagJournalpostForVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak): String {
         val uri = URI.create("$integrasjonUri/arkiv/v2")
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
+        if (vedtak.ansvarligEnhet == "9999") {
+            logger.error("Informasjon om enhet mangler på bruker ${vedtak.ansvarligSaksbehandler} og er satt til fallback-verdi, 9999")
+        }
 
         return Result.runCatching {
             val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
-            val dokumenter = listOf(Dokument(pdfByteArray, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE),
+            val dokumenter = listOf(Dokument(vedtak.stønadBrevPdF!!, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE),
                                     Dokument(vedleggPdf,
                                              FilType.PDFA,
                                              dokumentType = VEDLEGG_DOKUMENT_TYPE,
                                              tittel = VEDTAK_VEDLEGG_TITTEL))
-            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, "9999")
+            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, vedtak.ansvarligEnhet)
             val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(

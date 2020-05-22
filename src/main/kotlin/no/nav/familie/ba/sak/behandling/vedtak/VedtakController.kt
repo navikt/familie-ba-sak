@@ -7,11 +7,9 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
@@ -56,11 +54,16 @@ class VedtakController(
     }
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+    fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long,
+                                   @RequestParam behandlendeEnhet: String): ResponseEntity<Ressurs<RestFagsak>> {
+
+
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                 ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
-        return Result.runCatching { stegService.håndterSendTilBeslutter(behandling) }.fold(
+        return Result.runCatching {
+            stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
+        }.fold(
                 onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
                 onFailure = {
                     illegalState((it.cause?.message ?: it.message).toString(), it)

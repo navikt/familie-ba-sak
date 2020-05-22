@@ -6,6 +6,8 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -54,7 +56,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")
 
-        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), TEST_PDF) } returns "journalpostId"
+        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), any()) } returns "journalpostId"
 
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("9999",
                                                                                                                  "Ukjent"))

@@ -101,11 +101,11 @@ class StegService(
     }
 
     @Transactional
-    fun håndterSendTilBeslutter(behandling: Behandling): Behandling {
+    fun håndterSendTilBeslutter(behandling: Behandling, behandlendeEnhet: String): Behandling {
         val behandlingSteg: SendTilBeslutter = hentBehandlingSteg(StegType.SEND_TIL_BESLUTTER) as SendTilBeslutter
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "", this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet, this)
         }
     }
 

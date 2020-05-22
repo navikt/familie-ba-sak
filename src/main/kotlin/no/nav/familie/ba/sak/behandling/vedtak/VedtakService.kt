@@ -107,8 +107,6 @@ class VedtakService(private val behandlingService: BehandlingService,
                         .førsteDagINesteMåned() else null
         )
 
-        vedtak.stønadBrevMarkdown =
-                if (behandlingResultatType != BehandlingResultatType.INNVILGET) hentVedtaksbrevMarkdown(vedtak) else ""
 
         return lagreOgDeaktiverGammel(vedtak)
     }
@@ -116,7 +114,7 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     @Transactional
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Ressurs<RestFagsak> {
-        vedtak.stønadBrevMarkdown = hentVedtaksbrevMarkdown(vedtak)
+        vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak)
 
         lagreOgDeaktiverGammel(vedtak)
 

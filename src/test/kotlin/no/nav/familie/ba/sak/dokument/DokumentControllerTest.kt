@@ -8,11 +8,13 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.lang.IllegalStateException
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -25,21 +27,35 @@ class DokumentControllerTest(
 
     @Test
     @Tag("integration")
-    fun `Test hent html vedtak`() {
+    fun `Test generer vedtaksbrev`() {
         val mockDokumentService: DokumentService = mockk()
-        val vedtakService: VedtakService = mockk()
+        val vedtakService: VedtakService = mockk(relaxed = true)
         val mockDokumentController = DokumentController(mockDokumentService, vedtakService)
         every { vedtakService.hent(any()) } returns lagVedtak()
-        every { mockDokumentService.hentHtmlForVedtak(any()) } returns Ressurs.success("mock_html")
+        every { mockDokumentService.genererBrevForVedtak(any()) } returns "pdf".toByteArray()
 
-        val response = mockDokumentController.hentHtmlVedtak(1)
+        val response = mockDokumentController.genererVedtaksbrev(1)
         assert(response.status == Ressurs.Status.SUKSESS)
     }
 
     @Test
     @Tag("integration")
-    fun `Hent HTML vedtaksbrev Negative'`() {
-        val failRess = dokumentService.hentHtmlForVedtak(lagVedtak())
-        Assertions.assertEquals(Ressurs.Status.FEILET, failRess.status)
+    fun `Test hent pdf vedtak`() {
+        val mockDokumentService: DokumentService = mockk()
+        val vedtakService: VedtakService = mockk()
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService)
+        every { vedtakService.hent(any()) } returns lagVedtak()
+        every { mockDokumentService.hentBrevForVedtak(any()) } returns Ressurs.success("pdf".toByteArray())
+
+        val response = mockDokumentController.hentVedtaksbrev(1)
+        assert(response.status == Ressurs.Status.SUKSESS)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Hent pdf vedtaksbrev Negative'`() {
+        assertThrows<IllegalStateException> {
+            dokumentService.hentBrevForVedtak(lagVedtak())
+        }
     }
 }

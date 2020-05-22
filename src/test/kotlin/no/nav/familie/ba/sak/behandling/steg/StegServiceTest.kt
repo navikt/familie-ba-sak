@@ -95,7 +95,7 @@ class StegServiceTest(
         val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
 
-        stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg)
+        stegService.håndterSendTilBeslutter(behandlingEtterVilkårsvurderingSteg, "1234")
 
         val behandlingEtterSendTilBeslutter = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
@@ -184,7 +184,7 @@ class StegServiceTest(
         behandling.steg = StegType.BEHANDLING_AVSLUTTET
         behandling.status = BehandlingStatus.FERDIGSTILT
         assertThrows<IllegalStateException> {
-            stegService.håndterSendTilBeslutter(behandling)
+            stegService.håndterSendTilBeslutter(behandling, "1234")
         }
     }
 
@@ -197,7 +197,7 @@ class StegServiceTest(
         behandling.steg = StegType.BESLUTTE_VEDTAK
         behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
         assertThrows<IllegalStateException> {
-            stegService.håndterSendTilBeslutter(behandling)
+            stegService.håndterSendTilBeslutter(behandling, "1234")
         }
     }
 
