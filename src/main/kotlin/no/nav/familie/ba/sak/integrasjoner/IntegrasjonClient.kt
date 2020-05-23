@@ -20,6 +20,7 @@ import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.arkivering.Dokument
 import no.nav.familie.kontrakter.felles.arkivering.FilType
 import no.nav.familie.kontrakter.felles.distribusjon.DistribuerJournalpostRequest
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
