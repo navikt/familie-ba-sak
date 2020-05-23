@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.økonomi.OppdragId
+import no.nav.familie.ba.sak.økonomi.SøkerOgBehandlingDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.slf4j.Logger
@@ -59,11 +59,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandling(behandlingId)
     }
 
-    fun hentGjeldendeBehandlingerForLøpendeFagsaker(): List<OppdragId> {
+    fun hentGjeldendeBehandlingerForLøpendeFagsaker(): List<SøkerOgBehandlingDTO> {
         return fagsakService.hentLøpendeFagsaker()
                 .flatMap { fagsak -> hentGjeldendeForFagsak(fagsak.id) }
                 .map { behandling ->
-                    OppdragId(
+                    SøkerOgBehandlingDTO(
                             persongrunnlagService.hentSøker(behandling)!!.personIdent.ident,
                             behandling.id)
                 }

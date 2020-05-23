@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.ba.sak.økonomi.OppdragProtokollStatus
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -35,12 +35,12 @@ class StatusFraOppdrag(
         val statusFraOppdragDTO = data.statusFraOppdragDTO
         val task = data.task
 
-        Result.runCatching { økonomiService.hentStatus(data.statusFraOppdragDTO) }
+        Result.runCatching { økonomiService.hentStatus(statusFraOppdragDTO.oppdragId) }
                 .onFailure { throw it }
                 .onSuccess {
                     LOG.debug("Mottok status '$it' fra oppdrag")
-                    if (it != OppdragProtokollStatus.KVITTERT_OK) {
-                        if (it == OppdragProtokollStatus.LAGT_PÅ_KØ) {
+                    if (it != OppdragStatus.KVITTERT_OK) {
+                        if (it == OppdragStatus.LAGT_PÅ_KØ) {
                             task.triggerTid = LocalDateTime.now().plusMinutes(15)
                             taskRepository.save(task)
                         } else {

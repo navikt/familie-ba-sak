@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.common.BaseService
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
-import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
@@ -49,7 +49,7 @@ class ØkonomiKlient(
                 HttpEntity(utbetalingsoppdrag, headers))
     }
 
-    fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): ResponseEntity<Ressurs<OppdragProtokollStatus>> {
+    fun hentStatus(oppdragId: no.nav.familie.kontrakter.felles.oppdrag.OppdragId): ResponseEntity<Ressurs<OppdragStatus>> {
         val headers = HttpHeaders()
                 .medContentTypeJsonUTF8()
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
@@ -57,7 +57,7 @@ class ØkonomiKlient(
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/status"),
                 HttpMethod.POST,
-                HttpEntity(statusFraOppdragDTO, headers))
+                HttpEntity(oppdragId, headers))
     }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): ResponseEntity<Ressurs<String>> {
@@ -72,7 +72,7 @@ class ØkonomiKlient(
     }
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime,
-                                oppdragTilAvstemming: List<OppdragId>): ResponseEntity<Ressurs<String>> {
+                                oppdragTilAvstemming: List<SøkerOgBehandlingDTO>): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders().medContentTypeJsonUTF8()
 
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
@@ -80,6 +80,6 @@ class ØkonomiKlient(
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/konsistensavstemming/$FAGSYSTEM/?avstemmingsdato=$avstemmingsdato"),
                 HttpMethod.POST,
-                HttpEntity<List<OppdragId>>(oppdragTilAvstemming, headers))
+                HttpEntity<List<SøkerOgBehandlingDTO>>(oppdragTilAvstemming, headers))
     }
 }
