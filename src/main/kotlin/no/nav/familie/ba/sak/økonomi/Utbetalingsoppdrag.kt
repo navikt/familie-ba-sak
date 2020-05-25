@@ -46,7 +46,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
             kodeEndring = if (!erOpphør) NY else UEND,
             fagSystem = FAGSYSTEM,
             saksnummer = vedtak.behandling.fagsak.id.toString(),
-            aktoer = vedtak.behandling.fagsak.personIdent.ident,
+            aktoer = vedtak.behandling.fagsak.hentAktivIdent().ident,
             utbetalingsperiode = utbetalingsperioder
     )
 }
@@ -87,7 +87,7 @@ data class UtbetalingsperiodeMal(
                 segment.tom,
                 BigDecimal(segment.value),
                 MND,
-                vedtak.behandling.fagsak.personIdent.ident,
+                vedtak.behandling.fagsak.hentAktivIdent().ident,
                 vedtak.behandling.id
         )
     }

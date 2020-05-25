@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
@@ -44,12 +45,13 @@ class OppgaveServiceTest {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
-        every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
+        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns listOf(
                 mockk {
                     every { enhetId } returns ENHETSNUMMER
                 }
         )
+        every { integrasjonClient.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
@@ -70,10 +72,11 @@ class OppgaveServiceTest {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
-        every {  oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
+        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
+        every { integrasjonClient.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
@@ -139,11 +142,9 @@ class OppgaveServiceTest {
 
     private fun lagTestBehandling(): Behandling {
         return Behandling(
-                fagsak = Fagsak(
-                        id = FAGSAK_ID,
-                        personIdent = PersonIdent(ident = FNR),
-                        aktørId = AktørId(id = AKTØR_ID_FAGSAK)
-                ),
+                fagsak = Fagsak(id = FAGSAK_ID).also {
+                    it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
+                },
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR)

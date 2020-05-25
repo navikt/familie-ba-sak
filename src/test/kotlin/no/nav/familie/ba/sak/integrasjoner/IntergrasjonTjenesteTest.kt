@@ -83,7 +83,7 @@ class IntergrasjonTjenesteTest {
 
         val identerResponse = integrasjonClient.hentIdenter("12345678910")
 
-        assertThat(identerResponse!!.first().ident).isEqualTo("1234")
+        assertThat(identerResponse.first().ident).isEqualTo("1234")
         verify(anyRequestedFor(anyUrl())
                        .withRequestBody(equalTo("\"12345678910\"")))
     }
@@ -245,18 +245,6 @@ class IntergrasjonTjenesteTest {
         val enhet = integrasjonClient.hentBehandlendeEnhet("1")
         assertThat(enhet).isNotEmpty
         assertThat(enhet.first().enhetId).isEqualTo("2")
-    }
-
-    @Test
-    @Tag("integration")
-    fun `hentAktør returnerer OK`() {
-        stubFor(get("/api/aktoer/v1").willReturn(okJson(objectMapper.writeValueAsString(success(mapOf("aktørId" to 1L))))))
-
-        val aktørId = integrasjonClient.hentAktørId("12")
-        assertThat(aktørId.id).isEqualTo("1")
-
-        verify(getRequestedFor(urlEqualTo("/api/aktoer/v1"))
-                       .withHeader("Nav-Personident", equalTo("12")))
     }
 
     @Test
