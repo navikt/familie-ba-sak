@@ -120,8 +120,6 @@ class FagsakControllerTest(
                 FagsakRequest(personIdent = null, aktørId = aktørId.id)
         )
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-//        Assertions.assertEquals(aktørId,
-//                fagsakService.hent(PersonIdent(nyRestFagsak.body?.data!!.søkerFødselsnummer))?.aktørId) //TODO bytte til å teste med fnr
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(
                 personIdent = null, aktørId = aktørId.id))
