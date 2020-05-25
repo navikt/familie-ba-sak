@@ -54,7 +54,7 @@ fun nestePersonId(): Long {
 
 val defaultFagsak = Fagsak(1,
         FagsakStatus.OPPRETTET).also {
-    it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent("12345")))
+    it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr())))
 }
 
 fun lagBehandling(fagsak: Fagsak = defaultFagsak, behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL) =
