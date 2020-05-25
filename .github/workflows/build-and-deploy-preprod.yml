@@ -65,7 +65,7 @@ jobs:
           OPPDRAG_SCOPE: ${{ secrets.OPPDRAG_SCOPE }}
           BA_SAK_SCOPE: ${{ secrets.BA_SAK_SCOPE }}
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
-        run: cd ba-e2e/e2e; docker-compose up --force-recreate
+        run: cd ba-e2e/e2e; ./e2e.sh
       - name: Kjør tester (e2e)
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         run: cd ba-e2e/autotest; mvn -Dtest="**" test
