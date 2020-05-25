@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegType
@@ -22,18 +23,19 @@ import java.time.LocalDate
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
+                        private val fagsakPersonRepository: FagsakPersonRepository,
                         private val persongrunnlagService: PersongrunnlagService,
                         private val beregningService: BeregningService,
                         private val fagsakService: FagsakService) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
-        val fagsak = fagsakService.hent(personIdent = PersonIdent(nyBehandling.søkersIdent))
+        val fagsak = fagsakPersonRepository.finnFagsak(setOf(PersonIdent (nyBehandling.søkersIdent)))
                      ?: error("Kan ikke lage behandling på person uten tilknyttet fagsak")
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
-        // TOD journalbehandling til å ha en liste av journalpostenr (
+        // TODO: journalbehandling til å ha en liste av journalpostenr (
         return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             lagreNyOgDeaktiverGammelBehandling(
                     Behandling(fagsak = fagsak,

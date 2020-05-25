@@ -45,11 +45,12 @@ class PersongrunnlagService(
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
-        val søker = Person(personIdent = behandling.fagsak.personIdent,
+        val aktørId = integrasjonClient.hentAktivAktørId(fødselsnummer)
+        val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
                            type = PersonType.SØKER,
                            personopplysningGrunnlag = personopplysningGrunnlag,
                            fødselsdato = personinfo.fødselsdato,
-                           aktørId = behandling.fagsak.aktørId,
+                           aktørId = aktørId,
                            navn = personinfo.navn ?: "",
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT
         )
@@ -66,7 +67,7 @@ class PersongrunnlagService(
                                          type = PersonType.BARN,
                                          personopplysningGrunnlag = personopplysningGrunnlag,
                                          fødselsdato = personinfo.fødselsdato,
-                                         aktørId = integrasjonClient.hentAktørId(nyttBarn),
+                                         aktørId = integrasjonClient.hentAktivAktørId(nyttBarn),
                                          navn = personinfo.navn ?: "",
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT
             ))
