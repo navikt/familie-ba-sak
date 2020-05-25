@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import javax.persistence.*
 
@@ -13,21 +12,24 @@ data class Fagsak(
         @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
         val id: Long = 0,
 
-        @Embedded
-        @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
-        val aktørId: AktørId,
-
-        @Embedded
-        @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "person_ident", updatable = false)))
-        val personIdent: PersonIdent,
-
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
-        var status: FagsakStatus = FagsakStatus.OPPRETTET
+        var status: FagsakStatus = FagsakStatus.OPPRETTET,
+
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "fagsak",
+                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE],
+                   orphanRemoval = false
+        )
+        var søkerIdenter: Set<FagsakPerson> = setOf()
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "Fagsak(id=$id, aktørId=$aktørId)"
+        return "Fagsak(id=$id)"
+    }
+
+    fun hentAktivIdent(): PersonIdent {
+        return søkerIdenter.maxBy { it.opprettetTidspunkt }?.personIdent ?: error("Fant ingen ident på fagsak $id")
     }
 }
 
