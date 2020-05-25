@@ -44,9 +44,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: navikt/familie-ba-e2e
-          token: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          token: ${{ secrets.FAMILIE_BA_E2E_SECRET }}
           path: ba-e2e
-      - name: Setter riktig ba-mottak versjon i e2e tester
+      - name: Setter riktig ba-sak versjon i e2e tester
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         run: sed -i 's/familie-ba-sak:latest/familie-ba-sak:'$GITHUB_SHA'/g' ba-e2e/e2e/docker-compose.yml
       - name: Start alle apper (e2e)
