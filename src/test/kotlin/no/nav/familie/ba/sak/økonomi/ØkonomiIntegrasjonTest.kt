@@ -155,9 +155,9 @@ class ØkonomiIntegrasjonTest {
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)
 
-        val oppdragIdListe = behandlingService.hentGjeldendeBehandlingerForLøpendeFagsaker()
+        val søkerOgBehandlingListe = behandlingService.hentGjeldendeBehandlingerForLøpendeFagsaker()
 
-        Assertions.assertTrue(oppdragIdListe.contains(OppdragId(fnr, behandling.id)))
+        Assertions.assertTrue(søkerOgBehandlingListe.contains(OppdragIdForFagsystem(fnr, behandling.id)))
     }
 
     private fun lagBehandlingResultat(behandling: Behandling,

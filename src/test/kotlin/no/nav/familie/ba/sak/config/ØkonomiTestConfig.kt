@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.ba.sak.økonomi.OppdragProtokollStatus
 import no.nav.familie.ba.sak.økonomi.ØkonomiKlient
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -28,8 +28,8 @@ class ØkonomiTestConfig {
         every { økonomiKlient.iverksettOppdrag(any<Utbetalingsoppdrag>()) } returns iverksettRespons
 
         val hentStatusRespons =
-                ResponseEntity.ok().body(Ressurs(OppdragProtokollStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null))
-        every { økonomiKlient.hentStatus(any<StatusFraOppdragDTO>()) } returns hentStatusRespons
+                ResponseEntity.ok().body(Ressurs(OppdragStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null))
+        every { økonomiKlient.hentStatus(any<OppdragId>()) } returns hentStatusRespons
 
         return økonomiKlient
     }
