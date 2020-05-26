@@ -89,7 +89,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         if (ident.isEmpty()) {
             throw IntegrasjonException("Ved henting av identer er ident null eller tom")
         }
-        val uri = URI.create("$integrasjonUri/identer/BAR/historikk")
+        val uri = URI.create("$integrasjonUri/personopplysning/identer/BAR/historikk")
         log.info("Henter identhistorikk fra $uri")
         return try {
             val response = postForEntity<Ressurs<List<IdentInformasjon>>>(uri, ident)
