@@ -39,6 +39,39 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
       - name: Push Docker image
         run: docker push $IMAGE
+      - name: Checkout e2e tests
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        uses: actions/checkout@v2
+        with:
+          repository: navikt/familie-ba-e2e
+          token: ${{ secrets.FAMILIE_BA_E2E_SECRET }}
+          path: ba-e2e
+      - name: Setter riktig ba-sak versjon i e2e tester
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        run: sed -i 's/familie-ba-sak:latest/familie-ba-sak:'$GITHUB_SHA'/g' ba-e2e/e2e/docker-compose.yml
+      - name: Start alle apper (e2e)
+        env:
+          INTEGRASJONER_CLIENT_ID: ${{ secrets.INTEGRASJONER_CLIENT_ID }}
+          INTEGRASJONER_CLIENT_SECRET: ${{ secrets.INTEGRASJONER_CLIENT_SECRET }}
+          INTEGRASJONER_INFOTRYGD_KS_SCOPE: ${{ secrets.INTEGRASJONER_INFOTRYGD_KS_SCOPE }}
+          INTEGRASJONER_AAD_GRAPH_SCOPE: ${{ secrets.INTEGRASJONER_AAD_GRAPH_SCOPE }}
+          SAK_CLIENT_ID: ${{ secrets.SAK_CLIENT_ID }}
+          SAK_CLIENT_SECRET: ${{ secrets.SAK_CLIENT_SECRET }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          SAK_FRONTEND_CLIENT_ID: ${{ secrets.SAK_FRONTEND_CLIENT_ID }}
+          SAK_FRONTEND_CLIENT_SECRET: ${{ secrets.SAK_FRONTEND_CLIENT_SECRET }}
+          OPPDRAG_CLIENT_ID: ${{ secrets.OPPDRAG_CLIENT_ID }}
+          INTEGRASJONER_SCOPE: ${{ secrets.INTEGRASJONER_SCOPE }}
+          OPPDRAG_SCOPE: ${{ secrets.OPPDRAG_SCOPE }}
+          BA_SAK_SCOPE: ${{ secrets.BA_SAK_SCOPE }}
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        run: cd ba-e2e/e2e; ./e2e.sh
+      - name: Kjør tester (e2e)
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: "!contains(github.event.head_commit.message, 'e2e skip')"
+        run: cd ba-e2e/autotest; mvn -Dtest="**" test
       - name: Deploy til dev-fss
         uses: nais/deploy/actions/deploy@v1
         env:

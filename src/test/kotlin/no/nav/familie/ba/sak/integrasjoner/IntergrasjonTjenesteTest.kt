@@ -78,7 +78,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `Hent indenter skal returnere liste av identer`() {
-        stubFor(post("/api/identer/BAR/historikk").willReturn(
+        stubFor(post("/api/personopplysning/identer/BAR/historikk").willReturn(
                 okJson(objectMapper.writeValueAsString(success(listOf(IdentInformasjon("1234", false, "AKTORID")))))))
 
         val identerResponse = integrasjonClient.hentIdenter("12345678910")
