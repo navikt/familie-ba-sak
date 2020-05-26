@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.steg
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
@@ -17,6 +18,7 @@ class SendTilBeslutter(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository,
         private val oppgaveRepository: OppgaveRepository,
+        private val vedtakService: VedtakService,
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
 
@@ -51,6 +53,12 @@ class SendTilBeslutter(
         }
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,
                                                      status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+            ?: error("Fant ikke foreslått vedtak på behandling ${behandling.id}")
+        vedtak.ansvarligEnhet = data
+        vedtakService.lagreEllerOppdater(vedtak)
+
         return hentNesteStegForNormalFlyt(behandling)
     }
 

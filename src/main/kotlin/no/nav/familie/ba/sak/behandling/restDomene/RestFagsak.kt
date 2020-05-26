@@ -14,7 +14,7 @@ data class RestFagsak(
 fun Fagsak.toRestFagsak(restBehandlinger: List<RestBehandling>) = RestFagsak(
         opprettetTidspunkt = this.opprettetTidspunkt,
         id = this.id,
-        søkerFødselsnummer = this.personIdent.ident,
+        søkerFødselsnummer = this.hentAktivIdent().ident,
         status = this.status,
         behandlinger = restBehandlinger
 )

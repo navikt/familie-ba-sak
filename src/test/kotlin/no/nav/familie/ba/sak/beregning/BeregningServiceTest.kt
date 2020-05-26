@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.*
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
@@ -17,11 +18,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class BeregningServiceTest {
+class BeregningServiceTest() {
 
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     val behandlingResultatRepository = mockk<BehandlingResultatRepository>()
     val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
+    val integrasjonClient = mockk<IntegrasjonClient>()
 
     lateinit var beregningService: BeregningService
 
@@ -196,6 +198,8 @@ class BeregningServiceTest {
         val behandlingResultat = BehandlingResultat(
                 behandling = behandling
         )
+
+
 
         val periode1Fom = LocalDate.of(2020, 1, 1)
         val periode1Tom = LocalDate.of(2020, 11, 1)

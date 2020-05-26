@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner
 
 import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.domene.*
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
@@ -46,27 +47,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                         private val environment: Environment)
     : AbstractRestClient(restOperations, "integrasjon") {
 
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    fun hentAktørId(personident: String): AktørId {
-        if (personident.isEmpty()) {
-            throw IntegrasjonException("Ved henting av aktør id er personident null eller tom")
-        }
-        val uri = URI.create("$integrasjonUri/aktoer/v1")
-        logger.info("Henter aktørId fra $uri")
-        return try {
-            val response = getForEntity<Ressurs<MutableMap<*, *>>>(uri, HttpHeaders().medPersonident(personident))
-            secureLogger.info("Vekslet inn fnr: {} til aktørId: {}", personident, response)
-            val aktørId = response.data?.get("aktørId").toString()
-            if (aktørId.isEmpty()) {
-                throw IntegrasjonException(msg = "Kan ikke finne aktørId for ident", ident = personident)
-            } else {
-                AktørId(aktørId)
-            }
-        } catch (e: RestClientException) {
-            throw IntegrasjonException("Ukjent feil ved henting av aktørId", e, uri, personident)
-        }
-    }
-
     fun hentPersonIdent(aktørId: String?): PersonIdent? {
         if (aktørId == null || aktørId.isEmpty()) {
             throw IntegrasjonException("Ved henting av personident er aktørId null eller tom")
@@ -92,7 +72,19 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    fun hentIdenter(ident: String): List<IdentInformasjon>? {
+    fun hentAktivAktørId(ident: String): AktørId {
+        val identer = hentIdenter(ident = ident).filter { !it.historisk && it.gruppe == "AKTORID" }.map { it.ident }
+        if (identer.isEmpty()) error("Finner ingen aktiv aktørId for ident")
+        return AktørId(identer.first())
+    }
+
+    fun hentAktivPersonIdent(ident: String): PersonIdent {
+        val identer = hentIdenter(ident = ident).filter { !it.historisk && it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
+        if (identer.isEmpty()) error("Finner ingen aktiv personIdent for ident")
+        return PersonIdent(identer.first())
+    }
+
+    fun hentIdenter(ident: String): List<IdentInformasjon> {
         if (ident.isEmpty()) {
             throw IntegrasjonException("Ved henting av identer er ident null eller tom")
         }
@@ -100,7 +92,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         log.info("Henter identhistorikk fra $uri")
         return try {
             val response = postForEntity<Ressurs<List<IdentInformasjon>>>(uri, ident)
-            response?.getDataOrThrow()
+            response?.getDataOrThrow() ?: error("Finner ingen identer for ident")
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av identer", e, uri, ident)
         }
@@ -369,22 +361,25 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun journalFørVedtaksbrev(fnr: String, fagsakId: String, pdf: ByteArray): String {
-        return lagJournalpostForVedtaksbrev(fnr, fagsakId, pdf)
+    fun journalFørVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak): String {
+        return lagJournalpostForVedtaksbrev(fnr, fagsakId, vedtak)
     }
 
-    fun lagJournalpostForVedtaksbrev(fnr: String, fagsakId: String, pdfByteArray: ByteArray): String {
+    fun lagJournalpostForVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak): String {
         val uri = URI.create("$integrasjonUri/arkiv/v2")
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
+        if (vedtak.ansvarligEnhet == "9999") {
+            logger.error("Informasjon om enhet mangler på bruker ${vedtak.ansvarligSaksbehandler} og er satt til fallback-verdi, 9999")
+        }
 
         return Result.runCatching {
             val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
-            val dokumenter = listOf(Dokument(pdfByteArray, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE),
+            val dokumenter = listOf(Dokument(vedtak.stønadBrevPdF!!, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE),
                                     Dokument(vedleggPdf,
                                              FilType.PDFA,
                                              dokumentType = VEDLEGG_DOKUMENT_TYPE,
                                              tittel = VEDTAK_VEDLEGG_TITTEL))
-            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, "9999")
+            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, vedtak.ansvarligEnhet)
             val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(

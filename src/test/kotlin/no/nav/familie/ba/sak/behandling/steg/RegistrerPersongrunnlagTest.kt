@@ -14,6 +14,7 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
@@ -52,6 +53,10 @@ class RegistrerPersongrunnlagTest(
         val barn1Id = randomFnr()
         val barn2Id = randomFnr()
 
+        every {
+            integrasjonClient.hentPersoninfoFor(any())
+        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -62,10 +67,10 @@ class RegistrerPersongrunnlagTest(
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
-        Assertions.assertTrue(grunnlag1!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertEquals(3, grunnlag1!!.personer.size)
+        Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn2Id })
-        Assertions.assertEquals(3, grunnlag1.personer.size)
     }
 
     @Test
@@ -79,7 +84,6 @@ class RegistrerPersongrunnlagTest(
             integrasjonClient.hentPersoninfoFor(any())
         } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -89,21 +93,22 @@ class RegistrerPersongrunnlagTest(
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
-        Assertions.assertTrue(grunnlag1!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertEquals(2, grunnlag1!!.personer.size)
+        Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
-        Assertions.assertEquals(2, grunnlag1.personer.size)
+
 
         stegService.håndterPersongrunnlag(behandling = behandling1,
                                           registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(ident = morId,
                                                                                                   barnasIdenter = listOf(barn1Id,
                                                                                                                          barn2Id)))
-
         val grunnlag2 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
-        Assertions.assertTrue(grunnlag2!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertEquals(3, grunnlag2!!.personer.size)
+        Assertions.assertTrue(grunnlag2.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag2.personer.any { it.personIdent.ident == barn1Id })
         Assertions.assertTrue(grunnlag2.personer.any { it.personIdent.ident == barn2Id })
-        Assertions.assertEquals(3, grunnlag2.personer.size)
+
 
         // Skal ikke føre til flere personer på persongrunnlaget
         stegService.håndterPersongrunnlag(behandling = behandling1,
@@ -113,9 +118,10 @@ class RegistrerPersongrunnlagTest(
 
         val grunnlag3 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
-        Assertions.assertTrue(grunnlag3!!.personer.any { it.personIdent.ident == morId })
+        Assertions.assertEquals(3, grunnlag3!!.personer.size)
+        Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == barn1Id })
         Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == barn2Id })
-        Assertions.assertEquals(3, grunnlag3.personer.size)
+
     }
 }

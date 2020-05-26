@@ -26,9 +26,6 @@ class SøkFagsakNegativeTest {
     lateinit var fagsakService: FagsakService
 
     @Autowired
-    lateinit var integrasjonClient: IntegrasjonClient
-
-    @Autowired
     lateinit var fagsakController: FagsakController
 
     @Test

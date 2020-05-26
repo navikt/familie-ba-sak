@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDLEGG_DOKUMENT_TYPE
@@ -81,7 +83,7 @@ class IntergrasjonTjenesteTest {
 
         val identerResponse = integrasjonClient.hentIdenter("12345678910")
 
-        assertThat(identerResponse!!.first().ident).isEqualTo("1234")
+        assertThat(identerResponse.first().ident).isEqualTo("1234")
         verify(anyRequestedFor(anyUrl())
                        .withRequestBody(equalTo("\"12345678910\"")))
     }
@@ -132,7 +134,11 @@ class IntergrasjonTjenesteTest {
                                             .withHeader("Content-Type", "application/json")
                                             .withBody(objectMapper.writeValueAsString(journalpostOkResponse()))))
 
-        val journalPostId = integrasjonClient.lagJournalpostForVedtaksbrev(mockFnr, mockFagsakId, mockPdf)
+        val vedtak = lagVedtak(lagBehandling())
+        vedtak.stønadBrevPdF = mockPdf
+        vedtak.ansvarligEnhet = "1"
+
+        val journalPostId = integrasjonClient.lagJournalpostForVedtaksbrev(mockFnr, mockFagsakId, vedtak)
 
         assertThat(journalPostId).isEqualTo(mockJournalpostForVedtakId)
         verify(anyRequestedFor(anyUrl())
@@ -243,18 +249,6 @@ class IntergrasjonTjenesteTest {
 
     @Test
     @Tag("integration")
-    fun `hentAktør returnerer OK`() {
-        stubFor(get("/api/aktoer/v1").willReturn(okJson(objectMapper.writeValueAsString(success(mapOf("aktørId" to 1L))))))
-
-        val aktørId = integrasjonClient.hentAktørId("12")
-        assertThat(aktørId.id).isEqualTo("1")
-
-        verify(getRequestedFor(urlEqualTo("/api/aktoer/v1"))
-                       .withHeader("Nav-Personident", equalTo("12")))
-    }
-
-    @Test
-    @Tag("integration")
     fun `hentPersonIdent returnerer OK`() {
         stubFor(get("/api/aktoer/v1/fraaktorid").willReturn(okJson(objectMapper.writeValueAsString(success(mapOf("personIdent" to 1L))))))
 
@@ -342,7 +336,7 @@ class IntergrasjonTjenesteTest {
         return ArkiverDokumentRequest(fnr = mockFnr,
                                       forsøkFerdigstill = true,
                                       fagsakId = mockFagsakId,
-                                      journalførendeEnhet = "9999",
+                                      journalførendeEnhet = "1",
                                       dokumenter = listOf(Dokument(dokument = mockPdf,
                                                                    filType = FilType.PDFA,
                                                                    dokumentType = VEDTAK_DOKUMENT_TYPE),

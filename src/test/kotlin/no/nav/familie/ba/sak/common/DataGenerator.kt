@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.common
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
@@ -52,9 +53,9 @@ fun nestePersonId(): Long {
 }
 
 val defaultFagsak = Fagsak(1,
-        AktørId("1"),
-        PersonIdent("12345"),
-        FagsakStatus.OPPRETTET)
+        FagsakStatus.OPPRETTET).also {
+    it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr())))
+}
 
 fun lagBehandling(fagsak: Fagsak = defaultFagsak, behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL) =
         Behandling(id = nesteBehandlingId(),
@@ -81,7 +82,6 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
                 behandling = behandling,
                 ansvarligSaksbehandler = "ansvarligSaksbehandler",
                 vedtaksdato = LocalDate.now(),
-                stønadBrevMarkdown = "",
                 forrigeVedtakId = forrigeVedtak?.id,
                 opphørsdato = opphørsdato
         )

@@ -58,7 +58,7 @@ data class Person(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(aktørId, fødselsdato)
+        return Objects.hash(personIdent, fødselsdato)
     }
 }
 

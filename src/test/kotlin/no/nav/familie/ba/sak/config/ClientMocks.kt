@@ -6,7 +6,10 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.domene.*
@@ -14,6 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -52,7 +56,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")
 
-        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), TEST_PDF) } returns "journalpostId"
+        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), any()) } returns "journalpostId"
 
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("9999",
                                                                                                                  "Ukjent"))
@@ -80,9 +84,21 @@ class ClientMocks {
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
         every {
-            mockIntegrasjonClient.hentAktørId(any())
+            mockIntegrasjonClient.hentAktivAktørId(any())
         } answers {
             randomAktørId()
+        }
+
+        every {
+            mockIntegrasjonClient.hentAktivPersonIdent(any())
+        } answers {
+            PersonIdent(randomFnr())
+        }
+
+        every {
+            mockIntegrasjonClient.hentIdenter(any())
+        } answers {
+            listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
         }
 
         every {
@@ -162,7 +178,13 @@ class ClientMocks {
                              ))
 
         every {
-            mockIntegrasjonClient.hentAktørId(any())
+            mockIntegrasjonClient.hentIdenter(any())
+        } answers {
+            listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
+        }
+
+        every {
+            mockIntegrasjonClient.hentAktivAktørId(any())
         } answers {
             randomAktørId()
         }
@@ -201,6 +223,10 @@ fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, s�
     every {
         mockIntegrasjonClient.hentPersoninfoFor(eq(søkerFnr))
     } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+
+    every {
+        mockIntegrasjonClient.hentAktivAktørId(any())
+    } returns AktørId("1")
 }
 
 val TEST_PDF = "TEST PDF".toByteArray()

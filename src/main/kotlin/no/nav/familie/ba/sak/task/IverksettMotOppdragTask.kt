@@ -53,7 +53,7 @@ class IverksettMotOppdragTask(
 
         fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String): Task {
 
-            return opprettTask(behandling.fagsak.personIdent.ident,
+            return opprettTask(behandling.fagsak.hentAktivIdent().ident,
                                behandling.id,
                                vedtak.id,
                                saksbehandlerId)

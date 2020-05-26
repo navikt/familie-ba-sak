@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.lagTidslinjeMedOverlappendePerioder
+import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -37,9 +38,7 @@ class PeriodeMapperTest {
 
     @BeforeEach
     fun initEach() {
-        val fagsak = Fagsak(aktørId = AktørId("123"),
-                            personIdent = PersonIdent("123"),
-                            status = FagsakStatus.OPPRETTET)
+        val fagsak = defaultFagsak
         val behandling = Behandling(fagsak = fagsak,
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
