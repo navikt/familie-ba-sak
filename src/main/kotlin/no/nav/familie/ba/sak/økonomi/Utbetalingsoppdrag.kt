@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioder
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -13,6 +14,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode.SatsType.MND
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
+import java.time.LocalDate
 
 // Må forsikre oss om at tidslinjesegmentene er i samme rekkefølge for å få konsekvent periodeId
 // Sorter etter fraDato, sats, og evt til dato
@@ -31,14 +33,26 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
             else
                 UtbetalingsperiodeMal(vedtak)
 
-    val tidslinjeMap = beregnUtbetalingsperioder(andelerTilkjentYtelse)
+    //val tidslinjeMap = beregnUtbetalingsperioder(andelerTilkjentYtelse)
 
-    val utbetalingsperioder = tidslinjeMap.flatMap { (klassifisering, tidslinje) ->
+/*    val utbetalingsperioder = tidslinjeMap.flatMap { (klassifisering, tidslinje) ->
         tidslinje.toSegments()
                 .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                 .mapIndexed { indeks, segment ->
                     utbetalingsperiodeMal.lagPeriode(klassifisering, segment, indeks)
                 }.kunSisteHvis(erOpphør)
+    }*/
+
+    val utbetalingsperioder = andelerTilkjentYtelse
+            .sortedBy { andel -> andel.stønadFom }
+            .mapIndexed { indeks, andel ->
+                utbetalingsperiodeMal.lagPeriodeFraAndel(
+                        klassifisering = andel.type.klassifisering,
+                        stønadFom = andel.stønadFom,
+                        stønadTom = andel.stønadTom,
+                        beløp = andel.beløp,
+                        periodeIdOffset = indeks
+                )
     }
 
     return Utbetalingsoppdrag(
@@ -86,6 +100,33 @@ data class UtbetalingsperiodeMal(
                 segment.fom,
                 segment.tom,
                 BigDecimal(segment.value),
+                MND,
+                vedtak.behandling.fagsak.hentAktivIdent().ident,
+                vedtak.behandling.id
+        )
+    }
+
+    fun lagPeriodeFraAndel(klassifisering: String, stønadFom: LocalDate, stønadTom: LocalDate, beløp: Int, periodeIdOffset: Int): Utbetalingsperiode {
+
+        // Vedtak-id øker med 50, så vi kan ikke risikere overflow
+        if (periodeIdOffset >= MAX_PERIODEID_OFFSET) {
+            throw IllegalArgumentException("periodeIdOffset forsøkt satt høyere enn ${MAX_PERIODEID_OFFSET}. " +
+                    "Det ville ført til duplisert periodeId")
+        }
+
+        // Skaper "plass" til offset
+        val utvidetPeriodeIdStart = periodeIdStart * MAX_PERIODEID_OFFSET
+
+        return Utbetalingsperiode(
+                erEndringPåEksisterendePeriode,
+                vedtak.opphørsdato?.let { Opphør(it) },
+                utvidetPeriodeIdStart + periodeIdOffset,
+                if (periodeIdOffset > 0) utvidetPeriodeIdStart + (periodeIdOffset - 1).toLong() else null,
+                vedtak.vedtaksdato,
+                klassifisering,
+                stønadFom,
+                stønadTom,
+                BigDecimal(beløp),
                 MND,
                 vedtak.behandling.fagsak.hentAktivIdent().ident,
                 vedtak.behandling.id
