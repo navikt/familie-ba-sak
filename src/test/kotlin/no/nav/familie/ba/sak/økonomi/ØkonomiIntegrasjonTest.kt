@@ -157,7 +157,7 @@ class ØkonomiIntegrasjonTest {
 
         val søkerOgBehandlingListe = behandlingService.hentGjeldendeBehandlingerForLøpendeFagsaker()
 
-        Assertions.assertTrue(søkerOgBehandlingListe.contains(SøkerOgBehandlingDTO(fnr, behandling.id)))
+        Assertions.assertTrue(søkerOgBehandlingListe.contains(OppdragIdForFagsystem(fnr, behandling.id)))
     }
 
     private fun lagBehandlingResultat(behandling: Behandling,
