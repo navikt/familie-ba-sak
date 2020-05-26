@@ -1,0 +1,38 @@
+{
+  "kodeEndring": "NY",
+  "fagSystem": "BA",
+  "saksnummer": "1004151",
+  "aktoer": "02098918917",
+  "saksbehandlerId": "F_Z992637.E_Z992637@trygdeetaten.no",
+  "avstemmingTidspunkt": "2020-02-25T10:03:03.283032",
+  "utbetalingsperiode": [
+    {
+      "erEndringPåEksisterendePeriode": false,
+      "opphør": null,
+      "periodeId": 1002301000,
+      "forrigePeriodeId": null,
+      "datoForVedtak": "2020-02-25",
+      "klassifisering": "BATR",
+      "vedtakdatoFom": "2018-06-01",
+      "vedtakdatoTom": "2036-06-30",
+      "sats": 1054,
+      "satsType": "MND",
+      "utbetalesTil": "02098918917",
+      "behandlingId": 1008201
+    },
+    {
+      "erEndringPåEksisterendePeriode": false,
+      "opphør": null,
+      "periodeId": 1002301001,
+      "forrigePeriodeId": null,
+      "datoForVedtak": "2020-02-25",
+      "klassifisering": "BATR",
+      "vedtakdatoFom": "2020-03-01",
+      "vedtakdatoTom": "2038-02-28",
+      "sats": 1054,
+      "satsType": "MND",
+      "utbetalesTil": "02098918917",
+      "behandlingId": 1008201
+    }
+  ]
+}
