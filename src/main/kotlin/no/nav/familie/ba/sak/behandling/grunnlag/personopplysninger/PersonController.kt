@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.behandling.restDomene.toRestPersonInfo
-import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -32,7 +32,8 @@ class PersonController(private val integrasjonClient: IntegrasjonClient) {
         }
                 .fold(
                         onFailure = {
-                            illegalState("Hent person feilet: ${it.message}", it)
+                            throw Feil(message = "Hent person feilet: ${it.message}",
+                                       frontendFeilmelding = "Henting av person med ident '$personIdent' feilet.")
                         },
                         onSuccess = {
                             ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent)))

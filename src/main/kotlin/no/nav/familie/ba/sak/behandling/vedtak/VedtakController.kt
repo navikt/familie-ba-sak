@@ -39,7 +39,7 @@ class VedtakController(
     fun opprettEllerOppdaterVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
                                    @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         return Result.runCatching {
             stegService.håndterVilkårsvurdering(behandling, restVilkårsvurdering)
@@ -59,14 +59,14 @@ class VedtakController(
 
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         return Result.runCatching {
             stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
         }.fold(
                 onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId)) },
                 onFailure = {
-                    illegalState((it.cause?.message ?: it.message).toString(), it)
+                    throw it
                 }
         )
     }
@@ -75,7 +75,7 @@ class VedtakController(
     fun iverksettVedtak(@PathVariable fagsakId: Long,
                         @RequestBody restBeslutningPåVedtak: RestBeslutningPåVedtak): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         return Result.runCatching { stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak) }
                 .fold(
@@ -101,22 +101,22 @@ class VedtakController(
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter task for opphør av migrert vedtak for fagsak med id $fagsakId")
 
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
+                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+                     ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
         if (behandling.status != BehandlingStatus.IVERKSATT && behandling.status != BehandlingStatus.FERDIGSTILT) {
             return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt/ferdigstilt")
         }
 
         val task = OpphørVedtakTask.opprettOpphørVedtakTask(behandling,
-                vedtak,
-                saksbehandlerId,
-                if (behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD)
-                    BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
-                else BehandlingType.TEKNISK_OPPHØR,
-                opphørsvedtak.opphørsdato)
+                                                            vedtak,
+                                                            saksbehandlerId,
+                                                            if (behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD)
+                                                                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+                                                            else BehandlingType.TEKNISK_OPPHØR,
+                                                            opphørsvedtak.opphørsdato)
         taskRepository.save(task)
 
         return ResponseEntity.ok(Ressurs.success("Task for opphør av migrert behandling og vedtak på fagsak $fagsakId opprettet"))
@@ -142,5 +142,6 @@ data class RestBeslutningPåVedtak(
 
 enum class Beslutning {
     GODKJENT, UNDERKJENT;
+
     fun erGodkjent() = this == GODKJENT
 }

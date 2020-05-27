@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
@@ -55,7 +56,8 @@ class SendTilBeslutter(
                                                      status = BehandlingStatus.SENDT_TIL_BESLUTTER)
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-            ?: error("Fant ikke foreslått vedtak på behandling ${behandling.id}")
+                     ?: throw Feil(message = "Fant ikke foreslått vedtak på behandling ${behandling.id}",
+                                   frontendFeilmelding = "Fant ikke foreslått vedtak på behandling ${behandling.id}")
         vedtak.ansvarligEnhet = data
         vedtakService.lagreEllerOppdater(vedtak)
 

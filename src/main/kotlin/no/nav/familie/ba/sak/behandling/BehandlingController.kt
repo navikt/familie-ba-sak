@@ -8,9 +8,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.common.RessursUtils.badRequest
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -36,22 +35,22 @@ class BehandlingController(private val fagsakService: FagsakService,
     @PostMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         if (nyBehandling.søkersIdent.isBlank()) {
-            return badRequest("Søkers ident kan ikke være blank", null)
+            throw Feil(message = "Søkers ident kan ikke være blank",
+                       frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.")
         }
 
         return Result.runCatching {
             stegService.håndterNyBehandling(nyBehandling)
-        }
-                .fold(
-                        onFailure = {
-                            badRequest("Opprettelse av behandling feilet: ${it.cause?.message ?: it.message}", it)
-                        },
-                        onSuccess = {
-                            val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
-                            antallManuelleBehandlingerOpprettet[nyBehandling.behandlingType]?.increment()
-                            return restFagsak
-                        }
-                )
+        }.fold(
+                onSuccess = {
+                    val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
+                    antallManuelleBehandlingerOpprettet[nyBehandling.behandlingType]?.increment()
+                    return restFagsak
+                },
+                onFailure = {
+                    throw it
+                }
+        )
     }
 
     @PutMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])

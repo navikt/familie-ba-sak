@@ -41,7 +41,7 @@ class FagsakController(
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
                 .fold(
                         onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
-                        onFailure = { ResponseEntity.ok(Ressurs.failure(errorMessage = "Opprettelse eller henting av fagsak feilet", error = it)) }
+                        onFailure = { throw it }
                 )
     }
 
