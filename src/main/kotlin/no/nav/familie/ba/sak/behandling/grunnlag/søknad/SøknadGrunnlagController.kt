@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
-import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -31,7 +31,7 @@ class SøknadGrunnlagController(
         val behandling = behandlingService.hent(behandlingId = behandlingId)
 
         return Result.runCatching {
-                    stegService.håndterSøknad(behandling, RestRegistrerSøknad(søknad = søknadDTO, bekreftEndringerViaFrontend = true))
+            stegService.håndterSøknad(behandling, RestRegistrerSøknad(søknad = søknadDTO, bekreftEndringerViaFrontend = true))
         }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
@@ -44,7 +44,8 @@ class SøknadGrunnlagController(
     @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag/v2"],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registrereSøknadOgHentPersongrunnlagV2(@PathVariable behandlingId: Long,
-                                             @RequestBody restRegistrerSøknad: RestRegistrerSøknad): ResponseEntity<Ressurs<RestFagsak>> {
+                                               @RequestBody
+                                               restRegistrerSøknad: RestRegistrerSøknad): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hent(behandlingId = behandlingId)
 
         return Result.runCatching {
@@ -64,7 +65,8 @@ class SøknadGrunnlagController(
                 .fold(
                         onSuccess = {
                             when (it) {
-                                null -> return notFound("Fant ikke søknadsgrunnlag å behandling")
+                                null -> throw Feil(message = "Fant ikke søknadsgrunnlag på behandling",
+                                                   frontendFeilmelding = "Klarte ikke å hente søknadsgrunnlag på behandling")
                                 else -> ResponseEntity.ok(Ressurs.success(it.hentSøknadDto()))
                             }
                         },

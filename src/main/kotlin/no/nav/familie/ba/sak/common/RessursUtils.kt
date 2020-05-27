@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 object RessursUtils {
-    val LOG = LoggerFactory.getLogger(this::class.java)
-    val secureLogger = LoggerFactory.getLogger("secureLogger")
+    private val LOG = LoggerFactory.getLogger(this::class.java)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun <T> notFound(errorMessage: String): ResponseEntity<Ressurs<T>> =
             errorResponse(HttpStatus.NOT_FOUND, errorMessage, null)

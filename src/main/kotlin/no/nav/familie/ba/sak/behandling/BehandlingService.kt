@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
@@ -30,12 +31,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
-        val fagsak = fagsakPersonRepository.finnFagsak(setOf(PersonIdent (nyBehandling.søkersIdent)))
-                     ?: error("Kan ikke lage behandling på person uten tilknyttet fagsak")
+        val fagsak = fagsakPersonRepository.finnFagsak(setOf(PersonIdent(nyBehandling.søkersIdent)))
+                     ?: throw Feil(message = "Kan ikke lage behandling på person uten tilknyttet fagsak",
+                                   frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak")
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
-        // TODO: journalbehandling til å ha en liste av journalpostenr (
+        // TODO: journalbehandling til å ha en liste av journalpostenr
         return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             lagreNyOgDeaktiverGammelBehandling(
                     Behandling(fagsak = fagsak,
@@ -49,7 +51,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             aktivBehandling.status = BehandlingStatus.OPPRETTET
             behandlingRepository.save(aktivBehandling)
         } else {
-            error("Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
+            throw Feil(message = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
+                       frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
     }
 
