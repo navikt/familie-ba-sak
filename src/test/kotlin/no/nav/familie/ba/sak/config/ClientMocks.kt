@@ -1,13 +1,8 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.runs
+import io.mockk.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -95,10 +90,11 @@ class ClientMocks {
             PersonIdent(randomFnr())
         }
 
+        val identSlot = slot<String>()
         every {
-            mockIntegrasjonClient.hentIdenter(any())
+            mockIntegrasjonClient.hentIdenter(capture(identSlot))
         } answers {
-            listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
+            listOf(IdentInformasjon(identSlot.captured, false, "FOLKEREGISTERIDENT"))
         }
 
         every {
@@ -229,4 +225,4 @@ fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, s�
     } returns AktørId("1")
 }
 
-val TEST_PDF = "TEST PDF".toByteArray()
+val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()
