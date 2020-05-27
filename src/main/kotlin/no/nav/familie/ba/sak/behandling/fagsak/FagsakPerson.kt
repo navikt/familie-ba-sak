@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.LocalDateTime
