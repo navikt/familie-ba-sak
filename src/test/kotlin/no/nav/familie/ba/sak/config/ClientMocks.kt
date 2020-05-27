@@ -229,4 +229,4 @@ fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, s√
     } returns Akt√∏rId("1")
 }
 
-val TEST_PDF = "TEST PDF".toByteArray()
+val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()
