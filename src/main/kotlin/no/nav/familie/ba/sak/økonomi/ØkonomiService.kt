@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 
@@ -62,8 +64,8 @@ class ØkonomiService(
                 )
     }
 
-    fun hentStatus(statusFraOppdragDTO: StatusFraOppdragDTO): OppdragProtokollStatus {
-        Result.runCatching { økonomiKlient.hentStatus(statusFraOppdragDTO) }
+    fun hentStatus(oppdragId: OppdragId): OppdragStatus {
+        Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
                 .fold(
                         onSuccess = {
                             checkNotNull(it.body) { "Finner ikke ressurs" }

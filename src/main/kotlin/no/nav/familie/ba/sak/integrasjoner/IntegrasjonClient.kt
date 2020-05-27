@@ -20,6 +20,7 @@ import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.arkivering.Dokument
 import no.nav.familie.kontrakter.felles.arkivering.FilType
 import no.nav.familie.kontrakter.felles.distribusjon.DistribuerJournalpostRequest
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
@@ -88,7 +89,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         if (ident.isEmpty()) {
             throw IntegrasjonException("Ved henting av identer er ident null eller tom")
         }
-        val uri = URI.create("$integrasjonUri/identer/BAR/historikk")
+        val uri = URI.create("$integrasjonUri/personopplysning/identer/BAR/historikk")
         log.info("Henter identhistorikk fra $uri")
         return try {
             val response = postForEntity<Ressurs<List<IdentInformasjon>>>(uri, ident)
