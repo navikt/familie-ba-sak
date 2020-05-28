@@ -31,6 +31,9 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
             else
                 UtbetalingsperiodeMal(vedtak)
 
+    val andelerForPersoner = andelerTilkjentYtelse.groupBy { andel -> andel.personIdent }
+    
+
     val utbetalingsperioder = andelerTilkjentYtelse
             .mapIndexed { index, andelTilkjentYtelse ->
                 utbetalingsperiodeMal.lagPeriodeFraAndel(andelTilkjentYtelse, index)

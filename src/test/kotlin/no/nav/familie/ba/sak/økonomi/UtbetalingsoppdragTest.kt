@@ -15,7 +15,6 @@ import java.time.LocalDate.now
 internal class UtbetalingsoppdragPeriodiseringTest {
 
     @Test
-    @Disabled
     fun `skal opprette et nytt utbetalingsoppdrag med løpende periodeId fordelt på flere klasser`() {
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling=behandling)

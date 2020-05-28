@@ -91,8 +91,10 @@ fun lagAndelTilkjentYtelse(fom: String,
                            ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
                            beløp: Int = sats(ytelseType),
                            behandling: Behandling = lagBehandling()): AndelTilkjentYtelse {
+    val person = tilfeldigPerson()
     return AndelTilkjentYtelse(
-            personId = tilfeldigPerson().id,
+            personId = person.id,
+            personIdent = person.personIdent.ident,
             behandlingId = behandling.id,
             tilkjentYtelse = lagInitiellTilkjentYtelse(behandling),
             beløp = beløp,
