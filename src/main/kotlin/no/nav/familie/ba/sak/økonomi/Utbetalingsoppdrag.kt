@@ -32,12 +32,14 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                 UtbetalingsperiodeMal(vedtak)
 
     val andelerForPersoner = andelerTilkjentYtelse.groupBy { andel -> andel.personIdent }
-    
 
-    val utbetalingsperioder = andelerTilkjentYtelse
-            .mapIndexed { index, andelTilkjentYtelse ->
-                utbetalingsperiodeMal.lagPeriodeFraAndel(andelTilkjentYtelse, index)
-            }
+    var hovedIndeks = 0
+    val utbetalingsperioder: List<Utbetalingsperiode> = andelerForPersoner.flatMap { personMedAndeler ->
+        personMedAndeler.value.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
+            val forrigeOffset = if (index == 0) null else hovedIndeks - 1
+            utbetalingsperiodeMal.lagPeriodeFraAndel(andel, hovedIndeks, forrigeOffset).also { hovedIndeks++ }
+        }
+    }
 
     return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
@@ -90,12 +92,12 @@ data class UtbetalingsperiodeMal(
         )
     }
 
-    fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse, periodeIdOffset: Int): Utbetalingsperiode {
+    fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse, periodeIdOffset: Int, forrigePeriodeIdOffset: Int?): Utbetalingsperiode {
 
         // Vedtak-id øker med 50, så vi kan ikke risikere overflow
         if (periodeIdOffset >= MAX_PERIODEID_OFFSET) {
             throw IllegalArgumentException("periodeIdOffset forsøkt satt høyere enn ${MAX_PERIODEID_OFFSET}. " +
-                    "Det ville ført til duplisert periodeId")
+                                           "Det ville ført til duplisert periodeId")
         }
 
         // Skaper "plass" til offset
@@ -103,6 +105,7 @@ data class UtbetalingsperiodeMal(
 
         return Utbetalingsperiode(
                 erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
+                forrigePeriodeId = forrigePeriodeIdOffset?.let { utvidetPeriodeIdStart + forrigePeriodeIdOffset.toLong() },
                 opphør = vedtak.opphørsdato?.let { Opphør(it) },
                 periodeId = utvidetPeriodeIdStart + periodeIdOffset,
                 datoForVedtak = vedtak.vedtaksdato,
