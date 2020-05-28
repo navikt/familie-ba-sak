@@ -28,8 +28,6 @@ class Vilkårsvurdering(
         private val persongrunnlagService: PersongrunnlagService
 ) : BehandlingSteg<RestVilkårsvurdering> {
 
-    private val LOG = LoggerFactory.getLogger(this::class.java)
-
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: RestVilkårsvurdering,

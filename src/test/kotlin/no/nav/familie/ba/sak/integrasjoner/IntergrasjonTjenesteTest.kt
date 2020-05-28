@@ -267,8 +267,7 @@ class IntergrasjonTjenesteTest {
                 oppgaveId))))))
 
         val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
-        assertThat(oppgave.data).isNotNull
-        assertThat(oppgave.data?.id).isEqualTo(oppgaveId)
+        assertThat(oppgave.id).isEqualTo(oppgaveId)
 
         verify(getRequestedFor(urlEqualTo("/api/oppgave/$oppgaveId")))
     }

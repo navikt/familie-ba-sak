@@ -145,7 +145,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 .build().toUri()
 
         return try {
-            val response = getForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, httpHeaders = HttpHeaders().medPersonident(ident))
+            val response =
+                    getForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, httpHeaders = HttpHeaders().medPersonident(ident))
             response.data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
                                                         null,
                                                         uri)
@@ -242,7 +243,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun finnOppgaveMedId(oppgaveId: Long): Ressurs<Oppgave> {
+    fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
 
         return Result.runCatching {
@@ -250,7 +251,9 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }.fold(
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
-                    it
+
+                    secureLogger.info("Oppgave fra $uri med id $oppgaveId inneholder: ${it.data}")
+                    it.data!!
                 },
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
