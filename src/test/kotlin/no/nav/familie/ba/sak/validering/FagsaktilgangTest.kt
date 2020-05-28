@@ -79,10 +79,12 @@ internal class FagsaktilgangTest {
                                                  fagsak = mockk(),
                                                  kategori = BehandlingKategori.NASJONAL,
                                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                 underkategori = BehandlingUnderkategori.ORDINÆR),
+                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
+                                                 opprinnelse = BehandlingOpprinnelse.MANUELL),
                                       Behandling(id = 2,
                                                  fagsak = mockk(),
                                                  kategori = BehandlingKategori.NASJONAL,
                                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                 underkategori = BehandlingUnderkategori.ORDINÆR))
+                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
+                                                 opprinnelse = BehandlingOpprinnelse.MANUELL))
 }

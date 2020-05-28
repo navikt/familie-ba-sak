@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -59,7 +59,8 @@ class VedtakService(private val behandlingService: BehandlingService,
                                       journalpostID = null,
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
-                                      underkategori = gjeldendeBehandling.underkategori)
+                                      underkategori = gjeldendeBehandling.underkategori,
+                                      opprinnelse = BehandlingOpprinnelse.MANUELL)
 
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
         behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
@@ -119,27 +120,6 @@ class VedtakService(private val behandlingService: BehandlingService,
         lagreOgDeaktiverGammel(vedtak)
 
         return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
-    }
-
-    fun hentVedtaksbrevMarkdown(vedtak: Vedtak): String {
-        val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(vedtak.behandling.id)
-
-        return Result.runCatching {
-            val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
-
-            dokumentService.hentStønadBrevMarkdown(
-                    vedtak = vedtak,
-                    behandlingResultatType = behandlingResultatType,
-                    søknad = søknad
-            )
-        }
-                .fold(
-                        onSuccess = { it },
-                        onFailure = { e ->
-                            secureLogger.info("Klart ikke å oppdatere vedtak med vedtaksbrev: ${e.message}", e)
-                            error("Klart ikke å oppdatere vedtak med vedtaksbrev: ${e.message}")
-                        }
-                )
     }
 
     fun hentForrigeVedtak(behandling: Behandling): Vedtak? {

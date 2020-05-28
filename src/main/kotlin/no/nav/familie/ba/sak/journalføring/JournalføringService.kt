@@ -1,19 +1,15 @@
 package no.nav.familie.ba.sak.journalføring
 
 import no.nav.familie.ba.sak.behandling.NyBehandling
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.*
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
-import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
@@ -30,7 +26,6 @@ import java.time.LocalDate
 class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                            private val fagsakService: FagsakService,
                            private val stegService: StegService,
-                           private val loggService: LoggService,
                            private val oppgaveService: OppgaveService) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
@@ -96,12 +91,14 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
     }
 
     private fun opprettNyBehandling(søkersIdent: String, journalpostId: String): Behandling {
-        val nyBehandling = NyBehandling(søkersIdent = søkersIdent,
-                                        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                        kategori = BehandlingKategori.NASJONAL,
-                                        underkategori = BehandlingUnderkategori.ORDINÆR,
-                                        journalpostID = journalpostId)
-        return stegService.håndterNyBehandling(nyBehandling)
+        return stegService.håndterNyBehandling(
+                NyBehandling(søkersIdent = søkersIdent,
+                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                             kategori = BehandlingKategori.NASJONAL,
+                             underkategori = BehandlingUnderkategori.ORDINÆR,
+                             journalpostID = journalpostId,
+                             behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_JOURNALFØRING)
+        )
     }
 
     private fun oppdaterOgFerdigstill(request: OppdaterJournalpostRequest,

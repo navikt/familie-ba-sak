@@ -41,6 +41,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             lagreNyOgDeaktiverGammelBehandling(
                     Behandling(fagsak = fagsak,
+                               opprinnelse = nyBehandling.behandlingOpprinnelse,
                                journalpostID = nyBehandling.journalpostID,
                                type = nyBehandling.behandlingType,
                                kategori = nyBehandling.kategori,

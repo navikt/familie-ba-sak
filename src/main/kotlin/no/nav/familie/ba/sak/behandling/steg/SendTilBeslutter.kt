@@ -64,14 +64,19 @@ class SendTilBeslutter(
                      ?: throw Feil(message = "Fant ikke foreslått vedtak på behandling ${behandling.id}",
                                    frontendFeilmelding = "Fant ikke foreslått vedtak på behandling ${behandling.id}")
 
-        val enhetFraBehandleSakOppgave: String? = if (behandleSakDbOppgave != null)
-            oppgaveService.hentOppgave(oppgaveId = behandleSakDbOppgave.gsakId.toLong()).tildeltEnhetsnr
-        else null
+        val enhetFraBehandleSakOppgave = when (behandleSakDbOppgave) {
+            null -> null
+            else -> oppgaveService.hentOppgave(oppgaveId = behandleSakDbOppgave.gsakId.toLong()).tildeltEnhetsnr
+        }
+
         val enhetFraArbeidsfordeling =
                 arbeidsfordelingService.hentBehandlendeEnhet(fagsak = behandling.fagsak).firstOrNull()?.enhetId
 
-        logger.info("Enhet fra beh sak: $enhetFraBehandleSakOppgave, Enhet fra arbeidsfordeling: $enhetFraArbeidsfordeling, behandlende enhet: $data")
-        vedtak.ansvarligEnhet = enhetFraBehandleSakOppgave ?: enhetFraArbeidsfordeling ?: data
+        if (enhetFraBehandleSakOppgave == null && enhetFraArbeidsfordeling == null) {
+            throw Feil(message = "Finner ikke behandlende enhet på behandling. Både enhet fra oppgave og arbeidsfordeling er null")
+        }
+
+        vedtak.ansvarligEnhet = enhetFraBehandleSakOppgave ?: enhetFraArbeidsfordeling
         vedtakService.lagreEllerOppdater(vedtak)
 
         return hentNesteStegForNormalFlyt(behandling)
