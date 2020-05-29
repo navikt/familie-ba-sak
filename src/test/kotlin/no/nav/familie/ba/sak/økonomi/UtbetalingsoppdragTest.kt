@@ -14,6 +14,7 @@ import java.time.LocalDate.now
 
 internal class UtbetalingsoppdragPeriodiseringTest {
 
+    /*
     @Test
     fun `skal opprette et nytt utbetalingsoppdrag med løpende periodeId fordelt på flere klasser`() {
         val behandling = lagBehandling()
@@ -39,6 +40,30 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], id + 0, null, 1054, "2020-03-01", "2020-04-30")
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![1], id + 1, id + 0, 2108, "2020-05-01", "2021-02-28")
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![2], id + 2, id + 1, 1054, "2021-03-01", "2038-02-28")
+    }
+    */
+
+    @Test
+    fun `skal opprette et nytt utbetalingsperioder med for to personer med felles løpende periodeId og separat kjeding`() {
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling=behandling)
+        val personMedFlerePerioder = tilfeldigPerson()
+        val andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse("2020-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, behandling, person = personMedFlerePerioder),
+                lagAndelTilkjentYtelse("2026-05-01", "2027-06-30", SMÅBARNSTILLEGG, 660, behandling, person = personMedFlerePerioder),
+                lagAndelTilkjentYtelse("2020-03-01", "2038-02-28", ORDINÆR_BARNETRYGD, 1054, behandling))
+
+        val behandlingResultatType = BehandlingResultatType.INNVILGET
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, andelerTilkjentYtelse)
+
+        assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
+        assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
+
+        val id = vedtak.id * 1000
+        val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], id + 0, null, 660, "2020-04-01", "2023-03-31")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], id + 1, id + 0, 660, "2026-05-01", "2027-06-30")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], id + 2, null, 1054, "2020-03-01", "2038-02-28")
     }
 
     @Test
