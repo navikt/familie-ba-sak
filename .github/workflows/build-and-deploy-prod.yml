@@ -4,8 +4,8 @@ on:
     branches:
       - 'master'
 env:
-  REF: ${{ github.ref }} # refs/tags/<tag>
-  IMAGE_UTEN_TAG: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
+  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:latest
 jobs:
   deploy-to-prod:
     name: Bygg app/image, push til github, deploy til prod-fss og dev-fss
@@ -13,11 +13,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
-      - name: Set TAG env
-        run: echo ::set-env name=TAG::$(echo ${REF:10})
-        # Nais-clusteret bruker IMAGE-variabelen videre.
-      - name: Set IMAGE env
-        run: echo ::set-env name=IMAGE::$(echo ${IMAGE_UTEN_TAG}:${TAG})
       - name: Read/save .m2 cache
         uses: actions/cache@v1
         with:
@@ -36,7 +31,7 @@ jobs:
         run: mvn -B --no-transfer-progress package --settings .m2/maven-settings.xml --file pom.xml
       - name: Bygg Docker image
         run: |
-          docker build -t ${IMAGE} -t ${IMAGE_UTEN_TAG}:latest .
+          docker build -t ${IMAGE} -t ${IMAGE_LATEST} .
       - name: Login to Github Package Registry
         env:
           DOCKER_USERNAME: x-access-token
@@ -46,7 +41,7 @@ jobs:
       - name: Push Docker image med versjonstag
         run: docker push ${IMAGE}
       - name: Push Docker image med 'latest' tag
-        run: docker push ${IMAGE_UTEN_TAG}:latest
+        run: docker push ${IMAGE_LATEST}
       - name: Deploy til dev-fss
         uses: nais/deploy/actions/deploy@v1
         env:
