@@ -73,29 +73,26 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    fun hentAktivAktørId(ident: String): AktørId {
-        val identer = hentIdenter(ident = ident).filter { !it.historisk && it.gruppe == "AKTORID" }.map { it.ident }
+    fun hentAktivAktørId(ident: Ident): AktørId {
+        val identer = hentIdenter(ident).filter { !it.historisk && it.gruppe == "AKTORID" }.map { it.ident }
         if (identer.isEmpty()) error("Finner ingen aktiv aktørId for ident")
         return AktørId(identer.first())
     }
 
-    fun hentAktivPersonIdent(ident: String): PersonIdent {
-        val identer = hentIdenter(ident = ident).filter { !it.historisk && it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
+    fun hentAktivPersonIdent(ident: Ident): PersonIdent {
+        val identer = hentIdenter(ident).filter { !it.historisk && it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
         if (identer.isEmpty()) error("Finner ingen aktiv personIdent for ident")
         return PersonIdent(identer.first())
     }
 
-    fun hentIdenter(ident: String): List<IdentInformasjon> {
-        if (ident.isEmpty()) {
-            throw IntegrasjonException("Ved henting av identer er ident null eller tom")
-        }
+    fun hentIdenter(ident: Ident): List<IdentInformasjon> {
         val uri = URI.create("$integrasjonUri/personopplysning/identer/BAR/historikk")
         log.info("Henter identhistorikk fra $uri")
         return try {
             val response = postForEntity<Ressurs<List<IdentInformasjon>>>(uri, ident)
             response?.getDataOrThrow() ?: error("Finner ingen identer for ident")
         } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av identer", e, uri, ident)
+            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av identer", e, uri, ident.ident)
         }
     }
 
