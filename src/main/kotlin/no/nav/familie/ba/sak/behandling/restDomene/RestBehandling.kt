@@ -24,10 +24,11 @@ data class RestBehandling(val aktiv: Boolean,
 
 data class RestPersonResultat(
         val personIdent: String,
-        val vilkårResultater: List<RestVilkårResultat>?
+        val vilkårResultater: List<RestVilkårResultat>
 )
 
 data class RestVilkårResultat(
+        val id: Long,
         val vilkårType: Vilkår,
         val resultat: Resultat,
         val periodeFom: LocalDate?,
@@ -35,12 +36,15 @@ data class RestVilkårResultat(
         val begrunnelse: String
 )
 
-fun PersonResultat.tilRestPersonResultat() = RestPersonResultat(personIdent = this.personIdent,
-        vilkårResultater = this.vilkårResultater.map { resultat ->
-            RestVilkårResultat(resultat = resultat.resultat,
-                    vilkårType = resultat.vilkårType,
-                    periodeFom = resultat.periodeFom,
-                    periodeTom = resultat.periodeTom,
-                    begrunnelse = resultat.begrunnelse
-            )
-        })
+fun PersonResultat.tilRestPersonResultat() =
+        RestPersonResultat(personIdent = this.personIdent,
+                           vilkårResultater = this.vilkårResultater.map { resultat ->
+                               RestVilkårResultat(
+                                       resultat = resultat.resultat,
+                                       id = resultat.id,
+                                       vilkårType = resultat.vilkårType,
+                                       periodeFom = resultat.periodeFom,
+                                       periodeTom = resultat.periodeTom,
+                                       begrunnelse = resultat.begrunnelse
+                               )
+                           })

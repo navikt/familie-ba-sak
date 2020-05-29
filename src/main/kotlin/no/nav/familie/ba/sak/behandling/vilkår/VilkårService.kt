@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.endreVurderingForPeriodePåVilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.common.Feil
@@ -181,5 +182,24 @@ class VilkårService(
                            periodeTom = tom,
                            begrunnelse = "")
         }.toSet()
+    }
+
+    fun endreVilkår(behandlingId: Long,
+                    vilkårId: Long,
+                    restPersonResultat: RestPersonResultat) {
+        val behandlingResultat = hentVilkårsvurdering(behandlingId = behandlingId)
+                                 ?: throw Feil(message = "Fant ikke aktiv vilkårsvurdering ved endring på vilkår",
+                                               frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering")
+
+        val restVilkårResultat = restPersonResultat.vilkårResultater.first()
+        val personResultat = behandlingResultat.personResultater.find { it.personIdent == restPersonResultat.personIdent }
+                             ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
+                                           frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
+
+        val vilkårResultaterForVilkårType =
+                personResultat.vilkårResultater.filter { it.vilkårType == restVilkårResultat.vilkårType }
+
+        endreVurderingForPeriodePåVilkår(vilkårResultater = vilkårResultaterForVilkårType,
+                                         restVilkårResultat = restVilkårResultat)
     }
 }

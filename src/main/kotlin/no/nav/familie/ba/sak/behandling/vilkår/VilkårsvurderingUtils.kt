@@ -1,8 +1,26 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 
 object VilkårsvurderingUtils {
+
+    /**
+     * 1 2 3
+     * 2
+     *
+     * 1 3
+     * 2
+     */
+    fun endreVurderingForPeriodePåVilkår(vilkårResultater: List<VilkårResultat>,
+                                         restVilkårResultat: RestVilkårResultat) {
+        val vilkårResultaterUtenEndretVilkår = vilkårResultater.filter { it.id != restVilkårResultat.id }
+
+        vilkårResultaterUtenEndretVilkår.map {
+            if ()
+        }
+
+    }
 
     /**
      * Dersom personer i initieltResultat har vurderte vilkår i aktivtResultat vil disse flyttes til initieltResultat
