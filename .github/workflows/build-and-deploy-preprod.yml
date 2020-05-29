@@ -1,9 +1,7 @@
 name: Build-Deploy-Preprod
 on:
-  push:
-    branches:
-      - master
   pull_request:
+
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
 jobs:

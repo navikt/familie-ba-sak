@@ -1,7 +1,7 @@
 name: Build-Deploy-Prod
 on:
   push:
-    branch:
+    branches:
       - 'master'
 env:
   REF: ${{ github.ref }} # refs/tags/<tag>
@@ -25,10 +25,6 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - name: Sjekk at tag ligger på master
-        run: |
-          commit=$(git rev-parse --short HEAD)
-          if ! [[ $(git branch -r --contains "$commit" | grep -E '(^|\s)origin/master$') ]]; then exit 1; fi
       - name: Set up JDK 1.11
         uses: actions/setup-java@v1
         with:
