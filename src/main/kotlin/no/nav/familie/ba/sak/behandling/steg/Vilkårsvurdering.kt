@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.nare.core.evaluations.Resultat
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

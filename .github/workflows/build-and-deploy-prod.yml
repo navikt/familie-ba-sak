@@ -1,8 +1,8 @@
 name: Build-Deploy-Prod
 on:
   push:
-    tags:
-      - 'v*'
+    branch:
+      - 'master'
 env:
   REF: ${{ github.ref }} # refs/tags/<tag>
   IMAGE_UTEN_TAG: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak
