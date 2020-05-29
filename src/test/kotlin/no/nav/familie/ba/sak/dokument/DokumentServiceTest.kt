@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -15,7 +14,6 @@ import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,10 +50,7 @@ class DokumentServiceTest(
         private val vedtakService: VedtakService,
 
         @Autowired
-        private val dokumentService: DokumentService,
-
-        @Autowired
-        private val behandlingResultatRepository: BehandlingResultatRepository
+        private val dokumentService: DokumentService
 ) {
 
     @BeforeEach
