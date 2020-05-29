@@ -63,10 +63,14 @@ class BeregningService(
 
     private fun populerTilkjentYtelse(behandling: Behandling,
                                       utbetalingsoppdrag: Utbetalingsoppdrag): TilkjentYtelse {
-        val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.size == 1 && utbetalingsoppdrag.utbetalingsperiode[0].opphør != null
+        val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
         var opphørsdato: LocalDate? = null
-        if (utbetalingsoppdrag.utbetalingsperiode[0].opphør != null) {
+
+        if (erRentOpphør) {
             opphørsdato = utbetalingsoppdrag.utbetalingsperiode[0].opphør!!.opphørDatoFom
+            if (utbetalingsoppdrag.utbetalingsperiode.all { it.opphør!!.opphørDatoFom == opphørsdato }) {
+                //TODO:
+            }
         }
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)

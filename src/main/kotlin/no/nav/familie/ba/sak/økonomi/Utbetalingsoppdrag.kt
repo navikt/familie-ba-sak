@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioder
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -38,7 +37,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
         personMedAndeler.value.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
             val forrigeOffset = if (index == 0) null else hovedIndeks - 1
             utbetalingsperiodeMal.lagPeriodeFraAndel(andel, hovedIndeks, forrigeOffset).also { hovedIndeks++ }
-        }
+        }.kunSisteHvis(erOpphør)
     }
 
     return Utbetalingsoppdrag(
