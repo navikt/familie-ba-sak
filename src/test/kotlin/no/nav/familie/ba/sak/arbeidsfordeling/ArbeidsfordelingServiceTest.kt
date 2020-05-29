@@ -39,7 +39,8 @@ class ArbeidsfordelingServiceTest {
                 fagsak = fagsak,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                opprinnelse = BehandlingOpprinnelse.MANUELL
         )
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) }
                 .returns(PersonopplysningGrunnlag(behandlingId = 0))

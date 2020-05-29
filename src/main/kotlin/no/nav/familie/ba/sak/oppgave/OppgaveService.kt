@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.oppgave
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Ident
@@ -64,7 +65,11 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return integrasjonClient.fordelOppgave(oppgaveId, null)
     }
 
-    fun hentOppgave(oppgaveId: Long): Ressurs<Oppgave> {
+    fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): DbOppgave? {
+        return oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
+    }
+
+    fun hentOppgave(oppgaveId: Long): Oppgave {
         return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }
 

@@ -37,7 +37,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.hentJournalpost(any()) } returns success(lagTestJournalpost(søkerFnr[0], "1234"))
 
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
-                success(lagTestOppgaveDTO(1L))
+                lagTestOppgaveDTO(1L)
 
         every { mockIntegrasjonClient.hentOppgaver(any()) } returns
                 OppgaverOgAntall(2, listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "Z999999")))
@@ -54,7 +54,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), any()) } returns "journalpostId"
 
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("9999",
-                                                                                                                 "Ukjent"))
+                                                                                                          "Ukjent"))
 
         every { mockIntegrasjonClient.distribuerVedtaksbrev(any()) } just runs
 

@@ -5,11 +5,11 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -45,7 +45,10 @@ class OppgaveServiceTest {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
-        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
+        every {
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(),
+                                                                               any<Behandling>())
+        } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns listOf(
                 mockk {
                     every { enhetId } returns ENHETSNUMMER
@@ -72,7 +75,10 @@ class OppgaveServiceTest {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
-        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
+        every {
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(),
+                                                                               any<Behandling>())
+        } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
@@ -92,10 +98,11 @@ class OppgaveServiceTest {
 
     @Test
     fun `Ferdigstill oppgave`() {
-        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {
-            every { oppgaveId } returns OPPGAVE_ID
-        }
-        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns lagTestOppgave()
+        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {}
+        every {
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(),
+                                                                               any<Behandling>())
+        } returns lagTestOppgave()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
         val slot = slot<Long>()
         every { integrasjonClient.ferdigstillOppgave(capture(slot)) } just runs
@@ -106,11 +113,12 @@ class OppgaveServiceTest {
 
     @Test
     fun `Ferdigstill oppgave feiler fordi den ikke finner oppgave på behandlingen`() {
-        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(), any<Behandling>()) } returns null
+        every {
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any<Oppgavetype>(),
+                                                                               any<Behandling>())
+        } returns null
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
-        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {
-            every { oppgaveId } returns null
-        }
+        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {}
 
         assertThatThrownBy { oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
                 .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
@@ -147,7 +155,8 @@ class OppgaveServiceTest {
                 },
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR)
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                opprinnelse = BehandlingOpprinnelse.MANUELL)
     }
 
     private fun lagTestOppgave(): DbOppgave {
