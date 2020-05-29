@@ -90,11 +90,11 @@ class ClientMocks {
             PersonIdent(randomFnr())
         }
 
-        val identSlot = slot<String>()
+        val identSlot = slot<Ident>()
         every {
             mockIntegrasjonClient.hentIdenter(capture(identSlot))
         } answers {
-            listOf(IdentInformasjon(identSlot.captured, false, "FOLKEREGISTERIDENT"))
+            listOf(IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"))
         }
 
         every {

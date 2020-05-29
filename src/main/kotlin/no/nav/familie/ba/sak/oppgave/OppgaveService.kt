@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -33,7 +34,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
             error("Det finnes allerede en oppgave av typen $oppgavetype på behandling ${behandling.id} som ikke er ferdigstilt. Kan ikke opprette ny oppgave")
         }
         val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
-        val aktorId = integrasjonClient.hentAktivAktørId(behandling.fagsak.hentAktivIdent().ident).id
+        val aktorId = integrasjonClient.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
         val opprettOppgave = OpprettOppgave(
                 ident = OppgaveIdent(ident = aktorId, type = IdentType.Aktør),
                 saksId = fagsakId.toString(),
