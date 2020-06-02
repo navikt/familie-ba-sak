@@ -14,7 +14,7 @@ class Norg2Controller(
 ) {
 
     @GetMapping(path = ["/{enhet}"])
-    fun hentEnhet(@PathVariable enhet: String): Any {
+    fun hentEnhet(@PathVariable enhet: String): Enhet {
         return norg2RestClient.hentEnhet(enhet = enhet)
     }
 }

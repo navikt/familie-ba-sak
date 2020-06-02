@@ -33,8 +33,7 @@ class DokumentService(
                                                        søknad,
                                                        behandlingResultatType
         )
-        val markdown = dokGenKlient.hentMarkdownForMal(malMedData)
-        return markdown
+        return dokGenKlient.hentMarkdownForMal(malMedData)
     }
 
     @Deprecated("henter og viser PDF istedet")
