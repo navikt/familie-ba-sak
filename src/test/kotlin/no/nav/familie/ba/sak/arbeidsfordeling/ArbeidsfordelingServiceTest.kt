@@ -4,12 +4,14 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
@@ -18,13 +20,16 @@ import java.time.LocalDate
 class ArbeidsfordelingServiceTest {
 
     @MockK
-    lateinit var behandlingRepository: BehandlingRepository
+    lateinit var behandlingService: BehandlingService
 
     @MockK
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @MockK
     lateinit var integrasjonClient: IntegrasjonClient
+
+    @MockK
+    lateinit var oppgaveService: OppgaveService
 
     @InjectMockKs
     lateinit var arbeidsfordelingService: ArbeidsfordelingService
@@ -35,7 +40,7 @@ class ArbeidsfordelingServiceTest {
 
         every { integrasjonClient.hentBehandlendeEnhet(any()) } returns listOf()
         every { integrasjonClient.hentPersoninfoFor(any()) } returns Personinfo(LocalDate.now())
-        every { behandlingRepository.findByFagsakAndAktiv(any()) } returns Behandling(
+        every { behandlingService.hentAktivForFagsak(any()) } returns Behandling(
                 fagsak = fagsak,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
