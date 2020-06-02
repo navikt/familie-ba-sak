@@ -43,7 +43,7 @@ spring:
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
 FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.dev-adeo.no
-NORG2_BASE_URL: https://app-q1.adeo.no/norg2/api/v1
+NORG2_BASE_URL: https://app-q1.adeo.no/norg2
 
 VEILEDER_ROLLE: "93a26831-9866-4410-927b-74ff51a9107c"
 SAKSBEHANDLER_ROLLE: "d21e00a4-969d-4b28-8782-dc818abfae65"
