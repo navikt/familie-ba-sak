@@ -12,7 +12,7 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
-        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType())
+        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(), behandlingType = behandling.type)
     }
 
     fun validerSteg(behandling: Behandling) {}
@@ -93,19 +93,35 @@ enum class StegType(private val rekkefølge: Int,
         return this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
     }
 
-    fun hentNesteSteg(utførendeStegType: StegType): StegType {
-        return when (utførendeStegType) {
-            REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
-            REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-            VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-            SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-            BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-            IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-            VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
-            JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-            DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-            FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-            BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+    fun hentNesteSteg(utførendeStegType: StegType, behandlingType: BehandlingType? = null): StegType {
+        when (behandlingType) {
+            BehandlingType.TEKNISK_OPPHØR ->
+                return when (utførendeStegType) {
+                    REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
+                    REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                    VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                    else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
+                }
+            else ->
+                return when (utførendeStegType) {
+                    REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
+                    REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                    VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                    JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                    DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                }
         }
     }
 }
