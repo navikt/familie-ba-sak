@@ -6,9 +6,11 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -127,7 +129,10 @@ class DokumentService(
                 .fold(
                         onSuccess = { it },
                         onFailure = {
-                            throw it
+                            throw Feil(message = "Klarte ikke generere vedtaksbrev",
+                                       frontendFeilmelding = "Noe gikk galt ved generering av vedtaksbrev og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
+                                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                                       throwable = it)
                         }
                 )
     }
