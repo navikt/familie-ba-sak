@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.client
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.client.Enhet
-import no.nav.familie.ba.sak.client.Norg2RestClient
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary

@@ -8,23 +8,26 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.oppgave.OppgaveService
+import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
 
 @Service
 class ArbeidsfordelingService(private val behandlingService: BehandlingService,
-                              private val oppgaveService: OppgaveService,
+                              private val oppgaveRepository: OppgaveRepository,
                               private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
                               private val integrasjonClient: IntegrasjonClient) {
 
+    /**
+     * Bruker oppgaveRepository og integrasjonClient for å unngå dependency cycle.
+     */
     fun bestemBehandlendeEnhet(behandling: Behandling): String {
         val behandleSakDbOppgave =
-                oppgaveService.hentOppgaveSomIkkeErFerdigstilt(Oppgavetype.BehandleSak, behandling)
+                oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)
 
         val enhetFraBehandleSakOppgave = when (behandleSakDbOppgave) {
             null -> null
-            else -> oppgaveService.hentOppgave(oppgaveId = behandleSakDbOppgave.gsakId.toLong()).tildeltEnhetsnr
+            else -> integrasjonClient.finnOppgaveMedId(oppgaveId = behandleSakDbOppgave.gsakId.toLong()).tildeltEnhetsnr
         }
 
         val enhetFraArbeidsfordeling =
