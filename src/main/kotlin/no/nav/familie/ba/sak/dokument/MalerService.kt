@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -67,7 +66,6 @@ class MalerService(
 
         val barnasFødselsdatoer = Utils.slåSammen(barna.sortedBy { it.fødselsdato }.map { it.fødselsdato.tilKortString() })
 
-        logger.info("Ansvarlig enhet: ${vedtak.ansvarligEnhet}")
         val innvilget = Innvilget(
                 enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
                 else throw Feil(message = "Ansvarlig enhet er ikke satt ved generering av brev",
@@ -99,7 +97,6 @@ class MalerService(
     }
 
     companion object {
-        val logger = LoggerFactory.getLogger(this::class.java)
         fun malNavnForTypeSøkerOgResultatType(typeSøker: TypeSøker?,
                                               resultatType: BehandlingResultatType): String {
             return when (typeSøker) {

@@ -14,9 +14,9 @@ class Norg2RestClient(@Value("\${NORG2_BASE_URL}") private val norg2BaseUrl: URI
     : AbstractRestClient(restTemplate, "norg2") {
 
     fun hentEnhet(enhet: String?): Enhet {
+        val uri = UriComponentsBuilder.fromUri(norg2BaseUrl).pathSegment(PATH_HENT_ENHET, enhet).build().toUri()
+
         try {
-            val uri = UriComponentsBuilder.fromUri(norg2BaseUrl).pathSegment(PATH_HENT_ENHET, enhet).build().toUri()
-            log.info("Henter enhet($enhet) fra $uri")
             return getForEntity(uri)
         } catch (e: Exception) {
             throw RuntimeException("Feil ved henting av enhet fra NORG2", e)
