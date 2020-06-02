@@ -62,7 +62,8 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak, behandlingKategori: Behandling
                    fagsak = fagsak,
                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
                    kategori = behandlingKategori,
-                   underkategori = BehandlingUnderkategori.ORDINÆR)
+                   underkategori = BehandlingUnderkategori.ORDINÆR,
+                   opprinnelse = BehandlingOpprinnelse.MANUELL)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
         id = nestePersonId(),

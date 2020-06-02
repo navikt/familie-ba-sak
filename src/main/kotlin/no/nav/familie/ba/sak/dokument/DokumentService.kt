@@ -42,31 +42,31 @@ class DokumentService(
 
         val html = Result.runCatching {
             val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
-                ?: error("Finner ikke søker på vedtaket")
+                        ?: error("Finner ikke søker på vedtaket")
             val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
 
             val behandlingResultatType =
-                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+                    behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
             dokGenKlient.lagHtmlFraMarkdown(template = MalerService.malNavnForTypeSøkerOgResultatType(
-                typeSøker = søknad?.typeSøker,
-                resultatType = behandlingResultatType),
-                markdown = vedtak.stønadBrevMarkdown.takeIf { it.isNotEmpty() }
-                        ?: hentStønadBrevMarkdown(vedtak, søknad, behandlingResultatType),
-                dokumentHeaderFelter = DokumentHeaderFelter(
-                    fodselsnummer = søker.personIdent.ident,
-                    navn = søker.navn,
-                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
-                    dokumentDato = LocalDate.now().tilDagMånedÅr()
-                )
+                    typeSøker = søknad?.typeSøker,
+                    resultatType = behandlingResultatType),
+                                            markdown = vedtak.stønadBrevMarkdown.takeIf { it.isNotEmpty() }
+                                                       ?: hentStønadBrevMarkdown(vedtak, søknad, behandlingResultatType),
+                                            dokumentHeaderFelter = DokumentHeaderFelter(
+                                                    fodselsnummer = søker.personIdent.ident,
+                                                    navn = søker.navn,
+                                                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
+                                                    dokumentDato = LocalDate.now().tilDagMånedÅr()
+                                            )
             )
         }
-            .fold(
-                onSuccess = { it },
-                onFailure = { e ->
-                    return Ressurs.failure(errorMessage = "Klarte ikke å hent vedtaksbrev", error = e)
-                }
-            )
+                .fold(
+                        onSuccess = { it },
+                        onFailure = { e ->
+                            return Ressurs.failure(errorMessage = "Klarte ikke å hent vedtaksbrev", error = e)
+                        }
+                )
 
         return Ressurs.success(html)
     }
@@ -77,62 +77,63 @@ class DokumentService(
             val markdown = vedtak.stønadBrevMarkdown
 
             val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
-                ?: error("Finner ikke søker på vedtaket")
+                        ?: error("Finner ikke søker på vedtaket")
             val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
 
             val behandlingResultatType =
-                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+                    behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
             dokGenKlient.lagPdfFraMarkdown(template = MalerService.malNavnForTypeSøkerOgResultatType(
-                typeSøker = søknad?.typeSøker,
-                resultatType = behandlingResultatType),
-                markdown = markdown,
-                dokumentHeaderFelter = DokumentHeaderFelter(
-                    fodselsnummer = søker.personIdent.ident,
-                    navn = søker.navn,
-                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
-                    dokumentDato = LocalDate.now().tilDagMånedÅr()
-                ))
+                    typeSøker = søknad?.typeSøker,
+                    resultatType = behandlingResultatType),
+                                           markdown = markdown,
+                                           dokumentHeaderFelter = DokumentHeaderFelter(
+                                                   fodselsnummer = søker.personIdent.ident,
+                                                   navn = søker.navn,
+                                                   returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
+                                                   dokumentDato = LocalDate.now().tilDagMånedÅr()
+                                           ))
         }
-            .fold(
-                onSuccess = { it },
-                onFailure = {
-                    throw Exception("Klarte ikke å hente PDF for vedtak med id ${vedtak.id}", it)
-                }
-            )
+                .fold(
+                        onSuccess = { it },
+                        onFailure = {
+                            throw Exception("Klarte ikke å hente PDF for vedtak med id ${vedtak.id}", it)
+                        }
+                )
     }
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         val pdf = vedtak.stønadBrevPdF
-                ?: error("Klarte ikke finne brev for vetak med id ${vedtak.id}")
+                  ?: error("Klarte ikke finne brev for vetak med id ${vedtak.id}")
         return Ressurs.success(pdf)
     }
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
         return Result.runCatching {
             val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
-                    ?: error("Finner ikke søker på vedtaket")
+                        ?: error("Finner ikke søker på vedtaket")
             val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
 
             val behandlingResultatType =
                     behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
             val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
-                    navn = søker.navn,
-                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
-                    dokumentDato = LocalDate.now().tilDagMånedÅr())
+                                                    navn = søker.navn,
+                                                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
+                                                    dokumentDato = LocalDate.now().tilDagMånedÅr())
 
             val malMedData = malerService.mapTilBrevfelter(vedtak,
-                    søknad,
-                    behandlingResultatType
+                                                           søknad,
+                                                           behandlingResultatType
             )
             dokGenKlient.lagPdfForMal(malMedData, headerFelter)
         }
                 .fold(
                         onSuccess = { it },
-                        onFailure = { e ->
+                        onFailure = { throwable ->
                             throw Feil(message = "Klarte ikke generere vedtaksbrev",
                                        frontendFeilmelding = "Noe gikk galt ved generering av vedtaksbrev og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
-                                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+                                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                                       throwable = throwable)
                         }
                 )
     }

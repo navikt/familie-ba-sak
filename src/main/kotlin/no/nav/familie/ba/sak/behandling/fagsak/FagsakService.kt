@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -38,7 +39,7 @@ class FagsakService(
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
         val personIdent = when {
             fagsakRequest.personIdent !== null -> PersonIdent(fagsakRequest.personIdent)
-            fagsakRequest.aktørId !== null -> integrasjonClient.hentAktivPersonIdent(ident = fagsakRequest.aktørId)
+            fagsakRequest.aktørId !== null -> integrasjonClient.hentAktivPersonIdent(Ident(fagsakRequest.aktørId))
             else -> throw Feil(
                     "Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak.",
                     "Fagsak er forsøkt opprettet uten ident. Dette er en systemfeil, vennligst ta kontakt med systemansvarlig.",
@@ -53,7 +54,7 @@ class FagsakService(
 
     @Transactional
     fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak {
-        val identer = integrasjonClient.hentIdenter(personIdent.ident).map { PersonIdent(it.ident) }.toSet()
+        val identer = integrasjonClient.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
         var fagsak = fagsakPersonRepository.finnFagsak(personIdenter = identer)
         if (fagsak == null) {
             fagsak = Fagsak().also {
@@ -126,7 +127,7 @@ class FagsakService(
     }
 
     fun hent(personIdent: PersonIdent): Fagsak? {
-        val identer = integrasjonClient.hentIdenter(personIdent.ident).map { PersonIdent(it.ident) }.toSet()
+        val identer = integrasjonClient.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
         return fagsakPersonRepository.finnFagsak(identer)
     }
 

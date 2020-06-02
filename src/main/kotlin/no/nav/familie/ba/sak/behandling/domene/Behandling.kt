@@ -25,8 +25,9 @@ data class Behandling(
         @Column(name = "behandling_type", nullable = false)
         val type: BehandlingType,
 
-        @Column(name = "oppgaveId")
-        val oppgaveId: String? = null,
+        @Enumerated(EnumType.STRING)
+        @Column(name = "behandling_opprinnelse", nullable = false)
+        val opprinnelse: BehandlingOpprinnelse,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "kategori", nullable = false)
@@ -53,6 +54,26 @@ data class Behandling(
 
     override fun toString(): String {
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori)"
+    }
+}
+
+/**
+ * Opprinnelse er knyttet til en behandling og sier noe om hvordan behandling ble opprettet.
+ */
+enum class BehandlingOpprinnelse {
+    MANUELL,
+    AUTOMATISK_VED_FØDSELSHENDELSE,
+    AUTOMATISK_VED_JOURNALFØRING;
+
+    /**
+     * Ved noen opprinnelser så skal en behandling føre til en oppgave dersom det automatiske løpet feiler.
+     */
+    fun skalOppretteOppgave(): Boolean {
+        return when (this) {
+            MANUELL -> false
+            AUTOMATISK_VED_FØDSELSHENDELSE -> true
+            AUTOMATISK_VED_JOURNALFØRING -> false
+        }
     }
 }
 

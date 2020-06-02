@@ -21,14 +21,27 @@ object RessursUtils {
     fun <T> illegalState(errorMessage: String, throwable: Throwable): ResponseEntity<Ressurs<T>> =
             errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
 
+    fun <T> frontendFeil(feil: Feil): ResponseEntity<Ressurs<T>> = frontendErrorResponse(feil)
+
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
 
     private fun <T> errorResponse(httpStatus: HttpStatus,
                                   errorMessage: String,
                                   throwable: Throwable?): ResponseEntity<Ressurs<T>> {
-        secureLogger.info(errorMessage, throwable)
-        LOG.error(errorMessage)
+        secureLogger.info("En feil har oppstått: $errorMessage", throwable)
+        LOG.error("En feil har oppstått: $errorMessage")
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
+    }
+
+    private fun <T> frontendErrorResponse(feil: Feil): ResponseEntity<Ressurs<T>> {
+        secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): " +
+                           "${feil.frontendFeilmelding}, ${feil.stackTrace}", feil.throwable)
+        LOG.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
+
+        return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(
+                frontendFeilmelding = feil.frontendFeilmelding,
+                errorMessage = feil.message.toString()
+        ))
     }
 
     inline fun <reified T> assertGenerelleSuksessKriterier(it: Ressurs<T>?) {

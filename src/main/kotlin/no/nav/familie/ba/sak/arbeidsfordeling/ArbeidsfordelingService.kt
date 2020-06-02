@@ -32,7 +32,7 @@ class ArbeidsfordelingService(private val behandlingRepository: BehandlingReposi
         return integrasjonClient.hentBehandlendeEnhet(identMedStrengeste ?: søker.ident)
     }
 
-    fun identMedAdressebeskyttelse(ident: String) = IdentMedAdressebeskyttelse(
+    private fun identMedAdressebeskyttelse(ident: String) = IdentMedAdressebeskyttelse(
             ident = ident,
             adressebeskyttelsegradering = integrasjonClient.hentPersoninfoFor(ident).adressebeskyttelseGradering)
 

@@ -26,7 +26,7 @@ class DokGenKlientTest(@Autowired
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR),
+                                    underkategori = BehandlingUnderkategori.ORDINÆR,opprinnelse = BehandlingOpprinnelse.MANUELL),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )
@@ -36,7 +36,7 @@ class DokGenKlientTest(@Autowired
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR),
+                                    underkategori = BehandlingUnderkategori.ORDINÆR,opprinnelse = BehandlingOpprinnelse.MANUELL),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )
@@ -46,7 +46,7 @@ class DokGenKlientTest(@Autowired
                                     journalpostID = "",
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     kategori = BehandlingKategori.NASJONAL,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR),
+                                    underkategori = BehandlingUnderkategori.ORDINÆR,opprinnelse = BehandlingOpprinnelse.MANUELL),
             ansvarligSaksbehandler = "ansvarligSaksbehandler",
             vedtaksdato = LocalDate.now()
     )

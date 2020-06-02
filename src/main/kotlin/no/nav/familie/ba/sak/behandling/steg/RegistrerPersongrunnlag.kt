@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -26,7 +27,7 @@ class RegistrerPersongrunnlag(
                                       stegService: StegService?): StegType {
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident, data.barnasIdenter, behandling)
         vilkårService.initierVilkårvurderingForBehandling(behandling.id, data.bekreftEndringerViaFrontend)
-        if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
+        if (behandling.opprinnelse.skalOppretteOppgave() && featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
             val nyTask = OpprettOppgaveTask.opprettTask(
                     behandlingId = behandling.id,
                     oppgavetype = Oppgavetype.BehandleSak,
