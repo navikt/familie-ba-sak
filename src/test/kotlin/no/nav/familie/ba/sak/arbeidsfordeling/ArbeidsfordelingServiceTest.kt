@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.ba.sak.oppgave.OppgaveService
+import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
@@ -29,7 +29,7 @@ class ArbeidsfordelingServiceTest {
     lateinit var integrasjonClient: IntegrasjonClient
 
     @MockK
-    lateinit var oppgaveService: OppgaveService
+    lateinit var oppgaveRepository: OppgaveRepository
 
     @InjectMockKs
     lateinit var arbeidsfordelingService: ArbeidsfordelingService
