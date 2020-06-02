@@ -27,6 +27,7 @@ class Norg2RestClient(@Value("\${NORG2_BASE_URL}") private val norg2BaseUrl: URI
         }
     }
 
+
     companion object {
         private const val PATH_HENT_ENHET = "api/v1/enhet"
     }
