@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType
@@ -12,8 +10,6 @@ import no.nav.familie.ba.sak.beregning.domene.lagTidslinjeMedOverlappendePeriode
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -42,7 +38,8 @@ class PeriodeMapperTest {
         val behandling = Behandling(fagsak = fagsak,
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                                    type = BehandlingType.FØRSTEGANGSBEHANDLING)
+                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                    opprinnelse = BehandlingOpprinnelse.MANUELL)
         behandlingResultat = lagBehandlingResultat("", behandling, Resultat.KANSKJE)
     }
 

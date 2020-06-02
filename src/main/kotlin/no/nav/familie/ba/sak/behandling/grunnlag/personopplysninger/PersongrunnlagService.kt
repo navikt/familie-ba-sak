@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -45,7 +46,7 @@ class PersongrunnlagService(
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
-        val aktørId = integrasjonClient.hentAktivAktørId(fødselsnummer)
+        val aktørId = integrasjonClient.hentAktivAktørId(Ident(fødselsnummer))
         val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
                            type = PersonType.SØKER,
                            personopplysningGrunnlag = personopplysningGrunnlag,
@@ -67,7 +68,7 @@ class PersongrunnlagService(
                                          type = PersonType.BARN,
                                          personopplysningGrunnlag = personopplysningGrunnlag,
                                          fødselsdato = personinfo.fødselsdato,
-                                         aktørId = integrasjonClient.hentAktivAktørId(nyttBarn),
+                                         aktørId = integrasjonClient.hentAktivAktørId(Ident(nyttBarn)),
                                          navn = personinfo.navn ?: "",
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT
             ))

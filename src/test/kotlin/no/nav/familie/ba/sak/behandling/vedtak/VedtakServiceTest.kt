@@ -177,7 +177,8 @@ class VedtakServiceTest {
                                                                                 journalpostID = null,
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
-                                                                                underkategori = BehandlingUnderkategori.ORDINÆR))
+                                                                                underkategori = BehandlingUnderkategori.ORDINÆR,
+                                                                                opprinnelse = BehandlingOpprinnelse.MANUELL))
 
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
@@ -192,7 +193,8 @@ class VedtakServiceTest {
                                                                                 journalpostID = null,
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
-                                                                                underkategori = BehandlingUnderkategori.ORDINÆR))
+                                                                                underkategori = BehandlingUnderkategori.ORDINÆR,
+                                                                                opprinnelse = BehandlingOpprinnelse.MANUELL))
 
         val forrigeVedtak = vedtakService.hentForrigeVedtak(revurderingOpphørBehandling)
         Assertions.assertNotNull(forrigeVedtak)

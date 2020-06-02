@@ -19,11 +19,14 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClient: IntegrasjonClient) {
 
-    @PostMapping(path = ["/hent-oppgaver"], consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(path = ["/hent-oppgaver"],
+                 consumes = [MediaType.APPLICATION_JSON_VALUE],
+                 produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequest)
             : ResponseEntity<Ressurs<OppgaverOgAntall>> {
 
-        if (!finnOppgaveRequest.behandlingstema.isNullOrEmpty() && OppgaveService.Behandlingstema.values().all { it.kode != finnOppgaveRequest.behandlingstema }) {
+        if (!finnOppgaveRequest.behandlingstema.isNullOrEmpty() && OppgaveService.Behandlingstema.values()
+                        .all { it.kode != finnOppgaveRequest.behandlingstema }) {
             return badRequest("Ugyldig behandlingstema", null)
         }
 
@@ -37,7 +40,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
 
     @PostMapping(path = ["/{oppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long,
-                                      @RequestParam("saksbehandler") saksbehandler: String
+                      @RequestParam("saksbehandler") saksbehandler: String
     ): ResponseEntity<Ressurs<String>> {
 
         Result.runCatching {
@@ -63,8 +66,7 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
             : ResponseEntity<Ressurs<DataForManuellJournalføring>> {
 
         return Result.runCatching {
-            val oppgave = oppgaveService.hentOppgave(oppgaveId).data
-                          ?: error("Feil ved henting av oppgave, data finnes ikke på ressurs")
+            val oppgave = oppgaveService.hentOppgave(oppgaveId)
 
             Ressurs.success(DataForManuellJournalføring(
                     oppgave = oppgave,
@@ -97,6 +99,7 @@ class FinnOppgaveRequest(val behandlingstema: String? = null,
                          val aktivTomDato: String? = null,
                          val limit: Long? = null,
                          val offset: Long? = null) {
+
     val tema = "BAR"
 }
 

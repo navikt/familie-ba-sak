@@ -1,16 +1,18 @@
 package no.nav.familie.ba.sak.behandling.steg
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -18,10 +20,13 @@ import java.time.LocalDate
 class SendTilBeslutter(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository,
-        private val oppgaveRepository: OppgaveRepository,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val oppgaveService: OppgaveService,
         private val vedtakService: VedtakService,
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String,
@@ -37,16 +42,16 @@ class SendTilBeslutter(
         )
         taskRepository.save(godkjenneVedtakTask)
 
-        val behandleSakOppgave =
-                oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)
-        if (behandleSakOppgave !== null) {
+        val behandleSakDbOppgave =
+                oppgaveService.hentOppgaveSomIkkeErFerdigstilt(Oppgavetype.BehandleSak, behandling)
+        if (behandleSakDbOppgave !== null) {
             val ferdigstillBehandleSakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleSak)
             taskRepository.save(ferdigstillBehandleSakTask)
         }
 
         val behandleUnderkjentVedtakOppgave =
-                oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleUnderkjentVedtak,
-                                                                                   behandling)
+                oppgaveService.hentOppgaveSomIkkeErFerdigstilt(Oppgavetype.BehandleUnderkjentVedtak,
+                                                               behandling)
         if (behandleUnderkjentVedtakOppgave !== null) {
             val ferdigstillBehandleUnderkjentVedtakTask =
                     FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
@@ -58,7 +63,20 @@ class SendTilBeslutter(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: throw Feil(message = "Fant ikke foreslått vedtak på behandling ${behandling.id}",
                                    frontendFeilmelding = "Fant ikke foreslått vedtak på behandling ${behandling.id}")
-        vedtak.ansvarligEnhet = data
+
+        val enhetFraBehandleSakOppgave = when (behandleSakDbOppgave) {
+            null -> null
+            else -> oppgaveService.hentOppgave(oppgaveId = behandleSakDbOppgave.gsakId.toLong()).tildeltEnhetsnr
+        }
+
+        val enhetFraArbeidsfordeling =
+                arbeidsfordelingService.hentBehandlendeEnhet(fagsak = behandling.fagsak).firstOrNull()?.enhetId
+
+        if (enhetFraBehandleSakOppgave == null && enhetFraArbeidsfordeling == null) {
+            throw Feil(message = "Finner ikke behandlende enhet på behandling. Både enhet fra oppgave og arbeidsfordeling er null")
+        }
+
+        vedtak.ansvarligEnhet = enhetFraBehandleSakOppgave ?: enhetFraArbeidsfordeling
         vedtakService.lagreEllerOppdater(vedtak)
 
         return hentNesteStegForNormalFlyt(behandling)
