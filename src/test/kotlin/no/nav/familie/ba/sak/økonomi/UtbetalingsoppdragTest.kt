@@ -17,11 +17,21 @@ internal class UtbetalingsoppdragPeriodiseringTest {
     @Test
     fun `skal opprette et nytt utbetalingsoppdrag med felles løpende periodeId og separat kjeding på to personer`() {
         val behandling = lagBehandling()
-        val vedtak = lagVedtak(behandling=behandling)
+        val vedtak = lagVedtak(behandling = behandling)
         val personMedFlerePerioder = tilfeldigPerson()
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2019-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, behandling, person = personMedFlerePerioder),
-                lagAndelTilkjentYtelse("2026-05-01", "2027-06-30", SMÅBARNSTILLEGG, 660, behandling, person = personMedFlerePerioder),
+                lagAndelTilkjentYtelse("2019-04-01",
+                                       "2023-03-31",
+                                       SMÅBARNSTILLEGG,
+                                       660,
+                                       behandling,
+                                       person = personMedFlerePerioder),
+                lagAndelTilkjentYtelse("2026-05-01",
+                                       "2027-06-30",
+                                       SMÅBARNSTILLEGG,
+                                       660,
+                                       behandling,
+                                       person = personMedFlerePerioder),
                 lagAndelTilkjentYtelse("2019-03-01", "2037-02-28", ORDINÆR_BARNETRYGD, 1054, behandling))
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
@@ -43,14 +53,25 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         val vedtak = lagVedtak(behandling)
         val personMedFlerePerioder = tilfeldigPerson()
         val andelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse("2019-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, behandling, person = personMedFlerePerioder),
-                lagAndelTilkjentYtelse("2026-05-01", "2027-06-30", SMÅBARNSTILLEGG, 660, behandling, person = personMedFlerePerioder),
+                lagAndelTilkjentYtelse("2019-04-01",
+                                       "2023-03-31",
+                                       SMÅBARNSTILLEGG,
+                                       660,
+                                       behandling,
+                                       person = personMedFlerePerioder),
+                lagAndelTilkjentYtelse("2026-05-01",
+                                       "2027-06-30",
+                                       SMÅBARNSTILLEGG,
+                                       660,
+                                       behandling,
+                                       person = personMedFlerePerioder),
                 lagAndelTilkjentYtelse("2019-03-01", "2037-02-28", ORDINÆR_BARNETRYGD, 1054, behandling))
 
         val opphørFom = now()
         val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = opphørFom)
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, andelerTilkjentYtelse)
+        val utbetalingsoppdrag =
+                lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -58,8 +79,72 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         val id = vedtak.id * 1000
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], id + 1 , id + 0, 660, "2026-05-01", "2027-06-30", opphørFom)
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], id + 2, null, 1054, "2019-03-01", "2037-02-28", opphørFom)
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0],
+                                 id + 1,
+                                 id + 0,
+                                 660,
+                                 "2026-05-01",
+                                 "2027-06-30",
+                                 opphørFom)
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0],
+                                 id + 2,
+                                 null,
+                                 1054,
+                                 "2019-03-01",
+                                 "2037-02-28",
+                                 opphørFom)
+    }
+
+    @Test
+    fun `skal opprette et nytt utbetalingsoppdrag med to andeler på samme person og separat kjeding for småbarnstillegg`() {
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling = behandling)
+        val personMedFlerePerioder = tilfeldigPerson()
+        val andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse("2019-04-01",
+                                       "2023-03-31",
+                                       SMÅBARNSTILLEGG,
+                                       660,
+                                       behandling,
+                                       person = personMedFlerePerioder),
+                lagAndelTilkjentYtelse("2026-05-01",
+                                       "2027-06-30",
+                                       SMÅBARNSTILLEGG,
+                                       660,
+                                       behandling,
+                                       person = personMedFlerePerioder),
+                lagAndelTilkjentYtelse("2019-03-01",
+                                       "2037-02-28",
+                                       UTVIDET_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       person = personMedFlerePerioder))
+
+        val behandlingResultatType = BehandlingResultatType.INNVILGET
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, andelerTilkjentYtelse)
+
+        assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
+        assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
+
+        val id = vedtak.id * 1000
+        val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], id + 0, null, 660, "2019-04-01", "2023-03-31")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], id + 1, id + 0, 660, "2026-05-01", "2027-06-30")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], id + 2, null, 1054, "2019-03-01", "2037-02-28")
+    }
+
+    @Test
+    fun `opprettelse av utbetalingsoppdrag hvor flere har småbarnstillegg kaster feil`() {
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling = behandling)
+        val andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse("2019-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, behandling),
+                lagAndelTilkjentYtelse("2026-05-01", "2027-06-30", SMÅBARNSTILLEGG, 660, behandling))
+
+        val behandlingResultatType = BehandlingResultatType.INNVILGET
+        assertThrows<java.lang.IllegalArgumentException> {
+            lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, andelerTilkjentYtelse)
+        }
     }
 
     @Test

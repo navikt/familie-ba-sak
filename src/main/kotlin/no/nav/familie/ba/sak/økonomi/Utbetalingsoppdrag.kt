@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -30,13 +31,21 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
             else
                 UtbetalingsperiodeMal(vedtak)
 
-    val andelerForPersoner = andelerTilkjentYtelse.groupBy { andel -> andel.personIdent }
+    val (personMedSmåbarnstileggAndeler, personerMedAndeler) =
+            andelerTilkjentYtelse.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
+                it.groupBy { andel -> andel.personIdent }
+            }
 
-    var hovedIndeks = 0
-    val utbetalingsperioder: List<Utbetalingsperiode> = andelerForPersoner.flatMap { personMedAndeler ->
-        personMedAndeler.value.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
-            val forrigeOffset = if (index == 0) null else hovedIndeks - 1
-            utbetalingsperiodeMal.lagPeriodeFraAndel(andel, hovedIndeks, forrigeOffset).also { hovedIndeks++ }
+    if (personMedSmåbarnstileggAndeler.size > 1) {
+        throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
+    }
+
+    val samledeAndeler = listOf(personMedSmåbarnstileggAndeler.values.toList(), personerMedAndeler.values.toList()).flatten()
+    var offset = 0
+    val utbetalingsperioder: List<Utbetalingsperiode> = samledeAndeler.flatMap { andelerForPerson ->
+        andelerForPerson.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
+            val forrigeOffset = if (index == 0) null else offset - 1
+            utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also { offset++ }
         }.kunSisteHvis(erOpphør)
     }
 
@@ -50,6 +59,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
     )
 }
 
+// Et utbetalingsoppdrag for opphør inneholder kun én (den siste) utbetalingsperioden // TODO: kontrollere
 fun <T> List<T>.kunSisteHvis(kunSiste: Boolean): List<T> {
     return this.foldRight(mutableListOf()) { element, resultat ->
         if (resultat.size == 0 || !kunSiste) resultat.add(0, element);resultat
