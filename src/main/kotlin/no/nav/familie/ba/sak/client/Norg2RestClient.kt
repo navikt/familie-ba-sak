@@ -13,19 +13,15 @@ class Norg2RestClient(@Value("\${NORG2_BASE_URL}") private val norg2BaseUrl: URI
                       restTemplate: RestOperations)
     : AbstractRestClient(restTemplate, "norg2") {
 
-    private val hentEnhetBaseUri: UriComponentsBuilder =
-            UriComponentsBuilder.fromUri(norg2BaseUrl).pathSegment(PATH_HENT_ENHET)
-
     fun hentEnhet(enhet: String?): Enhet {
         try {
-            val uri = hentEnhetBaseUri.pathSegment("$enhet").build().toUri()
+            val uri = UriComponentsBuilder.fromUri(norg2BaseUrl).pathSegment(PATH_HENT_ENHET, enhet).build().toUri()
             log.info("Henter enhet fra $uri")
             return getForEntity(uri)
         } catch (e: Exception) {
             throw RuntimeException("Feil ved henting av enhet fra NORG2", e)
         }
     }
-
 
     companion object {
         private const val PATH_HENT_ENHET = "api/v1/enhet"
