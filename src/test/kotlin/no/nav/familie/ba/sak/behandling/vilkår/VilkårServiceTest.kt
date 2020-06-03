@@ -10,7 +10,10 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
@@ -21,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
+import java.util.*
 
 
 @SpringBootTest
@@ -81,6 +85,7 @@ class VilkårServiceTest(
                     vilkårResultater = personResultat.vilkårResultater.map {
                         if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
                             RestVilkårResultat(
+                                    id = UUID.randomUUID().mostSignificantBits,
                                     vilkårType = it.vilkårType,
                                     resultat = Resultat.JA,
                                     begrunnelse = "",
@@ -89,6 +94,7 @@ class VilkårServiceTest(
                             )
                         } else {
                             RestVilkårResultat(
+                                    id = UUID.randomUUID().mostSignificantBits,
                                     vilkårType = it.vilkårType,
                                     resultat = Resultat.JA,
                                     begrunnelse = "",
@@ -167,7 +173,7 @@ fun vilkårsvurderingInnvilget(søkerIdent: String,
                               barnFødselsdato: LocalDate): List<RestPersonResultat> = listOf(
         RestPersonResultat(
                 personIdent = søkerIdent,
-                vilkårResultater = listOf(RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
+                vilkårResultater = listOf(RestVilkårResultat(id = UUID.randomUUID().mostSignificantBits, vilkårType = Vilkår.BOSATT_I_RIKET,
                                                              resultat = Resultat.JA,
                                                              periodeFom = LocalDate.of(2018, 5, 8),
                                                              periodeTom = null,
@@ -175,22 +181,26 @@ fun vilkårsvurderingInnvilget(søkerIdent: String,
         RestPersonResultat(
                 personIdent = barnIdent,
                 vilkårResultater = listOf(
-                        RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
+                        RestVilkårResultat(id = UUID.randomUUID().mostSignificantBits,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
                                            resultat = Resultat.JA,
                                            periodeFom = LocalDate.of(2018, 5, 8),
                                            periodeTom = null,
                                            begrunnelse = ""),
-                        RestVilkårResultat(vilkårType = Vilkår.UNDER_18_ÅR,
+                        RestVilkårResultat(id = UUID.randomUUID().mostSignificantBits,
+                                vilkårType = Vilkår.UNDER_18_ÅR,
                                            resultat = Resultat.JA,
                                            periodeFom = barnFødselsdato,
                                            periodeTom = barnFødselsdato.plusYears(18),
                                            begrunnelse = ""),
-                        RestVilkårResultat(vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                        RestVilkårResultat(id = UUID.randomUUID().mostSignificantBits,
+                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                            resultat = Resultat.JA,
                                            periodeFom = LocalDate.of(2018, 5, 8),
                                            periodeTom = null,
                                            begrunnelse = ""),
-                        RestVilkårResultat(vilkårType = Vilkår.BOR_MED_SØKER,
+                        RestVilkårResultat(id = UUID.randomUUID().mostSignificantBits,
+                                vilkårType = Vilkår.BOR_MED_SØKER,
                                            resultat = Resultat.JA,
                                            periodeFom = LocalDate.of(2018, 5, 8),
                                            periodeTom = null,
@@ -203,6 +213,7 @@ fun vilkårsvurderingAvslått(
                 personIdent = personIdent,
                 vilkårResultater = listOf(
                         RestVilkårResultat(
+                                id = UUID.randomUUID().mostSignificantBits,
                                 vilkårType = Vilkår.BOSATT_I_RIKET,
                                 resultat = Resultat.NEI,
                                 periodeFom = LocalDate.now(),

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.common
 
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import java.time.LocalDate
 import java.time.YearMonth
@@ -37,12 +38,34 @@ fun LocalDate.isSameOrAfter(toCompare: LocalDate): Boolean {
 
 private fun LocalDate.toDate(): Date = Date.from(this.atStartOfDay(ZoneId.systemDefault()).toInstant())
 
-fun Periode.kanErstatte(periode: Periode): Boolean {
-    return this.fom.isSameOrBefore(periode.fom) && this.tom.isSameOrAfter(periode.tom)
+private fun LocalDate.isBetween(toCompare: Periode): Boolean {
+    return this.isAfter(toCompare.fom) && this.isBefore(toCompare.tom)
+}
+
+fun Periode.kanErstatte(other: Periode): Boolean {
+    return this.fom.isSameOrBefore(other.fom) && this.tom.isSameOrAfter(other.tom)
+}
+
+fun Periode.kanSplitte(other: Periode): Boolean {
+    return this.fom.isBetween(other) && this.tom.isBetween(other)
+}
+
+fun Periode.kanFlytteFom(other: Periode): Boolean {
+    return this.fom.isSameOrBefore(other.fom) && this.tom.isBetween(other)
+}
+
+fun Periode.kanFlytteTom(other: Periode): Boolean {
+    return this.fom.isBetween(other) && this.tom.isSameOrAfter(other.tom)
 }
 
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 
-fun VilkårResultat.toPeriode() {
-    Periode(fom = this.periodeFom ?: , tom = this.periodeTom)
+fun VilkårResultat.toPeriode(): Periode {
+    return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"), tom = this.periodeTom?: TIDENES_ENDE)
 }
+
+fun RestVilkårResultat.toPeriode(): Periode {
+    return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"), tom = this.periodeTom?: TIDENES_ENDE)
+}
+
+

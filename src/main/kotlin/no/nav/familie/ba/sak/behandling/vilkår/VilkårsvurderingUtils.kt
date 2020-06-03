@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.common.*
+import java.util.*
 
 object VilkårsvurderingUtils {
 
@@ -13,14 +15,44 @@ object VilkårsvurderingUtils {
      * 2
      */
     fun endreVurderingForPeriodePåVilkår(vilkårResultater: List<VilkårResultat>,
-                                         restVilkårResultat: RestVilkårResultat) {
+                                         restVilkårResultat: RestVilkårResultat): List<VilkårResultat> {
         val vilkårResultaterUtenEndretVilkår = vilkårResultater.filter { it.id != restVilkårResultat.id }
+        val nyttVilkårResultat = vilkårResultater.find { it.id == restVilkårResultat.id }?: throw Feil("Finner ikke innsendt restvilkår")
 
-        vilkårResultaterUtenEndretVilkår.map {
-            if ()
+        val periodePåNyttVilkår: Periode = restVilkårResultat.toPeriode()
+
+        val nyeVilkårResultater: MutableList<VilkårResultat> = mutableListOf<VilkårResultat>()
+
+        nyeVilkårResultater.add(nyttVilkårResultat)
+
+        vilkårResultaterUtenEndretVilkår.forEach foreach@{
+            val periode: Periode = it.toPeriode()
+            val nyFom = periodePåNyttVilkår.tom.plusDays(1)
+            val nyTom = periodePåNyttVilkår.fom.minusDays(1)
+
+            if (periodePåNyttVilkår.kanErstatte(periode)) {
+                return@foreach
+            } else if(periodePåNyttVilkår.kanSplitte(periode)){
+                nyeVilkårResultater.add(it.kopierMedNyPeriode(periode.fom, nyTom))
+                nyeVilkårResultater.add(it.kopierMedNyPeriode(nyFom, periode.tom))
+            } else {
+                nyeVilkårResultater.add(it)
+            }
+
+            /*else if(periodePåNyttVilkår.kanFlytteFom(periode)) {
+
+                nyeVilkårResultater.add(it.kopierMedNyPeriode())
+
+            } else if(periodePåNyttVilkår.kanFlytteTom(periode)) {
+
+            } else {
+
+            }*/
+
         }
 
-    }
+        return nyeVilkårResultater
+        }
 
     /**
      * Dersom personer i initieltResultat har vurderte vilkår i aktivtResultat vil disse flyttes til initieltResultat
@@ -40,7 +72,7 @@ object VilkårsvurderingUtils {
         val personResultaterOppdatert = mutableSetOf<PersonResultat>()
         initieltBehandlingResultat.personResultater.forEach { personFraInit ->
             val personTilOppdatert = PersonResultat(behandlingResultat = initieltBehandlingResultat,
-                                                    personIdent = personFraInit.personIdent)
+                    personIdent = personFraInit.personIdent)
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.personIdent == personFraInit.personIdent }
 
             if (personenSomFinnes == null) {

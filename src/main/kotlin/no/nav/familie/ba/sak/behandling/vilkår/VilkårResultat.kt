@@ -46,4 +46,15 @@ class VilkårResultat(
                 begrunnelse = begrunnelse
         )
     }
+
+    fun kopierMedNyPeriode(fom: LocalDate, tom: LocalDate): VilkårResultat {
+        return VilkårResultat(
+                personResultat = personResultat,
+                vilkårType = vilkårType,
+                resultat = resultat,
+                periodeFom = fom,
+                periodeTom = tom,
+                begrunnelse = begrunnelse
+        )
+    }
 }
