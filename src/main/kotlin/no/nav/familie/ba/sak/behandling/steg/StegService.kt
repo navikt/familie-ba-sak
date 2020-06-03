@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.SimuleringException
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -25,7 +26,8 @@ class StegService(
         private val behandlingService: BehandlingService,
         private val steg: List<BehandlingSteg<*>>,
         private val loggService: LoggService,
-        private val rolleConfig: RolleConfig
+        private val rolleConfig: RolleConfig,
+        private val behandlingResultatRepository: BehandlingResultatRepository
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -56,9 +58,9 @@ class StegService(
         loggService.opprettBehandlingLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
-                                     RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
-                                                                barnasIdenter = nyBehandling.barnasIdenter,
-                                                                bekreftEndringerViaFrontend = true))
+                RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                        barnasIdenter = nyBehandling.barnasIdenter,
+                        bekreftEndringerViaFrontend = true))
     }
 
     @Transactional
@@ -73,9 +75,9 @@ class StegService(
         return håndterPersongrunnlag(
                 behandlingEtterSøknadshåndtering,
                 RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
-                                           barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
-                                                   .map { barn -> barn.ident },
-                                           bekreftEndringerViaFrontend = restRegistrerSøknad.bekreftEndringerViaFrontend))
+                        barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
+                                .map { barn -> barn.ident },
+                        bekreftEndringerViaFrontend = restRegistrerSøknad.bekreftEndringerViaFrontend))
     }
 
     @Transactional
@@ -179,7 +181,7 @@ class StegService(
             if (behandlingSteg.stegType().kommerEtter(behandling.steg)) {
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${behandlingSteg.stegType()
                         .displayName()}'," +
-                      " men behandlingen er på steg '${behandling.steg.displayName()}'")
+                        " men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
@@ -217,7 +219,7 @@ class StegService(
             stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
             LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
             secureLogger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.",
-                              exception)
+                    exception)
             throw exception
         }
     }
@@ -229,11 +231,19 @@ class StegService(
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
         return steg.map {
             it.stegType() to Metrics.counter("behandling.steg.$type",
-                                             "steg",
-                                             it.stegType().name,
-                                             "beskrivelse",
-                                             it.stegType().displayName())
+                    "steg",
+                    it.stegType().name,
+                    "beskrivelse",
+                    it.stegType().displayName())
         }.toMap()
+    }
+
+    @Transactional
+    fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
+        val behandling = håndterNyBehandlingFraHendelse(nyBehandling)
+        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
+        val samletResultat = behandlingResultat?.hentSamletResultat()
+        throw SimuleringException(samletResultat)
     }
 
     companion object {
