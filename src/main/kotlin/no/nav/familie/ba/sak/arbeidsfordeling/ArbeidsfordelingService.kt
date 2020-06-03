@@ -31,9 +31,9 @@ class ArbeidsfordelingService(private val behandlingService: BehandlingService,
         }
 
         val enhetFraArbeidsfordeling =
-                hentBehandlendeEnhet(fagsak = behandling.fagsak).firstOrNull()?.enhetId
+                hentBehandlendeEnhet(fagsak = behandling.fagsak).firstOrNull()
 
-        return enhetFraBehandleSakOppgave ?: enhetFraArbeidsfordeling
+        return enhetFraBehandleSakOppgave ?: enhetFraArbeidsfordeling?.enhetId
                ?: throw Feil(message = "Finner ikke behandlende enhet på behandling. Både enhet fra oppgave og arbeidsfordeling er null")
     }
 
