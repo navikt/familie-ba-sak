@@ -52,6 +52,15 @@ class RestTemplateConfig(
     }
 
     @Bean
+    fun restOperations(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                       mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestOperations {
+        return RestTemplateBuilder()
+                .interceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
+                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .build()
+    }
+
+    @Bean
     fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
                                     mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor): RestTemplateBuilder {
         val restTemplateBuilder = RestTemplateBuilder()
