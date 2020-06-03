@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
@@ -58,3 +59,13 @@ class VilkårResultat(
         )
     }
 }
+
+fun RestVilkårResultat.mapNyVurdering(gammelVilkårResultat: VilkårResultat) = VilkårResultat(
+        id = gammelVilkårResultat.id,
+        personResultat = gammelVilkårResultat.personResultat,
+        vilkårType = gammelVilkårResultat.vilkårType,
+        resultat = this.resultat,
+        periodeFom = this.periodeFom,
+        periodeTom = this.periodeTom,
+        begrunnelse = this.begrunnelse
+)

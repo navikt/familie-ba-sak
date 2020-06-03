@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.*
+import no.nav.nare.core.evaluations.Resultat
+import java.time.LocalDate
 import java.util.*
 
 object VilkårsvurderingUtils {
@@ -17,13 +19,12 @@ object VilkårsvurderingUtils {
     fun endreVurderingForPeriodePåVilkår(vilkårResultater: List<VilkårResultat>,
                                          restVilkårResultat: RestVilkårResultat): List<VilkårResultat> {
         val vilkårResultaterUtenEndretVilkår = vilkårResultater.filter { it.id != restVilkårResultat.id }
-        val nyttVilkårResultat = vilkårResultater.find { it.id == restVilkårResultat.id }?: throw Feil("Finner ikke innsendt restvilkår")
+        val endretVilkårResultat = vilkårResultater.find { it.id == restVilkårResultat.id }
+                ?: throw Feil("Finner ikke innsendt restvilkår")
 
         val periodePåNyttVilkår: Periode = restVilkårResultat.toPeriode()
 
         val nyeVilkårResultater: MutableList<VilkårResultat> = mutableListOf<VilkårResultat>()
-
-        nyeVilkårResultater.add(nyttVilkårResultat)
 
         vilkårResultaterUtenEndretVilkår.forEach foreach@{
             val periode: Periode = it.toPeriode()
@@ -32,27 +33,43 @@ object VilkårsvurderingUtils {
 
             if (periodePåNyttVilkår.kanErstatte(periode)) {
                 return@foreach
-            } else if(periodePåNyttVilkår.kanSplitte(periode)){
+            } else if (periodePåNyttVilkår.kanSplitte(periode)) {
                 nyeVilkårResultater.add(it.kopierMedNyPeriode(periode.fom, nyTom))
                 nyeVilkårResultater.add(it.kopierMedNyPeriode(nyFom, periode.tom))
+            } else if (periodePåNyttVilkår.kanFlytteFom(periode)) {
+                nyeVilkårResultater.add(it.kopierMedNyPeriode(nyFom, periode.tom))
+            } else if (periodePåNyttVilkår.kanFlytteTom(periode)) {
+                nyeVilkårResultater.add(it.kopierMedNyPeriode(periode.fom, nyTom))
             } else {
                 nyeVilkårResultater.add(it)
             }
+        }
+        nyeVilkårResultater.add(restVilkårResultat.mapNyVurdering(endretVilkårResultat))
 
-            /*else if(periodePåNyttVilkår.kanFlytteFom(periode)) {
-
-                nyeVilkårResultater.add(it.kopierMedNyPeriode())
-
-            } else if(periodePåNyttVilkår.kanFlytteTom(periode)) {
-
+        return sorterListe(nyeVilkårResultater).fold(emptyList()) { acc: List<VilkårResultat>
+                                                                   , vilkårResultat: VilkårResultat ->
+            val siste: VilkårResultat? = acc.lastOrNull()
+            if(siste == null) {
+                listOf(vilkårResultat)
+            } else if (siste.erEtterfølgendePeriode(vilkårResultat)) {
+                return acc + vilkårResultat
             } else {
-
-            }*/
-
+                val nyttVilkår = lagUvurdertVilkårsresultat(personResultat = vilkårResultat.personResultat,
+                        vilkårType = vilkårResultat.vilkårType, fom = siste.toPeriode().tom.plusDays(1),
+                tom = vilkårResultat.toPeriode().fom.minusDays(1))
+                return acc + nyttVilkår + vilkårResultat
+            }
         }
 
-        return nyeVilkårResultater
-        }
+    }
+
+    fun sorterListe(liste: List<VilkårResultat>): List<VilkårResultat> {
+        return liste.sortedBy { it.periodeFom }
+    }
+
+    fun lagUvurdertVilkårsresultat(personResultat: PersonResultat, vilkårType: Vilkår, fom: LocalDate? = null, tom: LocalDate? = null): VilkårResultat {
+        return VilkårResultat(personResultat = personResultat, vilkårType = vilkårType, resultat = Resultat.KANSKJE, begrunnelse = "", periodeFom = fom, periodeTom = tom)
+    }
 
     /**
      * Dersom personer i initieltResultat har vurderte vilkår i aktivtResultat vil disse flyttes til initieltResultat
@@ -64,6 +81,7 @@ object VilkårsvurderingUtils {
      * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
      * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
      */
+
     fun flyttResultaterTilInitielt(initieltBehandlingResultat: BehandlingResultat,
                                    aktivtBehandlingResultat: BehandlingResultat): Pair<BehandlingResultat, BehandlingResultat> {
 
