@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -100,6 +101,8 @@ class BeregningServiceIntegrationTest {
     }
 
     @Test
+    @Disabled
+    // TODO: Husk disablede tester
     fun skalLagreRiktigTilkjentYtelseForRevurdering() {
 
         val fnr = randomFnr()
