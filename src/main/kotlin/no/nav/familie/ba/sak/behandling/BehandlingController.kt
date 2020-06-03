@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.task.SimuleringTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -26,7 +27,8 @@ import org.springframework.web.bind.annotation.*
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BehandlingController(private val fagsakService: FagsakService,
-                           private val stegService: StegService) {
+                           private val stegService: StegService,
+                           private val infotrygdFeedService: InfotrygdFeedService) {
 
     private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("manuell")
 
@@ -38,7 +40,7 @@ class BehandlingController(private val fagsakService: FagsakService,
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         if (nyBehandling.søkersIdent.isBlank()) {
             throw Feil(message = "Søkers ident kan ikke være blank",
-                    frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.")
+                       frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.")
         }
 
         return Result.runCatching {
@@ -58,7 +60,10 @@ class BehandlingController(private val fagsakService: FagsakService,
     @PutMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
-        return Result.runCatching { SimuleringTask.opprettTask(nyBehandling) }
+        return Result.runCatching {
+            infotrygdFeedService.SendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+            SimuleringTask.opprettTask(nyBehandling)
+        }
                 .fold(
                         onFailure = {
                             illegalState("Opprettelse av behandling fra hendelse feilet: ${it.message}", it)
@@ -73,9 +78,9 @@ class BehandlingController(private val fagsakService: FagsakService,
     private fun initBehandlingMetrikker(type: String): Map<BehandlingType, Counter> {
         return BehandlingType.values().map {
             it to Metrics.counter("behandling.opprettet.$type", "type",
-                    it.name,
-                    "beskrivelse",
-                    it.visningsnavn)
+                                  it.name,
+                                  "beskrivelse",
+                                  it.visningsnavn)
         }.toMap()
     }
 }
