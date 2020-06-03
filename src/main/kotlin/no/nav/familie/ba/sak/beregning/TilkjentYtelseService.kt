@@ -68,6 +68,7 @@ object TilkjentYtelseService {
                                             behandlingId = behandlingResultat.behandling.id,
                                             tilkjentYtelse = tilkjentYtelse,
                                             personId = person.id,
+                                            personIdent = person.personIdent.ident,
                                             stønadFom = beløpsperiode.fraOgMed.atDay(1),
                                             stønadTom = beløpsperiode.tilOgMed.atEndOfMonth(),
                                             beløp = beløpsperiode.beløp,

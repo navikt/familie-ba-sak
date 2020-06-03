@@ -9,10 +9,8 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
-import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.client.Norg2RestClient
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -24,7 +22,8 @@ import java.time.LocalDate
 class MalerService(
         private val vilkårService: VilkårService,
         private val beregningService: BeregningService,
-        private val persongrunnlagService: PersongrunnlagService
+        private val persongrunnlagService: PersongrunnlagService,
+        private val norg2RestClient: Norg2RestClient
 ) {
 
     fun mapTilBrevfelter(vedtak: Vedtak,
@@ -68,7 +67,9 @@ class MalerService(
         val barnasFødselsdatoer = Utils.slåSammen(barna.sortedBy { it.fødselsdato }.map { it.fødselsdato.tilKortString() })
 
         val innvilget = Innvilget(
-                enhet = vedtak.ansvarligEnhet ?: "9999",
+                enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
+                else throw Feil(message = "Ansvarlig enhet er ikke satt ved generering av brev",
+                                frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev"),
                 saksbehandler = vedtak.ansvarligSaksbehandler,
                 beslutter = vedtak.ansvarligBeslutter
                             ?: SikkerhetContext.hentSaksbehandlerNavn(),

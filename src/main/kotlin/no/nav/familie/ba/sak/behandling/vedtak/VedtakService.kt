@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
@@ -17,16 +17,17 @@ import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class VedtakService(private val behandlingService: BehandlingService,
+class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService,
+                    private val behandlingService: BehandlingService,
                     private val behandlingRepository: BehandlingRepository,
                     private val behandlingResultatService: BehandlingResultatService,
-                    private val søknadGrunnlagService: SøknadGrunnlagService,
                     private val loggService: LoggService,
                     private val vedtakRepository: VedtakRepository,
                     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -105,6 +106,7 @@ class VedtakService(private val behandlingService: BehandlingService,
                 ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = forrigeVedtak?.id,
+                ansvarligEnhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling),
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) LocalDate.now()
                         .førsteDagINesteMåned() else null
         )
@@ -167,7 +169,6 @@ class VedtakService(private val behandlingService: BehandlingService,
 
     companion object {
         val LOG = LoggerFactory.getLogger(this::class.java)
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 
