@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
@@ -59,54 +60,56 @@ class Vilkårsvurdering(
     }
 
     override fun validerSteg(behandling: Behandling) {
-        val behandlingResultat = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
-                                 ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
+        if (behandling.type != BehandlingType.TEKNISK_OPPHØR) {
+            val behandlingResultat = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
+                                     ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
 
-        val listeAvFeil = mutableListOf<String>()
+            val listeAvFeil = mutableListOf<String>()
 
-        val periodeResultater = behandlingResultat.periodeResultater(brukMåned = false)
+            val periodeResultater = behandlingResultat.periodeResultater(brukMåned = false)
 
-        val søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()
-        val sakType = hentSakType(behandlingKategori = behandling.kategori, søknadDTO = søknadDTO)
+            val søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()
+            val sakType = hentSakType(behandlingKategori = behandling.kategori, søknadDTO = søknadDTO)
 
 
-        val harGyldigePerioder = periodeResultater.any { periodeResultat ->
-            periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER,
-                                                      sakType) &&
-            periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN,
-                                                      sakType)
-        }
-
-        when {
-            !harGyldigePerioder -> {
-                listeAvFeil.add("Vurderingen har ingen perioder hvor alle påkrevde vilkår er vurdert.")
+            val harGyldigePerioder = periodeResultater.any { periodeResultat ->
+                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER,
+                                                          sakType) &&
+                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN,
+                                                          sakType)
             }
-        }
 
-        val barna = persongrunnlagService.hentBarna(behandling)
-        barna.map { barn ->
-            behandlingResultat.personResultater
-                    .flatMap { it.vilkårResultater }
-                    .filter { it.personResultat.personIdent == barn.personIdent.ident }
-                    .forEach { vilkårResultat ->
-                        if (vilkårResultat.resultat == Resultat.JA && vilkårResultat.periodeFom == null) {
-                            listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} mangler fom dato.")
-                        }
-                        if (vilkårResultat.periodeFom != null && vilkårResultat.periodeFom.isBefore(barn.fødselsdato)) {
-                            listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato før barnets fødselsdato.")
-                        }
-                        if (vilkårResultat.periodeFom != null &&
-                            vilkårResultat.periodeFom.isAfter(barn.fødselsdato.plusYears(18))) {
-                            listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato etter barnet har fylt 18.")
-                        }
-                    }
-        }
+            when {
+                !harGyldigePerioder -> {
+                    listeAvFeil.add("Vurderingen har ingen perioder hvor alle påkrevde vilkår er vurdert.")
+                }
+            }
 
-        if (listeAvFeil.isNotEmpty()) {
-            throw Feil(message = "Validering feilet for behandling ${behandling.id}",
-                       frontendFeilmelding = RessursUtils.lagFrontendMelding("Vilkårsvurderingen er ugyldig med følgende feil:",
-                                                                             listeAvFeil)
-            )
+            val barna = persongrunnlagService.hentBarna(behandling)
+            barna.map { barn ->
+                behandlingResultat.personResultater
+                        .flatMap { it.vilkårResultater }
+                        .filter { it.personResultat.personIdent == barn.personIdent.ident }
+                        .forEach { vilkårResultat ->
+                            if (vilkårResultat.resultat == Resultat.JA && vilkårResultat.periodeFom == null) {
+                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} mangler fom dato.")
+                            }
+                            if (vilkårResultat.periodeFom != null && vilkårResultat.periodeFom.isBefore(barn.fødselsdato)) {
+                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato før barnets fødselsdato.")
+                            }
+                            if (vilkårResultat.periodeFom != null &&
+                                vilkårResultat.periodeFom.isAfter(barn.fødselsdato.plusYears(18))) {
+                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato etter barnet har fylt 18.")
+                            }
+                        }
+            }
+
+            if (listeAvFeil.isNotEmpty()) {
+                throw Feil(message = "Validering feilet for behandling ${behandling.id}",
+                           frontendFeilmelding = RessursUtils.lagFrontendMelding("Vilkårsvurderingen er ugyldig med følgende feil:",
+                                                                                 listeAvFeil)
+                )
+            }
         }
     }
 }
