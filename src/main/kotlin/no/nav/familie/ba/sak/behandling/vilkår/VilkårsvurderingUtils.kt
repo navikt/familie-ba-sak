@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.*
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
-import java.util.*
 
 object VilkårsvurderingUtils {
 
@@ -20,7 +19,7 @@ object VilkårsvurderingUtils {
                                          restVilkårResultat: RestVilkårResultat): List<VilkårResultat> {
         val vilkårResultaterUtenEndretVilkår = vilkårResultater.filter { it.id != restVilkårResultat.id }
         val endretVilkårResultat = vilkårResultater.find { it.id == restVilkårResultat.id }
-                ?: throw Feil("Finner ikke innsendt restvilkår")
+                                   ?: throw Feil("Finner ikke innsendt restvilkår")
 
         val periodePåNyttVilkår: Periode = restVilkårResultat.toPeriode()
 
@@ -31,44 +30,50 @@ object VilkårsvurderingUtils {
             val nyFom = periodePåNyttVilkår.tom.plusDays(1)
             val nyTom = periodePåNyttVilkår.fom.minusDays(1)
 
-            if (periodePåNyttVilkår.kanErstatte(periode)) {
-                return@foreach
-            } else if (periodePåNyttVilkår.kanSplitte(periode)) {
-                nyeVilkårResultater.add(it.kopierMedNyPeriode(periode.fom, nyTom))
-                nyeVilkårResultater.add(it.kopierMedNyPeriode(nyFom, periode.tom))
-            } else if (periodePåNyttVilkår.kanFlytteFom(periode)) {
-                nyeVilkårResultater.add(it.kopierMedNyPeriode(nyFom, periode.tom))
-            } else if (periodePåNyttVilkår.kanFlytteTom(periode)) {
-                nyeVilkårResultater.add(it.kopierMedNyPeriode(periode.fom, nyTom))
-            } else {
-                nyeVilkårResultater.add(it)
+            when {
+                periodePåNyttVilkår.kanErstatte(periode) -> {
+                    return@foreach
+                }
+                periodePåNyttVilkår.kanSplitte(periode) -> {
+                    nyeVilkårResultater.add(it.kopierMedNyPeriode(periode.fom, nyTom))
+                    nyeVilkårResultater.add(it.kopierMedNyPeriode(nyFom, periode.tom))
+                }
+                periodePåNyttVilkår.kanFlytteFom(periode) -> {
+                    nyeVilkårResultater.add(it.kopierMedNyPeriode(nyFom, periode.tom))
+                }
+                periodePåNyttVilkår.kanFlytteTom(periode) -> {
+                    nyeVilkårResultater.add(it.kopierMedNyPeriode(periode.fom, nyTom))
+                }
+                else -> {
+                    nyeVilkårResultater.add(it)
+                }
             }
         }
         nyeVilkårResultater.add(restVilkårResultat.mapNyVurdering(endretVilkårResultat))
 
-        return sorterListe(nyeVilkårResultater).fold(emptyList()) { acc: List<VilkårResultat>
-                                                                   , vilkårResultat: VilkårResultat ->
-            val siste: VilkårResultat? = acc.lastOrNull()
-            if(siste == null) {
-                listOf(vilkårResultat)
-            } else if (siste.erEtterfølgendePeriode(vilkårResultat)) {
-                return acc + vilkårResultat
-            } else {
-                val nyttVilkår = lagUvurdertVilkårsresultat(personResultat = vilkårResultat.personResultat,
-                        vilkårType = vilkårResultat.vilkårType, fom = siste.toPeriode().tom.plusDays(1),
-                tom = vilkårResultat.toPeriode().fom.minusDays(1))
-                return acc + nyttVilkår + vilkårResultat
-            }
-        }
+        return sorterListe(nyeVilkårResultater)
+                .fold(emptyList(), { acc: List<VilkårResultat>, vilkårResultat: VilkårResultat ->
+                    val siste = acc.lastOrNull()
 
-    }
-
-    fun sorterListe(liste: List<VilkårResultat>): List<VilkårResultat> {
-        return liste.sortedBy { it.periodeFom }
-    }
-
-    fun lagUvurdertVilkårsresultat(personResultat: PersonResultat, vilkårType: Vilkår, fom: LocalDate? = null, tom: LocalDate? = null): VilkårResultat {
-        return VilkårResultat(personResultat = personResultat, vilkårType = vilkårType, resultat = Resultat.KANSKJE, begrunnelse = "", periodeFom = fom, periodeTom = tom)
+                    when {
+                        siste == null -> {
+                            listOf(vilkårResultat)
+                        }
+                        siste == vilkårResultat -> {
+                            acc
+                        }
+                        siste.erEtterfølgendePeriode(vilkårResultat) -> {
+                            acc + vilkårResultat
+                        }
+                        else -> {
+                            val nyttVilkår = lagUvurdertVilkårsresultat(personResultat = vilkårResultat.personResultat,
+                                                                        vilkårType = vilkårResultat.vilkårType,
+                                                                        fom = siste.toPeriode().tom.plusDays(1),
+                                                                        tom = vilkårResultat.toPeriode().fom.minusDays(1))
+                            acc + nyttVilkår + vilkårResultat
+                        }
+                    }
+                })
     }
 
     /**
@@ -90,7 +95,7 @@ object VilkårsvurderingUtils {
         val personResultaterOppdatert = mutableSetOf<PersonResultat>()
         initieltBehandlingResultat.personResultater.forEach { personFraInit ->
             val personTilOppdatert = PersonResultat(behandlingResultat = initieltBehandlingResultat,
-                    personIdent = personFraInit.personIdent)
+                                                    personIdent = personFraInit.personIdent)
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.personIdent == personFraInit.personIdent }
 
             if (personenSomFinnes == null) {
@@ -127,6 +132,22 @@ object VilkårsvurderingUtils {
         initieltBehandlingResultat.personResultater = personResultaterOppdatert
 
         return Pair(initieltBehandlingResultat, aktivtBehandlingResultat)
+    }
+
+    fun sorterListe(liste: List<VilkårResultat>): List<VilkårResultat> {
+        return liste.sortedBy { it.periodeFom }
+    }
+
+    fun lagUvurdertVilkårsresultat(personResultat: PersonResultat,
+                                   vilkårType: Vilkår,
+                                   fom: LocalDate? = null,
+                                   tom: LocalDate? = null): VilkårResultat {
+        return VilkårResultat(personResultat = personResultat,
+                              vilkårType = vilkårType,
+                              resultat = Resultat.KANSKJE,
+                              begrunnelse = "",
+                              periodeFom = fom,
+                              periodeTom = tom)
     }
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {
