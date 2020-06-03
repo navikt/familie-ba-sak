@@ -33,8 +33,7 @@ class DokumentService(
                                                        søknad,
                                                        behandlingResultatType
         )
-        val markdown = dokGenKlient.hentMarkdownForMal(malMedData)
-        return markdown
+        return dokGenKlient.hentMarkdownForMal(malMedData)
     }
 
     @Deprecated("henter og viser PDF istedet")
@@ -129,11 +128,11 @@ class DokumentService(
         }
                 .fold(
                         onSuccess = { it },
-                        onFailure = { throwable ->
+                        onFailure = {
                             throw Feil(message = "Klarte ikke generere vedtaksbrev",
                                        frontendFeilmelding = "Noe gikk galt ved generering av vedtaksbrev og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
                                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                                       throwable = throwable)
+                                       throwable = it)
                         }
                 )
     }
