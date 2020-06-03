@@ -28,10 +28,10 @@ class VilkårResultat(
         var resultat: Resultat,
 
         @Column(name = "periode_fom")
-        val periodeFom: LocalDate? = null,
+        var periodeFom: LocalDate? = null,
 
         @Column(name = "periode_tom")
-        val periodeTom: LocalDate? = null,
+        var periodeTom: LocalDate? = null,
 
         @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
         var begrunnelse: String

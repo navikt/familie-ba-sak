@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.nare.core.evaluations.Resultat

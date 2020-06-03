@@ -3,22 +3,23 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.endreVurderingForPeriodePåVilkår
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.fyllHullForVilkårResultater
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
@@ -102,8 +103,10 @@ class VilkårService(
 
         val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
 
-        val behandlingResultat = BehandlingResultat(behandling = behandlingService.hent(behandlingId),
-                                                    aktiv = true)
+        val behandlingResultat =
+                BehandlingResultat(behandling = behandlingService.hent(
+                        behandlingId),
+                                   aktiv = true)
         behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
@@ -184,9 +187,10 @@ class VilkårService(
         }.toSet()
     }
 
+    @Transactional
     fun endreVilkår(behandlingId: Long,
                     vilkårId: Long,
-                    restPersonResultat: RestPersonResultat) {
+                    restPersonResultat: RestPersonResultat): List<RestPersonResultat> {
         val behandlingResultat = hentVilkårsvurdering(behandlingId = behandlingId)
                                  ?: throw Feil(message = "Fant ikke aktiv vilkårsvurdering ved endring på vilkår",
                                                frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering")
@@ -196,10 +200,8 @@ class VilkårService(
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
 
-        val vilkårResultaterForVilkårType =
-                personResultat.vilkårResultater.filter { it.vilkårType == restVilkårResultat.vilkårType }
+        muterPersonResultat(personResultat, restVilkårResultat)
 
-        endreVurderingForPeriodePåVilkår(vilkårResultater = vilkårResultaterForVilkårType,
-                                         restVilkårResultat = restVilkårResultat)
+        return behandlingResultatService.oppdater(behandlingResultat).personResultater.map { it.tilRestPersonResultat() }
     }
 }

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.*
 import no.nav.nare.core.evaluations.Resultat
@@ -9,71 +8,75 @@ import java.time.LocalDate
 object VilkårsvurderingUtils {
 
     /**
-     * 1 2 3
-     * 2
-     *
-     * 1 3
-     * 2
+     * Funksjon som tar inn endret vilkår og muterer person resultatet til å få plass til den endrede perioden.
      */
-    fun endreVurderingForPeriodePåVilkår(vilkårResultater: List<VilkårResultat>,
-                                         restVilkårResultat: RestVilkårResultat): List<VilkårResultat> {
-        val vilkårResultaterUtenEndretVilkår = vilkårResultater.filter { it.id != restVilkårResultat.id }
-        val endretVilkårResultat = vilkårResultater.find { it.id == restVilkårResultat.id }
-                                   ?: throw Feil("Finner ikke innsendt restvilkår")
+    fun muterPersonResultat(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
+        personResultat.vilkårResultater.forEach {
+            tilpassVilkårForEndretVilkår(
+                    personResultat = personResultat,
+                    vilkårResultat = it,
+                    restVilkårResultat = restVilkårResultat
+            )
+        }
 
+        fyllHullForVilkårResultater(personResultat)
+    }
+
+    fun tilpassVilkårForEndretVilkår(personResultat: PersonResultat,
+                                     vilkårResultat: VilkårResultat,
+                                     restVilkårResultat: RestVilkårResultat) {
         val periodePåNyttVilkår: Periode = restVilkårResultat.toPeriode()
 
-        val nyeVilkårResultater: MutableList<VilkårResultat> = mutableListOf<VilkårResultat>()
-
-        vilkårResultaterUtenEndretVilkår.forEach foreach@{
-            val periode: Periode = it.toPeriode()
+        if (vilkårResultat.id == restVilkårResultat.id) {
+            vilkårResultat.periodeFom = restVilkårResultat.periodeFom
+            vilkårResultat.periodeTom = restVilkårResultat.periodeTom
+            vilkårResultat.begrunnelse = restVilkårResultat.begrunnelse
+            vilkårResultat.resultat = restVilkårResultat.resultat
+        } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType) {
+            val periode: Periode = vilkårResultat.toPeriode()
             val nyFom = periodePåNyttVilkår.tom.plusDays(1)
             val nyTom = periodePåNyttVilkår.fom.minusDays(1)
 
             when {
                 periodePåNyttVilkår.kanErstatte(periode) -> {
-                    return@foreach
+                    personResultat.removeVilkårResultat(vilkårResultatId = vilkårResultat.id)
                 }
                 periodePåNyttVilkår.kanSplitte(periode) -> {
-                    nyeVilkårResultater.add(it.kopierMedNyPeriode(periode.fom, nyTom))
-                    nyeVilkårResultater.add(it.kopierMedNyPeriode(nyFom, periode.tom))
+                    personResultat.addVilkårResultat(vilkårResultat.kopierMedNyPeriode(periode.fom, nyTom))
+                    personResultat.addVilkårResultat(vilkårResultat.kopierMedNyPeriode(nyFom, periode.tom))
                 }
                 periodePåNyttVilkår.kanFlytteFom(periode) -> {
-                    nyeVilkårResultater.add(it.kopierMedNyPeriode(nyFom, periode.tom))
+                    vilkårResultat.periodeFom = nyFom
                 }
                 periodePåNyttVilkår.kanFlytteTom(periode) -> {
-                    nyeVilkårResultater.add(it.kopierMedNyPeriode(periode.fom, nyTom))
-                }
-                else -> {
-                    nyeVilkårResultater.add(it)
+                    vilkårResultat.periodeTom = nyTom
                 }
             }
         }
-        nyeVilkårResultater.add(restVilkårResultat.mapNyVurdering(endretVilkårResultat))
+    }
 
-        return sorterListe(nyeVilkårResultater)
-                .fold(emptyList(), { acc: List<VilkårResultat>, vilkårResultat: VilkårResultat ->
-                    val siste = acc.lastOrNull()
+    fun fyllHullForVilkårResultater(personResultat: PersonResultat) {
+        personResultat.sorterVilkårResultater()
 
-                    when {
-                        siste == null -> {
-                            listOf(vilkårResultat)
-                        }
-                        siste == vilkårResultat -> {
-                            acc
-                        }
-                        siste.erEtterfølgendePeriode(vilkårResultat) -> {
-                            acc + vilkårResultat
-                        }
-                        else -> {
-                            val nyttVilkår = lagUvurdertVilkårsresultat(personResultat = vilkårResultat.personResultat,
-                                                                        vilkårType = vilkårResultat.vilkårType,
-                                                                        fom = siste.toPeriode().tom.plusDays(1),
-                                                                        tom = vilkårResultat.toPeriode().fom.minusDays(1))
-                            acc + nyttVilkår + vilkårResultat
-                        }
+        personResultat.vilkårResultater.forEach {
+            personResultat.sorterVilkårResultater()
+
+            val neste = personResultat.nextVilkårResultat(it)
+            if (neste != null) {
+                when {
+                    !it.erEtterfølgendePeriode(neste) -> {
+                        val nyttVilkår =
+                                lagUvurdertVilkårsresultat(personResultat = it.personResultat,
+                                                           vilkårType = it.vilkårType,
+                                                           fom = it.toPeriode().tom.plusDays(
+                                                                   1),
+                                                           tom = neste.toPeriode().fom.minusDays(
+                                                                   1))
+                        personResultat.addVilkårResultat(nyttVilkår)
                     }
-                })
+                }
+            }
+        }
     }
 
     /**

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
+import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.nare.core.evaluations.Resultat
 import org.springframework.stereotype.Service
@@ -92,11 +93,11 @@ class Vilkårsvurdering(
                         if (vilkårResultat.resultat == Resultat.JA && vilkårResultat.periodeFom == null) {
                             listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} mangler fom dato.")
                         }
-                        if (vilkårResultat.periodeFom != null && vilkårResultat.periodeFom.isBefore(barn.fødselsdato)) {
+                        if (vilkårResultat.periodeFom != null && vilkårResultat.toPeriode().fom.isBefore(barn.fødselsdato)) {
                             listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato før barnets fødselsdato.")
                         }
                         if (vilkårResultat.periodeFom != null &&
-                            vilkårResultat.periodeFom.isAfter(barn.fødselsdato.plusYears(18))) {
+                            vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18))) {
                             listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato etter barnet har fylt 18.")
                         }
                     }

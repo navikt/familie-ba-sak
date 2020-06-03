@@ -13,10 +13,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
-import no.nav.familie.ba.sak.behandling.vilkår.SakType
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType

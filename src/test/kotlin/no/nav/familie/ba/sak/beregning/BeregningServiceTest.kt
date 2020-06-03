@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.beregning
 
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
@@ -48,7 +48,8 @@ class BeregningServiceTest() {
         val behandling = lagBehandling()
         val barn1Fnr = randomFnr()
         val søkerFnr = randomFnr()
-        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        val behandlingResultat =
+                BehandlingResultat(behandling = behandling)
 
         val periodeFom = LocalDate.of(2020, 1, 1)
         val periodeTom = LocalDate.of(2020, 11, 1)
@@ -96,7 +97,8 @@ class BeregningServiceTest() {
         val behandling = lagBehandling()
         val barn1Fnr = randomFnr()
         val søkerFnr = randomFnr()
-        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        val behandlingResultat =
+                BehandlingResultat(behandling = behandling)
 
         val periodeFom = LocalDate.of(2018, 1, 1)
         val periodeTom = LocalDate.of(2020, 11, 1)
@@ -153,7 +155,8 @@ class BeregningServiceTest() {
         val behandling = lagBehandling()
         val barn1Fnr = randomFnr()
         val søkerFnr = randomFnr()
-        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        val behandlingResultat =
+                BehandlingResultat(behandling = behandling)
 
         val periodeFom = LocalDate.of(2020, 1, 1)
         val periodeTom = LocalDate.of(2020, 11, 1)

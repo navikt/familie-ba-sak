@@ -1,6 +1,7 @@
-package no.nav.familie.ba.sak.behandling.domene
+package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.beregning.domene.personResultaterTilPeriodeResultater
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -25,7 +26,8 @@ data class BehandlingResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "behandlingResultat",
-                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE]
+                   cascade = [CascadeType.ALL],
+                   orphanRemoval = true
         )
         var personResultater: Set<PersonResultat> = setOf()
 

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
@@ -141,7 +141,8 @@ class VilkårTilTilkjentYtelseTest {
 class TestBehandlingResultatBuilder(val sakType: String) {
     private val identPersonResultatMap = mutableMapOf<String, PersonResultat>()
     private val behandlingResultat =
-            BehandlingResultat(behandling = lagBehandling(behandlingKategori = BehandlingKategori.valueOf(sakType)))
+            BehandlingResultat(behandling = lagBehandling(
+                    behandlingKategori = BehandlingKategori.valueOf(sakType)))
 
     fun medPersonVilkårPeriode(person: Person, vilkår: String?, periode: String?): TestBehandlingResultatBuilder {
 
