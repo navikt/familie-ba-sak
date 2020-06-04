@@ -33,20 +33,12 @@ class VilkårController(
         return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
     }
 
-    @PutMapping(path = ["/{behandlingId}/valider"])
+    @PostMapping(path = ["/{behandlingId}/valider"])
     fun validerVilkårsvurdering(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hent(behandlingId)
+        stegService.håndterVilkårsvurdering(behandling)
 
-        return Result.runCatching {
-            stegService.håndterVilkårsvurdering(behandling)
-        }.fold(
-                onSuccess = {
-                    ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
-                },
-                onFailure = {
-                    throw it
-                }
-        )
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 }
 
