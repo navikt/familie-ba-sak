@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
@@ -20,35 +20,28 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class Vilkårsvurdering(
-        private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val vilkårService: VilkårService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService
-) : BehandlingSteg<RestVilkårsvurdering> {
+) : BehandlingSteg<String> {
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: RestVilkårsvurdering,
+                                      data: String,
                                       stegService: StegService?): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        val vilkårsvurdertBehandling = behandlingService.hent(behandlingId = behandling.id)
-
-        if (data.personResultater.isNotEmpty()) {
-            vilkårService.lagBehandlingResultatFraRestPersonResultater(data.personResultater,
-                                                                       vilkårsvurdertBehandling.id)
-        } else {
-            vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+            vilkårService.vurderVilkårForFødselshendelse(behandling.id)
         }
+
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                vilkårsvurdertBehandling,
+                behandling,
                 personopplysningGrunnlag,
                 ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn())
-
-        validerSteg(behandling)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 

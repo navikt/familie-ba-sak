@@ -24,8 +24,7 @@ class PersonResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "personResultat",
-                   cascade = [CascadeType.ALL],
-                   orphanRemoval = true
+                   cascade = [CascadeType.ALL]
         )
         @OrderBy("periode_fom")
         var vilkårResultater: Set<VilkårResultat> = setOf()

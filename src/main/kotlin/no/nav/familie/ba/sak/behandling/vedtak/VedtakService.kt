@@ -111,7 +111,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                         .førsteDagINesteMåned() else null
         )
 
-
         return lagreOgDeaktiverGammel(vedtak)
     }
 

@@ -62,7 +62,7 @@ object VilkårsvurderingUtils {
             personResultat.sorterVilkårResultater()
 
             val neste = personResultat.nextVilkårResultat(it)
-            if (neste != null) {
+            if (neste != null && it.vilkårType == neste.vilkårType) {
                 when {
                     !it.erEtterfølgendePeriode(neste) -> {
                         val nyttVilkår =

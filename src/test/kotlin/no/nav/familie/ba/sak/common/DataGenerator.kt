@@ -241,6 +241,21 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
     return personResultat
 }
 
+fun vurderBehandlingResultatTilInnvilget(behandlingResultat: BehandlingResultat, barn: Person) {
+    behandlingResultat.personResultater.forEach { personResultat ->
+        personResultat.vilkårResultater.forEach {
+            if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
+                it.resultat = Resultat.JA
+                it.periodeFom = barn.fødselsdato
+                it.periodeTom = barn.fødselsdato.plusYears(18)
+            } else {
+                it.resultat = Resultat.JA
+                it.periodeFom = LocalDate.now()
+            }
+        }
+    }
+}
+
 fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat): BehandlingResultat {
     val behandlingResultat = BehandlingResultat(
             behandling = behandling

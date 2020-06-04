@@ -26,8 +26,7 @@ data class BehandlingResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "behandlingResultat",
-                   cascade = [CascadeType.ALL],
-                   orphanRemoval = true
+                   cascade = [CascadeType.ALL]
         )
         var personResultater: Set<PersonResultat> = setOf()
 

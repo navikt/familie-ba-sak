@@ -136,33 +136,6 @@ class VilkårService(
         return behandlingResultat
     }
 
-    fun lagBehandlingResultatFraRestPersonResultater(personResultater: List<RestPersonResultat>,
-                                                     behandlingId: Long): BehandlingResultat {
-        val behandlingResultat = BehandlingResultat(
-                behandling = behandlingService.hent(behandlingId),
-                aktiv = true)
-
-        behandlingResultat.personResultater = personResultater.map { restPersonResultat ->
-            val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
-                                                personIdent = restPersonResultat.personIdent
-            )
-            personResultat.vilkårResultater = restPersonResultat.vilkårResultater?.map { restVilkårResultat ->
-                VilkårResultat(
-                        personResultat = personResultat,
-                        vilkårType = restVilkårResultat.vilkårType,
-                        resultat = restVilkårResultat.resultat,
-                        periodeFom = restVilkårResultat.periodeFom,
-                        periodeTom = restVilkårResultat.periodeTom,
-                        begrunnelse = restVilkårResultat.begrunnelse
-                )
-            }?.toSet() ?: setOf()
-
-            personResultat
-        }.toSet()
-
-        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
-    }
-
     private fun spesifikasjonerForPerson(person: Person, behandlingKategori: BehandlingKategori): Spesifikasjon<Fakta> {
         val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.valueOfType(behandlingKategori))
 

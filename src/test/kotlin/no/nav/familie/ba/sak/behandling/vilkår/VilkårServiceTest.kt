@@ -10,10 +10,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
@@ -33,6 +30,9 @@ import java.util.*
 class VilkårServiceTest(
         @Autowired
         private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val behandlingResultatService: BehandlingResultatService,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -79,35 +79,9 @@ class VilkårServiceTest(
 
         val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
 
-        val vurdertPersonResultater: List<RestPersonResultat> = behandlingResultat.personResultater.map { personResultat ->
-            RestPersonResultat(
-                    personIdent = personResultat.personIdent,
-                    vilkårResultater = personResultat.vilkårResultater.map {
-                        if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
-                            RestVilkårResultat(
-                                    id = UUID.randomUUID().mostSignificantBits,
-                                    vilkårType = it.vilkårType,
-                                    resultat = Resultat.JA,
-                                    begrunnelse = "",
-                                    periodeFom = barn.fødselsdato,
-                                    periodeTom = barn.fødselsdato.plusYears(18)
-                            )
-                        } else {
-                            RestVilkårResultat(
-                                    id = UUID.randomUUID().mostSignificantBits,
-                                    vilkårType = it.vilkårType,
-                                    resultat = Resultat.JA,
-                                    begrunnelse = "",
-                                    periodeFom = LocalDate.now(),
-                                    periodeTom = null
-                            )
-                        }
-                    }
-            )
-        }
+        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
 
-        vilkårService.lagBehandlingResultatFraRestPersonResultater(personResultater = vurdertPersonResultater,
-                                                                   behandlingId = behandling.id)
+        behandlingResultatService.oppdater(behandlingResultat)
 
         Assertions.assertDoesNotThrow { behandlingSteg.validerSteg(behandling) }
     }

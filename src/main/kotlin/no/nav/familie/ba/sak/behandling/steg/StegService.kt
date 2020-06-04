@@ -89,12 +89,12 @@ class StegService(
     }
 
     @Transactional
-    fun håndterVilkårsvurdering(behandling: Behandling, restVilkårsvurdering: RestVilkårsvurdering): Behandling {
+    fun håndterVilkårsvurdering(behandling: Behandling): Behandling {
         val behandlingSteg: Vilkårsvurdering =
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, restVilkårsvurdering, this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, "", this)
         }
     }
 

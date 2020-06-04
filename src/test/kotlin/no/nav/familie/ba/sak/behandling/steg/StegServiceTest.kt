@@ -1,22 +1,23 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.vilkårsvurderingInnvilget
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -28,11 +29,10 @@ import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.TestInstance.*
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import java.time.LocalDate
 
 
 @SpringBootTest
@@ -47,6 +47,9 @@ class StegServiceTest(
 
         @Autowired
         private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -67,7 +70,7 @@ class StegServiceTest(
     }
 
     @Test
-    fun `Skal håndtere steg for ordinær behandling`() {
+    fun `Skal håndtere steg for frontend ordinær behandling`() {
         val søkerFnr = randomFnr()
         val annenPartIdent = randomFnr()
         val barnFnr = randomFnr()
@@ -88,9 +91,13 @@ class StegServiceTest(
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
 
-        stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg, RestVilkårsvurdering(
-                personResultater = vilkårsvurderingInnvilget(søkerFnr, barnFnr, LocalDate.of(2018, 5, 1)))
-        )
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)!!
+        val barn: Person =
+                persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.find { it.personIdent.ident == barnFnr }!!
+        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
+        behandlingResultatService.oppdater(behandlingResultat)
+
+        stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
 
         val behandlingEtterVilkårsvurderingSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVilkårsvurderingSteg.steg)
@@ -169,9 +176,7 @@ class StegServiceTest(
         Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
 
         assertThrows<IllegalStateException> {
-            stegService.håndterVilkårsvurdering(behandling, RestVilkårsvurdering(
-                    personResultater = vilkårsvurderingInnvilget(søkerFnr, barnFnr, LocalDate.of(2019, 1, 1)))
-            )
+            stegService.håndterVilkårsvurdering(behandling)
         }
     }
 
