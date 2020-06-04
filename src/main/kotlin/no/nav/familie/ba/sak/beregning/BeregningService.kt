@@ -68,8 +68,8 @@ class BeregningService(
 
         if (erRentOpphør) {
             opphørsdato = utbetalingsoppdrag.utbetalingsperiode[0].opphør!!.opphørDatoFom
-            if (utbetalingsoppdrag.utbetalingsperiode.all { it.opphør!!.opphørDatoFom == opphørsdato }) {
-                //TODO:
+            if (utbetalingsoppdrag.utbetalingsperiode.any { it.opphør!!.opphørDatoFom != opphørsdato }) {
+                throw IllegalArgumentException("Systemet støtter ikke opphør med ulike opphørsdatoer")
             }
         }
 

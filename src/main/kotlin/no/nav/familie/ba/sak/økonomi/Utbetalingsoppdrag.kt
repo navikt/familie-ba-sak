@@ -40,9 +40,9 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
         throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
     }
 
-    val samledeAndeler = listOf(personMedSmåbarnstileggAndeler.values.toList(), personerMedAndeler.values.toList()).flatten()
+    val samledeAndeler : List<List<AndelTilkjentYtelse>> = listOf(personMedSmåbarnstileggAndeler.values.toList(), personerMedAndeler.values.toList()).flatten()
     var offset = 0
-    val utbetalingsperioder: List<Utbetalingsperiode> = samledeAndeler.flatMap { andelerForPerson ->
+    val utbetalingsperioder: List<Utbetalingsperiode> = samledeAndeler.flatMap { andelerForPerson: List<AndelTilkjentYtelse> ->
         andelerForPerson.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
             val forrigeOffset = if (index == 0) null else offset - 1
             utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also { offset++ }

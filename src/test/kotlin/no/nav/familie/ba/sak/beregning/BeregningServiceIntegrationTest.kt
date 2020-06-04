@@ -101,8 +101,6 @@ class BeregningServiceIntegrationTest {
     }
 
     @Test
-    @Disabled
-    // TODO: Husk disablede tester
     fun skalLagreRiktigTilkjentYtelseForRevurdering() {
 
         val fnr = randomFnr()
