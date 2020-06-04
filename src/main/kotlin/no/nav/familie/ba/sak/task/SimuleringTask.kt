@@ -10,8 +10,6 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
-class SimuleringException(val behandlingResultatType: BehandlingResultatType?) : RuntimeException("Simulering Ok")
-
 @Service
 @TaskStepBeskrivelse(taskStepType = SimuleringTask.TASK_STEP_TYPE,
         beskrivelse = "Simulering av regelkjøring for fødselshendelse",
@@ -23,8 +21,8 @@ class SimuleringTask(
         val nyBehandling = objectMapper.readValue(task.payload, NyBehandlingHendelse::class.java)
         try {
             stegService.regelkjørBehandling(nyBehandling)
-        } catch (e: SimuleringException) {
-            LOG.info("Simulering av behandling fullført med resultat: ${e.behandlingResultatType}")
+        } catch (e: SimulationException) {
+            LOG.info("Simulering av behandling. Data ikke persistert.")
         }
     }
 
@@ -40,3 +38,5 @@ class SimuleringTask(
         }
     }
 }
+
+class SimulationException : RuntimeException("Simulering OK")
