@@ -60,7 +60,7 @@ class Vilkårsvurdering(
     }
 
     override fun validerSteg(behandling: Behandling) {
-        if (behandling.type != BehandlingType.TEKNISK_OPPHØR) {
+        if (behandling.type != BehandlingType.TEKNISK_OPPHØR && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val behandlingResultat = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
                                      ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
 

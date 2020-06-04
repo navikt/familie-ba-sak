@@ -95,7 +95,7 @@ enum class StegType(private val rekkefølge: Int,
 
     fun hentNesteSteg(utførendeStegType: StegType, behandlingType: BehandlingType? = null): StegType {
         when (behandlingType) {
-            BehandlingType.TEKNISK_OPPHØR ->
+            BehandlingType.TEKNISK_OPPHØR, BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT ->
                 return when (utførendeStegType) {
                     REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
                     REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING

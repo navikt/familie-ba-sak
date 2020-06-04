@@ -57,10 +57,12 @@ val defaultFagsak = Fagsak(1,
     it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr())))
 }
 
-fun lagBehandling(fagsak: Fagsak = defaultFagsak, behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL) =
-        Behandling(id = nesteBehandlingId(),
+fun lagBehandling(fagsak: Fagsak = defaultFagsak,
+                  behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+                  behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+) = Behandling(id = nesteBehandlingId(),
                    fagsak = fagsak,
-                   type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                   type = behandlingType,
                    kategori = behandlingKategori,
                    underkategori = BehandlingUnderkategori.ORDINÆR,
                    opprinnelse = BehandlingOpprinnelse.MANUELL)

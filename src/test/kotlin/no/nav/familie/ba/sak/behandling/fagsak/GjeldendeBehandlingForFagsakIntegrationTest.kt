@@ -5,12 +5,11 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.beregning.lagTestUtbetalingsoppdragForFGB
+import no.nav.familie.ba.sak.beregning.lagTestUtbetalingsoppdragForFGBMedEttBarn
 import no.nav.familie.ba.sak.beregning.lagTestUtbetalingsoppdragForOpphør
 import no.nav.familie.ba.sak.beregning.lagTestUtbetalingsoppdragForRevurdering
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,7 +26,7 @@ import java.time.LocalDate
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres")
 @Tag("integration")
-class GjeldendeBehandlingForFagsakTest {
+class GjeldendeBehandlingForFagsakIntegrationTest {
 
     private val UTBETALINGSMÅNED = LocalDate.now()
 
@@ -123,7 +122,6 @@ class GjeldendeBehandlingForFagsakTest {
     }
 
     @Test
-    @Disabled
     fun `Sett riktig gjeldende behandling for revurdering frem i tid`() {
         val morId = randomFnr()
         val vedtakDato = LocalDate.now()
@@ -156,7 +154,6 @@ class GjeldendeBehandlingForFagsakTest {
     }
 
     @Test
-    @Disabled
     fun `Sett riktig gjeldende behandling ved revurdering denne måneden`() {
         val morId = randomFnr()
         val vedtakDato = LocalDate.now()
@@ -209,7 +206,7 @@ class GjeldendeBehandlingForFagsakTest {
     private fun lagFerdigstiltFGB(fagsak: Fagsak, personIdent: String, vedtakDato: LocalDate, stønadFom: LocalDate, stønadTom: LocalDate): Behandling {
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
         opprettTilkjentYtelseForBehandling(behandling)
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
+        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGBMedEttBarn(
                 personIdent,
                 fagsak.id.toString(),
                 behandling.id,

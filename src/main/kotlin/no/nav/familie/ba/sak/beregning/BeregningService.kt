@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
@@ -68,9 +69,15 @@ class BeregningService(
 
         if (erRentOpphør) {
             opphørsdato = utbetalingsoppdrag.utbetalingsperiode[0].opphør!!.opphørDatoFom
-            if (utbetalingsoppdrag.utbetalingsperiode.any { it.opphør!!.opphørDatoFom != opphørsdato }) {
+            if (utbetalingsoppdrag.utbetalingsperiode.any { it.opphør!!.opphørDatoFom != opphørsdato }
+                    && (behandling.type == BehandlingType.TEKNISK_OPPHØR || behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)) {
                 throw IllegalArgumentException("Systemet støtter ikke opphør med ulike opphørsdatoer")
             }
+        }
+
+        if (behandling.type == BehandlingType.REVURDERING) {
+            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør !== null }
+                    .maxBy { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
         }
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
