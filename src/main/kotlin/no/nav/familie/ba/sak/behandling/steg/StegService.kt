@@ -10,10 +10,12 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
+import no.nav.familie.ba.sak.task.SimulationException
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -25,7 +27,9 @@ class StegService(
         private val behandlingService: BehandlingService,
         private val steg: List<BehandlingSteg<*>>,
         private val loggService: LoggService,
-        private val rolleConfig: RolleConfig
+        private val rolleConfig: RolleConfig,
+        private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val featureToggleService: FeatureToggleService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -234,6 +238,19 @@ class StegService(
                                              "beskrivelse",
                                              it.stegType().displayName())
         }.toMap()
+    }
+
+    @Transactional
+    fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
+        val behandling = håndterNyBehandlingFraHendelse(nyBehandling)
+        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
+        val samletResultat = behandlingResultat?.hentSamletResultat()
+
+        secureLogger.info("Simulering av behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
+
+        if (featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
+            throw SimulationException()
+        }
     }
 
     companion object {
