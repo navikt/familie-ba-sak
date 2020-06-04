@@ -246,7 +246,7 @@ class StegService(
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
         val samletResultat = behandlingResultat?.hentSamletResultat()
 
-        LOG.info("Simulering av behandling fullført med resultat: ${samletResultat}")
+        secureLogger.info("Simulering av behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
 
         if (featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
             throw SimulationException()
