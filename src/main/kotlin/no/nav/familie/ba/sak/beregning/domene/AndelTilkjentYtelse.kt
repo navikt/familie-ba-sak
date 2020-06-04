@@ -23,6 +23,9 @@ data class AndelTilkjentYtelse(
         @Column(name = "fk_person_id", nullable = false, updatable = false)
         val personId: Long,
 
+        @Column(name = "person_ident", nullable = false, updatable = false)
+        val personIdent: String,
+
         @Column(name = "belop", nullable = false)
         val beløp: Int,
 

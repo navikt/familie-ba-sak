@@ -7,7 +7,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.common.RessursUtils
+import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
@@ -27,15 +28,14 @@ class ØkonomiService(
         val vedtak = vedtakService.hent(vedtakId)
         val behandlingResultatType =
                 if (vedtak.behandling.type == BehandlingType.TEKNISK_OPPHØR
-                        || vedtak.behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
+                    || vedtak.behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
                     BehandlingResultatType.OPPHØRT
                 else behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
         val andelerTilkjentYtelse = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) {
             val forrigeVedtak = vedtakService.hent(vedtak.forrigeVedtakId!!)
             beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id)
-        }
-        else beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingsId)
+        } else beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingsId)
 
         val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, behandlingResultatType, andelerTilkjentYtelse)
 
@@ -49,12 +49,7 @@ class ØkonomiService(
         Result.runCatching { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
                 .fold(
                         onSuccess = {
-                            checkNotNull(it.body) { "Finner ikke ressurs" }
-                            checkNotNull(it.body?.data) { "Ressurs mangler data" }
-
-                            check(it.body?.status == Ressurs.Status.SUKSESS) {
-                                "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}"
-                            }
+                            assertGenerelleSuksessKriterier(it.body)
 
                             behandlingService.oppdaterStatusPåBehandling(behandlingsId, BehandlingStatus.SENDT_TIL_IVERKSETTING)
                         },
@@ -68,11 +63,7 @@ class ØkonomiService(
         Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
                 .fold(
                         onSuccess = {
-                            checkNotNull(it.body) { "Finner ikke ressurs" }
-                            checkNotNull(it.body?.data) { "Ressurs mangler data" }
-                            check(it.body?.status == Ressurs.Status.SUKSESS) {
-                                "Ressurs returnerer ${it.body?.status} men har http status kode ${it.statusCode}"
-                            }
+                            assertGenerelleSuksessKriterier(it.body)
 
                             return it.body?.data!!
                         },

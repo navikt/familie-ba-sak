@@ -193,6 +193,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                         behandlingId = behandling.id,
                         tilkjentYtelse = tilkjentYtelse,
                         personId = person.id,
+                        personIdent = person.personIdent.ident,
                         stønadFom = stønadPeriode.fraOgMed,
                         stønadTom = stønadPeriode.tilOgMed!!,
                         beløp = beløp.toInt(),
