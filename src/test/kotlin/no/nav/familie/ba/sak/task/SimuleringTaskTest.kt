@@ -38,8 +38,7 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns true
-        val task = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033")))
-        simuleringTask.doTask(task)
+        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033"))))
         Assertions.assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910")))
     }
 
@@ -48,9 +47,7 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns false
-
-        val task = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033")))
-        simuleringTask.doTask(task)
+        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033"))))
         Assertions.assertNotNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910")))
     }
 
@@ -59,9 +56,7 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns false
-
-        val task1 = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033")))
-        simuleringTask.doTask(task1)
+        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033"))))
 
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
@@ -71,9 +66,8 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
         behandling.status = BehandlingStatus.FERDIGSTILT
         behandlingRepository.save(behandling)
-        
-        val task2 = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101900033")))
-        simuleringTask.doTask(task2)
+
+        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101900033"))))
         Assertions.assertEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 
@@ -82,17 +76,14 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns false
-
-        val task1 = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033")))
-        simuleringTask.doTask(task1)
+        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033"))))
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910"))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
         behandling.status = BehandlingStatus.FERDIGSTILT
         behandlingRepository.save(behandling)
-
-        val task2 = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101900033")))
-        simuleringTask.doTask(task2)
+        
+        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101900033"))))
         Assertions.assertNotEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 }
