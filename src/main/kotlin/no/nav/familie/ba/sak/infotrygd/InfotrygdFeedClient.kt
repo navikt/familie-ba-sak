@@ -25,7 +25,7 @@ class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") privat
         val uri = URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding")
 
         return Result.runCatching {
-            postForEntity<String>(uri, infotrygdFeedDto)
+            postForEntity<Ressurs<String>>(uri, infotrygdFeedDto)
         }.fold(
                 onSuccess = {
                 },
