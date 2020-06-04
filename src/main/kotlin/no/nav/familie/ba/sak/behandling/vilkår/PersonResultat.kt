@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
 import javax.persistence.*
@@ -26,10 +24,44 @@ class PersonResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "personResultat",
-                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
+                   cascade = [CascadeType.ALL]
+        )
+        @OrderBy("periode_fom")
         var vilkårResultater: Set<VilkårResultat> = setOf()
 
 ) : BaseEntitet() {
+
+    fun getVilkårResultat(index: Int): VilkårResultat? {
+        return vilkårResultater.elementAtOrNull(index)
+    }
+
+    fun nextVilkårResultat(vilkårResultat: VilkårResultat): VilkårResultat? {
+        var next = false
+        vilkårResultater.forEach {
+            if (next) {
+                return it
+            }
+
+            if (it.id == vilkårResultat.id) {
+                next = true
+            }
+        }
+
+        return null
+    }
+
+    fun addVilkårResultat(vilkårResultat: VilkårResultat) {
+        vilkårResultater = vilkårResultater.plus(vilkårResultat)
+        vilkårResultat.personResultat = this
+    }
+
+    fun removeVilkårResultat(vilkårResultatId: Long) {
+        vilkårResultater = vilkårResultater.filter { vilkårResultatId != it.id }.toSet()
+    }
+
+    fun sorterVilkårResultater() {
+        vilkårResultater = vilkårResultater.toSortedSet(compareBy({ it.periodeFom }, { it.vilkårType }))
+    }
 
     fun hentSamletResultat(): BehandlingResultatType {
         return when {

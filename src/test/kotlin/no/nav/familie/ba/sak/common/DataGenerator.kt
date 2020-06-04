@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType
@@ -244,6 +245,21 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                                                begrunnelse = ""))
     }
     return personResultat
+}
+
+fun vurderBehandlingResultatTilInnvilget(behandlingResultat: BehandlingResultat, barn: Person) {
+    behandlingResultat.personResultater.forEach { personResultat ->
+        personResultat.vilkårResultater.forEach {
+            if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
+                it.resultat = Resultat.JA
+                it.periodeFom = barn.fødselsdato
+                it.periodeTom = barn.fødselsdato.plusYears(18)
+            } else {
+                it.resultat = Resultat.JA
+                it.periodeFom = LocalDate.now()
+            }
+        }
+    }
 }
 
 fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat): BehandlingResultat {
