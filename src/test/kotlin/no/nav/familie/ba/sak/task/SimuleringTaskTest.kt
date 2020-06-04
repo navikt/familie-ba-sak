@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.task
 
 import io.mockk.every
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
@@ -23,6 +25,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
                          @Autowired private val featureToggleService: FeatureToggleService,
                          @Autowired private val fagsakRepository: FagsakRepository,
+                         @Autowired private val behandlingRepository: BehandlingRepository,
                          @Autowired private val databaseCleanupService: DatabaseCleanupService) {
 
     @BeforeEach
@@ -49,6 +52,48 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         val task = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033")))
         simuleringTask.doTask(task)
         Assertions.assertNotNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910")))
+    }
+
+    @Test
+    fun `fagsak eksisterer for søker, ny behandling blir ikke persistert`() {
+        every {
+            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
+        } returns false
+
+        val task1 = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033")))
+        simuleringTask.doTask(task1)
+
+        every {
+            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
+        } returns true
+
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910"))!!
+        val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
+        behandling.status = BehandlingStatus.FERDIGSTILT
+        behandlingRepository.save(behandling)
+        
+        val task2 = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101900033")))
+        simuleringTask.doTask(task2)
+        Assertions.assertEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
+    }
+
+    @Test
+    fun `fagsak eksisterer for søker, ny behandling opprettes og persisteres`() {
+        every {
+            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
+        } returns false
+
+        val task1 = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033")))
+        simuleringTask.doTask(task1)
+
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910"))!!
+        val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
+        behandling.status = BehandlingStatus.FERDIGSTILT
+        behandlingRepository.save(behandling)
+
+        val task2 = SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101900033")))
+        simuleringTask.doTask(task2)
+        Assertions.assertNotEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 }
 

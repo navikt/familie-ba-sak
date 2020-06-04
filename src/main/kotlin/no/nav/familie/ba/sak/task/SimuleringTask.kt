@@ -12,11 +12,12 @@ import org.springframework.stereotype.Service
 
 @Service
 @TaskStepBeskrivelse(taskStepType = SimuleringTask.TASK_STEP_TYPE,
-        beskrivelse = "Simulering av regelkjøring for fødselshendelse",
-        maxAntallFeil = 3)
+                     beskrivelse = "Simulering av regelkjøring for fødselshendelse",
+                     maxAntallFeil = 3)
 class SimuleringTask(
         private val stegService: StegService
 ) : AsyncTaskStep {
+
     override fun doTask(task: Task) {
         val nyBehandling = objectMapper.readValue(task.payload, NyBehandlingHendelse::class.java)
         try {

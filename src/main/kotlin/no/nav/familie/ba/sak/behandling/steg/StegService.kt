@@ -60,9 +60,9 @@ class StegService(
         loggService.opprettBehandlingLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
-                RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
-                        barnasIdenter = nyBehandling.barnasIdenter,
-                        bekreftEndringerViaFrontend = true))
+                                     RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                                                barnasIdenter = nyBehandling.barnasIdenter,
+                                                                bekreftEndringerViaFrontend = true))
     }
 
     @Transactional
@@ -77,9 +77,9 @@ class StegService(
         return håndterPersongrunnlag(
                 behandlingEtterSøknadshåndtering,
                 RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
-                        barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
-                                .map { barn -> barn.ident },
-                        bekreftEndringerViaFrontend = restRegistrerSøknad.bekreftEndringerViaFrontend))
+                                           barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
+                                                   .map { barn -> barn.ident },
+                                           bekreftEndringerViaFrontend = restRegistrerSøknad.bekreftEndringerViaFrontend))
     }
 
     @Transactional
@@ -183,7 +183,7 @@ class StegService(
             if (behandlingSteg.stegType().kommerEtter(behandling.steg)) {
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${behandlingSteg.stegType()
                         .displayName()}'," +
-                        " men behandlingen er på steg '${behandling.steg.displayName()}'")
+                      " men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
@@ -221,7 +221,7 @@ class StegService(
             stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
             LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
             secureLogger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.",
-                    exception)
+                              exception)
             throw exception
         }
     }
@@ -233,10 +233,10 @@ class StegService(
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
         return steg.map {
             it.stegType() to Metrics.counter("behandling.steg.$type",
-                    "steg",
-                    it.stegType().name,
-                    "beskrivelse",
-                    it.stegType().displayName())
+                                             "steg",
+                                             it.stegType().name,
+                                             "beskrivelse",
+                                             it.stegType().displayName())
         }.toMap()
     }
 
