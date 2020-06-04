@@ -3,21 +3,23 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.fyllHullForVilkårResultater
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
@@ -101,8 +103,10 @@ class VilkårService(
 
         val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
 
-        val behandlingResultat = BehandlingResultat(behandling = behandlingService.hent(behandlingId),
-                                                    aktiv = true)
+        val behandlingResultat =
+                BehandlingResultat(behandling = behandlingService.hent(
+                        behandlingId),
+                                   aktiv = true)
         behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
@@ -132,33 +136,6 @@ class VilkårService(
         return behandlingResultat
     }
 
-    fun lagBehandlingResultatFraRestPersonResultater(personResultater: List<RestPersonResultat>,
-                                                     behandlingId: Long): BehandlingResultat {
-        val behandlingResultat = BehandlingResultat(
-                behandling = behandlingService.hent(behandlingId),
-                aktiv = true)
-
-        behandlingResultat.personResultater = personResultater.map { restPersonResultat ->
-            val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
-                                                personIdent = restPersonResultat.personIdent
-            )
-            personResultat.vilkårResultater = restPersonResultat.vilkårResultater?.map { restVilkårResultat ->
-                VilkårResultat(
-                        personResultat = personResultat,
-                        vilkårType = restVilkårResultat.vilkårType,
-                        resultat = restVilkårResultat.resultat,
-                        periodeFom = restVilkårResultat.periodeFom,
-                        periodeTom = restVilkårResultat.periodeTom,
-                        begrunnelse = restVilkårResultat.begrunnelse
-                )
-            }?.toSet() ?: setOf()
-
-            personResultat
-        }.toSet()
-
-        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
-    }
-
     private fun spesifikasjonerForPerson(person: Person, behandlingKategori: BehandlingKategori): Spesifikasjon<Fakta> {
         val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.valueOfType(behandlingKategori))
 
@@ -181,5 +158,23 @@ class VilkårService(
                            periodeTom = tom,
                            begrunnelse = "")
         }.toSet()
+    }
+
+    @Transactional
+    fun endreVilkår(behandlingId: Long,
+                    vilkårId: Long,
+                    restPersonResultat: RestPersonResultat): List<RestPersonResultat> {
+        val behandlingResultat = hentVilkårsvurdering(behandlingId = behandlingId)
+                                 ?: throw Feil(message = "Fant ikke aktiv vilkårsvurdering ved endring på vilkår",
+                                               frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering")
+
+        val restVilkårResultat = restPersonResultat.vilkårResultater.first()
+        val personResultat = behandlingResultat.personResultater.find { it.personIdent == restPersonResultat.personIdent }
+                             ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
+                                           frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
+
+        muterPersonResultat(personResultat, restVilkårResultat)
+
+        return behandlingResultatService.oppdater(behandlingResultat).personResultater.map { it.tilRestPersonResultat() }
     }
 }

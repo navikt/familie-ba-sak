@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.domene
+package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -22,6 +22,11 @@ class BehandlingResultatService(
         return behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
+    fun oppdater(behandlingResultat: BehandlingResultat): BehandlingResultat {
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer behandlingsresultat $behandlingResultat")
+        return behandlingResultatRepository.saveAndFlush(behandlingResultat)
+    }
+
     fun lagreNyOgDeaktiverGammel(behandlingResultat: BehandlingResultat,
                                  loggHendelse: Boolean): BehandlingResultat {
         val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
@@ -35,7 +40,7 @@ class BehandlingResultatService(
             behandlingResultatRepository.saveAndFlush(aktivBehandlingResultat.also { it.aktiv = false })
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling resultat $behandlingResultat")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandlingsresultat $behandlingResultat")
         if (loggHendelse) {
             loggService.opprettVilkårsvurderingLogg(
                     behandlingResultat.behandling, forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)

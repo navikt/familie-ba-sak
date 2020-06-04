@@ -1,8 +1,83 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.common.*
+import no.nav.nare.core.evaluations.Resultat
+import java.time.LocalDate
 
 object VilkårsvurderingUtils {
+
+    /**
+     * Funksjon som tar inn endret vilkår og muterer person resultatet til å få plass til den endrede perioden.
+     */
+    fun muterPersonResultat(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
+        personResultat.vilkårResultater.forEach {
+            tilpassVilkårForEndretVilkår(
+                    personResultat = personResultat,
+                    vilkårResultat = it,
+                    restVilkårResultat = restVilkårResultat
+            )
+        }
+
+        fyllHullForVilkårResultater(personResultat)
+    }
+
+    fun tilpassVilkårForEndretVilkår(personResultat: PersonResultat,
+                                     vilkårResultat: VilkårResultat,
+                                     restVilkårResultat: RestVilkårResultat) {
+        val periodePåNyttVilkår: Periode = restVilkårResultat.toPeriode()
+
+        if (vilkårResultat.id == restVilkårResultat.id) {
+            vilkårResultat.periodeFom = restVilkårResultat.periodeFom
+            vilkårResultat.periodeTom = restVilkårResultat.periodeTom
+            vilkårResultat.begrunnelse = restVilkårResultat.begrunnelse
+            vilkårResultat.resultat = restVilkårResultat.resultat
+        } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType) {
+            val periode: Periode = vilkårResultat.toPeriode()
+            val nyFom = periodePåNyttVilkår.tom.plusDays(1)
+            val nyTom = periodePåNyttVilkår.fom.minusDays(1)
+
+            when {
+                periodePåNyttVilkår.kanErstatte(periode) -> {
+                    personResultat.removeVilkårResultat(vilkårResultatId = vilkårResultat.id)
+                }
+                periodePåNyttVilkår.kanSplitte(periode) -> {
+                    personResultat.addVilkårResultat(vilkårResultat.kopierMedNyPeriode(periode.fom, nyTom))
+                    personResultat.addVilkårResultat(vilkårResultat.kopierMedNyPeriode(nyFom, periode.tom))
+                }
+                periodePåNyttVilkår.kanFlytteFom(periode) -> {
+                    vilkårResultat.periodeFom = nyFom
+                }
+                periodePåNyttVilkår.kanFlytteTom(periode) -> {
+                    vilkårResultat.periodeTom = nyTom
+                }
+            }
+        }
+    }
+
+    fun fyllHullForVilkårResultater(personResultat: PersonResultat) {
+        personResultat.sorterVilkårResultater()
+
+        personResultat.vilkårResultater.forEach {
+            personResultat.sorterVilkårResultater()
+
+            val neste = personResultat.nextVilkårResultat(it)
+            if (neste != null && it.vilkårType == neste.vilkårType) {
+                when {
+                    !it.erEtterfølgendePeriode(neste) -> {
+                        val nyttVilkår =
+                                lagUvurdertVilkårsresultat(personResultat = it.personResultat,
+                                                           vilkårType = it.vilkårType,
+                                                           fom = it.toPeriode().tom.plusDays(
+                                                                   1),
+                                                           tom = neste.toPeriode().fom.minusDays(
+                                                                   1))
+                        personResultat.addVilkårResultat(nyttVilkår)
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Dersom personer i initieltResultat har vurderte vilkår i aktivtResultat vil disse flyttes til initieltResultat
@@ -14,6 +89,7 @@ object VilkårsvurderingUtils {
      * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
      * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
      */
+
     fun flyttResultaterTilInitielt(initieltBehandlingResultat: BehandlingResultat,
                                    aktivtBehandlingResultat: BehandlingResultat): Pair<BehandlingResultat, BehandlingResultat> {
 
@@ -59,6 +135,22 @@ object VilkårsvurderingUtils {
         initieltBehandlingResultat.personResultater = personResultaterOppdatert
 
         return Pair(initieltBehandlingResultat, aktivtBehandlingResultat)
+    }
+
+    fun sorterListe(liste: List<VilkårResultat>): List<VilkårResultat> {
+        return liste.sortedBy { it.periodeFom }
+    }
+
+    fun lagUvurdertVilkårsresultat(personResultat: PersonResultat,
+                                   vilkårType: Vilkår,
+                                   fom: LocalDate? = null,
+                                   tom: LocalDate? = null): VilkårResultat {
+        return VilkårResultat(personResultat = personResultat,
+                              vilkårType = vilkårType,
+                              resultat = Resultat.KANSKJE,
+                              begrunnelse = "",
+                              periodeFom = fom,
+                              periodeTom = tom)
     }
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {

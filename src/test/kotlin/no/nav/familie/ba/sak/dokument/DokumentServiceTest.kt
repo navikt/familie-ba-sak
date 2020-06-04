@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.dokument
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -105,7 +105,8 @@ class DokumentServiceTest(
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
         val stønadTom = dato_2020_01_01.plusYears(17)
-        val behandlingResultat1 = BehandlingResultat(behandling = behandling)
+        val behandlingResultat1 =
+                BehandlingResultat(behandling = behandling)
         behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat1,
                 fnr,
                 barn1Fnr,
@@ -151,7 +152,8 @@ class DokumentServiceTest(
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
         val stønadTom = dato_2020_01_01.plusYears(17)
-        val behandlingResultat1 = BehandlingResultat(behandling = behandling)
+        val behandlingResultat1 =
+                BehandlingResultat(behandling = behandling)
         behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat1,
                 fnr,
                 barn1Fnr,

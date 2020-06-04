@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.dokument
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO

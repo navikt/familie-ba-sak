@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.økonomi
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
@@ -165,7 +165,8 @@ class ØkonomiIntegrasjonTest {
                                       barnFnr: String,
                                       stønadFom: LocalDate,
                                       stønadTom: LocalDate): BehandlingResultat {
-        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        val behandlingResultat =
+                BehandlingResultat(behandling = behandling)
         behandlingResultat.personResultater = setOf(
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                         fnr = søkerFnr,

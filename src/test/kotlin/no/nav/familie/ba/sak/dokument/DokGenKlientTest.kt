@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.defaultFagsak
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
