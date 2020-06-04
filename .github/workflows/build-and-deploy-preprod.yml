@@ -41,6 +41,7 @@ jobs:
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         uses: actions/checkout@v2
         with:
+          ref: "feature/mellomlagring-put"
           repository: navikt/familie-ba-e2e
           token: ${{ secrets.FAMILIE_BA_E2E_SECRET }}
           path: ba-e2e
