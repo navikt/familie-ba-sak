@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.task.SimuleringTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -37,7 +38,7 @@ class BehandlingController(private val fagsakService: FagsakService,
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
         if (nyBehandling.søkersIdent.isBlank()) {
             throw Feil(message = "Søkers ident kan ikke være blank",
-                       frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.")
+                    frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.")
         }
 
         return Result.runCatching {
@@ -56,16 +57,15 @@ class BehandlingController(private val fagsakService: FagsakService,
 
     @PutMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
-                                                  nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<RestFagsak>> {
-        return Result.runCatching { stegService.håndterNyBehandlingFraHendelse(nyBehandling) }
+                                                  nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
+        return Result.runCatching { SimuleringTask.opprettTask(nyBehandling) }
                 .fold(
                         onFailure = {
                             illegalState("Opprettelse av behandling fra hendelse feilet: ${it.message}", it)
                         },
                         onSuccess = {
-                            val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
                             antallAutomatiskeBehandlingerOpprettet[BehandlingType.FØRSTEGANGSBEHANDLING]?.increment()
-                            return restFagsak
+                            return ResponseEntity.ok(Ressurs.Companion.success("Ok"))
                         }
                 )
     }
@@ -73,9 +73,9 @@ class BehandlingController(private val fagsakService: FagsakService,
     private fun initBehandlingMetrikker(type: String): Map<BehandlingType, Counter> {
         return BehandlingType.values().map {
             it to Metrics.counter("behandling.opprettet.$type", "type",
-                                  it.name,
-                                  "beskrivelse",
-                                  it.visningsnavn)
+                    it.name,
+                    "beskrivelse",
+                    it.visningsnavn)
         }.toMap()
     }
 }
