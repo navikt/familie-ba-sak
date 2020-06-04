@@ -57,6 +57,7 @@ BA_MOTTAK_CLIENT_ID: "dummy"
 FAMILIE_PROSESSERING_CLIENT_ID: "dummy"
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 FAMILIE_BA_DOKGEN_API_URL: http://localhost:8080
+FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed/api
 NORG2_BASE_URL: http://localhost:1337/rest/api/norg2
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed/api
 
