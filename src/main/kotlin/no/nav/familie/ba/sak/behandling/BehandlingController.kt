@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.task.SimuleringTask
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,7 +29,8 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService,
-                           private val infotrygdFeedService: InfotrygdFeedService) {
+                           private val infotrygdFeedService: InfotrygdFeedService,
+                           private val taskRepository: TaskRepository) {
 
     private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("manuell")
 
@@ -62,7 +64,8 @@ class BehandlingController(private val fagsakService: FagsakService,
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
         return Result.runCatching {
             infotrygdFeedService.SendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-            SimuleringTask.opprettTask(nyBehandling)
+            val task = SimuleringTask.opprettTask(nyBehandling)
+            taskRepository.save(task)
         }
                 .fold(
                         onFailure = {

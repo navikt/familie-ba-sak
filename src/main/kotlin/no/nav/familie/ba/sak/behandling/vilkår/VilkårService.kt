@@ -11,9 +11,9 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.fyllHullForVilkårResultater
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatDelete
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPut
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
@@ -173,7 +173,22 @@ class VilkårService(
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
 
-        muterPersonResultat(personResultat, restVilkårResultat)
+        muterPersonResultatPut(personResultat, restVilkårResultat)
+
+        return behandlingResultatService.oppdater(behandlingResultat).personResultater.map { it.tilRestPersonResultat() }
+    }
+
+    @Transactional
+    fun deleteVilkår(behandlingId: Long, vilkårId: Long, personIdent: String): List<RestPersonResultat> {
+        val behandlingResultat = hentVilkårsvurdering(behandlingId = behandlingId)
+                                 ?: throw Feil(message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
+                                               frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering")
+
+        val personResultat = behandlingResultat.personResultater.find { it.personIdent == personIdent }
+                             ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
+                                           frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${personIdent}")
+
+        muterPersonResultatDelete(personResultat, vilkårId)
 
         return behandlingResultatService.oppdater(behandlingResultat).personResultater.map { it.tilRestPersonResultat() }
     }

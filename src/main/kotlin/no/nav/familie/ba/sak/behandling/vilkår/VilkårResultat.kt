@@ -37,6 +37,13 @@ class VilkårResultat(
         var begrunnelse: String
 ) : BaseEntitet() {
 
+    fun nullstill() {
+        periodeFom = null
+        periodeTom = null
+        begrunnelse = ""
+        resultat = Resultat.KANSKJE
+    }
+
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
         return VilkårResultat(
                 personResultat = nyPersonResultat ?: personResultat,
