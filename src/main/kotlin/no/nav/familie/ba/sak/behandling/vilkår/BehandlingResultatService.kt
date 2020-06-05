@@ -28,8 +28,7 @@ class BehandlingResultatService(
         return behandlingResultatRepository.saveAndFlush(behandlingResultat)
     }
 
-    fun loggOpprettBehandlingsresultat(behandlingResultat: BehandlingResultat, behandling: Behandling,
-                                       loggHendelse: Boolean = true) {
+    fun loggOpprettBehandlingsresultat(behandlingResultat: BehandlingResultat, behandling: Behandling) {
         val aktivBehandlingResultat = hentAktivForBehandling(behandling.id)
         val alleBehandlingsresultat = behandlingResultatRepository.finnBehandlingResultater(behandling.id)
         val forrigeBehandlingResultatSomIkkeErAutogenerert: BehandlingResultat? =
@@ -37,11 +36,8 @@ class BehandlingResultatService(
                     aktivBehandlingResultat
                 else null
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandlingsresultat $behandlingResultat")
-        if (loggHendelse) {
-            loggService.opprettVilkårsvurderingLogg(
-                    behandling, forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)
-        }
+        loggService.opprettVilkårsvurderingLogg(behandling,
+                forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)
 
     }
 
@@ -53,8 +49,11 @@ class BehandlingResultatService(
             behandlingResultatRepository.saveAndFlush(aktivBehandlingResultat.also { it.aktiv = false })
         }
 
-        loggOpprettBehandlingsresultat(behandlingResultat=behandlingResultat,
-                behandling = behandlingResultat.behandling, loggHendelse = loggHendelse)
+        if(loggHendelse) {
+            loggOpprettBehandlingsresultat(behandlingResultat=behandlingResultat,
+                    behandling = behandlingResultat.behandling)
+        }
+
 
         return behandlingResultatRepository.save(behandlingResultat)
     }
