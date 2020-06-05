@@ -33,6 +33,17 @@ class VilkårController(
         return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
     }
 
+    @DeleteMapping(path = ["/{behandlingId}/{vilkaarId}"])
+    fun endreVilkår(@PathVariable behandlingId: Long,
+                    @PathVariable vilkaarId: Long,
+                    @RequestBody personIdent: String): ResponseEntity<Ressurs<List<RestPersonResultat>>> {
+        val nyVilkårsvurdering = vilkårService.deleteVilkår(behandlingId = behandlingId,
+                                                           vilkårId = vilkaarId,
+                                                           personIdent = personIdent)
+
+        return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
+    }
+
     @PostMapping(path = ["/{behandlingId}/valider"])
     fun validerVilkårsvurdering(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingService.hent(behandlingId)
