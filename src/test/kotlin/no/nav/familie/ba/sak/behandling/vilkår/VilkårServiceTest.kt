@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
@@ -20,7 +18,6 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import java.time.LocalDate
 
 
 @SpringBootTest
@@ -29,6 +26,9 @@ import java.time.LocalDate
 class VilkårServiceTest(
         @Autowired
         private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val behandlingResultatService: BehandlingResultatService,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -75,33 +75,9 @@ class VilkårServiceTest(
 
         val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
 
-        val vurdertPersonResultater: List<RestPersonResultat> = behandlingResultat.personResultater.map { personResultat ->
-            RestPersonResultat(
-                    personIdent = personResultat.personIdent,
-                    vilkårResultater = personResultat.vilkårResultater.map {
-                        if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
-                            RestVilkårResultat(
-                                    vilkårType = it.vilkårType,
-                                    resultat = Resultat.JA,
-                                    begrunnelse = "",
-                                    periodeFom = barn.fødselsdato,
-                                    periodeTom = barn.fødselsdato.plusYears(18)
-                            )
-                        } else {
-                            RestVilkårResultat(
-                                    vilkårType = it.vilkårType,
-                                    resultat = Resultat.JA,
-                                    begrunnelse = "",
-                                    periodeFom = LocalDate.now(),
-                                    periodeTom = null
-                            )
-                        }
-                    }
-            )
-        }
+        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
 
-        vilkårService.lagBehandlingResultatFraRestPersonResultater(personResultater = vurdertPersonResultater,
-                                                                   behandlingId = behandling.id)
+        behandlingResultatService.oppdater(behandlingResultat)
 
         Assertions.assertDoesNotThrow { behandlingSteg.validerSteg(behandling) }
     }
@@ -162,50 +138,3 @@ class VilkårServiceTest(
     }
 }
 
-fun vilkårsvurderingInnvilget(søkerIdent: String,
-                              barnIdent: String,
-                              barnFødselsdato: LocalDate): List<RestPersonResultat> = listOf(
-        RestPersonResultat(
-                personIdent = søkerIdent,
-                vilkårResultater = listOf(RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                             resultat = Resultat.JA,
-                                                             periodeFom = LocalDate.of(2018, 5, 8),
-                                                             periodeTom = null,
-                                                             begrunnelse = ""))),
-        RestPersonResultat(
-                personIdent = barnIdent,
-                vilkårResultater = listOf(
-                        RestVilkårResultat(vilkårType = Vilkår.BOSATT_I_RIKET,
-                                           resultat = Resultat.JA,
-                                           periodeFom = LocalDate.of(2018, 5, 8),
-                                           periodeTom = null,
-                                           begrunnelse = ""),
-                        RestVilkårResultat(vilkårType = Vilkår.UNDER_18_ÅR,
-                                           resultat = Resultat.JA,
-                                           periodeFom = barnFødselsdato,
-                                           periodeTom = barnFødselsdato.plusYears(18),
-                                           begrunnelse = ""),
-                        RestVilkårResultat(vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                           resultat = Resultat.JA,
-                                           periodeFom = LocalDate.of(2018, 5, 8),
-                                           periodeTom = null,
-                                           begrunnelse = ""),
-                        RestVilkårResultat(vilkårType = Vilkår.BOR_MED_SØKER,
-                                           resultat = Resultat.JA,
-                                           periodeFom = LocalDate.of(2018, 5, 8),
-                                           periodeTom = null,
-                                           begrunnelse = "")
-                )))
-
-fun vilkårsvurderingAvslått(
-        personIdent: String): List<RestPersonResultat> = listOf(
-        RestPersonResultat(
-                personIdent = personIdent,
-                vilkårResultater = listOf(
-                        RestVilkårResultat(
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                resultat = Resultat.NEI,
-                                periodeFom = LocalDate.now(),
-                                periodeTom = LocalDate.now(),
-                                begrunnelse = ""))
-        ))

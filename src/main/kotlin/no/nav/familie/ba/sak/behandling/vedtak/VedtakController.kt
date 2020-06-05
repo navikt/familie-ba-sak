@@ -34,25 +34,6 @@ class VedtakController(
         private val stegService: StegService,
         private val taskRepository: TaskRepository
 ) {
-
-    @PutMapping(path = ["/{fagsakId}/vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun opprettEllerOppdaterVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long,
-                                   @RequestBody restVilkårsvurdering: RestVilkårsvurdering): ResponseEntity<Ressurs<RestFagsak>> {
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
-
-        return Result.runCatching {
-            stegService.håndterVilkårsvurdering(behandling, restVilkårsvurdering)
-        }.fold(
-                onSuccess = {
-                    ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
-                },
-                onFailure = {
-                    throw it
-                }
-        )
-    }
-
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long,
                                    @RequestParam behandlendeEnhet: String): ResponseEntity<Ressurs<RestFagsak>> {

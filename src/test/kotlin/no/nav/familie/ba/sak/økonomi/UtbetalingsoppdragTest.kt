@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag

@@ -11,7 +11,9 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.task.SimuleringTask
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,7 +27,8 @@ import org.springframework.web.bind.annotation.*
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BehandlingController(private val fagsakService: FagsakService,
-                           private val stegService: StegService) {
+                           private val stegService: StegService,
+                           private val taskRepository: TaskRepository) {
 
     private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("manuell")
 
@@ -56,16 +59,18 @@ class BehandlingController(private val fagsakService: FagsakService,
 
     @PutMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
-                                                  nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<RestFagsak>> {
-        return Result.runCatching { stegService.håndterNyBehandlingFraHendelse(nyBehandling) }
+                                                  nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
+        return Result.runCatching {
+            val task = SimuleringTask.opprettTask(nyBehandling)
+            taskRepository.save(task)
+        }
                 .fold(
                         onFailure = {
                             illegalState("Opprettelse av behandling fra hendelse feilet: ${it.message}", it)
                         },
                         onSuccess = {
-                            val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
                             antallAutomatiskeBehandlingerOpprettet[BehandlingType.FØRSTEGANGSBEHANDLING]?.increment()
-                            return restFagsak
+                            return ResponseEntity.ok(Ressurs.Companion.success("Ok"))
                         }
                 )
     }
