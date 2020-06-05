@@ -105,7 +105,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
-            <version>1.7.28</version>
+            <version>1.7.30</version>
         </dependency>
 
         <dependency>
@@ -135,7 +135,7 @@
         <dependency>
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>3.3.0</version>
+            <version>3.3.3</version>
         </dependency>
 
 
