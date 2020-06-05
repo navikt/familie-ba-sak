@@ -20,6 +20,7 @@ class SimuleringTask(
     override fun doTask(task: Task) {
         val nyBehandling = objectMapper.readValue(task.payload, NyBehandlingHendelse::class.java)
         try {
+            LOG.info("Kjører simulering task")
             stegService.regelkjørBehandling(nyBehandling)
         } catch (e: SimulationException) {
             LOG.info("Simulering av behandling. Data ikke persistert.")
