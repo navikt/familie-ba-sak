@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.nare.core.evaluations.Resultat
 import javax.persistence.*
 
@@ -61,6 +62,21 @@ class PersonResultat(
 
     fun sorterVilkårResultater() {
         vilkårResultater = vilkårResultater.toSortedSet(compareBy({ it.periodeFom }, { it.vilkårType }))
+    }
+
+    fun slettEllerNullstill(vilkårResultatId: Long) {
+        val vilkårResultat = vilkårResultater.find { it.id == vilkårResultatId }
+                             ?: throw Feil(message = "Prøver å slette et vilkår som ikke finnes",
+                                           frontendFeilmelding = "Vilkåret du prøver å slette finnes ikke i systemet.")
+
+        val perioderMedSammeVilkårType = vilkårResultater
+                .filter { it.vilkårType == vilkårResultat.vilkårType && it.id != vilkårResultat.id }
+
+        if (perioderMedSammeVilkårType.isEmpty()) {
+            vilkårResultat.nullstill()
+        } else {
+            removeVilkårResultat(vilkårResultatId)
+        }
     }
 
     fun hentSamletResultat(): BehandlingResultatType {
