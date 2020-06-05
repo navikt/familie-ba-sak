@@ -5,10 +5,7 @@ import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -17,6 +14,7 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.core.env.Environment
 import org.springframework.core.env.get
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
@@ -57,5 +55,25 @@ class InfotrygdFeedClientTest {
         verify(anyRequestedFor(anyUrl())
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
                        .withRequestBody(equalToJson(objectMapper.writeValueAsString(request))))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Invokering av Infotrygd feed genererer http feil`() {
+        stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withStatus(401)))
+
+        assertThrows<HttpClientErrorException> {
+            client.leggTilInfotrygdFeed(InfotrygdFeedDto("fnr"))
+        }
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Invokering av Infotrygd returnerer ulovlig response format`() {
+        stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withBody("Create")))
+
+        assertThrows<RuntimeException> {
+            client.leggTilInfotrygdFeed(InfotrygdFeedDto("fnr"))
+        }
     }
 }
