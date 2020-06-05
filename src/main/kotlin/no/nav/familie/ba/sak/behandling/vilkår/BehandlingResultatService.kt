@@ -1,5 +1,6 @@
-package no.nav.familie.ba.sak.behandling.domene
+package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -22,24 +23,37 @@ class BehandlingResultatService(
         return behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun lagreNyOgDeaktiverGammel(behandlingResultat: BehandlingResultat,
-                                 loggHendelse: Boolean): BehandlingResultat {
-        val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
-        val alleBehandlingsresultat = behandlingResultatRepository.finnBehandlingResultater(behandlingResultat.behandling.id)
+    fun oppdater(behandlingResultat: BehandlingResultat): BehandlingResultat {
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer behandlingsresultat $behandlingResultat")
+        return behandlingResultatRepository.saveAndFlush(behandlingResultat)
+    }
+
+    fun loggOpprettBehandlingsresultat(behandlingResultat: BehandlingResultat, behandling: Behandling) {
+        val aktivBehandlingResultat = hentAktivForBehandling(behandling.id)
+        val alleBehandlingsresultat = behandlingResultatRepository.finnBehandlingResultater(behandling.id)
         val forrigeBehandlingResultatSomIkkeErAutogenerert: BehandlingResultat? =
                 if (alleBehandlingsresultat.size > 1)
                     aktivBehandlingResultat
                 else null
 
+        loggService.opprettVilkårsvurderingLogg(behandling,
+                forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)
+
+    }
+
+    fun lagreNyOgDeaktiverGammel(behandlingResultat: BehandlingResultat,
+                                 loggHendelse: Boolean): BehandlingResultat {
+        val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
+
         if (aktivBehandlingResultat != null) {
             behandlingResultatRepository.saveAndFlush(aktivBehandlingResultat.also { it.aktiv = false })
         }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling resultat $behandlingResultat")
-        if (loggHendelse) {
-            loggService.opprettVilkårsvurderingLogg(
-                    behandlingResultat.behandling, forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)
+        if(loggHendelse) {
+            loggOpprettBehandlingsresultat(behandlingResultat=behandlingResultat,
+                    behandling = behandlingResultat.behandling)
         }
+
 
         return behandlingResultatRepository.save(behandlingResultat)
     }

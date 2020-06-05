@@ -11,6 +11,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.beregning.*
 import no.nav.familie.ba.sak.common.*
@@ -188,7 +191,8 @@ class BehandlingIntegrationTest {
                 lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        val behandlingResultat =
+                BehandlingResultat(behandling = behandling)
         behandlingResultat.personResultater =
                 lagPersonResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, stønadFom, stønadTom)
         behandlingResultatRepository.save(behandlingResultat)
@@ -255,7 +259,8 @@ class BehandlingIntegrationTest {
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 ansvarligSaksbehandler = "saksbehandler1")
 
-        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        val behandlingResultat =
+                BehandlingResultat(behandling = behandling)
         behandlingResultat.personResultater = setOf(
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                         fnr = søkerFnr,
@@ -328,7 +333,8 @@ class BehandlingIntegrationTest {
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 ansvarligSaksbehandler = "saksbehandler1")
 
-        val behandlingResultat1 = BehandlingResultat(behandling = behandling)
+        val behandlingResultat1 =
+                BehandlingResultat(behandling = behandling)
         behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat1,
                 søkerFnr,
                 barn1Fnr,
@@ -340,7 +346,8 @@ class BehandlingIntegrationTest {
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
 
-        val behandlingResultat2 = BehandlingResultat(behandling = behandling)
+        val behandlingResultat2 =
+                BehandlingResultat(behandling = behandling)
         behandlingResultat2.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat2,
                 søkerFnr,
                 barn1Fnr,

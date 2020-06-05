@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
@@ -27,14 +28,21 @@ class VilkårResultat(
         var resultat: Resultat,
 
         @Column(name = "periode_fom")
-        val periodeFom: LocalDate? = null,
+        var periodeFom: LocalDate? = null,
 
         @Column(name = "periode_tom")
-        val periodeTom: LocalDate? = null,
+        var periodeTom: LocalDate? = null,
 
         @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
         var begrunnelse: String
 ) : BaseEntitet() {
+
+    fun nullstill() {
+        periodeFom = null
+        periodeTom = null
+        begrunnelse = ""
+        resultat = Resultat.KANSKJE
+    }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
         return VilkårResultat(
@@ -46,4 +54,25 @@ class VilkårResultat(
                 begrunnelse = begrunnelse
         )
     }
+
+    fun kopierMedNyPeriode(fom: LocalDate, tom: LocalDate): VilkårResultat {
+        return VilkårResultat(
+                personResultat = personResultat,
+                vilkårType = vilkårType,
+                resultat = resultat,
+                periodeFom = fom,
+                periodeTom = tom,
+                begrunnelse = begrunnelse
+        )
+    }
 }
+
+fun RestVilkårResultat.mapNyVurdering(gammelVilkårResultat: VilkårResultat) = VilkårResultat(
+        id = gammelVilkårResultat.id,
+        personResultat = gammelVilkårResultat.personResultat,
+        vilkårType = gammelVilkårResultat.vilkårType,
+        resultat = this.resultat,
+        periodeFom = this.periodeFom,
+        periodeTom = this.periodeTom,
+        begrunnelse = this.begrunnelse
+)
