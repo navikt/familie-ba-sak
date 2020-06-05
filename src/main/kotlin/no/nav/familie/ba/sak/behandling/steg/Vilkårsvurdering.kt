@@ -1,17 +1,18 @@
 package no.nav.familie.ba.sak.behandling.steg
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
+import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.nare.core.evaluations.Resultat
 import org.springframework.stereotype.Service
@@ -19,37 +20,36 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class Vilkårsvurdering(
-        private val behandlingService: BehandlingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val vilkårService: VilkårService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
-        private val persongrunnlagService: PersongrunnlagService
-) : BehandlingSteg<RestVilkårsvurdering> {
+        private val persongrunnlagService: PersongrunnlagService,
+        private val behandlingResultatService: BehandlingResultatService
+) : BehandlingSteg<String> {
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: RestVilkårsvurdering,
+                                      data: String,
                                       stegService: StegService?): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        val vilkårsvurdertBehandling = behandlingService.hent(behandlingId = behandling.id)
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id) ?:
+        throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
 
-        if (data.personResultater.isNotEmpty()) {
-            vilkårService.lagBehandlingResultatFraRestPersonResultater(data.personResultater,
-                                                                       vilkårsvurdertBehandling.id)
-        } else {
-            vilkårService.vurderVilkårForFødselshendelse(vilkårsvurdertBehandling.id)
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+            vilkårService.vurderVilkårForFødselshendelse(behandling.id)
         }
+
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                vilkårsvurdertBehandling,
+                behandling,
                 personopplysningGrunnlag,
                 ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn())
 
-        validerSteg(behandling)
-
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+
+        behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, behandling)
 
         return hentNesteStegForNormalFlyt(behandling)
     }
@@ -92,11 +92,11 @@ class Vilkårsvurdering(
                         if (vilkårResultat.resultat == Resultat.JA && vilkårResultat.periodeFom == null) {
                             listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} mangler fom dato.")
                         }
-                        if (vilkårResultat.periodeFom != null && vilkårResultat.periodeFom.isBefore(barn.fødselsdato)) {
+                        if (vilkårResultat.periodeFom != null && vilkårResultat.toPeriode().fom.isBefore(barn.fødselsdato)) {
                             listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato før barnets fødselsdato.")
                         }
                         if (vilkårResultat.periodeFom != null &&
-                            vilkårResultat.periodeFom.isAfter(barn.fødselsdato.plusYears(18))) {
+                            vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18))) {
                             listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato etter barnet har fylt 18.")
                         }
                     }

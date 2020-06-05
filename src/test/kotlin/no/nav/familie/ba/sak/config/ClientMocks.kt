@@ -198,6 +198,18 @@ class ClientMocks {
         return mockIntegrasjonClient
     }
 
+    @Bean
+    @Primary
+    fun mockFeatureToggleService(): FeatureToggleService {
+        val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
+
+        every {
+            mockFeatureToggleService.isEnabled(any())
+        } returns false
+
+        return mockFeatureToggleService
+    }
+
     companion object {
         val søkerFnr = arrayOf("12345678910", "11223344556")
         val barnFnr = arrayOf("01101800033", "01101900033")
