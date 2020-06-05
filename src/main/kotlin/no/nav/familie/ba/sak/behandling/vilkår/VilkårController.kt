@@ -34,7 +34,7 @@ class VilkårController(
     }
 
     @DeleteMapping(path = ["/{behandlingId}/{vilkaarId}"])
-    fun endreVilkår(@PathVariable behandlingId: Long,
+    fun slettVilkår(@PathVariable behandlingId: Long,
                     @PathVariable vilkaarId: Long,
                     @RequestBody personIdent: String): ResponseEntity<Ressurs<List<RestPersonResultat>>> {
         val nyVilkårsvurdering = vilkårService.deleteVilkår(behandlingId = behandlingId,
