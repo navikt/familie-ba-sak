@@ -22,7 +22,6 @@ class DokgenTestConfig {
     fun mockDokumentService(): DokumentService {
         val dokumentService: DokumentService = mockk()
         every { dokumentService.hentBrevForVedtak(any()) } returns success("pdf".toByteArray())
-        every { dokumentService.hentStønadBrevMarkdown(any(), any(), any()) } returns "Markdown mock"
         every { dokumentService.genererBrevForVedtak(any()) } returns TEST_PDF
         return dokumentService
     }
