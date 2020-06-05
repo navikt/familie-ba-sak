@@ -8,9 +8,20 @@ import java.time.LocalDate
 object VilkårsvurderingUtils {
 
     /**
+     * Funksjon som forsøker å slette en periode på et vilkår.
+     * Dersom det kun finnes en periode eller perioden som skal slettes
+     * lager en glippe. Isåfall nullstiller vi bare perioden.
+     */
+    fun muterPersonResultatDelete(personResultat: PersonResultat, vilkårResultatId: Long) {
+        personResultat.slettEllerNullstill(vilkårResultatId = vilkårResultatId)
+
+        fyllHullForVilkårResultater(personResultat)
+    }
+
+    /**
      * Funksjon som tar inn endret vilkår og muterer person resultatet til å få plass til den endrede perioden.
      */
-    fun muterPersonResultat(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
+    fun muterPersonResultatPut(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
         personResultat.vilkårResultater.forEach {
             tilpassVilkårForEndretVilkår(
                     personResultat = personResultat,
@@ -135,10 +146,6 @@ object VilkårsvurderingUtils {
         initieltBehandlingResultat.personResultater = personResultaterOppdatert
 
         return Pair(initieltBehandlingResultat, aktivtBehandlingResultat)
-    }
-
-    fun sorterListe(liste: List<VilkårResultat>): List<VilkårResultat> {
-        return liste.sortedBy { it.periodeFom }
     }
 
     fun lagUvurdertVilkårsresultat(personResultat: PersonResultat,

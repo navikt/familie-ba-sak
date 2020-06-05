@@ -29,7 +29,7 @@ class VilkårsvurderingUtilsTest {
                 personIdent = randomFnr()
         )
         vilkår = mockk()
-        resultat = mockk()
+        resultat = Resultat.JA
 
         vilkårResultat1 = VilkårResultat(1, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
@@ -54,8 +54,8 @@ class VilkårsvurderingUtilsTest {
         val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat,
                                                     LocalDate.of(2010, 6, 2), LocalDate.of(2011, 9, 1),
                                                     "")
-        VilkårsvurderingUtils.muterPersonResultat(personResultat,
-                                                  restVilkårResultat)
+        VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
+                                                     restVilkårResultat)
 
         personResultat.sorterVilkårResultater()
         assertEquals(2, personResultat.vilkårResultater.size)
@@ -74,8 +74,8 @@ class VilkårsvurderingUtilsTest {
                                                     LocalDate.of(2010, 6, 5), LocalDate.of(2010, 7, 1),
                                                     "")
 
-        VilkårsvurderingUtils.muterPersonResultat(personResultat,
-                                                  restVilkårResultat)
+        VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
+                                                     restVilkårResultat)
 
         assertEquals(5, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
@@ -101,8 +101,8 @@ class VilkårsvurderingUtilsTest {
                                                     LocalDate.of(2010, 4, 2), LocalDate.of(2010, 8, 1),
                                                     "")
 
-        VilkårsvurderingUtils.muterPersonResultat(personResultat,
-                                                  restVilkårResultat)
+        VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
+                                                     restVilkårResultat)
 
         assertEquals(3, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
@@ -122,8 +122,8 @@ class VilkårsvurderingUtilsTest {
                                                     LocalDate.of(2010, 6, 2), LocalDate.of(2010, 9, 1),
                                                     "")
 
-        VilkårsvurderingUtils.muterPersonResultat(personResultat,
-                                                  restVilkårResultat)
+        VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
+                                                     restVilkårResultat)
 
         assertEquals(3, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
@@ -135,5 +135,70 @@ class VilkårsvurderingUtilsTest {
         assertPeriode(Periode(LocalDate.of(2010, 9, 2),
                               LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
         )
+    }
+
+    @Test
+    fun `Skal fjerne og fylle inn tom periode i midten`() {
+        VilkårsvurderingUtils.muterPersonResultatDelete(personResultat,
+                                                     2)
+
+        assertEquals(3, personResultat.vilkårResultater.size)
+        assertPeriode(Periode(LocalDate.of(2010, 1, 1),
+                              LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
+        )
+        assertPeriode(Periode(LocalDate.of(2010, 6, 2),
+                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
+        )
+        assertEquals(Resultat.KANSKJE, personResultat.getVilkårResultat(1)!!.resultat)
+        assertPeriode(Periode(LocalDate.of(2010, 8, 2),
+                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
+        )
+    }
+
+    @Test
+    fun `Skal fjerne første periode`() {
+        VilkårsvurderingUtils.muterPersonResultatDelete(personResultat,
+                                                        1)
+
+        assertEquals(2, personResultat.vilkårResultater.size)
+        assertPeriode(Periode(LocalDate.of(2010, 6, 2),
+                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
+        )
+        assertPeriode(Periode(LocalDate.of(2010, 8, 2),
+                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
+        )
+    }
+
+    @Test
+    fun `Skal fjerne siste periode`() {
+        VilkårsvurderingUtils.muterPersonResultatDelete(personResultat,
+                                                        3)
+
+        assertEquals(2, personResultat.vilkårResultater.size)
+        assertPeriode(Periode(LocalDate.of(2010, 1, 1),
+                              LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
+        )
+        assertPeriode(Periode(LocalDate.of(2010, 6, 2),
+                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
+        )
+    }
+
+    @Test
+    fun `Skal nullstille periode hvis det kun finnes en periode`() {
+        val mockPersonResultat = PersonResultat(
+                behandlingResultat = behandlingResultat,
+                personIdent = randomFnr()
+        )
+
+        val mockVilkårResultat = VilkårResultat(1, mockPersonResultat, vilkår, resultat,
+                                         LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
+                                         "")
+        mockPersonResultat.vilkårResultater = setOf(mockVilkårResultat)
+
+        VilkårsvurderingUtils.muterPersonResultatDelete(mockPersonResultat,
+                                                        1)
+
+        assertEquals(1, mockPersonResultat.vilkårResultater.size)
+        assertEquals(Resultat.KANSKJE, mockPersonResultat.getVilkårResultat(0)!!.resultat)
     }
 }
