@@ -92,8 +92,8 @@ data class UtbetalingsperiodeMal(
 
         return Utbetalingsperiode(
                 erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-                forrigePeriodeId = forrigePeriodeIdOffset?.let { utvidetPeriodeIdStart + forrigePeriodeIdOffset.toLong() },
                 opphør = vedtak.opphørsdato?.let { Opphør(it) },
+                forrigePeriodeId = forrigePeriodeIdOffset?.let { utvidetPeriodeIdStart + forrigePeriodeIdOffset.toLong() },
                 periodeId = utvidetPeriodeIdStart + periodeIdOffset,
                 datoForVedtak = vedtak.vedtaksdato,
                 klassifisering = andel.type.klassifisering,

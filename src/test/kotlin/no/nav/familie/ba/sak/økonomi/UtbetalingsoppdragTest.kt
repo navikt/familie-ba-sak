@@ -157,7 +157,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         utbetalingsperiodeMal.lagPeriodeFraAndel(andelTilkjentYtelse, 999, null) //OK
 
         assertThrows<IllegalArgumentException> {
-            utbetalingsperiodeMal.lagPeriodeFraAndel(andelTilkjentYtelse,1000, 999)
+            utbetalingsperiodeMal.lagPeriodeFraAndel(andelTilkjentYtelse, 1000, 999)
         }
     }
 
