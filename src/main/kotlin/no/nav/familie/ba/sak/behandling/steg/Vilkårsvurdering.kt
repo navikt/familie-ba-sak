@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -24,7 +24,8 @@ class Vilkårsvurdering(
         private val vilkårService: VilkårService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
-        private val persongrunnlagService: PersongrunnlagService
+        private val persongrunnlagService: PersongrunnlagService,
+        private val behandlingResultatService: BehandlingResultatService
 ) : BehandlingSteg<String> {
 
     @Transactional
@@ -33,6 +34,9 @@ class Vilkårsvurdering(
                                       stegService: StegService?): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id) ?:
+        throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             vilkårService.vurderVilkårForFødselshendelse(behandling.id)
@@ -44,6 +48,8 @@ class Vilkårsvurdering(
                 ansvarligSaksbehandler = SikkerhetContext.hentSaksbehandlerNavn())
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+
+        behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, behandling)
 
         return hentNesteStegForNormalFlyt(behandling)
     }
