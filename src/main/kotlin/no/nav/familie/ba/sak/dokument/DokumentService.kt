@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.dokument
 
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
@@ -55,7 +55,6 @@ class DokumentService(
                                             dokumentHeaderFelter = DokumentHeaderFelter(
                                                     fodselsnummer = søker.personIdent.ident,
                                                     navn = søker.navn,
-                                                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr()
                                             )
             )
@@ -88,7 +87,6 @@ class DokumentService(
                                            dokumentHeaderFelter = DokumentHeaderFelter(
                                                    fodselsnummer = søker.personIdent.ident,
                                                    navn = søker.navn,
-                                                   returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
                                                    dokumentDato = LocalDate.now().tilDagMånedÅr()
                                            ))
         }
@@ -117,7 +115,6 @@ class DokumentService(
 
             val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
                                                     navn = søker.navn,
-                                                    returadresse = "NAV Voss, Postboks 143, 5701 VOSS",
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr())
 
             val malMedData = malerService.mapTilBrevfelter(vedtak,
