@@ -17,19 +17,6 @@ class DokumentController(
         private val dokumentService: DokumentService,
         private val vedtakService: VedtakService
 ) {
-
-    @Deprecated("Erstattes av vedtaksbrev/{vedtakId}")
-    @GetMapping(path = ["vedtak-html/{vedtakId}"])
-    fun hentHtmlVedtak(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<String> {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-
-        LOG.info("{} henter vedtaksbrev", saksbehandlerId)
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
-
-        return dokumentService.hentHtmlForVedtak(vedtak = vedtakService.hent(vedtakId))
-    }
-
-
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
