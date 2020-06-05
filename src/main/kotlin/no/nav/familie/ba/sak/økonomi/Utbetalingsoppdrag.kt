@@ -11,11 +11,10 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.N
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.UEND
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode.SatsType.MND
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
 
-// Må forsikre oss om at tidslinjesegmentene er i samme rekkefølge for å få konsekvent periodeId
-// Sorter etter fraDato, sats, og evt til dato
+//Lager utbetalingsoppdrag direkte fra AndelTilkjentYtelse. Kobler sammen alle perioder som gjelder samme barn i en kjede,
+// bortsett ra småbarnstillegg som må ha sin egen kjede fordi det er en egen klasse i OS
 // PeriodeId = Vedtak.id * 1000 + offset
 // Beholder bare siste utbetalingsperiode hvis det er opphør.
 fun lagUtbetalingsoppdrag(saksbehandlerId: String,
@@ -31,23 +30,29 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
             else
                 UtbetalingsperiodeMal(vedtak)
 
-    val (personMedSmåbarnstileggAndeler, personerMedAndeler) =
+    val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
             andelerTilkjentYtelse.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
                 it.groupBy { andel -> andel.personIdent }
             }
 
-    if (personMedSmåbarnstileggAndeler.size > 1) {
+    if (personMedSmåbarnstilleggAndeler.size > 1) {
         throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
     }
 
-    val samledeAndeler : List<List<AndelTilkjentYtelse>> = listOf(personMedSmåbarnstileggAndeler.values.toList(), personerMedAndeler.values.toList()).flatten()
+    val samledeAndeler : List<List<AndelTilkjentYtelse>> =
+            listOf(personMedSmåbarnstilleggAndeler.values.toList(), personerMedAndeler.values.toList()).flatten()
+
+    // TODO: Dette må gjøres annerledes for revurderinger. Her må kjeden for hver person starte med en offset som er lik
+    //  den siste periodeId-en for personen i forrige behandling, eller starte på 0 hvis personen ikke hadde andeler i
+    //  forrige behandling. 
     var offset = 0
-    val utbetalingsperioder: List<Utbetalingsperiode> = samledeAndeler.flatMap { andelerForPerson: List<AndelTilkjentYtelse> ->
-        andelerForPerson.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
-            val forrigeOffset = if (index == 0) null else offset - 1
-            utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also { offset++ }
-        }.kunSisteHvis(erOpphør)
-    }
+    val utbetalingsperioder: List<Utbetalingsperiode> = samledeAndeler
+            .flatMap { andelerForPerson: List<AndelTilkjentYtelse> ->
+                andelerForPerson.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
+                    val forrigeOffset = if (index == 0) null else offset - 1
+                    utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also { offset++ }
+                }.kunSisteHvis(erOpphør)
+            }
 
     return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
@@ -59,7 +64,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
     )
 }
 
-// Et utbetalingsoppdrag for opphør inneholder kun én (den siste) utbetalingsperioden // TODO: kontrollere
+// Et utbetalingsoppdrag for opphør inneholder kun én (den siste) utbetalingsperioden for hvert barn
 fun <T> List<T>.kunSisteHvis(kunSiste: Boolean): List<T> {
     return this.foldRight(mutableListOf()) { element, resultat ->
         if (resultat.size == 0 || !kunSiste) resultat.add(0, element);resultat
@@ -73,33 +78,6 @@ data class UtbetalingsperiodeMal(
 ) {
 
     private val MAX_PERIODEID_OFFSET = 1_000
-
-    fun lagPeriode(klassifisering: String, segment: LocalDateSegment<Int>, periodeIdOffset: Int): Utbetalingsperiode {
-
-        // Vedtak-id øker med 50, så vi kan ikke risikere overflow
-        if (periodeIdOffset >= MAX_PERIODEID_OFFSET) {
-            throw IllegalArgumentException("periodeIdOffset forsøkt satt høyere enn ${MAX_PERIODEID_OFFSET}. " +
-                                           "Det ville ført til duplisert periodeId")
-        }
-
-        // Skaper "plass" til offset
-        val utvidetPeriodeIdStart = periodeIdStart * MAX_PERIODEID_OFFSET
-
-        return Utbetalingsperiode(
-                erEndringPåEksisterendePeriode,
-                vedtak.opphørsdato?.let { Opphør(it) },
-                utvidetPeriodeIdStart + periodeIdOffset,
-                if (periodeIdOffset > 0) utvidetPeriodeIdStart + (periodeIdOffset - 1).toLong() else null,
-                vedtak.vedtaksdato,
-                klassifisering,
-                segment.fom,
-                segment.tom,
-                BigDecimal(segment.value),
-                MND,
-                vedtak.behandling.fagsak.hentAktivIdent().ident,
-                vedtak.behandling.id
-        )
-    }
 
     fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse, periodeIdOffset: Int, forrigePeriodeIdOffset: Int?): Utbetalingsperiode {
 

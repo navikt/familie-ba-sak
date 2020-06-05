@@ -78,24 +78,24 @@ class Vilkårsvurdering(
                 }
             }
 
-        val barna = persongrunnlagService.hentBarna(behandling)
-        barna.map { barn ->
-            behandlingResultat.personResultater
-                    .flatMap { it.vilkårResultater }
-                    .filter { it.personResultat.personIdent == barn.personIdent.ident }
-                    .forEach { vilkårResultat ->
-                        if (vilkårResultat.resultat == Resultat.JA && vilkårResultat.periodeFom == null) {
-                            listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} mangler fom dato.")
+            val barna = persongrunnlagService.hentBarna(behandling)
+            barna.map { barn ->
+                behandlingResultat.personResultater
+                        .flatMap { it.vilkårResultater }
+                        .filter { it.personResultat.personIdent == barn.personIdent.ident }
+                        .forEach { vilkårResultat ->
+                            if (vilkårResultat.resultat == Resultat.JA && vilkårResultat.periodeFom == null) {
+                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} mangler fom dato.")
+                            }
+                            if (vilkårResultat.periodeFom != null && vilkårResultat.toPeriode().fom.isBefore(barn.fødselsdato)) {
+                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato før barnets fødselsdato.")
+                            }
+                            if (vilkårResultat.periodeFom != null &&
+                                    vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18))) {
+                                listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato etter barnet har fylt 18.")
+                            }
                         }
-                        if (vilkårResultat.periodeFom != null && vilkårResultat.toPeriode().fom.isBefore(barn.fødselsdato)) {
-                            listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato før barnets fødselsdato.")
-                        }
-                        if (vilkårResultat.periodeFom != null &&
-                            vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18))) {
-                            listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato etter barnet har fylt 18.")
-                        }
-                    }
-        }
+            }
 
             if (listeAvFeil.isNotEmpty()) {
                 throw Feil(message = "Validering feilet for behandling ${behandling.id}",

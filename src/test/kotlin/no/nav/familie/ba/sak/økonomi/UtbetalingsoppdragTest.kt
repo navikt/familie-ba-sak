@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -152,12 +151,13 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         val vedtak = lagVedtak()
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(vedtak)
+        val behandling = lagBehandling()
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse("2019-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, behandling)
 
-        val segment = LocalDateSegment(now(), now().plusDays(1), 100)
-        utbetalingsperiodeMal.lagPeriode("A", segment, 999) //OK
+        utbetalingsperiodeMal.lagPeriodeFraAndel(andelTilkjentYtelse, 999, null) //OK
 
         assertThrows<IllegalArgumentException> {
-            utbetalingsperiodeMal.lagPeriode("A", segment, 1000)
+            utbetalingsperiodeMal.lagPeriodeFraAndel(andelTilkjentYtelse,1000, 999)
         }
     }
 
