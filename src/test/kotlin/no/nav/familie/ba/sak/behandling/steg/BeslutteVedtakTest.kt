@@ -37,7 +37,6 @@ class BeslutteVedtakTest {
         every { taskRepository.save(any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every { toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(any(), any(), any()) } just Runs
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just Runs
-        every { dokumentService.hentStønadBrevMarkdown(any(), any(), any()) } returns "mock markdown"
         every { vedtakService.godkjennVedtak(any()) } just runs
 
         beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, taskRepository, loggService)
