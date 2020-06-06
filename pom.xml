@@ -25,7 +25,7 @@
         <felles-kontrakter.version>2.0_20200522143947_ea010a5</felles-kontrakter.version>
         <felles.version>1.20200519094152_75dba46</felles.version>
         <mockk.version>1.9.3</mockk.version>
-        <token-validation-spring.version>1.1.4</token-validation-spring.version>
+        <token-validation-spring.version>1.1.5</token-validation-spring.version>
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
