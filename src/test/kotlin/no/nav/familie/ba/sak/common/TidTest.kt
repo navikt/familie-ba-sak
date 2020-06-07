@@ -1,6 +1,11 @@
 package no.nav.familie.ba.sak.common
 
-import org.junit.jupiter.api.Assertions.assertEquals
+import io.mockk.mockk
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.nare.core.evaluations.Resultat
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -39,6 +44,26 @@ internal class TidTest {
     @Test
     fun `skal finne siste dag i inneværende måned 2020-02-01 skuddår`() {
         assertEquals(dato("2020-02-29"), dato("2020-02-01").sisteDagIMåned())
+    }
+
+    @Test
+    fun `skal bestemme om periode er etterfølgende periode`() {
+        val personResultat: PersonResultat = mockk()
+        val resultat: Resultat = mockk()
+        val vilkår: Vilkår = mockk()
+
+        val førsteVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
+                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 1, 1),
+                periodeTom = LocalDate.of(2020, 3, 1), begrunnelse = "")
+        val etterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
+                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 3, 25),
+                periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "")
+        val ikkeEtterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
+                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 3, 30),
+                periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "")
+
+        assertTrue(førsteVilkårResultat.erEtterfølgendePeriode(etterfølgendeVilkårResultat))
+        assertFalse(førsteVilkårResultat.erEtterfølgendePeriode(ikkeEtterfølgendeVilkårResultat))
     }
 
     private fun dato(s: String): LocalDate {

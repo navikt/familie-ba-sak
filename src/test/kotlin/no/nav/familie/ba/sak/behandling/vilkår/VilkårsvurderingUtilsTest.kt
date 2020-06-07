@@ -77,21 +77,18 @@ class VilkårsvurderingUtilsTest {
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      restVilkårResultat)
 
-        assertEquals(5, personResultat.vilkårResultater.size)
+        assertEquals(4, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
                               LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
         )
-        assertPeriode(Periode(LocalDate.of(2010, 6, 2),
-                              LocalDate.of(2010, 6, 4)), personResultat.getVilkårResultat(1)!!.toPeriode()
-        )
         assertPeriode(Periode(LocalDate.of(2010, 6, 5),
-                              LocalDate.of(2010, 7, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
+                              LocalDate.of(2010, 7, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 7, 2),
-                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(3)!!.toPeriode()
+                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 8, 2),
-                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(4)!!.toPeriode()
+                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(3)!!.toPeriode()
         )
     }
 
