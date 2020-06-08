@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.task.SimuleringTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService,
+                           private val infotrygdFeedService: InfotrygdFeedService,
                            private val taskRepository: TaskRepository) {
 
     private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("manuell")
@@ -41,6 +43,11 @@ class BehandlingController(private val fagsakService: FagsakService,
         if (nyBehandling.søkersIdent.isBlank()) {
             throw Feil(message = "Søkers ident kan ikke være blank",
                        frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.")
+        }
+
+        if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && nyBehandling.barnasIdenter.isEmpty()) {
+            throw Feil(message = "Listen med barn er tom ved opprettelse av migreringsbehandling",
+                       frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler barna det gjelder.")
         }
 
         return Result.runCatching {
@@ -61,6 +68,7 @@ class BehandlingController(private val fagsakService: FagsakService,
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
         return Result.runCatching {
+            infotrygdFeedService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
             val task = SimuleringTask.opprettTask(nyBehandling)
             taskRepository.save(task)
         }
@@ -91,7 +99,8 @@ data class NyBehandling(
         val søkersIdent: String,
         val behandlingType: BehandlingType,
         val journalpostID: String? = null,
-        val behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
+        val behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL,
+        val barnasIdenter: List<String> = emptyList())
 
 class NyBehandlingHendelse(
         val søkersIdent: String,

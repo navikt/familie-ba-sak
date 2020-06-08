@@ -132,8 +132,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun hentBehandlingSomSkalOpphøres(tilkjentYtelse: TilkjentYtelse): Behandling {
         val utbetalingsOppdrag = objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
-        val opphørsperiode = utbetalingsOppdrag.utbetalingsperiode.find { it.opphør != null }
+        val perioderMedOpphør = utbetalingsOppdrag.utbetalingsperiode.filter { it.opphør != null }
+        val opphørsperiode = perioderMedOpphør.firstOrNull()
                              ?: throw IllegalArgumentException("Finner ikke opphør på tilkjent ytelse med id $tilkjentYtelse.id")
+        if (perioderMedOpphør.any { it.behandlingId != opphørsperiode.behandlingId }) {
+            throw IllegalArgumentException("Alle utbetalingsperioder med opphør må ha samme behandlingId")
+        }
         return behandlingRepository.finnBehandling(opphørsperiode.behandlingId)
     }
 

@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
@@ -63,10 +64,20 @@ class BeregningService(
 
     private fun populerTilkjentYtelse(behandling: Behandling,
                                       utbetalingsoppdrag: Utbetalingsoppdrag): TilkjentYtelse {
-        val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.size == 1 && utbetalingsoppdrag.utbetalingsperiode[0].opphør != null
+        val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
         var opphørsdato: LocalDate? = null
-        if (utbetalingsoppdrag.utbetalingsperiode[0].opphør != null) {
+
+        if (erRentOpphør) {
             opphørsdato = utbetalingsoppdrag.utbetalingsperiode[0].opphør!!.opphørDatoFom
+            if (utbetalingsoppdrag.utbetalingsperiode.any { it.opphør!!.opphørDatoFom != opphørsdato }
+                    && (behandling.type == BehandlingType.TEKNISK_OPPHØR || behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)) {
+                throw IllegalArgumentException("Systemet støtter ikke opphør med ulike opphørsdatoer")
+            }
+        }
+
+        if (behandling.type == BehandlingType.REVURDERING) {
+            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør !== null }
+                    .maxBy { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
         }
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)

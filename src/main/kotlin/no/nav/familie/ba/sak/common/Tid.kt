@@ -61,8 +61,8 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 
 fun VilkårResultat.toPeriode(): Periode {
-    return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"), tom = this.periodeTom
-            ?: TIDENES_ENDE)
+    return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"),
+            tom = this.periodeTom ?: TIDENES_ENDE)
 }
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
@@ -70,8 +70,8 @@ fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
 }
 
 fun RestVilkårResultat.toPeriode(): Periode {
-    return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"), tom = this.periodeTom
-            ?: TIDENES_ENDE)
+    return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"),
+            tom = this.periodeTom ?: TIDENES_ENDE)
 }
 
 

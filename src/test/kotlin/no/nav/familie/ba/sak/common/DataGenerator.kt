@@ -12,11 +12,15 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.*
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.SakType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
@@ -54,10 +58,12 @@ val defaultFagsak = Fagsak(1,
     it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr())))
 }
 
-fun lagBehandling(fagsak: Fagsak = defaultFagsak, behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL) =
-        Behandling(id = nesteBehandlingId(),
+fun lagBehandling(fagsak: Fagsak = defaultFagsak,
+                  behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+                  behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+) = Behandling(id = nesteBehandlingId(),
                    fagsak = fagsak,
-                   type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                   type = behandlingType,
                    kategori = behandlingKategori,
                    underkategori = BehandlingUnderkategori.ORDINÆR,
                    opprinnelse = BehandlingOpprinnelse.MANUELL)
