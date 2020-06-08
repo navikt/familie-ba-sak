@@ -2,10 +2,11 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions
@@ -46,88 +47,113 @@ class BeregningServiceIntegrationTest {
     private lateinit var behandlingResultatService: BehandlingResultatService
 
     @Test
-    fun skalLagreRiktigTilkjentYtelseForFGB() {
+    fun skalLagreRiktigTilkjentYtelseForFGBMedToBarn() {
         val fnr = randomFnr()
         val dagensDato = LocalDate.now()
+        val fomBarn1 = dagensDato.withDayOfMonth(1)
+        val fomBarn2 = fomBarn1.plusYears(2)
+        val tomBarn1 = fomBarn1.plusYears(18).sisteDagIMåned()
+        val tomBarn2 = fomBarn2.plusYears(18).sisteDagIMåned()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         opprettTilkjentYtelse(behandling)
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGB(
+        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGBMedToBarn(
                 fnr,
                 fagsak.id.toString(),
                 behandling.id,
                 dagensDato,
-                dagensDato.withDayOfMonth(1),
-                dagensDato.plusMonths(10)
+                fomBarn1,
+                tomBarn1,
+                fomBarn2,
+                tomBarn2
         )
 
         val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
-        Assertions.assertEquals(dagensDato.withDayOfMonth(1), tilkjentYtelse.stønadFom)
-        Assertions.assertEquals(dagensDato.plusMonths(10), tilkjentYtelse.stønadTom)
+        Assertions.assertEquals(fomBarn1, tilkjentYtelse.stønadFom)
+        Assertions.assertEquals(tomBarn2, tilkjentYtelse.stønadTom)
         Assertions.assertNull(tilkjentYtelse.opphørFom)
 
     }
 
     @Test
-    fun skalLagreRiktigTilkjentYtelseForOpphør() {
+    fun skalLagreRiktigTilkjentYtelseForOpphørMedToBarn() {
 
         val fnr = randomFnr()
         val dagensDato = LocalDate.now()
-        val opphørsDato = dagensDato.plusMonths(1).withDayOfMonth(1)
+        val fomBarn1 = dagensDato.withDayOfMonth(1)
+        val fomBarn2 = fomBarn1.plusYears(2)
+        val tomBarn1 = fomBarn1.plusYears(18).sisteDagIMåned()
+        val tomBarn2 = fomBarn2.plusYears(18).sisteDagIMåned()
+        val opphørsDato = fomBarn1.plusYears(5).withDayOfMonth(1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         opprettTilkjentYtelse(behandling)
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForOpphør(
+        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForOpphørMedToBarn(
                 fnr,
                 fagsak.id.toString(),
                 behandling.id,
                 dagensDato,
-                dagensDato.withDayOfMonth(1),
-                dagensDato.plusMonths(10),
+                fomBarn1,
+                tomBarn1,
+                fomBarn2,
+                tomBarn2,
                 opphørsDato
         )
 
         val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
-        Assertions.assertEquals(dagensDato.plusMonths(10), tilkjentYtelse.stønadTom)
+        Assertions.assertNull(tilkjentYtelse.stønadFom)
+        Assertions.assertEquals(tomBarn2, tilkjentYtelse.stønadTom)
         Assertions.assertNotNull(tilkjentYtelse.opphørFom)
         Assertions.assertEquals(opphørsDato, tilkjentYtelse.opphørFom)
     }
 
     @Test
-    fun skalLagreRiktigTilkjentYtelseForRevurdering() {
+    fun skalLagreRiktigTilkjentYtelseForRevurderingMedToBarn() {
 
         val fnr = randomFnr()
         val dagensDato = LocalDate.now()
-        val revurderingFom = dagensDato.plusMonths(3).withDayOfMonth(1)
-        val opphørFom = dagensDato.withDayOfMonth(1)
-        val tomDato = dagensDato.plusMonths(10)
+        val opphørFomBarn1 = LocalDate.of(2020,5,1)
+        val revurderingFomBarn1 = LocalDate.of(2020, 7, 1)
+        val fomDatoBarn1 = LocalDate.of(2020, 1, 1)
+        val tomDatoBarn1 = fomDatoBarn1.plusYears(18).sisteDagIMåned()
+
+        val opphørFomBarn2 = LocalDate.of(2020, 8, 1)
+        val revurderingFomBarn2 = LocalDate.of(2020, 10, 1)
+        val fomDatoBarn2 = LocalDate.of(2019, 10, 1)
+        val tomDatoBarn2 = fomDatoBarn2.plusYears(18).sisteDagIMåned()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING))
         opprettTilkjentYtelse(behandling)
-        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForRevurdering(
+        val utbetalingsoppdrag = lagTestUtbetalingsoppdragForRevurderingMedToBarn(
                 fnr,
                 fagsak.id.toString(),
                 behandling.id,
                 behandling.id - 1,
                 dagensDato,
-                opphørFom,
-                tomDato,
-                revurderingFom
+                opphørFomBarn1,
+                revurderingFomBarn1,
+                fomDatoBarn1,
+                tomDatoBarn1,
+                opphørFomBarn2,
+                revurderingFomBarn2,
+                fomDatoBarn2,
+                tomDatoBarn2
         )
 
         val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
-        Assertions.assertEquals(revurderingFom, tilkjentYtelse.stønadFom)
-        Assertions.assertEquals(tomDato, tilkjentYtelse.stønadTom)
-        Assertions.assertEquals(opphørFom, tilkjentYtelse.opphørFom)
+        Assertions.assertEquals(revurderingFomBarn1, tilkjentYtelse.stønadFom)
+        Assertions.assertEquals(tomDatoBarn1, tilkjentYtelse.stønadTom)
+        Assertions.assertEquals(opphørFomBarn2, tilkjentYtelse.opphørFom)
     }
 
     @Test
@@ -146,8 +172,7 @@ class BeregningServiceIntegrationTest {
         val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.id
         val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.id
 
-        val behandlingResultat =
-                BehandlingResultat(behandling = behandling)
+        val behandlingResultat = BehandlingResultat(behandling = behandling)
         behandlingResultat.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01, dato_2020_01_01.plusYears(17))
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
 
