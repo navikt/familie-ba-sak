@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.behandling.vedtak.RestVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -42,7 +41,14 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandling)
         loggService.opprettBehandlingLogg(behandling)
 
-        return behandling
+        return when (nyBehandling.behandlingType) {
+            BehandlingType.MIGRERING_FRA_INFOTRYGD ->
+                håndterPersongrunnlag(behandling,
+                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                                                 barnasIdenter = nyBehandling.barnasIdenter,
+                                                                 bekreftEndringerViaFrontend = true))
+            else -> behandling
+        }
     }
 
     @Transactional
@@ -61,9 +67,9 @@ class StegService(
         loggService.opprettBehandlingLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
-                RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
-                        barnasIdenter = nyBehandling.barnasIdenter,
-                        bekreftEndringerViaFrontend = true))
+                                     RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                                                barnasIdenter = nyBehandling.barnasIdenter,
+                                                                bekreftEndringerViaFrontend = true))
     }
 
     @Transactional
@@ -78,9 +84,9 @@ class StegService(
         return håndterPersongrunnlag(
                 behandlingEtterSøknadshåndtering,
                 RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
-                        barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
-                                .map { barn -> barn.ident },
-                        bekreftEndringerViaFrontend = restRegistrerSøknad.bekreftEndringerViaFrontend))
+                                           barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
+                                                   .map { barn -> barn.ident },
+                                           bekreftEndringerViaFrontend = restRegistrerSøknad.bekreftEndringerViaFrontend))
     }
 
     @Transactional
@@ -184,7 +190,7 @@ class StegService(
             if (behandlingSteg.stegType().kommerEtter(behandling.steg)) {
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${behandlingSteg.stegType()
                         .displayName()}'," +
-                        " men behandlingen er på steg '${behandling.steg.displayName()}'")
+                      " men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
@@ -222,7 +228,7 @@ class StegService(
             stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
             LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
             secureLogger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.",
-                    exception)
+                              exception)
             throw exception
         }
     }
@@ -234,10 +240,10 @@ class StegService(
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
         return steg.map {
             it.stegType() to Metrics.counter("behandling.steg.$type",
-                    "steg",
-                    it.stegType().name,
-                    "beskrivelse",
-                    it.stegType().displayName())
+                                             "steg",
+                                             it.stegType().name,
+                                             "beskrivelse",
+                                             it.stegType().displayName())
         }.toMap()
     }
 
