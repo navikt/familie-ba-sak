@@ -45,6 +45,11 @@ class BehandlingController(private val fagsakService: FagsakService,
                        frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.")
         }
 
+        if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && nyBehandling.barnasIdenter.isEmpty()) {
+            throw Feil(message = "Listen med barn er tom ved opprettelse av migreringsbehandling",
+                       frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler barna det gjelder.")
+        }
+
         return Result.runCatching {
             stegService.håndterNyBehandling(nyBehandling.copy(behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL))
         }.fold(
@@ -94,7 +99,8 @@ data class NyBehandling(
         val søkersIdent: String,
         val behandlingType: BehandlingType,
         val journalpostID: String? = null,
-        val behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
+        val behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL,
+        val barnasIdenter: List<String> = emptyList())
 
 class NyBehandlingHendelse(
         val søkersIdent: String,

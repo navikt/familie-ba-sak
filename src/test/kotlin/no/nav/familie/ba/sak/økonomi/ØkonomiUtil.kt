@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.dato
-import no.nav.fpsak.tidsserie.LocalDateSegment
 
 fun sats(ytelseType: YtelseType) =
         when (ytelseType) {
@@ -12,10 +10,3 @@ fun sats(ytelseType: YtelseType) =
             YtelseType.MANUELL_VURDERING->0
             YtelseType.EØS->0
         }
-
-fun lagSegmentBeløp(fom: String, tom: String, beløp: Int): LocalDateSegment<Int> =
-        LocalDateSegment(dato(fom), dato(tom), beløp)
-
-
-
-

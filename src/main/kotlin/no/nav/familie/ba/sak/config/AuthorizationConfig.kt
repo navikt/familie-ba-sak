@@ -20,7 +20,7 @@ class AuthorizationConfig(
         return AuthorizationFilter(oidcUtil = oidcUtil,
                                    acceptedClients = acceptedClients,
                                    disabled = environment.activeProfiles.any {
-                                       listOf("e2e", "dev")
+                                       listOf("e2e", "dev", "postgres")
                                                .contains(it.trim(' '))
                                    })
     }

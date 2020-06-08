@@ -5,13 +5,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
-fun beregnUtbetalingsperioder(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): Map<String, LocalDateTimeline<Int>> {
-    return andelerTilkjentYtelse.groupBy(
-            { it.type.klassifisering },
-            { personTilTimeline(it) }
-    ).mapValues { it.value.reduce(::reducer) }
-}
-
 fun beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse: Set<AndelTilkjentYtelse>): LocalDateTimeline<Int> {
     return andelerTilkjentYtelse
             .map { personTilTimeline(it) }
