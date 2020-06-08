@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -41,6 +42,13 @@ class VilkårController(
                                                            vilkårId = vilkaarId,
                                                            personIdent = personIdent)
 
+        return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
+    }
+
+    @PostMapping(path = ["/{behandlingId}"])
+    fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår):
+            ResponseEntity<Ressurs<List<RestPersonResultat>>> {
+        val nyVilkårsvurdering = vilkårService.postVilkår(behandlingId, restNyttVilkår)
         return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
     }
 
