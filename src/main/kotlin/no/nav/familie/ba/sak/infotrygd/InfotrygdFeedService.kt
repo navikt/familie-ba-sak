@@ -10,7 +10,7 @@ import javax.transaction.Transactional
 class InfotrygdFeedService(val taskRepository: TaskRepository) {
 
     @Transactional
-    fun SendTilInfotrygdFeed(barnsIdenter: List<String>) {
+    fun sendTilInfotrygdFeed(barnsIdenter: List<String>) {
         LOG.info("Send ${barnsIdenter.size} av fødselsmeldinger til Infotrygd.")
 
         barnsIdenter.forEach {

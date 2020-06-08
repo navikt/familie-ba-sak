@@ -61,7 +61,7 @@ class BehandlingController(private val fagsakService: FagsakService,
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
         return Result.runCatching {
-            infotrygdFeedService.SendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+            infotrygdFeedService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
             SimuleringTask.opprettTask(nyBehandling)
         }
                 .fold(
