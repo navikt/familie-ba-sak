@@ -39,7 +39,7 @@ class InfotrygdFeedClientTest {
         resetAllRequests()
         client = InfotrygdFeedClient(
                 URI.create("http://localhost:${environment.get("wiremock.server.port")}/api"),
-                restOperations
+                restOperations, environment
         )
     }
 
