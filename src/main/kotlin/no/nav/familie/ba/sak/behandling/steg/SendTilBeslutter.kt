@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.behandling.steg
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -19,17 +19,20 @@ class SendTilBeslutter(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository,
         private val oppgaveService: OppgaveService,
-        private val vedtakService: VedtakService,
-        private val loggService: LoggService
+        private val loggService: LoggService,
+        private val totrinnskontrollService: TotrinnskontrollService
 ) : BehandlingSteg<String> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: String,
-                                      stegService: StegService?): StegType {
+    override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
-        vilkårsvurdering.validerSteg(behandling)
+        vilkårsvurdering.postValiderSteg(behandling)
+    }
 
+    override fun utførStegOgAngiNeste(behandling: Behandling,
+                                      data: String): StegType {
         loggService.opprettSendTilBeslutterLogg(behandling)
+        totrinnskontrollService.opprettTotrinnskontroll(behandling)
+
         val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,
