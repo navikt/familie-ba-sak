@@ -7,7 +7,6 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.time.temporal.ChronoUnit
 
 val TIDENES_MORGEN = LocalDate.MIN
 val TIDENES_ENDE = LocalDate.MAX
@@ -67,7 +66,7 @@ fun VilkårResultat.toPeriode(): Periode {
 }
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
-    return ChronoUnit.DAYS.between(this.toPeriode().tom, other.toPeriode().fom) <= 28
+    return this.toPeriode().tom.month == other.toPeriode().fom.month
 }
 
 fun RestVilkårResultat.toPeriode(): Periode {

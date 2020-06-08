@@ -54,12 +54,12 @@ internal class TidTest {
 
         val førsteVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
                 vilkårType = vilkår, periodeFom = LocalDate.of(2020, 1, 1),
-                periodeTom = LocalDate.of(2020, 3, 1), begrunnelse = "")
+                periodeTom = LocalDate.of(2020, 3, 25), begrunnelse = "")
         val etterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
-                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 3, 25),
+                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 3, 31),
                 periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "")
         val ikkeEtterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
-                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 3, 30),
+                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 4, 1),
                 periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "")
 
         assertTrue(førsteVilkårResultat.erEtterfølgendePeriode(etterfølgendeVilkårResultat))
