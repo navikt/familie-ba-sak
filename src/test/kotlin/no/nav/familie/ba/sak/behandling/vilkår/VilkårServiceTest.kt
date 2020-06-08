@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
@@ -20,8 +18,6 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import java.time.LocalDate
-import java.util.*
 
 
 @SpringBootTest
@@ -142,55 +138,3 @@ class VilkårServiceTest(
     }
 }
 
-fun vilkårsvurderingInnvilget(søkerIdent: String,
-                              barnIdent: String,
-                              barnFødselsdato: LocalDate): List<RestPersonResultat> = listOf(
-        RestPersonResultat(
-                personIdent = søkerIdent,
-                vilkårResultater = listOf(RestVilkårResultat(id = UUID.randomUUID().mostSignificantBits, vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                             resultat = Resultat.JA,
-                                                             periodeFom = LocalDate.of(2018, 5, 8),
-                                                             periodeTom = null,
-                                                             begrunnelse = ""))),
-        RestPersonResultat(
-                personIdent = barnIdent,
-                vilkårResultater = listOf(
-                        RestVilkårResultat(id = UUID.randomUUID().mostSignificantBits,
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                           resultat = Resultat.JA,
-                                           periodeFom = LocalDate.of(2018, 5, 8),
-                                           periodeTom = null,
-                                           begrunnelse = ""),
-                        RestVilkårResultat(id = UUID.randomUUID().mostSignificantBits,
-                                vilkårType = Vilkår.UNDER_18_ÅR,
-                                           resultat = Resultat.JA,
-                                           periodeFom = barnFødselsdato,
-                                           periodeTom = barnFødselsdato.plusYears(18),
-                                           begrunnelse = ""),
-                        RestVilkårResultat(id = UUID.randomUUID().mostSignificantBits,
-                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                           resultat = Resultat.JA,
-                                           periodeFom = LocalDate.of(2018, 5, 8),
-                                           periodeTom = null,
-                                           begrunnelse = ""),
-                        RestVilkårResultat(id = UUID.randomUUID().mostSignificantBits,
-                                vilkårType = Vilkår.BOR_MED_SØKER,
-                                           resultat = Resultat.JA,
-                                           periodeFom = LocalDate.of(2018, 5, 8),
-                                           periodeTom = null,
-                                           begrunnelse = "")
-                )))
-
-fun vilkårsvurderingAvslått(
-        personIdent: String): List<RestPersonResultat> = listOf(
-        RestPersonResultat(
-                personIdent = personIdent,
-                vilkårResultater = listOf(
-                        RestVilkårResultat(
-                                id = UUID.randomUUID().mostSignificantBits,
-                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                resultat = Resultat.NEI,
-                                periodeFom = LocalDate.now(),
-                                periodeTom = LocalDate.now(),
-                                begrunnelse = ""))
-        ))

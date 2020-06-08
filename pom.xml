@@ -21,7 +21,7 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <spring.cloud.version>2.2.0.RELEASE</spring.cloud.version>
+        <spring.cloud.version>2.2.2.RELEASE</spring.cloud.version>
         <felles-kontrakter.version>2.0_20200522143947_ea010a5</felles-kontrakter.version>
         <felles.version>1.20200519094152_75dba46</felles.version>
         <mockk.version>1.9.3</mockk.version>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
-            <version>1.7.28</version>
+            <version>1.7.30</version>
         </dependency>
 
         <dependency>
@@ -123,7 +123,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.10</version>
+            <version>4.5.12</version>
         </dependency>
 
         <dependency>
@@ -135,7 +135,7 @@
         <dependency>
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>3.3.0</version>
+            <version>3.3.3</version>
         </dependency>
 
 
