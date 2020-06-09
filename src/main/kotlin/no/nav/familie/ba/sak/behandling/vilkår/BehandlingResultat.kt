@@ -51,6 +51,16 @@ data class BehandlingResultat(
     }
 
     fun periodeResultater(brukMåned: Boolean): Set<PeriodeResultat> = this.personResultaterTilPeriodeResultater(brukMåned)
+
+    fun kopier(): BehandlingResultat {
+        val nyttBehandlingResultat = BehandlingResultat(
+            behandling = behandling,
+                aktiv = aktiv
+        )
+
+        nyttBehandlingResultat.personResultater = personResultater.map{it.kopierMedParent(nyttBehandlingResultat)}.toSet()
+        return nyttBehandlingResultat
+    }
 }
 
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {

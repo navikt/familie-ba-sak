@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -235,6 +235,17 @@ fun mockHentPersoninfoForMedIdenter(mockIntegrasjonClient: IntegrasjonClient, s�
     every {
         mockIntegrasjonClient.hentAktivAktørId(any())
     } returns AktørId("1")
+}
+
+private fun setMedBarnOgSøker(behandling: Behandling, søkerFnr: String, barnFnr: String): MutableSet<Person> {
+    val barn = Person(type = PersonType.BARN, fødselsdato = LocalDate.of(2018, 11,7),
+            navn = "Barn Barnesen", kjønn = Kjønn.KVINNE, personIdent = PersonIdent(barnFnr),
+            personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id))
+    val søker = Person(type = PersonType.BARN, fødselsdato = LocalDate.of(1990, 8,27),
+            navn = "Mor Moresen", kjønn = Kjønn.KVINNE, personIdent = PersonIdent(søkerFnr),
+            personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id))
+
+    return mutableSetOf(barn, søker)
 }
 
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()

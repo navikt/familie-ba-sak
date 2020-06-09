@@ -96,4 +96,13 @@ class PersonResultat(
             }
         }
     }
+
+    fun kopierMedParent(behandlingResultat: BehandlingResultat): PersonResultat {
+        val nyttPersonResultat = PersonResultat(
+                behandlingResultat = behandlingResultat,
+                personIdent = personIdent
+        )
+        nyttPersonResultat.vilkårResultater = vilkårResultater.map{it.kopierMedParent(nyttPersonResultat)}.toSet()
+        return nyttPersonResultat
+    }
 }

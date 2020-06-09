@@ -23,6 +23,11 @@ class BehandlingResultatService(
         return behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
+    fun hentBehandlingResultatForBehandling(behandlingId: Long): List<BehandlingResultat> {
+        return behandlingResultatRepository.finnBehandlingResultater(behandlingId=behandlingId)
+    }
+
+
     fun oppdater(behandlingResultat: BehandlingResultat): BehandlingResultat {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer behandlingsresultat $behandlingResultat")
         return behandlingResultatRepository.saveAndFlush(behandlingResultat)
