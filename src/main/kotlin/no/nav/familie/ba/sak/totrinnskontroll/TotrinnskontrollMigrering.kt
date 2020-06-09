@@ -23,22 +23,24 @@ class TotrinnskontrollMigrering(
         var migrerteTotrinnskontrollBehandlinger = 0
         val behandlinger = behandlingRepository.findAll()
         behandlinger.forEach {
-            if (it.steg.rekkefølge >= StegType.BESLUTTE_VEDTAK.rekkefølge) {
-                val vedtak = vedtakService.hentAktivForBehandling(behandlingId = it.id)
-                val aktivTotrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = it.id)
+            runCatching {
+                if (it.steg.rekkefølge >= StegType.BESLUTTE_VEDTAK.rekkefølge) {
+                    val vedtak = vedtakService.hentAktivForBehandling(behandlingId = it.id)
+                    val aktivTotrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = it.id)
 
-                if (vedtak != null && aktivTotrinnskontroll == null) {
-                    val godkjent = it.status == BehandlingStatus.FERDIGSTILT
+                    if (vedtak != null && aktivTotrinnskontroll == null) {
+                        val godkjent = it.status == BehandlingStatus.FERDIGSTILT
 
-                    totrinnskontrollService.lagreEllerOppdater(Totrinnskontroll(
-                            behandling = it,
-                            saksbehandler = vedtak.ansvarligSaksbehandler,
-                            beslutter = vedtak.ansvarligBeslutter,
-                            godkjent = godkjent
-                    ))
-                    migrerteTotrinnskontrollBehandlinger++
+                        totrinnskontrollService.lagreEllerOppdater(Totrinnskontroll(
+                                behandling = it,
+                                saksbehandler = vedtak.ansvarligSaksbehandler,
+                                beslutter = vedtak.ansvarligBeslutter,
+                                godkjent = godkjent
+                        ))
+                        migrerteTotrinnskontrollBehandlinger++
+                    }
                 }
-            }
+            }.onFailure { LOG.info("Migrering for behandling $it feilet.", it) }
         }
 
         LOG.info("Fant ${behandlinger.size} behandlinger og flyttet data fra totrinnskontroll " +
