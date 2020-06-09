@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
@@ -31,7 +30,8 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         val totrinnskontroll = hentAktivForBehandling(behandlingId = behandling.id)
                                ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
 
-        if (totrinnskontroll.saksbehandler == beslutter) {
+        if (totrinnskontroll.saksbehandler == beslutter &&
+            !(totrinnskontroll.saksbehandler == SYSTEM_FORKORTELSE && beslutter == SYSTEM_FORKORTELSE)) {
             error("Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak")
         }
 
