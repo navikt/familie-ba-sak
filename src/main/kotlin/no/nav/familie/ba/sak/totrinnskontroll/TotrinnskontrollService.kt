@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -31,7 +31,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                                ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
 
         if (totrinnskontroll.saksbehandler == beslutter &&
-            !(totrinnskontroll.saksbehandler == SYSTEM_FORKORTELSE && beslutter == SYSTEM_FORKORTELSE)) {
+            !(totrinnskontroll.saksbehandler == SYSTEM_NAVN && beslutter == SYSTEM_NAVN)) {
             error("Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak")
         }
 
