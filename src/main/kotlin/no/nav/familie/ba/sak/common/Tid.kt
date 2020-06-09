@@ -66,7 +66,8 @@ fun VilkårResultat.toPeriode(): Periode {
 }
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
-    return this.toPeriode().tom.month == other.toPeriode().fom.month
+    return this.toPeriode().tom.month == other.toPeriode().fom.month &&
+            this.toPeriode().tom.year == other.toPeriode().fom.year
 }
 
 fun RestVilkårResultat.toPeriode(): Periode {
