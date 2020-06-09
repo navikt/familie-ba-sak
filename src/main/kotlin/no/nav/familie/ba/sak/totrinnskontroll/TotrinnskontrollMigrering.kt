@@ -28,8 +28,7 @@ class TotrinnskontrollMigrering(
                 val aktivTotrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = it.id)
 
                 if (vedtak != null && aktivTotrinnskontroll == null) {
-                    val godkjent = if (it.status == BehandlingStatus.UNDERKJENT_AV_BESLUTTER) false
-                    else it.status == BehandlingStatus.FERDIGSTILT
+                    val godkjent = it.status == BehandlingStatus.FERDIGSTILT
 
                     totrinnskontrollService.lagreEllerOppdater(Totrinnskontroll(
                             behandling = it,

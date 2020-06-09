@@ -32,7 +32,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                                ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
 
         if (totrinnskontroll.saksbehandler == beslutter) {
-            error("Samme saksbehandler kan ikke foreslå og beslutte om iverksetting på samme vedtak")
+            error("Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak")
         }
 
         behandlingService.oppdaterStatusPåBehandling(
