@@ -22,11 +22,7 @@ class TotrinnskontrollMigrering(
 
         var migrerteTotrinnskontrollBehandlinger = 0
         val behandlinger = behandlingRepository.findAll()
-        behandlinger.forEach {behandling ->
-            runCatching {
-                val verdi = behandling.steg.rekkefølge >= StegType.BESLUTTE_VEDTAK.rekkefølge
-            }.onFailure { LOG.warn("If for behandling $it feilet.", it) }
-
+        behandlinger.forEach { behandling ->
             runCatching {
                 if (behandling.steg.rekkefølge >= StegType.BESLUTTE_VEDTAK.rekkefølge) {
                     val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
