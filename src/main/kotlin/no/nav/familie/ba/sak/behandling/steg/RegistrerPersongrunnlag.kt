@@ -27,6 +27,7 @@ class RegistrerPersongrunnlag(
                                       stegService: StegService?): StegType {
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident, data.barnasIdenter, behandling)
         vilkårService.initierVilkårvurderingForBehandling(behandling.id, data.bekreftEndringerViaFrontend)
+        // TODO Denne kan flyttes til etter filtreringsregler og vilkårsvurdering
         if (behandling.opprinnelse.skalOppretteOppgave() && featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
             val nyTask = OpprettOppgaveTask.opprettTask(
                     behandlingId = behandling.id,

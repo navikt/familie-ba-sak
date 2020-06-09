@@ -57,7 +57,7 @@ class StegService(
 
         val behandling = behandlingService.opprettBehandling(NyBehandling(
                 søkersIdent = nyBehandling.søkersIdent,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingType = BehandlingType.BEHANDLING_FØDSELSHENDELSE,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE

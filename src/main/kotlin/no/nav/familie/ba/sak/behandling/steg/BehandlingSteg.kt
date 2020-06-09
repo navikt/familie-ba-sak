@@ -40,44 +40,49 @@ enum class StegType(private val rekkefølge: Int,
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
-    VILKÅRSVURDERING(
+    VELG_SAKSBEHANDLINGSSYSTEM(
             rekkefølge = 2,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
-    SEND_TIL_BESLUTTER(
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET)
+    ),
+    VILKÅRSVURDERING(
             rekkefølge = 3,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
-    BESLUTTE_VEDTAK(
+    SEND_TIL_BESLUTTER(
             rekkefølge = 4,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
+    BESLUTTE_VEDTAK(
+            rekkefølge = 5,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.SENDT_TIL_BESLUTTER)),
     IVERKSETT_MOT_OPPDRAG(
-            rekkefølge = 5,
+            rekkefølge = 6,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.GODKJENT)
     ),
     VENTE_PÅ_STATUS_FRA_ØKONOMI(
-            rekkefølge = 6,
+            rekkefølge = 7,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.SENDT_TIL_IVERKSETTING)
     ),
     JOURNALFØR_VEDTAKSBREV(
-            rekkefølge = 7,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
-    ),
-    DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 8,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
     ),
-    FERDIGSTILLE_BEHANDLING(
+    DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 9,
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
+    ),
+    FERDIGSTILLE_BEHANDLING(
+            rekkefølge = 10,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)),
     BEHANDLING_AVSLUTTET(
-            rekkefølge = 10,
+            rekkefølge = 11,
             tillattFor = emptyList(),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT));
 
@@ -108,6 +113,12 @@ enum class StegType(private val rekkefølge: Int,
                     BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                     else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
                 }
+            BehandlingType.BEHANDLING_FØDSELSHENDELSE ->
+                return when (utførendeStegType) {
+                    REGISTRERE_PERSONGRUNNLAG -> VELG_SAKSBEHANDLINGSSYSTEM
+                    VELG_SAKSBEHANDLINGSSYSTEM -> VILKÅRSVURDERING
+                    else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
+                }
             else ->
                 return when (utførendeStegType) {
                     REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
@@ -121,6 +132,7 @@ enum class StegType(private val rekkefølge: Int,
                     DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                     FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                     BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                    else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved behandlingstype $behandlingType")
                 }
         }
     }

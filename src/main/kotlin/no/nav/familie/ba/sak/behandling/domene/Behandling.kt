@@ -79,6 +79,7 @@ enum class BehandlingOpprinnelse {
 
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
+    BEHANDLING_FØDSELSHENDELSE("Behandling av fødselshendelse"),
     REVURDERING("Revurdering"),
     MIGRERING_FRA_INFOTRYGD("Migrering fra infotrygd"),
     KLAGE("Klage"),
