@@ -66,7 +66,12 @@ object VilkårsvurderingUtils {
             vilkårResultat.resultat = restVilkårResultat.resultat
         } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType) {
             val periode: Periode = vilkårResultat.toPeriode()
-            val nyFom = periodePåNyttVilkår.tom.plusDays(1)
+
+            var nyFom = periodePåNyttVilkår.tom;
+            if(periodePåNyttVilkår.tom != LocalDate.MAX) {
+                nyFom = periodePåNyttVilkår.tom.plusDays(1)
+            }
+
             val nyTom = periodePåNyttVilkår.fom.minusDays(1)
 
             when {
@@ -74,6 +79,7 @@ object VilkårsvurderingUtils {
                     personResultat.removeVilkårResultat(vilkårResultatId = vilkårResultat.id)
                 }
                 periodePåNyttVilkår.kanSplitte(periode) -> {
+                    personResultat.removeVilkårResultat(vilkårResultatId = vilkårResultat.id)
                     personResultat.addVilkårResultat(vilkårResultat.kopierMedNyPeriode(periode.fom, nyTom))
                     personResultat.addVilkårResultat(vilkårResultat.kopierMedNyPeriode(nyFom, periode.tom))
                 }
