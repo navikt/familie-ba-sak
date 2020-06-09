@@ -220,4 +220,17 @@ class VilkårsvurderingUtilsTest {
             VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
         }
     }
+
+    @Test
+    fun `Skal tilpasse vilkår for endret vilkår når begge mangler tom-dato`() {
+        val vilkårResultat = VilkårResultat(personResultat = personResultat, vilkårType = vilkår, resultat = resultat,
+        periodeFom = LocalDate.of(2020, 1, 1), begrunnelse = "")
+        val restVilkårResultat = RestVilkårResultat(id = 1, vilkårType = vilkår, resultat = resultat,
+                periodeFom = LocalDate.of(2020, 6, 1), periodeTom = null, begrunnelse = "")
+
+        VilkårsvurderingUtils.tilpassVilkårForEndretVilkår(personResultat, vilkårResultat, restVilkårResultat)
+
+        assertEquals(LocalDate.of(2020, 1, 1), vilkårResultat.periodeFom)
+        assertEquals(LocalDate.of(2020, 5, 31), vilkårResultat.periodeTom)
+    }
 }
