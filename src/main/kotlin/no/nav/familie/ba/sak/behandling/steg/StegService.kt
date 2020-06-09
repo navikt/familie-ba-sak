@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
@@ -29,7 +31,8 @@ class StegService(
         private val loggService: LoggService,
         private val rolleConfig: RolleConfig,
         private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val featureToggleService: FeatureToggleService
+        private val featureToggleService: FeatureToggleService,
+        private val behandlingResultatService: BehandlingResultatService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -112,6 +115,12 @@ class StegService(
     @Transactional
     fun håndterSendTilBeslutter(behandling: Behandling, behandlendeEnhet: String): Behandling {
         val behandlingSteg: SendTilBeslutter = hentBehandlingSteg(StegType.SEND_TIL_BESLUTTER) as SendTilBeslutter
+
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)?:
+                throw Feil("Fant ikke behandlingsresultat på behandling")
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat.kopier(),
+                true)
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet, this)
