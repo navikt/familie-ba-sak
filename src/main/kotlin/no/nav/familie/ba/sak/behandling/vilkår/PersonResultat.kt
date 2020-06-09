@@ -25,7 +25,8 @@ class PersonResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "personResultat",
-                   cascade = [CascadeType.ALL]
+                   cascade = [CascadeType.ALL],
+                   orphanRemoval = true
         )
         @OrderBy("periode_fom")
         var vilkårResultater: Set<VilkårResultat> = setOf()
@@ -57,6 +58,7 @@ class PersonResultat(
     }
 
     fun removeVilkårResultat(vilkårResultatId: Long) {
+        vilkårResultater.find { vilkårResultatId == it.id }?.personResultat = null
         vilkårResultater = vilkårResultater.filter { vilkårResultatId != it.id }.toSet()
     }
 

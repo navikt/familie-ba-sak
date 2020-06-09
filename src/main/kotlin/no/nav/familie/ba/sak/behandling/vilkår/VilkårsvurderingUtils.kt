@@ -24,7 +24,7 @@ object VilkårsvurderingUtils {
      */
     fun muterPersonResultatPost(personResultat: PersonResultat, vilkårType: Vilkår) {
         val nyttVilkårResultat = VilkårResultat(personResultat = personResultat, vilkårType = vilkårType,
-        resultat = Resultat.KANSKJE, begrunnelse = "")
+                                                resultat = Resultat.KANSKJE, begrunnelse = "")
         if (harUvurdertePerioder(personResultat, vilkårType)) {
             throw Feil("Det finnes allerede uvurderte vilkår av samme vilkårType")
         }
@@ -68,7 +68,7 @@ object VilkårsvurderingUtils {
             val periode: Periode = vilkårResultat.toPeriode()
 
             var nyFom = periodePåNyttVilkår.tom;
-            if(periodePåNyttVilkår.tom != LocalDate.MAX) {
+            if (periodePåNyttVilkår.tom != LocalDate.MAX) {
                 nyFom = periodePåNyttVilkår.tom.plusDays(1)
             }
 
@@ -104,12 +104,14 @@ object VilkårsvurderingUtils {
                 when {
                     !it.erEtterfølgendePeriode(neste) -> {
                         val nyttVilkår =
-                                lagUvurdertVilkårsresultat(personResultat = it.personResultat,
-                                                           vilkårType = it.vilkårType,
-                                                           fom = it.toPeriode().tom.plusDays(
-                                                                   1),
-                                                           tom = neste.toPeriode().fom.minusDays(
-                                                                   1))
+                                lagUvurdertVilkårsresultat(
+                                        personResultat = it.personResultat
+                                                         ?: throw Feil(message = "Finner ikke personresultat ved opprettelse av uvurdert periode"),
+                                        vilkårType = it.vilkårType,
+                                        fom = it.toPeriode().tom.plusDays(
+                                                1),
+                                        tom = neste.toPeriode().fom.minusDays(
+                                                1))
                         personResultat.addVilkårResultat(nyttVilkår)
                     }
                 }
