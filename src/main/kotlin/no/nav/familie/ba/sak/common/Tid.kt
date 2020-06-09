@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 val TIDENES_MORGEN = LocalDate.MIN
-val TIDENES_ENDE = LocalDate.MAX
+val TIDENES_ENDE = LocalDate.MAX.minusDays(1)
 
 
 fun LocalDate.tilKortString() = this.format(DateTimeFormatter.ofPattern("dd.MM.YY", nbLocale))

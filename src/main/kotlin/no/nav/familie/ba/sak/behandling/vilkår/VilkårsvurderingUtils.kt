@@ -14,8 +14,21 @@ object VilkårsvurderingUtils {
      */
     fun muterPersonResultatDelete(personResultat: PersonResultat, vilkårResultatId: Long) {
         personResultat.slettEllerNullstill(vilkårResultatId = vilkårResultatId)
-
         fyllHullForVilkårResultater(personResultat)
+    }
+
+    /**
+     * Funksjon som forsøker å legge til en periode på et vilkår.
+     * Dersom det allerede finnes en uvurdet periode med samme vilkårstype
+     * skal det kastes en feil.
+     */
+    fun muterPersonResultatPost(personResultat: PersonResultat, vilkårType: Vilkår) {
+        val nyttVilkårResultat = VilkårResultat(personResultat = personResultat, vilkårType = vilkårType,
+        resultat = Resultat.KANSKJE, begrunnelse = "")
+        if (harUvurdertePerioder(personResultat, vilkårType)) {
+            throw Feil("Det finnes allerede uvurderte vilkår av samme vilkårType")
+        }
+        personResultat.addVilkårResultat(vilkårResultat = nyttVilkårResultat)
     }
 
     /**
@@ -32,6 +45,14 @@ object VilkårsvurderingUtils {
 
         fyllHullForVilkårResultater(personResultat)
     }
+
+    fun harUvurdertePerioder(personResultat: PersonResultat, vilkårType: Vilkår): Boolean {
+        val uvurdetePerioderMedSammeVilkårType = personResultat.vilkårResultater
+                .filter { it.vilkårType == vilkårType }
+                .find { it.resultat == Resultat.KANSKJE }
+        return uvurdetePerioderMedSammeVilkårType != null
+    }
+
 
     fun tilpassVilkårForEndretVilkår(personResultat: PersonResultat,
                                      vilkårResultat: VilkårResultat,

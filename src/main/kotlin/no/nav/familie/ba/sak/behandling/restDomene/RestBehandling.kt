@@ -28,6 +28,11 @@ data class RestPersonResultat(
         val vilkårResultater: List<RestVilkårResultat>
 )
 
+data class RestNyttVilkår(
+        val personIdent: String,
+        val vilkårType: Vilkår
+)
+
 data class RestVilkårResultat(
         val id: Long,
         val vilkårType: Vilkår,

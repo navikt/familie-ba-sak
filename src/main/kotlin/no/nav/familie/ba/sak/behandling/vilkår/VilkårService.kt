@@ -7,12 +7,14 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatDelete
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPut
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.nare.core.evaluations.Evaluering
@@ -189,6 +191,22 @@ class VilkårService(
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${personIdent}")
 
         muterPersonResultatDelete(personResultat, vilkårId)
+
+        return behandlingResultatService.oppdater(behandlingResultat).personResultater.map { it.tilRestPersonResultat() }
+    }
+
+    @Transactional
+    fun postVilkår(behandlingId: Long, restNyttVilkår: RestNyttVilkår): List<RestPersonResultat> {
+        val behandlingResultat = hentVilkårsvurdering(behandlingId = behandlingId)
+                ?: throw Feil(message = "Fant ikke aktiv vilkårsvurdering ved opprettelse av vilkår",
+                        frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering")
+
+        val personResultat = behandlingResultat.personResultater.find { it.personIdent == restNyttVilkår.personIdent }
+                ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
+                        frontendFeilmelding =
+                        "Fant ikke vilkårsvurdering for person med ident '${restNyttVilkår.personIdent}")
+
+        muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
 
         return behandlingResultatService.oppdater(behandlingResultat).personResultater.map { it.tilRestPersonResultat() }
     }
