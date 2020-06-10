@@ -18,7 +18,7 @@ data class Personinfo(
         val kjønn: Kjønn? = null,
         val familierelasjoner: Set<Familierelasjoner> = emptySet(),
         val bostedsadresse: Bostedsadresse? = null,
-        val sivilstand: SIVILSTAND
+        val sivilstand: SIVILSTAND? = null
 )
 
 data class Familierelasjoner(
