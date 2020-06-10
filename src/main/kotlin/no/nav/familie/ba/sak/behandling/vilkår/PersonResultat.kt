@@ -25,12 +25,18 @@ class PersonResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "personResultat",
-                   cascade = [CascadeType.ALL]
+                   cascade = [CascadeType.ALL],
+                   orphanRemoval = true
         )
         @OrderBy("periode_fom")
-        var vilkårResultater: Set<VilkårResultat> = setOf()
+        val vilkårResultater: MutableSet<VilkårResultat> = mutableSetOf()
 
 ) : BaseEntitet() {
+
+    fun setVilkårResultater(nyeVilkårResultater: Set<VilkårResultat>) {
+        vilkårResultater.clear()
+        vilkårResultater.addAll(nyeVilkårResultater)
+    }
 
     fun getVilkårResultat(index: Int): VilkårResultat? {
         return vilkårResultater.elementAtOrNull(index)
@@ -52,16 +58,17 @@ class PersonResultat(
     }
 
     fun addVilkårResultat(vilkårResultat: VilkårResultat) {
-        vilkårResultater = vilkårResultater.plus(vilkårResultat)
+        vilkårResultater.add(vilkårResultat)
         vilkårResultat.personResultat = this
     }
 
     fun removeVilkårResultat(vilkårResultatId: Long) {
-        vilkårResultater = vilkårResultater.filter { vilkårResultatId != it.id }.toSet()
+        vilkårResultater.find { vilkårResultatId == it.id }?.personResultat = null
+        setVilkårResultater(vilkårResultater.filter { vilkårResultatId != it.id }.toSet())
     }
 
     fun sorterVilkårResultater() {
-        vilkårResultater = vilkårResultater.toSortedSet(compareBy({ it.periodeFom }, { it.vilkårType }))
+        setVilkårResultater(vilkårResultater.sortedWith(compareBy({ it.periodeFom }, { it.vilkårType })).toSet())
     }
 
     fun slettEllerNullstill(vilkårResultatId: Long) {
