@@ -73,7 +73,7 @@ class VilkårService(
                     Fakta(personForVurdering = person)
             )
             val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
-            personResultat.vilkårResultater = vilkårResultater(personResultat, barnet, evalueringer)
+            personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, evalueringer))
             personResultat
         }.toSet()
 
@@ -116,7 +116,7 @@ class VilkårService(
             val sakType = hentSakType(behandlingKategori = behandling.kategori, søknadDTO = søknadDTO)
 
             val relevanteVilkår = Vilkår.hentVilkårFor(person.type, sakType)
-            personResultat.vilkårResultater = relevanteVilkår.flatMap { vilkår ->
+            personResultat.setVilkårResultater(relevanteVilkår.flatMap { vilkår ->
                 val vilkårListe = mutableListOf<VilkårResultat>()
                 if (vilkår == Vilkår.UNDER_18_ÅR) {
                     vilkårListe.add(VilkårResultat(personResultat = personResultat,
@@ -132,7 +132,7 @@ class VilkårService(
                                                    begrunnelse = ""))
                 }
                 vilkårListe
-            }.toSet()
+            }.toSet())
             personResultat
         }.toSet()
         return behandlingResultat
@@ -198,13 +198,13 @@ class VilkårService(
     @Transactional
     fun postVilkår(behandlingId: Long, restNyttVilkår: RestNyttVilkår): List<RestPersonResultat> {
         val behandlingResultat = hentVilkårsvurdering(behandlingId = behandlingId)
-                ?: throw Feil(message = "Fant ikke aktiv vilkårsvurdering ved opprettelse av vilkår",
-                        frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering")
+                                 ?: throw Feil(message = "Fant ikke aktiv vilkårsvurdering ved opprettelse av vilkår",
+                                               frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering")
 
         val personResultat = behandlingResultat.personResultater.find { it.personIdent == restNyttVilkår.personIdent }
-                ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
-                        frontendFeilmelding =
-                        "Fant ikke vilkårsvurdering for person med ident '${restNyttVilkår.personIdent}")
+                             ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
+                                           frontendFeilmelding =
+                                           "Fant ikke vilkårsvurdering for person med ident '${restNyttVilkår.personIdent}")
 
         muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
 

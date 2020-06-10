@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.nare.core.evaluations.Resultat
@@ -104,7 +104,7 @@ class OppdaterBehandlingGrunnlagTest {
                     behandlingResultat = behandlingResultat,
                     personIdent = it)
 
-            personResultat.vilkårResultater =
+            personResultat.setVilkårResultater(
                     setOf(VilkårResultat(personResultat = personResultat,
                                          vilkårType = Vilkår.BOSATT_I_RIKET,
                                          resultat = Resultat.JA,
@@ -117,6 +117,8 @@ class OppdaterBehandlingGrunnlagTest {
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
                                          begrunnelse = ""))
+            )
+
             personResultat
         }.toSet()
 
@@ -133,7 +135,7 @@ class OppdaterBehandlingGrunnlagTest {
                     behandlingResultat = behandlingResultat,
                     personIdent = it)
 
-            personResultat.vilkårResultater =
+            personResultat.setVilkårResultater(
                     setOf(VilkårResultat(personResultat = personResultat,
                                          vilkårType = Vilkår.BOSATT_I_RIKET,
                                          resultat = Resultat.JA,
@@ -152,6 +154,7 @@ class OppdaterBehandlingGrunnlagTest {
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
                                          begrunnelse = ""))
+            )
             personResultat
         }.toSet()
 
