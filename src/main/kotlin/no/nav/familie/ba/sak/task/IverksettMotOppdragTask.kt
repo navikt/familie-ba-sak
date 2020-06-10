@@ -50,7 +50,6 @@ class IverksettMotOppdragTask(
         const val TASK_STEP_TYPE = "iverksettMotOppdrag"
         val LOG = LoggerFactory.getLogger(IverksettMotOppdragTask::class.java)
 
-
         fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String): Task {
 
             return opprettTask(behandling.fagsak.hentAktivIdent().ident,

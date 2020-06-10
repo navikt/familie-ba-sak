@@ -70,7 +70,7 @@ class VilkårServiceTest(
         val behandlingSteg: Vilkårsvurdering = stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         Assertions.assertNotNull(behandlingSteg)
 
-        Assertions.assertThrows(Feil::class.java) { behandlingSteg.validerSteg(behandling) }
+        Assertions.assertThrows(Feil::class.java) { behandlingSteg.postValiderSteg(behandling) }
 
         val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
 
@@ -78,7 +78,7 @@ class VilkårServiceTest(
 
         behandlingResultatService.oppdater(behandlingResultat)
 
-        Assertions.assertDoesNotThrow { behandlingSteg.validerSteg(behandling) }
+        Assertions.assertDoesNotThrow { behandlingSteg.postValiderSteg(behandling) }
     }
 
     @Test

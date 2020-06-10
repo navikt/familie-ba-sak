@@ -6,6 +6,7 @@ import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 
 object SikkerhetContext {
     val SYSTEM_FORKORTELSE = "VL"
+    val SYSTEM_NAVN = "System"
 
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
@@ -18,8 +19,8 @@ object SikkerhetContext {
     fun hentSaksbehandlerNavn(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
                 .fold(
-                        onSuccess = { it.getClaims("azuread")?.get("name")?.toString() ?: "System" },
-                        onFailure = { "System" }
+                        onSuccess = { it.getClaims("azuread")?.get("name")?.toString() ?: SYSTEM_NAVN },
+                        onFailure = { SYSTEM_NAVN }
                 )
     }
 

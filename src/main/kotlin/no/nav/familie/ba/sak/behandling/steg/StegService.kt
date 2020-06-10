@@ -81,7 +81,7 @@ class StegService(
         val søknadDTO = restRegistrerSøknad.søknad
 
         val behandlingEtterSøknadshåndtering = håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, søknadDTO, this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, søknadDTO)
         }
 
         return håndterPersongrunnlag(
@@ -98,7 +98,7 @@ class StegService(
                 hentBehandlingSteg(StegType.REGISTRERE_PERSONGRUNNLAG) as RegistrerPersongrunnlag
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO, this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO)
         }
     }
 
@@ -108,7 +108,7 @@ class StegService(
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "", this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
     }
 
@@ -123,7 +123,7 @@ class StegService(
                 true)
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet, this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
         }
     }
 
@@ -133,7 +133,7 @@ class StegService(
                 hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak, this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         }
     }
 
@@ -143,7 +143,7 @@ class StegService(
                 hentBehandlingSteg(StegType.IVERKSETT_MOT_OPPDRAG) as IverksettMotOppdrag
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, iverksettingTaskDTO, this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, iverksettingTaskDTO)
         }
     }
 
@@ -153,7 +153,7 @@ class StegService(
                 hentBehandlingSteg(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) as StatusFraOppdrag
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, statusFraOppdragMedTask, this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, statusFraOppdragMedTask)
         }
     }
 
@@ -163,7 +163,7 @@ class StegService(
                 hentBehandlingSteg(StegType.JOURNALFØR_VEDTAKSBREV) as JournalførVedtaksbrev
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, journalførVedtaksbrevDTO, this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, journalførVedtaksbrevDTO)
         }
     }
 
@@ -173,7 +173,7 @@ class StegService(
                 hentBehandlingSteg(StegType.DISTRIBUER_VEDTAKSBREV) as DistribuerVedtaksbrev
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, distribuerVedtaksbrevDTO, this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, distribuerVedtaksbrevDTO)
         }
     }
 
@@ -183,7 +183,7 @@ class StegService(
                 hentBehandlingSteg(StegType.FERDIGSTILLE_BEHANDLING) as FerdigstillBehandling
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "", this)
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
     }
 
@@ -215,9 +215,9 @@ class StegService(
                         .displayName()} pga manglende rolle.")
             }
 
+            behandlingSteg.preValiderSteg(behandling, this)
             val nesteSteg = utførendeSteg()
-
-            behandlingSteg.validerSteg(behandling)
+            behandlingSteg.postValiderSteg(behandling)
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
