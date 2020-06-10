@@ -19,10 +19,10 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         return totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun opprettTotrinnskontroll(behandling: Behandling) {
+    fun opprettTotrinnskontroll(behandling: Behandling, saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn()) {
         lagreOgDeaktiverGammel(Totrinnskontroll(
                 behandling = behandling,
-                saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
+                saksbehandler = saksbehandler
         ))
     }
 
