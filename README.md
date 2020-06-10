@@ -9,7 +9,7 @@ Appen tilgjengeliggjøres da på `localhost:8089`.
 ### Database
 Dersom man vil kjøre med postgres, kan man bytte til Spring-profilen `postgres`. Da må man sette opp postgres-databasen, dette gjøres slik:
 ```
-docker run --name familie-ba-sak -e POSTGRES_PASSWORD=test -d -p 5432:5432 postgres
+docker run --name familie-ba-sak-postgres -e POSTGRES_PASSWORD=test -d -p 5432:5432 postgres
 docker ps (finn container id)
 docker exec -it <container_id> bash
 psql -U postgres

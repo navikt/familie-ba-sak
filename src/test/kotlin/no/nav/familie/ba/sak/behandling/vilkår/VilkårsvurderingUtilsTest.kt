@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.nare.core.evaluations.Resultat
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
@@ -43,7 +42,7 @@ class VilkårsvurderingUtilsTest {
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
                                          "")
-        personResultat.vilkårResultater = setOf(vilkårResultat1, vilkårResultat2, vilkårResultat3)
+        personResultat.setVilkårResultater(setOf(vilkårResultat1, vilkårResultat2, vilkårResultat3))
 
     }
 
@@ -139,8 +138,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `Skal fjerne og fylle inn tom periode i midten`() {
-        VilkårsvurderingUtils.muterPersonResultatDelete(personResultat,
-                                                     2)
+        VilkårsvurderingUtils.muterPersonResultatDelete(personResultat, 2)
 
         assertEquals(3, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
@@ -191,9 +189,9 @@ class VilkårsvurderingUtilsTest {
         )
 
         val mockVilkårResultat = VilkårResultat(1, mockPersonResultat, vilkår, resultat,
-                                         LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                         "")
-        mockPersonResultat.vilkårResultater = setOf(mockVilkårResultat)
+                                                LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
+                                                "")
+        mockPersonResultat.setVilkårResultater(setOf(mockVilkårResultat))
 
         VilkårsvurderingUtils.muterPersonResultatDelete(mockPersonResultat,
                                                         1)
@@ -208,7 +206,7 @@ class VilkårsvurderingUtilsTest {
         VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
         assertEquals(4, personResultat.vilkårResultater.size)
 
-        assertThrows(Feil:: class.java) {
+        assertThrows(Feil::class.java) {
             VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
         }
     }
@@ -216,7 +214,7 @@ class VilkårsvurderingUtilsTest {
     @Test
     fun `Skal kaste feil når det legges til periode i en vilkårtype der det allerede finnes en uvurdert periode`() {
         VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
-        assertThrows(Feil:: class.java) {
+        assertThrows(Feil::class.java) {
             VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
         }
     }
@@ -224,9 +222,9 @@ class VilkårsvurderingUtilsTest {
     @Test
     fun `Skal tilpasse vilkår for endret vilkår når begge mangler tom-dato`() {
         val vilkårResultat = VilkårResultat(personResultat = personResultat, vilkårType = vilkår, resultat = resultat,
-        periodeFom = LocalDate.of(2020, 1, 1), begrunnelse = "")
+                                            periodeFom = LocalDate.of(2020, 1, 1), begrunnelse = "")
         val restVilkårResultat = RestVilkårResultat(id = 1, vilkårType = vilkår, resultat = resultat,
-                periodeFom = LocalDate.of(2020, 6, 1), periodeTom = null, begrunnelse = "")
+                                                    periodeFom = LocalDate.of(2020, 6, 1), periodeTom = null, begrunnelse = "")
 
         VilkårsvurderingUtils.tilpassVilkårForEndretVilkår(personResultat, vilkårResultat, restVilkårResultat)
 

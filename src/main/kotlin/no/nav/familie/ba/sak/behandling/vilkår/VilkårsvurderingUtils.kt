@@ -95,8 +95,9 @@ object VilkårsvurderingUtils {
 
     fun fyllHullForVilkårResultater(personResultat: PersonResultat) {
         personResultat.sorterVilkårResultater()
+        val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
 
-        personResultat.vilkårResultater.forEach {
+        kopiAvVilkårResultater.forEach {
             personResultat.sorterVilkårResultater()
 
             val neste = personResultat.nextVilkårResultat(it)
@@ -143,8 +144,9 @@ object VilkårsvurderingUtils {
 
             if (personenSomFinnes == null) {
                 // Legg til ny person
-                personTilOppdatert.vilkårResultater =
-                        personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }.toSet()
+                personTilOppdatert.setVilkårResultater(
+                        personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }
+                                .toSet())
             } else {
                 // Fyll inn den initierte med person fra aktiv
                 val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
@@ -160,13 +162,13 @@ object VilkårsvurderingUtils {
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
-                personTilOppdatert.vilkårResultater = personsVilkårOppdatert
+                personTilOppdatert.setVilkårResultater(personsVilkårOppdatert)
 
                 // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
                 if (personsVilkårAktivt.isEmpty()) {
                     personResultaterAktivt.remove(personenSomFinnes)
                 } else {
-                    personenSomFinnes.vilkårResultater = personsVilkårAktivt
+                    personenSomFinnes.setVilkårResultater(personsVilkårAktivt)
                 }
             }
             personResultaterOppdatert.add(personTilOppdatert)
