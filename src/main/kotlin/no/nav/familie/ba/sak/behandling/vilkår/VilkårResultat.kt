@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.nare.core.evaluations.Resultat
@@ -15,9 +16,10 @@ class VilkårResultat(
         @SequenceGenerator(name = "vilkar_resultat_seq_generator", sequenceName = "vilkar_resultat_seq", allocationSize = 50)
         val id: Long = 0,
 
+        // Denne må være nullable=true slik at man kan slette vilkår fra person resultat
         @JsonIgnore
-        @ManyToOne @JoinColumn(name = "fk_periode_resultat_id", nullable = false)
-        var personResultat: PersonResultat,
+        @ManyToOne @JoinColumn(name = "fk_periode_resultat_id")
+        var personResultat: PersonResultat?,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "vilkar")

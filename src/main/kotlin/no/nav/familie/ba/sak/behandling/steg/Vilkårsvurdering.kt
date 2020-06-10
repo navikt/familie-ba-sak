@@ -88,7 +88,7 @@ class Vilkårsvurdering(
             barna.map { barn ->
                 behandlingResultat.personResultater
                         .flatMap { it.vilkårResultater }
-                        .filter { it.personResultat.personIdent == barn.personIdent.ident }
+                        .filter { it.personResultat?.personIdent == barn.personIdent.ident }
                         .forEach { vilkårResultat ->
                             if (vilkårResultat.resultat == Resultat.JA && vilkårResultat.periodeFom == null) {
                                 listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} mangler fom dato.")
