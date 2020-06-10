@@ -22,8 +22,7 @@ class JournalførVedtaksbrev(
         private val taskRepository: TaskRepository) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: JournalførVedtaksbrevDTO,
-                                      stegService: StegService?): StegType {
+                                      data: JournalførVedtaksbrevDTO): StegType {
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
 
         val fnr = vedtak.behandling.fagsak.hentAktivIdent().ident

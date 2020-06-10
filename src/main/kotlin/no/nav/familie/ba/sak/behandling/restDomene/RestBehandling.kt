@@ -21,6 +21,7 @@ data class RestBehandling(val aktiv: Boolean,
                           val personResultater: List<RestPersonResultat>,
                           val samletResultat: BehandlingResultatType,
                           val vedtakForBehandling: List<RestVedtak?>,
+                          val totrinnskontroll: RestTotrinnskontroll?,
                           val endretAv: String)
 
 data class RestPersonResultat(

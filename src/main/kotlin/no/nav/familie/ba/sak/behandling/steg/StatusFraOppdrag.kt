@@ -27,11 +27,8 @@ class StatusFraOppdrag(
         private val økonomiService: ØkonomiService,
         private val taskRepository: TaskRepository) : BehandlingSteg<StatusFraOppdragMedTask> {
 
-    private val LOG = LoggerFactory.getLogger(this.javaClass)
-
     override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: StatusFraOppdragMedTask,
-                                      stegService: StegService?): StegType {
+                                      data: StatusFraOppdragMedTask): StegType {
         val statusFraOppdragDTO = data.statusFraOppdragDTO
         val task = data.task
 
@@ -84,5 +81,9 @@ class StatusFraOppdrag(
 
     override fun stegType(): StegType {
         return StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

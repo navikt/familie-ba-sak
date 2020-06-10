@@ -27,8 +27,7 @@ class FerdigstillBehandling(
     }.toMap()
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: String,
-                                      stegService: StegService?): StegType {
+                                      data: String): StegType {
         LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
 
         val fagsak = behandling.fagsak

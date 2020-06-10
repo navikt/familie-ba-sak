@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,9 +17,8 @@ class DistribuerVedtaksbrev(
         private val loggService: LoggService) : BehandlingSteg<DistribuerVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: DistribuerVedtaksbrevDTO,
-                                      stegService: StegService?): StegType {
-        DistribuerVedtaksbrevTask.LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
+                                      data: DistribuerVedtaksbrevDTO): StegType {
+        LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
         integrasjonClient.distribuerVedtaksbrev(data.journalpostId)
         loggService.opprettDistribuertBrevLogg(behandlingId = data.behandlingId,
                                                tekst = "Vedtaksbrev er sendt til bruker")
@@ -33,5 +33,9 @@ class DistribuerVedtaksbrev(
 
     override fun stegType(): StegType {
         return StegType.DISTRIBUER_VEDTAKSBREV
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
