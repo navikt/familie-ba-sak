@@ -26,7 +26,7 @@ data class BehandlingResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "behandlingResultat",
-                   cascade = [CascadeType.ALL]
+                   cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
         )
         var personResultater: Set<PersonResultat> = setOf()
 

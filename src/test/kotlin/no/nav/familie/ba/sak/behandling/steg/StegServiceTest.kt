@@ -173,7 +173,6 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å håndtere feil steg`() {
         val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
