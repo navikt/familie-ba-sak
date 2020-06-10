@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -33,6 +35,7 @@ class FagsakService(
         private val behandlingRepository: BehandlingRepository,
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakRepository: VedtakRepository,
+        private val totrinnskontrollRepository: TotrinnskontrollRepository,
         private val integrasjonClient: IntegrasjonClient) {
 
     @Transactional
@@ -91,6 +94,8 @@ class FagsakService(
                 vedtak.toRestVedtak(restVedtakPerson)
             }
 
+            val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+
             RestBehandling(
                     aktiv = behandling.aktiv,
                     behandlingId = behandling.id,
@@ -106,7 +111,8 @@ class FagsakService(
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
                     underkategori = behandling.underkategori,
-                    endretAv = behandling.endretAv
+                    endretAv = behandling.endretAv,
+                    totrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll()
             )
         }
 
@@ -122,8 +128,8 @@ class FagsakService(
 
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
-            val personIdent = PersonIdent(fødselsnummer)
-            return hentEllerOpprettFagsak(personIdent)
+        val personIdent = PersonIdent(fødselsnummer)
+        return hentEllerOpprettFagsak(personIdent)
     }
 
     fun hent(personIdent: PersonIdent): Fagsak? {

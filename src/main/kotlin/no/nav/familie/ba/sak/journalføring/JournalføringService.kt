@@ -131,6 +131,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         return OppdaterJournalpostRequest(avsenderMottaker = AvsenderMottaker(rest.avsender.id, navn = rest.avsender.navn),
                                           bruker = Bruker(rest.bruker.id, navn = rest.bruker.navn),
                                           sak = sak,
+                                          tittel = "Søknad om ordinær barnetrygd",
                                           dokumenter = listOf(dokument))
     }
 

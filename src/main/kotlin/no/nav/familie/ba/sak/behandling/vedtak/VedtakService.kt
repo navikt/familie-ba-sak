@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -33,7 +35,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
                     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokumentService: DokumentService,
-                    private val fagsakService: FagsakService) {
+                    private val fagsakService: FagsakService,
+                    private val totrinnskontrollService: TotrinnskontrollService) {
 
     @Transactional
     fun opphørVedtak(saksbehandler: String,
@@ -87,6 +90,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 endretDato = LocalDate.now()
         )
         tilkjentYtelseRepository.save(nyTilkjentYtelse)
+
+        totrinnskontrollService.opprettTotrinnskontroll(nyBehandling, saksbehandler)
+        totrinnskontrollService.besluttTotrinnskontroll(nyBehandling, SYSTEM_NAVN, Beslutning.GODKJENT)
+
         behandlingRepository.save(nyBehandling.also { it.steg = StegType.FERDIGSTILLE_BEHANDLING })
 
         postProsessor(nyttVedtak)

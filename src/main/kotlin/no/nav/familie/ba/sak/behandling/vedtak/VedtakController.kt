@@ -108,10 +108,6 @@ class VedtakController(
     }
 }
 
-data class RestVilkårsvurdering(
-        val personResultater: List<RestPersonResultat>
-)
-
 data class Opphørsvedtak(
         val opphørsdato: LocalDate
 )

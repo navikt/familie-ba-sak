@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.ToTrinnKontrollService
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
@@ -28,15 +28,15 @@ class BeslutteVedtakTest {
 
     @BeforeEach
     fun setUp() {
-        val toTrinnKontrollService = mockk<ToTrinnKontrollService>()
+        val toTrinnKontrollService = mockk<TotrinnskontrollService>()
         vedtakService = mockk()
         taskRepository = mockk()
         dokumentService = mockk()
         val loggService = mockk<LoggService>()
 
         every { taskRepository.save(any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
-        every { toTrinnKontrollService.valider2trinnVedBeslutningOmIverksetting(any(), any(), any()) } just Runs
-        every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just Runs
+        every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any()) } just Runs
+        every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.godkjennVedtak(any()) } just runs
 
         beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, taskRepository, loggService)

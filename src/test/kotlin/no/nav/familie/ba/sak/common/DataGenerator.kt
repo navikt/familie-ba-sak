@@ -12,15 +12,11 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.*
-import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
-import no.nav.familie.ba.sak.behandling.vilkår.SakType
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
@@ -62,11 +58,11 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                   behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
                   behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 ) = Behandling(id = nesteBehandlingId(),
-                   fagsak = fagsak,
-                   type = behandlingType,
-                   kategori = behandlingKategori,
-                   underkategori = BehandlingUnderkategori.ORDINÆR,
-                   opprinnelse = BehandlingOpprinnelse.MANUELL)
+               fagsak = fagsak,
+               type = behandlingType,
+               kategori = behandlingKategori,
+               underkategori = BehandlingUnderkategori.ORDINÆR,
+               opprinnelse = BehandlingOpprinnelse.MANUELL)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
         id = nestePersonId(),
@@ -228,21 +224,24 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
             personIdent = fnr)
 
     if (lagFullstendigVilkårResultat) {
-        personResultat.vilkårResultater = Vilkår.hentVilkårFor(personType, SakType.NASJONAL).map {
-            VilkårResultat(personResultat = personResultat,
-                           periodeFom = periodeFom,
-                           periodeTom = periodeTom,
-                           vilkårType = it,
-                           resultat = resultat,
-                           begrunnelse = "")
-        }.toSet()
+        personResultat.setVilkårResultater(
+                Vilkår.hentVilkårFor(personType, SakType.NASJONAL).map {
+                    VilkårResultat(personResultat = personResultat,
+                                   periodeFom = periodeFom,
+                                   periodeTom = periodeTom,
+                                   vilkårType = it,
+                                   resultat = resultat,
+                                   begrunnelse = "")
+                }.toSet())
     } else {
-        personResultat.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat,
-                                                               periodeFom = periodeFom,
-                                                               periodeTom = periodeTom,
-                                                               vilkårType = vilkårType,
-                                                               resultat = resultat,
-                                                               begrunnelse = ""))
+        personResultat.setVilkårResultater(
+                setOf(VilkårResultat(personResultat = personResultat,
+                                     periodeFom = periodeFom,
+                                     periodeTom = periodeTom,
+                                     vilkårType = vilkårType,
+                                     resultat = resultat,
+                                     begrunnelse = ""))
+        )
     }
     return personResultat
 }
@@ -269,13 +268,14 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
     val personResultat = PersonResultat(
             behandlingResultat = behandlingResultat,
             personIdent = fnr)
-    personResultat.vilkårResultater =
+    personResultat.setVilkårResultater(
             setOf(VilkårResultat(personResultat = personResultat,
                                  vilkårType = Vilkår.BOSATT_I_RIKET,
                                  resultat = resultat,
                                  periodeFom = LocalDate.now(),
                                  periodeTom = LocalDate.now(),
                                  begrunnelse = ""))
+    )
     behandlingResultat.personResultater = setOf(personResultat)
     return behandlingResultat
 }

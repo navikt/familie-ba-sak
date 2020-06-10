@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
@@ -61,7 +62,10 @@ class StegServiceTest(
         private val behandlingResultatService: BehandlingResultatService,
 
         @Autowired
-        private val databaseCleanupService: DatabaseCleanupService
+        private val databaseCleanupService: DatabaseCleanupService,
+
+        @Autowired
+        private val totrinnskontrollService: TotrinnskontrollService
 ) {
 
     @BeforeAll
@@ -169,7 +173,6 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å håndtere feil steg`() {
         val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -221,18 +224,18 @@ class StegServiceTest(
     }
 
     @Test
-    fun `Håndter underkjent beslutning`() {
+    fun `Underkjent beslutning resetter steg`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
         mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
-
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling.endretAv = "1234"
         Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
 
+        totrinnskontrollService.opprettTotrinnskontroll(behandling = behandling)
         behandling.steg = StegType.BESLUTTE_VEDTAK
         behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
         stegService.håndterBeslutningForVedtak(behandling,

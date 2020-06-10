@@ -80,30 +80,34 @@ class PeriodeMapperTest {
         val fnr2 = randomFnr()
         val personResultat1 = PersonResultat(behandlingResultat = behandlingResultat, personIdent = fnr1)
         val personResultat2 = PersonResultat(behandlingResultat = behandlingResultat, personIdent = fnr2)
-        personResultat1.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat1,
-                                                                vilkårType = Vilkår.UNDER_18_ÅR,
-                                                                resultat = Resultat.JA,
-                                                                periodeFom = datoer[0],
-                                                                periodeTom = datoer[2].minusDays(1),
-                                                                begrunnelse = ""),
-                                                 VilkårResultat(personResultat = personResultat1,
-                                                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                                resultat = Resultat.JA,
-                                                                periodeFom = datoer[1],
-                                                                periodeTom = datoer[5].minusDays(1),
-                                                                begrunnelse = ""),
-                                                 VilkårResultat(personResultat = personResultat1,
-                                                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                                                resultat = Resultat.JA,
-                                                                periodeFom = datoer[3],
-                                                                periodeTom = datoer[4].minusDays(1),
-                                                                begrunnelse = ""))
-        personResultat2.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat2,
-                                                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                                                resultat = Resultat.JA,
-                                                                periodeFom = datoer[1],
-                                                                periodeTom = datoer[4].minusDays(1),
-                                                                begrunnelse = ""))
+        personResultat1.setVilkårResultater(
+                setOf(VilkårResultat(personResultat = personResultat1,
+                                     vilkårType = Vilkår.UNDER_18_ÅR,
+                                     resultat = Resultat.JA,
+                                     periodeFom = datoer[0],
+                                     periodeTom = datoer[2].minusDays(1),
+                                     begrunnelse = ""),
+                      VilkårResultat(personResultat = personResultat1,
+                                     vilkårType = Vilkår.BOSATT_I_RIKET,
+                                     resultat = Resultat.JA,
+                                     periodeFom = datoer[1],
+                                     periodeTom = datoer[5].minusDays(1),
+                                     begrunnelse = ""),
+                      VilkårResultat(personResultat = personResultat1,
+                                     vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                     resultat = Resultat.JA,
+                                     periodeFom = datoer[3],
+                                     periodeTom = datoer[4].minusDays(1),
+                                     begrunnelse = ""))
+        )
+        personResultat2.setVilkårResultater(
+                setOf(VilkårResultat(personResultat = personResultat2,
+                                     vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                     resultat = Resultat.JA,
+                                     periodeFom = datoer[1],
+                                     periodeTom = datoer[4].minusDays(1),
+                                     begrunnelse = ""))
+        )
         behandlingResultat.personResultater = setOf(personResultat1, personResultat2)
         val periodeResultater = behandlingResultat.periodeResultater(true).toList()
 
@@ -165,12 +169,14 @@ class PeriodeMapperTest {
         // Periode med fom-dato medio mai og tom-dato medio juni skal bli hele mai og juni
 
         val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = randomFnr())
-        personResultat.vilkårResultater = setOf(VilkårResultat(personResultat = personResultat,
-                                                               vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                                               resultat = Resultat.JA,
-                                                               periodeFom = LocalDate.of(2020, 5, 15),
-                                                               periodeTom = LocalDate.of(2020, 6, 15),
-                                                               begrunnelse = ""))
+        personResultat.setVilkårResultater(
+                setOf(VilkårResultat(personResultat = personResultat,
+                                     vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                     resultat = Resultat.JA,
+                                     periodeFom = LocalDate.of(2020, 5, 15),
+                                     periodeTom = LocalDate.of(2020, 6, 15),
+                                     begrunnelse = ""))
+        )
         behandlingResultat.personResultater = setOf(personResultat)
         val periodeResultat = behandlingResultat.periodeResultater(true).toList()[0]
         assert(periodeResultat.periodeFom!! == LocalDate.of(2020, 5, 1))
@@ -185,31 +191,31 @@ class PeriodeMapperTest {
         val periodeTom18ÅrsVilkår = LocalDate.of(2038, 5, 15)
 
         val personResultat = PersonResultat(behandlingResultat = behandlingResultat, personIdent = barnFnr)
-        personResultat.vilkårResultater = setOf(
-                VilkårResultat(personResultat = personResultat,
-                               vilkårType = Vilkår.UNDER_18_ÅR,
-                               resultat = Resultat.JA,
-                               periodeFom = periodeFom18ÅrsVilkår,
-                               periodeTom = periodeTom18ÅrsVilkår,
-                               begrunnelse = ""),
-                VilkårResultat(personResultat = personResultat,
-                               vilkårType = Vilkår.BOSATT_I_RIKET,
-                               resultat = Resultat.JA,
-                               periodeFom = periodeFom,
-                               periodeTom = null,
-                               begrunnelse = ""),
-                VilkårResultat(personResultat = personResultat,
-                               vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                               resultat = Resultat.JA,
-                               periodeFom = periodeFom,
-                               periodeTom = null,
-                               begrunnelse = ""),
-                VilkårResultat(personResultat = personResultat,
-                               vilkårType = Vilkår.BOR_MED_SØKER,
-                               resultat = Resultat.JA,
-                               periodeFom = periodeFom,
-                               periodeTom = null,
-                               begrunnelse = "")
+        personResultat.setVilkårResultater(
+                setOf(VilkårResultat(personResultat = personResultat,
+                                     vilkårType = Vilkår.UNDER_18_ÅR,
+                                     resultat = Resultat.JA,
+                                     periodeFom = periodeFom18ÅrsVilkår,
+                                     periodeTom = periodeTom18ÅrsVilkår,
+                                     begrunnelse = ""),
+                      VilkårResultat(personResultat = personResultat,
+                                     vilkårType = Vilkår.BOSATT_I_RIKET,
+                                     resultat = Resultat.JA,
+                                     periodeFom = periodeFom,
+                                     periodeTom = null,
+                                     begrunnelse = ""),
+                      VilkårResultat(personResultat = personResultat,
+                                     vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                                     resultat = Resultat.JA,
+                                     periodeFom = periodeFom,
+                                     periodeTom = null,
+                                     begrunnelse = ""),
+                      VilkårResultat(personResultat = personResultat,
+                                     vilkårType = Vilkår.BOR_MED_SØKER,
+                                     resultat = Resultat.JA,
+                                     periodeFom = periodeFom,
+                                     periodeTom = null,
+                                     begrunnelse = ""))
         )
 
         behandlingResultat.personResultater = setOf(personResultat)
