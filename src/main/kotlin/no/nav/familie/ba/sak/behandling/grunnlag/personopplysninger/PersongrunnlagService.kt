@@ -57,6 +57,9 @@ class PersongrunnlagService(
         )
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
+
+        secureLogger.info("Setter persongrunnlag med søker: ${fødselsnummer} og barn: ${barnasFødselsnummer}")
+        secureLogger.info("Barna på persongrunnlaget som lagres: ${personopplysningGrunnlag.barna.map { it.personIdent.ident }}")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
@@ -77,5 +80,6 @@ class PersongrunnlagService(
 
     companion object {
         val LOG = LoggerFactory.getLogger(this::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
