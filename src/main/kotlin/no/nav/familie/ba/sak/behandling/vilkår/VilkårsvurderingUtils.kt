@@ -23,7 +23,8 @@ object VilkårsvurderingUtils {
      * skal det kastes en feil.
      */
     fun muterPersonResultatPost(personResultat: PersonResultat, vilkårType: Vilkår) {
-        val nyttVilkårResultat = VilkårResultat(personResultat = personResultat, vilkårType = vilkårType,
+        val nyttVilkårResultat = VilkårResultat(personResultat = personResultat,
+                                                vilkårType = vilkårType,
                                                 resultat = Resultat.KANSKJE, begrunnelse = "")
         if (harUvurdertePerioder(personResultat, vilkårType)) {
             throw Feil("Det finnes allerede uvurderte vilkår av samme vilkårType")
@@ -104,15 +105,12 @@ object VilkårsvurderingUtils {
             if (neste != null && it.vilkårType == neste.vilkårType) {
                 when {
                     !it.erEtterfølgendePeriode(neste) -> {
-                        val nyttVilkår =
-                                lagUvurdertVilkårsresultat(
-                                        personResultat = it.personResultat
-                                                         ?: throw Feil(message = "Finner ikke personresultat ved opprettelse av uvurdert periode"),
-                                        vilkårType = it.vilkårType,
-                                        fom = it.toPeriode().tom.plusDays(
-                                                1),
-                                        tom = neste.toPeriode().fom.minusDays(
-                                                1))
+                        val nyttVilkår = lagUvurdertVilkårsresultat(
+                                personResultat = it.personResultat
+                                                 ?: throw Feil(message = "Finner ikke personresultat ved opprettelse av uvurdert periode"),
+                                vilkårType = it.vilkårType,
+                                fom = it.toPeriode().tom.plusDays(1),
+                                tom = neste.toPeriode().fom.minusDays(1))
                         personResultat.addVilkårResultat(nyttVilkår)
                     }
                 }
