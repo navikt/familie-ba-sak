@@ -5,9 +5,12 @@ import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class OppdaterJournalpostRequest(val avsenderMottaker: AvsenderMottaker?,
-                                      val bruker: Bruker,
-                                      val tema: String? = "BAR",
+data class OppdaterJournalpostRequest(val avsenderMottaker: AvsenderMottaker? = null,
+                                      val bruker: Bruker? = null,
+                                      val tema: String? = null,
+                                      val behandlingstema: String? = null,
+                                      val tittel: String? = null,
+                                      val journalfoerendeEnhet: String? = null,
                                       val sak: Sak? = null,
                                       val dokumenter: List<DokumentInfo>? = null)
 
