@@ -35,7 +35,15 @@ class ØkonomiService(
             beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id)
         } else beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingsId)
 
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(saksbehandlerId, vedtak, behandlingResultatType, andelerTilkjentYtelse)
+        val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(vedtak.behandling.fagsak.id).size == 1
+
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag(
+                saksbehandlerId,
+                vedtak,
+                behandlingResultatType,
+                erFørsteBehandlingPåFagsak,
+                andelerTilkjentYtelse
+        )
 
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(vedtak.behandling, utbetalingsoppdrag)
         iverksettOppdrag(vedtak.behandling.id, utbetalingsoppdrag)

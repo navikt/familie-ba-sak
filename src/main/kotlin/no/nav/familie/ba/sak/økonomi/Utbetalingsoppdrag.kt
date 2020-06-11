@@ -20,6 +20,7 @@ import java.math.BigDecimal
 fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                           vedtak: Vedtak,
                           behandlingResultatType: BehandlingResultatType,
+                          erFørsteBehandlingPåFagsak: Boolean,
                           andelerTilkjentYtelse: List<AndelTilkjentYtelse>): Utbetalingsoppdrag {
 
     val erOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
@@ -56,7 +57,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
 
     return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
-            kodeEndring = if (!erOpphør) NY else UEND,
+            kodeEndring = if (!erOpphør && erFørsteBehandlingPåFagsak) NY else UEND,
             fagSystem = FAGSYSTEM,
             saksnummer = vedtak.behandling.fagsak.id.toString(),
             aktoer = vedtak.behandling.fagsak.hentAktivIdent().ident,
