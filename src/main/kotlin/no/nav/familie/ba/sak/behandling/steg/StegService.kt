@@ -10,8 +10,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
@@ -31,7 +29,7 @@ class StegService(
         private val loggService: LoggService,
         private val rolleConfig: RolleConfig,
         private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val featureToggleService: FeatureToggleService,
+        private val featureToggleService: FeatureToggleService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
