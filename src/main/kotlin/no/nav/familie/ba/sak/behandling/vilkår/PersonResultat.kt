@@ -96,4 +96,15 @@ class PersonResultat(
             }
         }
     }
+
+    fun kopierMedParent(behandlingResultat: BehandlingResultat): PersonResultat {
+        val nyttPersonResultat = PersonResultat(
+                behandlingResultat = behandlingResultat,
+                personIdent = personIdent
+        )
+        val kopierteVilkårResultater: MutableSet<VilkårResultat> =
+                vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toMutableSet()
+        nyttPersonResultat.setVilkårResultater(kopierteVilkårResultater)
+        return nyttPersonResultat
+    }
 }
