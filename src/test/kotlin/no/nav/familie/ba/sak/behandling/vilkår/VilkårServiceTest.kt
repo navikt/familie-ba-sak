@@ -121,6 +121,31 @@ class VilkårServiceTest(
     }
 
     @Test
+    fun `Behandlingsresultat kopieres riktig`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+                bekreftEndringerViaFrontend = true)
+
+        val kopiertBehandlingResultat = behandlingResultat.kopier()
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(kopiertBehandlingResultat, false)
+        val behandlingsResultater = behandlingResultatService
+                .hentBehandlingResultatForBehandling(behandlingId = behandling.id)
+
+        Assertions.assertEquals(2, behandlingsResultater.size)
+        Assertions.assertNotEquals(behandlingResultat.id, kopiertBehandlingResultat.id)
+    }
+
+    @Test
     fun `Valider gyldige vilkårspermutasjoner for barn og søker`() {
         Assertions.assertEquals(setOf(
                 Vilkår.UNDER_18_ÅR,
