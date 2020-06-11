@@ -32,7 +32,6 @@ class StegService(
         private val rolleConfig: RolleConfig,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val featureToggleService: FeatureToggleService,
-        private val behandlingResultatService: BehandlingResultatService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
