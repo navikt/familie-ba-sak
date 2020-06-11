@@ -26,7 +26,7 @@ data class BehandlingResultat(
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "behandlingResultat",
-                   cascade = [CascadeType.ALL]
+                   cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
         )
         var personResultater: Set<PersonResultat> = setOf()
 
@@ -51,6 +51,16 @@ data class BehandlingResultat(
     }
 
     fun periodeResultater(brukMåned: Boolean): Set<PeriodeResultat> = this.personResultaterTilPeriodeResultater(brukMåned)
+
+    fun kopier(): BehandlingResultat {
+        val nyttBehandlingResultat = BehandlingResultat(
+            behandling = behandling,
+                aktiv = aktiv
+        )
+
+        nyttBehandlingResultat.personResultater = personResultater.map{it.kopierMedParent(nyttBehandlingResultat)}.toSet()
+        return nyttBehandlingResultat
+    }
 }
 
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {

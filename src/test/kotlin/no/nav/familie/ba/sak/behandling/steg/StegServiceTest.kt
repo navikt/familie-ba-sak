@@ -7,17 +7,16 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -173,7 +172,6 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å håndtere feil steg`() {
         val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -187,9 +185,12 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å endre en avsluttet behandling`() {
         val søkerFnr = randomFnr()
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandlingResultat = BehandlingResultat(behandling = behandling, aktiv = true)
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, false)
+
         behandling.steg = StegType.BEHANDLING_AVSLUTTET
         behandling.status = BehandlingStatus.FERDIGSTILT
         assertThrows<IllegalStateException> {
@@ -200,9 +201,12 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å noe annet enn å beslutte behandling når den er på dette steget`() {
         val søkerFnr = randomFnr()
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandlingResultat = BehandlingResultat(behandling = behandling, aktiv = true)
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, false)
+
         behandling.steg = StegType.BESLUTTE_VEDTAK
         behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
         assertThrows<IllegalStateException> {
