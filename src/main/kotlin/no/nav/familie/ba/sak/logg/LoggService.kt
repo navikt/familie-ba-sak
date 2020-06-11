@@ -101,7 +101,7 @@ class LoggService(
         ))
     }
 
-    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, beslutter: String, begrunnelse: String?) {
+    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, begrunnelse: String?) {
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.GODKJENNE_VEDTAK,

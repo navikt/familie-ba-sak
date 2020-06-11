@@ -31,13 +31,12 @@ class Vilkårsvurdering(
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: String,
-                                      stegService: StegService?): StegType {
+                                      data: String): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id) ?:
-        throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
+                                 ?: throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             vilkårService.vurderVilkårForFødselshendelse(behandling.id)
@@ -59,7 +58,7 @@ class Vilkårsvurdering(
         return StegType.VILKÅRSVURDERING
     }
 
-    override fun validerSteg(behandling: Behandling) {
+    override fun postValiderSteg(behandling: Behandling) {
         if (behandling.type != BehandlingType.TEKNISK_OPPHØR && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val behandlingResultat = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
                                      ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
@@ -89,7 +88,7 @@ class Vilkårsvurdering(
             barna.map { barn ->
                 behandlingResultat.personResultater
                         .flatMap { it.vilkårResultater }
-                        .filter { it.personResultat.personIdent == barn.personIdent.ident }
+                        .filter { it.personResultat?.personIdent == barn.personIdent.ident }
                         .forEach { vilkårResultat ->
                             if (vilkårResultat.resultat == Resultat.JA && vilkårResultat.periodeFom == null) {
                                 listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} mangler fom dato.")
@@ -98,14 +97,14 @@ class Vilkårsvurdering(
                                 listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato før barnets fødselsdato.")
                             }
                             if (vilkårResultat.periodeFom != null &&
-                                    vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18))) {
+                                vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18))) {
                                 listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato etter barnet har fylt 18.")
                             }
                         }
             }
 
             if (listeAvFeil.isNotEmpty()) {
-                throw Feil(message = "Validering feilet for behandling ${behandling.id}",
+                throw Feil(message = "Validering av vilkårsvurdering feilet for behandling ${behandling.id}",
                            frontendFeilmelding = RessursUtils.lagFrontendMelding("Vilkårsvurderingen er ugyldig med følgende feil:",
                                                                                  listeAvFeil)
                 )

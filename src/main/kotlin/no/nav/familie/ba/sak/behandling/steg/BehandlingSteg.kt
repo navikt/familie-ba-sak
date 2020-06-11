@@ -6,8 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 
 interface BehandlingSteg<T> {
     fun utførStegOgAngiNeste(behandling: Behandling,
-                             data: T,
-                             stegService: StegService? = null): StegType
+                             data: T): StegType
 
     fun stegType(): StegType
 
@@ -15,7 +14,9 @@ interface BehandlingSteg<T> {
         return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(), behandlingType = behandling.type)
     }
 
-    fun validerSteg(behandling: Behandling) {}
+    fun preValiderSteg(behandling: Behandling, stegService: StegService? = null) {}
+
+    fun postValiderSteg(behandling: Behandling) {}
 }
 
 fun initSteg(behandlingType: BehandlingType?): StegType {
@@ -28,7 +29,7 @@ fun initSteg(behandlingType: BehandlingType?): StegType {
 
 val sisteSteg = StegType.BEHANDLING_AVSLUTTET
 
-enum class StegType(private val rekkefølge: Int,
+enum class StegType(val rekkefølge: Int,
                     val tillattFor: List<BehandlerRolle>,
                     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
 

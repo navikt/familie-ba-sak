@@ -7,17 +7,16 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -27,6 +26,7 @@ import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
@@ -61,7 +61,10 @@ class StegServiceTest(
         private val behandlingResultatService: BehandlingResultatService,
 
         @Autowired
-        private val databaseCleanupService: DatabaseCleanupService
+        private val databaseCleanupService: DatabaseCleanupService,
+
+        @Autowired
+        private val totrinnskontrollService: TotrinnskontrollService
 ) {
 
     @BeforeAll
@@ -169,7 +172,6 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å håndtere feil steg`() {
         val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -183,9 +185,12 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å endre en avsluttet behandling`() {
         val søkerFnr = randomFnr()
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandlingResultat = BehandlingResultat(behandling = behandling, aktiv = true)
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, false)
+
         behandling.steg = StegType.BEHANDLING_AVSLUTTET
         behandling.status = BehandlingStatus.FERDIGSTILT
         assertThrows<IllegalStateException> {
@@ -196,9 +201,12 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å noe annet enn å beslutte behandling når den er på dette steget`() {
         val søkerFnr = randomFnr()
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandlingResultat = BehandlingResultat(behandling = behandling, aktiv = true)
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, false)
+
         behandling.steg = StegType.BESLUTTE_VEDTAK
         behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
         assertThrows<IllegalStateException> {
@@ -221,18 +229,18 @@ class StegServiceTest(
     }
 
     @Test
-    fun `Håndter underkjent beslutning`() {
+    fun `Underkjent beslutning resetter steg`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
         mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
-
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling.endretAv = "1234"
         Assertions.assertEquals(initSteg(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING), behandling.steg)
 
+        totrinnskontrollService.opprettTotrinnskontroll(behandling = behandling)
         behandling.steg = StegType.BESLUTTE_VEDTAK
         behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
         stegService.håndterBeslutningForVedtak(behandling,

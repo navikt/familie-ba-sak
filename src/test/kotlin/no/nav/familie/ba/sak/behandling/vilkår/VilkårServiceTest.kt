@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
-import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -71,7 +70,7 @@ class VilkårServiceTest(
         val behandlingSteg: Vilkårsvurdering = stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         Assertions.assertNotNull(behandlingSteg)
 
-        Assertions.assertThrows(Feil::class.java) { behandlingSteg.validerSteg(behandling) }
+        Assertions.assertThrows(Feil::class.java) { behandlingSteg.postValiderSteg(behandling) }
 
         val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
 
@@ -79,7 +78,7 @@ class VilkårServiceTest(
 
         behandlingResultatService.oppdater(behandlingResultat)
 
-        Assertions.assertDoesNotThrow { behandlingSteg.validerSteg(behandling) }
+        Assertions.assertDoesNotThrow { behandlingSteg.postValiderSteg(behandling) }
     }
 
     @Test
@@ -119,6 +118,31 @@ class VilkårServiceTest(
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+    }
+
+    @Test
+    fun `Behandlingsresultat kopieres riktig`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+                bekreftEndringerViaFrontend = true)
+
+        val kopiertBehandlingResultat = behandlingResultat.kopier()
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(kopiertBehandlingResultat, false)
+        val behandlingsResultater = behandlingResultatService
+                .hentBehandlingResultatForBehandling(behandlingId = behandling.id)
+
+        Assertions.assertEquals(2, behandlingsResultater.size)
+        Assertions.assertNotEquals(behandlingResultat.id, kopiertBehandlingResultat.id)
     }
 
     @Test

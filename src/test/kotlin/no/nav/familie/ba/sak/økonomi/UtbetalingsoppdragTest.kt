@@ -34,7 +34,8 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                 lagAndelTilkjentYtelse("2019-03-01", "2037-02-28", ORDINÆR_BARNETRYGD, 1054, behandling))
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, andelerTilkjentYtelse)
+        val utbetalingsoppdrag =
+                lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, true, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -70,7 +71,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = opphørFom)
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
         val utbetalingsoppdrag =
-                lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, andelerTilkjentYtelse)
+                lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, false, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -120,7 +121,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                        person = personMedFlerePerioder))
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, andelerTilkjentYtelse)
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, true, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -142,7 +143,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
         assertThrows<java.lang.IllegalArgumentException> {
-            lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, andelerTilkjentYtelse)
+            lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, true, andelerTilkjentYtelse)
         }
     }
 

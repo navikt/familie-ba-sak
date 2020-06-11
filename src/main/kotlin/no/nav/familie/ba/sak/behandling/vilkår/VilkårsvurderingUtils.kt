@@ -23,8 +23,9 @@ object VilkårsvurderingUtils {
      * skal det kastes en feil.
      */
     fun muterPersonResultatPost(personResultat: PersonResultat, vilkårType: Vilkår) {
-        val nyttVilkårResultat = VilkårResultat(personResultat = personResultat, vilkårType = vilkårType,
-        resultat = Resultat.KANSKJE, begrunnelse = "")
+        val nyttVilkårResultat = VilkårResultat(personResultat = personResultat,
+                                                vilkårType = vilkårType,
+                                                resultat = Resultat.KANSKJE, begrunnelse = "")
         if (harUvurdertePerioder(personResultat, vilkårType)) {
             throw Feil("Det finnes allerede uvurderte vilkår av samme vilkårType")
         }
@@ -68,7 +69,7 @@ object VilkårsvurderingUtils {
             val periode: Periode = vilkårResultat.toPeriode()
 
             var nyFom = periodePåNyttVilkår.tom;
-            if(periodePåNyttVilkår.tom != LocalDate.MAX) {
+            if (periodePåNyttVilkår.tom != LocalDate.MAX) {
                 nyFom = periodePåNyttVilkår.tom.plusDays(1)
             }
 
@@ -95,21 +96,21 @@ object VilkårsvurderingUtils {
 
     fun fyllHullForVilkårResultater(personResultat: PersonResultat) {
         personResultat.sorterVilkårResultater()
+        val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
 
-        personResultat.vilkårResultater.forEach {
+        kopiAvVilkårResultater.forEach {
             personResultat.sorterVilkårResultater()
 
             val neste = personResultat.nextVilkårResultat(it)
             if (neste != null && it.vilkårType == neste.vilkårType) {
                 when {
                     !it.erEtterfølgendePeriode(neste) -> {
-                        val nyttVilkår =
-                                lagUvurdertVilkårsresultat(personResultat = it.personResultat,
-                                                           vilkårType = it.vilkårType,
-                                                           fom = it.toPeriode().tom.plusDays(
-                                                                   1),
-                                                           tom = neste.toPeriode().fom.minusDays(
-                                                                   1))
+                        val nyttVilkår = lagUvurdertVilkårsresultat(
+                                personResultat = it.personResultat
+                                                 ?: throw Feil(message = "Finner ikke personresultat ved opprettelse av uvurdert periode"),
+                                vilkårType = it.vilkårType,
+                                fom = it.toPeriode().tom.plusDays(1),
+                                tom = neste.toPeriode().fom.minusDays(1))
                         personResultat.addVilkårResultat(nyttVilkår)
                     }
                 }
@@ -141,8 +142,9 @@ object VilkårsvurderingUtils {
 
             if (personenSomFinnes == null) {
                 // Legg til ny person
-                personTilOppdatert.vilkårResultater =
-                        personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }.toSet()
+                personTilOppdatert.setVilkårResultater(
+                        personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }
+                                .toSet())
             } else {
                 // Fyll inn den initierte med person fra aktiv
                 val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
@@ -158,13 +160,13 @@ object VilkårsvurderingUtils {
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
-                personTilOppdatert.vilkårResultater = personsVilkårOppdatert
+                personTilOppdatert.setVilkårResultater(personsVilkårOppdatert)
 
                 // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
                 if (personsVilkårAktivt.isEmpty()) {
                     personResultaterAktivt.remove(personenSomFinnes)
                 } else {
-                    personenSomFinnes.vilkårResultater = personsVilkårAktivt
+                    personenSomFinnes.setVilkårResultater(personsVilkårAktivt)
                 }
             }
             personResultaterOppdatert.add(personTilOppdatert)

@@ -53,7 +53,7 @@ data class Behandling(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori)"
+        return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }
 }
 
