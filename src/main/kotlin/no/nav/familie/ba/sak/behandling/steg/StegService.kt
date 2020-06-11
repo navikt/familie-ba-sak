@@ -116,12 +116,6 @@ class StegService(
     fun håndterSendTilBeslutter(behandling: Behandling, behandlendeEnhet: String): Behandling {
         val behandlingSteg: SendTilBeslutter = hentBehandlingSteg(StegType.SEND_TIL_BESLUTTER) as SendTilBeslutter
 
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)?:
-                throw Feil("Fant ikke behandlingsresultat på behandling")
-
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat.kopier(),
-                true)
-
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
         }

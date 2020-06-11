@@ -102,7 +102,9 @@ class PersonResultat(
                 behandlingResultat = behandlingResultat,
                 personIdent = personIdent
         )
-        nyttPersonResultat.vilkårResultater = vilkårResultater.map{it.kopierMedParent(nyttPersonResultat)}.toSet()
+        val kopierteVilkårResultater: MutableSet<VilkårResultat> =
+                vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toMutableSet()
+        nyttPersonResultat.setVilkårResultater(kopierteVilkårResultater)
         return nyttPersonResultat
     }
 }
