@@ -81,7 +81,6 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
               opphørsdato: LocalDate? = null) =
         Vedtak(id = nesteVedtakId(),
                behandling = behandling,
-               ansvarligSaksbehandler = "ansvarligSaksbehandler",
                vedtaksdato = LocalDate.now(),
                forrigeVedtakId = forrigeVedtak?.id,
                opphørsdato = opphørsdato

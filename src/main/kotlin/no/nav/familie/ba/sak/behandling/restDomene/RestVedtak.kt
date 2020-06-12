@@ -5,7 +5,6 @@ import java.time.LocalDate
 
 data class RestVedtak(
         val aktiv: Boolean,
-        val ansvarligSaksbehandler: String,
         val vedtaksdato: LocalDate,
         val personBeregninger: List<RestVedtakPerson>,
         val id: Long
@@ -13,7 +12,6 @@ data class RestVedtak(
 
 fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
         aktiv = this.aktiv,
-        ansvarligSaksbehandler = this.ansvarligSaksbehandler,
         personBeregninger = restVedtakPerson,
         vedtaksdato = this.vedtaksdato,
         id= this.id
