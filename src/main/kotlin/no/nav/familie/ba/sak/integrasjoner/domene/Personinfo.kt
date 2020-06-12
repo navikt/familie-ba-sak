@@ -16,7 +16,9 @@ data class Personinfo(
         val navn: String? = null,
         @JsonDeserialize(using = KjonnDeserializer::class)
         val kjønn: Kjønn? = null,
-        val familierelasjoner: Set<Familierelasjoner> = emptySet()
+        val familierelasjoner: Set<Familierelasjoner> = emptySet(),
+        val bostedsadresse: Bostedsadresse? = null,
+        val sivilstand: SIVILSTAND? = null
 )
 
 data class Familierelasjoner(
@@ -24,6 +26,35 @@ data class Familierelasjoner(
         val relasjonsrolle: FAMILIERELASJONSROLLE,
         val navn: String? = null,
         val fødselsdato: LocalDate? = null
+)
+
+data class Bostedsadresse(
+        val vegadresse: Vegadresse? = null,
+        val matrikkeladresse: Matrikkeladresse? = null,
+        val ukjentBosted: UkjentBosted? = null
+)
+
+data class Vegadresse(
+        val matrikkelId: String?,
+        val husnummer: String?,
+        val husbokstav: String?,
+        val bruksenhetsnummer: String?,
+        val adressenavn: String?,
+        val kommunenummer: String?,
+        val tilleggsnavn: String?,
+        val postnummer: String?
+)
+
+data class UkjentBosted(
+        val bostedskommune: String
+)
+
+data class Matrikkeladresse(
+        val matrikkelId: String?,
+        val bruksenhetsnummer: String?,
+        val tilleggsnavn: String?,
+        val postnummer: String?,
+        val kommunenummer: String?
 )
 
 data class Personident(
@@ -46,6 +77,19 @@ data class IdentInformasjon(val ident: String,
                             val gruppe: String)
 
 enum class FAMILIERELASJONSROLLE { BARN, FAR, MEDMOR, MOR }
+
+enum class SIVILSTAND {
+    UOPPGITT,
+    UGIFT,
+    GIFT,
+    ENKE_ELLER_ENKEMANN,
+    SKILT,
+    SEPARERT,
+    REGISTRERT_PARTNER,
+    SEPARERT_PARTNER,
+    SKILT_PARTNER,
+    GJENLEVENDE_PARTNER
+}
 
 class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
     override fun deserialize(jp: JsonParser?, p1: DeserializationContext?): Kjønn {

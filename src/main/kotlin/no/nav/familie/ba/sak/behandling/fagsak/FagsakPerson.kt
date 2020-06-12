@@ -13,7 +13,7 @@ data class FagsakPerson (
     @SequenceGenerator(name = "fagsak_person_seq_generator", sequenceName = "fagsak_person_seq", allocationSize = 50)
     val id: Long = 0,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
     val fagsak: Fagsak,
 
