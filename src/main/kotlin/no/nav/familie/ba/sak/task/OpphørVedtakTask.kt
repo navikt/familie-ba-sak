@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -20,6 +21,7 @@ import java.util.*
                      maxAntallFeil = 3)
 class OpphørVedtakTask(
         private val vedtakService: VedtakService,
+        private val totrinnskontrollService: TotrinnskontrollService,
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
 
@@ -35,11 +37,13 @@ class OpphørVedtakTask(
     }
 
     fun opprettIverksettMotOppdragTask(vedtak: Vedtak) {
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = vedtak.behandling.id)
+                               ?: error("Finner ikke aktiv totrinnskontroll ved iverksetting av opphørsvedtak.")
         val nyTask = IverksettMotOppdragTask.opprettTask(
                 vedtak.behandling.fagsak.hentAktivIdent().ident,
                 vedtak.behandling.id,
                 vedtak.id,
-                vedtak.ansvarligSaksbehandler)
+                totrinnskontroll.saksbehandler)
 
         taskRepository.save(nyTask)
     }
@@ -70,7 +74,6 @@ class OpphørVedtakTask(
             )
         }
     }
-
 }
 
 data class OpphørVedtakTaskDTO(

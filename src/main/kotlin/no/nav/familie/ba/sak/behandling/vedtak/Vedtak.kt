@@ -16,12 +16,6 @@ data class Vedtak(
         @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
         val behandling: Behandling,
 
-        @Column(name = "ansvarlig_saksbehandler", nullable = false)
-        val ansvarligSaksbehandler: String,
-
-        @Column(name = "ansvarlig_beslutter", nullable = true)
-        var ansvarligBeslutter: String? = null,
-
         @Column(name = "ansvarlig_enhet", nullable = true)
         var ansvarligEnhet: String? = null,
 
@@ -44,7 +38,7 @@ data class Vedtak(
         val opphørsdato: LocalDate? = null
 ) : BaseEntitet() {
 
-        override fun toString(): String {
-                return "Vedtak(id=$id, behandling=$behandling, ansvarligSaksbehandler='$ansvarligSaksbehandler', vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
-        }
+    override fun toString(): String {
+        return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
+    }
 }
