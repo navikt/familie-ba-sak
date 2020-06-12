@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.task.dto.SimuleringTaskDTO
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -38,7 +39,8 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns true
-        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033"))))
+        simuleringTask.doTask(SimuleringTask.opprettTask(
+                SimuleringTaskDTO(NyBehandlingHendelse("12345678910", listOf("01101800033")), true)))
         Assertions.assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910")))
     }
 
@@ -47,7 +49,8 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns false
-        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033"))))
+        simuleringTask.doTask(SimuleringTask.opprettTask(
+                SimuleringTaskDTO(NyBehandlingHendelse("12345678910", listOf("01101800033")), false)))
         Assertions.assertNotNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910")))
     }
 
@@ -56,7 +59,8 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns false
-        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033"))))
+        simuleringTask.doTask(SimuleringTask.opprettTask(
+                SimuleringTaskDTO(NyBehandlingHendelse("12345678910", listOf("01101800033")), false)))
 
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
@@ -67,7 +71,8 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         behandling.status = BehandlingStatus.FERDIGSTILT
         behandlingRepository.save(behandling)
 
-        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101900033"))))
+        simuleringTask.doTask(SimuleringTask.opprettTask(
+                SimuleringTaskDTO(NyBehandlingHendelse("12345678910", listOf("01101900033")), true)))
         Assertions.assertEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 
@@ -76,14 +81,16 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns false
-        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101800033"))))
+        simuleringTask.doTask(SimuleringTask.opprettTask(
+                SimuleringTaskDTO(NyBehandlingHendelse("12345678910", listOf("01101800033")), false)))
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910"))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
         behandling.status = BehandlingStatus.FERDIGSTILT
         behandlingRepository.save(behandling)
         
-        simuleringTask.doTask(SimuleringTask.opprettTask(NyBehandlingHendelse("12345678910", listOf("01101900033"))))
+        simuleringTask.doTask(SimuleringTask.opprettTask(
+                SimuleringTaskDTO(NyBehandlingHendelse("12345678910", listOf("01101900033")), false)))
         Assertions.assertNotEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 }

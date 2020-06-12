@@ -12,6 +12,7 @@ class AvgjørAutomatiskEllerManuell
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
+        // TODO: Kjør filtreringsregler som avgjør om fødselshendelsen skal behandles automatisk eller manuelt
 
         return hentNesteStegForNormalFlyt(behandling)
     }

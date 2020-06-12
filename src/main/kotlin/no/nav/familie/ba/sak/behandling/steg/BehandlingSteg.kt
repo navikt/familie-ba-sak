@@ -41,54 +41,49 @@ enum class StegType(val rekkefølge: Int,
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
-    VELG_SAKSBEHANDLINGSSYSTEM(
+    AVGJØR_AUTOMATISK_ELLER_MANUELL(
             rekkefølge = 2,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET)
     ),
-    AVGJØR_AUTOMATISK_ELLER_MANUELL(
-            rekkefølge = 3,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET)
-    ),
     VILKÅRSVURDERING(
-            rekkefølge = 4,
+            rekkefølge = 3,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     SEND_TIL_BESLUTTER(
-            rekkefølge = 5,
+            rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
     BESLUTTE_VEDTAK(
-            rekkefølge = 6,
+            rekkefølge = 5,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.SENDT_TIL_BESLUTTER)),
     IVERKSETT_MOT_OPPDRAG(
-            rekkefølge = 7,
+            rekkefølge = 6,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.GODKJENT)
     ),
     VENTE_PÅ_STATUS_FRA_ØKONOMI(
-            rekkefølge = 8,
+            rekkefølge = 7,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.SENDT_TIL_IVERKSETTING)
     ),
     JOURNALFØR_VEDTAKSBREV(
-            rekkefølge = 9,
+            rekkefølge = 8,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
     ),
     DISTRIBUER_VEDTAKSBREV(
-            rekkefølge = 10,
+            rekkefølge = 9,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
     ),
     FERDIGSTILLE_BEHANDLING(
-            rekkefølge = 11,
+            rekkefølge = 10,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)),
     BEHANDLING_AVSLUTTET(
-            rekkefølge = 12,
+            rekkefølge = 11,
             tillattFor = emptyList(),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT));
 
@@ -121,8 +116,7 @@ enum class StegType(val rekkefølge: Int,
                 }
             BehandlingType.BEHANDLING_FØDSELSHENDELSE ->
                 return when (utførendeStegType) {
-                    REGISTRERE_PERSONGRUNNLAG -> VELG_SAKSBEHANDLINGSSYSTEM
-                    VELG_SAKSBEHANDLINGSSYSTEM -> AVGJØR_AUTOMATISK_ELLER_MANUELL
+                    REGISTRERE_PERSONGRUNNLAG -> AVGJØR_AUTOMATISK_ELLER_MANUELL
                     AVGJØR_AUTOMATISK_ELLER_MANUELL -> VILKÅRSVURDERING
                     VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
                     else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")

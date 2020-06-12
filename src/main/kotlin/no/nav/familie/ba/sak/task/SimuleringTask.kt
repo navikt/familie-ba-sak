@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.task.dto.SimuleringTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -18,10 +18,10 @@ class SimuleringTask(
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val nyBehandling = objectMapper.readValue(task.payload, NyBehandlingHendelse::class.java)
+        val simuleringTaskDTO = objectMapper.readValue(task.payload, SimuleringTaskDTO::class.java)
         try {
             LOG.info("Kjører simulering task")
-            stegService.regelkjørBehandling(nyBehandling)
+            stegService.regelkjørBehandling(simuleringTaskDTO.nyBehandling, simuleringTaskDTO.skalBehandlesHosInfotrygd)
         } catch (e: SimulationException) {
             LOG.info("Simulering av behandling. Data ikke persistert.")
         }
@@ -31,10 +31,10 @@ class SimuleringTask(
         const val TASK_STEP_TYPE = "simuleringTask"
         val LOG = LoggerFactory.getLogger(this::class.java)
 
-        fun opprettTask(nyBehandling: NyBehandlingHendelse): Task {
+        fun opprettTask(simuleringTaskDTO: SimuleringTaskDTO): Task {
             return Task.nyTask(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(nyBehandling)
+                    payload = objectMapper.writeValueAsString(simuleringTaskDTO)
             )
         }
     }

@@ -178,15 +178,6 @@ class StegService(
         }
     }
 
-    fun håndterVelgSaksbehandlingssystem(behandling: Behandling): Behandling {
-        val behandlingSteg: VelgSaksbehandlingssystem =
-                hentBehandlingSteg(StegType.VELG_SAKSBEHANDLINGSSYSTEM) as VelgSaksbehandlingssystem
-
-        return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "")
-        }
-    }
-
     fun håndterAvgjørAutomatiskEllerManuell(behandling: Behandling): Behandling {
         val behandlingSteg: AvgjørAutomatiskEllerManuell =
                 hentBehandlingSteg(StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL) as AvgjørAutomatiskEllerManuell
@@ -266,9 +257,8 @@ class StegService(
     }
 
     @Transactional
-    fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
+    fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse, skalBehandlesHosInfotrygd: Boolean) {
         var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
-        behandling = håndterVelgSaksbehandlingssystem(behandling)
         behandling = håndterAvgjørAutomatiskEllerManuell(behandling)
         behandling = håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
@@ -276,7 +266,7 @@ class StegService(
 
         secureLogger.info("Simulering av behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
 
-        if (featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
+        if (skalBehandlesHosInfotrygd) {
             throw SimulationException()
         }
     }
