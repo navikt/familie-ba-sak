@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.økonomi
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
@@ -12,6 +10,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
@@ -33,9 +33,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
 @SpringBootTest(classes = [ApplicationConfig::class],
-        properties = ["FAMILIE_OPPDRAG_API_URL=http://localhost:28085/api",
-            "FAMILIE_BA_DOKGEN_API_URL=http://localhost:28085/api",
-            "FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
+                properties = ["FAMILIE_OPPDRAG_API_URL=http://localhost:28085/api",
+                    "FAMILIE_BA_DOKGEN_API_URL=http://localhost:28085/api",
+                    "FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-dokgen", "mock-oauth")
@@ -74,15 +74,15 @@ class ØkonomiIntegrasjonTest {
 
         val responseBody = Ressurs.Companion.success("ok")
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success(mapOf("aktørId" to 1L))))))
+                        .willReturn(aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success(mapOf("aktørId" to 1L))))))
         stubFor(post(anyUrl())
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(responseBody))))
+                        .willReturn(aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(responseBody))))
 
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
@@ -99,8 +99,7 @@ class ØkonomiIntegrasjonTest {
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+                personopplysningGrunnlag = personopplysningGrunnlag
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
@@ -125,18 +124,17 @@ class ØkonomiIntegrasjonTest {
         val stønadTom = stønadFom.plusYears(17)
 
         stubFor(post(anyUrl())
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success("ok")))))
+                        .willReturn(aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success("ok")))))
 
         //Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val vedtak = Vedtak(behandling = behandling,
-                ansvarligSaksbehandler = "ansvarligSaksbehandler",
-                vedtaksdato = LocalDate.of(2020, 1, 1))
+                            vedtaksdato = LocalDate.of(2020, 1, 1))
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
@@ -169,20 +167,20 @@ class ØkonomiIntegrasjonTest {
                 BehandlingResultat(behandling = behandling)
         behandlingResultat.personResultater = setOf(
                 lagPersonResultat(behandlingResultat = behandlingResultat,
-                        fnr = søkerFnr,
-                        resultat = Resultat.JA,
-                        periodeFom = stønadFom,
-                        periodeTom = stønadTom,
-                        lagFullstendigVilkårResultat = true,
-                        personType = PersonType.SØKER
+                                  fnr = søkerFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = stønadFom,
+                                  periodeTom = stønadTom,
+                                  lagFullstendigVilkårResultat = true,
+                                  personType = PersonType.SØKER
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
-                        fnr = barnFnr,
-                        resultat = Resultat.JA,
-                        periodeFom = stønadFom,
-                        periodeTom = stønadTom,
-                        lagFullstendigVilkårResultat = true,
-                        personType = PersonType.BARN
+                                  fnr = barnFnr,
+                                  resultat = Resultat.JA,
+                                  periodeFom = stønadFom,
+                                  periodeTom = stønadTom,
+                                  lagFullstendigVilkårResultat = true,
+                                  personType = PersonType.BARN
                 )
         )
         return behandlingResultat
