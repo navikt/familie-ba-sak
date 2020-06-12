@@ -20,10 +20,10 @@ interface BehandlingSteg<T> {
 }
 
 fun initSteg(behandlingType: BehandlingType?): StegType {
-    return if (behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
-        StegType.REGISTRERE_PERSONGRUNNLAG
-    } else {
-        StegType.REGISTRERE_SØKNAD
+    return when (behandlingType) {
+        BehandlingType.MIGRERING_FRA_INFOTRYGD,
+        BehandlingType.BEHANDLING_FØDSELSHENDELSE -> StegType.REGISTRERE_PERSONGRUNNLAG
+        else -> StegType.REGISTRERE_SØKNAD
     }
 }
 
@@ -122,7 +122,9 @@ enum class StegType(val rekkefølge: Int,
             BehandlingType.BEHANDLING_FØDSELSHENDELSE ->
                 return when (utførendeStegType) {
                     REGISTRERE_PERSONGRUNNLAG -> VELG_SAKSBEHANDLINGSSYSTEM
-                    VELG_SAKSBEHANDLINGSSYSTEM -> VILKÅRSVURDERING
+                    VELG_SAKSBEHANDLINGSSYSTEM -> AVGJØR_AUTOMATISK_ELLER_MANUELL
+                    AVGJØR_AUTOMATISK_ELLER_MANUELL -> VILKÅRSVURDERING
+                    VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
                     else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
                 }
             else ->

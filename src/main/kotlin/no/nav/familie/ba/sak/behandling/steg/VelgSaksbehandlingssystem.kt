@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import org.springframework.stereotype.Service
 
+@Service
 class VelgSaksbehandlingssystem
     : BehandlingSteg<String> {
 

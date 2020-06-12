@@ -178,6 +178,24 @@ class StegService(
         }
     }
 
+    fun håndterVelgSaksbehandlingssystem(behandling: Behandling): Behandling {
+        val behandlingSteg: VelgSaksbehandlingssystem =
+                hentBehandlingSteg(StegType.VELG_SAKSBEHANDLINGSSYSTEM) as VelgSaksbehandlingssystem
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+    }
+
+    fun håndterAvgjørAutomatiskEllerManuell(behandling: Behandling): Behandling {
+        val behandlingSteg: AvgjørAutomatiskEllerManuell =
+                hentBehandlingSteg(StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL) as AvgjørAutomatiskEllerManuell
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+    }
+
     // Generelle stegmetoder
     private fun håndterSteg(behandling: Behandling,
                             behandlingSteg: BehandlingSteg<*>,
@@ -249,7 +267,10 @@ class StegService(
 
     @Transactional
     fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
-        val behandling = håndterNyBehandlingFraHendelse(nyBehandling)
+        var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
+        behandling = håndterVelgSaksbehandlingssystem(behandling)
+        behandling = håndterAvgjørAutomatiskEllerManuell(behandling)
+        behandling = håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
         val samletResultat = behandlingResultat?.hentSamletResultat()
 
