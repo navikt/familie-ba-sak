@@ -46,44 +46,49 @@ enum class StegType(val rekkefølge: Int,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET)
     ),
-    VILKÅRSVURDERING(
+    AVGJØR_AUTOMATISK_ELLER_MANUELL(
             rekkefølge = 3,
-            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
-    SEND_TIL_BESLUTTER(
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET)
+    ),
+    VILKÅRSVURDERING(
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
-    BESLUTTE_VEDTAK(
+    SEND_TIL_BESLUTTER(
             rekkefølge = 5,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
+    BESLUTTE_VEDTAK(
+            rekkefølge = 6,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.SENDT_TIL_BESLUTTER)),
     IVERKSETT_MOT_OPPDRAG(
-            rekkefølge = 6,
+            rekkefølge = 7,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.GODKJENT)
     ),
     VENTE_PÅ_STATUS_FRA_ØKONOMI(
-            rekkefølge = 7,
+            rekkefølge = 8,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.SENDT_TIL_IVERKSETTING)
     ),
     JOURNALFØR_VEDTAKSBREV(
-            rekkefølge = 8,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
-    ),
-    DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 9,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
     ),
-    FERDIGSTILLE_BEHANDLING(
+    DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 10,
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
+    ),
+    FERDIGSTILLE_BEHANDLING(
+            rekkefølge = 11,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)),
     BEHANDLING_AVSLUTTET(
-            rekkefølge = 11,
+            rekkefølge = 12,
             tillattFor = emptyList(),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT));
 

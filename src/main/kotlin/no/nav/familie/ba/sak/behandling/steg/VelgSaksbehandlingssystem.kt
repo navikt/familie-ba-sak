@@ -9,14 +9,13 @@ class VelgSaksbehandlingssystem
         return StegType.VELG_SAKSBEHANDLINGSSYSTEM
     }
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: String, stegService: StegService?): StegType {
-        // TODO: Kjøre filtreringsregler
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
+        // TODO: Gjør kall til Infotrygd replika-tjeneste. Har søker eller barn en sak i infotrygd fra før? Ja/nei.
 
-        // TODO: Avgjøre hva som blir samlet resultat - skal vi saksbehandle hos oss eller Infotrygd
+        // TODO: Avgjøre om vi skal saksbehandle hos oss eller Infotrygd
 
-        // TODO: Neste steg er å sende videre til regelkjøring (vilkårsvurdering) - blir noe refaktorering i Simuleringstask/
-        // regelkjørBehandling
+        // TODO: Neste steg er å sende videre til regelkjøring (vilkårsvurdering) - blir noe refaktorering i Simuleringstask/regelkjørBehandling
+
+        return hentNesteStegForNormalFlyt(behandling)
     }
-
-
 }
