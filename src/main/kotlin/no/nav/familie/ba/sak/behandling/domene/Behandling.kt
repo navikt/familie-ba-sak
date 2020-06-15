@@ -63,18 +63,7 @@ data class Behandling(
 enum class BehandlingOpprinnelse {
     MANUELL,
     AUTOMATISK_VED_FØDSELSHENDELSE,
-    AUTOMATISK_VED_JOURNALFØRING;
-
-    /**
-     * Ved noen opprinnelser så skal en behandling føre til en oppgave dersom det automatiske løpet feiler.
-     */
-    fun skalOppretteOppgave(): Boolean {
-        return when (this) {
-            MANUELL -> false
-            AUTOMATISK_VED_FØDSELSHENDELSE -> true
-            AUTOMATISK_VED_JOURNALFØRING -> false
-        }
-    }
+    AUTOMATISK_VED_JOURNALFØRING
 }
 
 enum class BehandlingType(val visningsnavn: String) {
