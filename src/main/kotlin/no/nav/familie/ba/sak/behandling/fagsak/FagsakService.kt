@@ -64,7 +64,7 @@ class FagsakService(
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
-        } else {
+        } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent.equals(personIdent) }) {
             fagsak.also {
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
                 lagre(it)

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.nare.core.evaluations.Resultat
@@ -34,28 +35,31 @@ import java.time.LocalDate
 @ActiveProfiles("postgres", "mock-dokgen", "mock-oauth")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
-class VedtakServiceTest {
+class VedtakServiceTest(
+        @Autowired
+        val behandlingRepository: BehandlingRepository,
 
-    @Autowired
-    lateinit var behandlingRepository: BehandlingRepository
+        @Autowired
+        val behandlingResultatService: BehandlingResultatService,
 
-    @Autowired
-    lateinit var behandlingResultatService: BehandlingResultatService
+        @Autowired
+        val vedtakService: VedtakService,
 
-    @Autowired
-    lateinit var vedtakService: VedtakService
+        @Autowired
+        val persongrunnlagService: PersongrunnlagService,
 
-    @Autowired
-    lateinit var persongrunnlagService: PersongrunnlagService
+        @Autowired
+        val beregningService: BeregningService,
 
-    @Autowired
-    lateinit var beregningService: BeregningService
+        @Autowired
+        val fagsakService: FagsakService,
 
-    @Autowired
-    lateinit var fagsakService: FagsakService
+        @Autowired
+        val fagsakPersonRepository: FagsakPersonRepository,
 
-    @Autowired
-    lateinit var fagsakPersonRepository: FagsakPersonRepository
+        @Autowired
+        val totrinnskontrollService: TotrinnskontrollService
+) {
 
     lateinit var behandlingService: BehandlingService
 
@@ -96,7 +100,7 @@ class VedtakServiceTest {
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
 
@@ -113,14 +117,19 @@ class VedtakServiceTest {
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+                personopplysningGrunnlag = personopplysningGrunnlag
         )
+
+        totrinnskontrollService.opprettTotrinnskontroll(behandling, "ansvarligSaksbehandler")
+        totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
-        Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
         Assertions.assertEquals(null, hentetVedtak?.stønadBrevPdF)
+
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
+        Assertions.assertNotNull(totrinnskontroll)
+        Assertions.assertEquals("ansvarligSaksbehandler", totrinnskontroll!!.saksbehandler)
     }
 
     @Test
@@ -147,13 +156,11 @@ class VedtakServiceTest {
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+                personopplysningGrunnlag = personopplysningGrunnlag
         )
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
-        Assertions.assertEquals("ansvarligSaksbehandler", hentetVedtak?.ansvarligSaksbehandler)
     }
 
     @Test
@@ -170,8 +177,7 @@ class VedtakServiceTest {
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandling,
-                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+                behandling = behandling
         )
 
         val revurderingInnvilgetBehandling =
@@ -185,8 +191,7 @@ class VedtakServiceTest {
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = revurderingInnvilgetBehandling,
-                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+                behandling = revurderingInnvilgetBehandling
         )
 
 
@@ -211,17 +216,17 @@ class VedtakServiceTest {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler1")
-        opprettNyttInvilgetVedtak(behandling, saksbehandler = "ansvarligSaksbehandler2")
+        opprettNyttInvilgetVedtak(behandling, ansvarligEnhet = "ansvarligEnhet1")
+        opprettNyttInvilgetVedtak(behandling, ansvarligEnhet = "ansvarligEnhet2")
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
-        Assertions.assertEquals("ansvarligSaksbehandler2", hentetVedtak?.ansvarligSaksbehandler)
+        Assertions.assertEquals("ansvarligEnhet2", hentetVedtak?.ansvarligEnhet)
     }
 
-    private fun opprettNyttInvilgetVedtak(behandling: Behandling, saksbehandler: String = "ansvarligSaksbehandler"): Vedtak {
+    private fun opprettNyttInvilgetVedtak(behandling: Behandling, ansvarligEnhet: String = "ansvarligEnhet"): Vedtak {
         vedtakService.lagreOgDeaktiverGammel(Vedtak(behandling = behandling,
-                                                    ansvarligSaksbehandler = saksbehandler,
+                                                    ansvarligEnhet = ansvarligEnhet,
                                                     vedtaksdato = LocalDate.now())
         )
 

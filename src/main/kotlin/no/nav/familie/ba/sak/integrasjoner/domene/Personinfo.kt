@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
 import java.time.LocalDate
 
 @JsonIgnoreProperties
@@ -16,7 +18,9 @@ data class Personinfo(
         val navn: String? = null,
         @JsonDeserialize(using = KjonnDeserializer::class)
         val kjønn: Kjønn? = null,
-        val familierelasjoner: Set<Familierelasjoner> = emptySet()
+        val familierelasjoner: Set<Familierelasjoner> = emptySet(),
+        val bostedsadresse: Bostedsadresse? = null,
+        val sivilstand: SIVILSTAND? = null
 )
 
 data class Familierelasjoner(
