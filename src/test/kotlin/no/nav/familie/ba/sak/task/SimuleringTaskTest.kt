@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.task
 
-import io.mockk.every
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.dto.SimuleringTaskDTO
@@ -24,7 +22,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ActiveProfiles("dev")
 @Tag("integration")
 class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
-                         @Autowired private val featureToggleService: FeatureToggleService,
                          @Autowired private val fagsakRepository: FagsakRepository,
                          @Autowired private val behandlingRepository: BehandlingRepository,
                          @Autowired private val databaseCleanupService: DatabaseCleanupService) {
@@ -36,9 +33,6 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
 
     @Test
     fun `simulering persisterer ikke behandlingsdata til databasen`() {
-        every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
-        } returns true
         simuleringTask.doTask(SimuleringTask.opprettTask(
                 SimuleringTaskDTO(NyBehandlingHendelse("12345678910", listOf("01101800033")), true)))
         Assertions.assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910")))
@@ -46,9 +40,6 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
 
     @Test
     fun `simulering persisterer behandlingsdata til databasen`() {
-        every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
-        } returns false
         simuleringTask.doTask(SimuleringTask.opprettTask(
                 SimuleringTaskDTO(NyBehandlingHendelse("12345678910", listOf("01101800033")), false)))
         Assertions.assertNotNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910")))
@@ -56,15 +47,8 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
 
     @Test
     fun `fagsak eksisterer for søker, ny behandling blir ikke persistert`() {
-        every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
-        } returns false
         simuleringTask.doTask(SimuleringTask.opprettTask(
                 SimuleringTaskDTO(NyBehandlingHendelse("12345678910", listOf("01101800033")), false)))
-
-        every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
-        } returns true
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910"))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
@@ -78,9 +62,6 @@ class SimuleringTaskTest(@Autowired private val simuleringTask: SimuleringTask,
 
     @Test
     fun `fagsak eksisterer for søker, ny behandling opprettes og persisteres`() {
-        every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
-        } returns false
         simuleringTask.doTask(SimuleringTask.opprettTask(
                 SimuleringTaskDTO(NyBehandlingHendelse("12345678910", listOf("01101800033")), false)))
 
