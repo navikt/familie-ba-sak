@@ -46,9 +46,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                type = nyBehandling.behandlingType,
                                kategori = nyBehandling.kategori,
                                underkategori = nyBehandling.underkategori,
-                               steg = initSteg(nyBehandling.behandlingType)))
+                               steg = initSteg(nyBehandling.behandlingType, null)))
         } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
-            aktivBehandling.steg = initSteg(nyBehandling.behandlingType)
+            aktivBehandling.steg = initSteg(nyBehandling.behandlingType, null)
             aktivBehandling.status = BehandlingStatus.OPPRETTET
             behandlingRepository.save(aktivBehandling)
         } else {

@@ -49,7 +49,7 @@ data class Behandling(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "steg", nullable = false)
-        var steg: StegType = initSteg(null)
+        var steg: StegType = initSteg(null, null)
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -79,7 +79,6 @@ enum class BehandlingOpprinnelse {
 
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
-    BEHANDLING_FØDSELSHENDELSE("Behandling av fødselshendelse"),
     REVURDERING("Revurdering"),
     MIGRERING_FRA_INFOTRYGD("Migrering fra infotrygd"),
     KLAGE("Klage"),

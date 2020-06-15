@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -28,8 +27,7 @@ class StegService(
         private val steg: List<BehandlingSteg<*>>,
         private val loggService: LoggService,
         private val rolleConfig: RolleConfig,
-        private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val featureToggleService: FeatureToggleService
+        private val behandlingResultatRepository: BehandlingResultatRepository
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -57,7 +55,7 @@ class StegService(
 
         val behandling = behandlingService.opprettBehandling(NyBehandling(
                 søkersIdent = nyBehandling.søkersIdent,
-                behandlingType = BehandlingType.BEHANDLING_FØDSELSHENDELSE,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE

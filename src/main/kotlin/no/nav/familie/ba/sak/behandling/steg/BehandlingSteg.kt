@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 
@@ -11,7 +12,9 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
-        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(), behandlingType = behandling.type)
+        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(),
+                                             behandlingType = behandling.type,
+                                             behandlingOpprinnelse = behandling.opprinnelse)
     }
 
     fun preValiderSteg(behandling: Behandling, stegService: StegService? = null) {}
@@ -19,12 +22,10 @@ interface BehandlingSteg<T> {
     fun postValiderSteg(behandling: Behandling) {}
 }
 
-fun initSteg(behandlingType: BehandlingType?): StegType {
-    return when (behandlingType) {
-        BehandlingType.MIGRERING_FRA_INFOTRYGD,
-        BehandlingType.BEHANDLING_FØDSELSHENDELSE -> StegType.REGISTRERE_PERSONGRUNNLAG
-        else -> StegType.REGISTRERE_SØKNAD
-    }
+fun initSteg(behandlingType: BehandlingType?, behandlingOpprinnelse: BehandlingOpprinnelse?): StegType {
+    return if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
+               || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) { StegType.REGISTRERE_PERSONGRUNNLAG }
+    else { StegType.REGISTRERE_SØKNAD }
 }
 
 val sisteSteg = StegType.BEHANDLING_AVSLUTTET
@@ -99,43 +100,47 @@ enum class StegType(val rekkefølge: Int,
         return this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
     }
 
-    fun hentNesteSteg(utførendeStegType: StegType, behandlingType: BehandlingType? = null): StegType {
-        when (behandlingType) {
-            BehandlingType.TEKNISK_OPPHØR, BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, BehandlingType.MIGRERING_FRA_INFOTRYGD ->
-                return when (utførendeStegType) {
-                    REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
-                    REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                    VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
-                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                    else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
-                }
-            BehandlingType.BEHANDLING_FØDSELSHENDELSE ->
-                return when (utførendeStegType) {
-                    REGISTRERE_PERSONGRUNNLAG -> AVGJØR_AUTOMATISK_ELLER_MANUELL
-                    AVGJØR_AUTOMATISK_ELLER_MANUELL -> VILKÅRSVURDERING
-                    VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
-                    else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
-                }
-            else ->
-                return when (utførendeStegType) {
-                    REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
-                    REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                    VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
-                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
-                    IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                    VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
-                    JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                    DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                    BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                    else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved behandlingstype $behandlingType")
-                }
+    fun hentNesteSteg(utførendeStegType: StegType,
+                      behandlingType: BehandlingType? = null,
+                      behandlingOpprinnelse: BehandlingOpprinnelse? = null): StegType {
+        return if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+            when (utførendeStegType) {
+                REGISTRERE_PERSONGRUNNLAG -> AVGJØR_AUTOMATISK_ELLER_MANUELL
+                AVGJØR_AUTOMATISK_ELLER_MANUELL -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
+                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
+            }
+        } else {
+            when (behandlingType) {
+                BehandlingType.TEKNISK_OPPHØR, BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, BehandlingType.MIGRERING_FRA_INFOTRYGD ->
+                    when (utførendeStegType) {
+                        REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
+                        REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                        VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                        SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                        BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+                        IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                        VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                        FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                        BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                        else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
+                    }
+                else ->
+                    when (utførendeStegType) {
+                        REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
+                        REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                        VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                        SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                        BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+                        IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                        VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                        JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                        DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                        FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                        BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                        else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved behandlingstype $behandlingType")
+                    }
+            }
         }
     }
 }
