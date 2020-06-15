@@ -42,6 +42,16 @@ class BehandlingStegTest {
             assertEquals(steg, it)
             steg = it.hentNesteSteg(utførendeStegType = steg)
         }
+        val riktigRekkefølgeForFødselshendelser = listOf(
+                StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL,
+                StegType.VILKÅRSVURDERING,
+                StegType.IVERKSETT_MOT_OPPDRAG)
+        steg = initSteg(BehandlingType.BEHANDLING_FØDSELSHENDELSE)
+        riktigRekkefølgeForFødselshendelser.forEach {
+            assertEquals(steg, it)
+            steg = it.hentNesteSteg(utførendeStegType = steg, behandlingType = BehandlingType.BEHANDLING_FØDSELSHENDELSE)
+        }
     }
 
     @Test
