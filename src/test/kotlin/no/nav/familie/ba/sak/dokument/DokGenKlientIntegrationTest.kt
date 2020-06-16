@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.dokument
 
-import com.fasterxml.jackson.databind.ObjectMapper
+
+import io.mockk.verify
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.dokument.domene.DokumentRequest
@@ -16,6 +19,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
+import java.lang.RuntimeException
 import java.time.LocalDate
 
 @SpringBootTest
@@ -24,20 +28,10 @@ import java.time.LocalDate
 @Tag("integration")
 class DokGenKlientIntegrationTest {
 
-    class DokGenTestKlient : DokGenKlient("mock_dokgen_uri", RestTemplate()) {
+    class DokGenTestKlient(restTemplate: RestTemplate) : DokGenKlient("mock://familie-ba-dokgen.adeo.no", restTemplate) {
         override fun <T : Any> utførRequest(request: RequestEntity<Any>, responseType: Class<T>): ResponseEntity<T> {
-            if (request.url.path.matches(Regex(".+create-markdown"))) {
-                assert(request.body is String)
-                val mapper = ObjectMapper()
-                val felter = mapper.readValue(request.body as String, Map::class.java)
-                assert(felter.contains("belop"))
-                assert(felter.contains("startDato"))
-                assert(felter.contains("fodselsnummer"))
-                assert(felter.contains("fodselsdato"))
-                assert(felter.contains("etterbetaling"))
-                assert(felter.contains("enhet"))
-                assert(felter.contains("saksbehandler"))
-            } else if (request.url.path.matches(Regex(".+create-doc"))) {
+            super.utførRequest(request, responseType)
+            if (request.url.path.matches(Regex(".+create-doc"))) {
                 return when ((request.body!! as DokumentRequest).docFormat) {
                     DocFormat.HTML -> ResponseEntity.ok(responseType.cast("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
                     DocFormat.PDF -> ResponseEntity.ok(responseType.cast("Vedtaksbrev PDF".toByteArray()))
@@ -46,16 +40,33 @@ class DokGenKlientIntegrationTest {
             } else {
                 fail("Invalid URI")
             }
-
-            return ResponseEntity(responseType.cast("mockup_response"), HttpStatus.OK)
         }
     }
 
     @Test
     @Tag("integration")
     fun `Test generer pdf`() {
-        val dokgen = DokGenTestKlient()
+        val restTemplate: RestTemplate = mockk(relaxed = true)
+        val dokgen = DokGenTestKlient(restTemplate)
         val pdf = dokgen.lagPdfForMal(MalMedData("Innvilget", "fletteFelter"), testDokumentHeaderFelter)
+        assert(pdf.contentEquals("Vedtaksbrev PDF".toByteArray()))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `fss fallback`() {
+        val restTemplate: RestTemplate = mockk()
+        every {
+            restTemplate.exchange(any(),
+                                  ByteArray::class.java)
+        } throws RuntimeException("of some kind") andThen ResponseEntity.ok("Vedtaksbrev PDF".toByteArray())
+
+        val dokgen = DokGenTestKlient(restTemplate)
+        val pdf = dokgen.lagPdfForMal(MalMedData("Innvilget", "fletteFelter"), testDokumentHeaderFelter)
+
+        verify(exactly = 2) {
+            restTemplate.exchange(any(), ByteArray::class.java)
+        }
         assert(pdf.contentEquals("Vedtaksbrev PDF".toByteArray()))
     }
 }

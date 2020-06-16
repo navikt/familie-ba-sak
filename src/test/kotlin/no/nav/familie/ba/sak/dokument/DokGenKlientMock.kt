@@ -20,9 +20,7 @@ class DokGenKlientMock : DokGenKlient(
     val TEST_PDF = this::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()
 
     override fun <T : Any> utførRequest(request: RequestEntity<Any>, responseType: Class<T>): ResponseEntity<T> {
-        if (request.url.path.matches(Regex(".+create-markdown"))) {
-            return ResponseEntity.ok(responseType.cast("# Vedtaksbrev Markdown (Mock)"))
-        } else if (request.url.path.matches(Regex(".+create-doc"))) {
+        if (request.url.path.matches(Regex(".+create-doc"))) {
             return when ((request.body!! as DokumentRequest).docFormat) {
                 DocFormat.HTML -> ResponseEntity.ok(responseType.cast("<HTML><H1>Vedtaksbrev HTML (Mock)</H1></HTML>"))
                 DocFormat.PDF -> ResponseEntity.ok(responseType.cast(TEST_PDF))
