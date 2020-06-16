@@ -393,7 +393,7 @@ class BehandlingIntegrationTest {
     }
 
     @Test
-    fun `Hent bostedsadresse av person fra PDL og lager til database`() {
+    fun `Hent en persons bostedsadresse fra PDL og lagre den i database`() {
         val søkerFnr = "12345678910"
         val barn1Fnr = "01101800033"
         val barn2Fnr = "01101900033"
