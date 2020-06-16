@@ -20,6 +20,11 @@ class IverksettMotOppdrag(private val økonomiService: ØkonomiService,
                                              frontendFeilmelding = "Mangler totrinnskontroll ved iverksetting"
                                )
 
+        if (!totrinnskontrollService.erTotrinnskontrollGyldig(totrinnskontroll)) {
+            throw Feil(message = "Totrinnskontroll($totrinnskontroll) er ugyldig ved iverksetting",
+                       frontendFeilmelding = "Totrinnskontroll er ugyldig ved iverksetting")
+        }
+
         if (!totrinnskontroll.godkjent) {
             throw Feil(message = "Prøver å iverksette et underkjent vedtak",
                        frontendFeilmelding = ""

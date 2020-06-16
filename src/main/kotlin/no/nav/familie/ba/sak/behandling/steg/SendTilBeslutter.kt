@@ -33,7 +33,7 @@ class SendTilBeslutter(
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {
         loggService.opprettSendTilBeslutterLogg(behandling)
-        totrinnskontrollService.opprettTotrinnskontroll(behandling)
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling)
 
         val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,

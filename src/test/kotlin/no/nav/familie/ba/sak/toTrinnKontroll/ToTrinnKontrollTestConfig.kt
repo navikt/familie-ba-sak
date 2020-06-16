@@ -53,13 +53,15 @@ class ToTrinnKontrollTestConfig {
             totrinnskontrollRepository.save(totrinnskontroll)
         }
 
-        every { totrinnskontrollService.opprettTotrinnskontroll(any(), any()) } answers {
+        every { totrinnskontrollService.opprettEllerHentTotrinnskontroll(any(), any()) } answers {
             val behandling = firstArg<Behandling>()
             totrinnskontrollRepository.save(Totrinnskontroll(
                     behandling = behandling,
                     saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
             ))
         }
+
+        every { totrinnskontrollService.erTotrinnskontrollGyldig(any()) } returns true
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } answers {
             val behandlingId = firstArg<Long>()

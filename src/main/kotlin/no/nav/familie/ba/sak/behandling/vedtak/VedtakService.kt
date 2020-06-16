@@ -92,7 +92,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         )
         tilkjentYtelseRepository.save(nyTilkjentYtelse)
 
-        totrinnskontrollService.opprettTotrinnskontroll(nyBehandling, saksbehandler)
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(nyBehandling, saksbehandler)
         totrinnskontrollService.besluttTotrinnskontroll(nyBehandling, SYSTEM_NAVN, Beslutning.GODKJENT)
 
         behandlingRepository.save(nyBehandling.also { it.steg = StegType.FERDIGSTILLE_BEHANDLING })

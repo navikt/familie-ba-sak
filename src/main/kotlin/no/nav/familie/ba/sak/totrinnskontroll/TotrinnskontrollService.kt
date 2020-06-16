@@ -19,19 +19,33 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         return totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun opprettTotrinnskontroll(behandling: Behandling, saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn()) {
-        lagreOgDeaktiverGammel(Totrinnskontroll(
-                behandling = behandling,
-                saksbehandler = saksbehandler
-        ))
+    fun opprettEllerHentTotrinnskontroll(behandling: Behandling,
+                                         saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn()): Totrinnskontroll {
+        return when (val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)) {
+            null -> lagreOgDeaktiverGammel(Totrinnskontroll(
+                    behandling = behandling,
+                    saksbehandler = saksbehandler
+            ))
+            else -> {
+                if (totrinnskontroll.saksbehandler != saksbehandler) {
+                    lagreOgDeaktiverGammel(Totrinnskontroll(
+                            behandling = behandling,
+                            saksbehandler = saksbehandler
+                    ))
+                } else {
+                    totrinnskontroll
+                }
+            }
+        }
     }
 
     fun besluttTotrinnskontroll(behandling: Behandling, beslutter: String, beslutning: Beslutning) {
         val totrinnskontroll = hentAktivForBehandling(behandlingId = behandling.id)
                                ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
 
-        if (totrinnskontroll.saksbehandler == beslutter &&
-            !(totrinnskontroll.saksbehandler == SYSTEM_NAVN && beslutter == SYSTEM_NAVN)) {
+        totrinnskontroll.beslutter = beslutter
+        totrinnskontroll.godkjent = beslutning.erGodkjent()
+        if (erTotrinnskontrollGyldig(totrinnskontroll)) {
             error("Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak")
         }
 
@@ -39,9 +53,12 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                 behandlingId = behandling.id,
                 status = if (beslutning.erGodkjent()) BehandlingStatus.GODKJENT else BehandlingStatus.UNDERKJENT_AV_BESLUTTER)
 
-        totrinnskontroll.beslutter = beslutter
-        totrinnskontroll.godkjent = beslutning.erGodkjent()
         lagreEllerOppdater(totrinnskontroll)
+    }
+
+    fun erTotrinnskontrollGyldig(totrinnskontroll: Totrinnskontroll): Boolean {
+        return totrinnskontroll.saksbehandler == totrinnskontroll.beslutter &&
+               !(totrinnskontroll.saksbehandler == SYSTEM_NAVN && totrinnskontroll.beslutter == SYSTEM_NAVN)
     }
 
     fun lagreOgDeaktiverGammel(totrinnskontroll: Totrinnskontroll): Totrinnskontroll {
