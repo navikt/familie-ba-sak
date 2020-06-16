@@ -40,7 +40,12 @@ data class Person(
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
-        val aktørId: AktørId? = null
+        val aktørId: AktørId? = null,
+
+        @ManyToOne
+        @JoinColumn
+        val bostedsadresse: BostedsadressePdl
+
 ) : BaseEntitet() {
 
     override fun toString(): String {

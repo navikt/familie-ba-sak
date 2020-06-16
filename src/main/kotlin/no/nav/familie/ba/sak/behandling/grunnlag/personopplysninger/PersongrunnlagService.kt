@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.domene.Bostedsadresse
 import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -53,6 +54,7 @@ class PersongrunnlagService(
                            fødselsdato = personinfo.fødselsdato,
                            aktørId = aktørId,
                            navn = personinfo.navn ?: "",
+                           bostedsadresse = tilBostedsadresserPdl(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT
         )
         personopplysningGrunnlag.personer.add(søker)
@@ -61,6 +63,16 @@ class PersongrunnlagService(
         secureLogger.info("Setter persongrunnlag med søker: ${fødselsnummer} og barn: ${barnasFødselsnummer}")
         secureLogger.info("Barna på persongrunnlaget som lagres: ${personopplysningGrunnlag.barna.map { it.personIdent.ident }}")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+    }
+
+    private fun tilBostedsadresserPdl(bostedsadresse: Bostedsadresse?): Set<BostedsadressePdl> {
+        val bostedsadresserPdl: Set<BostedsadressePdl> = mutableSetOf()
+
+        bostedsadresse?.matrikkeladresse?.let { bostedsadresserPdl.plus(it) }
+        bostedsadresse?.ukjentBosted?.let { bostedsadresserPdl.plus(it) }
+        bostedsadresse?.vegadresse?.let { bostedsadresserPdl.plus(it) }
+
+        return bostedsadresserPdl
     }
 
     private fun hentBarn(barnasFødselsnummer: List<String>,
@@ -73,7 +85,8 @@ class PersongrunnlagService(
                                          fødselsdato = personinfo.fødselsdato,
                                          aktørId = integrasjonClient.hentAktivAktørId(Ident(nyttBarn)),
                                          navn = personinfo.navn ?: "",
-                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT
+                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+                                         bostedsadresse = tilBostedsadresserPdl(personinfo.bostedsadresse)
             ))
         }
     }
