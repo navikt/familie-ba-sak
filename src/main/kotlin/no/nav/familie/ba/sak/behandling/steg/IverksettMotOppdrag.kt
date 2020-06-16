@@ -20,7 +20,7 @@ class IverksettMotOppdrag(private val økonomiService: ØkonomiService,
                                              frontendFeilmelding = "Mangler totrinnskontroll ved iverksetting"
                                )
 
-        if (!totrinnskontrollService.erTotrinnskontrollUgyldig(totrinnskontroll)) {
+        if (totrinnskontrollService.erTotrinnskontrollUgyldig(totrinnskontroll)) {
             throw Feil(message = "Totrinnskontroll($totrinnskontroll) er ugyldig ved iverksetting",
                        frontendFeilmelding = "Totrinnskontroll er ugyldig ved iverksetting")
         }
