@@ -42,9 +42,9 @@ data class Person(
         @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
         val aktørId: AktørId? = null,
 
-        @ManyToOne
+        @OneToOne
         @JoinColumn
-        val bostedsadresse: BostedsadressePdl
+        val bostedsadresse: BostedsadressePdl? = null
 
 ) : BaseEntitet() {
 

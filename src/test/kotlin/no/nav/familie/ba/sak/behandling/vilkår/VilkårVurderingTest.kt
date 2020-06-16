@@ -109,7 +109,8 @@ class VilkårVurderingTest(
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
                                                      fødselsdato = LocalDate.now(),
                                                      navn = "",
-                                                     kjønn = Kjønn.MANN))
+                                                     kjønn = Kjønn.MANN
+        ))
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
