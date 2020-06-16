@@ -10,7 +10,6 @@ CREATE TABLE PO_BOSTEDSADRESSE
     kommunenummer               varchar(10),
     tilleggsnavn                varchar(30),
     postnummer                  varchar(5),
-    bruksenhetsnummer           varchar(10),
     opprettet_av                varchar(20)  DEFAULT 'VL'                     NOT NULL,
     opprettet_tid               TIMESTAMP(3) DEFAULT current_timestamp        NOT NULL,
     endret_av                   varchar(20),
@@ -20,6 +19,4 @@ CREATE TABLE PO_BOSTEDSADRESSE
 
 CREATE SEQUENCE PO_BOSTEDSADRESSE_SEQ INCREMENT BY 50 START WITH 1000000 NO CYCLE;
 
-ALTER TABLE PO_PERSON ADD COLUMN BOSTEDSADRESSE_ID bigint;
-
-ALTER TABLE PO_PERSON FOREIGN KEY(BOSTEDSADRESSE_ID) REFERENCES PO_BOSTEDSADRESSE;
+ALTER TABLE PO_PERSON ADD COLUMN bostedsadresse_id    bigint  REFERENCES PO_BOSTEDSADRESSE;

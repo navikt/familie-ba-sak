@@ -10,10 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -402,74 +399,77 @@ class BehandlingIntegrationTest {
         val barn2Fnr = "01101900033"
         val barn3Fnr = "11223344556"
 
-        val søkerHusnummer= "12"
-        val søkerHusbokstav= "A"
-        val søkerBruksenhetsnummer= "H012"
-        val søkerAdressnavn= "Sannergate"
-        val søkerKommunenummer= "1234"
-        val søkerTilleggsnavn= "whatever"
-        val søkerPostnummer= "2222"
+        val søkerHusnummer = "12"
+        val søkerHusbokstav = "A"
+        val søkerBruksenhetsnummer = "H012"
+        val søkerAdressnavn = "Sannergate"
+        val søkerKommunenummer = "1234"
+        val søkerTilleggsnavn = "whatever"
+        val søkerPostnummer = "2222"
 
-        val barn1Bruksenhetsnummer= "H201"
-        val barn1Tilleggsnavn= "whoknows"
-        val barn1Postnummer= "3333"
-        val barn1Kommunenummer= "3233"
+        val barn1Bruksenhetsnummer = "H201"
+        val barn1Tilleggsnavn = "whoknows"
+        val barn1Postnummer = "3333"
+        val barn1Kommunenummer = "3233"
 
-        val barn2BostedKommune= "Oslo"
+        val barn2BostedKommune = "Oslo"
 
         every { integrasjonClient.hentPersoninfoFor(søkerFnr) } returns Personinfo(
-                fødselsdato= LocalDate.of(1990, 1, 1),
-                adressebeskyttelseGradering= null,
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                adressebeskyttelseGradering = null,
                 navn = "Mor",
-                kjønn= Kjønn.KVINNE,
-                familierelasjoner= emptySet(),
-                bostedsadresse= Bostedsadresse( vegadresse =  Vegadresse(søkerHusnummer, søkerHusbokstav, søkerBruksenhetsnummer,
-                                           søkerAdressnavn, søkerKommunenummer, søkerTilleggsnavn, søkerPostnummer)),
+                kjønn = Kjønn.KVINNE,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(søkerHusnummer,
+                                                                        søkerHusbokstav,
+                                                                        søkerBruksenhetsnummer,
+                                                                        søkerAdressnavn,
+                                                                        søkerKommunenummer,
+                                                                        søkerTilleggsnavn,
+                                                                        søkerPostnummer)),
                 sivilstand = null
         )
 
         every { integrasjonClient.hentPersoninfoFor(barn1Fnr) } returns Personinfo(
-                fødselsdato= LocalDate.of(2009, 1, 1),
-                adressebeskyttelseGradering= null,
+                fødselsdato = LocalDate.of(2009, 1, 1),
+                adressebeskyttelseGradering = null,
                 navn = "Gutt",
-                kjønn= Kjønn.MANN,
-                familierelasjoner= emptySet(),
-                bostedsadresse= Bostedsadresse(matrikkeladresse = Matrikkeladresse(barn1Bruksenhetsnummer, barn1Tilleggsnavn,
-                                                                                   barn1Postnummer, barn1Kommunenummer)),
+                kjønn = Kjønn.MANN,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(barn1Bruksenhetsnummer, barn1Tilleggsnavn,
+                                                                                    barn1Postnummer, barn1Kommunenummer)),
                 sivilstand = null
         )
 
         every { integrasjonClient.hentPersoninfoFor(barn2Fnr) } returns Personinfo(
-                fødselsdato= LocalDate.of(2012, 1, 1),
-                adressebeskyttelseGradering= null,
+                fødselsdato = LocalDate.of(2012, 1, 1),
+                adressebeskyttelseGradering = null,
                 navn = "Jente",
-                kjønn= Kjønn.KVINNE,
-                familierelasjoner= emptySet(),
-                bostedsadresse= Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)),
+                kjønn = Kjønn.KVINNE,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)),
                 sivilstand = null
         )
 
         every { integrasjonClient.hentPersoninfoFor(barn3Fnr) } returns Personinfo(
-                fødselsdato= LocalDate.of(2013, 1, 1),
-                adressebeskyttelseGradering= null,
+                fødselsdato = LocalDate.of(2013, 1, 1),
+                adressebeskyttelseGradering = null,
                 navn = "Jente2",
-                kjønn= Kjønn.KVINNE,
-                familierelasjoner= emptySet(),
-                bostedsadresse= Bostedsadresse(),
+                kjønn = Kjønn.KVINNE,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(),
                 sivilstand = null
         )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-        Assertions.assertNotNull(personopplysningGrunnlag)
 
-        persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr), behandling)
+        persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerFnr,
+                                                                           listOf(barn1Fnr, barn2Fnr, barn3Fnr),
+                                                                           behandling)
 
-        val søker= personRepository.findByPersonIdent(PersonIdent(søkerFnr))[0]
-        val vegadresse= søker.bostedsadresse as Vegadresse
+        val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
+        val vegadresse = søker.bostedsadresse as VegadressePdl
         Assertions.assertEquals(søkerAdressnavn, vegadresse.adressenavn)
         Assertions.assertEquals(søkerBruksenhetsnummer, vegadresse.bruksenhetsnummer)
         Assertions.assertEquals(søkerHusbokstav, vegadresse.husbokstav)
@@ -480,19 +480,19 @@ class BehandlingIntegrationTest {
 
         Assertions.assertEquals(4, søker.personopplysningGrunnlag.personer.size)
 
-        søker.personopplysningGrunnlag.barna.forEach{
-            if(it.personIdent.ident== barn1Fnr){
-                val matrikkeladresse= it.bostedsadresse as Matrikkeladresse
+        søker.personopplysningGrunnlag.barna.forEach {
+            if (it.personIdent.ident == barn1Fnr) {
+                val matrikkeladresse = it.bostedsadresse as MatrikkeladressePdl
                 Assertions.assertEquals(barn1Bruksenhetsnummer, matrikkeladresse.bruksenhetsnummer)
                 Assertions.assertEquals(barn1Kommunenummer, matrikkeladresse.kommunenummer)
                 Assertions.assertEquals(barn1Postnummer, matrikkeladresse.postnummer)
                 Assertions.assertEquals(barn1Tilleggsnavn, matrikkeladresse.tilleggsnavn)
-            }else if(it.personIdent.ident== barn2Fnr){
-                val ukjentBosted= it.bostedsadresse as UkjentBosted
+            } else if (it.personIdent.ident == barn2Fnr) {
+                val ukjentBosted = it.bostedsadresse as UkjentBostedPdl
                 Assertions.assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
-            }else if(it.personIdent.ident== barn3Fnr){
+            } else if (it.personIdent.ident == barn3Fnr) {
                 Assertions.assertNull(it.bostedsadresse)
-            }else{
+            } else {
                 throw RuntimeException("Ujent barn fnr")
             }
         }
