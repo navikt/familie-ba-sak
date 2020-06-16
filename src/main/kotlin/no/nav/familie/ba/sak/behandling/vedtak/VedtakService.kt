@@ -92,7 +92,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         )
         tilkjentYtelseRepository.save(nyTilkjentYtelse)
 
-        totrinnskontrollService.opprettTotrinnskontroll(nyBehandling, saksbehandler)
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(nyBehandling, saksbehandler)
         totrinnskontrollService.besluttTotrinnskontroll(nyBehandling, SYSTEM_NAVN, Beslutning.GODKJENT)
 
         behandlingRepository.save(nyBehandling.also { it.steg = StegType.FERDIGSTILLE_BEHANDLING })
@@ -122,12 +122,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
 
     @Transactional
-    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Ressurs<RestFagsak> {
+    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak) {
         vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak)
 
         lagreOgDeaktiverGammel(vedtak)
-
-        return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
 
     fun hentForrigeVedtak(behandling: Behandling): Vedtak? {
@@ -163,11 +161,11 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         return vedtakRepository.save(vedtak)
     }
 
-    fun oppdaterVedtaksdato(vedtak: Vedtak) {
+    fun besluttVedtak(vedtak: Vedtak) {
         vedtak.vedtaksdato = LocalDate.now()
         oppdaterVedtakMedStønadsbrev(vedtak)
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vedtaksdato på vedtak $vedtak")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
         lagreEllerOppdater(vedtak)
     }
 
