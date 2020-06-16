@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.infotrygd
 
+import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.http.client.AbstractRestClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,22 +17,25 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
                                 @Qualifier("jwtBearer") restOperations: RestOperations)
     : AbstractRestClient(restOperations, "infotrygd_barnetrygd") {
 
-    fun foo(dto: String): Int {
+    fun finnesHosInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String>): Boolean {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/personsok")
 
+        val request = InfotrygdSøkRequest(søkersIdenter.map { FoedselsNr(it) }, barnasIdenter.map { FoedselsNr(it) })
+
         return try {
-            postForEntity<String>(uri, dto) // String, Int, foo er midlertidig.
-            2
+            postForEntity<InfotrygdSøkResponse>(uri, request)!!.ingenTreff
         } catch (ex: Exception) {
             when (ex) {
-                is HttpClientErrorException -> logger.error("Http feil mot infotrygd barnetrygd: httpkode: ${ex.statusCode}, feilmelding ${ex.message}", ex)
-                else -> logger.error("Feil mot infotrygd feed; melding ${ex.message}", ex)
+                is HttpClientErrorException -> secureLogger.error("Http feil mot infotrygd barnetrygd: httpkode: ${ex.statusCode}, feilmelding ${ex.message}", ex)
+                else -> secureLogger.error("Feil mot infotrygd-barnetrygd; melding ${ex.message}", ex)
             }
+            logger.error("Feil mot Infotrygd-barnetrygd.")
             throw ex
         }
     }
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(this::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
