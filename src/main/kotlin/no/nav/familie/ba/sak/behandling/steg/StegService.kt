@@ -176,9 +176,10 @@ class StegService(
         }
     }
 
-    fun håndterAvgjørAutomatiskEllerManuell(behandling: Behandling): Behandling {
-        val behandlingSteg: AvgjørAutomatiskEllerManuell =
-                hentBehandlingSteg(StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL) as AvgjørAutomatiskEllerManuell
+    fun håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling: Behandling): Behandling {
+        val behandlingSteg: AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser =
+                hentBehandlingSteg(StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER)
+                        as AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
@@ -257,7 +258,7 @@ class StegService(
     @Transactional
     fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse, skalBehandlesHosInfotrygd: Boolean) {
         var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
-        behandling = håndterAvgjørAutomatiskEllerManuell(behandling)
+        behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling)
         behandling = håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
         val samletResultat = behandlingResultat?.hentSamletResultat()

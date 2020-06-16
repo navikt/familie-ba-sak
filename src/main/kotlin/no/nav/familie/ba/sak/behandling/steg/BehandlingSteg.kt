@@ -42,7 +42,7 @@ enum class StegType(val rekkefølge: Int,
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
-    AVGJØR_AUTOMATISK_ELLER_MANUELL(
+    AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER(
             rekkefølge = 2,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET)
@@ -105,8 +105,8 @@ enum class StegType(val rekkefølge: Int,
                       behandlingOpprinnelse: BehandlingOpprinnelse? = null): StegType {
         return if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> AVGJØR_AUTOMATISK_ELLER_MANUELL
-                AVGJØR_AUTOMATISK_ELLER_MANUELL -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER
+                AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
                 else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
             }
