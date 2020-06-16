@@ -120,18 +120,21 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         }
     }
 
-    private fun mapTilOppdaterJournalpostRequest(rest: RestOppdaterJournalpost, sak: Sak): OppdaterJournalpostRequest {
-        val dokument = DokumentInfo(dokumentInfoId = rest.dokumentInfoId,
-                                    tittel = rest.dokumentTittel,
+    private fun mapTilOppdaterJournalpostRequest(restOppdaterJournalpost: RestOppdaterJournalpost,
+                                                 sak: Sak): OppdaterJournalpostRequest {
+        val dokument = DokumentInfo(dokumentInfoId = restOppdaterJournalpost.dokumentInfoId,
+                                    tittel = restOppdaterJournalpost.dokumentTittel,
                                     brevkode = null,
                                     dokumentstatus = Dokumentstatus.FERDIGSTILT,
                                     dokumentvarianter = null,
                                     logiskeVedlegg = null)
 
-        return OppdaterJournalpostRequest(avsenderMottaker = AvsenderMottaker(rest.avsender.id, navn = rest.avsender.navn),
-                                          bruker = Bruker(rest.bruker.id, navn = rest.bruker.navn),
+        return OppdaterJournalpostRequest(avsenderMottaker = AvsenderMottaker(restOppdaterJournalpost.avsender.id,
+                                                                              navn = restOppdaterJournalpost.avsender.navn),
+                                          bruker = Bruker(restOppdaterJournalpost.bruker.id,
+                                                          navn = restOppdaterJournalpost.bruker.navn),
                                           sak = sak,
-                                          tittel = "Søknad om ordinær barnetrygd",
+                                          tittel = restOppdaterJournalpost.dokumentTittel,
                                           dokumenter = listOf(dokument))
     }
 
