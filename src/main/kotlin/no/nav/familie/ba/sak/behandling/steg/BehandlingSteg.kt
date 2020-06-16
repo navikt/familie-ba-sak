@@ -22,7 +22,7 @@ interface BehandlingSteg<T> {
     fun postValiderSteg(behandling: Behandling) {}
 }
 
-fun initSteg(behandlingType: BehandlingType?, behandlingOpprinnelse: BehandlingOpprinnelse?): StegType {
+fun initSteg(behandlingType: BehandlingType? = null, behandlingOpprinnelse: BehandlingOpprinnelse? = null): StegType {
     return if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
                || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) { StegType.REGISTRERE_PERSONGRUNNLAG }
     else { StegType.REGISTRERE_SØKNAD }

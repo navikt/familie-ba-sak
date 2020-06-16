@@ -73,7 +73,7 @@ class BehandlingStegTest {
     fun testInitSteg() {
         assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG,
                      initSteg(BehandlingType.MIGRERING_FRA_INFOTRYGD, BehandlingOpprinnelse.MANUELL))
-        assertEquals(StegType.REGISTRERE_SØKNAD, initSteg(null, BehandlingOpprinnelse.MANUELL))
+        assertEquals(StegType.REGISTRERE_SØKNAD, initSteg(behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL))
         assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG,
                      initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
     }
