@@ -45,7 +45,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
 
         totrinnskontroll.beslutter = beslutter
         totrinnskontroll.godkjent = beslutning.erGodkjent()
-        if (erTotrinnskontrollGyldig(totrinnskontroll)) {
+        if (erTotrinnskontrollUgyldig(totrinnskontroll)) {
             error("Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak")
         }
 
@@ -56,7 +56,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         lagreEllerOppdater(totrinnskontroll)
     }
 
-    fun erTotrinnskontrollGyldig(totrinnskontroll: Totrinnskontroll): Boolean {
+    fun erTotrinnskontrollUgyldig(totrinnskontroll: Totrinnskontroll): Boolean {
         return totrinnskontroll.saksbehandler == totrinnskontroll.beslutter &&
                !(totrinnskontroll.saksbehandler == SYSTEM_NAVN && totrinnskontroll.beslutter == SYSTEM_NAVN)
     }

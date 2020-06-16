@@ -61,7 +61,7 @@ class ToTrinnKontrollTestConfig {
             ))
         }
 
-        every { totrinnskontrollService.erTotrinnskontrollGyldig(any()) } returns true
+        every { totrinnskontrollService.erTotrinnskontrollUgyldig(any()) } returns true
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } answers {
             val behandlingId = firstArg<Long>()
