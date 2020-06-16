@@ -120,7 +120,7 @@ class VedtakServiceTest(
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        totrinnskontrollService.opprettTotrinnskontroll(behandling, "ansvarligSaksbehandler")
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling, "ansvarligSaksbehandler")
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)

@@ -37,7 +37,7 @@ class BeslutteVedtakTest {
         every { taskRepository.save(any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any()) } just Runs
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
-        every { vedtakService.oppdaterVedtaksdato(any()) } just runs
+        every { vedtakService.besluttVedtak(any()) } just runs
 
         beslutteVedtak = BeslutteVedtak(toTrinnKontrollService, vedtakService, taskRepository, loggService)
     }

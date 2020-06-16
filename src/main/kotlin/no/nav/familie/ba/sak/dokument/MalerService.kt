@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
 import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker.TREDJELANDSBORGER
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
@@ -53,9 +54,7 @@ class MalerService(
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
         val behandling = vedtak.behandling
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
-                               ?: throw Feil(message = "Finner ingen aktiv totrinnskontroll på behandling ved generering av brev.",
-                                             frontendFeilmelding = "Finner ingen aktiv totrinnskontroll på behandling ved generering av brev.")
+        val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling)
         val barna = persongrunnlagService.hentBarna(behandling)
 
         val andelTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
@@ -76,8 +75,7 @@ class MalerService(
                                 frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev"),
                 saksbehandler = totrinnskontroll.saksbehandler,
                 beslutter = totrinnskontroll.beslutter
-                            ?: throw Feil(message = "Beslutter er ikke satt ved generering av brev",
-                                          frontendFeilmelding = "Beslutter er ikke satt ved generering av brev"),
+                            ?: totrinnskontroll.saksbehandler,
                 barnasFodselsdatoer = barnasFødselsdatoer,
                 virkningsdato = utbetalingsperioder.minLocalDate.førsteDagIInneværendeMåned().tilDagMånedÅr(),
                 vilkårsdato = vilkårsdato.tilDagMånedÅr(),

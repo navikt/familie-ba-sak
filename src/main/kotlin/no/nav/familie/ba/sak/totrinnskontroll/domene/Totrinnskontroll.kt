@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.totrinnskontroll.domene
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import javax.persistence.*
 
 @Entity(name = "Totrinnskontroll")
@@ -26,4 +27,10 @@ data class Totrinnskontroll(
 
         @Column(name = "godkjent")
         var godkjent: Boolean = false
-) : BaseEntitet()
+) : BaseEntitet() {
+
+    fun erUgyldig(): Boolean {
+        return saksbehandler == beslutter &&
+               !(saksbehandler == SikkerhetContext.SYSTEM_NAVN && beslutter == SikkerhetContext.SYSTEM_NAVN)
+    }
+}
