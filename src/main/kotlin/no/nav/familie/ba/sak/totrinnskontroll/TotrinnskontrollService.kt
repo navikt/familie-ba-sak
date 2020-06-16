@@ -5,9 +5,8 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -45,7 +44,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
 
         totrinnskontroll.beslutter = beslutter
         totrinnskontroll.godkjent = beslutning.erGodkjent()
-        if (erTotrinnskontrollUgyldig(totrinnskontroll)) {
+        if (totrinnskontroll.erUgyldig()) {
             error("Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak")
         }
 
@@ -54,11 +53,6 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                 status = if (beslutning.erGodkjent()) BehandlingStatus.GODKJENT else BehandlingStatus.UNDERKJENT_AV_BESLUTTER)
 
         lagreEllerOppdater(totrinnskontroll)
-    }
-
-    fun erTotrinnskontrollUgyldig(totrinnskontroll: Totrinnskontroll): Boolean {
-        return totrinnskontroll.saksbehandler == totrinnskontroll.beslutter &&
-               !(totrinnskontroll.saksbehandler == SYSTEM_NAVN && totrinnskontroll.beslutter == SYSTEM_NAVN)
     }
 
     fun lagreOgDeaktiverGammel(totrinnskontroll: Totrinnskontroll): Totrinnskontroll {
