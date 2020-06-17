@@ -61,7 +61,6 @@ class StegService(
         ))
 
         loggService.opprettFødselshendelseLogg(behandling)
-        loggService.opprettBehandlingLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
