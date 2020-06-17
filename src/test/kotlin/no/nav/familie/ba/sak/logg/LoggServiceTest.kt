@@ -94,8 +94,7 @@ class LoggServiceTest(
         ))
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
-        // Blir generert i Vilkårsvurdering.utførStegOgAngiNeste og vilkårService.vurderVilkårForFødselshendelse(behandling.id)
-        Assertions.assertEquals(4, loggForBehandling.size)
+        Assertions.assertEquals(2, loggForBehandling.size)
         Assertions.assertTrue(loggForBehandling.any { it.type == LoggType.FØDSELSHENDELSE })
         Assertions.assertTrue(loggForBehandling.any { it.type == LoggType.BEHANDLING_OPPRETTET })
         Assertions.assertTrue(loggForBehandling.none { it.rolle != BehandlerRolle.SYSTEM })

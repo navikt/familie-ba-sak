@@ -64,12 +64,11 @@ class StegService(
         loggService.opprettFødselshendelseLogg(behandling)
         loggService.opprettBehandlingLogg(behandling)
 
-        val behandlingEtterPersongrunnlag= håndterPersongrunnlag(behandling,
+        return håndterPersongrunnlag(behandling,
                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
                                                                 barnasIdenter = nyBehandling.barnasIdenter,
 
                                                                 bekreftEndringerViaFrontend = true))
-        return håndterVilkårsvurdering(behandlingEtterPersongrunnlag)
     }
 
     @Transactional
