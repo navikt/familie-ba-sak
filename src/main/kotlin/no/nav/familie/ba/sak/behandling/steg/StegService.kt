@@ -39,7 +39,6 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
-        loggService.opprettBehandlingLogg(behandling)
 
         return when (nyBehandling.behandlingType) {
             BehandlingType.MIGRERING_FRA_INFOTRYGD ->
@@ -64,7 +63,6 @@ class StegService(
         ))
 
         loggService.opprettFødselshendelseLogg(behandling)
-        loggService.opprettBehandlingLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,

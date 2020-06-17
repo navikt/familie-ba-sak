@@ -59,7 +59,7 @@ internal class TidTest {
                 vilkårType = vilkår, periodeFom = LocalDate.of(2020, 3, 31),
                 periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "")
         val ikkeEtterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
-                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 4, 1),
+                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 5, 1),
                 periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "")
 
         assertTrue(førsteVilkårResultat.erEtterfølgendePeriode(etterfølgendeVilkårResultat))
