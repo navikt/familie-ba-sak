@@ -21,6 +21,7 @@ import java.net.URI
 @ActiveProfiles("dev", "integrasjonstest", "mock-oauth")
 @AutoConfigureWireMock(port = 0)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Tag("integration")
 class InfotrygdBarnetrygdClientTest {
 
     @Autowired
@@ -60,7 +61,6 @@ class InfotrygdBarnetrygdClientTest {
     }
 
     @Test
-    @Tag("integration")
     fun `Invokering av Infotrygd feed genererer http feil`() {
         stubFor(post("/api/infotrygd/barnetrygd/personsok").willReturn(aResponse().withStatus(401)))
 
