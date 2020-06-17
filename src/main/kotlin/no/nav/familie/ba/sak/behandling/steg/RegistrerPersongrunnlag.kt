@@ -1,17 +1,12 @@
 package no.nav.familie.ba.sak.behandling.steg
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.task.OpprettOppgaveTask
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 
 @Service
 class RegistrerPersongrunnlag(
@@ -26,16 +21,6 @@ class RegistrerPersongrunnlag(
                                       data: RegistrerPersongrunnlagDTO): StegType {
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident, data.barnasIdenter, behandling)
         vilkårService.initierVilkårvurderingForBehandling(behandling.id, data.bekreftEndringerViaFrontend)
-        if (behandling.opprinnelse.skalOppretteOppgave() && featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
-            val nyTask = OpprettOppgaveTask.opprettTask(
-                    behandlingId = behandling.id,
-                    oppgavetype = Oppgavetype.BehandleSak,
-                    fristForFerdigstillelse = LocalDate.now()
-            )
-            taskRepository.save(nyTask)
-        } else {
-            BehandlingService.LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
-        }
 
         return hentNesteStegForNormalFlyt(behandling)
     }
