@@ -1,15 +1,11 @@
 package no.nav.familie.ba.sak.infotrygd
 
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
@@ -17,6 +13,7 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.core.env.Environment
 import org.springframework.core.env.get
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
@@ -46,7 +43,7 @@ class InfotrygdBarnetrygdClientTest {
 
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr`() {
-        stubFor(WireMock.post("/api/infotrygd/barnetrygd/personsok").willReturn(okJson(objectMapper.writeValueAsString(
+        stubFor(post("/api/infotrygd/barnetrygd/personsok").willReturn(okJson(objectMapper.writeValueAsString(
                 InfotrygdSøkResponse(true)))))
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
@@ -61,5 +58,13 @@ class InfotrygdBarnetrygdClientTest {
         Assertions.assertEquals(true, finnesIkkeHosInfotrygd)
     }
 
+    @Test
+    @Tag("integration")
+    fun `Invokering av Infotrygd feed genererer http feil`() {
+        stubFor(post("/api/infotrygd/barnetrygd/personsok").willReturn(aResponse().withStatus(401)))
 
+        assertThrows<HttpClientErrorException> {
+            client.finnesIkkeHosInfotrygd(ClientMocks.søkerFnr.toList(), ClientMocks.barnFnr.toList())
+        }
+    }
 }
