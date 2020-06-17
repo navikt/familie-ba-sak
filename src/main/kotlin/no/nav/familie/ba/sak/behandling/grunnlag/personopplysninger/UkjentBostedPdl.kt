@@ -8,7 +8,7 @@ import javax.persistence.Entity
 @Entity(name = "ukjentBostedTpl")
 @DiscriminatorValue("ukjentBosted")
 data class UkjentBostedPdl(
-        @Column(name = "bostedskommune", nullable = false)
+        @Column(name = "bostedskommune")
         val bostedskommune: String
 
 ) : BostedsadressePdl() {

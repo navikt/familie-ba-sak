@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.UkjentBostedPdl
 import no.nav.nare.core.evaluations.Evaluering
 
 internal fun barnUnder18År(fakta: Fakta): Evaluering {
@@ -12,12 +13,13 @@ internal fun barnUnder18År(fakta: Fakta): Evaluering {
 internal fun barnBorMedMor(fakta: Fakta): Evaluering {
     val barn = fakta.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
-    val søkerBorSammen = søker.filter {
-        it.bostedsadresse?.equals(barn.bostedsadresse) ?: false
-    }
 
-    //According to Anna, only a fagsak with one søker who is a mother can be automitically processed.
-    return if (søker.size == 1 && søker.first().kjønn == Kjønn.KVINNE && søkerBorSammen.size == 1)
+    //According to Anna, only a fagsak with one søker who is a mother can be automatically processed.
+    return if (søker.size == 1 &&
+               søker.first().kjønn == Kjønn.KVINNE &&
+               søker.first().bostedsadresse != null &&
+               søker.first().bostedsadresse !is UkjentBostedPdl &&
+               søker.first().bostedsadresse == barn.bostedsadresse)
         Evaluering.ja("Barnet bor med mor")
     else Evaluering.nei("Barnet bor ikke med mor")
 }

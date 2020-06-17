@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakter.felles.personinfo.UkjentBosted
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -231,52 +232,69 @@ class VilkårVurderingTest(
     }
 
     @Test
-    fun `Negative Test for sjekk barn bor med søker`() {
+    fun `Negativ vurdering - Barn og søker har ikke adresse angitt`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 2)
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, null)
+        personopplysningGrunnlag.personer.add(søker)
+
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, null)
+        personopplysningGrunnlag.personer.add(barn)
+
+        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn)).resultat)
+
+    }
+
+    @Test
+    fun `Negativ vurdering - To søker`() {
         val søkerAddress = VegadressePdl("11", "B", "H022",
                                          "St. Olavsvegen", "1232", "whatever", "4322")
 
-        //Negative Scenario 1: søker and barn both have null bostedAddress
-        val personopplysningGrunnlag1 = PersonopplysningGrunnlag(behandlingId = 2)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 3)
+        val søker1 = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
+        personopplysningGrunnlag.personer.add(søker1)
+        val søker2 = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
+        personopplysningGrunnlag.personer.add(søker2)
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
+        personopplysningGrunnlag.personer.add(barn)
 
-        val søker1 = genererPerson(PersonType.SØKER, personopplysningGrunnlag1, null)
+        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn)).resultat)
+    }
 
-        personopplysningGrunnlag1.personer.add(søker1)
+    @Test
+    fun `Negativ vurdering - ingen søker`() {
+        val søkerAddress = VegadressePdl("11", "B", "H022",
+                                         "St. Olavsvegen", "1232", "whatever", "4322")
 
-        val barn11 = genererPerson(PersonType.BARN, personopplysningGrunnlag1, null)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 4)
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
+        personopplysningGrunnlag.personer.add(barn)
 
-        personopplysningGrunnlag1.personer.add(barn11)
+        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn)).resultat)
+    }
 
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn11)).resultat)
+    @Test
+    fun `Negativ vurdering - ikke mor som søker`() {
+        val søkerAddress = VegadressePdl("11", "B", "H022",
+                                         "St. Olavsvegen", "1232", "whatever", "4322")
 
-        //Negative Scenario 2: Two søker
-        val personopplysningGrunnlag2 = PersonopplysningGrunnlag(behandlingId = 3)
+        val personopplysningGrunnlag= PersonopplysningGrunnlag(behandlingId = 5)
+        val søker= genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
+        personopplysningGrunnlag.personer.add(søker)
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
+        personopplysningGrunnlag.personer.add(barn)
 
-        val søker21 = genererPerson(PersonType.SØKER, personopplysningGrunnlag2, søkerAddress)
-        personopplysningGrunnlag2.personer.add(søker21)
+        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn)).resultat)
+    }
 
-        val søker22 = genererPerson(PersonType.SØKER, personopplysningGrunnlag2, søkerAddress)
-        personopplysningGrunnlag2.personer.add(søker22)
+    @Test
+    fun `Negativ vurdering - søker har ukjentadresse`() {
+        val ukjentbosted = UkjentBostedPdl("Oslo")
+        val personopplysningGrunnlag= PersonopplysningGrunnlag(behandlingId = 6)
+        val søker= genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
+        personopplysningGrunnlag.personer.add(søker)
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
+        personopplysningGrunnlag.personer.add(barn)
 
-        val barn21 = genererPerson(PersonType.BARN, personopplysningGrunnlag2, søkerAddress)
-        personopplysningGrunnlag2.personer.add(barn21)
-
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn21)).resultat)
-
-        //Negative Scenario 3: No søker
-        val personopplysningGrunnlag3 = PersonopplysningGrunnlag(behandlingId = 4)
-
-        val barn31 = genererPerson(PersonType.BARN, personopplysningGrunnlag3, søkerAddress, Kjønn.MANN)
-        personopplysningGrunnlag3.personer.add(barn31)
-
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn31)).resultat)
-
-        //Negative Scenario 4: Søker is not mother
-        val personopplysningGrunnlag4= PersonopplysningGrunnlag(behandlingId = 5)
-        val søker41= genererPerson(PersonType.SØKER, personopplysningGrunnlag4, søkerAddress, Kjønn.MANN)
-        personopplysningGrunnlag4.personer.add(søker41)
-        val barn41 = genererPerson(PersonType.BARN, personopplysningGrunnlag4, søkerAddress)
-        personopplysningGrunnlag4.personer.add(barn41)
-
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn41)).resultat)
+        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn)).resultat)
     }
 }
