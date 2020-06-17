@@ -26,7 +26,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                     saksbehandler = saksbehandler
             ))
             else -> {
-                if (totrinnskontroll.saksbehandler != saksbehandler && totrinnskontroll.beslutter != null) {
+                if (totrinnskontroll.saksbehandler != saksbehandler && totrinnskontroll.beslutter == null) {
                     lagreOgDeaktiverGammel(Totrinnskontroll(
                             behandling = behandling,
                             saksbehandler = saksbehandler
