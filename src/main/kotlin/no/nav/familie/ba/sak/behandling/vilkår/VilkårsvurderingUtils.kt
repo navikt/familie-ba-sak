@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.*
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
+import java.util.*
 
 object VilkårsvurderingUtils {
 
@@ -36,7 +37,9 @@ object VilkårsvurderingUtils {
      * Funksjon som tar inn endret vilkår og muterer person resultatet til å få plass til den endrede perioden.
      */
     fun muterPersonResultatPut(personResultat: PersonResultat, restVilkårResultat: RestVilkårResultat) {
-        personResultat.vilkårResultater.forEach {
+        val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
+
+        kopiAvVilkårResultater.forEach {
             tilpassVilkårForEndretVilkår(
                     personResultat = personResultat,
                     vilkårResultat = it,
@@ -68,8 +71,8 @@ object VilkårsvurderingUtils {
         } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType) {
             val periode: Periode = vilkårResultat.toPeriode()
 
-            var nyFom = periodePåNyttVilkår.tom;
-            if (periodePåNyttVilkår.tom != LocalDate.MAX) {
+            var nyFom = periodePåNyttVilkår.tom
+            if (periodePåNyttVilkår.tom != TIDENES_ENDE) {
                 nyFom = periodePåNyttVilkår.tom.plusDays(1)
             }
 
@@ -95,27 +98,39 @@ object VilkårsvurderingUtils {
     }
 
     fun fyllHullForVilkårResultater(personResultat: PersonResultat) {
-        personResultat.sorterVilkårResultater()
-        val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
+        val kopiAvVilkårResultater = personResultat.vilkårResultater.toSortedSet(PersonResultat.comparator)
 
-        kopiAvVilkårResultater.forEach {
-            personResultat.sorterVilkårResultater()
-
-            val neste = personResultat.nextVilkårResultat(it)
-            if (neste != null && it.vilkårType == neste.vilkårType) {
+        kopiAvVilkårResultater.forEachIndexed { index, vilkårResultat ->
+            val neste = hentNesteVilkårResultat(kopiAvVilkårResultater, index)
+            if (neste != null && vilkårResultat.vilkårType == neste.vilkårType) {
                 when {
-                    !it.erEtterfølgendePeriode(neste) -> {
+                    !vilkårResultat.erEtterfølgendePeriode(neste) -> {
                         val nyttVilkår = lagUvurdertVilkårsresultat(
-                                personResultat = it.personResultat
+                                personResultat = vilkårResultat.personResultat
                                                  ?: throw Feil(message = "Finner ikke personresultat ved opprettelse av uvurdert periode"),
-                                vilkårType = it.vilkårType,
-                                fom = it.toPeriode().tom.plusDays(1),
+                                vilkårType = vilkårResultat.vilkårType,
+                                fom = vilkårResultat.toPeriode().tom.plusDays(1),
                                 tom = neste.toPeriode().fom.minusDays(1))
                         personResultat.addVilkårResultat(nyttVilkår)
                     }
                 }
             }
         }
+    }
+
+    fun hentNesteVilkårResultat(vilkårResultater: SortedSet<VilkårResultat>, index: Int): VilkårResultat? {
+        var next = false
+        vilkårResultater.forEachIndexed { forEachIndex, vilkårResultat ->
+            if (next) {
+                return vilkårResultat
+            }
+
+            if (forEachIndex == index) {
+                next = true
+            }
+        }
+
+        return null
     }
 
     /**
@@ -144,11 +159,11 @@ object VilkårsvurderingUtils {
                 // Legg til ny person
                 personTilOppdatert.setVilkårResultater(
                         personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }
-                                .toSet())
+                                .toSortedSet(PersonResultat.comparator))
             } else {
                 // Fyll inn den initierte med person fra aktiv
-                val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
-                val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
+                val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toSortedSet(PersonResultat.comparator)
+                val personsVilkårOppdatert = sortedSetOf<VilkårResultat>()
                 personFraInit.vilkårResultater.forEach { vilkårFraInit ->
                     val vilkårSomFinnes = personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
                     if (vilkårSomFinnes.isEmpty()) {

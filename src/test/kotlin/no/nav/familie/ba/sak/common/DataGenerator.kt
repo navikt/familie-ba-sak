@@ -12,10 +12,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -232,15 +231,15 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                    vilkårType = it,
                                    resultat = resultat,
                                    begrunnelse = "")
-                }.toSet())
+                }.toSortedSet(PersonResultat.comparator))
     } else {
         personResultat.setVilkårResultater(
-                setOf(VilkårResultat(personResultat = personResultat,
-                                     periodeFom = periodeFom,
-                                     periodeTom = periodeTom,
-                                     vilkårType = vilkårType,
-                                     resultat = resultat,
-                                     begrunnelse = ""))
+                sortedSetOf(VilkårResultat(personResultat = personResultat,
+                                           periodeFom = periodeFom,
+                                           periodeTom = periodeTom,
+                                           vilkårType = vilkårType,
+                                           resultat = resultat,
+                                           begrunnelse = ""))
         )
     }
     return personResultat
@@ -269,12 +268,12 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
             behandlingResultat = behandlingResultat,
             personIdent = fnr)
     personResultat.setVilkårResultater(
-            setOf(VilkårResultat(personResultat = personResultat,
-                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                 resultat = resultat,
-                                 periodeFom = LocalDate.now(),
-                                 periodeTom = LocalDate.now(),
-                                 begrunnelse = ""))
+            sortedSetOf(VilkårResultat(personResultat = personResultat,
+                                       vilkårType = Vilkår.BOSATT_I_RIKET,
+                                       resultat = resultat,
+                                       periodeFom = LocalDate.now(),
+                                       periodeTom = LocalDate.now(),
+                                       begrunnelse = ""))
     )
     behandlingResultat.personResultater = setOf(personResultat)
     return behandlingResultat

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import javax.persistence.*
@@ -62,19 +64,9 @@ class VilkårResultat(
                 personResultat = personResultat,
                 vilkårType = vilkårType,
                 resultat = resultat,
-                periodeFom = fom,
-                periodeTom = tom,
+                periodeFom = if (fom == TIDENES_MORGEN) null else fom,
+                periodeTom = if (tom == TIDENES_ENDE) null else tom,
                 begrunnelse = begrunnelse
         )
     }
 }
-
-fun RestVilkårResultat.mapNyVurdering(gammelVilkårResultat: VilkårResultat) = VilkårResultat(
-        id = gammelVilkårResultat.id,
-        personResultat = gammelVilkårResultat.personResultat,
-        vilkårType = gammelVilkårResultat.vilkårType,
-        resultat = this.resultat,
-        periodeFom = this.periodeFom,
-        periodeTom = this.periodeTom,
-        begrunnelse = this.begrunnelse
-)

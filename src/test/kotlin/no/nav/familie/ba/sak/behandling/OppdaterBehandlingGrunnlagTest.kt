@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-
 class OppdaterBehandlingGrunnlagTest {
 
     @Test
@@ -105,18 +104,18 @@ class OppdaterBehandlingGrunnlagTest {
                     personIdent = it)
 
             personResultat.setVilkårResultater(
-                    setOf(VilkårResultat(personResultat = personResultat,
-                                         vilkårType = Vilkår.BOSATT_I_RIKET,
-                                         resultat = Resultat.JA,
-                                         periodeFom = LocalDate.now(),
-                                         periodeTom = LocalDate.now(),
-                                         begrunnelse = ""),
-                          VilkårResultat(personResultat = personResultat,
-                                         vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                         resultat = Resultat.JA,
-                                         periodeFom = LocalDate.now(),
-                                         periodeTom = LocalDate.now(),
-                                         begrunnelse = ""))
+                    sortedSetOf(VilkårResultat(personResultat = personResultat,
+                                               vilkårType = Vilkår.BOSATT_I_RIKET,
+                                               resultat = Resultat.JA,
+                                               periodeFom = LocalDate.now(),
+                                               periodeTom = LocalDate.now(),
+                                               begrunnelse = ""),
+                                VilkårResultat(personResultat = personResultat,
+                                               vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                                               resultat = Resultat.JA,
+                                               periodeFom = LocalDate.now(),
+                                               periodeTom = LocalDate.now(),
+                                               begrunnelse = ""))
             )
 
             personResultat
@@ -136,24 +135,24 @@ class OppdaterBehandlingGrunnlagTest {
                     personIdent = it)
 
             personResultat.setVilkårResultater(
-                    setOf(VilkårResultat(personResultat = personResultat,
-                                         vilkårType = Vilkår.BOSATT_I_RIKET,
-                                         resultat = Resultat.JA,
-                                         periodeFom = LocalDate.now(),
-                                         periodeTom = LocalDate.now(),
-                                         begrunnelse = ""),
-                          VilkårResultat(personResultat = personResultat,
-                                         vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                         resultat = Resultat.JA,
-                                         periodeFom = LocalDate.now(),
-                                         periodeTom = LocalDate.now(),
-                                         begrunnelse = ""),
-                          VilkårResultat(personResultat = personResultat,
-                                         vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                         resultat = Resultat.JA,
-                                         periodeFom = LocalDate.now(),
-                                         periodeTom = LocalDate.now(),
-                                         begrunnelse = ""))
+                    sortedSetOf(VilkårResultat(personResultat = personResultat,
+                                               vilkårType = Vilkår.BOSATT_I_RIKET,
+                                               resultat = Resultat.JA,
+                                               periodeFom = LocalDate.now(),
+                                               periodeTom = LocalDate.now(),
+                                               begrunnelse = ""),
+                                VilkårResultat(personResultat = personResultat,
+                                               vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                                               resultat = Resultat.JA,
+                                               periodeFom = LocalDate.now(),
+                                               periodeTom = LocalDate.now(),
+                                               begrunnelse = ""),
+                                VilkårResultat(personResultat = personResultat,
+                                               vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                               resultat = Resultat.JA,
+                                               periodeFom = LocalDate.now(),
+                                               periodeTom = LocalDate.now(),
+                                               begrunnelse = ""))
             )
             personResultat
         }.toSet()

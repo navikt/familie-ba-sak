@@ -160,7 +160,8 @@ class TestBehandlingResultatBuilder(val sakType: String) {
                     begrunnelse = "")
         }.toSet()
 
-        personResultat.setVilkårResultater(personResultat.vilkårResultater.plus(vilkårsresultater))
+        personResultat.setVilkårResultater(personResultat.vilkårResultater.plus(vilkårsresultater)
+                                                   .toSortedSet(PersonResultat.comparator))
 
         return this
     }

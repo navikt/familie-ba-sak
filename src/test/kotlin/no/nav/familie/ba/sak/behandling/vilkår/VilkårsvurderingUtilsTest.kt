@@ -42,7 +42,7 @@ class VilkårsvurderingUtilsTest {
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
                                          "")
-        personResultat.setVilkårResultater(setOf(vilkårResultat1, vilkårResultat2, vilkårResultat3))
+        personResultat.setVilkårResultater(sortedSetOf(vilkårResultat1, vilkårResultat2, vilkårResultat3))
 
     }
 
@@ -59,7 +59,6 @@ class VilkårsvurderingUtilsTest {
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      restVilkårResultat)
 
-        personResultat.sorterVilkårResultater()
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
                               LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
@@ -191,7 +190,7 @@ class VilkårsvurderingUtilsTest {
         val mockVilkårResultat = VilkårResultat(1, mockPersonResultat, vilkår, resultat,
                                                 LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
                                                 "")
-        mockPersonResultat.setVilkårResultater(setOf(mockVilkårResultat))
+        mockPersonResultat.setVilkårResultater(sortedSetOf(mockVilkårResultat))
 
         VilkårsvurderingUtils.muterPersonResultatDelete(mockPersonResultat,
                                                         1)
