@@ -17,7 +17,7 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
                                 @Qualifier("jwtBearer") restOperations: RestOperations)
     : AbstractRestClient(restOperations, "infotrygd_barnetrygd") {
 
-    fun finnesHosInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String>): Boolean {
+    fun finnesIkkeHosInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String>): Boolean {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/personsok")
 
         val request = InfotrygdSøkRequest(søkersIdenter.map { FoedselsNr(it) }, barnasIdenter.map { FoedselsNr(it) })

@@ -28,7 +28,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                     .map { identinfo -> identinfo.ident }
         }
 
-        return infotrygdBarnetrygdClient.finnesHosInfotrygd(søkersIdenter, alleBarnasIdenter)
+        return !infotrygdBarnetrygdClient.finnesIkkeHosInfotrygd(søkersIdenter, alleBarnasIdenter)
     }
 
     fun sendTilInfotrygdFeed(barnIdenter: List<String>) {
