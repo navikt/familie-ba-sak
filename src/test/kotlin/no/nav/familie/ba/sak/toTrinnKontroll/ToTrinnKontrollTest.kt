@@ -45,7 +45,7 @@ class ToTrinnKontrollTest(
         behandlingService.sendBehandlingTilBeslutter(behandling)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hent(behandling.id).status)
 
-        totrinnskontrollService.opprettTotrinnskontroll(behandling = behandling)
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling = behandling)
         totrinnskontrollService.besluttTotrinnskontroll(behandling, beslutning = Beslutning.GODKJENT, beslutter = "Beslutter")
         Assertions.assertEquals(BehandlingStatus.GODKJENT, behandlingService.hent(behandling.id).status)
 
@@ -64,7 +64,7 @@ class ToTrinnKontrollTest(
         behandlingService.sendBehandlingTilBeslutter(behandling)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hent(behandling.id).status)
 
-        totrinnskontrollService.opprettTotrinnskontroll(behandling = behandling)
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling = behandling)
         totrinnskontrollService.besluttTotrinnskontroll(behandling, beslutter = "Beslutter", beslutning = Beslutning.UNDERKJENT)
         Assertions.assertEquals(BehandlingStatus.UNDERKJENT_AV_BESLUTTER, behandlingService.hent(behandling.id).status)
 
