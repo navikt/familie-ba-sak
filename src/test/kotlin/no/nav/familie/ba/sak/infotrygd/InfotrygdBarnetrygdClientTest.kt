@@ -61,7 +61,7 @@ class InfotrygdBarnetrygdClientTest {
     }
 
     @Test
-    fun `Invokering av Infotrygd feed genererer http feil`() {
+    fun `Invokering av Infotrygd-Barnetrygd genererer http feil`() {
         stubFor(post("/api/infotrygd/barnetrygd/personsok").willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
