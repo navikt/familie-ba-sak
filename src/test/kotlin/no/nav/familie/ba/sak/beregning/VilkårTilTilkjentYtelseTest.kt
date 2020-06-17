@@ -161,7 +161,7 @@ class TestBehandlingResultatBuilder(val sakType: String) {
         }.toSet()
 
         personResultat.setVilkårResultater(personResultat.vilkårResultater.plus(vilkårsresultater)
-                                                   .toSortedSet(PersonResultat.comparator))
+                                                   .toSet())
 
         return this
     }

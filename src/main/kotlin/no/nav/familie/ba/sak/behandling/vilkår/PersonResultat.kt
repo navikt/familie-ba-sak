@@ -29,14 +29,13 @@ class PersonResultat(
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        @OrderBy("periode_fom")
         val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(comparator)
 
 ) : BaseEntitet() {
 
-    fun setVilkårResultater(nyeVilkårResultater: SortedSet<VilkårResultat>) {
+    fun setVilkårResultater(nyeVilkårResultater: Set<VilkårResultat>) {
         vilkårResultater.clear()
-        vilkårResultater.addAll(nyeVilkårResultater)
+        vilkårResultater.addAll(nyeVilkårResultater.toSortedSet(comparator))
     }
 
     fun getVilkårResultat(index: Int): VilkårResultat? {
@@ -45,12 +44,13 @@ class PersonResultat(
 
     fun addVilkårResultat(vilkårResultat: VilkårResultat) {
         vilkårResultater.add(vilkårResultat)
+        setVilkårResultater(vilkårResultater.toSet())
         vilkårResultat.personResultat = this
     }
 
     fun removeVilkårResultat(vilkårResultatId: Long) {
         vilkårResultater.find { vilkårResultatId == it.id }?.personResultat = null
-        setVilkårResultater(vilkårResultater.filter { vilkårResultatId != it.id }.toSortedSet(comparator))
+        setVilkårResultater(vilkårResultater.filter { vilkårResultatId != it.id }.toSet())
     }
 
     fun slettEllerNullstill(vilkårResultatId: Long) {

@@ -143,7 +143,6 @@ object VilkårsvurderingUtils {
      * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
      * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
      */
-
     fun flyttResultaterTilInitielt(initieltBehandlingResultat: BehandlingResultat,
                                    aktivtBehandlingResultat: BehandlingResultat): Pair<BehandlingResultat, BehandlingResultat> {
 
@@ -159,11 +158,11 @@ object VilkårsvurderingUtils {
                 // Legg til ny person
                 personTilOppdatert.setVilkårResultater(
                         personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }
-                                .toSortedSet(PersonResultat.comparator))
+                                .toSet())
             } else {
                 // Fyll inn den initierte med person fra aktiv
-                val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toSortedSet(PersonResultat.comparator)
-                val personsVilkårOppdatert = sortedSetOf<VilkårResultat>()
+                val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
+                val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
                 personFraInit.vilkårResultater.forEach { vilkårFraInit ->
                     val vilkårSomFinnes = personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
                     if (vilkårSomFinnes.isEmpty()) {
@@ -175,13 +174,13 @@ object VilkårsvurderingUtils {
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
-                personTilOppdatert.setVilkårResultater(personsVilkårOppdatert)
+                personTilOppdatert.setVilkårResultater(personsVilkårOppdatert.toSet())
 
                 // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
                 if (personsVilkårAktivt.isEmpty()) {
                     personResultaterAktivt.remove(personenSomFinnes)
                 } else {
-                    personenSomFinnes.setVilkårResultater(personsVilkårAktivt)
+                    personenSomFinnes.setVilkårResultater(personsVilkårAktivt.toSet())
                 }
             }
             personResultaterOppdatert.add(personTilOppdatert)

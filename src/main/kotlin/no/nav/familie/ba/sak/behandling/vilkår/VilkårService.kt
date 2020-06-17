@@ -133,7 +133,7 @@ class VilkårService(
                                                    begrunnelse = ""))
                 }
                 vilkårListe
-            }.toSortedSet(PersonResultat.comparator))
+            }.toSet())
             personResultat
         }.toSet()
         return behandlingResultat

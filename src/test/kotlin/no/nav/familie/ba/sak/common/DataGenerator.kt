@@ -231,15 +231,15 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                    vilkårType = it,
                                    resultat = resultat,
                                    begrunnelse = "")
-                }.toSortedSet(PersonResultat.comparator))
+                }.toSet())
     } else {
         personResultat.setVilkårResultater(
-                sortedSetOf(VilkårResultat(personResultat = personResultat,
-                                           periodeFom = periodeFom,
-                                           periodeTom = periodeTom,
-                                           vilkårType = vilkårType,
-                                           resultat = resultat,
-                                           begrunnelse = ""))
+                setOf(VilkårResultat(personResultat = personResultat,
+                                     periodeFom = periodeFom,
+                                     periodeTom = periodeTom,
+                                     vilkårType = vilkårType,
+                                     resultat = resultat,
+                                     begrunnelse = ""))
         )
     }
     return personResultat
@@ -268,12 +268,12 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
             behandlingResultat = behandlingResultat,
             personIdent = fnr)
     personResultat.setVilkårResultater(
-            sortedSetOf(VilkårResultat(personResultat = personResultat,
-                                       vilkårType = Vilkår.BOSATT_I_RIKET,
-                                       resultat = resultat,
-                                       periodeFom = LocalDate.now(),
-                                       periodeTom = LocalDate.now(),
-                                       begrunnelse = ""))
+            setOf(VilkårResultat(personResultat = personResultat,
+                                 vilkårType = Vilkår.BOSATT_I_RIKET,
+                                 resultat = resultat,
+                                 periodeFom = LocalDate.now(),
+                                 periodeTom = LocalDate.now(),
+                                 begrunnelse = ""))
     )
     behandlingResultat.personResultater = setOf(personResultat)
     return behandlingResultat
