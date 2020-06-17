@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.integrasjoner.domene.KjonnDeserializer
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -95,6 +96,9 @@ class BehandlingIntegrationTest {
     @Autowired
     lateinit var integrasjonClient: IntegrasjonClient
 
+    @Autowired
+    lateinit var loggService: LoggService
+
     lateinit var behandlingService: BehandlingService
 
     @BeforeEach
@@ -105,7 +109,8 @@ class BehandlingIntegrationTest {
                 fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,
-                fagsakService)
+                fagsakService,
+                loggService)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
                         .willReturn(aResponse()
