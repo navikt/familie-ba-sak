@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
@@ -20,20 +19,19 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
-import no.nav.familie.ba.sak.integrasjoner.domene.KjonnDeserializer
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
-import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.personinfo.*
+import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personinfo.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personinfo.UkjentBosted
+import no.nav.familie.kontrakter.felles.personinfo.Vegadresse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Resultat
