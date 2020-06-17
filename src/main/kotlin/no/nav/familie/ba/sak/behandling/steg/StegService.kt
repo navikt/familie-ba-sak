@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -27,6 +28,7 @@ class StegService(
         private val steg: List<BehandlingSteg<*>>,
         private val loggService: LoggService,
         private val rolleConfig: RolleConfig,
+        private val featureToggleService: FeatureToggleService,
         private val behandlingResultatRepository: BehandlingResultatRepository
 ) {
 
@@ -265,7 +267,7 @@ class StegService(
 
         secureLogger.info("Behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
 
-        if (skalBehandlesHosInfotrygd) {
+        if (skalBehandlesHosInfotrygd || featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
             throw KontrollertRollbackException()
         }
     }
