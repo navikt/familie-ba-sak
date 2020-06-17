@@ -45,7 +45,7 @@ class BehandlingStegTest {
         }
         val riktigRekkefølgeForFødselshendelser = listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
-                StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL,
+                StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER,
                 StegType.VILKÅRSVURDERING)
         steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
         riktigRekkefølgeForFødselshendelser.forEach {
@@ -73,7 +73,7 @@ class BehandlingStegTest {
     fun testInitSteg() {
         assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG,
                      initSteg(BehandlingType.MIGRERING_FRA_INFOTRYGD, BehandlingOpprinnelse.MANUELL))
-        assertEquals(StegType.REGISTRERE_SØKNAD, initSteg(null, BehandlingOpprinnelse.MANUELL))
+        assertEquals(StegType.REGISTRERE_SØKNAD, initSteg(behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL))
         assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG,
                      initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
     }

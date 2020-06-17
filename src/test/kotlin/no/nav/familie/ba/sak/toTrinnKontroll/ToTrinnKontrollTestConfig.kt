@@ -53,7 +53,7 @@ class ToTrinnKontrollTestConfig {
             totrinnskontrollRepository.save(totrinnskontroll)
         }
 
-        every { totrinnskontrollService.opprettTotrinnskontroll(any(), any()) } answers {
+        every { totrinnskontrollService.opprettEllerHentTotrinnskontroll(any(), any()) } answers {
             val behandling = firstArg<Behandling>()
             totrinnskontrollRepository.save(Totrinnskontroll(
                     behandling = behandling,

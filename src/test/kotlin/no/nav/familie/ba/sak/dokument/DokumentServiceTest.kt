@@ -120,7 +120,7 @@ class DokumentServiceTest(
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat1, true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        totrinnskontrollService.opprettTotrinnskontroll(behandling, "ansvarligSaksbehandler")
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling, "ansvarligSaksbehandler")
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
 
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
@@ -170,7 +170,7 @@ class DokumentServiceTest(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        totrinnskontrollService.opprettTotrinnskontroll(behandling, "ansvarligSaksbehandler")
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling, "ansvarligSaksbehandler")
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
 
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)

@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
-import no.nav.familie.ba.sak.task.SimulationException
+import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -176,9 +176,10 @@ class StegService(
         }
     }
 
-    fun håndterAvgjørAutomatiskEllerManuell(behandling: Behandling): Behandling {
-        val behandlingSteg: AvgjørAutomatiskEllerManuell =
-                hentBehandlingSteg(StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL) as AvgjørAutomatiskEllerManuell
+    fun håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling: Behandling): Behandling {
+        val behandlingSteg: AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser =
+                hentBehandlingSteg(StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER)
+                        as AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
@@ -257,15 +258,15 @@ class StegService(
     @Transactional
     fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse, skalBehandlesHosInfotrygd: Boolean) {
         var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
-        behandling = håndterAvgjørAutomatiskEllerManuell(behandling)
+        behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling)
         behandling = håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
         val samletResultat = behandlingResultat?.hentSamletResultat()
 
-        secureLogger.info("Simulering av behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
+        secureLogger.info("Behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
 
         if (skalBehandlesHosInfotrygd) {
-            throw SimulationException()
+            throw KontrollertRollbackException()
         }
     }
 

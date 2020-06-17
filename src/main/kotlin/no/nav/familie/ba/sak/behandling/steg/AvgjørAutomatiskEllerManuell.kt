@@ -4,11 +4,11 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import org.springframework.stereotype.Service
 
 @Service
-class AvgjørAutomatiskEllerManuell
+class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser
     : BehandlingSteg<String> {
 
     override fun stegType(): StegType {
-        return StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL
+        return StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
