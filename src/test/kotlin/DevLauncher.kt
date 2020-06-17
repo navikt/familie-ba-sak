@@ -9,7 +9,9 @@ object DevLauncher {
                           "mock-totrinnkontroll",
                           "mock-dokgen-java",
                           "mock-iverksett",
-                          "mock-infotrygd-feed")
+                          "mock-infotrygd-feed",
+                          "mock-infotrygd-barnetrygd"
+                )
         app.run(*args)
     }
 }
