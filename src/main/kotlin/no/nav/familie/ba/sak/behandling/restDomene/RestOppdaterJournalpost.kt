@@ -10,6 +10,7 @@ data class RestOppdaterJournalpost(val avsender: NavnOgIdent,
                                    val dokumentTittel: String,
                                    val dokumentInfoId: String,
                                    val knyttTilFagsak: Boolean,
+                                   val tilknyttedeBehandlingIder: List<String>,
                                    val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>,
                                    val logiskeVedlegg: List<LogiskVedlegg>,
                                    val navIdent: String

@@ -83,7 +83,8 @@ class JournalføringServiceTest {
                                                 2020,
                                                 5,
                                                 4).atStartOfDay(),
-                                        navIdent = "Z992691")
+                                        navIdent = "Z992691",
+                                        tilknyttedeBehandlingIder = listOf("123"))
 
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
 
@@ -123,7 +124,8 @@ class JournalføringServiceTest {
                                                               "tittel")),
                                         datoMottatt = LocalDate.now()
                                                 .atStartOfDay(),
-                                        navIdent = "Z111111")
+                                        navIdent = "Z111111",
+                                        tilknyttedeBehandlingIder = listOf("123"))
 
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
 
