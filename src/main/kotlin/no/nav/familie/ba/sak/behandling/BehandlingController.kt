@@ -72,7 +72,7 @@ class BehandlingController(private val fagsakService: FagsakService,
             val skalBehandlesHosInfotrygd = fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(nyBehandling.søkersIdent,
                                                                                                             nyBehandling.barnasIdenter)
             fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-            val task = SimuleringTask.opprettTask(SimuleringTaskDTO(nyBehandling, skalBehandlesHosInfotrygd))
+            val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling, skalBehandlesHosInfotrygd))
             taskRepository.save(task)
         }
                 .fold(
