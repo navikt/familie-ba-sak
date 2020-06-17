@@ -23,6 +23,7 @@ import no.nav.nare.core.specifications.Spesifikasjon
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.util.*
 
 @Service
 class VilkårService(
@@ -148,7 +149,7 @@ class VilkårService(
 
     private fun vilkårResultater(personResultat: PersonResultat,
                                  barnet: Person,
-                                 evalueringer: List<Evaluering>): Set<VilkårResultat> {
+                                 evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
         return evalueringer.map { child ->
             val tom: LocalDate? =
                     if (Vilkår.valueOf(child.identifikator) == Vilkår.UNDER_18_ÅR) barnet.fødselsdato.plusYears(18) else null
@@ -159,7 +160,7 @@ class VilkårService(
                            periodeFom = barnet.fødselsdato,
                            periodeTom = tom,
                            begrunnelse = "")
-        }.toSet()
+        }.toSortedSet(PersonResultat.comparator)
     }
 
     @Transactional
