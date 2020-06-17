@@ -7,9 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.*
-
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -61,6 +59,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String): String {
         return integrasjonClient.fordelOppgave(oppgaveId, saksbehandler)
     }
+
     fun tilbakestillFordelingPåOppgave(oppgaveId: Long): String {
         return integrasjonClient.fordelOppgave(oppgaveId, null)
     }
