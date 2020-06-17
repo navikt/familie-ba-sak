@@ -37,7 +37,8 @@ class InfotrygdBarnetrygdClientTest {
         resetAllRequests()
         client = InfotrygdBarnetrygdClient(
                 URI.create("http://localhost:${environment.get("wiremock.server.port")}/api"),
-                restOperations
+                restOperations,
+                environment
         )
     }
 
