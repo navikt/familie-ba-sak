@@ -61,7 +61,7 @@ class InfotrygdBarnetrygdClientTest {
 
     /*
     Denne testen er en kopi av tilsvarende test i InfotrygdFeedClientTest.
-    Testen kjører fint lokalt, men feiler på byggeserveren med en RuntimeException i AbstractRestClient.executeMedMetrics.
+    Testen kjører med suksess lokalt, men feiler på byggeserveren med en RuntimeException i AbstractRestClient.executeMedMetrics.
 
     @Test
     fun `Invokering av Infotrygd-Barnetrygd genererer http feil`() {
