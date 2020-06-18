@@ -11,14 +11,9 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
                              private val integrasjonClient: IntegrasjonClient) {
 
-    fun fødselshendelseSkalBehandlesHosInfotrygd(søkersIdent: String, barnasIdenter: List<String>): Boolean {
-        // Siden vi sender til ba-sak uansett, dersom søker har sak i ba-sak eller ikke har en sak i noen av fagsystemene,
-        // holder det å sjekke om søker har en sak i infotrygd for å avgjøre hvor vi skal sende hendelsen videre.
+    fun fødselshendelseSkalBehandlesHosInfotrygd(morsIdent: String, barnasIdenter: List<String>): Boolean {
 
-        // Tjenesten mot infotrygd-replika sjekker om søker eller barn finnes I DET HELE TATT, m.a.o. alle tidligere og
-        // avsluttede søknader.
-
-        val søkersIdenter = integrasjonClient.hentIdenter(Ident(søkersIdent))
+        val morsIdenter = integrasjonClient.hentIdenter(Ident(morsIdent))
                 .filter { it.gruppe == "FOLKEREGISTERIDENT" }
                 .map { it.ident }
         val alleBarnasIdenter = barnasIdenter.flatMap {
@@ -27,7 +22,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                     .map { identinfo -> identinfo.ident }
         }
 
-        return !infotrygdBarnetrygdClient.finnesIkkeHosInfotrygd(søkersIdenter, alleBarnasIdenter)
+        return !infotrygdBarnetrygdClient.finnesIkkeHosInfotrygd(morsIdenter, alleBarnasIdenter)
     }
 
     fun sendTilInfotrygdFeed(barnIdenter: List<String>) {
