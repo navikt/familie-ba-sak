@@ -63,7 +63,7 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
                                                                                    bekreftEndringerViaFrontend = true)
         Assertions.assertEquals(2, behandlingResultat.personResultater.size)
 
@@ -94,7 +94,7 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
                                                                                    bekreftEndringerViaFrontend = true)
         Assertions.assertEquals(2, behandlingResultat.personResultater.size)
 
@@ -102,7 +102,7 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr, barnFnr2))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagMedEkstraBarn)
 
-        val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
+        val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
                                                                                                 bekreftEndringerViaFrontend = true)
         Assertions.assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
     }
@@ -132,8 +132,8 @@ class VilkårServiceTest(
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandlingId = behandling.id,
-                bekreftEndringerViaFrontend = true)
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
+                                                                                   bekreftEndringerViaFrontend = true)
 
         val kopiertBehandlingResultat = behandlingResultat.kopier()
 
