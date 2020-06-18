@@ -47,7 +47,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
-                                        steg = initSteg(nyBehandling.behandlingType, null))
+                                        steg = initSteg(nyBehandling.behandlingType))
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
             behandling
