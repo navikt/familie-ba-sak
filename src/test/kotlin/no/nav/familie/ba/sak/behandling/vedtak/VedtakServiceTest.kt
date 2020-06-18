@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -58,7 +59,10 @@ class VedtakServiceTest(
         val fagsakPersonRepository: FagsakPersonRepository,
 
         @Autowired
-        val totrinnskontrollService: TotrinnskontrollService
+        val totrinnskontrollService: TotrinnskontrollService,
+
+        @Autowired
+        val loggService: LoggService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -71,7 +75,8 @@ class VedtakServiceTest(
                 fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,
-                fagsakService)
+                fagsakService,
+                loggService)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
                         .willReturn(aResponse()
