@@ -42,8 +42,7 @@ class VilkårsvurderingUtilsTest {
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
                                          "")
-        personResultat.setVilkårResultater(setOf(vilkårResultat1, vilkårResultat2, vilkårResultat3))
-
+        personResultat.setVilkårResultater(setOf(vilkårResultat1, vilkårResultat2, vilkårResultat3).toSortedSet(PersonResultat.comparator))
     }
 
     private fun assertPeriode(expected: Periode, actual: Periode) {
@@ -59,7 +58,6 @@ class VilkårsvurderingUtilsTest {
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      restVilkårResultat)
 
-        personResultat.sorterVilkårResultater()
         assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
                               LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
@@ -73,24 +71,27 @@ class VilkårsvurderingUtilsTest {
     @Test
     fun `periode splittes dersom en periode med inneklemt tidsintervall legges til`() {
         val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat,
-                                                    LocalDate.of(2010, 6, 5), LocalDate.of(2010, 7, 1),
+                                                    LocalDate.of(2010, 3, 5), LocalDate.of(2010, 5, 20),
                                                     "")
 
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      restVilkårResultat)
 
-        assertEquals(4, personResultat.vilkårResultater.size)
+        assertEquals(5, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
-                              LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
+                              LocalDate.of(2010, 3, 4)), personResultat.getVilkårResultat(0)!!.toPeriode()
         )
-        assertPeriode(Periode(LocalDate.of(2010, 6, 5),
-                              LocalDate.of(2010, 7, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
+        assertPeriode(Periode(LocalDate.of(2010, 3, 5),
+                              LocalDate.of(2010, 5, 20)), personResultat.getVilkårResultat(1)!!.toPeriode()
         )
-        assertPeriode(Periode(LocalDate.of(2010, 7, 2),
-                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
+        assertPeriode(Periode(LocalDate.of(2010, 5, 21),
+                              LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
+        )
+        assertPeriode(Periode(LocalDate.of(2010, 6, 2),
+                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(3)!!.toPeriode()
         )
         assertPeriode(Periode(LocalDate.of(2010, 8, 2),
-                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(3)!!.toPeriode()
+                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(4)!!.toPeriode()
         )
     }
 

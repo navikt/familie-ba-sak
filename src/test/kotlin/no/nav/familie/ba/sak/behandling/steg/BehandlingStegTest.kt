@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.steg
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import org.junit.jupiter.api.Assertions.*
@@ -21,7 +22,7 @@ class BehandlingStegTest {
                 StegType.FERDIGSTILLE_BEHANDLING,
                 StegType.BEHANDLING_AVSLUTTET)
 
-        var steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING)
+        var steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingOpprinnelse.MANUELL)
         riktigRekkefølge.forEach {
             assertEquals(steg, it)
             steg = it.hentNesteSteg(utførendeStegType = steg)
@@ -42,6 +43,17 @@ class BehandlingStegTest {
             assertEquals(steg, it)
             steg = it.hentNesteSteg(utførendeStegType = steg)
         }
+        val riktigRekkefølgeForFødselshendelser = listOf(
+                StegType.REGISTRERE_PERSONGRUNNLAG,
+                StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER,
+                StegType.VILKÅRSVURDERING)
+        steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+        riktigRekkefølgeForFødselshendelser.forEach {
+            assertEquals(steg, it)
+            steg = it.hentNesteSteg(utførendeStegType = steg,
+                                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                    behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+        }
     }
 
     @Test
@@ -58,8 +70,11 @@ class BehandlingStegTest {
     }
 
     @Test
-    fun testInitSteg(){
-        assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG, initSteg(BehandlingType.MIGRERING_FRA_INFOTRYGD))
-        assertEquals(StegType.REGISTRERE_SØKNAD, initSteg(null))
+    fun testInitSteg() {
+        assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG,
+                     initSteg(BehandlingType.MIGRERING_FRA_INFOTRYGD, BehandlingOpprinnelse.MANUELL))
+        assertEquals(StegType.REGISTRERE_SØKNAD, initSteg(behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL))
+        assertEquals(StegType.REGISTRERE_PERSONGRUNNLAG,
+                     initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
     }
 }

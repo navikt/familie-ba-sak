@@ -10,12 +10,11 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
-import no.nav.familie.ba.sak.task.SimulationException
+import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -28,8 +27,7 @@ class StegService(
         private val steg: List<BehandlingSteg<*>>,
         private val loggService: LoggService,
         private val rolleConfig: RolleConfig,
-        private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val featureToggleService: FeatureToggleService
+        private val behandlingResultatRepository: BehandlingResultatRepository
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -39,7 +37,6 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
-        loggService.opprettBehandlingLogg(behandling)
 
         return when (nyBehandling.behandlingType) {
             BehandlingType.MIGRERING_FRA_INFOTRYGD ->
@@ -64,7 +61,6 @@ class StegService(
         ))
 
         loggService.opprettFødselshendelseLogg(behandling)
-        loggService.opprettBehandlingLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
@@ -178,6 +174,16 @@ class StegService(
         }
     }
 
+    fun håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling: Behandling): Behandling {
+        val behandlingSteg: AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser =
+                hentBehandlingSteg(StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER)
+                        as AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+    }
+
     // Generelle stegmetoder
     private fun håndterSteg(behandling: Behandling,
                             behandlingSteg: BehandlingSteg<*>,
@@ -248,15 +254,17 @@ class StegService(
     }
 
     @Transactional
-    fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
-        val behandling = håndterNyBehandlingFraHendelse(nyBehandling)
+    fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse, skalBehandlesHosInfotrygd: Boolean) {
+        var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
+        behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling)
+        behandling = håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
         val samletResultat = behandlingResultat?.hentSamletResultat()
 
-        secureLogger.info("Simulering av behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
+        secureLogger.info("Behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
 
-        if (featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
-            throw SimulationException()
+        if (skalBehandlesHosInfotrygd) {
+            throw KontrollertRollbackException()
         }
     }
 
