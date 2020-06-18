@@ -12,7 +12,6 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val integrasjonClient: IntegrasjonClient) {
 
     fun fødselshendelseSkalBehandlesHosInfotrygd(søkersIdent: String, barnasIdenter: List<String>): Boolean {
-
         // Siden vi sender til ba-sak uansett, dersom søker har sak i ba-sak eller ikke har en sak i noen av fagsystemene,
         // holder det å sjekke om søker har en sak i infotrygd for å avgjøre hvor vi skal sende hendelsen videre.
 
