@@ -64,7 +64,7 @@ class SendTilBeslutter(
                                  throw Feil("Fant ikke behandlingsresultat på behandling")
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat.kopier(),
-                                                           true)
+                                                           false)
 
         return hentNesteStegForNormalFlyt(behandling)
     }
