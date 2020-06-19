@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.hendelse
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -10,6 +12,9 @@ import org.springframework.stereotype.Service
 class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedService,
                              private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
                              private val integrasjonClient: IntegrasjonClient) {
+
+    val finnesHosInfotrygdCounter: Counter = Metrics.counter("fødselshendelse.mor.eller.barn.finnes.i.infotrygd")
+    val finnesIkkeHosInfotrygdCounter: Counter = Metrics.counter("fødselshendelse.mor.eller.barn.finnes.ikke.i.infotrygd")
 
     fun fødselshendelseSkalBehandlesHosInfotrygd(morsIdent: String, barnasIdenter: List<String>): Boolean {
 
@@ -22,7 +27,13 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                     .map { identinfo -> identinfo.ident }
         }
 
-        return !infotrygdBarnetrygdClient.finnesIkkeHosInfotrygd(morsIdenter, alleBarnasIdenter)
+        val finnesHosInfotrygd = !infotrygdBarnetrygdClient.finnesIkkeHosInfotrygd(morsIdenter, alleBarnasIdenter)
+        when (finnesHosInfotrygd) {
+            true -> finnesHosInfotrygdCounter.increment()
+            false -> finnesIkkeHosInfotrygdCounter.increment()
+        }
+
+        return finnesHosInfotrygd
     }
 
     fun sendTilInfotrygdFeed(barnIdenter: List<String>) {

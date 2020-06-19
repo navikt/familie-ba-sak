@@ -40,6 +40,7 @@ class DokgenTestConfig {
     @Primary
     fun mockDokGenNegativeService(): DokGenKlient {
         val dokgenService: DokGenKlient = mockk()
+        every { dokgenService.lagHtmlFraMarkdown("Innvilget", "TEST_MARKDOWN_MOCKUP", testDokumentHeaderFelter) } throws IllegalStateException()
         return dokgenService
     }
 }
