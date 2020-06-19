@@ -27,7 +27,7 @@ class ToTrinnKontrollTestConfig {
     lateinit var totrinnskontrollRepository: TotrinnskontrollRepository
 
     @Bean
-    @Profile("mock-totrinnkontroll")
+    @Profile("mock-totrinnkontroll") // Obs! Mock til e2e-tester. Vil ikke fungere som en mock ved manuell testing lokalt.
     @Primary
     fun mockToTrinnKontrollService(): TotrinnskontrollService {
         val totrinnskontrollService: TotrinnskontrollService = mockk()
