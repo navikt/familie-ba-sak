@@ -7,5 +7,6 @@ fun main(args: Array<String>) {
     SpringApplicationBuilder(ApplicationConfig::class.java).profiles("postgres",
                                                                      "mock-dokgen-java",
                                                                      "mock-iverksett",
-                                                                     "mock-infotrygd-feed").run(*args)
+                                                                     "mock-infotrygd-feed",
+                                                                     "mock-infotrygd-barnetrygd").run(*args)
 }
