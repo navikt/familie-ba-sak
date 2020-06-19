@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.kontrakter.felles.oppgave.*
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,33 +28,35 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
-        if (oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling) !== null
-            && oppgavetype !== Oppgavetype.Journalføring) {
-            error("Det finnes allerede en oppgave av typen $oppgavetype på behandling ${behandling.id} som ikke er ferdigstilt. Kan ikke opprette ny oppgave")
+        val eksisterendeOppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
+
+        return if (eksisterendeOppgave != null
+                   && oppgavetype != Oppgavetype.Journalføring) {
+            LOG.error("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
+                      "Vi går videre, men kaster feil for å følge med på utviklingen.")
+
+            eksisterendeOppgave.gsakId
+        } else {
+            val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
+            val aktorId = integrasjonClient.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
+            val opprettOppgave = OpprettOppgave(
+                    ident = OppgaveIdent(ident = aktorId, type = IdentType.Aktør),
+                    saksId = fagsakId.toString(),
+                    tema = Tema.BAR,
+                    oppgavetype = oppgavetype,
+                    fristFerdigstillelse = fristForFerdigstillelse,
+                    beskrivelse = lagOppgaveTekst(fagsakId),
+                    enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
+                    behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode,
+                    tilordnetRessurs = tilordnetNavIdent
+            )
+
+            val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
+
+            val oppgave = DbOppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = oppgavetype)
+            oppgaveRepository.save(oppgave)
+            opprettetOppgaveId
         }
-        val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
-        val aktorId = integrasjonClient.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
-        val opprettOppgave = OpprettOppgave(
-                ident = OppgaveIdent(ident = aktorId, type = IdentType.Aktør),
-                saksId = fagsakId.toString(),
-                tema = Tema.BAR,
-                oppgavetype = oppgavetype,
-                fristFerdigstillelse = fristForFerdigstillelse,
-                beskrivelse = lagOppgaveTekst(fagsakId),
-                enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
-                behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode,
-                tilordnetRessurs = tilordnetNavIdent
-        )
-
-        val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
-
-        val oppgave = DbOppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = oppgavetype)
-        oppgaveRepository.save(oppgave)
-        return opprettetOppgaveId
-    }
-
-    fun opprettOppgave(request: OpprettOppgave): String {
-        return integrasjonClient.opprettOppgave(request)
     }
 
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String): String {
@@ -97,5 +100,9 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         BARNETRYGD_EØS("ab0058"),
         BARNETRYGD("ab0270"), //Kan brukes hvis man ikke vet om det er EØS, Utvidet eller Ordinært
         UTVIDET_BARNETRYGD("ab0096")
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

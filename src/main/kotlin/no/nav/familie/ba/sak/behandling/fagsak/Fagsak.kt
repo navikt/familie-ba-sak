@@ -24,6 +24,10 @@ data class Fagsak(
         var søkerIdenter: Set<FagsakPerson> = setOf()
 ) : BaseEntitet() {
 
+    override fun hashCode(): Int {
+        return toString().hashCode()
+    }
+
     override fun toString(): String {
         return "Fagsak(id=$id)"
     }

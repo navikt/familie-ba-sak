@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import javax.persistence.*
 
 @Entity(name = "Behandling")
@@ -20,6 +21,10 @@ data class Behandling(
 
         @Column(name = "journalpost_id")
         val journalpostID: String? = null,
+
+        @ManyToMany(cascade = [CascadeType.ALL])
+        @JoinColumn
+        val journalposter: MutableSet<DbJournalpost> = mutableSetOf(),
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
