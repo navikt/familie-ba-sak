@@ -5,7 +5,6 @@ class DevLauncherPostgres
 
 fun main(args: Array<String>) {
     SpringApplicationBuilder(ApplicationConfig::class.java).profiles("postgres",
-                                                                     "mock-totrinnkontroll",
                                                                      "mock-dokgen-java",
                                                                      "mock-iverksett",
                                                                      "mock-infotrygd-feed",

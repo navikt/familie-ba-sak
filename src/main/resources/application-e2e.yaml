@@ -62,7 +62,7 @@ FAMILIE_BA_DOKGEN_API_URL: http://familie-ba-dokgen:8080
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner:8085/api
 NORG2_BASE_URL: http://familie-mock-server:1337/rest/api/norg2
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed:8092/api
-FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://familie-ba-infotrygd-barnetrygd:8093
+FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: dummy
 
 #Unleash
 NAIS_APP_NAME: ""
