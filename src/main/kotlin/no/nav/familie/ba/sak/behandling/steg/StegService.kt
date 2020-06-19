@@ -256,7 +256,7 @@ class StegService(
     }
 
     @Transactional
-    fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse, skalBehandlesHosInfotrygd: Boolean) {
+    fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
         var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
         behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling)
         behandling = håndterVilkårsvurdering(behandling)
@@ -265,7 +265,7 @@ class StegService(
 
         secureLogger.info("Behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
 
-        if (skalBehandlesHosInfotrygd || featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
+        if (featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
             throw KontrollertRollbackException()
         }
     }
