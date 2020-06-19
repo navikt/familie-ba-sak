@@ -8,6 +8,9 @@ import javax.persistence.Entity
 @Entity(name = "VegadressePdl")
 @DiscriminatorValue("Vegadresse")
 data class VegadressePdl(
+        @Column(name = "matrikkel_id")
+        val matrikkelId: Long?,
+
         @Column(name = "husnummer")
         val husnummer: String?,
 
@@ -39,6 +42,7 @@ data class VegadressePdl(
     companion object {
         fun fraVegadresse(vegadresse: Vegadresse): VegadressePdl =
                 VegadressePdl(
+                        matrikkelId = vegadresse.matrikkelId,
                         husnummer = vegadresse.husnummer,
                         husbokstav = vegadresse.husbokstav,
                         bruksenhetsnummer = vegadresse.bruksenhetsnummer,

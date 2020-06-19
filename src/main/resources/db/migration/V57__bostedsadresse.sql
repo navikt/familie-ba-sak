@@ -2,6 +2,7 @@ CREATE TABLE PO_BOSTEDSADRESSE
 (
     id                          bigint primary key,
     type                        varchar(20)                                   NOT NULL,
+    matrikkel_id                bigint,
     bostedskommune              varchar(20),
     husnummer                   varchar(4),
     husbokstav                  varchar(2),

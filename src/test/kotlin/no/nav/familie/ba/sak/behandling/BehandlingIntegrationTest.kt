@@ -402,6 +402,7 @@ class BehandlingIntegrationTest {
         val barn2Fnr = "01101900033"
         val barn3Fnr = "11223344556"
 
+        val matrikkelId = 123456L
         val søkerHusnummer = "12"
         val søkerHusbokstav = "A"
         val søkerBruksenhetsnummer = "H012"
@@ -423,7 +424,8 @@ class BehandlingIntegrationTest {
                 navn = "Mor",
                 kjønn = Kjønn.KVINNE,
                 familierelasjoner = emptySet(),
-                bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(søkerHusnummer,
+                bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
+                                                                        søkerHusnummer,
                                                                         søkerHusbokstav,
                                                                         søkerBruksenhetsnummer,
                                                                         søkerAdressnavn,
@@ -439,7 +441,7 @@ class BehandlingIntegrationTest {
                 navn = "Gutt",
                 kjønn = Kjønn.MANN,
                 familierelasjoner = emptySet(),
-                bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(barn1Bruksenhetsnummer, barn1Tilleggsnavn,
+                bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId, barn1Bruksenhetsnummer, barn1Tilleggsnavn,
                                                                                     barn1Postnummer, barn1Kommunenummer)),
                 sivilstand = null
         )
@@ -474,6 +476,7 @@ class BehandlingIntegrationTest {
         val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
         val vegadresse = søker.bostedsadresse as VegadressePdl
         Assertions.assertEquals(søkerAdressnavn, vegadresse.adressenavn)
+        Assertions.assertEquals(matrikkelId, vegadresse.matrikkelId)
         Assertions.assertEquals(søkerBruksenhetsnummer, vegadresse.bruksenhetsnummer)
         Assertions.assertEquals(søkerHusbokstav, vegadresse.husbokstav)
         Assertions.assertEquals(søkerHusnummer, vegadresse.husnummer)

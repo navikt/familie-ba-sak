@@ -208,9 +208,9 @@ class VilkårVurderingTest(
 
     @Test
     fun `Sjekk barn bor med søker`() {
-        val søkerAddress = VegadressePdl("11", "B", "H022",
+        val søkerAddress = VegadressePdl(1234, "11", "B", "H022",
                                          "St. Olavsvegen", "1232", "whatever", "4322")
-        val barnAddress = VegadressePdl("11", "B", "H024",
+        val barnAddress = VegadressePdl(1234, "11", "B", "H024",
                                         "St. Olavsvegen", "1232", "whatever", "4322")
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
 
@@ -246,7 +246,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - To søker`() {
-        val søkerAddress = VegadressePdl("11", "B", "H022",
+        val søkerAddress = VegadressePdl(1234, "11", "B", "H022",
                                          "St. Olavsvegen", "1232", "whatever", "4322")
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 3)
@@ -262,7 +262,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - ingen søker`() {
-        val søkerAddress = VegadressePdl("11", "B", "H022",
+        val søkerAddress = VegadressePdl(1234, "11", "B", "H022",
                                          "St. Olavsvegen", "1232", "whatever", "4322")
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 4)
@@ -274,7 +274,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - ikke mor som søker`() {
-        val søkerAddress = VegadressePdl("11", "B", "H022",
+        val søkerAddress = VegadressePdl(2147483649,"11", "B", "H022",
                                          "St. Olavsvegen", "1232", "whatever", "4322")
 
         val personopplysningGrunnlag= PersonopplysningGrunnlag(behandlingId = 5)
