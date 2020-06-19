@@ -69,9 +69,10 @@ class BehandlingController(private val fagsakService: FagsakService,
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
         return Result.runCatching {
-            val skalBehandlesHosInfotrygd = fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd()
+            val skalBehandlesHosInfotrygd = fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(nyBehandling.søkersIdent,
+                                                                                                            nyBehandling.barnasIdenter)
             fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
-            val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling, skalBehandlesHosInfotrygd))
+            val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling))
             taskRepository.save(task)
         }
                 .fold(
