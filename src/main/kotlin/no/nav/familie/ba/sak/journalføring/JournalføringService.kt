@@ -39,7 +39,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                     oppgaveId: String): String {
         val behandlinger = request.tilknyttedeBehandlingIder.map {
             val behandling = behandlingService.hent(it.toLong())
-            behandlingService.knyttJournalpostTilBehandling(behandling = behandling, journalpostId = it)
+            behandlingService.knyttJournalpostTilBehandling(behandling = behandling, journalpostId = journalpostId)
             behandling
         }
 

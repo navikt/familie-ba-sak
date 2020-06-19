@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
+import java.util.*
 import javax.persistence.*
 
 @Entity(name = "Behandling")
@@ -22,8 +23,8 @@ data class Behandling(
         @Column(name = "journalpost_id")
         val journalpostID: String? = null,
 
-        @ManyToMany(cascade = [CascadeType.ALL])
-        @JoinColumn
+        @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.EAGER,
+                    mappedBy = "behandling")
         val journalposter: MutableSet<DbJournalpost> = mutableSetOf(),
 
         @Enumerated(EnumType.STRING)
@@ -56,6 +57,10 @@ data class Behandling(
         @Column(name = "steg", nullable = false)
         var steg: StegType = initSteg()
 ) : BaseEntitet() {
+
+    fun addJournalpost(journalpostId: String) {
+        journalposter.add(DbJournalpost(behandling = this, journalpostId = journalpostId))
+    }
 
     override fun toString(): String {
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"

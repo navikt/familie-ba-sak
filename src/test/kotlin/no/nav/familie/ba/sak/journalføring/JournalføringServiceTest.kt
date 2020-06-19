@@ -7,12 +7,14 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.runs
 import io.mockk.slot
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
@@ -20,47 +22,57 @@ import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
-class JournalføringServiceTest {
+class JournalføringServiceTest(
+        @MockK
+        private val integrasjonClient: IntegrasjonClient,
 
-    @MockK
-    lateinit var integrasjonClient: IntegrasjonClient
+        @MockK
+        private val stegService: StegService,
 
-    @MockK
-    lateinit var fagsakService: FagsakService
+        @MockK
+        private val oppgaveService: OppgaveService,
 
-    @MockK
-    lateinit var stegService: StegService
+        @MockK
+        private val loggService: LoggService,
 
-    @MockK
-    lateinit var oppgaveService: OppgaveService
+        @Autowired
+        private val behandlingService: BehandlingService,
 
-    @MockK
-    lateinit var loggService: LoggService
+        @Autowired
+        private val fagsakService: FagsakService,
 
-    @InjectMockKs
-    lateinit var journalføringService: JournalføringService
+        @Autowired
+        private val journalføringService: JournalføringService
+
+) {
+
+
 
     @Test
     fun `ferdigstill skal oppdatere journalpost med fagsakId hvis knyttTilFagsak er true`() {
         val journalpostId = "1234567"
         val fagsakId = "1111111"
 
+        val søkerFnr = randomFnr()
+        val fagsak = fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerFnr))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
         val slot = slot<OppdaterJournalpostRequest>()
         every { integrasjonClient.oppdaterJournalpost(capture(slot), any()) } returns OppdaterJournalpostResponse(journalpostId)
         every { integrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
         every { integrasjonClient.ferdigstillOppgave(any()) } just runs
-        every { fagsakService.hentEllerOpprettFagsakForPersonIdent(any()) } returns Fagsak(id = fagsakId.toLong())
         every { integrasjonClient.hentJournalpost(any()) } returns Ressurs.Companion.success(lagTestJournalpost("1", "1234567"))
         every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns ""
-        every { stegService.håndterNyBehandling(any()) } returns lagBehandling()
         every { loggService.opprettMottattDokument(any(), any(), any()) } just runs
 
         val request =
@@ -84,7 +96,7 @@ class JournalføringServiceTest {
                                                 5,
                                                 4).atStartOfDay(),
                                         navIdent = "Z992691",
-                                        tilknyttedeBehandlingIder = listOf("123"))
+                                        tilknyttedeBehandlingIder = listOf(behandling.id.toString()))
 
         journalføringService.ferdigstill(request, journalpostId, "9999", "1")
 

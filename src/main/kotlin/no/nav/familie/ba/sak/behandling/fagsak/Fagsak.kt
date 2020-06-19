@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import java.util.*
 import javax.persistence.*
 
 @Entity(name = "Fagsak")
@@ -25,7 +26,7 @@ data class Fagsak(
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {
-        return toString().hashCode()
+        return Objects.hashCode(id);
     }
 
     override fun toString(): String {

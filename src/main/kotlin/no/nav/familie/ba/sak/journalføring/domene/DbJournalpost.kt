@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.journalføring.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import java.util.*
 import javax.persistence.*
 
 @Entity(name = "Journalpost")
@@ -18,4 +19,8 @@ data class DbJournalpost(
 
         @Column(name = "journalpost_id")
         val journalpostId: String
-)
+) {
+        override fun hashCode(): Int {
+                return Objects.hashCode(id);
+        }
+}

@@ -44,11 +44,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             val behandling = Behandling(fagsak = fagsak,
                                         opprinnelse = nyBehandling.behandlingOpprinnelse,
-                                        journalpostID = nyBehandling.journalpostID,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
                                         steg = initSteg(nyBehandling.behandlingType))
+            if(!nyBehandling.journalpostID.isNullOrBlank()) {
+                behandling.addJournalpost(journalpostId = nyBehandling.journalpostID)
+            }
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
             behandling
@@ -63,7 +65,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     fun knyttJournalpostTilBehandling(behandling: Behandling, journalpostId: String) {
-        behandling.journalposter.add(DbJournalpost(behandling = behandling, journalpostId = journalpostId))
+        behandling.addJournalpost(journalpostId)
         lagre(behandling)
     }
 
