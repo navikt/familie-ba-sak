@@ -28,7 +28,7 @@ abstract class BostedsadressePdl(
     }
 
     companion object {
-        fun fraBostedadress(bostedsadresse: Bostedsadresse?): BostedsadressePdl? {
+        fun fraBostedsadresse(bostedsadresse: Bostedsadresse?): BostedsadressePdl? {
             if(bostedsadresse == null){
                 return null
             }else if (bostedsadresse.vegadresse != null) {

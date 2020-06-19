@@ -54,7 +54,7 @@ class PersongrunnlagService(
                            fødselsdato = personinfo.fødselsdato,
                            aktørId = aktørId,
                            navn = personinfo.navn ?: "",
-                           bostedsadresse = BostedsadressePdl.fraBostedadress(personinfo.bostedsadresse),
+                           bostedsadresse = BostedsadressePdl.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT
         )
         personopplysningGrunnlag.personer.add(søker)
@@ -65,7 +65,7 @@ class PersongrunnlagService(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    private fun tilBostedsadresserPdl(bostedsadresse: Bostedsadresse?): Set<BostedsadressePdl> {
+    private fun tilBostedsadressePDL(bostedsadresse: Bostedsadresse?): Set<BostedsadressePdl> {
         val bostedsadresserPdl: Set<BostedsadressePdl> = mutableSetOf()
 
         bostedsadresse?.matrikkeladresse?.let { bostedsadresserPdl.plus(it) }
@@ -86,7 +86,7 @@ class PersongrunnlagService(
                                          aktørId = integrasjonClient.hentAktivAktørId(Ident(nyttBarn)),
                                          navn = personinfo.navn ?: "",
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                                         bostedsadresse = BostedsadressePdl.fraBostedadress(personinfo.bostedsadresse)
+                                         bostedsadresse = BostedsadressePdl.fraBostedsadresse(personinfo.bostedsadresse)
             ))
         }
     }

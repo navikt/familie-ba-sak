@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.logg.LoggService
@@ -397,10 +398,10 @@ class BehandlingIntegrationTest {
 
     @Test
     fun `Hent en persons bostedsadresse fra PDL og lagre den i database`() {
-        val søkerFnr = "12345678910"
-        val barn1Fnr = "01101800033"
-        val barn2Fnr = "01101900033"
-        val barn3Fnr = "11223344556"
+        val søkerFnr = ClientMocks.søkerFnr[0]
+        val barn1Fnr = ClientMocks.barnFnr[0]
+        val barn2Fnr = ClientMocks.barnFnr[1]
+        val barn3Fnr = ClientMocks.søkerFnr[1]
 
         val matrikkelId = 123456L
         val søkerHusnummer = "12"

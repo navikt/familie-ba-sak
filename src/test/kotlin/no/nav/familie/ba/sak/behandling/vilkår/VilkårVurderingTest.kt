@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakter.felles.personinfo.UkjentBosted
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -195,7 +194,7 @@ class VilkårVurderingTest(
         assertFalse(begrensetGyldigVilkårsperiode.gyldigFor(LocalDate.now().plusDays(6)))
     }
 
-    private fun genererPerson(type: PersonType, personopplysningGrunnlag: PersonopplysningGrunnlag, bostedAddress: BostedsadressePdl?, kjønn: Kjønn= Kjønn.KVINNE) : Person{
+    private fun genererPerson(type: PersonType, personopplysningGrunnlag: PersonopplysningGrunnlag, bostedsadresse: BostedsadressePdl?, kjønn: Kjønn= Kjønn.KVINNE) : Person{
         return  Person(aktørId = randomAktørId(),
                        personIdent = PersonIdent(randomFnr()),
                        type = type,
@@ -203,7 +202,7 @@ class VilkårVurderingTest(
                        fødselsdato = LocalDate.of(1991, 1, 1),
                        navn = "navn",
                        kjønn = kjønn,
-                       bostedsadresse = bostedAddress)
+                       bostedsadresse = bostedsadresse)
     }
 
     @Test
