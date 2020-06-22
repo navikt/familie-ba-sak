@@ -37,13 +37,32 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                     journalpostId: String,
                     behandlendeEnhet: String,
                     oppgaveId: String): String {
-        val behandlinger = request.tilknyttedeBehandlingIder.map {
-            val behandling = behandlingService.hent(it.toLong())
-            behandlingService.knyttJournalpostTilBehandling(behandling = behandling, journalpostId = journalpostId)
-            behandling
+
+        val (sak, behandlinger) = knyttJournalpostTilBehandlingOgFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
+
+        håndterLogiskeVedlegg(request, journalpostId)
+
+        oppdaterOgFerdigstill(request = request.oppdaterMedDokumentOgSak(sak),
+                              journalpostId = journalpostId,
+                              behandlendeEnhet = behandlendeEnhet,
+                              oppgaveId = oppgaveId)
+
+        when (val aktivBehandling = behandlinger.find { it.aktiv }) {
+            null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
+            else -> opprettOppgaveFor(aktivBehandling, request.navIdent)
         }
 
-        val fagsak = when (request.knyttTilFagsak) {
+        return sak.fagsakId ?: ""
+    }
+
+    fun knyttJournalpostTilBehandlingOgFagsakTilJournalpost(tilknyttedeBehandlingIder: List<String>, journalpostId: String): Pair<Sak, List<Behandling>> {
+
+        val behandlinger = tilknyttedeBehandlingIder.map {
+            val behandling = behandlingService.hent(it.toLong())
+            behandlingService.knyttJournalpostTilBehandling(behandling = behandling, journalpostId = journalpostId)
+        }
+
+        val fagsak = when (tilknyttedeBehandlingIder.isNotEmpty()) {
             true -> {
                 val fagsaker = behandlinger.map { it.fagsak }.toSet()
 
@@ -62,19 +81,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                       arkivsaksystem = null,
                       arkivsaksnummer = null)
 
-        håndterLogiskeVedlegg(request, journalpostId)
+        return Pair(sak, behandlinger)
 
-        oppdaterOgFerdigstill(request = mapTilOppdaterJournalpostRequest(request, sak),
-                              journalpostId = journalpostId,
-                              behandlendeEnhet = behandlendeEnhet,
-                              oppgaveId = oppgaveId)
-
-        when (val aktivBehandling = behandlinger.find { it.aktiv }) {
-            null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
-            else -> opprettOppgaveFor(aktivBehandling, request.navIdent)
-        }
-
-        return sak.fagsakId ?: ""
     }
 
     private fun håndterLogiskeVedlegg(request: RestOppdaterJournalpost, journalpostId: String) {

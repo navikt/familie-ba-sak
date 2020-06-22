@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.beregning.domene
 
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query

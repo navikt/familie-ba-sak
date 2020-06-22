@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -64,9 +63,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    fun knyttJournalpostTilBehandling(behandling: Behandling, journalpostId: String) {
+    fun knyttJournalpostTilBehandling(behandling: Behandling, journalpostId: String) : Behandling {
         behandling.addJournalpost(journalpostId)
-        lagre(behandling)
+        return lagre(behandling)
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
@@ -91,8 +90,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
-    fun lagre(behandling: Behandling) {
-        behandlingRepository.save(behandling)
+    fun lagre(behandling: Behandling) : Behandling {
+        return behandlingRepository.save(behandling)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
