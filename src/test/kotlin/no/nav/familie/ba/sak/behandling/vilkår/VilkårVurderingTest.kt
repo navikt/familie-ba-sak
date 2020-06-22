@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
+import io.mockk.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -194,15 +197,18 @@ class VilkårVurderingTest(
         assertFalse(begrensetGyldigVilkårsperiode.gyldigFor(LocalDate.now().plusDays(6)))
     }
 
-    private fun genererPerson(type: PersonType, personopplysningGrunnlag: PersonopplysningGrunnlag, bostedsadresse: BostedsadressePdl?, kjønn: Kjønn= Kjønn.KVINNE) : Person{
-        return  Person(aktørId = randomAktørId(),
-                       personIdent = PersonIdent(randomFnr()),
-                       type = type,
-                       personopplysningGrunnlag = personopplysningGrunnlag,
-                       fødselsdato = LocalDate.of(1991, 1, 1),
-                       navn = "navn",
-                       kjønn = kjønn,
-                       bostedsadresse = bostedsadresse)
+    private fun genererPerson(type: PersonType,
+                              personopplysningGrunnlag: PersonopplysningGrunnlag,
+                              bostedsadresse: BostedsadressePdl?,
+                              kjønn: Kjønn = Kjønn.KVINNE): Person {
+        return Person(aktørId = randomAktørId(),
+                      personIdent = PersonIdent(randomFnr()),
+                      type = type,
+                      personopplysningGrunnlag = personopplysningGrunnlag,
+                      fødselsdato = LocalDate.of(1991, 1, 1),
+                      navn = "navn",
+                      kjønn = kjønn,
+                      bostedsadresse = bostedsadresse)
     }
 
     @Test
@@ -213,7 +219,7 @@ class VilkårVurderingTest(
                                         "St. Olavsvegen", "1232", "whatever", "4322")
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
 
-        val søker= genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
         personopplysningGrunnlag.personer.add(søker)
 
         val barn1 = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
@@ -240,7 +246,6 @@ class VilkårVurderingTest(
         personopplysningGrunnlag.personer.add(barn)
 
         Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
-
     }
 
     @Test
@@ -273,11 +278,11 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - ikke mor som søker`() {
-        val søkerAddress = VegadressePdl(2147483649,"11", "B", "H022",
+        val søkerAddress = VegadressePdl(2147483649, "11", "B", "H022",
                                          "St. Olavsvegen", "1232", "whatever", "4322")
 
-        val personopplysningGrunnlag= PersonopplysningGrunnlag(behandlingId = 5)
-        val søker= genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 5)
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(søker)
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
         personopplysningGrunnlag.personer.add(barn)
@@ -288,8 +293,8 @@ class VilkårVurderingTest(
     @Test
     fun `Negativ vurdering - søker har ukjentadresse`() {
         val ukjentbosted = UkjentBostedPdl("Oslo")
-        val personopplysningGrunnlag= PersonopplysningGrunnlag(behandlingId = 6)
-        val søker= genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(søker)
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(barn)

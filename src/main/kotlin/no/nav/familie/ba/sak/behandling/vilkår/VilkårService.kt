@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
-import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
@@ -36,8 +35,8 @@ class VilkårService(
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
-    private val vilkårSuksessMetrics: Map<Vilkår, Counter> = initVilkårMetrikker("suksess")
-    private val vilkårFeiletMetrics: Map<Vilkår, Counter> = initVilkårMetrikker("feil")
+    private val vilkårSuksessMetrics: MutableMap<Vilkår, Counter> = mutableMapOf()
+    private val vilkårFeiletMetrics: MutableMap<Vilkår, Counter> = mutableMapOf()
 
     fun hentVilkårsdato(behandling: Behandling): LocalDate? {
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
@@ -147,25 +146,55 @@ class VilkårService(
         return behandlingResultat
     }
 
-    private fun initVilkårMetrikker(type: String): Map<Vilkår, Counter> {
-        return Vilkår.values().map {
-            it to Metrics.counter("behandling.vilkår.$type",
-                                             "vilkår",
-                                             it.spesifikasjon.identifikator,
-                                             "beskrivelse",
-                                             it.spesifikasjon.beskrivelse)
-        }.toMap()
+    private fun hentIdentifikatorForEvaluering(evaluering: Evaluering): String {
+        return if (evaluering.identifikator != "")
+            evaluering.identifikator
+        else if (!evaluering.children.isEmpty())
+            hentIdentifikatorForEvaluering(evaluering.children.first())
+        else
+            throw java.lang.IllegalStateException("Evaluering har ikke identifikator")
     }
 
-    private fun addEvalueringsResultatTilMatrikkel(evalueringer: List<Evaluering>) {
+    private fun hentIdentifikatorForSpesifikasjon(spesifikasjon: Spesifikasjon<Fakta>): String {
+        return if (spesifikasjon.identifikator != "")
+            spesifikasjon.identifikator
+        else if (!spesifikasjon.children.isEmpty())
+            hentIdentifikatorForSpesifikasjon(spesifikasjon.children.first())
+        else
+            throw java.lang.IllegalStateException("Spesifikasjon har ikke identifikator")
+    }
+
+    private fun lagCounterForVilkår(resultat: Resultat, vilkår: Vilkår): Counter {
+        val type = if (resultat == Resultat.JA) "suksess"
+        else if (resultat == Resultat.NEI) "feil"
+        else throw java.lang.IllegalStateException("Vilkårsvurderings Resultat er ikke JA eller NEI")
+        return Metrics.counter("behandling.vilkår.$type",
+                               "vilkår",
+                               hentIdentifikatorForSpesifikasjon(vilkår.spesifikasjon),
+                               "beskrivelse",
+                               vilkår.spesifikasjon.beskrivelse)
+    }
+
+    private fun hentCounterFraMap(counterMap: MutableMap<Vilkår, Counter>, resultat: Resultat, vilkår: Vilkår): Counter?{
+        if (counterMap.get(vilkår) == null) {
+            counterMap.put(vilkår, lagCounterForVilkår(resultat, vilkår))
+        }
+        return counterMap.get(vilkår)
+    }
+
+    private fun hentCounterForVilkår(resultat: Resultat, vilkår: Vilkår): Counter? {
+        return if (resultat == Resultat.JA) {
+            hentCounterFraMap(vilkårSuksessMetrics, resultat, vilkår)
+        } else if (resultat == Resultat.NEI) {
+            hentCounterFraMap(vilkårFeiletMetrics, resultat, vilkår)
+        } else
+            throw java.lang.IllegalStateException("Illegal type of metrics")
+    }
+
+    fun addEvalueringsResultatTilMatrikkel(evalueringer: List<Evaluering>) {
         evalueringer.forEach {
-            if (it.resultat.equals(Resultat.JA)) {
-                val counter = vilkårSuksessMetrics.get(Vilkår.valueOf(it.identifikator))
-                counter?.increment()
-            } else if (it.resultat.equals(Resultat.NEI)) {
-                val counter = vilkårFeiletMetrics.get(Vilkår.valueOf(it.identifikator))
-                counter?.increment()
-            }
+            val counter = hentCounterForVilkår(it.resultat, Vilkår.valueOf(hentIdentifikatorForEvaluering(it)))
+            counter?.increment()
         }
     }
 
