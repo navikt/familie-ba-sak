@@ -41,7 +41,7 @@ class LoggService(
         val tittel = if (!søknadFinnesFraFør) "Søknaden ble registrert" else "Søknaden ble endret"
         lagre(Logg(
                 behandlingId = behandling.id,
-                type = LoggType.FØDSELSHENDELSE,
+                type = LoggType.SØKNAD_REGISTRERT,
                 tittel = tittel,
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = ""

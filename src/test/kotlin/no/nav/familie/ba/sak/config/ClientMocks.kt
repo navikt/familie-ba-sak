@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
+import java.util.*
 
 @Component
 class ClientMocks {
@@ -34,7 +35,7 @@ class ClientMocks {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
 
-        every { mockIntegrasjonClient.hentJournalpost(any()) } returns success(lagTestJournalpost(søkerFnr[0], "1234"))
+        every { mockIntegrasjonClient.hentJournalpost(any()) } answers { success(lagTestJournalpost(søkerFnr[0], UUID.randomUUID().toString())) }
 
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 lagTestOppgaveDTO(1L)
