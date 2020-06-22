@@ -28,11 +28,12 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     implementasjon = { barnBorMedSøker(this) })
                     og Spesifikasjon(beskrivelse = "§2-2 - Bor med søker: Har eksakt en søker",
                                      identifikator = "BOR_MED_SØKER",
-                                     implementasjon = { harEttSøker(this) })
+                                     implementasjon = { harEnSøker(this) })
                     og Spesifikasjon(beskrivelse = "§2-2 - Bor med søker: søker må være mor",
                                      identifikator = "BOR_MED_SØKER",
                                      implementasjon = { søkerErMor(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
+
     GIFT_PARTNERSKAP(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
             spesifikasjon = Spesifikasjon(

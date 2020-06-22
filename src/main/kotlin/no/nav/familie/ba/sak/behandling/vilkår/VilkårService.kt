@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
@@ -10,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
@@ -32,6 +35,9 @@ class VilkårService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
+
+    private val vilkårSuksessMetrics: Map<Vilkår, Counter> = initVilkårMetrikker("suksess")
+    private val vilkårFeiletMetrics: Map<Vilkår, Counter> = initVilkårMetrikker("feil")
 
     fun hentVilkårsdato(behandling: Behandling): LocalDate? {
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
@@ -75,6 +81,8 @@ class VilkårService(
             )
             val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
             personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, evalueringer))
+
+            addEvalueringsResultatTilMatrikkel(evalueringer)
             personResultat
         }.toSet()
 
@@ -137,6 +145,28 @@ class VilkårService(
             personResultat
         }.toSet()
         return behandlingResultat
+    }
+
+    private fun initVilkårMetrikker(type: String): Map<Vilkår, Counter> {
+        return Vilkår.values().map {
+            it to Metrics.counter("behandling.vilkår.$type",
+                                             "vilkår",
+                                             it.spesifikasjon.identifikator,
+                                             "beskrivelse",
+                                             it.spesifikasjon.beskrivelse)
+        }.toMap()
+    }
+
+    private fun addEvalueringsResultatTilMatrikkel(evalueringer: List<Evaluering>) {
+        evalueringer.forEach {
+            if (it.resultat.equals(Resultat.JA)) {
+                val counter = vilkårSuksessMetrics.get(Vilkår.valueOf(it.identifikator))
+                counter?.increment()
+            } else if (it.resultat.equals(Resultat.NEI)) {
+                val counter = vilkårFeiletMetrics.get(Vilkår.valueOf(it.identifikator))
+                counter?.increment()
+            }
+        }
     }
 
     private fun spesifikasjonerForPerson(person: Person, behandlingKategori: BehandlingKategori): Spesifikasjon<Fakta> {

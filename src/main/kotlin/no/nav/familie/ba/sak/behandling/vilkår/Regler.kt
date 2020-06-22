@@ -10,7 +10,7 @@ internal fun barnUnder18År(fakta: Fakta): Evaluering {
     else Evaluering.nei("Barn er ikke under 18 år")
 }
 
-internal fun harEttSøker(fakta: Fakta): Evaluering {
+internal fun harEnSøker(fakta: Fakta): Evaluering {
     val barn = fakta.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
     return if (søker.size == 1) Evaluering.ja(("Har en søker")) else Evaluering.nei(("Har ikke eksakt en søker"))
@@ -19,9 +19,12 @@ internal fun harEttSøker(fakta: Fakta): Evaluering {
 internal fun søkerErMor(fakta: Fakta): Evaluering {
     val barn = fakta.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
+
     return if (søker.isEmpty())
         Evaluering.nei(("Ingen søker"))
-    else if (søker.first().kjønn == Kjønn.KVINNE) Evaluering.ja(("Søker er mor")) else Evaluering.nei(("Søker er ikke mor"))
+    else if (søker.first().kjønn == Kjønn.KVINNE)
+        Evaluering.ja(("Søker er mor"))
+    else Evaluering.nei(("Søker er ikke mor"))
 }
 
 internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
