@@ -225,9 +225,9 @@ class VilkårVurderingTest(
         val barn3 = genererPerson(PersonType.BARN, personopplysningGrunnlag, null, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(barn3)
 
-        Assertions.assertEquals(Resultat.JA, barnBorMedMor (Fakta(barn1)).resultat)
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor (Fakta(barn2)).resultat)
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor (Fakta(barn3)).resultat)
+        Assertions.assertEquals(Resultat.JA, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn1)).resultat)
+        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn2)).resultat)
+        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn3)).resultat)
     }
 
     @Test
@@ -239,7 +239,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, null)
         personopplysningGrunnlag.personer.add(barn)
 
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn)).resultat)
+        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
 
     }
 
@@ -256,7 +256,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
         personopplysningGrunnlag.personer.add(barn)
 
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn)).resultat)
+        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
     }
 
     @Test
@@ -268,7 +268,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(barn)
 
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn)).resultat)
+        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
     }
 
     @Test
@@ -282,7 +282,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
         personopplysningGrunnlag.personer.add(barn)
 
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn)).resultat)
+        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
     }
 
     @Test
@@ -294,6 +294,6 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(barn)
 
-        Assertions.assertEquals(Resultat.NEI, barnBorMedMor(Fakta(barn)).resultat)
+        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
     }
 }

@@ -22,10 +22,16 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     BOR_MED_SØKER(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
-            spesifikasjon = Spesifikasjon(
+            spesifikasjon = Spesifikasjon<Fakta>(
                     beskrivelse = "§2-2 - Bor med søker",
                     identifikator = "BOR_MED_SØKER",
-                    implementasjon = { barnBorMedMor(this) }),
+                    implementasjon = { barnBorMedSøker(this) })
+                    og Spesifikasjon(beskrivelse = "§2-2 - Bor med søker: Har eksakt en søker",
+                                     identifikator = "BOR_MED_SØKER",
+                                     implementasjon = { harEttSøker(this) })
+                    og Spesifikasjon(beskrivelse = "§2-2 - Bor med søker: søker må være mor",
+                                     identifikator = "BOR_MED_SØKER",
+                                     implementasjon = { søkerErMor(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     GIFT_PARTNERSKAP(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
@@ -53,6 +59,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     override fun toString(): String {
         return this.spesifikasjon.beskrivelse
     }
+
     companion object {
         fun hentVilkårForPart(personType: PersonType) = values()
                 .filter { personType in it.parterDetteGjelderFor }.toSet()

@@ -13,8 +13,12 @@ data class UkjentBostedPdl(
 
 ) : BostedsadressePdl() {
 
-    override fun toString(): String {
+    override fun toSecureString(): String {
         return """UkjentadresseDao(bostedskommune=$bostedskommune""".trimMargin()
+    }
+
+    override fun toString(): String {
+        return ""
     }
 
     companion object {

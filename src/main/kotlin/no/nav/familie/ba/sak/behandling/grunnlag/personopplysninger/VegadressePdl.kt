@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.kontrakter.felles.personinfo.Vegadresse
+import java.util.*
 import javax.persistence.Column
 import javax.persistence.DiscriminatorValue
 import javax.persistence.Entity
@@ -34,9 +35,28 @@ data class VegadressePdl(
 
 ) : BostedsadressePdl() {
 
-    override fun toString(): String {
-        return """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,bruksenhetsnummer=$bruksenhetsnummer,
+    override fun toSecureString(): String {
+        return """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
 |           adressenavn=$adressenavn,kommunenummer=$kommunenummer,tilleggsnavn=$tilleggsnavn,postnummer=$postnummer""".trimMargin()
+    }
+
+    override fun toString(): String{
+        return ""
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null || javaClass != other.javaClass) {
+            return false
+        }
+        val otherVegadresse = other as VegadressePdl
+        return this === other
+               || matrikkelId != null
+               && matrikkelId == otherVegadresse.matrikkelId
+               && bruksenhetsnummer == otherVegadresse.bruksenhetsnummer
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(matrikkelId, bruksenhetsnummer)
     }
 
     companion object {

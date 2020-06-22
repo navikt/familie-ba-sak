@@ -150,6 +150,7 @@ class VilkårService(
     private fun vilkårResultater(personResultat: PersonResultat,
                                  barnet: Person,
                                  evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
+
         return evalueringer.map { child ->
             val tom: LocalDate? =
                     if (Vilkår.valueOf(child.identifikator) == Vilkår.UNDER_18_ÅR) barnet.fødselsdato.plusYears(18) else null

@@ -16,16 +16,7 @@ abstract class BostedsadressePdl(
         val id: Long = 0
 ) : BaseEntitet() {
 
-    override fun equals(other: Any?): Boolean {
-        if (other == null || javaClass != other.javaClass) {
-            return false
-        }
-        return this === other || toString() == other.toString()
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(toString())
-    }
+    abstract fun toSecureString(): String
 
     companion object {
         fun fraBostedsadresse(bostedsadresse: Bostedsadresse?): BostedsadressePdl? {
