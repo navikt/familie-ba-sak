@@ -23,7 +23,8 @@ import java.time.LocalDate
 @Service
 class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                            private val behandlingService: BehandlingService,
-                           private val oppgaveService: OppgaveService) {
+                           private val oppgaveService: OppgaveService,
+                           private val journalføringRepository: JournalføringRepository) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
         return integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
@@ -58,8 +59,11 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
     fun knyttJournalpostTilBehandlingOgFagsakTilJournalpost(tilknyttedeBehandlingIder: List<String>, journalpostId: String): Pair<Sak, List<Behandling>> {
 
         val behandlinger = tilknyttedeBehandlingIder.map {
-            val behandling = behandlingService.hent(it.toLong())
-            behandlingService.knyttJournalpostTilBehandling(behandling = behandling, journalpostId = journalpostId)
+            behandlingService.hent(it.toLong())
+        }
+
+        behandlinger.forEach {
+            journalføringRepository.save(DbJournalpost(behandling = it, journalpostId = journalpostId))
         }
 
         val fagsak = when (tilknyttedeBehandlingIder.isNotEmpty()) {

@@ -63,10 +63,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    fun knyttJournalpostTilBehandling(behandling: Behandling, journalpostId: String) : Behandling {
-        behandling.addJournalpost(journalpostId)
-        return lagre(behandling)
-    }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
