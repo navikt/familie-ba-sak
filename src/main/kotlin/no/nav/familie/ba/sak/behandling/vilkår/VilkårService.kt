@@ -147,7 +147,7 @@ class VilkårService(
     }
 
     private fun hentIdentifikatorForEvaluering(evaluering: Evaluering): String {
-        return if (evaluering.identifikator != "")
+        return if (enumValues<Vilkår>().map{it.name}.contains(evaluering.identifikator))
             evaluering.identifikator
         else if (!evaluering.children.isEmpty())
             hentIdentifikatorForEvaluering(evaluering.children.first())
@@ -156,7 +156,7 @@ class VilkårService(
     }
 
     private fun hentIdentifikatorForSpesifikasjon(spesifikasjon: Spesifikasjon<Fakta>): String {
-        return if (spesifikasjon.identifikator != "")
+        return if (enumValues<Vilkår>().map{it.name}.contains(spesifikasjon.identifikator))
             spesifikasjon.identifikator
         else if (!spesifikasjon.children.isEmpty())
             hentIdentifikatorForSpesifikasjon(spesifikasjon.children.first())
