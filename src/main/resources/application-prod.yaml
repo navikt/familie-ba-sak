@@ -42,6 +42,15 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-ba-infotrygd-barnetrygd-clientcredentials:
+        resource-url: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_SCOPE}
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILIE_PROSESSERING_CLIENT_ID}
 
@@ -61,7 +70,7 @@ APPDYNAMICS_AGENT_ACCOUNT_NAME: PROD
 
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
-FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.nais.adeo.no
+FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.adeo.no
 NORG2_BASE_URL: https://app.adeo.no/norg2
 
 #Unleash
