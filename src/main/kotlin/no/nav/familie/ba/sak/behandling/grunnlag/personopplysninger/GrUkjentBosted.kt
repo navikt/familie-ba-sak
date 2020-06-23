@@ -5,7 +5,7 @@ import javax.persistence.Column
 import javax.persistence.DiscriminatorValue
 import javax.persistence.Entity
 
-@Entity(name = "ukjentBostedTpl")
+@Entity(name = "GrUkjentBosted")
 @DiscriminatorValue("ukjentBosted")
 data class GrUkjentBosted(
         @Column(name = "bostedskommune")

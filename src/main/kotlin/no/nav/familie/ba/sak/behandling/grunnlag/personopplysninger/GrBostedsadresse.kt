@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
 import javax.persistence.*
 
-@Entity(name = "BostedsadressePdl")
+@Entity(name = "GrBostedsadresse")
 @Inheritance
 @DiscriminatorColumn(name = "type")
 @Table(name = "PO_BOSTEDSADRESSE")
