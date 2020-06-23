@@ -47,9 +47,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
                                         steg = initSteg(nyBehandling.behandlingType))
-            if(!nyBehandling.journalpostID.isNullOrBlank()) {
-                behandling.addJournalpost(journalpostId = nyBehandling.journalpostID)
-            }
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
             behandling

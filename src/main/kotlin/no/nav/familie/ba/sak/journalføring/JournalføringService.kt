@@ -39,7 +39,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                     behandlendeEnhet: String,
                     oppgaveId: String): String {
 
-        val (sak, behandlinger) = knyttJournalpostTilBehandlingOgFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
+        val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
 
         håndterLogiskeVedlegg(request, journalpostId)
 
@@ -56,7 +56,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         return sak.fagsakId ?: ""
     }
 
-    fun knyttJournalpostTilBehandlingOgFagsakTilJournalpost(tilknyttedeBehandlingIder: List<String>, journalpostId: String): Pair<Sak, List<Behandling>> {
+    fun lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder: List<String>, journalpostId: String): Pair<Sak, List<Behandling>> {
 
         val behandlinger = tilknyttedeBehandlingIder.map {
             behandlingService.hent(it.toLong())

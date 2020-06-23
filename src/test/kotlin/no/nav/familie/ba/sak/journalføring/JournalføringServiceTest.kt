@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,28 +29,30 @@ class JournalføringServiceTest(
         private val fagsakService: FagsakService,
 
         @Autowired
-        private val journalføringService: JournalføringService
+        private val journalføringService: JournalføringService,
+
+        @Autowired
+        private val journalføringRepository: JournalføringRepository
 
 ) {
 
 
 
     @Test
-    fun `knytter journalpost til behandling og fagsak til journalpost`() {
-
+    fun `lagrer journalpostreferanse til behandling og fagsak til journalpost`() {
 
         val søkerFnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerFnr))
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
-                .knyttJournalpostTilBehandlingOgFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
+                .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
 
+        val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.id)
+
+        assertEquals(1, journalposter.size)
         assertEquals(fagsak.id.toString(), sak.fagsakId)
         assertEquals(1, behandlinger.size)
-        assertEquals(1, behandlinger.first().journalposter.size)
-        assertEquals("12345", behandlinger.first().journalposter.first().journalpostId)
-
 
     }
 
@@ -60,7 +63,7 @@ class JournalføringServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
-                .knyttJournalpostTilBehandlingOgFagsakTilJournalpost(listOf(), "12345")
+                .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
 
         assertNull(sak.fagsakId)
         assertEquals(Sakstype.GENERELL_SAK.type, sak.sakstype)

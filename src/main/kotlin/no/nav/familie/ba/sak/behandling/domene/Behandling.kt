@@ -22,10 +22,6 @@ data class Behandling(
         @Column(name = "journalpost_id")
         val journalpostID: String? = null,
 
-        @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.EAGER,
-                    mappedBy = "behandling")
-        val journalposter: MutableSet<DbJournalpost> = mutableSetOf(),
-
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
         val type: BehandlingType,
@@ -56,10 +52,6 @@ data class Behandling(
         @Column(name = "steg", nullable = false)
         var steg: StegType = initSteg()
 ) : BaseEntitet() {
-
-    fun addJournalpost(journalpostId: String) {
-        journalposter.add(DbJournalpost(behandling = this, journalpostId = journalpostId))
-    }
 
     override fun toString(): String {
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
