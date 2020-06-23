@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -66,8 +66,7 @@ class FerdigstillBehandlingTaskTest {
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+                personopplysningGrunnlag = personopplysningGrunnlag
         )
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)

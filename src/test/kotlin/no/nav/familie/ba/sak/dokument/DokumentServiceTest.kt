@@ -7,11 +7,13 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.*
@@ -50,7 +52,10 @@ class DokumentServiceTest(
         private val vedtakService: VedtakService,
 
         @Autowired
-        private val dokumentService: DokumentService
+        private val dokumentService: DokumentService,
+
+        @Autowired
+        private val totrinnskontrollService: TotrinnskontrollService
 ) {
 
     @BeforeEach
@@ -96,8 +101,7 @@ class DokumentServiceTest(
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandling,
-                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+                behandling = behandling
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
@@ -116,6 +120,9 @@ class DokumentServiceTest(
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat1, true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling, "ansvarligSaksbehandler")
+        totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
+
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
         val pdfvedtaksbrevRess = dokumentService.hentBrevForVedtak(vedtak)
@@ -140,8 +147,7 @@ class DokumentServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandling,
-                ansvarligSaksbehandler = "ansvarligSaksbehandler"
+                behandling = behandling
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
@@ -164,7 +170,9 @@ class DokumentServiceTest(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling, "ansvarligSaksbehandler")
+        totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
+
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
         val pdfvedtaksbrev = dokumentService.genererBrevForVedtak(vedtak)

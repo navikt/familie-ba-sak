@@ -2,7 +2,10 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
@@ -19,7 +22,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -73,7 +75,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         loggService.opprettBehandlingLogg(nyBehandling)
 
         val nyttVedtak = Vedtak(
-                ansvarligSaksbehandler = saksbehandler,
                 behandling = nyBehandling,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = gjeldendeVedtak.id,
@@ -91,7 +92,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         )
         tilkjentYtelseRepository.save(nyTilkjentYtelse)
 
-        totrinnskontrollService.opprettTotrinnskontroll(nyBehandling, saksbehandler)
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(nyBehandling, saksbehandler)
         totrinnskontrollService.besluttTotrinnskontroll(nyBehandling, SYSTEM_NAVN, Beslutning.GODKJENT)
 
         behandlingRepository.save(nyBehandling.also { it.steg = StegType.FERDIGSTILLE_BEHANDLING })
@@ -103,14 +104,12 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     @Transactional
     fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
-                                                   personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                                   ansvarligSaksbehandler: String): Vedtak {
+                                                   personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
         val forrigeVedtak = hentForrigeVedtak(behandling = behandling)
         val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
 
         val vedtak = Vedtak(
                 behandling = behandling,
-                ansvarligSaksbehandler = ansvarligSaksbehandler,
                 vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = forrigeVedtak?.id,
                 ansvarligEnhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling),
@@ -123,12 +122,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
 
     @Transactional
-    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Ressurs<RestFagsak> {
+    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak) {
         vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak)
 
         lagreOgDeaktiverGammel(vedtak)
-
-        return fagsakService.hentRestFagsak(vedtak.behandling.fagsak.id)
     }
 
     fun hentForrigeVedtak(behandling: Behandling): Vedtak? {
@@ -164,12 +161,11 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         return vedtakRepository.save(vedtak)
     }
 
-    fun godkjennVedtak(vedtak: Vedtak) {
-        vedtak.ansvarligBeslutter = SikkerhetContext.hentSaksbehandlerNavn()
+    fun besluttVedtak(vedtak: Vedtak) {
         vedtak.vedtaksdato = LocalDate.now()
         oppdaterVedtakMedStønadsbrev(vedtak)
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} godkjenner vedtak $vedtak")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
         lagreEllerOppdater(vedtak)
     }
 

@@ -15,6 +15,6 @@ data class RestOppdaterJournalpost(val avsender: NavnOgIdent,
                                    val navIdent: String
 )
 
-data class NavnOgIdent (val navn: String,
-                        val id: String
+data class NavnOgIdent(val navn: String,
+                       val id: String
 )

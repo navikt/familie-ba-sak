@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.dokument
 
-import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
-import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.HTML
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat.PDF
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.dokument.domene.DokumentRequest
@@ -27,24 +25,6 @@ class DokGenKlient(
         private val restTemplate: RestTemplate
 ) {
 
-    fun hentMarkdownForMal(malMedData: MalMedData): String {
-        val url = URI.create("$dokgenServiceUri/template/${malMedData.mal}/create-markdown")
-        val response = utførRequest(lagPostRequest(url, malMedData.fletteFelter), String::class.java)
-        return response.body.orEmpty()
-    }
-
-    fun lagHtmlFraMarkdown(template: String, markdown: String, dokumentHeaderFelter: DokumentHeaderFelter): String {
-        val request = lagDokumentRequestForMarkdown(HTML, template, markdown, dokumentHeaderFelter)
-        val response = utførRequest(request, String::class.java)
-        return response.body.orEmpty()
-    }
-
-    fun lagPdfFraMarkdown(template: String, markdown: String, dokumentHeaderFelter: DokumentHeaderFelter): ByteArray {
-        val request = lagDokumentRequestForMarkdown(PDF, template, markdown, dokumentHeaderFelter)
-        val response = utførRequest(request, ByteArray::class.java)
-        return response.body!!
-    }
-
     fun lagPdfForMal(malMedData: MalMedData, dokumentHeaderFelter: DokumentHeaderFelter): ByteArray {
         val url = URI.create("$dokgenServiceUri/template/${malMedData.mal}/create-doc")
         val request = lagPostRequest(url, DokumentRequest(docFormat = PDF,
@@ -55,20 +35,6 @@ class DokGenKlient(
                                                           headerFields = objectMapper.writeValueAsString(dokumentHeaderFelter)))
         val response = utførRequest(request ,ByteArray::class.java)
         return response.body!!
-    }
-
-    fun lagDokumentRequestForMarkdown(format: DocFormat,
-                                      template: String,
-                                      markdown: String,
-                                      dokumentHeaderFelter: DokumentHeaderFelter): RequestEntity<Any> {
-        val url = URI.create("$dokgenServiceUri/template/${template}/create-doc")
-        val body = DokumentRequest(format,
-                                   markdown,
-                                   true,
-                                   null,
-                                   true,
-                                   objectMapper.writeValueAsString(dokumentHeaderFelter))
-        return lagPostRequest(url, body)
     }
 
     private fun lagPostRequest(url: URI, body: Any): RequestEntity<Any> {
@@ -86,8 +52,16 @@ class DokGenKlient(
             return restTemplate.exchange(request, responseType)
         } catch (e: HttpClientErrorException.NotFound) {
             error("Ugyldig mal.")
-        } catch (e: RestClientException) {
-            error("Ukjent feil ved dokumentgenerering.")
+        } catch (e: Exception) {
+            if (request.url.host == "familie-ba-dokgen.adeo.no") {
+                LOG.error("Feilet mot prod-gcp. Redirect'er request til prod-fss")
+                val url_prod_fss = URI.create(request.url.toString().replace("adeo.no", "nais.adeo.no"))
+                return utførRequest(lagPostRequest(url_prod_fss, request.body!!), responseType)
+            }
+            if (e is RestClientException) {
+                error("Ukjent feil ved dokumentgenerering.")
+            }
+            throw e
         }
     }
 

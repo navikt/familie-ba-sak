@@ -200,14 +200,14 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                     it?.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId.",
                                                                                   null,
                                                                                   uri,
-                                                                                  opprettOppgave.ident.ident)
+                                                                                  opprettOppgave.ident?.ident)
                 },
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
                     throw IntegrasjonException("Kall mot integrasjon feilet ved opprett oppgave. response=$message",
                                                it,
                                                uri,
-                                               opprettOppgave.ident.ident)
+                                               opprettOppgave.ident?.ident)
                 }
         )
     }
@@ -370,7 +370,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/arkiv/v2")
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
         if (vedtak.ansvarligEnhet == "9999") {
-            logger.error("Informasjon om enhet mangler på bruker ${vedtak.ansvarligSaksbehandler} og er satt til fallback-verdi, 9999")
+            logger.error("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, 9999")
         }
 
         return Result.runCatching {

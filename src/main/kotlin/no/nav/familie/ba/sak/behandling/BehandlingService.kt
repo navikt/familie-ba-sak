@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
@@ -27,7 +28,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakPersonRepository: FagsakPersonRepository,
                         private val persongrunnlagService: PersongrunnlagService,
                         private val beregningService: BeregningService,
-                        private val fagsakService: FagsakService) {
+                        private val fagsakService: FagsakService,
+                        private val loggService: LoggService) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -39,14 +41,16 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         // TODO: journalbehandling til å ha en liste av journalpostenr
         return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
-            lagreNyOgDeaktiverGammelBehandling(
-                    Behandling(fagsak = fagsak,
-                               opprinnelse = nyBehandling.behandlingOpprinnelse,
-                               journalpostID = nyBehandling.journalpostID,
-                               type = nyBehandling.behandlingType,
-                               kategori = nyBehandling.kategori,
-                               underkategori = nyBehandling.underkategori,
-                               steg = initSteg(nyBehandling.behandlingType)))
+            val behandling = Behandling(fagsak = fagsak,
+                                        opprinnelse = nyBehandling.behandlingOpprinnelse,
+                                        journalpostID = nyBehandling.journalpostID,
+                                        type = nyBehandling.behandlingType,
+                                        kategori = nyBehandling.kategori,
+                                        underkategori = nyBehandling.underkategori,
+                                        steg = initSteg(nyBehandling.behandlingType))
+            lagreNyOgDeaktiverGammelBehandling(behandling)
+            loggService.opprettBehandlingLogg(behandling)
+            behandling
         } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
             aktivBehandling.steg = initSteg(nyBehandling.behandlingType)
             aktivBehandling.status = BehandlingStatus.OPPRETTET

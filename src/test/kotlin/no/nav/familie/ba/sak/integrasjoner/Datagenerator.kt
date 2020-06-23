@@ -28,6 +28,7 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
                       sakstype = Sakstype.FAGSAK.name,
                       fagsakId = null,
                       fagsaksystem = FAGSYSTEM),
+            tittel = "Søknad om ordinær barnetrygd",
             relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT"))
     )
 }

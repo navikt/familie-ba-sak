@@ -34,14 +34,14 @@ class BeslutteVedtak(
         }
 
         totrinnskontrollService.besluttTotrinnskontroll(behandling = behandling,
-                                                                               beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
-                                                                               beslutning = data.beslutning)
+                                                        beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
+                                                        beslutning = data.beslutning)
 
         if (data.beslutning.erGodkjent()) {
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                          ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-            vedtakService.godkjennVedtak(vedtak)
+            vedtakService.besluttVedtak(vedtak)
 
             opprettTaskIverksettMotOppdrag(behandling, vedtak)
         }

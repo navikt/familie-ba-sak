@@ -33,7 +33,7 @@ class SendTilBeslutter(
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {
         loggService.opprettSendTilBeslutterLogg(behandling)
-        totrinnskontrollService.opprettTotrinnskontroll(behandling)
+        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling)
 
         val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,
@@ -64,7 +64,7 @@ class SendTilBeslutter(
                                  throw Feil("Fant ikke behandlingsresultat på behandling")
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat.kopier(),
-                                                           true)
+                                                           false)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

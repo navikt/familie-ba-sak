@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 val TIDENES_MORGEN = LocalDate.MIN
-val TIDENES_ENDE = LocalDate.MAX.minusDays(1)
+val TIDENES_ENDE = LocalDate.MAX
 
 
 fun LocalDate.tilKortString() = this.format(DateTimeFormatter.ofPattern("dd.MM.YY", nbLocale))
@@ -66,7 +66,7 @@ fun VilkårResultat.toPeriode(): Periode {
 }
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
-    return this.toPeriode().tom.month == other.toPeriode().fom.month &&
+    return (other.toPeriode().fom.monthValue - this.toPeriode().tom.monthValue <= 1) &&
             this.toPeriode().tom.year == other.toPeriode().fom.year
 }
 

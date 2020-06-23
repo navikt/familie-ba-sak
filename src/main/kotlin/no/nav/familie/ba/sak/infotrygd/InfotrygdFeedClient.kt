@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.infotrygd
 
-import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.Logger

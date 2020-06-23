@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.dokument
 
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
 import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker.TREDJELANDSBORGER
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
@@ -13,7 +14,7 @@ import no.nav.familie.ba.sak.client.Norg2RestClient
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -21,6 +22,7 @@ import java.time.LocalDate
 @Service
 class MalerService(
         private val vilkårService: VilkårService,
+        private val totrinnskontrollService: TotrinnskontrollService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
         private val norg2RestClient: Norg2RestClient
@@ -52,6 +54,7 @@ class MalerService(
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
         val behandling = vedtak.behandling
+        val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling)
         val barna = persongrunnlagService.hentBarna(behandling)
 
         val andelTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
@@ -70,9 +73,9 @@ class MalerService(
                 enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
                 else throw Feil(message = "Ansvarlig enhet er ikke satt ved generering av brev",
                                 frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev"),
-                saksbehandler = vedtak.ansvarligSaksbehandler,
-                beslutter = vedtak.ansvarligBeslutter
-                            ?: SikkerhetContext.hentSaksbehandlerNavn(),
+                saksbehandler = totrinnskontroll.saksbehandler,
+                beslutter = totrinnskontroll.beslutter
+                            ?: totrinnskontroll.saksbehandler,
                 barnasFodselsdatoer = barnasFødselsdatoer,
                 virkningsdato = utbetalingsperioder.minLocalDate.førsteDagIInneværendeMåned().tilDagMånedÅr(),
                 vilkårsdato = vilkårsdato.tilDagMånedÅr(),

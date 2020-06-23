@@ -27,7 +27,7 @@ class ToTrinnKontrollTestConfig {
     lateinit var totrinnskontrollRepository: TotrinnskontrollRepository
 
     @Bean
-    @Profile("mock-totrinnkontroll")
+    @Profile("mock-totrinnkontroll") // Obs! Mock til e2e-tester. Vil ikke fungere som en mock ved manuell testing lokalt.
     @Primary
     fun mockToTrinnKontrollService(): TotrinnskontrollService {
         val totrinnskontrollService: TotrinnskontrollService = mockk()
@@ -53,7 +53,7 @@ class ToTrinnKontrollTestConfig {
             totrinnskontrollRepository.save(totrinnskontroll)
         }
 
-        every { totrinnskontrollService.opprettTotrinnskontroll(any(), any()) } answers {
+        every { totrinnskontrollService.opprettEllerHentTotrinnskontroll(any(), any()) } answers {
             val behandling = firstArg<Behandling>()
             totrinnskontrollRepository.save(Totrinnskontroll(
                     behandling = behandling,
