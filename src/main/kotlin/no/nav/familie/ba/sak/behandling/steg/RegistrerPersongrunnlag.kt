@@ -11,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class RegistrerPersongrunnlag(
         private val persongrunnlagService: PersongrunnlagService,
-        private val featureToggleService: FeatureToggleService,
-        private val taskRepository: TaskRepository,
         private val vilkårService: VilkårService
 ) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
 
