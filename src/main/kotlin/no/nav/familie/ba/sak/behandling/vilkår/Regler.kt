@@ -15,9 +15,9 @@ internal fun harEnSøker(fakta: Fakta): Evaluering {
     val barn = fakta.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
     return if (søker.size == 1)
-        Evaluering.ja(("Har en søker"))
+        Evaluering.ja("Søknad har eksakt en søker")
     else
-        Evaluering.nei(("Har ikke eksakt en søker"))
+        Evaluering.nei("Søknad har mer enn en eller ingen søker")
 }
 
 internal fun søkerErMor(fakta: Fakta): Evaluering {
