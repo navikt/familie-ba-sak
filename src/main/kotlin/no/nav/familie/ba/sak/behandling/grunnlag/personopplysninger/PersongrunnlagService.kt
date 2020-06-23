@@ -54,7 +54,7 @@ class PersongrunnlagService(
                            fødselsdato = personinfo.fødselsdato,
                            aktørId = aktørId,
                            navn = personinfo.navn ?: "",
-                           bostedsadresse = BostedsadressePdl.fraBostedsadresse(personinfo.bostedsadresse),
+                           bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT
         )
         personopplysningGrunnlag.personer.add(søker)
@@ -65,14 +65,14 @@ class PersongrunnlagService(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    private fun tilBostedsadressePDL(bostedsadresse: Bostedsadresse?): Set<BostedsadressePdl> {
-        val bostedsadresserPdl: Set<BostedsadressePdl> = mutableSetOf()
+    private fun tilGrBostedsadresse(bostedsadresse: Bostedsadresse?): Set<GrBostedsadresse> {
+        val grBostedsadresser: Set<GrBostedsadresse> = mutableSetOf()
 
-        bostedsadresse?.matrikkeladresse?.let { bostedsadresserPdl.plus(it) }
-        bostedsadresse?.ukjentBosted?.let { bostedsadresserPdl.plus(it) }
-        bostedsadresse?.vegadresse?.let { bostedsadresserPdl.plus(it) }
+        bostedsadresse?.matrikkeladresse?.let { grBostedsadresser.plus(it) }
+        bostedsadresse?.ukjentBosted?.let { grBostedsadresser.plus(it) }
+        bostedsadresse?.vegadresse?.let { grBostedsadresser.plus(it) }
 
-        return bostedsadresserPdl
+        return grBostedsadresser
     }
 
     private fun hentBarn(barnasFødselsnummer: List<String>,
@@ -86,7 +86,7 @@ class PersongrunnlagService(
                                          aktørId = integrasjonClient.hentAktivAktørId(Ident(nyttBarn)),
                                          navn = personinfo.navn ?: "",
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                                         bostedsadresse = BostedsadressePdl.fraBostedsadresse(personinfo.bostedsadresse)
+                                         bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse)
             ))
         }
     }

@@ -119,8 +119,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                     søkerPersonIdent: String,
                                     barnasIdenter: List<String>): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
-    val bostedsadresse = MatrikkeladressePdl(matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
-                                             postnummer = "0202", kommunenummer = "2231")
+    val bostedsadresse = GrMatrikkeladresse(matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
+                                            postnummer = "0202", kommunenummer = "2231")
 
     val søker = Person(aktørId = randomAktørId(),
                        personIdent = PersonIdent(søkerPersonIdent),

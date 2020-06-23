@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.UkjentBostedPdl
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrUkjentBosted
 import no.nav.nare.core.evaluations.Evaluering
 
 internal fun barnUnder18År(fakta: Fakta): Evaluering {
@@ -34,7 +34,7 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
     return if (søker.isEmpty())
         Evaluering.nei(("Ingen søker"))
     else if (søker.first().bostedsadresse != null &&
-             søker.first().bostedsadresse !is UkjentBostedPdl &&
+             søker.first().bostedsadresse !is GrUkjentBosted &&
              søker.first().bostedsadresse == barn.bostedsadresse)
         Evaluering.ja("Barnet bor med mor")
     else Evaluering.nei("Barnet bor ikke med mor")

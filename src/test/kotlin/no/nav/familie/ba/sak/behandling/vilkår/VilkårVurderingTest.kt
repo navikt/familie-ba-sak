@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Metrics
-import io.mockk.*
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -199,7 +196,7 @@ class VilkårVurderingTest(
 
     private fun genererPerson(type: PersonType,
                               personopplysningGrunnlag: PersonopplysningGrunnlag,
-                              bostedsadresse: BostedsadressePdl?,
+                              grBostedsadresse: GrBostedsadresse?,
                               kjønn: Kjønn = Kjønn.KVINNE): Person {
         return Person(aktørId = randomAktørId(),
                       personIdent = PersonIdent(randomFnr()),
@@ -208,15 +205,15 @@ class VilkårVurderingTest(
                       fødselsdato = LocalDate.of(1991, 1, 1),
                       navn = "navn",
                       kjønn = kjønn,
-                      bostedsadresse = bostedsadresse)
+                      bostedsadresse = grBostedsadresse)
     }
 
     @Test
     fun `Sjekk barn bor med søker`() {
-        val søkerAddress = VegadressePdl(1234, "11", "B", "H022",
-                                         "St. Olavsvegen", "1232", "whatever", "4322")
-        val barnAddress = VegadressePdl(1234, "11", "B", "H024",
+        val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
                                         "St. Olavsvegen", "1232", "whatever", "4322")
+        val barnAddress = GrVegadresse(1234, "11", "B", "H024",
+                                       "St. Olavsvegen", "1232", "whatever", "4322")
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
 
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
@@ -250,8 +247,8 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - To søker`() {
-        val søkerAddress = VegadressePdl(1234, "11", "B", "H022",
-                                         "St. Olavsvegen", "1232", "whatever", "4322")
+        val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
+                                        "St. Olavsvegen", "1232", "whatever", "4322")
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 3)
         val søker1 = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
@@ -266,8 +263,8 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - ingen søker`() {
-        val søkerAddress = VegadressePdl(1234, "11", "B", "H022",
-                                         "St. Olavsvegen", "1232", "whatever", "4322")
+        val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
+                                        "St. Olavsvegen", "1232", "whatever", "4322")
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 4)
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
@@ -278,8 +275,8 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - ikke mor som søker`() {
-        val søkerAddress = VegadressePdl(2147483649, "11", "B", "H022",
-                                         "St. Olavsvegen", "1232", "whatever", "4322")
+        val søkerAddress = GrVegadresse(2147483649, "11", "B", "H022",
+                                        "St. Olavsvegen", "1232", "whatever", "4322")
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 5)
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
@@ -292,7 +289,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - søker har ukjentadresse`() {
-        val ukjentbosted = UkjentBostedPdl("Oslo")
+        val ukjentbosted = GrUkjentBosted("Oslo")
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(søker)

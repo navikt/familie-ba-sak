@@ -10,8 +10,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.nare.core.evaluations.Resultat
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,7 +30,7 @@ class VilkårMetricsTest(
 
     private fun genererPerson(type: PersonType,
                               personopplysningGrunnlag: PersonopplysningGrunnlag,
-                              bostedsadresse: BostedsadressePdl?,
+                              bostedsadresse: GrBostedsadresse?,
                               kjønn: Kjønn = Kjønn.KVINNE): Person {
         return Person(aktørId = randomAktørId(),
                       personIdent = PersonIdent(randomFnr()),
@@ -73,10 +71,10 @@ class VilkårMetricsTest(
 
     @Test
     fun `Sjekk vilkår metrics`() {
-        val søkerAddress = VegadressePdl(1234, "11", "B", "H022",
-                                         "St. Olavsvegen", "1232", "whatever", "4322")
-        val barnAddress = VegadressePdl(1234, "11", "B", "H024",
-                                        "St. Oldavsvegen", "1232", "whatever", "4322")
+        val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
+                                        "St. Olavsvegen", "1232", "whatever", "4322")
+        val barnAddress = GrVegadresse(1234, "11", "B", "H024",
+                                       "St. Oldavsvegen", "1232", "whatever", "4322")
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
 
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)

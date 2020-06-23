@@ -475,7 +475,7 @@ class BehandlingIntegrationTest {
                                                                            behandling)
 
         val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
-        val vegadresse = søker.bostedsadresse as VegadressePdl
+        val vegadresse = søker.bostedsadresse as GrVegadresse
         Assertions.assertEquals(søkerAdressnavn, vegadresse.adressenavn)
         Assertions.assertEquals(matrikkelId, vegadresse.matrikkelId)
         Assertions.assertEquals(søkerBruksenhetsnummer, vegadresse.bruksenhetsnummer)
@@ -489,13 +489,13 @@ class BehandlingIntegrationTest {
 
         søker.personopplysningGrunnlag.barna.forEach {
             if (it.personIdent.ident == barn1Fnr) {
-                val matrikkeladresse = it.bostedsadresse as MatrikkeladressePdl
+                val matrikkeladresse = it.bostedsadresse as GrMatrikkeladresse
                 Assertions.assertEquals(barn1Bruksenhetsnummer, matrikkeladresse.bruksenhetsnummer)
                 Assertions.assertEquals(barn1Kommunenummer, matrikkeladresse.kommunenummer)
                 Assertions.assertEquals(barn1Postnummer, matrikkeladresse.postnummer)
                 Assertions.assertEquals(barn1Tilleggsnavn, matrikkeladresse.tilleggsnavn)
             } else if (it.personIdent.ident == barn2Fnr) {
-                val ukjentBosted = it.bostedsadresse as UkjentBostedPdl
+                val ukjentBosted = it.bostedsadresse as GrUkjentBosted
                 Assertions.assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
             } else if (it.personIdent.ident == barn3Fnr) {
                 Assertions.assertNull(it.bostedsadresse)

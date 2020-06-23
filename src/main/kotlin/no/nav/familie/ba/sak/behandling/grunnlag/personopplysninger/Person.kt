@@ -44,7 +44,7 @@ data class Person(
 
         @OneToOne(cascade = [CascadeType.ALL])
         @JoinColumn
-        val bostedsadresse: BostedsadressePdl? = null
+        val bostedsadresse: GrBostedsadresse? = null
 
 ) : BaseEntitet() {
 

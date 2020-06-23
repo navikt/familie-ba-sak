@@ -2,14 +2,13 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
-import java.util.*
 import javax.persistence.*
 
 @Entity(name = "BostedsadressePdl")
 @Inheritance
 @DiscriminatorColumn(name = "type")
 @Table(name = "PO_BOSTEDSADRESSE")
-abstract class BostedsadressePdl(
+abstract class GrBostedsadresse(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_bostedsadresse_seq_generator")
         @SequenceGenerator(name = "po_bostedsadresse_seq_generator", sequenceName = "po_bostedsadresse_seq", allocationSize = 50)
@@ -19,15 +18,15 @@ abstract class BostedsadressePdl(
     abstract fun toSecureString(): String
 
     companion object {
-        fun fraBostedsadresse(bostedsadresse: Bostedsadresse?): BostedsadressePdl? {
+        fun fraBostedsadresse(bostedsadresse: Bostedsadresse?): GrBostedsadresse? {
             if(bostedsadresse == null){
                 return null
             }else if (bostedsadresse.vegadresse != null) {
-                return VegadressePdl.fraVegadresse(bostedsadresse.vegadresse!!)
+                return GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
             } else if (bostedsadresse.matrikkeladresse != null) {
-                return MatrikkeladressePdl.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
+                return GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
             } else if (bostedsadresse.ukjentBosted != null) {
-                return UkjentBostedPdl.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
+                return GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
             } else {
                 return null
             }

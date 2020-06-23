@@ -6,9 +6,9 @@ import javax.persistence.Column
 import javax.persistence.DiscriminatorValue
 import javax.persistence.Entity
 
-@Entity(name = "MatrikkeladressePdl")
+@Entity(name = "GrMatrikkeladresse")
 @DiscriminatorValue("Matrikkeladresse")
-data class MatrikkeladressePdl(
+data class GrMatrikkeladresse(
         @Column(name = "matrikkel_id")
         val matrikkelId: Long?,
 
@@ -24,7 +24,7 @@ data class MatrikkeladressePdl(
         @Column(name = "kommunenummer")
         val kommunenummer: String?
 
-) : BostedsadressePdl() {
+) : GrBostedsadresse() {
 
     override fun toSecureString(): String {
         return """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
@@ -39,7 +39,7 @@ data class MatrikkeladressePdl(
         if (other == null || javaClass != other.javaClass) {
             return false
         }
-        val otherMatrikkeladresse = other as MatrikkeladressePdl
+        val otherMatrikkeladresse = other as GrMatrikkeladresse
         return this === other
                || matrikkelId != null
                && matrikkelId == otherMatrikkeladresse.matrikkelId
@@ -51,8 +51,8 @@ data class MatrikkeladressePdl(
     }
 
     companion object {
-        fun fraMatrikkeladresse(matrikkeladresse: Matrikkeladresse): MatrikkeladressePdl =
-                MatrikkeladressePdl(
+        fun fraMatrikkeladresse(matrikkeladresse: Matrikkeladresse): GrMatrikkeladresse =
+                GrMatrikkeladresse(
                         matrikkelId = matrikkeladresse.matrikkelId,
                         bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
                         tilleggsnavn = matrikkeladresse.tilleggsnavn,

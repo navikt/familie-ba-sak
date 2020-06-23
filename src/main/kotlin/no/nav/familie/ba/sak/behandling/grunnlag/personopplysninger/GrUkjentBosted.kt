@@ -7,11 +7,11 @@ import javax.persistence.Entity
 
 @Entity(name = "ukjentBostedTpl")
 @DiscriminatorValue("ukjentBosted")
-data class UkjentBostedPdl(
+data class GrUkjentBosted(
         @Column(name = "bostedskommune")
         val bostedskommune: String
 
-) : BostedsadressePdl() {
+) : GrBostedsadresse() {
 
     override fun toSecureString(): String {
         return """UkjentadresseDao(bostedskommune=$bostedskommune""".trimMargin()
@@ -22,7 +22,7 @@ data class UkjentBostedPdl(
     }
 
     companion object {
-        fun fraUkjentBosted(ukjentBosted: UkjentBosted): UkjentBostedPdl =
-                UkjentBostedPdl(bostedskommune = ukjentBosted.bostedskommune)
+        fun fraUkjentBosted(ukjentBosted: UkjentBosted): GrUkjentBosted =
+                GrUkjentBosted(bostedskommune = ukjentBosted.bostedskommune)
     }
 }
