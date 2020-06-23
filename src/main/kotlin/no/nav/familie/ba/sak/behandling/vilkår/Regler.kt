@@ -7,13 +7,17 @@ import no.nav.nare.core.evaluations.Evaluering
 internal fun barnUnder18År(fakta: Fakta): Evaluering {
     return if (fakta.alder < 18)
         Evaluering.ja("Barn er under 18 år")
-    else Evaluering.nei("Barn er ikke under 18 år")
+    else
+        Evaluering.nei("Barn er ikke under 18 år")
 }
 
 internal fun harEnSøker(fakta: Fakta): Evaluering {
     val barn = fakta.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
-    return if (søker.size == 1) Evaluering.ja(("Har en søker")) else Evaluering.nei(("Har ikke eksakt en søker"))
+    return if (søker.size == 1)
+        Evaluering.ja(("Har en søker"))
+    else
+        Evaluering.nei(("Har ikke eksakt en søker"))
 }
 
 internal fun søkerErMor(fakta: Fakta): Evaluering {
@@ -37,7 +41,8 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
              søker.first().bostedsadresse !is GrUkjentBosted &&
              søker.first().bostedsadresse == barn.bostedsadresse)
         Evaluering.ja("Barnet bor med mor")
-    else Evaluering.nei("Barnet bor ikke med mor")
+    else
+        Evaluering.nei("Barnet bor ikke med mor")
 }
 
 internal fun bosattINorge(fakta: Fakta): Evaluering {
@@ -49,11 +54,13 @@ internal fun bosattINorge(fakta: Fakta): Evaluering {
 internal fun lovligOpphold(fakta: Fakta): Evaluering {
     return if (fakta.personForVurdering.id !== null) //TODO: Implementere når data på plass
         Evaluering.ja("Person har lovlig opphold i Norge")
-    else Evaluering.nei("Person har lovlig opphold i Norge")
+    else
+        Evaluering.nei("Person har lovlig opphold i Norge")
 }
 
 internal fun giftEllerPartneskap(fakta: Fakta): Evaluering {
     return if (fakta.personForVurdering.id !== null) //TODO: Implementere når data på plass
         Evaluering.ja("Person har lovlig opphold i Norge")
-    else Evaluering.nei("Person har lovlig opphold i Norge")
+    else
+        Evaluering.nei("Person har lovlig opphold i Norge")
 }

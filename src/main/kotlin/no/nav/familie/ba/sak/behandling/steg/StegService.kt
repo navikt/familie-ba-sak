@@ -65,7 +65,6 @@ class StegService(
         return håndterPersongrunnlag(behandling,
                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
                                                                 barnasIdenter = nyBehandling.barnasIdenter,
-
                                                                 bekreftEndringerViaFrontend = true))
     }
 
