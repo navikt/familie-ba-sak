@@ -90,9 +90,9 @@ class VilkårMetricsTest(
         personopplysningGrunnlag.personer.add(barn3)
 
         mockMetrics()
-        vilkårService.addEvalueringsResultatTilMatrikkel(listOf(Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn1))))
-        vilkårService.addEvalueringsResultatTilMatrikkel(listOf(Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn2))))
-        vilkårService.addEvalueringsResultatTilMatrikkel(listOf(Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn3))))
+        vilkårService.tellMetrikker(listOf(Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn1))))
+        vilkårService.tellMetrikker(listOf(Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn2))))
+        vilkårService.tellMetrikker(listOf(Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn3))))
 
         verify(exactly = 1) {
             mockBorMedSøkerSuksessCounter.increment()

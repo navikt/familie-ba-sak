@@ -18,7 +18,7 @@ data class GrUkjentBosted(
     }
 
     override fun toString(): String {
-        return ""
+        return "UkjentBostedAdresse(detaljer skjult)"
     }
 
     companion object {

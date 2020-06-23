@@ -32,7 +32,7 @@ data class GrMatrikkeladresse(
     }
 
     override fun toString(): String {
-        return ""
+        return "Matrikkeladresse(detaljer skjult)"
     }
 
     override fun equals(other: Any?): Boolean {

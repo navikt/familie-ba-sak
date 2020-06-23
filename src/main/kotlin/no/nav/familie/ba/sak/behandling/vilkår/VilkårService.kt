@@ -81,7 +81,7 @@ class VilkårService(
             val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
             personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, evalueringer))
 
-            addEvalueringsResultatTilMatrikkel(evalueringer)
+            tellMetrikker(evalueringer)
             personResultat
         }.toSet()
 
@@ -191,7 +191,7 @@ class VilkårService(
             throw java.lang.IllegalStateException("Illegal type of metrics")
     }
 
-    fun addEvalueringsResultatTilMatrikkel(evalueringer: List<Evaluering>) {
+    fun tellMetrikker(evalueringer: List<Evaluering>) {
         evalueringer.forEach {
             val counter = hentCounterForVilkår(it.resultat, Vilkår.valueOf(hentIdentifikatorForEvaluering(it)))
             counter?.increment()

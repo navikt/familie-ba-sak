@@ -41,7 +41,7 @@ data class GrVegadresse(
     }
 
     override fun toString(): String{
-        return ""
+        return "Vegadresse(detaljer skjult)"
     }
 
     override fun equals(other: Any?): Boolean {
