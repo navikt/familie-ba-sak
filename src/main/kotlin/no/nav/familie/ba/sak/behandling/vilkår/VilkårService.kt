@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -146,17 +147,19 @@ class VilkårService(
         return behandlingResultat
     }
 
-    private fun hentIdentifikatorForEvaluering(evaluering: Evaluering): String {
-        return if (enumValues<Vilkår>().map{it.name}.contains(evaluering.identifikator))
+    private fun hentIdentifikatorForEvaluering(evaluering: Evaluering): String? {
+        return if (enumValues<Vilkår>().map { it.name }.contains(evaluering.identifikator))
             evaluering.identifikator
         else if (!evaluering.children.isEmpty())
             hentIdentifikatorForEvaluering(evaluering.children.first())
-        else
-            throw java.lang.IllegalStateException("Evaluering har ikke identifikator")
+        else{
+            LOG.error("Internal Error: Illegal Identifikator for Evaluering")
+            null
+        }
     }
 
     private fun hentIdentifikatorForSpesifikasjon(spesifikasjon: Spesifikasjon<Fakta>): String {
-        return if (enumValues<Vilkår>().map{it.name}.contains(spesifikasjon.identifikator))
+        return if (enumValues<Vilkår>().map { it.name }.contains(spesifikasjon.identifikator))
             spesifikasjon.identifikator
         else if (!spesifikasjon.children.isEmpty())
             hentIdentifikatorForSpesifikasjon(spesifikasjon.children.first())
@@ -175,7 +178,7 @@ class VilkårService(
                                vilkår.spesifikasjon.beskrivelse)
     }
 
-    private fun hentCounterFraMap(counterMap: MutableMap<Vilkår, Counter>, resultat: Resultat, vilkår: Vilkår): Counter?{
+    private fun hentCounterFraMap(counterMap: MutableMap<Vilkår, Counter>, resultat: Resultat, vilkår: Vilkår): Counter? {
         if (counterMap.get(vilkår) == null) {
             counterMap.put(vilkår, lagCounterForVilkår(resultat, vilkår))
         }
@@ -187,14 +190,19 @@ class VilkårService(
             hentCounterFraMap(vilkårSuksessMetrics, resultat, vilkår)
         } else if (resultat == Resultat.NEI) {
             hentCounterFraMap(vilkårFeiletMetrics, resultat, vilkår)
-        } else
-            throw java.lang.IllegalStateException("Illegal type of metrics")
+        } else{
+            LOG.error("Internal Error: Illegal type of metrics")
+            null
+        }
     }
 
     fun tellMetrikker(evalueringer: List<Evaluering>) {
         evalueringer.forEach {
-            val counter = hentCounterForVilkår(it.resultat, Vilkår.valueOf(hentIdentifikatorForEvaluering(it)))
-            counter?.increment()
+            val identifikator = hentIdentifikatorForEvaluering(it)
+            if (identifikator != null) {
+                val counter = hentCounterForVilkår(it.resultat, Vilkår.valueOf(identifikator))
+                counter?.increment()
+            }
         }
     }
 
@@ -270,5 +278,9 @@ class VilkårService(
         muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
 
         return behandlingResultatService.oppdater(behandlingResultat).personResultater.map { it.tilRestPersonResultat() }
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
