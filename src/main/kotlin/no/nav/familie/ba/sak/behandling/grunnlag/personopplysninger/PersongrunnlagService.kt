@@ -65,16 +65,6 @@ class PersongrunnlagService(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    private fun tilGrBostedsadresse(bostedsadresse: Bostedsadresse?): Set<GrBostedsadresse> {
-        val grBostedsadresser: Set<GrBostedsadresse> = mutableSetOf()
-
-        bostedsadresse?.matrikkeladresse?.let { grBostedsadresser.plus(it) }
-        bostedsadresse?.ukjentBosted?.let { grBostedsadresser.plus(it) }
-        bostedsadresse?.vegadresse?.let { grBostedsadresser.plus(it) }
-
-        return grBostedsadresser
-    }
-
     private fun hentBarn(barnasFødselsnummer: List<String>,
                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
         return barnasFødselsnummer.map { nyttBarn ->
