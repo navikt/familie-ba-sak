@@ -109,12 +109,20 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                                       journalpostId: String,
                                       behandlendeEnhet: String,
                                       oppgaveId: String) {
+        secureLogger.info("Oppdater og ferdigstill data: $request")
+        secureLogger.info("Oppdater og ferdigstill journalpostId: $journalpostId")
+        secureLogger.info("Oppdater og ferdigstill oppgaveId: $oppgaveId")
+
         runCatching {
             integrasjonClient.oppdaterJournalpost(request, journalpostId)
             integrasjonClient.ferdigstillJournalpost(journalpostId = journalpostId, journalførendeEnhet = behandlendeEnhet)
             integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
         }.onFailure {
+            LOG.info("Feilet ved oppdater og ferdigstill jp: ${it.message}")
+            secureLogger.info("Feilet ved oppdater og ferdigstill jp: ${it.message}", it)
+
             hentJournalpost(journalpostId).data?.journalstatus.apply {
+                LOG.info("Journalpost status: $this")
                 if (this == FERDIGSTILT) {
                     integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
                 } else {
@@ -122,24 +130,6 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                 }
             }
         }
-    }
-
-    private fun mapTilOppdaterJournalpostRequest(restOppdaterJournalpost: RestOppdaterJournalpost,
-                                                 sak: Sak): OppdaterJournalpostRequest {
-        val dokument = DokumentInfo(dokumentInfoId = restOppdaterJournalpost.dokumentInfoId,
-                                    tittel = restOppdaterJournalpost.dokumentTittel,
-                                    brevkode = null,
-                                    dokumentstatus = Dokumentstatus.FERDIGSTILT,
-                                    dokumentvarianter = null,
-                                    logiskeVedlegg = null)
-
-        return OppdaterJournalpostRequest(avsenderMottaker = AvsenderMottaker(restOppdaterJournalpost.avsender.id,
-                                                                              navn = restOppdaterJournalpost.avsender.navn),
-                                          bruker = Bruker(restOppdaterJournalpost.bruker.id,
-                                                          navn = restOppdaterJournalpost.bruker.navn),
-                                          sak = sak,
-                                          tittel = restOppdaterJournalpost.dokumentTittel,
-                                          dokumenter = listOf(dokument))
     }
 
     private fun opprettOppgaveFor(behandling: Behandling, navIdent: String) {
@@ -151,5 +141,6 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
 
     companion object {
         private val LOG = LoggerFactory.getLogger(this::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
