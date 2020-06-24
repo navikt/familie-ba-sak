@@ -21,7 +21,7 @@ class BehandleFødselshendelseTask(
         val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
         try {
             LOG.info("Kjører BehandleFødselshendelseTask")
-            stegService.regelkjørBehandling(behandleFødselshendelseTaskDTO.nyBehandling, behandleFødselshendelseTaskDTO.skalBehandlesHosInfotrygd)
+            stegService.regelkjørBehandling(behandleFødselshendelseTaskDTO.nyBehandling)
         } catch (e: KontrollertRollbackException) {
             LOG.info("Rollback utført. Data ikke persistert.")
         }

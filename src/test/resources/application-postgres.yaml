@@ -41,6 +41,15 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-ba-infotrygd-barnetrygd-clientcredentials:
+        resource-url: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_SCOPE}
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILIE_PROSESSERING_CLIENT_ID}
 
