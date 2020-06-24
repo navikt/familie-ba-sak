@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.økonomi
 
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.called
+import io.mockk.spyk
+import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus

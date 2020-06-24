@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Tag
