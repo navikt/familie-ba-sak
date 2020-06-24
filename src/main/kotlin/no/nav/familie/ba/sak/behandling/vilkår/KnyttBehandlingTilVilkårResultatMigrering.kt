@@ -13,6 +13,7 @@ class KnyttBehandlingTilVilkårResultatMigrering(
 
     @Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE)
     fun migrerVilkårResultat() {
+        LOG.info("Migrerer over behandling id til vilkår resultat: start")
         val behandlinger = behandlingRepository.findAll()
 
         behandlinger.forEach { behandling ->
@@ -28,6 +29,8 @@ class KnyttBehandlingTilVilkårResultatMigrering(
                 behandlingResultatRepository.save(behandlingResultat)
             }
         }
+
+        LOG.info("Migrerer over behandling id til vilkår resultat: slutt")
     }
 
     companion object {

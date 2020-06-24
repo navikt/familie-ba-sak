@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -144,6 +145,60 @@ class VilkårServiceTest(
         Assertions.assertEquals(2, behandlingsResultater.size)
         Assertions.assertNotEquals(behandlingResultat.id, kopiertBehandlingResultat.id)
     }
+
+
+    @Test
+    fun `Behandlingsresultat fra forrige behandling kopieres riktig`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
+                                                                                   bekreftEndringerViaFrontend = true)
+
+        val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
+        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
+
+        behandlingResultatService.oppdater(behandlingResultat)
+        behandling.steg = StegType.BEHANDLING_AVSLUTTET
+        behandlingService.lagre(behandling)
+
+        val barnFnr2 = randomFnr()
+
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag2 =
+                lagTestPersonopplysningGrunnlag(behandling2.id, fnr, listOf(barnFnr, barnFnr2))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
+
+        val behandlingResultat2 = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling2,
+                                                                                    bekreftEndringerViaFrontend = true)
+
+        Assertions.assertEquals(3, behandlingResultat2.personResultater.size)
+
+        behandlingResultat2.personResultater.forEach { personResultat ->
+            personResultat.vilkårResultater.forEach { vilkårResultat ->
+                if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) {
+                    Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
+                } else {
+                    if (personResultat.personIdent == barnFnr2) {
+                        Assertions.assertEquals(Resultat.KANSKJE, vilkårResultat.resultat)
+                        Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
+                    } else {
+                        Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
+                        Assertions.assertEquals(behandling.id, vilkårResultat.behandlingId)
+                    }
+                }
+            }
+        }
+    }
+
 
     @Test
     fun `Valider gyldige vilkårspermutasjoner for barn og søker`() {

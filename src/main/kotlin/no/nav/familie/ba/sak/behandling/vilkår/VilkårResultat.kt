@@ -38,8 +38,8 @@ class VilkårResultat(
         @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
         var begrunnelse: String,
 
-        @Column(name = "behandling_id")
-        var behandlingId: Long
+        @Column(name = "behandling_id", nullable = true)
+        var behandlingId: Long?
 ) : BaseEntitet() {
 
     fun nullstill() {
