@@ -51,17 +51,15 @@ class PersongrunnlagService(
                                                      behandling: Behandling) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        var søker : Person?= null
-        var barn : List<Person>?= null
-
+        val (søker, barn) =
         if(environment.activeProfiles.contains("e2e")){
-            søker= e2eMockSøker(fødselsnummer, personopplysningGrunnlag)
-            barn= e2eMockBarn(barnasFødselsnummer, personopplysningGrunnlag)
-            LOG.info("Mock søker and barn person information for e2e: Søker $søker Barn $barn")
+            val søker= e2eMockSøker(fødselsnummer, personopplysningGrunnlag)
+            val barn= e2eMockBarn(barnasFødselsnummer, personopplysningGrunnlag)
+            Pair(søker, barn)
         }else{
             val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
             val aktørId = integrasjonClient.hentAktivAktørId(Ident(fødselsnummer))
-            søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
+            val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
                                type = PersonType.SØKER,
                                personopplysningGrunnlag = personopplysningGrunnlag,
                                fødselsdato = personinfo.fødselsdato,
@@ -70,10 +68,11 @@ class PersongrunnlagService(
                                bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                                kjønn = personinfo.kjønn ?: Kjønn.UKJENT
             )
-            barn = hentBarn(barnasFødselsnummer, personopplysningGrunnlag)
+            val barn = hentBarn(barnasFødselsnummer, personopplysningGrunnlag)
+            Pair(søker, barn)
         }
-        personopplysningGrunnlag.personer.add(søker!!)
-        personopplysningGrunnlag.personer.addAll(barn!!)
+        personopplysningGrunnlag.personer.add(søker)
+        personopplysningGrunnlag.personer.addAll(barn)
 
         secureLogger.info("Setter persongrunnlag med søker: ${fødselsnummer} og barn: ${barnasFødselsnummer}")
         secureLogger.info("Barna på persongrunnlaget som lagres: ${personopplysningGrunnlag.barna.map { it.personIdent.ident }}")
