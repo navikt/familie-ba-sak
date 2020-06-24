@@ -85,7 +85,7 @@ class PersongrunnlagService(
                       type = PersonType.SØKER,
                       personopplysningGrunnlag = personopplysningGrunnlag,
                       fødselsdato = LocalDate.of(1990, 1, 1),
-                      aktørId = AktørId("e2eAktørId"),
+                      aktørId = AktørId("e2eaktørid"),
                       navn = "Etoe Tester",
                       bostedsadresse = GrBostedsadresse.fraBostedsadresse(Bostedsadresse(vegadresse = Vegadresse(
                               1, "1", "B", "H101",
@@ -101,7 +101,7 @@ class PersongrunnlagService(
                              type = PersonType.BARN,
                              personopplysningGrunnlag = personopplysningGrunnlag,
                              fødselsdato = LocalDate.of(2009, 1, 1),
-                             aktørId = AktørId("e2eBarnAktørId"),
+                             aktørId = AktørId("e2ebarnaktørid"),
                              navn = "Etoe Barnet",
                              bostedsadresse = GrBostedsadresse.fraBostedsadresse(Bostedsadresse(vegadresse = Vegadresse(
                                      1, "1", "B", "H101",
