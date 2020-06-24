@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.journalføring
 
-import no.nav.familie.ba.sak.behandling.NyBehandling
-import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
-import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.*
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
@@ -17,16 +15,16 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentstatus
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
 import no.nav.familie.kontrakter.felles.journalpost.Sak
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
 class JournalføringService(private val integrasjonClient: IntegrasjonClient,
-                           private val fagsakService: FagsakService,
-                           private val stegService: StegService,
-                           private val oppgaveService: OppgaveService) {
+                           private val behandlingService: BehandlingService,
+                           private val oppgaveService: OppgaveService,
+                           private val journalføringRepository: JournalføringRepository) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
         return integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
@@ -41,12 +39,44 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                     behandlendeEnhet: String,
                     oppgaveId: String): String {
 
-        val (fagsak, behandling) = when (request.knyttTilFagsak) {
+        val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
+
+        håndterLogiskeVedlegg(request, journalpostId)
+
+        oppdaterOgFerdigstill(request = request.oppdaterMedDokumentOgSak(sak),
+                              journalpostId = journalpostId,
+                              behandlendeEnhet = behandlendeEnhet,
+                              oppgaveId = oppgaveId)
+
+        when (val aktivBehandling = behandlinger.find { it.aktiv }) {
+            null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
+            else -> opprettOppgaveFor(aktivBehandling, request.navIdent)
+        }
+
+        return sak.fagsakId ?: ""
+    }
+
+    fun lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder: List<String>, journalpostId: String): Pair<Sak, List<Behandling>> {
+
+        val behandlinger = tilknyttedeBehandlingIder.map {
+            behandlingService.hent(it.toLong())
+        }
+
+        behandlinger.forEach {
+            journalføringRepository.save(DbJournalpost(behandling = it, journalpostId = journalpostId))
+        }
+
+        val fagsak = when (tilknyttedeBehandlingIder.isNotEmpty()) {
             true -> {
-                fagsakService.hentEllerOpprettFagsakForPersonIdent(request.bruker.id) to
-                        runCatching { opprettNyBehandling(request.bruker.id, journalpostId) }.getOrNull()
+                val fagsaker = behandlinger.map { it.fagsak }.toSet()
+
+                if (fagsaker.size != 1) {
+                    throw Feil(message = "Behandlings'idene tilhørerer ikke samme fagsak, eller vi fant ikke fagsaken.",
+                               frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn.")
+                }
+                fagsaker.first()
             }
-            else -> null to null
+            false -> null
         }
 
         val sak = Sak(fagsakId = fagsak?.id?.toString(),
@@ -55,23 +85,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                       arkivsaksystem = null,
                       arkivsaksnummer = null)
 
-        håndterLogiskeVedlegg(request, journalpostId)
+        return Pair(sak, behandlinger)
 
-        oppdaterOgFerdigstill(request = mapTilOppdaterJournalpostRequest(request, sak),
-                              journalpostId = journalpostId,
-                              behandlendeEnhet = behandlendeEnhet,
-                              oppgaveId = oppgaveId)
-
-        if (fagsak != null) {
-            when (behandling) {
-                null -> opprettOppgaveUtenBehandling(fagsak, request, behandlendeEnhet)
-                else -> {
-                    opprettOppgaveFor(behandling, request.navIdent)
-                }
-            }
-        }
-
-        return sak.fagsakId ?: ""
     }
 
     private fun håndterLogiskeVedlegg(request: RestOppdaterJournalpost, journalpostId: String) {
@@ -88,17 +103,6 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         nyeVedlegg.forEach {
             integrasjonClient.leggTilLogiskVedlegg(LogiskVedleggRequest(it.tittel), dokumentInfoId)
         }
-    }
-
-    private fun opprettNyBehandling(søkersIdent: String, journalpostId: String): Behandling {
-        return stegService.håndterNyBehandling(
-                NyBehandling(søkersIdent = søkersIdent,
-                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                             kategori = BehandlingKategori.NASJONAL,
-                             underkategori = BehandlingUnderkategori.ORDINÆR,
-                             journalpostID = journalpostId,
-                             behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_JOURNALFØRING)
-        )
     }
 
     private fun oppdaterOgFerdigstill(request: OppdaterJournalpostRequest,
@@ -143,18 +147,6 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                                       oppgavetype = Oppgavetype.BehandleSak,
                                       fristForFerdigstillelse = LocalDate.now(),
                                       tilordnetNavIdent = navIdent)
-    }
-
-    private fun opprettOppgaveUtenBehandling(fagsak: Fagsak, request: RestOppdaterJournalpost, behandlendeEnhet: String) {
-        oppgaveService.opprettOppgave(OpprettOppgave(ident = OppgaveIdent(ident = request.bruker.id, type = IdentType.Aktør),
-                                                     saksId = fagsak.id.toString(),
-                                                     tema = Tema.BAR,
-                                                     oppgavetype = Oppgavetype.BehandleSak,
-                                                     fristFerdigstillelse = LocalDate.now(),
-                                                     beskrivelse = oppgaveService.lagOppgaveTekst(fagsak.id),
-                                                     enhetsnummer = behandlendeEnhet,
-                                                     behandlingstema = OppgaveService.Behandlingstema.ORDINÆR_BARNETRYGD.kode,
-                                                     tilordnetRessurs = request.navIdent))
     }
 
     companion object {

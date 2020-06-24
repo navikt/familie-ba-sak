@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse

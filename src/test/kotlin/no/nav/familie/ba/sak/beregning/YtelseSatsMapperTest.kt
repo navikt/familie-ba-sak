@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.beregning.domene.SatsType
-import org.junit.jupiter.api.Assertions.*
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class YtelseSatsMapperTest {

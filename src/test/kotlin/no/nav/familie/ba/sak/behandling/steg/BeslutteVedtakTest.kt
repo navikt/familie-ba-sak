@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import io.mockk.*
-import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
@@ -12,6 +11,7 @@ import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository

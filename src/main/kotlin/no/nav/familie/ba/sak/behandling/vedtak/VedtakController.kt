@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState

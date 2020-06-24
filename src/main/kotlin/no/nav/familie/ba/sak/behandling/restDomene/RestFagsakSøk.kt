@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 
 
 data class RestSøkParam(

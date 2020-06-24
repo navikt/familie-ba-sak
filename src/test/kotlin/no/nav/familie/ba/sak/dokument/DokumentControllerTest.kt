@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.kontrakter.felles.Ressurs
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.lang.IllegalStateException
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)

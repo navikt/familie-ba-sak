@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
