@@ -49,13 +49,15 @@ class PeriodeMapperTest {
                                                                    VilkårResultat(personResultat = personResultat,
                                                                                   vilkårType = Vilkår.UNDER_18_ÅR,
                                                                                   resultat = Resultat.JA,
-                                                                                  begrunnelse = ""))))
+                                                                                  begrunnelse = "",
+                                                                                  behandlingId = behandlingResultat.behandling.id))))
         val tidslinje2 = LocalDateTimeline(listOf(LocalDateSegment(datoer[1],
                                                                    datoer[3].minusDays(1),
                                                                    VilkårResultat(personResultat = personResultat,
                                                                                   vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                   resultat = Resultat.JA,
-                                                                                  begrunnelse = ""))))
+                                                                                  begrunnelse = "",
+                                                                                  behandlingId = behandlingResultat.behandling.id))))
 
         val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(listOf(tidslinje1, tidslinje2))
 
@@ -86,19 +88,22 @@ class PeriodeMapperTest {
                                      resultat = Resultat.JA,
                                      periodeFom = datoer[0],
                                      periodeTom = datoer[2].minusDays(1),
-                                     begrunnelse = ""),
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id),
                       VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.BOSATT_I_RIKET,
                                      resultat = Resultat.JA,
                                      periodeFom = datoer[1],
                                      periodeTom = datoer[5].minusDays(1),
-                                     begrunnelse = ""),
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id),
                       VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                      resultat = Resultat.JA,
                                      periodeFom = datoer[3],
                                      periodeTom = datoer[4].minusDays(1),
-                                     begrunnelse = ""))
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id))
         )
         personResultat2.setVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat2,
@@ -106,7 +111,8 @@ class PeriodeMapperTest {
                                      resultat = Resultat.JA,
                                      periodeFom = datoer[1],
                                      periodeTom = datoer[4].minusDays(1),
-                                     begrunnelse = ""))
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id))
         )
         behandlingResultat.personResultater = setOf(personResultat1, personResultat2)
         val periodeResultater = behandlingResultat.periodeResultater(true).toList()
@@ -175,7 +181,8 @@ class PeriodeMapperTest {
                                      resultat = Resultat.JA,
                                      periodeFom = LocalDate.of(2020, 5, 15),
                                      periodeTom = LocalDate.of(2020, 6, 15),
-                                     begrunnelse = ""))
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id))
         )
         behandlingResultat.personResultater = setOf(personResultat)
         val periodeResultat = behandlingResultat.periodeResultater(true).toList()[0]
@@ -197,25 +204,29 @@ class PeriodeMapperTest {
                                      resultat = Resultat.JA,
                                      periodeFom = periodeFom18ÅrsVilkår,
                                      periodeTom = periodeTom18ÅrsVilkår,
-                                     begrunnelse = ""),
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.BOSATT_I_RIKET,
                                      resultat = Resultat.JA,
                                      periodeFom = periodeFom,
                                      periodeTom = null,
-                                     begrunnelse = ""),
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                      resultat = Resultat.JA,
                                      periodeFom = periodeFom,
                                      periodeTom = null,
-                                     begrunnelse = ""),
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.BOR_MED_SØKER,
                                      resultat = Resultat.JA,
                                      periodeFom = periodeFom,
                                      periodeTom = null,
-                                     begrunnelse = ""))
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id))
         )
 
         behandlingResultat.personResultater = setOf(personResultat)

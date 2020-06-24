@@ -88,7 +88,7 @@ class VilkårService(
         val forrigeBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = annenBehandling.id)
                                         ?: throw Feil(message = "Finner ikke behandlingsresultat fra annen behandling.")
         val (oppdatert) = flyttResultaterTilInitielt(aktivtBehandlingResultat = forrigeBehandlingResultat,
-                                                             initieltBehandlingResultat = initiertBehandlingResultat)
+                                                     initieltBehandlingResultat = initiertBehandlingResultat)
         return oppdatert
     }
 
@@ -149,12 +149,14 @@ class VilkårService(
                                                vilkårType = vilkår,
                                                periodeFom = person.fødselsdato,
                                                periodeTom = person.fødselsdato.plusYears(18),
-                                               begrunnelse = "Vurdert og satt automatisk"))
+                                               begrunnelse = "Vurdert og satt automatisk",
+                                               behandlingId = behandlingResultat.behandling.id))
             } else {
                 vilkårListe.add(VilkårResultat(personResultat = personResultat,
                                                resultat = Resultat.KANSKJE,
                                                vilkårType = vilkår,
-                                               begrunnelse = ""))
+                                               begrunnelse = "",
+                                               behandlingId = behandlingResultat.behandling.id))
             }
             vilkårListe
         }.toSet())
@@ -181,7 +183,8 @@ class VilkårService(
                            vilkårType = Vilkår.valueOf(child.identifikator),
                            periodeFom = barnet.fødselsdato,
                            periodeTom = tom,
-                           begrunnelse = "")
+                           begrunnelse = "",
+                           behandlingId = personResultat.behandlingResultat.behandling.id)
         }.toSortedSet(PersonResultat.comparator)
     }
 

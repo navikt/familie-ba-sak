@@ -230,7 +230,8 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                    periodeTom = periodeTom,
                                    vilkårType = it,
                                    resultat = resultat,
-                                   begrunnelse = "")
+                                   begrunnelse = "",
+                                   behandlingId = behandlingResultat.behandling.id)
                 }.toSet())
     } else {
         personResultat.setVilkårResultater(
@@ -239,7 +240,8 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                      periodeTom = periodeTom,
                                      vilkårType = vilkårType,
                                      resultat = resultat,
-                                     begrunnelse = ""))
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id))
         )
     }
     return personResultat
@@ -273,7 +275,8 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
                                  resultat = resultat,
                                  periodeFom = LocalDate.now(),
                                  periodeTom = LocalDate.now(),
-                                 begrunnelse = ""))
+                                 begrunnelse = "",
+                                 behandlingId = behandling.id))
     )
     behandlingResultat.personResultater = setOf(personResultat)
     return behandlingResultat

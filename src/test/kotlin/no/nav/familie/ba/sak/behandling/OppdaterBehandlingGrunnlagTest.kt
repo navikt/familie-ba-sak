@@ -109,13 +109,15 @@ class OppdaterBehandlingGrunnlagTest {
                                          resultat = Resultat.JA,
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
-                                         begrunnelse = ""),
+                                         begrunnelse = "",
+                                         behandlingId = behandling.id),
                           VilkårResultat(personResultat = personResultat,
                                          vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                          resultat = Resultat.JA,
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
-                                         begrunnelse = ""))
+                                         begrunnelse = "",
+                                         behandlingId = behandling.id))
             )
 
             personResultat
@@ -140,19 +142,22 @@ class OppdaterBehandlingGrunnlagTest {
                                          resultat = Resultat.JA,
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
-                                         begrunnelse = ""),
+                                         begrunnelse = "",
+                                         behandlingId = behandling.id),
                           VilkårResultat(personResultat = personResultat,
                                          vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                          resultat = Resultat.JA,
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
-                                         begrunnelse = ""),
+                                         begrunnelse = "",
+                                         behandlingId = behandling.id),
                           VilkårResultat(personResultat = personResultat,
                                          vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                          resultat = Resultat.JA,
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
-                                         begrunnelse = ""))
+                                         begrunnelse = "",
+                                         behandlingId = behandling.id))
             )
             personResultat
         }.toSet()

@@ -157,7 +157,8 @@ class TestBehandlingResultatBuilder(val sakType: String) {
                     resultat = Resultat.JA,
                     periodeFom = testperiode.fraOgMed,
                     periodeTom = testperiode.tilOgMed,
-                    begrunnelse = "")
+                    begrunnelse = "",
+                    behandlingId = behandlingResultat.behandling.id)
         }.toSet()
 
         personResultat.setVilkårResultater(personResultat.vilkårResultater.plus(vilkårsresultater)

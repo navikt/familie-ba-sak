@@ -35,14 +35,16 @@ class VilkårsvurderingUtilsTest {
 
         vilkårResultat1 = VilkårResultat(1, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                         "")
+                                         "", behandlingResultat.behandling.id)
         vilkårResultat2 = VilkårResultat(2, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
-                                         "")
+                                         "", behandlingResultat.behandling.id)
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
-                                         "")
-        personResultat.setVilkårResultater(setOf(vilkårResultat1, vilkårResultat2, vilkårResultat3).toSortedSet(PersonResultat.comparator))
+                                         "", behandlingResultat.behandling.id)
+        personResultat.setVilkårResultater(setOf(vilkårResultat1,
+                                                 vilkårResultat2,
+                                                 vilkårResultat3).toSortedSet(PersonResultat.comparator))
     }
 
     private fun assertPeriode(expected: Periode, actual: Periode) {
@@ -191,7 +193,7 @@ class VilkårsvurderingUtilsTest {
 
         val mockVilkårResultat = VilkårResultat(1, mockPersonResultat, vilkår, resultat,
                                                 LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                                "")
+                                                "", behandlingResultat.behandling.id)
         mockPersonResultat.setVilkårResultater(setOf(mockVilkårResultat))
 
         VilkårsvurderingUtils.muterPersonResultatDelete(mockPersonResultat,
@@ -222,8 +224,12 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `Skal tilpasse vilkår for endret vilkår når begge mangler tom-dato`() {
-        val vilkårResultat = VilkårResultat(personResultat = personResultat, vilkårType = vilkår, resultat = resultat,
-                                            periodeFom = LocalDate.of(2020, 1, 1), begrunnelse = "")
+        val vilkårResultat = VilkårResultat(personResultat = personResultat,
+                                            vilkårType = vilkår,
+                                            resultat = resultat,
+                                            periodeFom = LocalDate.of(2020, 1, 1),
+                                            begrunnelse = "",
+                                            behandlingId = behandlingResultat.behandling.id)
         val restVilkårResultat = RestVilkårResultat(id = 1, vilkårType = vilkår, resultat = resultat,
                                                     periodeFom = LocalDate.of(2020, 6, 1), periodeTom = null, begrunnelse = "")
 

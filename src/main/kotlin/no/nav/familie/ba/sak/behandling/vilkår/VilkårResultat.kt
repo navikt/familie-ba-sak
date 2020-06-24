@@ -36,7 +36,10 @@ class VilkårResultat(
         var periodeTom: LocalDate? = null,
 
         @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
-        var begrunnelse: String
+        var begrunnelse: String,
+
+        @Column(name = "behandling_id")
+        var behandlingId: Long
 ) : BaseEntitet() {
 
     fun nullstill() {
@@ -53,7 +56,8 @@ class VilkårResultat(
                 resultat = resultat,
                 periodeFom = if (periodeFom != null) LocalDate.from(periodeFom) else null,
                 periodeTom = if (periodeTom != null) LocalDate.from(periodeTom) else null,
-                begrunnelse = begrunnelse
+                begrunnelse = begrunnelse,
+                behandlingId = behandlingId
         )
     }
 
@@ -64,7 +68,8 @@ class VilkårResultat(
                 resultat = resultat,
                 periodeFom = if (fom == TIDENES_MORGEN) null else fom,
                 periodeTom = if (tom == TIDENES_ENDE) null else tom,
-                begrunnelse = begrunnelse
+                begrunnelse = begrunnelse,
+                behandlingId = behandlingId
         )
     }
 }
