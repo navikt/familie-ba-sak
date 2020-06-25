@@ -48,9 +48,17 @@ internal class TidTest {
 
     @Test
     fun `skal bestemme om periode er etterfølgende periode`() {
-        val personResultat: PersonResultat = mockk()
+        val personIdent = randomFnr()
+        val behandling = lagBehandling()
         val resultat: Resultat = mockk()
         val vilkår: Vilkår = mockk()
+        val behandlingResultat = lagBehandlingResultat(personIdent, behandling, resultat)
+
+        val personResultat = PersonResultat(
+                behandlingResultat = behandlingResultat,
+                personIdent = personIdent
+        )
+
 
         val førsteVilkårResultat = VilkårResultat(personResultat = personResultat,
                                                   resultat = resultat,

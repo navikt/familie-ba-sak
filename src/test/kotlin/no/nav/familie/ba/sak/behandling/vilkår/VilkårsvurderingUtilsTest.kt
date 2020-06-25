@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.toPeriode
+import no.nav.familie.ba.sak.common.*
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -22,16 +20,23 @@ class VilkårsvurderingUtilsTest {
     lateinit var personResultat: PersonResultat
     lateinit var vilkår: Vilkår
     lateinit var resultat: Resultat
+    lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
-        behandlingResultat = mockk()
-        personResultat = PersonResultat(
-                behandlingResultat = behandlingResultat,
-                personIdent = randomFnr()
-        )
+        val personIdent = randomFnr()
+
+        behandling = lagBehandling()
+
         vilkår = Vilkår.BOR_MED_SØKER
         resultat = Resultat.JA
+
+        behandlingResultat = lagBehandlingResultat(personIdent, behandling, resultat)
+
+        personResultat = PersonResultat(
+                behandlingResultat = behandlingResultat,
+                personIdent = personIdent
+        )
 
         vilkårResultat1 = VilkårResultat(1, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
