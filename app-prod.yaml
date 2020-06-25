@@ -9,6 +9,7 @@ metadata:
 spec:
   image: {{ image }}
   port: 8089
+  leaderElection: true
   liveness:
     path: /internal/health
     initialDelay: 20
