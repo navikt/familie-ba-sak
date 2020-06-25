@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.dokument.domene.maler
 
 data class Innvilget(
         val enhet: String,
-        //val saksbehandler: String,
+        val saksbehandler: String,
         val beslutter: String,
         val barnasFodselsdatoer: String, // "24.12.19, 24.12.18 og 24.12.17"
         val belop: String, // 1 054
