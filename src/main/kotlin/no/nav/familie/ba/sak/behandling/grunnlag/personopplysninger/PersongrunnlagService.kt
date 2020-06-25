@@ -59,11 +59,6 @@ class PersongrunnlagService(
         )
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
-        LOG.info("DEBUG-VILKAAL søker adresse: ${søker.bostedsadresse?.toSecureString()}")
-        if(!personopplysningGrunnlag.barna.isEmpty()){
-            LOG.info("DEBUG-VILKAAL barn adresse: ${personopplysningGrunnlag.barna.get(0).bostedsadresse?.toSecureString()}")
-        }
-
         secureLogger.info("Setter persongrunnlag med søker: ${fødselsnummer} og barn: ${barnasFødselsnummer}")
         secureLogger.info("Barna på persongrunnlaget som lagres: ${personopplysningGrunnlag.barna.map { it.personIdent.ident }}")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)

@@ -36,12 +36,6 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
     val barn = fakta.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
 
-    val LOG = LoggerFactory.getLogger(VilkårService::class.java)
-    if(!søker.isEmpty()){
-        LOG.info("DEBUG-VILKAAL regler søker adresse: ${søker.first().bostedsadresse?.toSecureString()}")
-    }
-    LOG.info("DEBUG-VILKAAL regler barn adresse: ${barn.bostedsadresse?.toSecureString()}")
-
     return if (søker.isEmpty())
         Evaluering.nei(("Ingen søker"))
     else if (søker.first().bostedsadresse != null &&
