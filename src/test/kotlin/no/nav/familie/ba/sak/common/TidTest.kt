@@ -47,6 +47,11 @@ internal class TidTest {
     }
 
     @Test
+    fun `skal returnere seneste dato av 2020-01-01 og 2019-01-01`() {
+        assertEquals(dato("2020-01-01"), senesteDatoAv(dato("2020-01-01"), dato("2019-01-01")))
+    }
+
+    @Test
     fun `skal bestemme om periode er etterfølgende periode`() {
         val personResultat: PersonResultat = mockk()
         val resultat: Resultat = mockk()
