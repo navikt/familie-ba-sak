@@ -5,7 +5,7 @@ import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
 import javax.persistence.*
 
 @Entity(name = "GrBostedsadresse")
-@Inheritance
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type")
 @Table(name = "PO_BOSTEDSADRESSE")
 abstract class GrBostedsadresse(
