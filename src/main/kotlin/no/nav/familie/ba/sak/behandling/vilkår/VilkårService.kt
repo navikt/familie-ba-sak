@@ -43,10 +43,10 @@ class VilkårService(
     private fun initVilkårMetrikker(type: String): Map<Vilkår, Counter> {
         return Vilkår.values().map {
             it to Metrics.counter("behandling.vilkår.$type",
-                                             "vilkår",
-                                             it.name,
-                                             "beskrivelse",
-                                             it.spesifikasjon.beskrivelse)
+                                  "vilkår",
+                                  it.name,
+                                  "beskrivelse",
+                                  it.spesifikasjon.beskrivelse)
         }.toMap()
     }
 
@@ -87,11 +87,12 @@ class VilkårService(
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
             val spesifikasjonerForPerson = spesifikasjonerForPerson(person, behandling.kategori)
+            val fakta= Fakta(personForVurdering = person)
             val evaluering = spesifikasjonerForPerson.evaluer(
-                    Fakta(personForVurdering = person)
+                    fakta
             )
             val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
-            personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, evalueringer))
+            personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, fakta, evalueringer))
 
             tellMetrikker(evalueringer)
             personResultat
@@ -144,12 +145,18 @@ class VilkårService(
                                                    vilkårType = vilkår,
                                                    periodeFom = person.fødselsdato,
                                                    periodeTom = person.fødselsdato.plusYears(18),
-                                                   begrunnelse = "Vurdert og satt automatisk"))
+                                                   begrunnelse = "Vurdert og satt automatisk",
+                                                   regelInput = null,
+                                                   regelOutput = null
+                    ))
                 } else {
                     vilkårListe.add(VilkårResultat(personResultat = personResultat,
                                                    resultat = Resultat.KANSKJE,
                                                    vilkårType = vilkår,
-                                                   begrunnelse = ""))
+                                                   begrunnelse = "",
+                                                   regelInput = null,
+                                                   regelOutput = null
+                    ))
                 }
                 vilkårListe
             }.toSet())
@@ -163,7 +170,7 @@ class VilkårService(
             evaluering.identifikator
         else if (!evaluering.children.isEmpty())
             hentIdentifikatorForEvaluering(evaluering.children.first())
-        else{
+        else {
             LOG.warn("Internal Error: Illegal Identifikator for Evaluering")
             null
         }
@@ -174,7 +181,7 @@ class VilkårService(
             vilkårSuksessMetrics.get(vilkår)
         } else if (resultat == Resultat.NEI) {
             vilkårFeiletMetrics.get(vilkår)
-        } else{
+        } else {
             LOG.warn("Internal Error: Illegal type of metrics $resultat")
             null
         }
@@ -200,6 +207,7 @@ class VilkårService(
 
     private fun vilkårResultater(personResultat: PersonResultat,
                                  barnet: Person,
+                                 fakta: Fakta,
                                  evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
 
         return evalueringer.map { child ->
@@ -211,7 +219,10 @@ class VilkårService(
                            vilkårType = Vilkår.valueOf(child.identifikator),
                            periodeFom = barnet.fødselsdato,
                            periodeTom = tom,
-                           begrunnelse = "")
+                           begrunnelse = "",
+                           regelInput = fakta.toJson(),
+                           regelOutput = evalueringer.toJson()
+            )
         }.toSortedSet(PersonResultat.comparator)
     }
 

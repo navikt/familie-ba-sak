@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -139,6 +141,17 @@ class VilkårVurderingTest(
 
         val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
         Assertions.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
+
+        behandlingResultat.personResultater.forEach {
+            it.vilkårResultater.forEach {
+                Assertions.assertNotNull(it.regelInput)
+                val fakta = ObjectMapper().readValue(it.regelInput, Map::class.java)
+                assertTrue(fakta.containsKey("personForVurdering"))
+                Assertions.assertNotNull(it.regelOutput)
+                val listOfEvaluering = ObjectMapper().readValue(it.regelOutput, Object::class.java)
+                assertTrue(listOfEvaluering is List<*>)
+            }
+        }
     }
 
     @Test

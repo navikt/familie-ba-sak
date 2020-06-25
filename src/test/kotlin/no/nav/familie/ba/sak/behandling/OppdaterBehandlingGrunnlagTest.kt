@@ -109,13 +109,18 @@ class OppdaterBehandlingGrunnlagTest {
                                          resultat = Resultat.JA,
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
-                                         begrunnelse = ""),
+                                         begrunnelse = "",
+                                         regelInput = null,
+                                         regelOutput = null),
                           VilkårResultat(personResultat = personResultat,
                                          vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                          resultat = Resultat.JA,
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
-                                         begrunnelse = ""))
+                                         begrunnelse = "",
+                                         regelInput = null,
+                                         regelOutput = null
+                          ))
             )
 
             personResultat
@@ -135,24 +140,34 @@ class OppdaterBehandlingGrunnlagTest {
                     personIdent = it)
 
             personResultat.setVilkårResultater(
-                    setOf(VilkårResultat(personResultat = personResultat,
-                                         vilkårType = Vilkår.BOSATT_I_RIKET,
-                                         resultat = Resultat.JA,
-                                         periodeFom = LocalDate.now(),
-                                         periodeTom = LocalDate.now(),
-                                         begrunnelse = ""),
-                          VilkårResultat(personResultat = personResultat,
-                                         vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                         resultat = Resultat.JA,
-                                         periodeFom = LocalDate.now(),
-                                         periodeTom = LocalDate.now(),
-                                         begrunnelse = ""),
-                          VilkårResultat(personResultat = personResultat,
-                                         vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                         resultat = Resultat.JA,
-                                         periodeFom = LocalDate.now(),
-                                         periodeTom = LocalDate.now(),
-                                         begrunnelse = ""))
+                    setOf(
+                            VilkårResultat(personResultat = personResultat,
+                                           vilkårType = Vilkår.BOSATT_I_RIKET,
+                                           resultat = Resultat.JA,
+                                           periodeFom = LocalDate.now(),
+                                           periodeTom = LocalDate.now(),
+                                           begrunnelse = "",
+                                           regelInput = null,
+                                           regelOutput = null
+                            ),
+                            VilkårResultat(personResultat = personResultat,
+                                           vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                                           resultat = Resultat.JA,
+                                           periodeFom = LocalDate.now(),
+                                           periodeTom = LocalDate.now(),
+                                           begrunnelse = "",
+                                           regelInput = null,
+                                           regelOutput = null
+                            ),
+                            VilkårResultat(personResultat = personResultat,
+                                           vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                           resultat = Resultat.JA,
+                                           periodeFom = LocalDate.now(),
+                                           periodeTom = LocalDate.now(),
+                                           begrunnelse = "",
+                                           regelInput = null,
+                                           regelOutput = null
+                            ))
             )
             personResultat
         }.toSet()

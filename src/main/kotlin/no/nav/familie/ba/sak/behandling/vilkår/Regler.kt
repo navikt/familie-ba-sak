@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrUkjentBosted
 import no.nav.nare.core.evaluations.Evaluering
@@ -65,3 +66,5 @@ internal fun giftEllerPartneskap(fakta: Fakta): Evaluering {
     else
         Evaluering.nei("Person har lovlig opphold i Norge")
 }
+
+fun List<Evaluering>.toJson(): String = ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(this)
