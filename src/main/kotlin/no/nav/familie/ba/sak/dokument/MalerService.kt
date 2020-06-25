@@ -72,7 +72,7 @@ class MalerService(
                 enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
                 else throw Feil(message = "Ansvarlig enhet er ikke satt ved generering av brev",
                                 frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev"),
-                saksbehandler = totrinnskontroll.saksbehandler,
+                //saksbehandler = totrinnskontroll.saksbehandler,
                 beslutter = totrinnskontroll.beslutter
                             ?: totrinnskontroll.saksbehandler,
                 barnasFodselsdatoer = barnasFødselsdatoer,
