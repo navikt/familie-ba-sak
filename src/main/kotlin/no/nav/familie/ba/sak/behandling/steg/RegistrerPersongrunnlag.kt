@@ -34,7 +34,9 @@ class RegistrerPersongrunnlag(
                                                                                behandling)
         }
 
-        vilkårService.initierVilkårvurderingForBehandling(behandling, data.bekreftEndringerViaFrontend)
+        vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
+                                                          bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
+                                                          forrigeBehandling = forrigeBehandlingSomErIverksatt)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

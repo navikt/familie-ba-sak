@@ -57,7 +57,7 @@ class FerdigstillBehandlingTaskTest {
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, resultat)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
         Assertions.assertNotNull(behandling.fagsak.id)
 
         val personopplysningGrunnlag =

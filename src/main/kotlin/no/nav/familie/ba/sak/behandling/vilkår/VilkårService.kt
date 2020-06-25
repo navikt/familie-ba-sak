@@ -79,7 +79,7 @@ class VilkårService(
             personResultat
         }.toSet()
 
-        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
+        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
     }
 
     fun lagInitieltBehandlingResultatFraAnnenBehandling(behandling: Behandling, annenBehandling: Behandling): BehandlingResultat {
@@ -92,16 +92,14 @@ class VilkårService(
         return oppdatert
     }
 
-    fun initierVilkårvurderingForBehandling(behandling: Behandling, bekreftEndringerViaFrontend: Boolean): BehandlingResultat {
+    fun initierVilkårvurderingForBehandling(behandling: Behandling, bekreftEndringerViaFrontend: Boolean, forrigeBehandling: Behandling?): BehandlingResultat {
         val initiertBehandlingResultat = lagInitieltBehandlingResultat(behandling = behandling)
         val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
 
-        val annenBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-
-        return if (annenBehandling != null && aktivBehandlingResultat == null) {
+        return if (forrigeBehandling != null && aktivBehandlingResultat == null) {
             val behandlingResultat =
-                    lagInitieltBehandlingResultatFraAnnenBehandling(behandling = behandling, annenBehandling = annenBehandling)
-            return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, false)
+                    lagInitieltBehandlingResultatFraAnnenBehandling(behandling = behandling, annenBehandling = forrigeBehandling)
+            return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = false)
         } else {
             if (aktivBehandlingResultat != null) {
                 val (oppdatert, aktivt) = flyttResultaterTilInitielt(aktivtBehandlingResultat = aktivBehandlingResultat,
@@ -111,7 +109,7 @@ class VilkårService(
                                frontendFeilmelding = lagFjernAdvarsel(aktivt.personResultater)
                     )
                 }
-                return behandlingResultatService.lagreNyOgDeaktiverGammel(oppdatert, false)
+                return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = oppdatert, loggHendelse = false)
             } else {
                 behandlingResultatService.lagreInitiert(initiertBehandlingResultat)
             }
