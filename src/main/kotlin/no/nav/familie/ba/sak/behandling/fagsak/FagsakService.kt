@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
-import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -81,10 +80,23 @@ class FagsakService(
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
+        val restBehandlinger: List<RestBehandling> = lagRestBehandlinger(fagsak)
+        return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
+    }
 
+    fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestFagsak?> {
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
+        if (fagsak != null) {
+            val restBehandlinger: List<RestBehandling> = lagRestBehandlinger(fagsak)
+            return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
+        }
+        return Ressurs.success(data = null)
+    }
+
+    fun lagRestBehandlinger(fagsak: Fagsak): List<RestBehandling> {
         val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
 
-        val restBehandlinger: List<RestBehandling> = behandlinger.map { behandling ->
+        return behandlinger.map { behandling ->
             val personopplysningGrunnlag =
                     behandling.id.let { id -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(id) }
 
@@ -115,8 +127,6 @@ class FagsakService(
                     totrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll()
             )
         }
-
-        return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
     }
 
     fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {

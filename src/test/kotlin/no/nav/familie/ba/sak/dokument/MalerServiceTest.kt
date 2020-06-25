@@ -1,10 +1,8 @@
 package no.nav.familie.ba.sak.dokument
 
-import org.junit.jupiter.api.Assertions.*
-
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
-
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 

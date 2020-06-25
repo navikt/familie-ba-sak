@@ -16,7 +16,10 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient

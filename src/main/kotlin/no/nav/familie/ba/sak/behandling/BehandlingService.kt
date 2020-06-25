@@ -43,7 +43,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             val behandling = Behandling(fagsak = fagsak,
                                         opprinnelse = nyBehandling.behandlingOpprinnelse,
-                                        journalpostID = nyBehandling.journalpostID,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
@@ -60,6 +59,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                        frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
     }
+
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
@@ -81,6 +81,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
+    }
+
+    fun lagre(behandling: Behandling) : Behandling {
+        return behandlingRepository.save(behandling)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {

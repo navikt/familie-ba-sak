@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.dokument
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.TEST_PDF

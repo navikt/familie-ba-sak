@@ -5,6 +5,14 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.nare.core.evaluations.Resultat

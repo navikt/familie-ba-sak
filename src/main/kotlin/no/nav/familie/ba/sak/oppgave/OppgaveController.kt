@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.oppgave
 
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.toRestPersonInfo
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/oppgave")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClient: IntegrasjonClient) {
+class OppgaveController(val oppgaveService: OppgaveService,
+                        val fagsakService: FagsakService,
+                        val integrasjonClient: IntegrasjonClient) {
 
     @PostMapping(path = ["/hent-oppgaver"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -67,17 +70,17 @@ class OppgaveController(val oppgaveService: OppgaveService, val integrasjonClien
 
         return Result.runCatching {
             val oppgave = oppgaveService.hentOppgave(oppgaveId)
+            val personIdent = if (oppgave.aktoerId == null) null else {
+                integrasjonClient.hentPersonIdent(oppgave.aktoerId) ?: error("Fant ikke personident for aktør id")
+            }
+            val fagsak = if (personIdent == null) null else fagsakService.hentRestFagsakForPerson(personIdent).data
 
             Ressurs.success(DataForManuellJournalføring(
                     oppgave = oppgave,
                     journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!).data
                                                                                ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
-                    person = if (oppgave.aktoerId == null) null else {
-                        val personIdent = integrasjonClient.hentPersonIdent(oppgave.aktoerId)?.ident
-                                          ?: error("Fant ikke personident for aktør id")
-
-                        integrasjonClient.hentPersoninfoFor(personIdent).toRestPersonInfo(personIdent)
-                    }
+                    person = personIdent?.ident?.let { integrasjonClient.hentPersoninfoFor(it).toRestPersonInfo(it) },
+                    fagsak = fagsak
             ))
         }.fold(
                 onSuccess = { return ResponseEntity.ok().body(it) },

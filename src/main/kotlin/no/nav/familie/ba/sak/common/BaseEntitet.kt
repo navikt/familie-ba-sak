@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.common
 
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.io.Serializable
 import java.time.LocalDateTime

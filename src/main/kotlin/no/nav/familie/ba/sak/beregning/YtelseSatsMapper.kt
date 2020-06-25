@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.beregning.domene.SatsType
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 
 object YtelseSatsMapper {
 
