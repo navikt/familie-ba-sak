@@ -82,41 +82,45 @@ class VilkårService(
         return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
     }
 
-    fun lagInitieltBehandlingResultatFraAnnenBehandling(behandling: Behandling, annenBehandling: Behandling): BehandlingResultat {
-        val initiertBehandlingResultat = lagInitieltBehandlingResultat(behandling = behandling)
-
-        val forrigeBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = annenBehandling.id)
-                                        ?: throw Feil(message = "Finner ikke behandlingsresultat fra annen behandling.")
-        val (oppdatert) = flyttResultaterTilInitielt(aktivtBehandlingResultat = forrigeBehandlingResultat,
-                                                     initieltBehandlingResultat = initiertBehandlingResultat)
-        return oppdatert
-    }
-
     fun initierVilkårvurderingForBehandling(behandling: Behandling, bekreftEndringerViaFrontend: Boolean, forrigeBehandling: Behandling?): BehandlingResultat {
-        val initiertBehandlingResultat = lagInitieltBehandlingResultat(behandling = behandling)
+        val initieltBehandlingResultat = genererInitieltBehandlingResultat(behandling = behandling)
         val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
 
         return if (forrigeBehandling != null && aktivBehandlingResultat == null) {
             val behandlingResultat =
-                    lagInitieltBehandlingResultatFraAnnenBehandling(behandling = behandling, annenBehandling = forrigeBehandling)
+                    genererInitieltBehandlingResultatFraAnnenBehandling(behandling = behandling, annenBehandling = forrigeBehandling)
             return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = false)
         } else {
             if (aktivBehandlingResultat != null) {
-                val (oppdatert, aktivt) = flyttResultaterTilInitielt(aktivtBehandlingResultat = aktivBehandlingResultat,
-                                                                     initieltBehandlingResultat = initiertBehandlingResultat)
-                if (aktivt.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
+                val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
+                        initieltBehandlingResultat = initieltBehandlingResultat,
+                        aktivtBehandlingResultat = aktivBehandlingResultat
+                )
+
+                if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
                     throw Feil(message = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
-                               frontendFeilmelding = lagFjernAdvarsel(aktivt.personResultater)
+                               frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
                     )
                 }
-                return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = oppdatert, loggHendelse = false)
+                return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = initieltSomErOppdatert, loggHendelse = false)
             } else {
-                behandlingResultatService.lagreInitiert(initiertBehandlingResultat)
+                behandlingResultatService.lagreInitielt(initieltBehandlingResultat)
             }
         }
     }
 
-    fun lagInitieltBehandlingResultat(behandling: Behandling): BehandlingResultat {
+
+    fun genererInitieltBehandlingResultatFraAnnenBehandling(behandling: Behandling, annenBehandling: Behandling): BehandlingResultat {
+        val initieltBehandlingResultat = genererInitieltBehandlingResultat(behandling = behandling)
+
+        val forrigeBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = annenBehandling.id)
+                                        ?: throw Feil(message = "Finner ikke behandlingsresultat fra annen behandling.")
+        val (oppdatert) = flyttResultaterTilInitielt(aktivtBehandlingResultat = forrigeBehandlingResultat,
+                                                     initieltBehandlingResultat = initieltBehandlingResultat)
+        return oppdatert
+    }
+
+    private fun genererInitieltBehandlingResultat(behandling: Behandling): BehandlingResultat {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling $behandling")
 

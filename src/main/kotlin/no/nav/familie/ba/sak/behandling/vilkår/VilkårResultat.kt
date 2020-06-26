@@ -38,8 +38,10 @@ class VilkårResultat(
         @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
         var begrunnelse: String,
 
-        @Column(name = "behandling_id", nullable = true)
+        @JsonIgnore
+        @ManyToOne @JoinColumn(name = "fk_behandling_id", nullable = true)
         var behandlingId: Long?
+
 ) : BaseEntitet() {
 
     fun nullstill() {
