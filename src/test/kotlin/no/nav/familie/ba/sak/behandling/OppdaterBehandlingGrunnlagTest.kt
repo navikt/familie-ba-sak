@@ -121,9 +121,7 @@ class OppdaterBehandlingGrunnlagTest {
                                          begrunnelse = "",
                                          behandlingId = behandling.id,
                                          regelInput = null,
-                                         regelOutput = null),
-                          ))
-            )
+                                         regelOutput = null)))
 
             personResultat
         }.toSet()
