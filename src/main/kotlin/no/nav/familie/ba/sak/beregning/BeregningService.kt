@@ -69,10 +69,6 @@ class BeregningService(
 
         if (erRentOpphør) {
             opphørsdato = utbetalingsoppdrag.utbetalingsperiode[0].opphør!!.opphørDatoFom
-            if (utbetalingsoppdrag.utbetalingsperiode.any { it.opphør!!.opphørDatoFom != opphørsdato }
-                    && (behandling.type == BehandlingType.TEKNISK_OPPHØR || behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)) {
-                throw IllegalArgumentException("Systemet støtter ikke opphør med ulike opphørsdatoer")
-            }
         }
 
         if (behandling.type == BehandlingType.REVURDERING) {
