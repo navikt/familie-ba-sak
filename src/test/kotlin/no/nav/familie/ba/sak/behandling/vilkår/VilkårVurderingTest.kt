@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -148,8 +149,8 @@ class VilkårVurderingTest(
                 val fakta = ObjectMapper().readValue(it.regelInput, Map::class.java)
                 assertTrue(fakta.containsKey("personForVurdering"))
                 Assertions.assertNotNull(it.regelOutput)
-                val listOfEvaluering = ObjectMapper().readValue(it.regelOutput, Object::class.java)
-                assertTrue(listOfEvaluering is List<*>)
+                val evaluering = ObjectMapper().readValue(it.regelOutput, Map::class.java)
+                assertEquals(evaluering["resultat"], "JA")
             }
         }
     }

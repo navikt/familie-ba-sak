@@ -221,7 +221,7 @@ class VilkårService(
                            periodeTom = tom,
                            begrunnelse = "",
                            regelInput = fakta.toJson(),
-                           regelOutput = evalueringer.toJson()
+                           regelOutput = child.toJson()
             )
         }.toSortedSet(PersonResultat.comparator)
     }

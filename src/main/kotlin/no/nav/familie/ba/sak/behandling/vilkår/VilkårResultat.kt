@@ -38,12 +38,10 @@ class VilkårResultat(
         @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
         var begrunnelse: String,
 
-        @Column(name = "regel_input")
-        @Lob
+        @Column(name = "regel_input", columnDefinition = "TEXT")
         var regelInput: String?,
 
-        @Column(name = "regel_output")
-        @Lob
+        @Column(name = "regel_output", columnDefinition = "TEXT")
         var regelOutput: String?
 ) : BaseEntitet() {
 
