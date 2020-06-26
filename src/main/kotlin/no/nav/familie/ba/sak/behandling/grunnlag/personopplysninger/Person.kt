@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -34,13 +35,19 @@ data class Person(
                                               column = Column(name = "person_ident", updatable = false)))
         val personIdent: PersonIdent,
 
+        @JsonIgnore
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
         val personopplysningGrunnlag: PersonopplysningGrunnlag,
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
-        val aktørId: AktørId? = null
+        val aktørId: AktørId? = null,
+
+        @OneToOne(cascade = [CascadeType.ALL])
+        @JoinColumn
+        val bostedsadresse: GrBostedsadresse? = null
+
 ) : BaseEntitet() {
 
     override fun toString(): String {
