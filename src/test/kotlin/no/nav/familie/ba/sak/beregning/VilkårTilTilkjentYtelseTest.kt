@@ -158,6 +158,7 @@ class TestBehandlingResultatBuilder(val sakType: String) {
                     periodeFom = testperiode.fraOgMed,
                     periodeTom = testperiode.tilOgMed,
                     begrunnelse = "",
+                    behandlingId = behandlingResultat.behandling.id,
                     regelInput = null,
                     regelOutput = null)
         }.toSet()

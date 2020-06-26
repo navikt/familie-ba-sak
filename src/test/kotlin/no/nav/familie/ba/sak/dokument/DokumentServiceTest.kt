@@ -117,7 +117,7 @@ class DokumentServiceTest(
                 barn2Fnr,
                 dato_2020_01_01.minusMonths(1),
                 stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat1, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat1, loggHendelse = true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling, "ansvarligSaksbehandler")
@@ -166,7 +166,7 @@ class DokumentServiceTest(
                 barn2Fnr,
                 dato_2020_01_01.minusMonths(1),
                 stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat1, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat1, loggHendelse = true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 

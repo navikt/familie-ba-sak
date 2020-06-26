@@ -110,6 +110,7 @@ class OppdaterBehandlingGrunnlagTest {
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
                                          begrunnelse = "",
+                                         behandlingId = behandling.id,
                                          regelInput = null,
                                          regelOutput = null),
                           VilkårResultat(personResultat = personResultat,
@@ -118,10 +119,9 @@ class OppdaterBehandlingGrunnlagTest {
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
                                          begrunnelse = "",
+                                         behandlingId = behandling.id,
                                          regelInput = null,
-                                         regelOutput = null
-                          ))
-            )
+                                         regelOutput = null)))
 
             personResultat
         }.toSet()
@@ -147,6 +147,7 @@ class OppdaterBehandlingGrunnlagTest {
                                            periodeFom = LocalDate.now(),
                                            periodeTom = LocalDate.now(),
                                            begrunnelse = "",
+                                           behandlingId = behandling.id,
                                            regelInput = null,
                                            regelOutput = null
                             ),
@@ -156,6 +157,7 @@ class OppdaterBehandlingGrunnlagTest {
                                            periodeFom = LocalDate.now(),
                                            periodeTom = LocalDate.now(),
                                            begrunnelse = "",
+                                           behandlingId = behandling.id,
                                            regelInput = null,
                                            regelOutput = null
                             ),
@@ -165,6 +167,7 @@ class OppdaterBehandlingGrunnlagTest {
                                            periodeFom = LocalDate.now(),
                                            periodeTom = LocalDate.now(),
                                            begrunnelse = "",
+                                           behandlingId = behandling.id,
                                            regelInput = null,
                                            regelOutput = null
                             ))

@@ -233,6 +233,7 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                    vilkårType = it,
                                    resultat = resultat,
                                    begrunnelse = "",
+                                   behandlingId = behandlingResultat.behandling.id,
                                    regelInput = null,
                                    regelOutput = null)
                 }.toSet())
@@ -244,6 +245,7 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                      vilkårType = vilkårType,
                                      resultat = resultat,
                                      begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id,
                                      regelInput = null,
                                      regelOutput = null))
         )
@@ -280,6 +282,7 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
                                  periodeFom = LocalDate.now(),
                                  periodeTom = LocalDate.now(),
                                  begrunnelse = "",
+                                 behandlingId = behandling.id,
                                  regelInput = null,
                                  regelOutput = null))
     )

@@ -27,6 +27,7 @@ object VilkårsvurderingUtils {
         val nyttVilkårResultat = VilkårResultat(personResultat = personResultat,
                                                 vilkårType = vilkårType,
                                                 resultat = Resultat.KANSKJE, begrunnelse = "",
+                                                behandlingId = personResultat.behandlingResultat.behandling.id,
                                                 regelInput = null,
                                                 regelOutput = null)
         if (harUvurdertePerioder(personResultat, vilkårType)) {
@@ -203,6 +204,7 @@ object VilkårsvurderingUtils {
                               begrunnelse = "",
                               periodeFom = fom,
                               periodeTom = tom,
+                              behandlingId = personResultat.behandlingResultat.behandling.id,
                               regelInput = null,
                               regelOutput = null)
     }
