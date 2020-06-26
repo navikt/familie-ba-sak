@@ -50,14 +50,18 @@ class PeriodeMapperTest {
                                                                                   vilkårType = Vilkår.UNDER_18_ÅR,
                                                                                   resultat = Resultat.JA,
                                                                                   begrunnelse = "",
-                                                                                  behandlingId = behandlingResultat.behandling.id))))
+                                                                                  behandlingId = behandlingResultat.behandling.id,
+                                                                                  regelInput = null,
+                                                                                  regelOutput = null))))
         val tidslinje2 = LocalDateTimeline(listOf(LocalDateSegment(datoer[1],
                                                                    datoer[3].minusDays(1),
                                                                    VilkårResultat(personResultat = personResultat,
                                                                                   vilkårType = Vilkår.BOSATT_I_RIKET,
                                                                                   resultat = Resultat.JA,
                                                                                   begrunnelse = "",
-                                                                                  behandlingId = behandlingResultat.behandling.id))))
+                                                                                  behandlingId = behandlingResultat.behandling.id,
+                                                                                  regelInput = null,
+                                                                                  regelOutput = null))))
 
         val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(listOf(tidslinje1, tidslinje2))
 
@@ -89,21 +93,30 @@ class PeriodeMapperTest {
                                      periodeFom = datoer[0],
                                      periodeTom = datoer[2].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id),
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null
+                ),
                       VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.BOSATT_I_RIKET,
                                      resultat = Resultat.JA,
                                      periodeFom = datoer[1],
                                      periodeTom = datoer[5].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id),
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null
+                      ),
                       VilkårResultat(personResultat = personResultat1,
                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
                                      resultat = Resultat.JA,
                                      periodeFom = datoer[3],
                                      periodeTom = datoer[4].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id))
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null
+                      ))
         )
         personResultat2.setVilkårResultater(
                 setOf(VilkårResultat(personResultat = personResultat2,
@@ -112,7 +125,10 @@ class PeriodeMapperTest {
                                      periodeFom = datoer[1],
                                      periodeTom = datoer[4].minusDays(1),
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id))
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null
+                ))
         )
         behandlingResultat.personResultater = setOf(personResultat1, personResultat2)
         val periodeResultater = behandlingResultat.periodeResultater(true).toList()
@@ -182,7 +198,10 @@ class PeriodeMapperTest {
                                      periodeFom = LocalDate.of(2020, 5, 15),
                                      periodeTom = LocalDate.of(2020, 6, 15),
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id))
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null
+                ))
         )
         behandlingResultat.personResultater = setOf(personResultat)
         val periodeResultat = behandlingResultat.periodeResultater(true).toList()[0]
@@ -205,28 +224,40 @@ class PeriodeMapperTest {
                                      periodeFom = periodeFom18ÅrsVilkår,
                                      periodeTom = periodeTom18ÅrsVilkår,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id),
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null
+                ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.BOSATT_I_RIKET,
                                      resultat = Resultat.JA,
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id),
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null
+                      ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.GIFT_PARTNERSKAP,
                                      resultat = Resultat.JA,
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id),
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null
+                      ),
                       VilkårResultat(personResultat = personResultat,
                                      vilkårType = Vilkår.BOR_MED_SØKER,
                                      resultat = Resultat.JA,
                                      periodeFom = periodeFom,
                                      periodeTom = null,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id))
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null
+                      ))
         )
 
         behandlingResultat.personResultater = setOf(personResultat)

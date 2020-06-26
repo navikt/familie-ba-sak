@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
@@ -11,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
@@ -21,6 +24,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -33,6 +37,19 @@ class VilkårService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
+
+    private val vilkårSuksessMetrics: Map<Vilkår, Counter> = initVilkårMetrikker("suksess")
+    private val vilkårFeiletMetrics: Map<Vilkår, Counter> = initVilkårMetrikker("feil")
+
+    private fun initVilkårMetrikker(type: String): Map<Vilkår, Counter> {
+        return Vilkår.values().map {
+            it to Metrics.counter("behandling.vilkår.$type",
+                                  "vilkår",
+                                  it.name,
+                                  "beskrivelse",
+                                  it.spesifikasjon.beskrivelse)
+        }.toMap()
+    }
 
     fun hentVilkårsdato(behandling: Behandling): LocalDate? {
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
@@ -71,11 +88,14 @@ class VilkårService(
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
             val spesifikasjonerForPerson = spesifikasjonerForPerson(person, behandling.kategori)
+            val fakta= Fakta(personForVurdering = person)
             val evaluering = spesifikasjonerForPerson.evaluer(
-                    Fakta(personForVurdering = person)
+                    fakta
             )
             val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
-            personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, evalueringer))
+            personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, fakta, evalueringer))
+
+            tellMetrikker(evalueringer)
             personResultat
         }.toSet()
 
@@ -152,17 +172,53 @@ class VilkårService(
                                                periodeFom = person.fødselsdato,
                                                periodeTom = person.fødselsdato.plusYears(18),
                                                begrunnelse = "Vurdert og satt automatisk",
-                                               behandlingId = behandlingResultat.behandling.id))
+                                               behandlingId = behandlingResultat.behandling.id,
+                                               regelInput = null,
+                                               regelOutput = null))
             } else {
                 vilkårListe.add(VilkårResultat(personResultat = personResultat,
                                                resultat = Resultat.KANSKJE,
                                                vilkårType = vilkår,
                                                begrunnelse = "",
-                                               behandlingId = behandlingResultat.behandling.id))
+                                               behandlingId = behandlingResultat.behandling.id,
+                                               regelInput = null,
+                                               regelOutput = null))
             }
             vilkårListe
         }.toSet())
         return personResultat
+    }
+
+    private fun hentIdentifikatorForEvaluering(evaluering: Evaluering): String? {
+        return if (enumValues<Vilkår>().map { it.name }.contains(evaluering.identifikator))
+            evaluering.identifikator
+        else if (!evaluering.children.isEmpty())
+            hentIdentifikatorForEvaluering(evaluering.children.first())
+        else {
+            LOG.warn("Internal Error: Illegal Identifikator for Evaluering")
+            null
+        }
+    }
+
+    private fun hentCounterForVilkår(resultat: Resultat, vilkår: Vilkår): Counter? {
+        return if (resultat == Resultat.JA) {
+            vilkårSuksessMetrics.get(vilkår)
+        } else if (resultat == Resultat.NEI) {
+            vilkårFeiletMetrics.get(vilkår)
+        } else {
+            LOG.warn("Internal Error: Illegal type of metrics $resultat")
+            null
+        }
+    }
+
+    fun tellMetrikker(evalueringer: List<Evaluering>) {
+        evalueringer.forEach {
+            val identifikator = hentIdentifikatorForEvaluering(it)
+            if (identifikator != null) {
+                val counter = hentCounterForVilkår(it.resultat, Vilkår.valueOf(identifikator))
+                counter?.increment()
+            }
+        }
     }
 
     private fun spesifikasjonerForPerson(person: Person, behandlingKategori: BehandlingKategori): Spesifikasjon<Fakta> {
@@ -175,7 +231,9 @@ class VilkårService(
 
     private fun vilkårResultater(personResultat: PersonResultat,
                                  barnet: Person,
+                                 fakta: Fakta,
                                  evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
+
         return evalueringer.map { child ->
             val tom: LocalDate? =
                     if (Vilkår.valueOf(child.identifikator) == Vilkår.UNDER_18_ÅR) barnet.fødselsdato.plusYears(18) else null
@@ -186,7 +244,10 @@ class VilkårService(
                            periodeFom = barnet.fødselsdato,
                            periodeTom = tom,
                            begrunnelse = "",
-                           behandlingId = personResultat.behandlingResultat.behandling.id)
+                           behandlingId = personResultat.behandlingResultat.behandling.id,
+                           regelInput = fakta.toJson(),
+                           regelOutput = child.toJson()
+            )
         }.toSortedSet(PersonResultat.comparator)
     }
 
@@ -237,5 +298,9 @@ class VilkårService(
         muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
 
         return behandlingResultatService.oppdater(behandlingResultat).personResultater.map { it.tilRestPersonResultat() }
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

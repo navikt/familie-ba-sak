@@ -5,10 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
@@ -122,13 +119,17 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                     søkerPersonIdent: String,
                                     barnasIdenter: List<String>): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
+    val bostedsadresse = GrMatrikkeladresse(matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
+                                            postnummer = "0202", kommunenummer = "2231")
+
     val søker = Person(aktørId = randomAktørId(),
                        personIdent = PersonIdent(søkerPersonIdent),
                        type = PersonType.SØKER,
                        personopplysningGrunnlag = personopplysningGrunnlag,
                        fødselsdato = LocalDate.of(2019, 1, 1),
                        navn = "",
-                       kjønn = Kjønn.KVINNE)
+                       kjønn = Kjønn.KVINNE,
+                       bostedsadresse = bostedsadresse)
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
@@ -138,7 +139,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
                                                      fødselsdato = LocalDate.of(2019, 1, 1),
                                                      navn = "",
-                                                     kjønn = Kjønn.MANN))
+                                                     kjønn = Kjønn.MANN,
+                                                     bostedsadresse = bostedsadresse))
     }
     return personopplysningGrunnlag
 }
@@ -231,7 +233,8 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                    vilkårType = it,
                                    resultat = resultat,
                                    begrunnelse = "",
-                                   behandlingId = behandlingResultat.behandling.id)
+                                   regelInput = null,
+                                   regelOutput = null)
                 }.toSet())
     } else {
         personResultat.setVilkårResultater(
@@ -241,7 +244,8 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                      vilkårType = vilkårType,
                                      resultat = resultat,
                                      begrunnelse = "",
-                                     behandlingId = behandlingResultat.behandling.id))
+                                     regelInput = null,
+                                     regelOutput = null))
         )
     }
     return personResultat
@@ -276,7 +280,8 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
                                  periodeFom = LocalDate.now(),
                                  periodeTom = LocalDate.now(),
                                  begrunnelse = "",
-                                 behandlingId = behandling.id))
+                                 regelInput = null,
+                                 regelOutput = null))
     )
     behandlingResultat.personResultater = setOf(personResultat)
     return behandlingResultat

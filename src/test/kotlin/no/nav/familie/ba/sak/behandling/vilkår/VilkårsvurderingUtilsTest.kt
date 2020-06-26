@@ -40,13 +40,13 @@ class VilkårsvurderingUtilsTest {
 
         vilkårResultat1 = VilkårResultat(1, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                         "", behandlingResultat.behandling.id)
+                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
         vilkårResultat2 = VilkårResultat(2, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
-                                         "", behandlingResultat.behandling.id)
+                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
-                                         "", behandlingResultat.behandling.id)
+                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
         personResultat.setVilkårResultater(setOf(vilkårResultat1,
                                                  vilkårResultat2,
                                                  vilkårResultat3).toSortedSet(PersonResultat.comparator))
@@ -198,7 +198,7 @@ class VilkårsvurderingUtilsTest {
 
         val mockVilkårResultat = VilkårResultat(1, mockPersonResultat, vilkår, resultat,
                                                 LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                                "", behandlingResultat.behandling.id)
+                                                "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
         mockPersonResultat.setVilkårResultater(setOf(mockVilkårResultat))
 
         VilkårsvurderingUtils.muterPersonResultatDelete(mockPersonResultat,
@@ -234,7 +234,9 @@ class VilkårsvurderingUtilsTest {
                                             resultat = resultat,
                                             periodeFom = LocalDate.of(2020, 1, 1),
                                             begrunnelse = "",
-                                            behandlingId = behandlingResultat.behandling.id)
+                                            regelInput = null,
+                                            behandlingId = behandlingResultat.behandling.id,
+                                            regelOutput = null)
         val restVilkårResultat = RestVilkårResultat(id = 1, vilkårType = vilkår, resultat = resultat,
                                                     periodeFom = LocalDate.of(2020, 6, 1), periodeTom = null, begrunnelse = "")
 

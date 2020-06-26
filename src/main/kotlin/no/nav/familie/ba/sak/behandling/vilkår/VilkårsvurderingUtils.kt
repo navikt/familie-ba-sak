@@ -26,9 +26,10 @@ object VilkårsvurderingUtils {
     fun muterPersonResultatPost(personResultat: PersonResultat, vilkårType: Vilkår) {
         val nyttVilkårResultat = VilkårResultat(personResultat = personResultat,
                                                 vilkårType = vilkårType,
-                                                resultat = Resultat.KANSKJE,
-                                                begrunnelse = "",
-                                                behandlingId = personResultat.behandlingResultat.behandling.id)
+                                                resultat = Resultat.KANSKJE, begrunnelse = "",
+                                                behandlingId = personResultat.behandlingResultat.behandling.id,
+                                                regelInput = null,
+                                                regelOutput = null)
         if (harUvurdertePerioder(personResultat, vilkårType)) {
             throw Feil("Det finnes allerede uvurderte vilkår av samme vilkårType")
         }
@@ -203,7 +204,9 @@ object VilkårsvurderingUtils {
                               begrunnelse = "",
                               periodeFom = fom,
                               periodeTom = tom,
-                              behandlingId = personResultat.behandlingResultat.behandling.id)
+                              behandlingId = personResultat.behandlingResultat.behandling.id,
+                              regelInput = null,
+                              regelOutput = null)
     }
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {
