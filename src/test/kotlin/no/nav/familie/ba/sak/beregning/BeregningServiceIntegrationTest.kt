@@ -174,7 +174,7 @@ class BeregningServiceIntegrationTest {
 
         val behandlingResultat = BehandlingResultat(behandling = behandling)
         behandlingResultat.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01, dato_2020_01_01.plusYears(17))
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 

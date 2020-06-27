@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -53,11 +54,11 @@ class PersongrunnlagService(
                            fødselsdato = personinfo.fødselsdato,
                            aktørId = aktørId,
                            navn = personinfo.navn ?: "",
+                           bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT
         )
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
-
         secureLogger.info("Setter persongrunnlag med søker: ${fødselsnummer} og barn: ${barnasFødselsnummer}")
         secureLogger.info("Barna på persongrunnlaget som lagres: ${personopplysningGrunnlag.barna.map { it.personIdent.ident }}")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -73,7 +74,8 @@ class PersongrunnlagService(
                                          fødselsdato = personinfo.fødselsdato,
                                          aktørId = integrasjonClient.hentAktivAktørId(Ident(nyttBarn)),
                                          navn = personinfo.navn ?: "",
-                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT
+                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+                                         bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse)
             ))
         }
     }
