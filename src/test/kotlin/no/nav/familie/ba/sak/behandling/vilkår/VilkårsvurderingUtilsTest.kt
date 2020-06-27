@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.toPeriode
+import no.nav.familie.ba.sak.common.*
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -22,27 +20,36 @@ class VilkårsvurderingUtilsTest {
     lateinit var personResultat: PersonResultat
     lateinit var vilkår: Vilkår
     lateinit var resultat: Resultat
+    lateinit var behandling: Behandling
 
     @BeforeEach
     fun init() {
-        behandlingResultat = mockk()
-        personResultat = PersonResultat(
-                behandlingResultat = behandlingResultat,
-                personIdent = randomFnr()
-        )
+        val personIdent = randomFnr()
+
+        behandling = lagBehandling()
+
         vilkår = Vilkår.BOR_MED_SØKER
         resultat = Resultat.JA
 
+        behandlingResultat = lagBehandlingResultat(personIdent, behandling, resultat)
+
+        personResultat = PersonResultat(
+                behandlingResultat = behandlingResultat,
+                personIdent = personIdent
+        )
+
         vilkårResultat1 = VilkårResultat(1, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                         "")
+                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
         vilkårResultat2 = VilkårResultat(2, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
-                                         "")
+                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
         vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
                                          LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
-                                         "")
-        personResultat.setVilkårResultater(setOf(vilkårResultat1, vilkårResultat2, vilkårResultat3).toSortedSet(PersonResultat.comparator))
+                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
+        personResultat.setVilkårResultater(setOf(vilkårResultat1,
+                                                 vilkårResultat2,
+                                                 vilkårResultat3).toSortedSet(PersonResultat.comparator))
     }
 
     private fun assertPeriode(expected: Periode, actual: Periode) {
@@ -191,7 +198,7 @@ class VilkårsvurderingUtilsTest {
 
         val mockVilkårResultat = VilkårResultat(1, mockPersonResultat, vilkår, resultat,
                                                 LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                                                "")
+                                                "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
         mockPersonResultat.setVilkårResultater(setOf(mockVilkårResultat))
 
         VilkårsvurderingUtils.muterPersonResultatDelete(mockPersonResultat,
@@ -222,8 +229,14 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `Skal tilpasse vilkår for endret vilkår når begge mangler tom-dato`() {
-        val vilkårResultat = VilkårResultat(personResultat = personResultat, vilkårType = vilkår, resultat = resultat,
-                                            periodeFom = LocalDate.of(2020, 1, 1), begrunnelse = "")
+        val vilkårResultat = VilkårResultat(personResultat = personResultat,
+                                            vilkårType = vilkår,
+                                            resultat = resultat,
+                                            periodeFom = LocalDate.of(2020, 1, 1),
+                                            begrunnelse = "",
+                                            regelInput = null,
+                                            behandlingId = behandlingResultat.behandling.id,
+                                            regelOutput = null)
         val restVilkårResultat = RestVilkårResultat(id = 1, vilkårType = vilkår, resultat = resultat,
                                                     periodeFom = LocalDate.of(2020, 6, 1), periodeTom = null, begrunnelse = "")
 

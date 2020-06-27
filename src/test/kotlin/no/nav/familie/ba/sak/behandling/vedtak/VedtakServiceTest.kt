@@ -109,7 +109,7 @@ class VedtakServiceTest(
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
 
         val behandlingResultatType =
                 behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = behandling.id)
@@ -148,7 +148,7 @@ class VedtakServiceTest(
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.NEI)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
 
         val behandlingResultatType =
                 behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = behandling.id)

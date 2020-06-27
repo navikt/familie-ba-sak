@@ -48,19 +48,38 @@ internal class TidTest {
 
     @Test
     fun `skal bestemme om periode er etterfølgende periode`() {
-        val personResultat: PersonResultat = mockk()
+        val personIdent = randomFnr()
+        val behandling = lagBehandling()
         val resultat: Resultat = mockk()
         val vilkår: Vilkår = mockk()
+        val behandlingResultat = lagBehandlingResultat(personIdent, behandling, resultat)
 
-        val førsteVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
-                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 1, 1),
-                periodeTom = LocalDate.of(2020, 3, 25), begrunnelse = "")
+        val personResultat = PersonResultat(
+                behandlingResultat = behandlingResultat,
+                personIdent = personIdent
+        )
+
+        val førsteVilkårResultat = VilkårResultat(personResultat = personResultat,
+                                                  resultat = resultat,
+                                                  vilkårType = vilkår,
+                                                  periodeFom = LocalDate.of(2020, 1, 1),
+                                                  periodeTom = LocalDate.of(2020, 3, 25),
+                                                  begrunnelse = "",
+                                                  behandlingId = personResultat.behandlingResultat.behandling.id,
+                                                  regelInput = null,
+                                                  regelOutput = null)
         val etterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
-                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 3, 31),
-                periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "")
+                                                         vilkårType = vilkår, periodeFom = LocalDate.of(2020, 3, 31),
+                                                         periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "",
+                                                         behandlingId = personResultat.behandlingResultat.behandling.id,
+                                                         regelInput = null,
+                                                         regelOutput = null)
         val ikkeEtterfølgendeVilkårResultat = VilkårResultat(personResultat = personResultat, resultat = resultat,
-                vilkårType = vilkår, periodeFom = LocalDate.of(2020, 5, 1),
-                periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "")
+                                                             vilkårType = vilkår, periodeFom = LocalDate.of(2020, 5, 1),
+                                                             periodeTom = LocalDate.of(2020, 6, 1), begrunnelse = "",
+                                                             behandlingId = personResultat.behandlingResultat.behandling.id,
+                                                             regelInput = null,
+                                                             regelOutput = null)
 
         assertTrue(førsteVilkårResultat.erEtterfølgendePeriode(etterfølgendeVilkårResultat))
         assertFalse(førsteVilkårResultat.erEtterfølgendePeriode(ikkeEtterfølgendeVilkårResultat))
