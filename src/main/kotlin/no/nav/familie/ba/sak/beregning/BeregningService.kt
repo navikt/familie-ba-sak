@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -64,20 +65,23 @@ class BeregningService(
 
     private fun populerTilkjentYtelse(behandling: Behandling,
                                       utbetalingsoppdrag: Utbetalingsoppdrag): TilkjentYtelse {
+        LOG.info("Populerer tilkjent ytelse med " + utbetalingsoppdrag.utbetalingsperiode.size + " perioder.")
         val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
         var opphørsdato: LocalDate? = null
 
         if (erRentOpphør) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode[0].opphør!!.opphørDatoFom
+            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.map { it.opphør!!.opphørDatoFom }.sorted().last()
+            LOG.info("Er rent opphør")
         }
 
         if (behandling.type == BehandlingType.REVURDERING) {
             opphørsdato = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør !== null }
                     .maxBy { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
+            LOG.info("Er revurdering")
         }
+        LOG.info("Opphørsdato: " + opphørsdato)
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-
         return tilkjentYtelse.apply {
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
             this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxBy { it.vedtakdatoTom }!!.vedtakdatoTom
@@ -87,6 +91,10 @@ class BeregningService(
             this.endretDato = LocalDate.now()
             this.opphørFom = opphørsdato
         }
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
 
