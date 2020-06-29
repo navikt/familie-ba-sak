@@ -88,7 +88,7 @@ class VilkårService(
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
             val spesifikasjonerForPerson = spesifikasjonerForPerson(person, behandling.kategori)
-            val fakta= Fakta(personForVurdering = person)
+            val fakta = Fakta(personForVurdering = person)
             val evaluering = spesifikasjonerForPerson.evaluer(
                     fakta
             )
