@@ -62,7 +62,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         }
 
         val nyBehandling = Behandling(fagsak = gjeldendeBehandling.fagsak,
-                                      journalpostID = null,
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori,
