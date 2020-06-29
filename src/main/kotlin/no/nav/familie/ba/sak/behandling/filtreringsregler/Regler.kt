@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.behandling.filtreringsregler
 import no.nav.nare.core.evaluations.Evaluering
 import java.time.LocalDate
 
-internal fun søkerHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
-    return when (!erDnummer(fakta.søker.personIdent.ident)) {
+internal fun morHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
+    return when (!erDnummer(fakta.mor.personIdent.ident)) {
         true -> Evaluering.ja("Søker har gyldig fødselsnummer")
         false -> Evaluering.nei("Søker har D-nummer")
     }
@@ -24,13 +24,23 @@ internal fun barnetErUnder6mnd(fakta: Fakta): Evaluering {
     }
 }
 
-internal fun søkerErOver18år(fakta: Fakta): Evaluering {
-    return when (LocalDate.now().isAfter(fakta.søker.fødselsdato.plusYears(18))) {
+internal fun morErOver18år(fakta: Fakta): Evaluering {
+    return when (LocalDate.now().isAfter(fakta.mor.fødselsdato.plusYears(18))) {
         true -> Evaluering.ja("Søker er over 18 år")
         false -> Evaluering.nei("Søker er under 18 år")
     }
 }
 
+internal fun merEnn5mndSidenForrigeBarn(fakta: Fakta): Evaluering {
+    val barnetsFødselsdato = fakta.barn.fødselsdato
+    val listenAvAndreBarnUnder5måneder = fakta.restenAvBarna.filter {
+        it.fødselsdato.isAfter(barnetsFødselsdato.minusMonths(5))
+    }
+    return when (listenAvAndreBarnUnder5måneder.isEmpty()) {
+        true -> Evaluering.ja("Mor har ikke barn som er født med mindre enn fem måneders mellomrom fra aktuelt barn.")
+        false -> Evaluering.nei("Mor har barn som er født med mindre enn fem måneders mellomrom fra aktuelt barn.")
+    }
+}
 
 private fun erDnummer(personIdent: String): Boolean {
     return personIdent.substring(0, 1).toInt() > 3
