@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
+import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import java.time.YearMonth
@@ -69,7 +70,8 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: Perso
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
         navn = "",
-        kjønn = Kjønn.MANN
+        kjønn = Kjønn.MANN,
+        sivilstand = SIVILSTAND.UGIFT
 )
 
 fun lagVedtak(behandling: Behandling = lagBehandling(),
@@ -129,7 +131,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                        fødselsdato = LocalDate.of(2019, 1, 1),
                        navn = "",
                        kjønn = Kjønn.KVINNE,
-                       bostedsadresse = bostedsadresse)
+                       bostedsadresse = bostedsadresse,
+                       sivilstand = SIVILSTAND.GIFT)
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
@@ -140,7 +143,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      fødselsdato = LocalDate.of(2019, 1, 1),
                                                      navn = "",
                                                      kjønn = Kjønn.MANN,
-                                                     bostedsadresse = bostedsadresse))
+                                                     bostedsadresse = bostedsadresse,
+                                                     sivilstand = SIVILSTAND.UGIFT))
     }
     return personopplysningGrunnlag
 }
