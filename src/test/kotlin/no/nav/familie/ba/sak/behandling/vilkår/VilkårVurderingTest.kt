@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.*
@@ -118,7 +119,8 @@ class VilkårVurderingTest(
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
                                                      fødselsdato = LocalDate.now(),
                                                      navn = "",
-                                                     kjønn = Kjønn.MANN
+                                                     kjønn = Kjønn.MANN,
+                                                     sivilstand = SIVILSTAND.UGIFT
         ))
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -171,7 +173,8 @@ class VilkårVurderingTest(
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
                                                      fødselsdato = LocalDate.of(1980, 1, 1), //Over 18år
                                                      navn = "",
-                                                     kjønn = Kjønn.MANN))
+                                                     kjønn = Kjønn.MANN,
+                                                     sivilstand = SIVILSTAND.UGIFT))
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
@@ -227,7 +230,8 @@ class VilkårVurderingTest(
                       fødselsdato = LocalDate.of(1991, 1, 1),
                       navn = "navn",
                       kjønn = kjønn,
-                      bostedsadresse = grBostedsadresse)
+                      bostedsadresse = grBostedsadresse,
+                      sivilstand = SIVILSTAND.UGIFT)
     }
 
     @Test
