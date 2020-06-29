@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
 import java.time.LocalDate
 import java.util.*
 import javax.persistence.*
@@ -29,6 +30,9 @@ data class Person(
 
         @Enumerated(EnumType.STRING) @Column(name = "kjoenn", nullable = false)
         val kjønn: Kjønn,
+
+        @Enumerated(EnumType.STRING) @Column(name = "sivilstand", nullable = false)
+        val sivilstand: SIVILSTAND, 
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident",
@@ -72,3 +76,5 @@ data class Person(
 enum class Kjønn {
     MANN, KVINNE, UKJENT
 }
+
+
