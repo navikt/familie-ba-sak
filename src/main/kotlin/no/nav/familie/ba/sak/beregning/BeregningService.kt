@@ -71,8 +71,10 @@ class BeregningService(
         }
 
         if (behandling.type == BehandlingType.REVURDERING) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør !== null }
-                    .maxBy { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
+            val opphørPåRevurdering = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
+            if (opphørPåRevurdering.isNotEmpty()) {
+                opphørsdato = opphørPåRevurdering.maxBy { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
+            }
         }
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
