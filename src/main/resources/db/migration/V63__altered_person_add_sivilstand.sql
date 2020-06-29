@@ -1,1 +1,1 @@
-ALTER TABLE PO_PERSON ADD COLUMN sivilstand TYPE varchar;
+ALTER TABLE PO_PERSON ADD COLUMN sivilstand varchar;
