@@ -181,7 +181,6 @@ class VedtakServiceTest(
 
         val revurderingInnvilgetBehandling =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
-                                                                                journalpostID = null,
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -196,7 +195,6 @@ class VedtakServiceTest(
 
         val revurderingOpphørBehandling =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
-                                                                                journalpostID = null,
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
