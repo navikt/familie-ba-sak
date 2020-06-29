@@ -34,10 +34,6 @@ data class Personident(
         val id: String
 )
 
-data class Ident(
-        val ident: String
-)
-
 enum class ADRESSEBESKYTTELSEGRADERING {
     STRENGT_FORTROLIG_UTLAND, // Kode 19
     FORTROLIG, // Kode 7
