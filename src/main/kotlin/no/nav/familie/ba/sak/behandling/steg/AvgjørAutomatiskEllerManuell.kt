@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.behandling.steg
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.filtreringsregler.Fakta
+import no.nav.familie.ba.sak.behandling.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -8,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.nare.core.evaluations.Resultat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -32,25 +36,22 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
         val søker = personopplysningGrunnlag.søker[0]
         val barnet = personopplysningGrunnlag.barna[0]
 
-        barnet.fødselsdato
-
-        if (erDnummer(søker.personIdent.ident) ) {
-            opprettOppgave(behandling)
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(Fakta(søker, barnet))
+        evaluering.children.forEach {
+            Metrics.counter("barnetrygd.hendelse.filtreringsregler.${it.identifikator.toLowerCase()}",
+                            "type",
+                            //it.name,
+                            "beskrivelse")
+                            //it.visningsnavn
         }
 
-        if (erDnummer(barnet.personIdent.ident)) {
+        if (evaluering.resultat == Resultat.JA) {
+            // TODO Fortsett med vilkårsvurdering
+
+        } else {
             opprettOppgave(behandling)
+            throw java.lang.IllegalStateException("Behandles manuelt. Går ikke videre til vilkårsvurdering")
         }
-
-        if (erOver6mnd(barnet)) {
-            opprettOppgave(behandling)
-        }
-
-        if (erUnder18år(søker)) {
-            opprettOppgave(behandling)
-        }
-
-
 
         return hentNesteStegForNormalFlyt(behandling)
     }
