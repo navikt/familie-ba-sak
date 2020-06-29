@@ -19,9 +19,6 @@ data class Behandling(
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         val fagsak: Fagsak,
 
-        @Column(name = "journalpost_id")
-        val journalpostID: String? = null,
-
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
         val type: BehandlingType,
