@@ -4,8 +4,8 @@ import io.mockk.*
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.integrasjoner.domene.IdentInformasjon
+import no.nav.familie.kontrakter.felles.personinfo.Ident
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -33,7 +33,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal filtrere bort aktørId`() {
         every { integrasjonClientMock.hentIdenter(Ident(søkerFnr)) } returns listOf(IdentInformasjon(søkerFnr, false, "FOLKEREGISTERIDENT"),
-                IdentInformasjon("1234567890123", false, "AKTORID"))
+                                                                                         IdentInformasjon("1234567890123", false, "AKTORID"))
         every { integrasjonClientMock.hentIdenter(Ident(barn1Fnr)) } returns listOf(IdentInformasjon(barn1Fnr, false, "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
