@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
@@ -20,7 +21,8 @@ class ØkonomiService(
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
-        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
+        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) {
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
@@ -64,6 +66,11 @@ class ØkonomiService(
                             throw Exception("Iverksetting mot oppdrag feilet", it)
                         }
                 )
+    }
+
+    private fun hentSisteOffsetForPerson(personIdent: String): Long? {
+        val sorterteAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPerson(personIdent).sortedBy { it.periodeOffset }
+        return sorterteAndeler.last().periodeOffset
     }
 
     fun hentStatus(oppdragId: OppdragId): OppdragStatus {
