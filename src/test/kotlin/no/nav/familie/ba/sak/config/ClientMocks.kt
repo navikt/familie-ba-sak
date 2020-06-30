@@ -100,6 +100,14 @@ class ClientMocks {
         }
 
         every {
+            mockIntegrasjonClient.hentDødsfall(any())
+        } returns DødsfallData(false, null)
+
+        every {
+            mockIntegrasjonClient.hentVergeData(any())
+        } returns VergeData(false)
+
+        every {
             mockIntegrasjonClient.journalFørVedtaksbrev(eq(søkerFnr[0]), any(), any())
         } returns "Testrespons"
 
@@ -218,8 +226,8 @@ class ClientMocks {
         val personInfo = mapOf(
                 søkerFnr[0] to Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
                 søkerFnr[1] to Personinfo(fødselsdato = LocalDate.of(1995, 2, 19), kjønn = Kjønn.MANN, navn = "Far Faresen"),
-                barnFnr[0] to Personinfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.MANN, navn = "Gutten Barnesen"),
-                barnFnr[1] to Personinfo(fødselsdato = LocalDate.of(2019, 5, 1), kjønn = Kjønn.KVINNE, navn = "Jenta Barnesen")
+                barnFnr[0] to Personinfo(fødselsdato = LocalDate.now().minusYears(1), kjønn = Kjønn.MANN, navn = "Gutten Barnesen"),
+                barnFnr[1] to Personinfo(fødselsdato = LocalDate.now(), kjønn = Kjønn.KVINNE, navn = "Jenta Barnesen")
         )
     }
 
