@@ -47,11 +47,10 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
         Evaluering.nei("Barnet bor ikke med mor")
 }
 
-internal fun bosattINorge(fakta: Fakta): Evaluering {
-    return if (fakta.personForVurdering.id !== null) //TODO: Implementere når data på plass
-        Evaluering.ja("Person bosatt i Norge")
-    else Evaluering.nei("Person ikke bosatt i Norge")
-}
+internal fun bosattINorge(fakta: Fakta): Evaluering =
+        fakta.personForVurdering.bostedsadresse
+                ?.let { Evaluering.ja("Person bosatt i Norge") }
+                ?: Evaluering.nei("Person er ikke bosatt i Norge")
 
 internal fun lovligOpphold(fakta: Fakta): Evaluering {
     return if (fakta.personForVurdering.id !== null) //TODO: Implementere når data på plass
