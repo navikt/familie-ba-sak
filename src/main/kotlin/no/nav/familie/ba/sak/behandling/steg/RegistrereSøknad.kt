@@ -16,11 +16,14 @@ class RegistrereSøknad(
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: SøknadDTO): StegType {
-        val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
-        loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlag != null)
+        val aktivSøknadGrunnlagFinnes = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id) != null
 
+        val innsendtSøknad = data.writeValueAsString();
+
+        loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)
         søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
-                                                                                     søknad = data.writeValueAsString()))
+                                                                                         søknad = innsendtSøknad))
+
         return hentNesteStegForNormalFlyt(behandling)
     }
 
