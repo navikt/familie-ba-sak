@@ -32,7 +32,7 @@ data class Person(
         val kjønn: Kjønn,
 
         @Enumerated(EnumType.STRING) @Column(name = "sivilstand", nullable = false)
-        val sivilstand: SIVILSTAND, 
+        val sivilstand: SIVILSTAND,
 
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident",
