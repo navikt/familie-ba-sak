@@ -47,6 +47,26 @@ internal class TidTest {
     }
 
     @Test
+    fun `skal returnere seneste dato av 2020-01-01 og 2019-01-01`() {
+        assertEquals(dato("2020-01-01"), senesteDatoAv(dato("2020-01-01"), dato("2019-01-01")))
+    }
+
+    @Test
+    fun `skal returnere true for dato som er senere enn`() {
+        assertEquals(true, dato("2020-01-01").isSameOrAfter( dato("2019-01-01")))
+    }
+
+    @Test
+    fun `skal returnere false for dato som er tidligere`() {
+        assertEquals(false, dato("2019-01-01").isSameOrAfter( dato("2020-01-01")))
+    }
+
+    @Test
+    fun `skal returnere true for dato som er lik`() {
+        assertEquals(true, dato("2020-01-01").isSameOrAfter( dato("2020-01-01")))
+    }
+
+    @Test
     fun `skal bestemme om periode er etterfølgende periode`() {
         val personIdent = randomFnr()
         val behandling = lagBehandling()
