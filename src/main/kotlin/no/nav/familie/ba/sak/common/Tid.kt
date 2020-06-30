@@ -21,6 +21,10 @@ fun LocalDate.sisteDagIForrigeMåned(): LocalDate {
     return sammeDagForrigeMåned.sisteDagIMåned()
 }
 
+fun senesteDatoAv(dato1: LocalDate, dato2: LocalDate): LocalDate {
+    return if (dato1.isSameOrAfter(dato2)) dato1 else dato2
+}
+
 fun LocalDate.sisteDagIMåned(): LocalDate {
     return YearMonth.from(this).atEndOfMonth()
 }
