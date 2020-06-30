@@ -29,7 +29,23 @@ enum class Filtreringsregler(val spesifikasjon: Spesifikasjon<Fakta>) {
                                      "Det har gått mer enn 5 måneder siden forrige barn ble født",
                                      "MER_ENN_5_MND_SIDEN_FORRIGE_BARN",
                                      implementasjon = { merEnn5mndSidenForrigeBarn(this) })
+    ),
+    MOR_LEVER(Spesifikasjon(
+            "Mor lever",
+            "MOR_LEVER",
+            implementasjon = { morLever(this) })
+    ),
+    BARNET_LEVER(Spesifikasjon(
+            "Barnet lever",
+            "BARNET_LEVER",
+            implementasjon = { barnetLever(this) })
+    ),
+    MOR_HAR_IKKE_VERGE(Spesifikasjon(
+            "Mor har ikke verge",
+            "MOR_HAR_IKKE_VERGE",
+            implementasjon = { morHarIkkeVerge(this) })
     );
+
     override fun toString(): String {
         return this.spesifikasjon.beskrivelse
     }

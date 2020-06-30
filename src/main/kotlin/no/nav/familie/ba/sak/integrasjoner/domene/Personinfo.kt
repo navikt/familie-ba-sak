@@ -51,6 +51,13 @@ data class IdentInformasjon(val ident: String,
 
 enum class FAMILIERELASJONSROLLE { BARN, FAR, MEDMOR, MOR }
 
+
+data class DødsfallData(val erDød: Boolean,
+                            val dødsdato: String?)
+
+data class VergeData(val harVerge: Boolean)
+
+
 class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
     override fun deserialize(jp: JsonParser?, p1: DeserializationContext?): Kjønn {
         val node: JsonNode = jp!!.codec.readTree(jp)

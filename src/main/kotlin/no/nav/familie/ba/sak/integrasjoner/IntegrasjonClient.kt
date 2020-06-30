@@ -96,6 +96,39 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
+    fun hentDødsfall(ident: Ident): DødsfallData {
+        val uri = URI.create("$integrasjonUri/personopplysning/doedsfall/BAR")
+        log.info("Henter informasjon om dødsfall fra $uri")
+
+        return exchange(
+                networkRequest = {
+                    postForEntity<Ressurs<DødsfallData>>(uri, ident)
+                },
+                onFailure = {
+                    IntegrasjonException("Kall mot integrasjon feilet ved uthenting av data om dødsfall. response=${responseBody(it)}",
+                                         it,
+                                         uri)
+                }
+        )
+    }
+
+    fun hentVergeData(ident: Ident): VergeData {
+        val uri = URI.create("$integrasjonUri/personopplysning/harVerge/BAR")
+        log.info("Henter informasjon om verge fra $uri")
+
+        return exchange(
+                networkRequest = {
+                    postForEntity<Ressurs<VergeData>>(uri, ident)
+                },
+                onFailure = {
+                    IntegrasjonException("Kall mot integrasjon feilet ved uthenting av data om verge. response=${responseBody(it)}",
+                                         it,
+                                         uri)
+                }
+        )
+    }
+
+
     fun hentPersoninfoFor(personIdent: String): Personinfo {
         val personinfo = hentPersoninfo(personIdent, medRelasjoner = true)
         val familierelasjoner = personinfo.familierelasjoner.map {

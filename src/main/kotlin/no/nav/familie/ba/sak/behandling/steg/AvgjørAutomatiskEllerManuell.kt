@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -31,18 +32,7 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
-
-        val mor = personopplysningGrunnlag.søker[0]
-        val barnet = personopplysningGrunnlag.barna[0]
-        val restenAvBarna = integrasjonClient.hentPersoninfoFor(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
-            it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && it.personIdent.id != barnet.personIdent.ident
-        }.map {
-            integrasjonClient.hentPersoninfoFor(it.personIdent.id)
-        }
-
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(Fakta(mor, barnet, restenAvBarna))
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling))
 
         oppdaterMetrikker(evaluering)
 
@@ -54,6 +44,26 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
         }
 
         return hentNesteStegForNormalFlyt(behandling)
+    }
+
+    private fun lagFaktaObjekt(behandling: Behandling): Fakta {
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+
+        val mor = personopplysningGrunnlag.søker[0]
+        val barnet = personopplysningGrunnlag.barna[0]
+        val restenAvBarna =
+                integrasjonClient.hentPersoninfoFor(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
+                    it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && it.personIdent.id != barnet.personIdent.ident
+                }.map {
+                    integrasjonClient.hentPersoninfoFor(it.personIdent.id)
+                }
+
+        val morLever = !integrasjonClient.hentDødsfall(Ident(mor.personIdent.ident)).erDød
+        val barnetLever = !integrasjonClient.hentDødsfall(Ident(barnet.personIdent.ident)).erDød
+        val morHarVerge = integrasjonClient.hentVergeData(Ident(mor.personIdent.ident)).harVerge
+
+        return Fakta(mor, barnet, restenAvBarna, morLever, barnetLever, morHarVerge)
     }
 
     private fun oppdaterMetrikker(evaluering: Evaluering) {

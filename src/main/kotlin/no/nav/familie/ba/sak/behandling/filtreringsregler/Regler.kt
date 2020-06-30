@@ -42,6 +42,27 @@ internal fun merEnn5mndSidenForrigeBarn(fakta: Fakta): Evaluering {
     }
 }
 
+internal fun morLever(fakta: Fakta): Evaluering {
+    return when (fakta.morLever) {
+        true -> Evaluering.ja("Det er ikke registrert dødsfall på mor")
+        false -> Evaluering.nei("Det er registrert dødsfall på mor")
+    }
+}
+
+internal fun barnetLever(fakta: Fakta): Evaluering {
+    return when (fakta.barnetLever) {
+        true -> Evaluering.ja("Det er ikke registrert dødsfall på barnet")
+        false -> Evaluering.nei("Det er registrert dødsfall på barnet")
+    }
+}
+
+internal fun morHarIkkeVerge(fakta: Fakta): Evaluering {
+    return when (!fakta.morHarVerge) {
+        true -> Evaluering.ja("Mor har ikke verge")
+        false -> Evaluering.nei("Mor har verge")
+    }
+}
+
 private fun erDnummer(personIdent: String): Boolean {
     return personIdent.substring(0, 1).toInt() > 3
 }
