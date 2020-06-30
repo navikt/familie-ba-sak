@@ -4,12 +4,11 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.filtreringsregler.Filtreringsregler
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.integrasjoner.domene.Ident
+import no.nav.familie.kontrakter.felles.personinfo.Ident
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -70,7 +69,10 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
         evaluering.children.forEach {
             val counter = Metrics.counter(
                     "barnetrygd.hendelse.filtreringsregler.${it.identifikator.toLowerCase()}.${jaNei(it.resultat)}",
-                    "filtreringsregler")
+                    "beskrivelse",
+                    it.beskrivelse,
+                    "begrunnelse",
+                    it.begrunnelse)
             counter.increment()
         }
 
