@@ -5,14 +5,14 @@ import no.nav.nare.core.specifications.Spesifikasjon
 
 enum class Filtreringsregler(val spesifikasjon: Spesifikasjon<Fakta>) {
 
-    MOR_HAR_GYLDIG_FØDSELSNUMMER(Spesifikasjon(
+    MOR_HAR_GYLDIG_FOEDSELSNUMMER(Spesifikasjon(
             "Mor har gyldig fødselsnummer",
-            "MOR_HAR_GYLDIG_FØDSELSNUMMER",
+            "MOR_HAR_GYLDIG_FOEDSELSNUMMER",
             implementasjon = { morHarGyldigFødselsnummer(this) })
     ),
-    BARNET_HAR_GYLDIG_FØDSELSNUMMER(Spesifikasjon(
+    BARNET_HAR_GYLDIG_FOEDSELSNUMMER(Spesifikasjon(
             "Barnet har gyldig fødselsnummer",
-            "BARNET_HAR_GYLDIG_FØDSELSNUMMER",
+            "BARNET_HAR_GYLDIG_FOEDSELSNUMMER",
             implementasjon = { barnetHarGyldigFødselsnummer(this) })
     ),
     BARNET_ER_UNDER_6_MND(Spesifikasjon(
@@ -20,9 +20,9 @@ enum class Filtreringsregler(val spesifikasjon: Spesifikasjon<Fakta>) {
             "BARNET_ER_UNDER_6_MND",
             implementasjon = { barnetErUnder6mnd(this) })
     ),
-    MOR_ER_OVER_18_ÅR(Spesifikasjon(
+    MOR_ER_OVER_18_AAR(Spesifikasjon(
             "Mor er over 18 år",
-            "MOR_ER_OVER_18_ÅR",
+            "MOR_ER_OVER_18_AAR",
             implementasjon = { morErOver18år(this) })
     ),
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN(Spesifikasjon(

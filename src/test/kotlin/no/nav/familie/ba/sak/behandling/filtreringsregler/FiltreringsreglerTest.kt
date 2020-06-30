@@ -36,7 +36,7 @@ internal class FiltreringsreglerTest {
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.MOR_HAR_GYLDIG_FØDSELSNUMMER.spesifikasjon.identifikator)
+                Filtreringsregler.MOR_HAR_GYLDIG_FOEDSELSNUMMER.spesifikasjon.identifikator)
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class FiltreringsreglerTest {
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.BARNET_HAR_GYLDIG_FØDSELSNUMMER.spesifikasjon.identifikator)
+                Filtreringsregler.BARNET_HAR_GYLDIG_FOEDSELSNUMMER.spesifikasjon.identifikator)
     }
 
     @Test
@@ -81,7 +81,7 @@ internal class FiltreringsreglerTest {
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.MOR_ER_OVER_18_ÅR.spesifikasjon.identifikator)
+                Filtreringsregler.MOR_ER_OVER_18_AAR.spesifikasjon.identifikator)
     }
 
     @Test
