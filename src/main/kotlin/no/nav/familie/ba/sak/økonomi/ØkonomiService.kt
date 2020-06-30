@@ -19,7 +19,8 @@ class ØkonomiService(
         private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService,
-        private val beregningService: BeregningService
+        private val beregningService: BeregningService,
+        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
 ) {
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
@@ -37,7 +38,7 @@ class ØkonomiService(
 
         val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(vedtak.behandling.fagsak.id).size == 1
 
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(
+        val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 saksbehandlerId,
                 vedtak,
                 behandlingResultatType,

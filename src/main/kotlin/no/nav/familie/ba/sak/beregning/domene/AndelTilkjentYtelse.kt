@@ -26,6 +26,9 @@ data class AndelTilkjentYtelse(
         @Column(name = "person_ident", nullable = false, updatable = false)
         val personIdent: String,
 
+        @Column(name = "periode_offset")
+        var periodeOffset: Long? = null,
+
         @Column(name = "belop", nullable = false)
         val beløp: Int,
 

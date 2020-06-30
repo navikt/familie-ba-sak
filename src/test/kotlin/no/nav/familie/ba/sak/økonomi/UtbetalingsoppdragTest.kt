@@ -1,17 +1,38 @@
 package no.nav.familie.ba.sak.økonomi
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDate.now
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class UtbetalingsoppdragPeriodiseringTest {
+
+    lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
+
+    @BeforeAll
+    fun setUp() {
+        val andel = lagAndelTilkjentYtelse("2019-04-01",
+                                           "2023-03-31",
+                                           SMÅBARNSTILLEGG,
+                                           660,
+                                           lagBehandling())
+        val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+        every { andelTilkjentYtelseRepository.save(any<AndelTilkjentYtelse>()) } returns andel
+        utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(andelTilkjentYtelseRepository)
+    }
 
     @Test
     fun `skal opprette et nytt utbetalingsoppdrag med felles løpende periodeId og separat kjeding på to personer`() {
@@ -35,7 +56,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
         val utbetalingsoppdrag =
-                lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, true, andelerTilkjentYtelse)
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, true, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -71,7 +92,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = opphørFom)
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
         val utbetalingsoppdrag =
-                lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, false, andelerTilkjentYtelse)
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, false, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -107,7 +128,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = opphørFom)
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
         val utbetalingsoppdrag =
-                lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, false, andelerTilkjentYtelse)
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, false, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -157,7 +178,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                        person = personMedFlerePerioder))
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, true, andelerTilkjentYtelse)
+        val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, true, andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -179,7 +200,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
         assertThrows<java.lang.IllegalArgumentException> {
-            lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, true, andelerTilkjentYtelse)
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler", vedtak, behandlingResultatType, true, andelerTilkjentYtelse)
         }
     }
 
