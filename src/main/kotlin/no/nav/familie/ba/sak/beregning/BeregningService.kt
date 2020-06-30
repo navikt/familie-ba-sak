@@ -66,22 +66,18 @@ class BeregningService(
                                       utbetalingsoppdrag: Utbetalingsoppdrag): TilkjentYtelse {
         val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
         var opphørsdato: LocalDate? = null
-
         if (erRentOpphør) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode[0].opphør!!.opphørDatoFom
-            if (utbetalingsoppdrag.utbetalingsperiode.any { it.opphør!!.opphørDatoFom != opphørsdato }
-                    && (behandling.type == BehandlingType.TEKNISK_OPPHØR || behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)) {
-                throw IllegalArgumentException("Systemet støtter ikke opphør med ulike opphørsdatoer")
-            }
+            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.map { it.opphør!!.opphørDatoFom }.sorted().last()
         }
 
         if (behandling.type == BehandlingType.REVURDERING) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør !== null }
-                    .maxBy { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
+            val opphørPåRevurdering = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
+            if (opphørPåRevurdering.isNotEmpty()) {
+                opphørsdato = opphørPåRevurdering.maxBy { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
+            }
         }
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-
         return tilkjentYtelse.apply {
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
             this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxBy { it.vedtakdatoTom }!!.vedtakdatoTom

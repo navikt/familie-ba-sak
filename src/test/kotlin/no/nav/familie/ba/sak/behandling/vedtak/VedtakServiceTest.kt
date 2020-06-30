@@ -82,13 +82,7 @@ class VedtakServiceTest(
                         .willReturn(aResponse()
                                             .withHeader("Content-Type", "application/json")
                                             .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
-        stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
-                        .willReturn(aResponse()
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
-                                                    LocalDate.of(2019,
-                                                                 1,
-                                                                 1)))))))
+
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
                         .willReturn(aResponse()
                                             .withHeader("Content-Type", "application/json")
@@ -109,7 +103,7 @@ class VedtakServiceTest(
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
 
         val behandlingResultatType =
                 behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = behandling.id)
@@ -148,7 +142,7 @@ class VedtakServiceTest(
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.NEI)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
 
         val behandlingResultatType =
                 behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = behandling.id)
@@ -187,7 +181,6 @@ class VedtakServiceTest(
 
         val revurderingInnvilgetBehandling =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
-                                                                                journalpostID = null,
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -202,7 +195,6 @@ class VedtakServiceTest(
 
         val revurderingOpphørBehandling =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
-                                                                                journalpostID = null,
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,

@@ -66,13 +66,7 @@ class DokumentServiceTest(
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
-        stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
-                                LocalDate.of(2019,
-                                        1,
-                                        1)))))))
+
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
@@ -117,7 +111,7 @@ class DokumentServiceTest(
                 barn2Fnr,
                 dato_2020_01_01.minusMonths(1),
                 stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat1, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat1, loggHendelse = true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling, "ansvarligSaksbehandler")
@@ -166,7 +160,7 @@ class DokumentServiceTest(
                 barn2Fnr,
                 dato_2020_01_01.minusMonths(1),
                 stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat1, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat1, loggHendelse = true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 

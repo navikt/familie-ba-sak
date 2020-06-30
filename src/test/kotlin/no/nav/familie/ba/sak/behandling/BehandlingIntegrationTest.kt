@@ -9,8 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -20,13 +19,20 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personinfo.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personinfo.UkjentBosted
+import no.nav.familie.kontrakter.felles.personinfo.Vegadresse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Resultat
@@ -57,6 +63,9 @@ class BehandlingIntegrationTest {
     lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
+    lateinit var personRepository: PersonRepository
+
+    @Autowired
     lateinit var vedtakRepository: VedtakRepository
 
     @Autowired
@@ -84,6 +93,9 @@ class BehandlingIntegrationTest {
     lateinit var fagsakService: FagsakService
 
     @Autowired
+    lateinit var integrasjonClient: IntegrasjonClient
+
+    @Autowired
     lateinit var loggService: LoggService
 
     lateinit var behandlingService: BehandlingService
@@ -103,12 +115,7 @@ class BehandlingIntegrationTest {
                         .willReturn(aResponse()
                                             .withHeader("Content-Type", "application/json")
                                             .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
-        stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
-                        .willReturn(aResponse()
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019,
-                                                                                                                              1,
-                                                                                                                              1)))))))
+
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
                         .willReturn(aResponse()
                                             .withHeader("Content-Type", "application/json")
@@ -364,7 +371,7 @@ class BehandlingIntegrationTest {
                                                                                    barn3Fnr,
                                                                                    dato_2021_01_01.minusMonths(1),
                                                                                    stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat2, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat2, loggHendelse = true)
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
@@ -382,5 +389,114 @@ class BehandlingIntegrationTest {
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn3Fnr]!!.stønadTom)
 
         Assertions.assertNull(restVedtakBarnMap[barn2Fnr])
+    }
+
+    @Test
+    fun `Hent en persons bostedsadresse fra PDL og lagre den i database`() {
+        val søkerFnr = ClientMocks.søkerFnr[0]
+        val barn1Fnr = ClientMocks.barnFnr[0]
+        val barn2Fnr = ClientMocks.barnFnr[1]
+        val barn3Fnr = ClientMocks.søkerFnr[1]
+
+        val matrikkelId = 123456L
+        val søkerHusnummer = "12"
+        val søkerHusbokstav = "A"
+        val søkerBruksenhetsnummer = "H012"
+        val søkerAdressnavn = "Sannergate"
+        val søkerKommunenummer = "1234"
+        val søkerTilleggsnavn = "whatever"
+        val søkerPostnummer = "2222"
+
+        val barn1Bruksenhetsnummer = "H201"
+        val barn1Tilleggsnavn = "whoknows"
+        val barn1Postnummer = "3333"
+        val barn1Kommunenummer = "3233"
+
+        val barn2BostedKommune = "Oslo"
+
+        every { integrasjonClient.hentPersoninfoFor(søkerFnr) } returns Personinfo(
+                fødselsdato = LocalDate.of(1990, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Mor",
+                kjønn = Kjønn.KVINNE,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(matrikkelId,
+                                                                        søkerHusnummer,
+                                                                        søkerHusbokstav,
+                                                                        søkerBruksenhetsnummer,
+                                                                        søkerAdressnavn,
+                                                                        søkerKommunenummer,
+                                                                        søkerTilleggsnavn,
+                                                                        søkerPostnummer)),
+                sivilstand = null
+        )
+
+        every { integrasjonClient.hentPersoninfoFor(barn1Fnr) } returns Personinfo(
+                fødselsdato = LocalDate.of(2009, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Gutt",
+                kjønn = Kjønn.MANN,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId, barn1Bruksenhetsnummer, barn1Tilleggsnavn,
+                                                                                    barn1Postnummer, barn1Kommunenummer)),
+                sivilstand = null
+        )
+
+        every { integrasjonClient.hentPersoninfoFor(barn2Fnr) } returns Personinfo(
+                fødselsdato = LocalDate.of(2012, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Jente",
+                kjønn = Kjønn.KVINNE,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)),
+                sivilstand = null
+        )
+
+        every { integrasjonClient.hentPersoninfoFor(barn3Fnr) } returns Personinfo(
+                fødselsdato = LocalDate.of(2013, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Jente2",
+                kjønn = Kjønn.KVINNE,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(),
+                sivilstand = null
+        )
+
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
+
+        persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerFnr,
+                                                                           listOf(barn1Fnr, barn2Fnr, barn3Fnr),
+                                                                           behandling)
+
+        val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
+        val vegadresse = søker.bostedsadresse as GrVegadresse
+        Assertions.assertEquals(søkerAdressnavn, vegadresse.adressenavn)
+        Assertions.assertEquals(matrikkelId, vegadresse.matrikkelId)
+        Assertions.assertEquals(søkerBruksenhetsnummer, vegadresse.bruksenhetsnummer)
+        Assertions.assertEquals(søkerHusbokstav, vegadresse.husbokstav)
+        Assertions.assertEquals(søkerHusnummer, vegadresse.husnummer)
+        Assertions.assertEquals(søkerKommunenummer, vegadresse.kommunenummer)
+        Assertions.assertEquals(søkerPostnummer, vegadresse.postnummer)
+        Assertions.assertEquals(søkerTilleggsnavn, vegadresse.tilleggsnavn)
+
+        Assertions.assertEquals(4, søker.personopplysningGrunnlag.personer.size)
+
+        søker.personopplysningGrunnlag.barna.forEach {
+            if (it.personIdent.ident == barn1Fnr) {
+                val matrikkeladresse = it.bostedsadresse as GrMatrikkeladresse
+                Assertions.assertEquals(barn1Bruksenhetsnummer, matrikkeladresse.bruksenhetsnummer)
+                Assertions.assertEquals(barn1Kommunenummer, matrikkeladresse.kommunenummer)
+                Assertions.assertEquals(barn1Postnummer, matrikkeladresse.postnummer)
+                Assertions.assertEquals(barn1Tilleggsnavn, matrikkeladresse.tilleggsnavn)
+            } else if (it.personIdent.ident == barn2Fnr) {
+                val ukjentBosted = it.bostedsadresse as GrUkjentBosted
+                Assertions.assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
+            } else if (it.personIdent.ident == barn3Fnr) {
+                Assertions.assertNull(it.bostedsadresse)
+            } else {
+                throw RuntimeException("Ujent barn fnr")
+            }
+        }
     }
 }

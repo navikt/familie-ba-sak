@@ -63,8 +63,7 @@ class SendTilBeslutter(
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)?:
                                  throw Feil("Fant ikke behandlingsresultat på behandling")
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat.kopier(),
-                                                           false)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat.kopier(), loggHendelse = false)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

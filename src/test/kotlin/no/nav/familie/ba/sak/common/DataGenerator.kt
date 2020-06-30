@@ -5,10 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
@@ -20,6 +17,7 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
+import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import java.time.YearMonth
@@ -72,7 +70,8 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: Perso
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
         navn = "",
-        kjønn = Kjønn.MANN
+        kjønn = Kjønn.MANN,
+        sivilstand = SIVILSTAND.UGIFT
 )
 
 fun lagVedtak(behandling: Behandling = lagBehandling(),
@@ -122,13 +121,18 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                     søkerPersonIdent: String,
                                     barnasIdenter: List<String>): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
+    val bostedsadresse = GrMatrikkeladresse(matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
+                                            postnummer = "0202", kommunenummer = "2231")
+
     val søker = Person(aktørId = randomAktørId(),
                        personIdent = PersonIdent(søkerPersonIdent),
                        type = PersonType.SØKER,
                        personopplysningGrunnlag = personopplysningGrunnlag,
                        fødselsdato = LocalDate.of(2019, 1, 1),
                        navn = "",
-                       kjønn = Kjønn.KVINNE)
+                       kjønn = Kjønn.KVINNE,
+                       bostedsadresse = bostedsadresse,
+                       sivilstand = SIVILSTAND.GIFT)
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
@@ -138,7 +142,9 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
                                                      fødselsdato = LocalDate.of(2019, 1, 1),
                                                      navn = "",
-                                                     kjønn = Kjønn.MANN))
+                                                     kjønn = Kjønn.MANN,
+                                                     bostedsadresse = bostedsadresse,
+                                                     sivilstand = SIVILSTAND.UGIFT))
     }
     return personopplysningGrunnlag
 }
@@ -230,7 +236,10 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                    periodeTom = periodeTom,
                                    vilkårType = it,
                                    resultat = resultat,
-                                   begrunnelse = "")
+                                   begrunnelse = "",
+                                   behandlingId = behandlingResultat.behandling.id,
+                                   regelInput = null,
+                                   regelOutput = null)
                 }.toSet())
     } else {
         personResultat.setVilkårResultater(
@@ -239,7 +248,10 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
                                      periodeTom = periodeTom,
                                      vilkårType = vilkårType,
                                      resultat = resultat,
-                                     begrunnelse = ""))
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null))
         )
     }
     return personResultat
@@ -273,7 +285,10 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
                                  resultat = resultat,
                                  periodeFom = LocalDate.now(),
                                  periodeTom = LocalDate.now(),
-                                 begrunnelse = ""))
+                                 begrunnelse = "",
+                                 behandlingId = behandling.id,
+                                 regelInput = null,
+                                 regelOutput = null))
     )
     behandlingResultat.personResultater = setOf(personResultat)
     return behandlingResultat

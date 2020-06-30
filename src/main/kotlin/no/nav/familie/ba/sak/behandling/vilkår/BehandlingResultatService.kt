@@ -63,7 +63,7 @@ class BehandlingResultatService(
         return behandlingResultatRepository.save(behandlingResultat)
     }
 
-    fun lagreInitiert(behandlingResultat: BehandlingResultat): BehandlingResultat {
+    fun lagreInitielt(behandlingResultat: BehandlingResultat): BehandlingResultat {
         val aktivBehandlingResultat = hentAktivForBehandling(behandlingResultat.behandling.id)
         if (aktivBehandlingResultat != null) {
             error("Det finnes allerede et aktivt behandlingsresultat for behandling ${behandlingResultat.behandling.id}")
