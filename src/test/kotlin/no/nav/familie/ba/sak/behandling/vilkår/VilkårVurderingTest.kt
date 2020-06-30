@@ -1,16 +1,10 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -18,11 +12,9 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
-import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -62,8 +54,8 @@ class VilkårVurderingTest(
                                   Vilkår.GIFT_PARTNERSKAP,
                                   Vilkår.BOSATT_I_RIKET,
                                   Vilkår.LOVLIG_OPPHOLD)
-        Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
-        Assertions.assertEquals(vilkårForBarn, relevanteVilkårForDato)
+        assertEquals(vilkårForBarn, relevanteVilkår)
+        assertEquals(vilkårForBarn, relevanteVilkårForDato)
     }
 
     @Test
@@ -71,24 +63,28 @@ class VilkårVurderingTest(
         val relevanteVilkår = Vilkår.hentVilkårForPart(PersonType.SØKER)
         val vilkårForSøker = setOf(Vilkår.BOSATT_I_RIKET,
                                    Vilkår.LOVLIG_OPPHOLD)
-        Assertions.assertEquals(vilkårForSøker, relevanteVilkår)
+        assertEquals(vilkårForSøker, relevanteVilkår)
     }
 
     @Test
-    fun `Hent relevante vilkår for saktype`() {
+    fun `Hent relevante vilkår for saktype EØS`() {
         val vilkårForEøs = Vilkår.hentVilkårForSakstype(SakType.valueOfType(BehandlingKategori.EØS))
+        assertEquals(setOf(Vilkår.UNDER_18_ÅR,
+                           Vilkår.BOR_MED_SØKER,
+                           Vilkår.GIFT_PARTNERSKAP,
+                           Vilkår.BOSATT_I_RIKET,
+                           Vilkår.LOVLIG_OPPHOLD),
+                     vilkårForEøs)
+    }
+
+    @Test
+    fun `Hent relevante vilkår for saktype Nasjonal`() {
         val vilkårForNasjonal = Vilkår.hentVilkårForSakstype(SakType.valueOfType(BehandlingKategori.NASJONAL))
-        Assertions.assertEquals(setOf(Vilkår.UNDER_18_ÅR,
-                                      Vilkår.BOR_MED_SØKER,
-                                      Vilkår.GIFT_PARTNERSKAP,
-                                      Vilkår.BOSATT_I_RIKET,
-                                      Vilkår.LOVLIG_OPPHOLD),
-                                vilkårForEøs)
-        Assertions.assertEquals(setOf(Vilkår.UNDER_18_ÅR,
-                                      Vilkår.BOR_MED_SØKER,
-                                      Vilkår.GIFT_PARTNERSKAP,
-                                      Vilkår.BOSATT_I_RIKET),
-                                vilkårForNasjonal)
+        assertEquals(setOf(Vilkår.UNDER_18_ÅR,
+                           Vilkår.BOR_MED_SØKER,
+                           Vilkår.GIFT_PARTNERSKAP,
+                           Vilkår.BOSATT_I_RIKET),
+                     vilkårForNasjonal)
     }
 
     @Test
@@ -99,7 +95,7 @@ class VilkårVurderingTest(
                                   Vilkår.GIFT_PARTNERSKAP,
                                   Vilkår.BOSATT_I_RIKET,
                                   Vilkår.LOVLIG_OPPHOLD)
-        Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
+        assertEquals(vilkårForBarn, relevanteVilkår)
     }
 
     @Test
@@ -143,7 +139,7 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
-        Assertions.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
+        assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
 
         behandlingResultat.personResultater.forEach {
             it.vilkårResultater.forEach {
@@ -179,7 +175,7 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
 
-        Assertions.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
+        assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
     }
 
     @Test
@@ -200,8 +196,8 @@ class VilkårVurderingTest(
         val forventetAntallVurderteVilkår =
                 Vilkår.hentVilkårFor(PersonType.BARN, SakType.valueOfType(BehandlingKategori.NASJONAL)).size +
                 Vilkår.hentVilkårFor(PersonType.SØKER, SakType.valueOfType(BehandlingKategori.NASJONAL)).size
-        Assertions.assertEquals(forventetAntallVurderteVilkår,
-                                behandlingResultat.personResultater.flatMap { personResultat -> personResultat.vilkårResultater }.size)
+        assertEquals(forventetAntallVurderteVilkår,
+                     behandlingResultat.personResultater.flatMap { personResultat -> personResultat.vilkårResultater }.size)
     }
 
     @Test
@@ -221,8 +217,9 @@ class VilkårVurderingTest(
 
     private fun genererPerson(type: PersonType,
                               personopplysningGrunnlag: PersonopplysningGrunnlag,
-                              grBostedsadresse: GrBostedsadresse?,
-                              kjønn: Kjønn = Kjønn.KVINNE): Person {
+                              grBostedsadresse: GrBostedsadresse? = null,
+                              kjønn: Kjønn = Kjønn.KVINNE,
+                              sivilstand: SIVILSTAND = SIVILSTAND.UGIFT): Person {
         return Person(aktørId = randomAktørId(),
                       personIdent = PersonIdent(randomFnr()),
                       type = type,
@@ -231,7 +228,7 @@ class VilkårVurderingTest(
                       navn = "navn",
                       kjønn = kjønn,
                       bostedsadresse = grBostedsadresse,
-                      sivilstand = SIVILSTAND.UGIFT)
+                      sivilstand = sivilstand)
     }
 
     @Test
@@ -254,9 +251,9 @@ class VilkårVurderingTest(
         val barn3 = genererPerson(PersonType.BARN, personopplysningGrunnlag, null, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(barn3)
 
-        Assertions.assertEquals(Resultat.JA, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn1)).resultat)
-        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn2)).resultat)
-        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn3)).resultat)
+        assertEquals(Resultat.JA, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn1)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn2)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn3)).resultat)
     }
 
     @Test
@@ -268,7 +265,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, null)
         personopplysningGrunnlag.personer.add(barn)
 
-        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
     }
 
     @Test
@@ -284,7 +281,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
         personopplysningGrunnlag.personer.add(barn)
 
-        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
     }
 
     @Test
@@ -296,7 +293,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(barn)
 
-        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
     }
 
     @Test
@@ -310,7 +307,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
         personopplysningGrunnlag.personer.add(barn)
 
-        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
     }
 
     @Test
@@ -322,6 +319,25 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(barn)
 
-        Assertions.assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+    }
+
+
+    @Test
+    fun `Sjekk at barn er ugift`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var barn = genererPerson(PersonType.BARN, personopplysningGrunnlag)
+        personopplysningGrunnlag.personer.add(barn)
+
+        assertEquals(Resultat.JA, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(Fakta(barn)).resultat)
+    }
+
+    @Test
+    fun `Negativ vurdering - barn er gift`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        personopplysningGrunnlag.personer.add(barn)
+
+        assertEquals(Resultat.NEI, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(Fakta(barn)).resultat)
     }
 }
