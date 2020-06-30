@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import javax.persistence.*
 
 @Entity(name = "Behandling")
@@ -17,9 +18,6 @@ data class Behandling(
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         val fagsak: Fagsak,
-
-        @Column(name = "journalpost_id")
-        val journalpostID: String? = null,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)

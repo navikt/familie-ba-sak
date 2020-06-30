@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.personinfo.Ident
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -23,6 +24,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
+import java.util.*
 
 @Component
 class ClientMocks {
@@ -34,7 +36,7 @@ class ClientMocks {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
 
-        every { mockIntegrasjonClient.hentJournalpost(any()) } returns success(lagTestJournalpost(søkerFnr[0], "1234"))
+        every { mockIntegrasjonClient.hentJournalpost(any()) } answers { success(lagTestJournalpost(søkerFnr[0], UUID.randomUUID().toString())) }
 
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 lagTestOppgaveDTO(1L)

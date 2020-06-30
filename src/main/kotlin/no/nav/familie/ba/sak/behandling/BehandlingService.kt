@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -43,7 +44,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
             val behandling = Behandling(fagsak = fagsak,
                                         opprinnelse = nyBehandling.behandlingOpprinnelse,
-                                        journalpostID = nyBehandling.journalpostID,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
@@ -54,12 +54,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
             aktivBehandling.steg = initSteg(nyBehandling.behandlingType)
             aktivBehandling.status = BehandlingStatus.OPPRETTET
-            behandlingRepository.save(aktivBehandling)
+            lagre(aktivBehandling)
         } else {
             throw Feil(message = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
                        frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
     }
+
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
@@ -81,6 +82,17 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
+    }
+
+    fun hentForrigeBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
+        val behandlinger = hentBehandlinger(fagsakId)
+        return behandlinger
+                .sortedBy { it.opprettetTidspunkt }
+                .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+    }
+
+    fun lagre(behandling: Behandling): Behandling {
+        return behandlingRepository.save(behandling)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {

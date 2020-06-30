@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.common
 
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.io.Serializable
 import java.time.LocalDateTime
@@ -13,17 +12,20 @@ import javax.persistence.*
 @MappedSuperclass
 abstract class BaseEntitet : Serializable {
 
+    //The properties have to be open because when a subclass is lazy class, hibernate needs to override the accessor
+    //to intercept its behavior. If they are final, hibernate will complain and it also can cause potential bug.
+    //See: https://stackoverflow.com/questions/55958667/kotlin-inheritance-and-jpa
     @Column(name = "opprettet_av", nullable = false, updatable = false)
-    val opprettetAv: String = SikkerhetContext.hentSaksbehandler()
+    open val opprettetAv: String = SikkerhetContext.hentSaksbehandler()
 
     @Column(name = "opprettet_tid", nullable = false, updatable = false)
-    val opprettetTidspunkt: LocalDateTime = LocalDateTime.now()
+    open val opprettetTidspunkt: LocalDateTime = LocalDateTime.now()
 
     @Column(name = "endret_av")
-    var endretAv: String = SikkerhetContext.hentSaksbehandler()
+    open var endretAv: String = SikkerhetContext.hentSaksbehandler()
 
     @Column(name = "endret_tid")
-    var endretTidspunkt: LocalDateTime = LocalDateTime.now()
+    open var endretTidspunkt: LocalDateTime = LocalDateTime.now()
 
     @Version
     @Column(name = "versjon", nullable = false)

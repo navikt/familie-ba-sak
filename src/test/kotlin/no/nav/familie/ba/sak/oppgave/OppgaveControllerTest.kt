@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -19,6 +20,9 @@ class OppgaveControllerTest {
 
     @MockK
     lateinit var oppgaveService: OppgaveService
+
+    @MockK
+    lateinit var fagsakService: FagsakService
 
     @InjectMockKs
     lateinit var oppgaveController: OppgaveController

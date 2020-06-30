@@ -37,13 +37,18 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
       - name: Push Docker image
         run: docker push $IMAGE
+      - uses: navikt/github-app-token-generator@master
+        id: get-token
+        with:
+          private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
+          app-id: ${{ secrets.REPO_CLONER_APP_ID }}
       - name: Checkout e2e tests
         if: "!contains(github.event.head_commit.message, 'e2e skip')"
         uses: actions/checkout@v2
         with:
           ref: "master"
           repository: navikt/familie-ba-e2e
-          token: ${{ secrets.FAMILIE_BA_E2E_SECRET }}
+          token: ${{ steps.get-token.outputs.token }}
           path: ba-e2e
       - name: Setter riktig ba-sak versjon i e2e tester
         if: "!contains(github.event.head_commit.message, 'e2e skip')"

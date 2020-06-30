@@ -85,7 +85,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                  660,
                                  "2026-05-01",
                                  "2027-06-30",
-                                 opphørFom)
+                                 dato("2026-05-01"))
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0],
                                  id + 2,
                                  null,
@@ -93,6 +93,42 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                  "2019-03-01",
                                  "2037-02-28",
                                  opphørFom)
+    }
+
+    @Test
+    fun `skal opprette et opphør hvor periodens fom-dato er opphørsdato når denne er senere`() {
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling)
+        val andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse("2010-03-01", "2030-02-28", ORDINÆR_BARNETRYGD, 1054, behandling),
+                lagAndelTilkjentYtelse("2025-01-01", "2030-02-28", ORDINÆR_BARNETRYGD, 1054, behandling))
+
+        val opphørFom = dato("2020-01-01")
+        val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = opphørFom)
+        val behandlingResultatType = BehandlingResultatType.OPPHØRT
+        val utbetalingsoppdrag =
+                lagUtbetalingsoppdrag("saksbehandler", opphørVedtak, behandlingResultatType, false, andelerTilkjentYtelse)
+
+        assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
+        assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
+
+        val id = vedtak.id * 1000
+
+        val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0],
+                                 id,
+                                 null,
+                                 1054,
+                                 "2010-03-01",
+                                 "2030-02-28",
+                                opphørFom)
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![1],
+                                 id + 1,
+                                 null,
+                                 1054,
+                                 "2025-01-01",
+                                 "2030-02-28",
+                                 dato("2025-01-01"))
     }
 
     @Test

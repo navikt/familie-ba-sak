@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.dokument
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.TEST_PDF
@@ -66,13 +66,7 @@ class DokumentServiceTest(
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
-        stubFor(get(urlEqualTo("/api/personopplysning/v1/info"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
-                                LocalDate.of(2019,
-                                        1,
-                                        1)))))))
+
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
@@ -117,7 +111,7 @@ class DokumentServiceTest(
                 barn2Fnr,
                 dato_2020_01_01.minusMonths(1),
                 stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat1, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat1, loggHendelse = true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling, "ansvarligSaksbehandler")
@@ -166,7 +160,7 @@ class DokumentServiceTest(
                 barn2Fnr,
                 dato_2020_01_01.minusMonths(1),
                 stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat1, true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat1, loggHendelse = true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
