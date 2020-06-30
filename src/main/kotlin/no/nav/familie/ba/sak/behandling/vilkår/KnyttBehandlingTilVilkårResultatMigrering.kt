@@ -18,9 +18,9 @@ class KnyttBehandlingTilVilkårResultatMigrering(
                 personResultat.vilkårResultater.forEach {
                     it.behandlingId = it.behandlingId ?: behandlingResultat.behandling.id
                 }
-
-                behandlingResultatRepository.save(behandlingResultat)
             }
+
+            behandlingResultatRepository.save(behandlingResultat)
         }
 
         LOG.info("Migrerer over behandling id til vilkår resultat: slutt")

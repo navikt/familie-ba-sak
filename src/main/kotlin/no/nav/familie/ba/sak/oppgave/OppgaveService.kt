@@ -4,10 +4,10 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
 import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.personinfo.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate

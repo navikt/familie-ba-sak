@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrUkjentBosted
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
 
 internal fun barnUnder18År(fakta: Fakta): Evaluering {
@@ -59,11 +60,11 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
         Evaluering.nei("Person har lovlig opphold i Norge")
 }
 
-internal fun giftEllerPartneskap(fakta: Fakta): Evaluering {
-    return if (fakta.personForVurdering.id !== null) //TODO: Implementere når data på plass
-        Evaluering.ja("Person har lovlig opphold i Norge")
-    else
-        Evaluering.nei("Person har lovlig opphold i Norge")
-}
+internal fun giftEllerPartneskap(fakta: Fakta): Evaluering =
+        when (fakta.personForVurdering.sivilstand) {
+            SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER, SIVILSTAND.UOPPGITT ->
+                Evaluering.nei("Person er gift eller har registrert partner")
+            else -> Evaluering.ja("Person er ikke gift eller har registrert partner")
+        }
 
 fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)

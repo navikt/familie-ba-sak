@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.domene.Ident
 import no.nav.familie.ba.sak.integrasjoner.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
@@ -26,6 +25,7 @@ import no.nav.familie.kontrakter.felles.arkivering.FilType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
+import no.nav.familie.kontrakter.felles.personinfo.Ident
 import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -284,8 +284,6 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `hentPerson returnerer OK`() {
-        stubFor(get(urlMatching("/api/personopplysning/v1/info")).willReturn(
-                okJson(objectMapper.writeValueAsString(success(Personinfo(fødselsdato = LocalDate.now()))))))
         stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(
                 okJson(objectMapper.writeValueAsString(success(Personinfo(fødselsdato = LocalDate.now()))))))
 
@@ -298,8 +296,7 @@ class IntergrasjonTjenesteTest {
 
     @Test
     @Tag("integration")
-    fun `hentPerson ikke funet`() {
-        stubFor(get(urlMatching("/api/personopplysning/v1/info")).willReturn(aResponse().withStatus(404)))
+    fun `hentPerson ikke funnet`() {
         stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(aResponse().withStatus(404)))
 
         assertThrows<HttpClientErrorException> {
@@ -310,7 +307,6 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `hentPerson feil`() {
-        stubFor(get(urlMatching("/api/personopplysning/v1/info")).willReturn(aResponse().withStatus(400)))
         stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(aResponse().withStatus(400)))
 
         assertThrows<IntegrasjonException> {
