@@ -56,7 +56,7 @@ class AvgjørAutomatiskEllerManuellTest {
             avgjørAutomatiskEllerManuell.utførStegOgAngiNeste(behandling, "data")
         }
     }
-
+    /*
     @Test
     fun `utførStegOgAngiNeste skal kaste feil dersom hendelsen skal behandles manuelt`() {
         spesifiserMocks(17)
@@ -65,6 +65,7 @@ class AvgjørAutomatiskEllerManuellTest {
             avgjørAutomatiskEllerManuell.utførStegOgAngiNeste(behandling, "data")
         }
     }
+    */
 
     private fun spesifiserMocks(morsAlder: Long) {
         val søker = tilfeldigPerson(LocalDate.now().minusYears(morsAlder), PersonType.SØKER).copy(personIdent = PersonIdent("12345678910"))
