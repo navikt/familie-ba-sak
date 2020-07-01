@@ -95,7 +95,7 @@ class VilkårService(
             val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
             personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, fakta, evalueringer))
 
-            tellMetrikker(evalueringer)
+            tellMetrikker(evalueringer, person.type)
             personResultat
         }.toSet()
 
@@ -211,9 +211,10 @@ class VilkårService(
         }
     }
 
-    fun tellMetrikker(evalueringer: List<Evaluering>) {
+    fun tellMetrikker(evalueringer: List<Evaluering>, personType: PersonType) {
         evalueringer.forEach {
-            val identifikator = hentIdentifikatorForEvaluering(it)
+            var identifikator = hentIdentifikatorForEvaluering(it)
+            identifikator.plus("_").plus(personType.name)
             if (identifikator != null) {
                 val counter = hentCounterForVilkår(it.resultat, Vilkår.valueOf(identifikator))
                 counter?.increment()
