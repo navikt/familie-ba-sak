@@ -39,7 +39,7 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
             // TODO Fortsett med vilkårsvurdering
         } else {
             opprettOppgave(behandling)
-            throw java.lang.IllegalStateException("Behandles manuelt. Går ikke videre til vilkårsvurdering")
+            //throw java.lang.IllegalStateException("Behandles manuelt. Går ikke videre til vilkårsvurdering")
         }
 
         return hentNesteStegForNormalFlyt(behandling)
