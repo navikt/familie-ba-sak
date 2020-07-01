@@ -7,12 +7,13 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 
 internal fun barnUnder18År(fakta: Fakta): Evaluering =
     if (fakta.alder < 18)
-        evalueringJa("Barn er under 18 år", Vilkår.UNDER_18_ÅR)
+        evalueringJa("Barn er under 18 år", Vilkår.UNDER_18_ÅR, fakta.personForVurdering.type)
     else
-        evalueringNei("Barn er ikke under 18 år", Vilkår.UNDER_18_ÅR)
+        evalueringNei("Barn er ikke under 18 år", Vilkår.UNDER_18_ÅR, fakta.personForVurdering.type)
 
 internal fun harEnSøker(fakta: Fakta): Evaluering {
     val subVilkårEnSøker = Vilkår.BOR_MED_SØKER.spesifikasjon.children
@@ -33,13 +34,14 @@ internal fun søkerErMor(fakta: Fakta): Evaluering {
 
     val barn = fakta.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
+    val beskrivelse = barn.type.name.plus(subVilkårErMor.beskrivelse)
 
     return if (søker.isEmpty())
         Evaluering.nei(("Ingen søker"))
     else if (søker.first().kjønn == Kjønn.KVINNE)
-        evalueringJa("Søker er mor", Vilkår.BOR_MED_SØKER.name, subVilkårErMor.beskrivelse)
+        evalueringJa("Søker er mor", Vilkår.BOR_MED_SØKER.name, beskrivelse)
     else
-        evalueringNei("Søker er ikke mor", Vilkår.BOR_MED_SØKER.name, subVilkårErMor.beskrivelse)
+        evalueringNei("Søker er ikke mor", Vilkår.BOR_MED_SØKER.name, beskrivelse)
 
 }
 
@@ -52,9 +54,9 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
     else if (søker.first().bostedsadresse != null &&
              søker.first().bostedsadresse !is GrUkjentBosted &&
              søker.first().bostedsadresse == barn.bostedsadresse)
-        evalueringJa("Barnet bor med mor", Vilkår.BOR_MED_SØKER)
+        evalueringJa("Barnet bor med mor", Vilkår.BOR_MED_SØKER, barn.type)
     else
-        evalueringNei("Barnet bor ikke med mor", Vilkår.BOR_MED_SØKER)
+        evalueringNei("Barnet bor ikke med mor", Vilkår.BOR_MED_SØKER, barn.type)
 }
 
 internal fun bosattINorge(fakta: Fakta): Evaluering {
@@ -82,8 +84,10 @@ fun evalueringJa(begrunnelse: String, vilkår: String, beskrivelse: String): Eva
     return Evaluering.ja(begrunnelse)
 }
 
-fun evalueringJa(begrunnelse: String, vilkår: Vilkår): Evaluering {
-    hentMetricCounter("suksess", vilkår.name, vilkår.spesifikasjon.beskrivelse).increment()
+fun evalueringJa(begrunnelse: String, vilkår: Vilkår, personType: PersonType): Evaluering {
+    val beskrivelse = personType.name.plus(vilkår.spesifikasjon.beskrivelse)
+
+    hentMetricCounter("suksess", vilkår.name, beskrivelse).increment()
     return Evaluering.ja(begrunnelse)
 }
 
@@ -92,8 +96,10 @@ fun evalueringNei(begrunnelse: String, vilkår: String, beskrivelse: String): Ev
     return Evaluering.nei(begrunnelse)
 }
 
-fun evalueringNei(begrunnelse: String, vilkår: Vilkår): Evaluering {
-    hentMetricCounter("feil", vilkår.name, vilkår.spesifikasjon.beskrivelse).increment()
+fun evalueringNei(begrunnelse: String, vilkår: Vilkår, personType: PersonType): Evaluering {
+    val beskrivelse = personType.name.plus(vilkår.spesifikasjon.beskrivelse)
+
+    hentMetricCounter("feil", vilkår.name, beskrivelse).increment()
     return Evaluering.nei(begrunnelse)
 }
 
