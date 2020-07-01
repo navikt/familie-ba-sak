@@ -13,6 +13,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.U
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode.SatsType.MND
 import java.math.BigDecimal
+import java.time.LocalDate
 
 //Lager utbetalingsoppdrag direkte fra AndelTilkjentYtelse. Kobler sammen alle perioder som gjelder samme barn i en kjede,
 // bortsett ra småbarnstillegg som må ha sin egen kjede fordi det er en egen klasse i OS
@@ -28,7 +29,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
 
     val utbetalingsperiodeMal =
             if (erOpphør)
-                UtbetalingsperiodeMal(vedtak, true, vedtak.forrigeVedtakId!!)
+                UtbetalingsperiodeMal(vedtak, andelerTilkjentYtelse, true, vedtak.forrigeVedtakId!!)
             else
                 UtbetalingsperiodeMal(vedtak)
 
@@ -41,7 +42,7 @@ fun lagUtbetalingsoppdrag(saksbehandlerId: String,
         throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
     }
 
-    val samledeAndeler : List<List<AndelTilkjentYtelse>> =
+    val samledeAndeler: List<List<AndelTilkjentYtelse>> =
             listOf(personMedSmåbarnstilleggAndeler.values.toList(), personerMedAndeler.values.toList()).flatten()
 
     // TODO: Dette må gjøres annerledes for revurderinger. Her må kjeden for hver person starte med en offset som er lik
@@ -75,6 +76,7 @@ fun <T> List<T>.kunSisteHvis(kunSiste: Boolean): List<T> {
 
 data class UtbetalingsperiodeMal(
         val vedtak: Vedtak,
+        val andeler: List<AndelTilkjentYtelse>? = null,
         val erEndringPåEksisterendePeriode: Boolean = false,
         val periodeIdStart: Long = vedtak.id
 ) {
@@ -94,7 +96,7 @@ data class UtbetalingsperiodeMal(
 
         return Utbetalingsperiode(
                 erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-                opphør = vedtak.opphørsdato?.let { Opphør(senesteDatoAv(vedtak.opphørsdato, andel.stønadFom)) },
+                opphør = vedtak.opphørsdato?.let { Opphør(senesteDatoAv(vedtak.opphørsdato, tidligsteFomDatoIKjede(andel))) },
                 forrigePeriodeId = forrigePeriodeIdOffset?.let { utvidetPeriodeIdStart + forrigePeriodeIdOffset.toLong() },
                 periodeId = utvidetPeriodeIdStart + periodeIdOffset,
                 datoForVedtak = vedtak.vedtaksdato,
@@ -106,5 +108,11 @@ data class UtbetalingsperiodeMal(
                 utbetalesTil = vedtak.behandling.fagsak.hentAktivIdent().ident,
                 behandlingId = vedtak.behandling.id
         )
+    }
+
+    fun tidligsteFomDatoIKjede(andel: AndelTilkjentYtelse): LocalDate {
+        return andeler!!.filter { it.type == andel.type && it.personIdent == andel.personIdent }
+                .sortedBy { it.stønadFom }
+                .first().stønadFom
     }
 }
