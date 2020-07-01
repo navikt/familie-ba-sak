@@ -1,36 +1,46 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import io.micrometer.core.instrument.Counter
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrUkjentBosted
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
+import io.micrometer.core.instrument.Metrics
 
-internal fun barnUnder18År(fakta: Fakta): Evaluering {
-    return if (fakta.alder < 18)
-        Evaluering.ja("Barn er under 18 år")
+internal fun barnUnder18År(fakta: Fakta): Evaluering =
+    if (fakta.alder < 18)
+        evalueringJa("Barn er under 18 år", Vilkår.UNDER_18_ÅR)
     else
-        Evaluering.nei("Barn er ikke under 18 år")
-}
+        evalueringNei("Barn er ikke under 18 år", Vilkår.UNDER_18_ÅR)
 
 internal fun harEnSøker(fakta: Fakta): Evaluering {
+    val subVilkårEnSøker = Vilkår.BOR_MED_SØKER.spesifikasjon.children
+            .first { it.beskrivelse.contains("Har eksakt en søker") }
+
     val barn = fakta.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
+
     return if (søker.size == 1)
-        Evaluering.ja("Søknad har eksakt en søker")
+        evalueringJa("Søknad har eksakt en søker", Vilkår.BOR_MED_SØKER.name, subVilkårEnSøker.beskrivelse)
     else
-        Evaluering.nei("Søknad har mer enn en eller ingen søker")
+        evalueringNei("Søknad har mer enn en eller ingen søker", Vilkår.BOR_MED_SØKER.name, subVilkårEnSøker.beskrivelse)
 }
 
 internal fun søkerErMor(fakta: Fakta): Evaluering {
+    val subVilkårErMor = Vilkår.BOR_MED_SØKER.spesifikasjon.children
+            .first { it.beskrivelse.contains("søker må være mor") }
+
     val barn = fakta.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
 
     return if (søker.isEmpty())
         Evaluering.nei(("Ingen søker"))
     else if (søker.first().kjønn == Kjønn.KVINNE)
-        Evaluering.ja(("Søker er mor"))
-    else Evaluering.nei(("Søker er ikke mor"))
+        evalueringJa("Søker er mor", Vilkår.BOR_MED_SØKER.name, subVilkårErMor.beskrivelse)
+    else
+        evalueringNei("Søker er ikke mor", Vilkår.BOR_MED_SØKER.name, subVilkårErMor.beskrivelse)
+
 }
 
 internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
@@ -42,9 +52,9 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
     else if (søker.first().bostedsadresse != null &&
              søker.first().bostedsadresse !is GrUkjentBosted &&
              søker.first().bostedsadresse == barn.bostedsadresse)
-        Evaluering.ja("Barnet bor med mor")
+        evalueringJa("Barnet bor med mor", Vilkår.BOR_MED_SØKER)
     else
-        Evaluering.nei("Barnet bor ikke med mor")
+        evalueringNei("Barnet bor ikke med mor", Vilkår.BOR_MED_SØKER)
 }
 
 internal fun bosattINorge(fakta: Fakta): Evaluering {
@@ -66,5 +76,32 @@ internal fun giftEllerPartneskap(fakta: Fakta): Evaluering =
                 Evaluering.nei("Person er gift eller har registrert partner")
             else -> Evaluering.ja("Person er ikke gift eller har registrert partner")
         }
+
+fun evalueringJa(begrunnelse: String, vilkår: String, beskrivelse: String): Evaluering {
+    hentMetricCounter("suksess", vilkår, beskrivelse).increment()
+    return Evaluering.ja(begrunnelse)
+}
+
+fun evalueringJa(begrunnelse: String, vilkår: Vilkår): Evaluering {
+    hentMetricCounter("suksess", vilkår.name, vilkår.spesifikasjon.beskrivelse).increment()
+    return Evaluering.ja(begrunnelse)
+}
+
+fun evalueringNei(begrunnelse: String, vilkår: String, beskrivelse: String): Evaluering {
+    hentMetricCounter("feil", vilkår, beskrivelse).increment()
+    return Evaluering.nei(begrunnelse)
+}
+
+fun evalueringNei(begrunnelse: String, vilkår: Vilkår): Evaluering {
+    hentMetricCounter("feil", vilkår.name, vilkår.spesifikasjon.beskrivelse).increment()
+    return Evaluering.nei(begrunnelse)
+}
+
+private fun hentMetricCounter(type: String, vilkår: String, beskrivelse: String) : Counter =
+    Metrics.counter("behandling.vilkår.$type",
+                    "vilkår",
+                    vilkår,
+                    "beskrivelse",
+                    beskrivelse)
 
 fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
