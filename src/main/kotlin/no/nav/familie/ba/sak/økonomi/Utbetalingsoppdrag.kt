@@ -112,7 +112,6 @@ data class UtbetalingsperiodeMal(
 
     fun tidligsteFomDatoIKjede(andel: AndelTilkjentYtelse): LocalDate {
         return andeler!!.filter { it.type == andel.type && it.personIdent == andel.personIdent }
-                .sortedBy { it.stønadFom }
-                .first().stønadFom
+                .minBy { it.stønadFom }!!.stønadFom
     }
 }
