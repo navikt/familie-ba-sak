@@ -14,4 +14,7 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
 
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.personIdent = :personIdent")
     fun finnAndelerTilkjentYtelseForPerson(personIdent: String): List<AndelTilkjentYtelse>
+
+    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.personIdent IN :personIdenter")
+    fun finnAndelerTilkjentYtelseForPersoner(personIdenter: List<String>): List<AndelTilkjentYtelse>
 }

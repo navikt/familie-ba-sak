@@ -31,6 +31,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                            lagBehandling())
         val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
         every { andelTilkjentYtelseRepository.save(any<AndelTilkjentYtelse>()) } returns andel
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(any<List<String>>()) } returns emptyList()
         utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(andelTilkjentYtelseRepository)
     }
 

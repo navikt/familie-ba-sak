@@ -34,33 +34,70 @@ class UtbetalingsoppdragGenerator(
                 else
                     UtbetalingsperiodeMal(vedtak)
 
+        // Må separere i lister siden småbarnstillegg og utvidet barnetrygd begge vil stå på forelder, men skal kjedes separat
         val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
                 andelerTilkjentYtelse.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
                     it.groupBy { andel -> andel.personIdent }
                 }
 
+        val alleIdenterPåFagsak = setOf( personMedSmåbarnstilleggAndeler.keys, personerMedAndeler.keys).flatten().toList()
+
+        var offset = if (!erFørsteBehandlingPåFagsak) hentSisteOffsetPåFagsak(alleIdenterPåFagsak) ?: 0 else 0
+
+        val utbetalingsperioder: MutableList<Utbetalingsperiode> = mutableListOf()
+
         if (personMedSmåbarnstilleggAndeler.size > 1) {
             throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
+        } else {
+            val utbetalingsperioderSmåbarn: List<Utbetalingsperiode> = personMedSmåbarnstilleggAndeler
+                    .flatMap { (ident: String, andelerForPerson: List<AndelTilkjentYtelse>) ->
+
+                        /*
+
+                        if (!erFørsteBehandlingPåFagsak) {
+                            val ident = andelerForPerson.first().personIdent
+                            val type = andelerForPerson.first().type
+
+                            forrigeOffsetHvisFunnet = if (type == YtelseType.SMÅBARNSTILLEGG) {
+                                hentSisteOffsetForPerson(personIdent = ident, ytelseType = type)
+                            } else {
+                                hentSisteOffsetForPerson(ident)
+                            }
+                        }
+                        */
+
+                        andelerForPerson.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
+                            val forrigeOffset = if (index == 0) null else offset - 1
+                            utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
+                                andel.periodeOffset = offset.toLong()
+                                andelTilkjentYtelseRepository.save(andel)
+                                offset++
+                            }
+                        }.kunSisteHvis(erOpphør)
+                    }
+            utbetalingsperioder.addAll(utbetalingsperioderSmåbarn)
         }
 
-        val samledeAndeler: List<List<AndelTilkjentYtelse>> =
-                listOf(personMedSmåbarnstilleggAndeler.values.toList(), personerMedAndeler.values.toList()).flatten()
+        // Småbarnstillegg og utvidet barnetrygd skal ha to forskjellige kjeder. Derfor ikke lagt i map, da forelder ville hatt to identiske keys.
+        //val samledeAndeler: List<List<AndelTilkjentYtelse>> = listOf(personMedSmåbarnstilleggAndeler.values.toList(), personerMedAndeler.values.toList()).flatten()
 
-        var offset = 0
 
-        val utbetalingsperioder: List<Utbetalingsperiode> = samledeAndeler
-                .flatMap { andelerForPerson: List<AndelTilkjentYtelse> ->
+        val utbetalingsperioderResten: List<Utbetalingsperiode> = personerMedAndeler
+                .flatMap { (ident: String, andelerForPerson: List<AndelTilkjentYtelse>) ->
+
+                    /*
 
                     if (!erFørsteBehandlingPåFagsak) {
                         val ident = andelerForPerson.first().personIdent
                         val type = andelerForPerson.first().type
 
-                        offset = if (type == YtelseType.SMÅBARNSTILLEGG) {
-                            hentSisteOffsetForPerson(personIdent = ident, ytelseType = type) ?: 0
+                        forrigeOffsetHvisFunnet = if (type == YtelseType.SMÅBARNSTILLEGG) {
+                            hentSisteOffsetForPerson(personIdent = ident, ytelseType = type)
                         } else {
-                            hentSisteOffsetForPerson(ident) ?: 0
+                            hentSisteOffsetForPerson(ident)
                         }
                     }
+                    */
 
                     andelerForPerson.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
                         val forrigeOffset = if (index == 0) null else offset - 1
@@ -71,6 +108,7 @@ class UtbetalingsoppdragGenerator(
                         }
                     }.kunSisteHvis(erOpphør)
                 }
+        utbetalingsperioder.addAll(utbetalingsperioderResten)
 
         return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -91,11 +129,18 @@ class UtbetalingsoppdragGenerator(
 
     private fun hentSisteOffsetForPerson(personIdent: String, ytelseType: YtelseType? = null): Int? {
         val sorterteAndeler =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPerson(personIdent).sortedBy { it.periodeOffset }
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(listOf(personIdent))
+                        .sortedBy { it.periodeOffset }
         return if (ytelseType != null) {
             sorterteAndeler.filter { it.type == ytelseType }.lastOrNull()?.periodeOffset?.toInt()
         } else {
             sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
         }
+    }
+
+    private fun hentSisteOffsetPåFagsak(personIdenter: List<String>): Int? {
+        val sorterteAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(personIdenter).sortedBy { it.periodeOffset }
+        return sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
     }
 }

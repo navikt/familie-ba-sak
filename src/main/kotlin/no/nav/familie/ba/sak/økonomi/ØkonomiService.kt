@@ -21,8 +21,7 @@ class ØkonomiService(
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
-        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
-        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
 ) {
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
