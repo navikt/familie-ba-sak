@@ -48,6 +48,9 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
 }
 
 internal fun bosattINorge(fakta: Fakta): Evaluering =
+        // En person med registrert bostedsadresse er bosatt i Norge.
+        // En person som mangler registrert bostedsadresse er utflyttet.
+        // See: https://navikt.github.io/pdl/#_utflytting
         fakta.personForVurdering.bostedsadresse
                 ?.let { Evaluering.ja("Person bosatt i Norge") }
                 ?: Evaluering.nei("Person er ikke bosatt i Norge")
