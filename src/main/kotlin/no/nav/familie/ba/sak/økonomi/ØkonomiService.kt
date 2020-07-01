@@ -68,11 +68,6 @@ class ØkonomiService(
                 )
     }
 
-    private fun hentSisteOffsetForPerson(personIdent: String): Long? {
-        val sorterteAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPerson(personIdent).sortedBy { it.periodeOffset }
-        return sorterteAndeler.last().periodeOffset
-    }
-
     fun hentStatus(oppdragId: OppdragId): OppdragStatus {
         Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
                 .fold(

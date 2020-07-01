@@ -5,16 +5,12 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.senesteDatoAv
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
-import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.UEND
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode.SatsType.MND
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 
 @Component
 class UtbetalingsoppdragGenerator(
@@ -50,12 +46,22 @@ class UtbetalingsoppdragGenerator(
         val samledeAndeler: List<List<AndelTilkjentYtelse>> =
                 listOf(personMedSmåbarnstilleggAndeler.values.toList(), personerMedAndeler.values.toList()).flatten()
 
-        // TODO: Dette må gjøres annerledes for revurderinger. Her må kjeden for hver person starte med en offset som er lik
-        //  den siste periodeId-en for personen i forrige behandling, eller starte på 0 hvis personen ikke hadde andeler i
-        //  forrige behandling.
         var offset = 0
+
         val utbetalingsperioder: List<Utbetalingsperiode> = samledeAndeler
                 .flatMap { andelerForPerson: List<AndelTilkjentYtelse> ->
+
+                    if (!erFørsteBehandlingPåFagsak) {
+                        val ident = andelerForPerson.first().personIdent
+                        val type = andelerForPerson.first().type
+
+                        offset = if (type == YtelseType.SMÅBARNSTILLEGG) {
+                            hentSisteOffsetForPerson(personIdent = ident, ytelseType = type) ?: 0
+                        } else {
+                            hentSisteOffsetForPerson(ident) ?: 0
+                        }
+                    }
+
                     andelerForPerson.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
                         val forrigeOffset = if (index == 0) null else offset - 1
                         utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
@@ -80,6 +86,16 @@ class UtbetalingsoppdragGenerator(
     fun <T> List<T>.kunSisteHvis(kunSiste: Boolean): List<T> {
         return this.foldRight(mutableListOf()) { element, resultat ->
             if (resultat.size == 0 || !kunSiste) resultat.add(0, element);resultat
+        }
+    }
+
+    private fun hentSisteOffsetForPerson(personIdent: String, ytelseType: YtelseType? = null): Int? {
+        val sorterteAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPerson(personIdent).sortedBy { it.periodeOffset }
+        return if (ytelseType != null) {
+            sorterteAndeler.filter { it.type == ytelseType }.lastOrNull()?.periodeOffset?.toInt()
+        } else {
+            sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
         }
     }
 }
