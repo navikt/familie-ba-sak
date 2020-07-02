@@ -38,8 +38,8 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
         if (evaluering.resultat == Resultat.JA) {
             // TODO Fortsett med vilkårsvurdering
         } else {
-            opprettOppgave(behandling)
-            throw java.lang.IllegalStateException("Behandles manuelt. Går ikke videre til vilkårsvurdering")
+            // TODO Ikke fortsett med vilkårsvurdering, og opprett oppgave
+            // opprettOppgave(behandling)
         }
 
         return hentNesteStegForNormalFlyt(behandling)
