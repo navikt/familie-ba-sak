@@ -67,13 +67,13 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
 
     private fun oppdaterMetrikker(evaluering: Evaluering) {
         evaluering.children.forEach {
-            val counter = Metrics.counter(
-                    "barnetrygd.hendelse.filtreringsregler.${it.identifikator.toLowerCase()}.${jaNei(it.resultat)}",
-                    "beskrivelse",
-                    it.beskrivelse,
-                    "begrunnelse",
-                    it.begrunnelse)
-            counter.increment()
+            if (it.resultat == Resultat.NEI) {
+                Metrics.counter(
+                        "barnetrygd.hendelse.filtreringsregler.negativt.utfall",
+                        "begrunnelse",
+                        it.begrunnelse
+                ).increment()
+            }
         }
 
         when (evaluering.resultat) {
