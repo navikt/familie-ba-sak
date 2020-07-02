@@ -57,15 +57,6 @@ class AvgjørAutomatiskEllerManuellTest {
         }
     }
 
-    @Test
-    fun `utførStegOgAngiNeste skal kaste feil dersom hendelsen skal behandles manuelt`() {
-        spesifiserMocks(17)
-
-        assertThrows<IllegalStateException> {
-            avgjørAutomatiskEllerManuell.utførStegOgAngiNeste(behandling, "data")
-        }
-    }
-
     private fun spesifiserMocks(morsAlder: Long) {
         val søker = tilfeldigPerson(LocalDate.now().minusYears(morsAlder), PersonType.SØKER).copy(personIdent = PersonIdent("12345678910"))
         val barn = tilfeldigPerson().copy(personIdent = PersonIdent("12345678911"))

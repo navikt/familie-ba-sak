@@ -340,4 +340,42 @@ class VilkårVurderingTest(
 
         assertEquals(Resultat.NEI, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(Fakta(barn)).resultat)
     }
+
+    @Test
+    fun `Sjekk at søker er bosatt i norge`() {
+        val ukjentbosted = GrUkjentBosted("Oslo")
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
+        personopplysningGrunnlag.personer.add(søker)
+
+        assertEquals(Resultat.JA, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(søker)).resultat)
+    }
+
+    @Test
+    fun `Negativ vurdering - søker er ikke bosatt i norge`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        personopplysningGrunnlag.personer.add(søker)
+
+        assertEquals(Resultat.NEI, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(søker)).resultat)
+    }
+
+    @Test
+    fun `Sjekk at mor er bosatt i norge`() {
+        val ukjentbosted = GrUkjentBosted("Oslo")
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
+        personopplysningGrunnlag.personer.add(barn)
+
+        assertEquals(Resultat.JA, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(barn)).resultat)
+    }
+
+    @Test
+    fun `Negativ vurdering - mor er ikke bosatt i norge`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        personopplysningGrunnlag.personer.add(barn)
+
+        assertEquals(Resultat.NEI, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(barn)).resultat)
+    }
 }
