@@ -26,9 +26,9 @@ enum class Filtreringsregler(val spesifikasjon: Spesifikasjon<Fakta>) {
             implementasjon = { morErOver18år(this) })
     ),
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN(Spesifikasjon(
-                                     "Det har gått mer enn 5 måneder siden forrige barn ble født",
-                                     "MER_ENN_5_MND_SIDEN_FORRIGE_BARN",
-                                     implementasjon = { merEnn5mndSidenForrigeBarn(this) })
+            "Det har gått mer enn 5 måneder siden forrige barn ble født",
+            "MER_ENN_5_MND_SIDEN_FORRIGE_BARN",
+            implementasjon = { merEnn5mndSidenForrigeBarn(this) })
     ),
     MOR_LEVER(Spesifikasjon(
             "Mor lever",
