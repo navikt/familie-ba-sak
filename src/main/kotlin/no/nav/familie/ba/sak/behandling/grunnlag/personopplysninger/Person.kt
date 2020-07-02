@@ -34,6 +34,12 @@ data class Person(
         @Enumerated(EnumType.STRING) @Column(name = "sivilstand", nullable = false)
         val sivilstand: SIVILSTAND,
 
+        @Column(name = "statsborgerskap", nullable = false)
+        val statsborgerskap: String,
+
+        @Enumerated(EnumType.STRING) @Column(name = "medlemskap", nullable = false)
+        val medlemskap: Medlemskap,
+
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident",
                                               column = Column(name = "person_ident", updatable = false)))
@@ -76,5 +82,10 @@ data class Person(
 enum class Kjønn {
     MANN, KVINNE, UKJENT
 }
+
+enum class Medlemskap {
+    NORDEN, EØS, TREDJELANDSBORGER, UKJENT
+}
+
 
 
