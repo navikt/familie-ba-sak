@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Service
 class PersongrunnlagService(
         private val personRepository: PersonRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val integrasjonClient: IntegrasjonClient
+        private val integrasjonClient: IntegrasjonClient,
+        private val statsborgerskapService: StatsborgerskapService
 ) {
 
     fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
@@ -48,6 +50,8 @@ class PersongrunnlagService(
 
         val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
         val aktørId = integrasjonClient.hentAktivAktørId(Ident(fødselsnummer))
+        val (statsborgerskap, medlemskap) = statsborgerskapService.hentStatsborgerskapOgMedlemskap(Ident(fødselsnummer))
+
         val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
                            type = PersonType.SØKER,
                            personopplysningGrunnlag = personopplysningGrunnlag,
@@ -56,7 +60,9 @@ class PersongrunnlagService(
                            navn = personinfo.navn ?: "",
                            bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
+                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
+                           statsborgerskap = statsborgerskap,
+                           medlemskap = medlemskap
         )
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
@@ -69,6 +75,8 @@ class PersongrunnlagService(
                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
         return barnasFødselsnummer.map { nyttBarn ->
             val personinfo = integrasjonClient.hentPersoninfoFor(nyttBarn)
+            val (statsborgerskap, medlemskap) = statsborgerskapService.hentStatsborgerskapOgMedlemskap(Ident(nyttBarn))
+
             personRepository.save(Person(personIdent = PersonIdent(nyttBarn),
                                          type = PersonType.BARN,
                                          personopplysningGrunnlag = personopplysningGrunnlag,
@@ -77,7 +85,9 @@ class PersongrunnlagService(
                                          navn = personinfo.navn ?: "",
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                                          bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
-                                         sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
+                                         sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
+                                         statsborgerskap = statsborgerskap,
+                                         medlemskap = medlemskap
             ))
         }
     }
