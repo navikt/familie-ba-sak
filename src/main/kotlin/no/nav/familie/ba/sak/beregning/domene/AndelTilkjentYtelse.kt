@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.beregning.domene
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import java.util.*
@@ -14,13 +15,13 @@ data class AndelTilkjentYtelse(
         val id: Long = 0,
 
         @Column(name = "fk_behandling_id", nullable = false, updatable = false)
-        val behandlingId: Long,
+        val behandlingId: Long, //TODO: Benytt faktisk behandling ?
 
         @ManyToOne
         @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
         var tilkjentYtelse: TilkjentYtelse,
 
-        @Column(name = "fk_person_id", nullable = false, updatable = false)
+        @Column(name = "fk_person_id", nullable = false, updatable = false) // TODO: fjerne dette feltet
         val personId: Long,
 
         @Column(name = "person_ident", nullable = false, updatable = false)
