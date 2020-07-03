@@ -53,7 +53,7 @@ class AvgjørAutomatiskEllerManuellTest {
         spesifiserMocks(20)
 
         assertDoesNotThrow {
-            avgjørAutomatiskEllerManuell.utførStegOgAngiNeste(behandling, "data")
+            avgjørAutomatiskEllerManuell.utførStegOgAngiNeste(behandling, "12345678911")
         }
     }
 
