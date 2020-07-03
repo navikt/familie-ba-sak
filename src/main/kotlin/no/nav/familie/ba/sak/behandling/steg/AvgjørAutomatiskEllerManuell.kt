@@ -31,7 +31,7 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling))
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, data))
 
         oppdaterMetrikker(evaluering)
 
@@ -45,12 +45,14 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    private fun lagFaktaObjekt(behandling: Behandling): Fakta {
+    private fun lagFaktaObjekt(behandling: Behandling, barnetsIdent: String): Fakta {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         val mor = personopplysningGrunnlag.søker[0]
-        val barnet = personopplysningGrunnlag.barna[0]
+        val barnet = personopplysningGrunnlag.barna.filter { it.personIdent.ident == barnetsIdent }.firstOrNull()
+                ?: throw java.lang.IllegalStateException("Barnets ident er ikke tilstede i personopplysningsgrunnlaget.")
+
         val restenAvBarna =
                 integrasjonClient.hentPersoninfoFor(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
                     it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && it.personIdent.id != barnet.personIdent.ident
