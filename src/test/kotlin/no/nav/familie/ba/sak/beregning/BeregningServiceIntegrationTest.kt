@@ -169,8 +169,8 @@ class BeregningServiceIntegrationTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.id
-        val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.id
+        val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.personIdent.ident
+        val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.personIdent.ident
 
         val behandlingResultat = BehandlingResultat(behandling = behandling)
         behandlingResultat.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01, dato_2020_01_01.plusYears(17))
@@ -179,8 +179,8 @@ class BeregningServiceIntegrationTest {
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-        val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personId == barn1Id }
-        val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personId == barn2Id }
+        val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personIdent == barn1Id }
+        val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personIdent == barn2Id }
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertTrue(tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty())

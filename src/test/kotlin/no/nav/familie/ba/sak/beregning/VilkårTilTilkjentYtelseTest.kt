@@ -193,7 +193,6 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                 AndelTilkjentYtelse(
                         behandlingId = behandling.id,
                         tilkjentYtelse = tilkjentYtelse,
-                        personId = person.id,
                         personIdent = person.personIdent.ident,
                         stønadFom = stønadPeriode.fraOgMed,
                         stønadTom = stønadPeriode.tilOgMed!!,

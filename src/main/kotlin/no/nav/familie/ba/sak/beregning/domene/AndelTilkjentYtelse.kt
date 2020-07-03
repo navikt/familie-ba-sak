@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.beregning.domene
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import java.util.*
@@ -20,9 +19,6 @@ data class AndelTilkjentYtelse(
         @ManyToOne
         @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
         var tilkjentYtelse: TilkjentYtelse,
-
-        @Column(name = "fk_person_id", nullable = false, updatable = false) // TODO: fjerne dette feltet
-        val personId: Long,
 
         @Column(name = "person_ident", nullable = false, updatable = false)
         val personIdent: String,
@@ -57,16 +53,16 @@ data class AndelTilkjentYtelse(
                         && Objects.equals(beløp, annen.beløp)
                         && Objects.equals(stønadFom, annen.stønadFom)
                         && Objects.equals(stønadTom, annen.stønadTom)
-                        && Objects.equals(personId, annen.personId)
+                        && Objects.equals(personIdent, annen.personIdent)
         }
 
         override fun hashCode(): Int {
-                return Objects.hash(id, behandlingId, type, beløp, stønadFom, stønadTom, personId)
+                return Objects.hash(id, behandlingId, type, beløp, stønadFom, stønadTom, personIdent)
         }
 
         override fun toString(): String {
-                return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, person = $personId, " +
-                       "beløp = $beløp, stønadFom = $stønadFom, stønadTom = $stønadTom)"
+                return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, " +
+                       "beløp = $beløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
         }
 }
 

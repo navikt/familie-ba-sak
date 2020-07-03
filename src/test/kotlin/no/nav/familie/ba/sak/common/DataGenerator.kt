@@ -91,7 +91,6 @@ fun lagAndelTilkjentYtelse(fom: String,
                            behandling: Behandling = lagBehandling(),
                            person: Person = tilfeldigPerson()): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
-            personId = person.id,
             personIdent = person.personIdent.ident,
             behandlingId = behandling.id,
             tilkjentYtelse = lagInitiellTilkjentYtelse(behandling),

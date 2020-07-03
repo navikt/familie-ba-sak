@@ -22,12 +22,12 @@ data class RestYtelsePeriode (
 fun lagRestVedtakPerson(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, personopplysningGrunnlag: PersonopplysningGrunnlag?)
         : List<RestVedtakPerson>{
 
-    return andelerTilkjentYtelse.groupBy { it.personId }
+    return andelerTilkjentYtelse.groupBy { it.personIdent }
             .map { andelerForPerson ->
                 val personId = andelerForPerson.key
                 val andeler = andelerForPerson.value
                 RestVedtakPerson(
-                        personIdent = personopplysningGrunnlag?.personer?.find { person -> person.id == personId }?.personIdent?.ident,
+                        personIdent = personopplysningGrunnlag?.personer?.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
                         beløp = andeler.map { it.beløp }.sum(),
                         stønadFom = andeler.map { it.stønadFom }.min() ?: LocalDate.MIN,
                         ytelsePerioder = andeler.map { it1->RestYtelsePeriode(it1.beløp, it1.stønadFom, it1.stønadTom, it1.type) }

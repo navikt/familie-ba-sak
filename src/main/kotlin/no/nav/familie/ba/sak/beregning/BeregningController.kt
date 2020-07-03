@@ -77,11 +77,11 @@ class BeregningController(
                 periodeTom = segment.tom,
                 ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
                 utbetaltPerMnd = segment.value,
-                antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.id == andel.personId } },
+                antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
                 sakstype = behandling.kategori,
                 beregningDetaljer = andelerForSegment.map { andel ->
-                    val personForAndel = personopplysningGrunnlag.personer.find { person -> andel.personId == person.id }
-                            ?: throw java.lang.IllegalStateException("Fant ikke personopplysningsgrunnlag for andel med personId ${andel.personId}")
+                    val personForAndel = personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                            ?: throw java.lang.IllegalStateException("Fant ikke personopplysningsgrunnlag for andel ${andel.id} på behandling ${andel.behandlingId}")
                     RestBeregningDetalj(
                             person = RestPerson(
                                     type = personForAndel.type,
