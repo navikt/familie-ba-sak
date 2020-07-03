@@ -69,6 +69,10 @@ class PersonResultat(
     }
 
     fun hentSamletResultat(): BehandlingResultatType {
+        if(vilkårResultater.any{ it.resultat == Resultat.KANSKJE}) {
+            return BehandlingResultatType.IKKE_VURDERT
+        }
+
         return when {
             vilkårResultater.all { it.resultat == Resultat.JA } -> {
                 BehandlingResultatType.INNVILGET
