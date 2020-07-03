@@ -10,7 +10,6 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDate.now
 
@@ -18,43 +17,17 @@ import java.time.LocalDate.now
 internal class UtbetalingsoppdragPeriodiseringTest {
 
     lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
-    val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
-
     var sisteOppdatertePersonsAndeler = slot<MutableList<AndelTilkjentYtelse>>()
-    var oppdaterteAndeler = mutableListOf<List<AndelTilkjentYtelse>>()
 
     @BeforeAll
     fun setUp() {
+        val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
         utbetalingsoppdragGenerator = spyk(UtbetalingsoppdragGenerator(andelTilkjentYtelseRepository))
-        /*
-        //val personidenter = slot<List<String>>()
-        every {
-            //andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(capture(personidenter))
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(any<List<String>>())
-        } returns (
-                if (sisteOppdatertePersonsAndeler.isCaptured) sisteOppdatertePersonsAndeler.captured else emptyList())
-        every { andelTilkjentYtelseRepository.saveAll(capture(sisteOppdatertePersonsAndeler)) } returns emptyList() // TODO: sloten fylles aldri
-        utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(andelTilkjentYtelseRepository)
-        */
-        /*
-        every {
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(any<List<String>>())
-        } returns sisteOppdatertePersonsAndeler2[0]
-        every { andelTilkjentYtelseRepository.saveAll(capture(sisteOppdatertePersonsAndeler2)) } returns emptyList()
-        utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(andelTilkjentYtelseRepository)
-         */
 
         every { utbetalingsoppdragGenerator.hentSisteOffsetForPerson(any()) } returns null
-        //every { utbetalingsoppdragGenerator.hentSisteOffsetPåFagsak(any()) } returns (if (oppdaterteAndeler.isNotEmpty()) oppdaterteAndeler.last().sortedBy { it.periodeOffset }.last().periodeOffset?.toInt() else null)
-        //every { utbetalingsoppdragGenerator.lagreOppdaterteAndeler( capture(oppdaterteAndeler) ) } just Runs
-        every { utbetalingsoppdragGenerator.hentSisteOffsetPåFagsak(any()) } returns (if (sisteOppdatertePersonsAndeler.isCaptured) sisteOppdatertePersonsAndeler.captured.sortedBy { it.periodeOffset }.last().periodeOffset?.toInt() else null)
+        every { utbetalingsoppdragGenerator.hentSisteOffsetForPerson(any(), any()) } returns null
+        every { utbetalingsoppdragGenerator.hentSisteOffsetPåFagsak(any()) } returns (if (sisteOppdatertePersonsAndeler.isCaptured) sisteOppdatertePersonsAndeler.captured.maxBy { it.periodeOffset!! }?.periodeOffset?.toInt() else null)
         every { utbetalingsoppdragGenerator.lagreOppdaterteAndeler( capture(sisteOppdatertePersonsAndeler) ) } just Runs
-
-    }
-
-    @BeforeEach
-    fun cleanUp() {
-        sisteOppdatertePersonsAndeler.clear()
     }
 
     @Test
@@ -98,7 +71,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
     @Test
     fun `skal opprette et opphør med felles løpende periodeId og separat kjeding på to personer`() {
         val behandling = lagBehandling()
-        val vedtak = lagVedtak(behandling)
+        val vedtak = lagVedtak(behandling = behandling)
         val personMedFlerePerioder = tilfeldigPerson()
         val andelerTilkjentYtelse = listOf(
                 lagAndelTilkjentYtelse("2019-04-01",

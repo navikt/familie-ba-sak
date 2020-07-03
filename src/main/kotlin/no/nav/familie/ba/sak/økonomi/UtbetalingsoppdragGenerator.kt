@@ -34,26 +34,17 @@ class UtbetalingsoppdragGenerator(
                     it.groupBy { andel -> andel.personIdent }
                 }
 
-        val alleIdenterPåFagsak = setOf(personMedSmåbarnstilleggAndeler.keys, personerMedAndeler.keys).flatten().toList()
-
-        val utbetalingsperioder: MutableList<Utbetalingsperiode> = mutableListOf()
+        val alleUnikeIdenterPåFagsak = setOf(personMedSmåbarnstilleggAndeler.keys, personerMedAndeler.keys).flatten().toList()
+        val andelerForKjeding =  listOf(personMedSmåbarnstilleggAndeler.values, personerMedAndeler.values).flatten()
 
         if (personMedSmåbarnstilleggAndeler.size > 1) {
             throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
-        } else {
-            val utbetalingsperioderSmåbarn = lagUtbetalingsperioderAvAndeler(personerMedAndeler = personMedSmåbarnstilleggAndeler,
-                                                                             alleIdenterPåFagsak = alleIdenterPåFagsak,
-                                                                             behandlingResultatType = behandlingResultatType,
-                                                                             erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-                                                                             vedtak = vedtak)
-            utbetalingsperioder.addAll(utbetalingsperioderSmåbarn)
         }
-        val utbetalingsperioderResten = lagUtbetalingsperioderAvAndeler(personerMedAndeler = personerMedAndeler,
-                                                                        alleIdenterPåFagsak = alleIdenterPåFagsak,
-                                                                        behandlingResultatType = behandlingResultatType,
-                                                                        erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-                                                                        vedtak = vedtak)
-        utbetalingsperioder.addAll(utbetalingsperioderResten)
+        val utbetalingsperioder = lagUtbetalingsperioderAvAndeler(andelerForKjeding = andelerForKjeding,
+                                                                  alleIdenterPåFagsak = alleUnikeIdenterPåFagsak,
+                                                                  behandlingResultatType = behandlingResultatType,
+                                                                  erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
+                                                                  vedtak = vedtak)
 
         return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -74,7 +65,7 @@ class UtbetalingsoppdragGenerator(
 
 
 
-    private fun lagUtbetalingsperioderAvAndeler(personerMedAndeler: Map<String, List<AndelTilkjentYtelse>>,
+    private fun lagUtbetalingsperioderAvAndeler(andelerForKjeding: List<List<AndelTilkjentYtelse>>,
                                                 vedtak: Vedtak,
                                                 behandlingResultatType: BehandlingResultatType,
                                                 erFørsteBehandlingPåFagsak: Boolean,
@@ -89,9 +80,10 @@ class UtbetalingsoppdragGenerator(
                     UtbetalingsperiodeMal(vedtak, true, vedtak.forrigeVedtakId!!)
                 else
                     UtbetalingsperiodeMal(vedtak)
-        val utbetalingsperioder = personerMedAndeler
-                .flatMap { (ident: String, andelerForPerson: List<AndelTilkjentYtelse>) ->
-                    val type = andelerForPerson.first().type
+        val utbetalingsperioder = andelerForKjeding
+                .flatMap { kjede: List<AndelTilkjentYtelse> ->
+                    val ident = kjede.first().personIdent
+                    val type = kjede.first().type
                     val erSøker =
                             (type == YtelseType.UTVIDET_BARNETRYGD || type == YtelseType.SMÅBARNSTILLEGG) // TODO: Undersøk hvordan vi kan finne ut om det er forelder det dreier seg om
                     var forrigeOffsetPåPersonHvisFunnet: Int? = null
@@ -102,7 +94,7 @@ class UtbetalingsoppdragGenerator(
                             hentSisteOffsetForPerson(ident)
                         }
                     }
-                    andelerForPerson.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
+                    kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
                         val forrigeOffset = if (index == 0) forrigeOffsetPåPersonHvisFunnet else offset - 1
                         utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
                             andel.periodeOffset = offset.toLong()
@@ -111,7 +103,7 @@ class UtbetalingsoppdragGenerator(
                         }
                     }.kunSisteHvis(erOpphør)
                 }
-        lagreOppdaterteAndeler(personerMedAndeler.values.flatten())
+        lagreOppdaterteAndeler(andelerForKjeding.flatten())
         return utbetalingsperioder
     }
 
