@@ -1,3 +1,5 @@
+ALTER TABLE PO_PERSON ADD COLUMN medlemskap varchar DEFAULT 'UKJENT' NOT NULL;
+
 CREATE TABLE PO_STATSBORGERSKAP
 (
     id                bigint primary key,

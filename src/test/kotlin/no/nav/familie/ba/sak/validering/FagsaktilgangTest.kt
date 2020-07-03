@@ -74,6 +74,7 @@ internal class FagsaktilgangTest {
                                                          Kjønn.MANN,
                                                          SIVILSTAND.GIFT,
                                                          PersonIdent(randomFnr()),
+                                                         Medlemskap.NORDEN,
                                                          PersonopplysningGrunnlag(1, 1))),
                                      true)
 

@@ -56,6 +56,7 @@ class PersongrunnlagService(
                            navn = personinfo.navn ?: "",
                            bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+                           statsborgerskap = null,
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
         )
         personopplysningGrunnlag.personer.add(søker)

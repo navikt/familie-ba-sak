@@ -66,6 +66,7 @@ internal class BehandlingstilgangTest {
                                                          Kjønn.MANN,
                                                          SIVILSTAND.UGIFT,
                                                          PersonIdent(randomFnr()),
+                                                         Medlemskap.NORDEN,
                                                          PersonopplysningGrunnlag(1, 1))),
                                      true)
 

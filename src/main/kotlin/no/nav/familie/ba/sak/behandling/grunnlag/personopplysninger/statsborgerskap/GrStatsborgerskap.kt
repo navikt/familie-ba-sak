@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import javax.persistence.*
@@ -17,7 +16,7 @@ data class GrStatsborgerskap(
         val id: Long = 0,
 
         @Embedded
-        val fromTom: DatoIntervallEntitet? = null,
+        val gyldigPeriode: DatoIntervallEntitet? = null,
 
         @Column(name = "landkode", nullable = false)
         val landkode: String,
@@ -33,14 +32,14 @@ data class GrStatsborgerskap(
 
         other as GrStatsborgerskap
 
-        if (fromTom != other.fromTom) return false
+        if (gyldigPeriode != other.gyldigPeriode) return false
         if (landkode != other.landkode) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = fromTom.hashCode()
+        var result = gyldigPeriode.hashCode()
         result = 31 * result + landkode.hashCode()
         return result
     }
