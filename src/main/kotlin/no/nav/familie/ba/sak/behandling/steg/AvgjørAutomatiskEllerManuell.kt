@@ -85,14 +85,6 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
         }
     }
 
-    private fun jaNei(resultat: Resultat): String {
-        return when (resultat) {
-            Resultat.JA -> "ja"
-            Resultat.NEI -> "nei"
-            Resultat.KANSKJE -> "kanskje"
-        }
-    }
-
     private fun opprettOppgave(behandling: Behandling) {
         if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
             val nyTask = OpprettOppgaveTask.opprettTask(
