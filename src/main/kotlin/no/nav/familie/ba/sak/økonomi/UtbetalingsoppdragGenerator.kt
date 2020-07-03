@@ -83,16 +83,11 @@ class UtbetalingsoppdragGenerator(
                 else
                     UtbetalingsperiodeMal(vedtak)
 
-        val vedtakBehandlingId = vedtak.behandling.id
         val utbetalingsperioder = andelerForKjeding
                 .flatMap { kjede: List<AndelTilkjentYtelse> ->
-                    val ident = kjede.find { it.behandlingId == vedtakBehandlingId }!!.personIdent
-                    val type = kjede.find { it.behandlingId == vedtakBehandlingId }!!.type
-                    val personopplysningsgrunnlag =
-                            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = vedtakBehandlingId)
-                    val personType = personopplysningsgrunnlag!!.personer.find { it.personIdent.ident == ident }!!.type
-                    val erSøker =
-                            (personType == PersonType.SØKER)
+                    val ident = kjede.first().personIdent
+                    val type = kjede.first().type
+                    val erSøker = PersonType.SØKER == hentPersontypeForPerson(ident, kjede.first().behandlingId)
                     var forrigeOffsetPåPersonHvisFunnet: Int? = null
                     if (!erFørsteBehandlingPåFagsak) {
                         forrigeOffsetPåPersonHvisFunnet = if (erSøker) {
@@ -111,6 +106,12 @@ class UtbetalingsoppdragGenerator(
                 }
         lagreOppdaterteAndeler(andelerForKjeding.flatten())
         return utbetalingsperioder
+    }
+
+    fun hentPersontypeForPerson(personIdent: String, behandlingId: Long): PersonType {
+        val personopplysningsgrunnlag =
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
+        return personopplysningsgrunnlag!!.personer.find { it.personIdent.ident == personIdent }!!.type
     }
 
     fun hentSisteOffsetForPerson(personIdent: String, ytelseType: YtelseType? = null): Int? {

@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.økonomi
 
 import io.mockk.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
@@ -22,12 +24,15 @@ internal class UtbetalingsoppdragPeriodiseringTest {
     @BeforeAll
     fun setUp() {
         val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
-        utbetalingsoppdragGenerator = spyk(UtbetalingsoppdragGenerator(andelTilkjentYtelseRepository))
+        val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+        utbetalingsoppdragGenerator = spyk(UtbetalingsoppdragGenerator(andelTilkjentYtelseRepository, personopplysningGrunnlagRepository))
 
         every { utbetalingsoppdragGenerator.hentSisteOffsetForPerson(any()) } returns null
         every { utbetalingsoppdragGenerator.hentSisteOffsetForPerson(any(), any()) } returns null
         every { utbetalingsoppdragGenerator.hentSisteOffsetPåFagsak(any()) } returns (if (sisteOppdatertePersonsAndeler.isCaptured) sisteOppdatertePersonsAndeler.captured.maxBy { it.periodeOffset!! }?.periodeOffset?.toInt() else null)
         every { utbetalingsoppdragGenerator.lagreOppdaterteAndeler( capture(sisteOppdatertePersonsAndeler) ) } just Runs
+        // Persontype er uvesentlig for nåværende tester da vi ikke tester offsets på tvers av behandlinger
+        every { utbetalingsoppdragGenerator.hentPersontypeForPerson(any(), any()) } returns PersonType.BARN
     }
 
     @Test

@@ -22,14 +22,15 @@ import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
+import kotlin.math.abs
 import kotlin.random.Random
 
 fun randomFnr(): String = UUID.randomUUID().toString()
 fun randomAktørId(): AktørId = AktørId(UUID.randomUUID().toString())
 
-private var gjeldendeVedtakId: Long = Random.nextLong()
-private var gjeldendeBehandlingId: Long = Random.nextLong()
-private var gjeldendePersonId: Long = Random.nextLong()
+private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
+private var gjeldendeBehandlingId: Long = abs(Random.nextLong(10000000))
+private var gjeldendePersonId: Long = abs(Random.nextLong(10000000))
 private val id_inkrement = 50
 
 fun nesteVedtakId(): Long {
