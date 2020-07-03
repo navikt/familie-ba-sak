@@ -72,22 +72,7 @@ class UtbetalingsoppdragGenerator(
         }
     }
 
-    private fun hentSisteOffsetForPerson(personIdent: String, ytelseType: YtelseType? = null): Int? {
-        val sorterteAndeler =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(listOf(personIdent))
-                        .sortedBy { it.periodeOffset }
-        return if (ytelseType != null) {
-            sorterteAndeler.filter { it.type == ytelseType }.lastOrNull()?.periodeOffset?.toInt()
-        } else {
-            sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
-        }
-    }
 
-    private fun hentSisteOffsetPåFagsak(personIdenter: List<String>): Int? {
-        val sorterteAndeler =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(personIdenter).sortedBy { it.periodeOffset }
-        return sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
-    }
 
     private fun lagUtbetalingsperioderAvAndeler(personerMedAndeler: Map<String, List<AndelTilkjentYtelse>>,
                                                 vedtak: Vedtak,
@@ -104,7 +89,7 @@ class UtbetalingsoppdragGenerator(
                     UtbetalingsperiodeMal(vedtak, true, vedtak.forrigeVedtakId!!)
                 else
                     UtbetalingsperiodeMal(vedtak)
-        return personerMedAndeler
+        val utbetalingsperioder = personerMedAndeler
                 .flatMap { (ident: String, andelerForPerson: List<AndelTilkjentYtelse>) ->
                     val type = andelerForPerson.first().type
                     val erSøker =
@@ -121,10 +106,33 @@ class UtbetalingsoppdragGenerator(
                         val forrigeOffset = if (index == 0) forrigeOffsetPåPersonHvisFunnet else offset - 1
                         utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
                             andel.periodeOffset = offset.toLong()
-                            andelTilkjentYtelseRepository.save(andel)
+                            //andelTilkjentYtelseRepository.save(andel)
                             offset++
                         }
                     }.kunSisteHvis(erOpphør)
                 }
+        lagreOppdaterteAndeler(personerMedAndeler.values.flatten())
+        return utbetalingsperioder
+    }
+
+    fun hentSisteOffsetForPerson(personIdent: String, ytelseType: YtelseType? = null): Int? {
+        val sorterteAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(listOf(personIdent))
+                        .sortedBy { it.periodeOffset }
+        return if (ytelseType != null) {
+            sorterteAndeler.filter { it.type == ytelseType }.lastOrNull()?.periodeOffset?.toInt()
+        } else {
+            sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
+        }
+    }
+
+    fun hentSisteOffsetPåFagsak(personIdenter: List<String>): Int? {
+        val sorterteAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(personIdenter).sortedBy { it.periodeOffset }
+        return sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
+    }
+
+    fun lagreOppdaterteAndeler(andeler: List<AndelTilkjentYtelse>){
+        andelTilkjentYtelseRepository.saveAll(andeler)
     }
 }
