@@ -37,7 +37,8 @@ data class BehandlingResultat(
     }
 
     fun hentSamletResultat(): BehandlingResultatType {
-        if (personResultater.isEmpty()) {
+        if (personResultater.isEmpty() ||
+            personResultater.any{ it.hentSamletResultat() == BehandlingResultatType.IKKE_VURDERT}) {
             return BehandlingResultatType.IKKE_VURDERT
         }
 
