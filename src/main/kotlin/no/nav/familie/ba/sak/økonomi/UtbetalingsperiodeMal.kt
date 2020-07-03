@@ -6,18 +6,18 @@ import no.nav.familie.ba.sak.common.senesteDatoAv
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.math.BigDecimal
+import java.time.LocalDate
 
 data class UtbetalingsperiodeMal(
         val vedtak: Vedtak,
+        val andeler: List<AndelTilkjentYtelse>? = null,
         val erEndringPåEksisterendePeriode: Boolean = false,
         val periodeIdStart: Long = vedtak.id
 ) {
 
     private val MAX_PERIODEID_OFFSET = 1_000
 
-    fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse,
-                           periodeIdOffset: Int,
-                           forrigePeriodeIdOffset: Int?): Utbetalingsperiode {
+    fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse, periodeIdOffset: Int, forrigePeriodeIdOffset: Int?): Utbetalingsperiode {
 
         // Vedtak-id øker med 50, så vi kan ikke risikere overflow
         if (periodeIdOffset >= MAX_PERIODEID_OFFSET) {
@@ -30,7 +30,7 @@ data class UtbetalingsperiodeMal(
 
         return Utbetalingsperiode(
                 erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-                opphør = vedtak.opphørsdato?.let { Opphør(senesteDatoAv(vedtak.opphørsdato, andel.stønadFom)) },
+                opphør = vedtak.opphørsdato?.let { Opphør(senesteDatoAv(vedtak.opphørsdato, tidligsteFomDatoIKjede(andel))) },
                 forrigePeriodeId = forrigePeriodeIdOffset?.let { utvidetPeriodeIdStart + forrigePeriodeIdOffset.toLong() },
                 periodeId = utvidetPeriodeIdStart + periodeIdOffset,
                 datoForVedtak = vedtak.vedtaksdato,
@@ -42,5 +42,10 @@ data class UtbetalingsperiodeMal(
                 utbetalesTil = vedtak.behandling.fagsak.hentAktivIdent().ident,
                 behandlingId = vedtak.behandling.id
         )
+    }
+
+    fun tidligsteFomDatoIKjede(andel: AndelTilkjentYtelse): LocalDate {
+        return andeler!!.filter { it.type == andel.type && it.personIdent == andel.personIdent }
+                .minBy { it.stønadFom }!!.stønadFom
     }
 }

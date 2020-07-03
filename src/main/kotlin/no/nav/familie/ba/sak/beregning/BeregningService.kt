@@ -67,7 +67,7 @@ class BeregningService(
         val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
         var opphørsdato: LocalDate? = null
         if (erRentOpphør) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.map { it.opphør!!.opphørDatoFom }.sorted().last()
+            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.map { it.opphør!!.opphørDatoFom }.sorted().first()
         }
 
         if (behandling.type == BehandlingType.REVURDERING) {

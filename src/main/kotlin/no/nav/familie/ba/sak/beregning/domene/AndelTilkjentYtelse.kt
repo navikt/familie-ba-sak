@@ -14,7 +14,7 @@ data class AndelTilkjentYtelse(
         val id: Long = 0,
 
         @Column(name = "fk_behandling_id", nullable = false, updatable = false)
-        val behandlingId: Long, //TODO: Benytt faktisk behandling ?
+        val behandlingId: Long,
 
         @ManyToOne
         @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)

@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -82,7 +80,7 @@ class UtbetalingsoppdragGenerator(
 
         val utbetalingsperiodeMal =
                 if (erOpphør)
-                    UtbetalingsperiodeMal(vedtak, true, vedtak.forrigeVedtakId!!)
+                    UtbetalingsperiodeMal(vedtak, andelerForKjeding.flatten(), true, vedtak.forrigeVedtakId!!)
                 else
                     UtbetalingsperiodeMal(vedtak)
 
