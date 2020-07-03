@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.økonomi
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
@@ -14,7 +16,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class UtbetalingsoppdragGenerator(
-        val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository) {
+        val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+        val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
 
     //Lager utbetalingsoppdrag direkte fra AndelTilkjentYtelse. Kobler sammen alle perioder som gjelder samme barn i en kjede,
     // bortsett ra småbarnstillegg som må ha sin egen kjede fordi det er en egen klasse i OS
@@ -31,11 +34,11 @@ class UtbetalingsoppdragGenerator(
         // Må separere i lister siden småbarnstillegg og utvidet barnetrygd begge vil stå på forelder, men skal kjedes separat
         val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
                 andelerTilkjentYtelse.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
-                    it.groupBy { andel -> andel.personIdent }
+                    it.groupBy { andel -> andel.personIdent } // TODO: Hva skjer dersom personidenten endrer seg? Bør gruppere på en annen måte og oppdatere lagingen av utbetalingsperioder fra andeler
                 }
 
         val alleUnikeIdenterPåFagsak = setOf(personMedSmåbarnstilleggAndeler.keys, personerMedAndeler.keys).flatten().toList()
-        val andelerForKjeding =  listOf(personMedSmåbarnstilleggAndeler.values, personerMedAndeler.values).flatten()
+        val andelerForKjeding = listOf(personMedSmåbarnstilleggAndeler.values, personerMedAndeler.values).flatten()
 
         if (personMedSmåbarnstilleggAndeler.size > 1) {
             throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
@@ -64,7 +67,6 @@ class UtbetalingsoppdragGenerator(
     }
 
 
-
     private fun lagUtbetalingsperioderAvAndeler(andelerForKjeding: List<List<AndelTilkjentYtelse>>,
                                                 vedtak: Vedtak,
                                                 behandlingResultatType: BehandlingResultatType,
@@ -80,12 +82,17 @@ class UtbetalingsoppdragGenerator(
                     UtbetalingsperiodeMal(vedtak, true, vedtak.forrigeVedtakId!!)
                 else
                     UtbetalingsperiodeMal(vedtak)
+
+        val vedtakBehandlingId = vedtak.behandling.id
         val utbetalingsperioder = andelerForKjeding
                 .flatMap { kjede: List<AndelTilkjentYtelse> ->
-                    val ident = kjede.first().personIdent
-                    val type = kjede.first().type
+                    val ident = kjede.find { it.behandlingId == vedtakBehandlingId }!!.personIdent
+                    val type = kjede.find { it.behandlingId == vedtakBehandlingId }!!.type
+                    val personopplysningsgrunnlag =
+                            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = vedtakBehandlingId)
+                    val personType = personopplysningsgrunnlag!!.personer.find { it.personIdent.ident == ident }!!.type
                     val erSøker =
-                            (type == YtelseType.UTVIDET_BARNETRYGD || type == YtelseType.SMÅBARNSTILLEGG) // TODO: Undersøk hvordan vi kan finne ut om det er forelder det dreier seg om
+                            (personType == PersonType.SØKER)
                     var forrigeOffsetPåPersonHvisFunnet: Int? = null
                     if (!erFørsteBehandlingPåFagsak) {
                         forrigeOffsetPåPersonHvisFunnet = if (erSøker) {
@@ -98,7 +105,6 @@ class UtbetalingsoppdragGenerator(
                         val forrigeOffset = if (index == 0) forrigeOffsetPåPersonHvisFunnet else offset - 1
                         utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
                             andel.periodeOffset = offset.toLong()
-                            //andelTilkjentYtelseRepository.save(andel)
                             offset++
                         }
                     }.kunSisteHvis(erOpphør)
@@ -124,7 +130,7 @@ class UtbetalingsoppdragGenerator(
         return sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
     }
 
-    fun lagreOppdaterteAndeler(andeler: List<AndelTilkjentYtelse>){
+    fun lagreOppdaterteAndeler(andeler: List<AndelTilkjentYtelse>) {
         andelTilkjentYtelseRepository.saveAll(andeler)
     }
 }
