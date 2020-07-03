@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -101,7 +102,7 @@ class FagsakService(
                     behandling.id.let { id -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(id) }
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
-                val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
                 val restVedtakPerson = lagRestVedtakPerson(andelerTilkjentYtelse, personopplysningGrunnlag)
                 vedtak.toRestVedtak(restVedtakPerson)
             }
@@ -149,6 +150,11 @@ class FagsakService(
 
     fun hentLøpendeFagsaker(): List<Fagsak> {
         return fagsakRepository.finnLøpendeFagsaker()
+    }
+
+    fun hentAndelerPåFagsak(fagsakId: Long): List<AndelTilkjentYtelse> {
+        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlinger.map { it.id }.toList())
     }
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {

@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.økonomi
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -17,7 +20,8 @@ import org.springframework.stereotype.Component
 @Component
 class UtbetalingsoppdragGenerator(
         val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-        val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
+        val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        val fagsakService: FagsakService) {
 
     //Lager utbetalingsoppdrag direkte fra AndelTilkjentYtelse. Kobler sammen alle perioder som gjelder samme barn i en kjede,
     // bortsett ra småbarnstillegg som må ha sin egen kjede fordi det er en egen klasse i OS
@@ -37,17 +41,16 @@ class UtbetalingsoppdragGenerator(
                     it.groupBy { andel -> andel.personIdent } // TODO: Hva skjer dersom personidenten endrer seg? Bør gruppere på en annen måte og oppdatere lagingen av utbetalingsperioder fra andeler
                 }
 
-        val alleUnikeIdenterPåFagsak = setOf(personMedSmåbarnstilleggAndeler.keys, personerMedAndeler.keys).flatten().toList()
         val andelerForKjeding = listOf(personMedSmåbarnstilleggAndeler.values, personerMedAndeler.values).flatten()
 
         if (personMedSmåbarnstilleggAndeler.size > 1) {
             throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
         }
-        val utbetalingsperioder = lagUtbetalingsperioderAvAndeler(andelerForKjeding = andelerForKjeding,
-                                                                  alleIdenterPåFagsak = alleUnikeIdenterPåFagsak,
-                                                                  behandlingResultatType = behandlingResultatType,
-                                                                  erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-                                                                  vedtak = vedtak)
+        val utbetalingsperioder = lagUtbetalingsperioderAvAndeler(
+                andelerForKjeding = andelerForKjeding,
+                behandlingResultatType = behandlingResultatType,
+                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
+                vedtak = vedtak)
 
         return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -70,10 +73,10 @@ class UtbetalingsoppdragGenerator(
     private fun lagUtbetalingsperioderAvAndeler(andelerForKjeding: List<List<AndelTilkjentYtelse>>,
                                                 vedtak: Vedtak,
                                                 behandlingResultatType: BehandlingResultatType,
-                                                erFørsteBehandlingPåFagsak: Boolean,
-                                                alleIdenterPåFagsak: List<String>): List<Utbetalingsperiode> {
+                                                erFørsteBehandlingPåFagsak: Boolean): List<Utbetalingsperiode> {
 
-        var offset = if (!erFørsteBehandlingPåFagsak) hentSisteOffsetPåFagsak(alleIdenterPåFagsak) ?: 0 else 0
+        val fagsakId = vedtak.behandling.fagsak.id
+        var offset = if (!erFørsteBehandlingPåFagsak) hentSisteOffsetPåFagsak(fagsakId) ?: 0 else 0
 
         val erOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
 
@@ -91,9 +94,9 @@ class UtbetalingsoppdragGenerator(
                     var forrigeOffsetPåPersonHvisFunnet: Int? = null
                     if (!erFørsteBehandlingPåFagsak) {
                         forrigeOffsetPåPersonHvisFunnet = if (erSøker) {
-                            hentSisteOffsetForPerson(personIdent = ident, ytelseType = type)
+                            hentSisteOffsetForPerson(fagsakId = fagsakId, personIdent = ident, ytelseType = type)
                         } else {
-                            hentSisteOffsetForPerson(ident)
+                            hentSisteOffsetForPerson(fagsakId = fagsakId, personIdent = ident)
                         }
                     }
                     kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
@@ -114,10 +117,11 @@ class UtbetalingsoppdragGenerator(
         return personopplysningsgrunnlag!!.personer.find { it.personIdent.ident == personIdent }!!.type
     }
 
-    fun hentSisteOffsetForPerson(personIdent: String, ytelseType: YtelseType? = null): Int? {
-        val sorterteAndeler =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(listOf(personIdent))
-                        .sortedBy { it.periodeOffset }
+    fun hentSisteOffsetForPerson(fagsakId: Long, personIdent: String, ytelseType: YtelseType? = null): Int? {
+        val andelerPåFagsak = fagsakService.hentAndelerPåFagsak(fagsakId)
+        val sorterteAndeler = andelerPåFagsak
+                .filter { it.personIdent == personIdent }
+                .sortedBy { it.periodeOffset }
         return if (ytelseType != null) {
             sorterteAndeler.filter { it.type == ytelseType }.lastOrNull()?.periodeOffset?.toInt()
         } else {
@@ -125,9 +129,9 @@ class UtbetalingsoppdragGenerator(
         }
     }
 
-    fun hentSisteOffsetPåFagsak(personIdenter: List<String>): Int? {
-        val sorterteAndeler =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForPersoner(personIdenter).sortedBy { it.periodeOffset }
+    fun hentSisteOffsetPåFagsak(fagsakId: Long): Int? {
+        val andelerPåFagsak = fagsakService.hentAndelerPåFagsak(fagsakId)
+        val sorterteAndeler = andelerPåFagsak.sortedBy { it.periodeOffset }
         return sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
     }
 

@@ -50,7 +50,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                               ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling $gjeldendeBehandlingsId")
 
         val gjeldendeAndelerTilkjentYtelse =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(gjeldendeBehandlingsId)
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(gjeldendeBehandlingsId))
         if (gjeldendeAndelerTilkjentYtelse.isEmpty()) {
             return Ressurs.failure(
                     "Fant ikke andeler tilkjent ytelse tilknyttet behandling $gjeldendeBehandlingsId")
