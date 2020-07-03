@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -34,12 +35,6 @@ data class Person(
         @Enumerated(EnumType.STRING) @Column(name = "sivilstand", nullable = false)
         val sivilstand: SIVILSTAND,
 
-        @Column(name = "statsborgerskap", nullable = false)
-        val statsborgerskap: String,
-
-        @Enumerated(EnumType.STRING) @Column(name = "medlemskap", nullable = false)
-        val medlemskap: Medlemskap,
-
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident",
                                               column = Column(name = "person_ident", updatable = false)))
@@ -56,7 +51,10 @@ data class Person(
 
         @OneToOne(cascade = [CascadeType.ALL])
         @JoinColumn
-        val bostedsadresse: GrBostedsadresse? = null
+        val bostedsadresse: GrBostedsadresse? = null,
+
+        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        val statsborgerskap: List<GrStatsborgerskap>? = null
 
 ) : BaseEntitet() {
 

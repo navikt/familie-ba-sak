@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
@@ -132,7 +133,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                        navn = "",
                        kjønn = Kjønn.KVINNE,
                        bostedsadresse = bostedsadresse,
-                       sivilstand = SIVILSTAND.GIFT)
+                       sivilstand = SIVILSTAND.GIFT,
+                       statsborgerskap = null)
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
@@ -144,7 +146,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      navn = "",
                                                      kjønn = Kjønn.MANN,
                                                      bostedsadresse = bostedsadresse,
-                                                     sivilstand = SIVILSTAND.UGIFT))
+                                                     sivilstand = SIVILSTAND.UGIFT,
+                                                     statsborgerskap = null))
     }
     return personopplysningGrunnlag
 }
