@@ -14,12 +14,14 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @SpringBootTest
 @ActiveProfiles("dev")
 @TestInstance(Lifecycle.PER_CLASS)
+@DirtiesContext
 class RegistrerPersongrunnlagTest(
         @Autowired
         private val stegService: StegService,

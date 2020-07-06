@@ -79,7 +79,7 @@ class StegService(
         val søknadDTO = restRegistrerSøknad.søknad
 
         val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
-        val innsendtSøknad = søknadDTO.writeValueAsString();
+        val innsendtSøknad = søknadDTO.writeValueAsString()
 
         if(aktivSøknadGrunnlag != null && innsendtSøknad == aktivSøknadGrunnlag.søknad) {
             return behandling
@@ -186,13 +186,13 @@ class StegService(
         }
     }
 
-    fun håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling: Behandling): Behandling {
+    fun håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling: Behandling, barnetsIdent: String): Behandling {
         val behandlingSteg: AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser =
                 hentBehandlingSteg(StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER)
                         as AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+            behandlingSteg.utførStegOgAngiNeste(behandling, barnetsIdent)
         }
     }
 
@@ -268,7 +268,7 @@ class StegService(
     @Transactional
     fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
         var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
-        behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling)
+        behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling, nyBehandling.barnasIdenter[0])
         behandling = håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
         val samletResultat = behandlingResultat?.hentSamletResultat()
