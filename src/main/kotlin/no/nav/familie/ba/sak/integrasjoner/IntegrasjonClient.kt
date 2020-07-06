@@ -91,7 +91,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         log.info("Henter identhistorikk fra $uri")
         return try {
             val response = postForEntity<Ressurs<List<IdentInformasjon>>>(uri, ident)
-            response?.getDataOrThrow() ?: error("Finner ingen identer for ident")
+            response.getDataOrThrow()
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av identer", e, uri, ident.ident)
         }
@@ -106,7 +106,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                     postForEntity<Ressurs<DødsfallData>>(uri, ident)
                 },
                 onFailure = {
-                    IntegrasjonException("Kall mot integrasjon feilet ved uthenting av data om dødsfall. response=${responseBody(it)}",
+                    IntegrasjonException("Kall mot integrasjon feilet ved uthenting av data om dødsfall. response=${responseBody(
+                            it)}",
                                          it,
                                          uri)
                 }
@@ -197,7 +198,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }.fold(
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
-                    if (it?.data?.isBlank() != false) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
+                    if (it.getDataOrThrow().isBlank()) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
                     logger.info("Distribusjon av vedtaksbrev bestilt")
                     secureLogger.info("Distribusjon av vedtaksbrev bestilt med data i responsen: ${it.data}")
                 },
@@ -231,10 +232,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
 
-                    it?.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId.",
-                                                                                  null,
-                                                                                  uri,
-                                                                                  opprettOppgave.ident?.ident)
+                    it.getDataOrThrow().oppgaveId.toString()
                 },
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
@@ -259,10 +257,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
 
-                    it?.data?.oppgaveId?.toString() ?: throw IntegrasjonException("Response fra oppgave mangler oppgaveId.",
-                                                                                  null,
-                                                                                  uri
-                    )
+                    it.getDataOrThrow().oppgaveId.toString()
                 },
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
@@ -284,7 +279,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                     assertGenerelleSuksessKriterier(it)
 
                     secureLogger.info("Oppgave fra $uri med id $oppgaveId inneholder: ${it.data}")
-                    it.data!!
+                    it.getDataOrThrow()
                 },
                 onFailure = {
                     val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
@@ -323,7 +318,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 val ressurs =
                         postForEntity<Ressurs<OppgaverOgAntall>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
                 assertGenerelleSuksessKriterier(ressurs)
-                ressurs?.data ?: throw IntegrasjonException("Ressurs mangler.", null, uri, null)
+                ressurs.getDataOrThrow()
             } catch (e: Exception) {
                 val message = if (e is RestClientResponseException) e.responseBodyAsString else ""
                 throw IntegrasjonException("Kall mot integrasjon feilet ved hentOppgaver. response=$message",
@@ -420,7 +415,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }.fold(
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
-                    val arkiverDokumentResponse = it?.data ?: error("Ressurs mangler data")
+                    val arkiverDokumentResponse = it.getDataOrThrow()
                     if (!arkiverDokumentResponse.ferdigstilt) {
                         error("Klarte ikke ferdigstille journalpost med id ${arkiverDokumentResponse.journalpostId}")
                     }
@@ -455,7 +450,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
-        return postForEntity(tilgangUri, personIdenter)!!
+        return postForEntity(tilgangUri, personIdenter)
     }
 
     private fun HttpHeaders.medContentTypeJsonUTF8(): HttpHeaders {

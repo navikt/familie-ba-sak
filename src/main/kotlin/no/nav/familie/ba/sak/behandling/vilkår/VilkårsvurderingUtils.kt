@@ -84,8 +84,14 @@ object VilkårsvurderingUtils {
                 }
                 periodePåNyttVilkår.kanSplitte(periode) -> {
                     personResultat.removeVilkårResultat(vilkårResultatId = vilkårResultat.id)
-                    personResultat.addVilkårResultat(vilkårResultat.kopierMedNyPeriode(periode.fom, nyTom))
-                    personResultat.addVilkårResultat(vilkårResultat.kopierMedNyPeriode(nyFom, periode.tom))
+                    personResultat.addVilkårResultat(
+                            vilkårResultat.kopierMedNyPeriode(fom = nyFom,
+                                                              tom = periode.tom,
+                                                              behandlingId = personResultat.behandlingResultat.behandling.id))
+                    personResultat.addVilkårResultat(
+                            vilkårResultat.kopierMedNyPeriode(fom = periode.fom,
+                                                              tom = nyTom,
+                                                              behandlingId = personResultat.behandlingResultat.behandling.id))
                 }
                 periodePåNyttVilkår.kanFlytteFom(periode) -> {
                     vilkårResultat.periodeFom = nyFom

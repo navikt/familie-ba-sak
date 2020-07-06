@@ -39,8 +39,8 @@ class VilkårResultat(
         @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
         var begrunnelse: String,
 
-        @Column(name = "fk_behandling_id", nullable = true)
-        var behandlingId: Long?,
+        @Column(name = "fk_behandling_id", nullable = false)
+        var behandlingId: Long,
 
         @Column(name = "regel_input", columnDefinition = "TEXT")
         var regelInput: String?,
@@ -78,7 +78,7 @@ class VilkårResultat(
         )
     }
 
-    fun kopierMedNyPeriode(fom: LocalDate, tom: LocalDate): VilkårResultat {
+    fun kopierMedNyPeriode(fom: LocalDate, tom: LocalDate, behandlingId: Long): VilkårResultat {
         return VilkårResultat(
                 personResultat = personResultat,
                 vilkårType = vilkårType,
@@ -86,9 +86,9 @@ class VilkårResultat(
                 periodeFom = if (fom == TIDENES_MORGEN) null else fom,
                 periodeTom = if (tom == TIDENES_ENDE) null else tom,
                 begrunnelse = begrunnelse,
-                behandlingId = personResultat!!.behandlingResultat.behandling.id,
                 regelInput = regelInput,
-                regelOutput = regelOutput
+                regelOutput = regelOutput,
+                behandlingId = behandlingId
         )
     }
 
