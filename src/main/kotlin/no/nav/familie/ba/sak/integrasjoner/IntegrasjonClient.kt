@@ -91,7 +91,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         log.info("Henter identhistorikk fra $uri")
         return try {
             val response = postForEntity<Ressurs<List<IdentInformasjon>>>(uri, ident)
-            response?.getDataOrThrow() ?: error("Finner ingen identer for ident")
+            response.getDataOrThrow()
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av identer", e, uri, ident.ident)
         }
@@ -106,7 +106,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                     postForEntity<Ressurs<DødsfallData>>(uri, ident)
                 },
                 onFailure = {
-                    IntegrasjonException("Kall mot integrasjon feilet ved uthenting av data om dødsfall. response=${responseBody(it)}",
+                    IntegrasjonException("Kall mot integrasjon feilet ved uthenting av data om dødsfall. response=${responseBody(
+                            it)}",
                                          it,
                                          uri)
                 }
@@ -197,7 +198,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }.fold(
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
-                    if (it?.data?.isBlank() != false) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
+                    if (it.getDataOrThrow().isBlank()) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
                     logger.info("Distribusjon av vedtaksbrev bestilt")
                     secureLogger.info("Distribusjon av vedtaksbrev bestilt med data i responsen: ${it.data}")
                 },
