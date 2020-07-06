@@ -32,9 +32,9 @@ class ØkonomiService(
         val intersection = nåværendeTilstand.intersectAndeler(oppdatertTilstand)
         // TODO: Hva er mest intuitivt å lese? Dette blir dobbelt for-loop x 2, men intersect blir også dobbelt for-loop + filter på begge
          */
-        val andelerSomOpphøres = nåværendeTilstand.subtractAndeler(oppdatertTilstand)
-        val andelerSomErNye = oppdatertTilstand.subtractAndeler(nåværendeTilstand)
-        return Pair(andelerSomErNye.toList(), andelerSomOpphøres.toList())
+        val andelerSomOpphøres = nåværendeTilstand.subtractAndeler(oppdatertTilstand).toList()
+        val andelerSomErNye = oppdatertTilstand.subtractAndeler(nåværendeTilstand).toList()
+        return Pair(andelerSomErNye, andelerSomOpphøres)
     }
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId: Long, saksbehandlerId: String) {
@@ -48,21 +48,18 @@ class ØkonomiService(
 
         val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(vedtak.behandling.fagsak.id).size == 1
 
-        val forrigeVedtak = if (! erFørsteBehandlingPåFagsak) vedtakService.hent(vedtak.forrigeVedtakId!!) else null
-        val andelerTilkjentYtelse = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) {
-            beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak!!.behandling.id)
+        val andelerTilkjentYtelse = if (!erFørsteBehandlingPåFagsak) {
+            // TODO: Må sørge for at man når siste behandling er opphør ikke klarer å finne noen andeler på behandling, slik at subtract resulterer i at alle er nye
+            val forrigeVedtak = vedtakService.hent(vedtak.forrigeVedtakId!!)
+            val (andelerSomErNye, andelerSomOpphøres) = separerINyeOgOpphørteAndelerMotØkonomi(vedtak.behandling.id,
+                                                                                               forrigeVedtak.behandling.id)
+            if (behandlingResultatType == BehandlingResultatType.OPPHØRT
+                && (andelerSomErNye.size < 0 || andelerSomOpphøres.size == 0)) {
+                throw IllegalStateException("Kan ikke oppdatere tilkjent ytelse og iverksette vedtak fordi opphør inneholder nye " +
+                                            "andeler eller mangler opphørte andeler.")
+            }
+            beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id) // TODO: Skal returnere begge deler
         } else beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
-
-        /*
-        val (andelerSomErNye, andelerSomOpphøres) = separerINyeOgOpphørteAndelerMotØkonomi(vedtak.behandling.id, forrigeVedtak.behandling.id)
-        if (behandlingResultatType == BehandlingResultatType.OPPHØRT
-            && (andelerSomErNye.size < 0 || andelerSomOpphøres.size == 0)) {
-            throw IllegalStateException("Kan ikke oppdatere tilkjent ytelse og iverksette vedtak fordi opphør inneholder nye " +
-                                        "andeler eller mangler opphørte andeler.")
-        }
-        */
-
-
 
         val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 saksbehandlerId,
