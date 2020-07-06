@@ -10,7 +10,9 @@ import javax.persistence.*
 data class AndelTilkjentYtelse(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "andel_tilkjent_ytelse_seq_generator")
-        @SequenceGenerator(name = "andel_tilkjent_ytelse_seq_generator", sequenceName = "andel_tilkjent_ytelse_seq", allocationSize = 50)
+        @SequenceGenerator(name = "andel_tilkjent_ytelse_seq_generator",
+                           sequenceName = "andel_tilkjent_ytelse_seq",
+                           allocationSize = 50)
         val id: Long = 0,
 
         @Column(name = "fk_behandling_id", nullable = false, updatable = false)
@@ -40,37 +42,45 @@ data class AndelTilkjentYtelse(
         val type: YtelseType
 ) : BaseEntitet() {
 
-        override fun equals(other: Any?): Boolean {
-                if (other == null || javaClass != other.javaClass) {
-                        return false
-                } else if (this === other) {
-                        return true
-                }
-
-                val annen = other as AndelTilkjentYtelse
-                return Objects.equals(behandlingId, annen.behandlingId)
-                        && Objects.equals(type, annen.type)
-                        && Objects.equals(beløp, annen.beløp)
-                        && Objects.equals(stønadFom, annen.stønadFom)
-                        && Objects.equals(stønadTom, annen.stønadTom)
-                        && Objects.equals(personIdent, annen.personIdent)
+    override fun equals(other: Any?): Boolean {
+        if (other == null || javaClass != other.javaClass) {
+            return false
+        } else if (this === other) {
+            return true
         }
 
-        override fun hashCode(): Int {
-                return Objects.hash(id, behandlingId, type, beløp, stønadFom, stønadTom, personIdent)
-        }
+        val annen = other as AndelTilkjentYtelse
+        return Objects.equals(behandlingId, annen.behandlingId)
+               && Objects.equals(type, annen.type)
+               && Objects.equals(beløp, annen.beløp)
+               && Objects.equals(stønadFom, annen.stønadFom)
+               && Objects.equals(stønadTom, annen.stønadTom)
+               && Objects.equals(personIdent, annen.personIdent)
+    }
 
-        override fun toString(): String {
-                return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, " +
-                       "beløp = $beløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
-        }
+    override fun hashCode(): Int {
+        return Objects.hash(id, behandlingId, type, beløp, stønadFom, stønadTom, personIdent)
+    }
+
+    override fun toString(): String {
+        return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, " +
+               "beløp = $beløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
+    }
+
+    fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
+        return this.personIdent == other.personIdent
+               && this.stønadFom == other.stønadFom
+               && this.stønadTom == other.stønadTom
+               && this.beløp == other.beløp
+               && this.type == other.type
+    }
 }
 
 
 enum class YtelseType(val klassifisering: String) {
-        ORDINÆR_BARNETRYGD("BATR"),
-        UTVIDET_BARNETRYGD("BATR"),
-        SMÅBARNSTILLEGG("BATRSMA"),
-        EØS("BATR"),
-        MANUELL_VURDERING("BATR")
+    ORDINÆR_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD("BATR"),
+    SMÅBARNSTILLEGG("BATRSMA"),
+    EØS("BATR"),
+    MANUELL_VURDERING("BATR")
 }
