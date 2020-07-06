@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
@@ -55,6 +56,14 @@ class VilkårResultat(
         resultat = Resultat.KANSKJE
     }
 
+    fun oppdater(restVilkårResultat: RestVilkårResultat) {
+        periodeFom = restVilkårResultat.periodeFom
+        periodeTom = restVilkårResultat.periodeTom
+        begrunnelse = restVilkårResultat.begrunnelse
+        resultat = restVilkårResultat.resultat
+        behandlingId = personResultat!!.behandlingResultat.behandling.id
+    }
+
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
         return VilkårResultat(
                 personResultat = nyPersonResultat ?: personResultat,
@@ -77,9 +86,13 @@ class VilkårResultat(
                 periodeFom = if (fom == TIDENES_MORGEN) null else fom,
                 periodeTom = if (tom == TIDENES_ENDE) null else tom,
                 begrunnelse = begrunnelse,
-                behandlingId = behandlingId,
+                behandlingId = personResultat!!.behandlingResultat.behandling.id,
                 regelInput = regelInput,
                 regelOutput = regelOutput
         )
+    }
+
+    fun oppdaterPekerTilBehandling() {
+        behandlingId = personResultat!!.behandlingResultat.behandling.id
     }
 }

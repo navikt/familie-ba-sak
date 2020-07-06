@@ -38,7 +38,7 @@ data class BehandlingResultat(
 
     fun hentSamletResultat(): BehandlingResultatType {
         if (personResultater.isEmpty() ||
-            personResultater.any{ it.hentSamletResultat() == BehandlingResultatType.IKKE_VURDERT}) {
+            personResultater.any { it.hentSamletResultat() == BehandlingResultatType.IKKE_VURDERT }) {
             return BehandlingResultatType.IKKE_VURDERT
         }
 
@@ -55,11 +55,11 @@ data class BehandlingResultat(
 
     fun kopier(): BehandlingResultat {
         val nyttBehandlingResultat = BehandlingResultat(
-            behandling = behandling,
+                behandling = behandling,
                 aktiv = aktiv
         )
 
-        nyttBehandlingResultat.personResultater = personResultater.map{it.kopierMedParent(nyttBehandlingResultat)}.toSet()
+        nyttBehandlingResultat.personResultater = personResultater.map { it.kopierMedParent(nyttBehandlingResultat) }.toSet()
         return nyttBehandlingResultat
     }
 }

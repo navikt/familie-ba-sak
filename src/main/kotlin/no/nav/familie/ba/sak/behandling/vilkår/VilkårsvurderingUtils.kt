@@ -67,10 +67,7 @@ object VilkårsvurderingUtils {
         val periodePåNyttVilkår: Periode = restVilkårResultat.toPeriode()
 
         if (vilkårResultat.id == restVilkårResultat.id) {
-            vilkårResultat.periodeFom = restVilkårResultat.periodeFom
-            vilkårResultat.periodeTom = restVilkårResultat.periodeTom
-            vilkårResultat.begrunnelse = restVilkårResultat.begrunnelse
-            vilkårResultat.resultat = restVilkårResultat.resultat
+            vilkårResultat.oppdater(restVilkårResultat)
         } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType) {
             val periode: Periode = vilkårResultat.toPeriode()
 
@@ -92,9 +89,11 @@ object VilkårsvurderingUtils {
                 }
                 periodePåNyttVilkår.kanFlytteFom(periode) -> {
                     vilkårResultat.periodeFom = nyFom
+                    vilkårResultat.oppdaterPekerTilBehandling()
                 }
                 periodePåNyttVilkår.kanFlytteTom(periode) -> {
                     vilkårResultat.periodeTom = nyTom
+                    vilkårResultat.oppdaterPekerTilBehandling()
                 }
             }
         }
