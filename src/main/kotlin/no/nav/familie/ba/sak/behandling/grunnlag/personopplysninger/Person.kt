@@ -41,7 +41,7 @@ data class Person(
         val personIdent: PersonIdent,
 
         @Enumerated(EnumType.STRING) @Column(name = "medlemskap", nullable = false)
-        val medlemskap: Medlemskap? = Medlemskap.UKJENT,
+        val medlemskap: Medlemskap = Medlemskap.UKJENT,
 
         @JsonIgnore
         @ManyToOne(optional = false)

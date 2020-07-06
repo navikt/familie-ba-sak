@@ -133,8 +133,7 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                        navn = "",
                        kjønn = Kjønn.KVINNE,
                        bostedsadresse = bostedsadresse,
-                       sivilstand = SIVILSTAND.GIFT,
-                       statsborgerskap = null)
+                       sivilstand = SIVILSTAND.GIFT)
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
@@ -146,8 +145,7 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      navn = "",
                                                      kjønn = Kjønn.MANN,
                                                      bostedsadresse = bostedsadresse,
-                                                     sivilstand = SIVILSTAND.UGIFT,
-                                                     statsborgerskap = null))
+                                                     sivilstand = SIVILSTAND.UGIFT))
     }
     return personopplysningGrunnlag
 }
