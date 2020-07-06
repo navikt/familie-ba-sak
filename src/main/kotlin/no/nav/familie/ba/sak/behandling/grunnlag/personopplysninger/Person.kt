@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -50,7 +51,10 @@ data class Person(
 
         @OneToOne(cascade = [CascadeType.ALL])
         @JoinColumn
-        val bostedsadresse: GrBostedsadresse? = null
+        val bostedsadresse: GrBostedsadresse? = null,
+
+        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        val statsborgerskap: List<GrStatsborgerskap>? = null
 
 ) : BaseEntitet() {
 
@@ -76,5 +80,10 @@ data class Person(
 enum class Kjønn {
     MANN, KVINNE, UKJENT
 }
+
+enum class Medlemskap {
+    NORDEN, EØS, TREDJELANDSBORGER, UKJENT
+}
+
 
 
