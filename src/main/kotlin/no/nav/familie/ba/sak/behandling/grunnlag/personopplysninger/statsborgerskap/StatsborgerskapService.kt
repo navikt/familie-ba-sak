@@ -17,7 +17,7 @@ class StatsborgerskapService(
         return integrasjonClient.hentStatsborgerskap(ident)
     }
 
-    fun hentStatsborgerskapMedMedlemskapOgHistorikk(ident: Ident): List<Statsborgerskap> {
+    fun hentStatsborgerskapMedMedlemskapOgHistorikk(ident: Ident): List<GrStatsborgerskap> {
         return integrasjonClient.hentStatsborgerskap(ident)
     }
 
