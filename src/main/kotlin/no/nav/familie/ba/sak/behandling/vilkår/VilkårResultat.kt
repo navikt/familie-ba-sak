@@ -61,7 +61,7 @@ class VilkårResultat(
         periodeTom = restVilkårResultat.periodeTom
         begrunnelse = restVilkårResultat.begrunnelse
         resultat = restVilkårResultat.resultat
-        behandlingId = personResultat!!.behandlingResultat.behandling.id
+        oppdaterPekerTilBehandling()
     }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
