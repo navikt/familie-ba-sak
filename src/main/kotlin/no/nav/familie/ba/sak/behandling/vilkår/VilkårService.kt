@@ -77,7 +77,6 @@ class VilkårService(
             )
             val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
             personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, fakta, evalueringer))
-
             personResultat
         }.toSet()
 
