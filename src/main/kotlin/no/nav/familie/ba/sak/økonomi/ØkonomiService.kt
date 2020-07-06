@@ -24,7 +24,7 @@ class ØkonomiService(
         private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
 ) {
 
-    fun oppdaterTilkjentYtelseOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
+    fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId: Long, saksbehandlerId: String) {
         val vedtak = vedtakService.hent(vedtakId)
         val behandlingResultatType =
                 if (vedtak.behandling.type == BehandlingType.TEKNISK_OPPHØR
@@ -35,7 +35,7 @@ class ØkonomiService(
         val andelerTilkjentYtelse = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) {
             val forrigeVedtak = vedtakService.hent(vedtak.forrigeVedtakId!!)
             beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id)
-        } else beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingsId)
+        } else beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
 
         val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(vedtak.behandling.fagsak.id).size == 1
 
