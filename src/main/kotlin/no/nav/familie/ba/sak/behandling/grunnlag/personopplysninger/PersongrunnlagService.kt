@@ -50,8 +50,6 @@ class PersongrunnlagService(
 
         val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
         val aktørId = integrasjonClient.hentAktivAktørId(Ident(fødselsnummer))
-        val (statsborgerskap, medlemskap) = statsborgerskapService.hentStatsborgerskapOgMedlemskap(Ident(fødselsnummer))
-
         val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
                            type = PersonType.SØKER,
                            personopplysningGrunnlag = personopplysningGrunnlag,
@@ -60,8 +58,7 @@ class PersongrunnlagService(
                            navn = personinfo.navn ?: "",
                            bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
-                           statsborgerskap = statsborgerskap,
+                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
         )
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
@@ -74,8 +71,6 @@ class PersongrunnlagService(
                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
         return barnasFødselsnummer.map { nyttBarn ->
             val personinfo = integrasjonClient.hentPersoninfoFor(nyttBarn)
-            val (statsborgerskap, medlemskap) = statsborgerskapService.hentStatsborgerskapOgMedlemskap(Ident(nyttBarn))
-
             personRepository.save(Person(personIdent = PersonIdent(nyttBarn),
                                          type = PersonType.BARN,
                                          personopplysningGrunnlag = personopplysningGrunnlag,
@@ -84,8 +79,7 @@ class PersongrunnlagService(
                                          navn = personinfo.navn ?: "",
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                                          bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
-                                         sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
-                                         statsborgerskap = statsborgerskap
+                                         sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
             ))
         }
     }
