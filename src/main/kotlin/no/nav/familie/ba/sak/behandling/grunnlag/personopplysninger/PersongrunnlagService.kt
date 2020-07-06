@@ -62,7 +62,6 @@ class PersongrunnlagService(
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
                            statsborgerskap = statsborgerskap,
-                           medlemskap = medlemskap
         )
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
@@ -86,8 +85,7 @@ class PersongrunnlagService(
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                                          bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                                          sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
-                                         statsborgerskap = statsborgerskap,
-                                         medlemskap = medlemskap
+                                         statsborgerskap = statsborgerskap
             ))
         }
     }

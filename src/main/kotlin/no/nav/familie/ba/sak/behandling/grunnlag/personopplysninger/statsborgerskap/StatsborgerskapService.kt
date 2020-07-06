@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.kontrakter.felles.personinfo.Ident
+import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -11,6 +12,14 @@ import java.time.LocalDate
 class StatsborgerskapService(
         private val integrasjonClient: IntegrasjonClient
 ) {
+
+    fun hentStatsborgerskapMedHistorikk(ident: Ident): List<Statsborgerskap> {
+        return integrasjonClient.hentStatsborgerskap(ident)
+    }
+
+    fun hentStatsborgerskapMedMedlemskapOgHistorikk(ident: Ident): List<Statsborgerskap> {
+        return integrasjonClient.hentStatsborgerskap(ident)
+    }
 
     fun hentStatsborgerskap(ident: Ident): List<String> =
             integrasjonClient.hentStatsborgerskap(ident)
@@ -20,10 +29,10 @@ class StatsborgerskapService(
     fun hentStatsborgerskapOgMedlemskap(ident: Ident): Pair<String, Medlemskap> {
         val statsborgerskap = hentStatsborgerskap(ident)
 
-        val norsk = statsborgerskap.filter { it == "NOR" }
+        val norsk = statsborgerskap.filter { it == LANDKODE_NORGE }
         val nordisk = statsborgerskap.filter { erNordisk(it) }
         val eøs = statsborgerskap.filter { erEØS(it) }
-        val tredjeland = statsborgerskap.filter { it != "XUK" }
+        val tredjeland = statsborgerskap.filter { it != LANDKODE_UKJENT }
 
         return when {
             norsk.isNotEmpty() -> Pair(LANDKODE_NORGE, Medlemskap.NORDEN)
