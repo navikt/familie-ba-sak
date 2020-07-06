@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
@@ -20,6 +21,9 @@ data class GrStatsborgerskap(
 
         @Column(name = "landkode", nullable = false)
         val landkode: String,
+
+        @Enumerated(EnumType.STRING) @Column(name = "medlemskap", nullable = false)
+        val medlemskap: Medlemskap = Medlemskap.UKJENT,
 
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)

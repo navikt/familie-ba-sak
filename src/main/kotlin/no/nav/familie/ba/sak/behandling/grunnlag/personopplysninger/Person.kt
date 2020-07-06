@@ -40,9 +40,6 @@ data class Person(
                                               column = Column(name = "person_ident", updatable = false)))
         val personIdent: PersonIdent,
 
-        @Enumerated(EnumType.STRING) @Column(name = "medlemskap", nullable = false)
-        val medlemskap: Medlemskap = Medlemskap.UKJENT,
-
         @JsonIgnore
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
