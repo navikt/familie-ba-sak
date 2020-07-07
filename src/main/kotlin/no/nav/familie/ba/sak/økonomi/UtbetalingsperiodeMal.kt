@@ -30,7 +30,8 @@ data class UtbetalingsperiodeMal(
 
         return Utbetalingsperiode(
                 erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-                opphør = vedtak.opphørsdato?.let { Opphør(senesteDatoAv(vedtak.opphørsdato, tidligsteFomDatoIKjede(andel))) },
+                opphør = if (erEndringPåEksisterendePeriode) utledOpphørPåLinje(opphørForVedtak = vedtak.opphørsdato,
+                                                                                linje = andel) else null,
                 forrigePeriodeId = forrigePeriodeIdOffset?.let { utvidetPeriodeIdStart + forrigePeriodeIdOffset.toLong() },
                 periodeId = utvidetPeriodeIdStart + periodeIdOffset,
                 datoForVedtak = vedtak.vedtaksdato,
@@ -47,5 +48,13 @@ data class UtbetalingsperiodeMal(
     fun tidligsteFomDatoIKjede(andel: AndelTilkjentYtelse): LocalDate {
         return andeler!!.filter { it.type == andel.type && it.personIdent == andel.personIdent }
                 .minBy { it.stønadFom }!!.stønadFom
+    }
+
+    fun utledOpphørPåLinje(opphørForVedtak: LocalDate?, linje: AndelTilkjentYtelse): Opphør? {
+        return if (opphørForVedtak != null) {
+            Opphør(senesteDatoAv(opphørForVedtak, tidligsteFomDatoIKjede(linje)))
+        } else {
+            Opphør(linje.stønadFom)
+        }
     }
 }
