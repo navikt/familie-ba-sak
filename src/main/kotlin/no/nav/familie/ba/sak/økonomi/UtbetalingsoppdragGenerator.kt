@@ -10,8 +10,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.NY
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.UEND
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Component
 
@@ -45,9 +44,14 @@ class UtbetalingsoppdragGenerator(
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak)
 
+        val aksjonskodePåOppdragsnivå =
+                if (erFørsteBehandlingPåFagsak) NY
+                else if (erFullstendigOpphør) UEND
+                else ENDR
+
         return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
-                kodeEndring = if (!erFullstendigOpphør && erFørsteBehandlingPåFagsak) NY else UEND,
+                kodeEndring = aksjonskodePåOppdragsnivå,
                 fagSystem = FAGSYSTEM,
                 saksnummer = vedtak.behandling.fagsak.id.toString(),
                 aktoer = vedtak.behandling.fagsak.hentAktivIdent().ident,
@@ -130,7 +134,7 @@ class UtbetalingsoppdragGenerator(
         andelTilkjentYtelseRepository.saveAll(andeler)
     }
 
-    fun delOppIKjeder(andelerSomSkalSplittes: List<AndelTilkjentYtelse>): List<List<AndelTilkjentYtelse>>{
+    fun delOppIKjeder(andelerSomSkalSplittes: List<AndelTilkjentYtelse>): List<List<AndelTilkjentYtelse>> {
         // Separereer i lister siden småbarnstillegg og utvidet barnetrygd begge vil stå på forelder, men skal kjedes separat
         val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
                 andelerSomSkalSplittes.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
