@@ -68,11 +68,11 @@ data class AndelTilkjentYtelse(
     }
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
-        return this.personIdent == other.personIdent
+        return (this.personIdent == other.personIdent
                && this.stønadFom == other.stønadFom
                && this.stønadTom == other.stønadTom
                && this.beløp == other.beløp
-               && this.type == other.type
+               && this.type == other.type)
     }
 }
 

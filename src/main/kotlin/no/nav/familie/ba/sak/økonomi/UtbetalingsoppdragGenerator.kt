@@ -29,18 +29,19 @@ class UtbetalingsoppdragGenerator(
                               vedtak: Vedtak,
                               behandlingResultatType: BehandlingResultatType,
                               erFørsteBehandlingPåFagsak: Boolean,
-                              andelerTilkjentYtelse: List<AndelTilkjentYtelse>): Utbetalingsoppdrag {
+                              nyeAndeler: List<AndelTilkjentYtelse> = emptyList(),
+                              opphørteAndeler: List<AndelTilkjentYtelse> = emptyList()): Utbetalingsoppdrag {
 
-        val erOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
+        val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
+
+        val totaltUtbetalingsperioder = mutableListOf<Utbetalingsperiode>()
 
         // Må separere i lister siden småbarnstillegg og utvidet barnetrygd begge vil stå på forelder, men skal kjedes separat
         val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
-                andelerTilkjentYtelse.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
+                nyeAndeler.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
                     it.groupBy { andel -> andel.personIdent } // TODO: Hva skjer dersom personidenten endrer seg? Bør gruppere på en annen måte og oppdatere lagingen av utbetalingsperioder fra andeler
                 }
-
         val andelerForKjeding = listOf(personMedSmåbarnstilleggAndeler.values, personerMedAndeler.values).flatten()
-
         if (personMedSmåbarnstilleggAndeler.size > 1) {
             throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
         }
@@ -49,14 +50,29 @@ class UtbetalingsoppdragGenerator(
                 behandlingResultatType = behandlingResultatType,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak)
+        val (personMedSmåbarnstilleggAndeler2, personerMedAndeler2) =
+                opphørteAndeler.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
+                    it.groupBy { andel -> andel.personIdent } // TODO: Hva skjer dersom personidenten endrer seg? Bør gruppere på en annen måte og oppdatere lagingen av utbetalingsperioder fra andeler
+                }
+        val andelerForKjeding2 = listOf(personMedSmåbarnstilleggAndeler2.values, personerMedAndeler2.values).flatten()
+        if (personMedSmåbarnstilleggAndeler2.size > 1) {
+            throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
+        }
+        val utbetalingsperioder2 = lagUtbetalingsperioderAvAndeler(
+                andelerForKjeding = andelerForKjeding2,
+                behandlingResultatType = behandlingResultatType,
+                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
+                vedtak = vedtak)
+        totaltUtbetalingsperioder.addAll(utbetalingsperioder)
+        totaltUtbetalingsperioder.addAll(utbetalingsperioder2)
 
         return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
-                kodeEndring = if (!erOpphør && erFørsteBehandlingPåFagsak) NY else UEND,
+                kodeEndring = if (!erFullstendigOpphør && erFørsteBehandlingPåFagsak) NY else UEND,
                 fagSystem = FAGSYSTEM,
                 saksnummer = vedtak.behandling.fagsak.id.toString(),
                 aktoer = vedtak.behandling.fagsak.hentAktivIdent().ident,
-                utbetalingsperiode = utbetalingsperioder
+                utbetalingsperiode = totaltUtbetalingsperioder
         )
     }
 
@@ -67,19 +83,17 @@ class UtbetalingsoppdragGenerator(
         }
     }
 
-
     private fun lagUtbetalingsperioderAvAndeler(andelerForKjeding: List<List<AndelTilkjentYtelse>>,
                                                 vedtak: Vedtak,
                                                 behandlingResultatType: BehandlingResultatType,
                                                 erFørsteBehandlingPåFagsak: Boolean): List<Utbetalingsperiode> {
-
         val fagsakId = vedtak.behandling.fagsak.id
         var offset = if (!erFørsteBehandlingPåFagsak) hentSisteOffsetPåFagsak(fagsakId) ?: 0 else 0
 
-        val erOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
+        val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
 
         val utbetalingsperiodeMal =
-                if (erOpphør)
+                if (erFullstendigOpphør)
                     UtbetalingsperiodeMal(vedtak, andelerForKjeding.flatten(), true, vedtak.forrigeVedtakId!!)
                 else
                     UtbetalingsperiodeMal(vedtak)
@@ -103,7 +117,7 @@ class UtbetalingsoppdragGenerator(
                             andel.periodeOffset = offset.toLong()
                             offset++
                         }
-                    }.kunSisteHvis(erOpphør)
+                    }.kunSisteHvis(erFullstendigOpphør)
                 }
         lagreOppdaterteAndeler(andelerForKjeding.flatten())
         return utbetalingsperioder

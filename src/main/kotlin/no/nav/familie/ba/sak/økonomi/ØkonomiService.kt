@@ -24,16 +24,14 @@ class ØkonomiService(
         private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
 ) {
 
-    fun separerINyeOgOpphørteAndelerMotØkonomi(behandlingId: Long,
-                                               forrigeBehandlingId: Long): Pair<List<AndelTilkjentYtelse>, List<AndelTilkjentYtelse>> {
-        val nåværendeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandlingId).toSet()
+    fun separerNyeOgOpphørteAndelerForØkonomi(behandlingId: Long,
+                                              forrigeBehandlingId: Long): Pair<List<AndelTilkjentYtelse>, List<AndelTilkjentYtelse>> {
+        val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandlingId).toSet()
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId).toSet()
-        /*
-        val intersection = nåværendeTilstand.intersectAndeler(oppdatertTilstand)
-        // TODO: Hva er mest intuitivt å lese? Dette blir dobbelt for-loop x 2, men intersect blir også dobbelt for-loop + filter på begge
-         */
-        val andelerSomOpphøres = nåværendeTilstand.subtractAndeler(oppdatertTilstand).toList()
-        val andelerSomErNye = oppdatertTilstand.subtractAndeler(nåværendeTilstand).toList()
+
+        // TODO: Kan intersecte og så filtrere på intersection, men blir ikke mer effektivt.
+        val andelerSomErNye = oppdatertTilstand.subtractAndeler(forrigeTilstand).toList()
+        val andelerSomOpphøres = forrigeTilstand.subtractAndeler(oppdatertTilstand).toList()
         return Pair(andelerSomErNye, andelerSomOpphøres)
     }
 
@@ -48,25 +46,29 @@ class ØkonomiService(
 
         val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(vedtak.behandling.fagsak.id).size == 1
 
-        val andelerTilkjentYtelse = if (!erFørsteBehandlingPåFagsak) {
+        val (nyeandeler, opphørandeler) = if (erFørsteBehandlingPåFagsak) {
+            val nyeandeler = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+            Pair(nyeandeler, listOf<AndelTilkjentYtelse>())
+        } else {
             // TODO: Må sørge for at man når siste behandling er opphør ikke klarer å finne noen andeler på behandling, slik at subtract resulterer i at alle er nye
             val forrigeVedtak = vedtakService.hent(vedtak.forrigeVedtakId!!)
-            val (andelerSomErNye, andelerSomOpphøres) = separerINyeOgOpphørteAndelerMotØkonomi(vedtak.behandling.id,
-                                                                                               forrigeVedtak.behandling.id)
+            val (andelerSomErNye, andelerSomOpphøres) = separerNyeOgOpphørteAndelerForØkonomi(vedtak.behandling.id,
+                                                                                              forrigeVedtak.behandling.id)
             if (behandlingResultatType == BehandlingResultatType.OPPHØRT
                 && (andelerSomErNye.size < 0 || andelerSomOpphøres.size == 0)) {
                 throw IllegalStateException("Kan ikke oppdatere tilkjent ytelse og iverksette vedtak fordi opphør inneholder nye " +
                                             "andeler eller mangler opphørte andeler.")
             }
-            beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id) // TODO: Skal returnere begge deler
-        } else beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+            Pair(beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id), emptyList()) // TODO: Skal returnere begge deler
+        }
 
         val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 saksbehandlerId,
                 vedtak,
                 behandlingResultatType,
                 erFørsteBehandlingPåFagsak,
-                andelerTilkjentYtelse
+                nyeAndeler = nyeandeler,
+                opphørteAndeler = opphørandeler
         )
 
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(vedtak.behandling, utbetalingsoppdrag)
@@ -94,7 +96,6 @@ class ØkonomiService(
                 .fold(
                         onSuccess = {
                             assertGenerelleSuksessKriterier(it.body)
-
                             return it.body?.data!!
                         },
                         onFailure = {
@@ -104,28 +105,17 @@ class ØkonomiService(
     }
 
     companion object {
-        fun Set<AndelTilkjentYtelse>.intersectAndeler(other: Set<AndelTilkjentYtelse>): Set<Pair<AndelTilkjentYtelse, AndelTilkjentYtelse>> {
-            val andelerIBegge = mutableSetOf<Pair<AndelTilkjentYtelse, AndelTilkjentYtelse>>()
-            this.forEach { a ->
+        fun Set<AndelTilkjentYtelse>.subtractAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
+            val andelerKunIDenne = mutableSetOf<AndelTilkjentYtelse>()
+            this.forEach letEtterTilsvarende@{ a ->
                 other.forEach { b ->
                     if (a.erTilsvarendeForUtbetaling(b)) {
-                        andelerIBegge.add(Pair(a, b))
+                        return@letEtterTilsvarende
                     }
                 }
+                andelerKunIDenne.add(a)
             }
-            return andelerIBegge
-        }
-
-        fun Set<AndelTilkjentYtelse>.subtractAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
-            val andelerKunIOther = mutableSetOf<AndelTilkjentYtelse>()
-            this.forEach { a ->
-                other.forEach { b ->
-                    if (!a.erTilsvarendeForUtbetaling(b)) {
-                        andelerKunIOther.add(b)
-                    }
-                }
-            }
-            return andelerKunIOther
+            return andelerKunIDenne
         }
     }
 }
