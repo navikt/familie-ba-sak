@@ -34,37 +34,16 @@ class UtbetalingsoppdragGenerator(
 
         val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
 
-        val totaltUtbetalingsperioder = mutableListOf<Utbetalingsperiode>()
-
-        // Må separere i lister siden småbarnstillegg og utvidet barnetrygd begge vil stå på forelder, men skal kjedes separat
-        val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
-                nyeAndeler.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
-                    it.groupBy { andel -> andel.personIdent } // TODO: Hva skjer dersom personidenten endrer seg? Bør gruppere på en annen måte og oppdatere lagingen av utbetalingsperioder fra andeler
-                }
-        val andelerForKjeding = listOf(personMedSmåbarnstilleggAndeler.values, personerMedAndeler.values).flatten()
-        if (personMedSmåbarnstilleggAndeler.size > 1) {
-            throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
-        }
-        val utbetalingsperioder = lagUtbetalingsperioderAvAndeler(
-                andelerForKjeding = andelerForKjeding,
+        val nyeUtbetalingsperioder = lagUtbetalingsperioderAvAndeler(
+                andelerForKjeding = delOppIKjeder(nyeAndeler),
                 behandlingResultatType = behandlingResultatType,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak)
-        val (personMedSmåbarnstilleggAndeler2, personerMedAndeler2) =
-                opphørteAndeler.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
-                    it.groupBy { andel -> andel.personIdent } // TODO: Hva skjer dersom personidenten endrer seg? Bør gruppere på en annen måte og oppdatere lagingen av utbetalingsperioder fra andeler
-                }
-        val andelerForKjeding2 = listOf(personMedSmåbarnstilleggAndeler2.values, personerMedAndeler2.values).flatten()
-        if (personMedSmåbarnstilleggAndeler2.size > 1) {
-            throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
-        }
-        val utbetalingsperioder2 = lagUtbetalingsperioderAvAndeler(
-                andelerForKjeding = andelerForKjeding2,
+        val opphørteUtbetalingsperioder = lagUtbetalingsperioderAvAndeler(
+                andelerForKjeding = delOppIKjeder(opphørteAndeler),
                 behandlingResultatType = behandlingResultatType,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak)
-        totaltUtbetalingsperioder.addAll(utbetalingsperioder)
-        totaltUtbetalingsperioder.addAll(utbetalingsperioder2)
 
         return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -72,7 +51,7 @@ class UtbetalingsoppdragGenerator(
                 fagSystem = FAGSYSTEM,
                 saksnummer = vedtak.behandling.fagsak.id.toString(),
                 aktoer = vedtak.behandling.fagsak.hentAktivIdent().ident,
-                utbetalingsperiode = totaltUtbetalingsperioder
+                utbetalingsperiode = listOf(nyeUtbetalingsperioder, opphørteUtbetalingsperioder).flatten()
         )
     }
 
@@ -149,5 +128,18 @@ class UtbetalingsoppdragGenerator(
 
     fun lagreOppdaterteAndeler(andeler: List<AndelTilkjentYtelse>) {
         andelTilkjentYtelseRepository.saveAll(andeler)
+    }
+
+    fun delOppIKjeder(andelerSomSkalSplittes: List<AndelTilkjentYtelse>): List<List<AndelTilkjentYtelse>>{
+        // Separereer i lister siden småbarnstillegg og utvidet barnetrygd begge vil stå på forelder, men skal kjedes separat
+        val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
+                andelerSomSkalSplittes.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
+                    it.groupBy { andel -> andel.personIdent } // TODO: Hva skjer dersom personidenten endrer seg? Bør gruppere på en annen måte og oppdatere lagingen av utbetalingsperioder fra andeler
+                }
+        val andelerForKjeding = listOf(personMedSmåbarnstilleggAndeler.values, personerMedAndeler.values).flatten()
+        if (personMedSmåbarnstilleggAndeler.size > 1) {
+            throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
+        }
+        return andelerForKjeding
     }
 }
