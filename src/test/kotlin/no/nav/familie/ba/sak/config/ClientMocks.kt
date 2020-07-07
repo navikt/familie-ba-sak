@@ -92,6 +92,12 @@ class ClientMocks {
             PersonIdent(randomFnr())
         }
 
+        every {
+            mockIntegrasjonClient.hentStatsborgerskap(any())
+        } answers {
+            emptyList()
+        }
+
         val identSlot = slot<Ident>()
         every {
             mockIntegrasjonClient.hentIdenter(capture(identSlot))
@@ -185,6 +191,12 @@ class ClientMocks {
             mockIntegrasjonClient.hentAktivAktørId(any())
         } answers {
             randomAktørId()
+        }
+
+        every {
+            mockIntegrasjonClient.hentStatsborgerskap(any())
+        } answers {
+            emptyList()
         }
 
         val ukjentId = "43125678910"

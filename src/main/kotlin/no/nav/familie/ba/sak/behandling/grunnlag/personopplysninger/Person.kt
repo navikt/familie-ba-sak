@@ -54,7 +54,7 @@ data class Person(
         val bostedsadresse: GrBostedsadresse? = null,
 
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
-        val statsborgerskap: List<GrStatsborgerskap>? = null
+        var statsborgerskap: List<GrStatsborgerskap>? = null
 
 ) : BaseEntitet() {
 

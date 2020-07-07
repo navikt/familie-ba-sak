@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
-import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.personinfo.Ident
 import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
 import org.springframework.stereotype.Service
@@ -13,43 +15,79 @@ class StatsborgerskapService(
         private val integrasjonClient: IntegrasjonClient
 ) {
 
-    fun hentStatsborgerskapMedHistorikk(ident: Ident): List<Statsborgerskap> {
-        return integrasjonClient.hentStatsborgerskap(ident)
-    }
+    val fomComparator =
+            Comparator { stb1: GrStatsborgerskap, stb2: GrStatsborgerskap
+                ->
+                stb1.gyldigPeriode!!.fom!!.compareTo(stb2.gyldigPeriode!!.fom)
+            }
 
-    fun hentStatsborgerskapMedMedlemskapOgHistorikk(ident: Ident): List<GrStatsborgerskap> {
-        return integrasjonClient.hentStatsborgerskap(ident)
-    }
+    fun hentStatsborgerskapMedMedlemskapOgHistorikk(ident: Ident, person: Person): List<GrStatsborgerskap> =
+            integrasjonClient.hentStatsborgerskap(ident).flatMap {
+                hentStatsborgerskapMedMedlemskap(it, person)
+            }.sortedWith(fomComparator)
 
-    fun hentStatsborgerskap(ident: Ident): List<String> =
-            integrasjonClient.hentStatsborgerskap(ident)
-                    .filter { it.gyldigTilOgMed?.isSameOrAfter(LocalDate.now()) ?: true }
-                    .map { it.land }
-
-    fun hentStatsborgerskapOgMedlemskap(ident: Ident): Pair<String, Medlemskap> {
-        val statsborgerskap = hentStatsborgerskap(ident)
-
-        val norsk = statsborgerskap.filter { it == LANDKODE_NORGE }
-        val nordisk = statsborgerskap.filter { erNordisk(it) }
-        val eøs = statsborgerskap.filter { erEØS(it) }
-        val tredjeland = statsborgerskap.filter { it != LANDKODE_UKJENT }
-
-        return when {
-            norsk.isNotEmpty() -> Pair(LANDKODE_NORGE, Medlemskap.NORDEN)
-            nordisk.isNotEmpty() -> Pair(nordisk.first(), Medlemskap.NORDEN)
-            eøs.isNotEmpty() -> Pair(eøs.first(), Medlemskap.EØS)
-            tredjeland.isNotEmpty() -> Pair(tredjeland.first(), Medlemskap.TREDJELANDSBORGER)
-            else -> Pair(LANDKODE_UKJENT, Medlemskap.UKJENT)
+    private fun hentStatsborgerskapMedMedlemskap(statsborgerskap: Statsborgerskap, person: Person): List<GrStatsborgerskap> {
+        if (erNordisk(statsborgerskap.land)) {
+            return listOf(GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = statsborgerskap.gyldigFraOgMed,
+                                                                                 tom = statsborgerskap.gyldigTilOgMed),
+                                            landkode = statsborgerskap.land,
+                                            medlemskap = Medlemskap.NORDEN,
+                                            person = person))
         }
+
+        val perioderSomEØSLand = integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land]
+
+        val grStatsborgerskap = ArrayList<GrStatsborgerskap>()
+        var datoFra = statsborgerskap.gyldigFraOgMed
+
+        while (true) {
+            val datoTil = finnDatoTil(perioderSomEØSLand, datoFra, statsborgerskap)
+
+            grStatsborgerskap += GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = datoFra, tom = datoTil),
+                                                   landkode = statsborgerskap.land,
+                                                   medlemskap = finnMedlemskap(statsborgerskap, perioderSomEØSLand, datoFra),
+                                                   person = person)
+
+            if (datoTil == statsborgerskap.gyldigTilOgMed) break;
+
+            datoFra = datoTil?.plusDays(1)
+        }
+
+        return grStatsborgerskap
     }
 
-    private fun erEØS(landkode: String): Boolean = integrasjonClient.hentAlleEØSLand().contains(landkode)
+    private fun finnDatoTil(eøsLand: List<BetydningDto>?, datoFra: LocalDate?, statsborgerskap: Statsborgerskap): LocalDate? =
+            // Dato til - skal være etter dato fra men før statsborgerskapets siste gyldige dag.
+            // null betyr uendelig sent.
+            // 9999-01-01 betyr uendelig sent.
+            eøsLand?.flatMap { listOf(it.gyldigFra.minusDays(1), it.gyldigTil) }
+                    ?.firstOrNull {
+                        it > datoFra &&
+                        it < LocalDate.parse("9990-01-01") &&
+                        (statsborgerskap.gyldigTilOgMed == null || it < statsborgerskap.gyldigTilOgMed)
+                    }
+            ?: statsborgerskap.gyldigTilOgMed
+
+    private fun finnMedlemskap(statsborgerskap: Statsborgerskap,
+                               perioderEØSLand: List<BetydningDto>?,
+                               gyldigFraOgMed: LocalDate?): Medlemskap =
+            when {
+                erNordisk(statsborgerskap.land) -> Medlemskap.NORDEN
+                erEØS(perioderEØSLand, gyldigFraOgMed) -> Medlemskap.EØS
+                erTredjeland(statsborgerskap.land) -> Medlemskap.TREDJELANDSBORGER
+                else -> Medlemskap.UKJENT
+            }
+
+    private fun erEØS(perioderEØSLand: List<BetydningDto>?,
+                      fraDato: LocalDate?): Boolean =
+            perioderEØSLand?.any { (it.gyldigFra <= fraDato && it.gyldigTil >= fraDato) } ?: false
 
     private fun erNordisk(landkode: String): Boolean = Norden.values().map { it.name }.contains(landkode)
 
+    private fun erTredjeland(landkode: String): Boolean = landkode != LANDKODE_UKJENT
+
     companion object {
         const val LANDKODE_UKJENT = "XUK"
-        const val LANDKODE_NORGE = "NOR"
     }
 }
 

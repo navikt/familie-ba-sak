@@ -5,13 +5,12 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -377,5 +376,41 @@ class VilkårVurderingTest(
         personopplysningGrunnlag.personer.add(barn)
 
         assertEquals(Resultat.NEI, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(barn)).resultat)
+    }
+
+    @Test
+    fun `Lovlig opphold - nordisk statsborger`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+                .also { it.statsborgerskap =
+                        listOf(
+                                GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = LocalDate.now().minusYears(1))
+                                , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it)
+                        )
+                }
+
+        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+    }
+
+    @Test
+    fun `Lovlig opphold - valider at alle gjeldende medlemskap blir returnert`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+                .also { it.statsborgerskap =
+                        listOf(
+                                GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = LocalDate.now().minusYears(1))
+                                , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it),
+                               GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = LocalDate.now().minusYears(1))
+                                , landkode = "DEU", medlemskap = Medlemskap.EØS, person = it),
+                               GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = LocalDate.now().minusYears(2), fom = LocalDate.now().minusYears(2))
+                                , landkode = "POL", medlemskap = Medlemskap.EØS, person = it)
+                        )
+                }
+
+        val medlemskap = finnNåværendeMedlemskap(Fakta(person))
+
+        assertEquals(2, medlemskap.size)
+        assertEquals(Medlemskap.NORDEN, medlemskap[0])
+        assertEquals(Medlemskap.EØS, medlemskap[1])
     }
 }
