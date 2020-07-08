@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personinfo.Ident
 import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 
 @Service
@@ -73,7 +74,7 @@ class PersongrunnlagService(
                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
         return barnasFødselsnummer.map { nyttBarn ->
             val personinfo = integrasjonClient.hentPersoninfoFor(nyttBarn)
-            personRepository.save(Person(personIdent = PersonIdent(nyttBarn),
+            Person(personIdent = PersonIdent(nyttBarn),
                                          type = PersonType.BARN,
                                          personopplysningGrunnlag = personopplysningGrunnlag,
                                          fødselsdato = personinfo.fødselsdato,
@@ -83,7 +84,6 @@ class PersongrunnlagService(
                                          bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                                          sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
             ).also { it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(nyttBarn), it)}
-            )
         }
     }
 
