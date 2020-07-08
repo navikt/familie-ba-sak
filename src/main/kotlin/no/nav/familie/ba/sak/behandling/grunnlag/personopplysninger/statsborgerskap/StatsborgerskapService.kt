@@ -50,38 +50,38 @@ class StatsborgerskapService(
         val grStatsborgerskap = ArrayList<GrStatsborgerskap>()
         var datoFra = statsborgerskap.gyldigFraOgMed
 
-        while (true) {
-            val datoTil = finnDatoTil(perioderSomEØSLand, datoFra, statsborgerskap)
+        hentMedlemskapsIntervaller(perioderSomEØSLand, statsborgerskap.gyldigFraOgMed, statsborgerskap.gyldigTilOgMed)
+                .forEach {
+                    grStatsborgerskap += GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = datoFra,
+                                                                                                tom = it.minusDays(1)),
+                                                           landkode = statsborgerskap.land,
+                                                           medlemskap = finnMedlemskap(statsborgerskap,
+                                                                                       perioderSomEØSLand,
+                                                                                       datoFra),
+                                                           person = person)
+                    datoFra = it
+                }
 
-            grStatsborgerskap += GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = datoFra, tom = datoTil),
-                                                   landkode = statsborgerskap.land,
-                                                   medlemskap = finnMedlemskap(statsborgerskap, perioderSomEØSLand, datoFra),
-                                                   person = person)
-
-            if (datoTil == statsborgerskap.gyldigTilOgMed) break;
-
-            datoFra = datoTil?.plusDays(1)
-        }
+        grStatsborgerskap += GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = datoFra,
+                                                                                    tom = statsborgerskap.gyldigTilOgMed),
+                                               landkode = statsborgerskap.land,
+                                               medlemskap = finnMedlemskap(statsborgerskap, perioderSomEØSLand, datoFra),
+                                               person = person)
 
         return grStatsborgerskap
     }
 
-    private fun finnDatoTil(eøsLand: List<BetydningDto>?, datoFra: LocalDate?, statsborgerskap: Statsborgerskap): LocalDate? =
-            // Finn neste dato i statsborgerskaps medlemskaps-intervall,
-            // det er enten start stopp på medlemsintervall eller start stop på statsborgerskaps intervall.
-            eøsLand?.flatMap { listOf(it.gyldigFra.minusDays(1), it.gyldigTil) }
+    private fun hentMedlemskapsIntervaller(eøsLand: List<BetydningDto>?, fra: LocalDate?, til: LocalDate?): List<LocalDate> =
+            eøsLand?.flatMap { listOf(it.gyldigFra, it.gyldigTil.plusDays(1)) }
                     // fjern datum som betegner uendelighet i kodeverk (9999-01-01 og 1900-01-01)
-                    ?.filter { it.isAfter(LocalDate.parse("1900-01-02")) &&
-                                it.isBefore(LocalDate.parse("9990-01-01"))}
+                    ?.filter {
+                        it.isAfter(LocalDate.parse("1900-01-02")) &&
+                        it.isBefore(LocalDate.parse("9990-01-01"))
+                    }?.filter {
+                        (fra == null || it > fra ) &&
+                        (til == null || it < til )
+                    } ?: emptyList()
 
-                    // Dato til - skal være etter dato fra men før statsborgerskapets siste gyldige dag.
-                    // Statsborgerskap null er samme som uendelighet.
-                    ?.firstOrNull {
-                         datoFra == null ||
-                         (it > datoFra &&
-                        (statsborgerskap.gyldigTilOgMed == null || it < statsborgerskap.gyldigTilOgMed))
-                    }
-            ?: statsborgerskap.gyldigTilOgMed
 
     private fun finnMedlemskap(statsborgerskap: Statsborgerskap,
                                perioderEØSLand: List<BetydningDto>?,
@@ -95,8 +95,10 @@ class StatsborgerskapService(
 
     private fun erEØS(perioderEØSLand: List<BetydningDto>?,
                       fraDato: LocalDate?): Boolean =
-            perioderEØSLand?.any { fraDato == null || (it.gyldigFra <= fraDato &&
-                                   it.gyldigTil >= fraDato) } ?: false
+            perioderEØSLand?.any {
+                fraDato == null || (it.gyldigFra <= fraDato &&
+                                    it.gyldigTil >= fraDato)
+            } ?: false
 
     private fun erNordisk(landkode: String): Boolean = Norden.values().map { it.name }.contains(landkode)
 
