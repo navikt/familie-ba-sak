@@ -395,10 +395,10 @@ class VilkårVurderingTest(
     @Test
     fun `Lovlig opphold - valider at alle gjeldende medlemskap blir returnert`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        var person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        val person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
                 .also { it.statsborgerskap =
                         listOf(
-                                GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = LocalDate.now().minusYears(1))
+                                GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null)
                                 , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it),
                                GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = LocalDate.now().minusYears(1))
                                 , landkode = "DEU", medlemskap = Medlemskap.EØS, person = it),

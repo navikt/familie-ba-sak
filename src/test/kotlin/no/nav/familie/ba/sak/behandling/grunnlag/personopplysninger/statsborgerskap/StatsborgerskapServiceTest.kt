@@ -18,6 +18,7 @@ import java.time.LocalDate
 import java.time.Month
 
 internal class StatsborgerskapServiceTest {
+    val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
     val FOM_1990 = LocalDate.of(1990, Month.JANUARY, 1)
     val FOM_2000 = LocalDate.of(2000, Month.JANUARY, 1)
     val FOM_2004 = LocalDate.of(2004, Month.JANUARY, 1)
@@ -97,6 +98,41 @@ internal class StatsborgerskapServiceTest {
         assertStatsborgerskap(statsborgerskap[1], "GBR", FOM_2010, null, Medlemskap.TREDJELANDSBORGER)
     }
 
+    @Test
+    fun `Sjekk statsborgerskap med gyldig fra dato null`() {
+
+        every { integrasjonClient.hentStatsborgerskap(Ident("0011")) }.returns(
+                listOf(
+                        Statsborgerskap("GBR",
+                                        gyldigFraOgMed = null,
+                                        gyldigTilOgMed = null)
+                )
+        )
+
+        val statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident("0011"), tilfeldigPerson())
+
+        assertThat(statsborgerskap.size == 2)
+        assertStatsborgerskap(statsborgerskap[0], "GBR", null, TOM_2010, Medlemskap.EØS)
+        assertStatsborgerskap(statsborgerskap[1], "GBR", FOM_2010, null, Medlemskap.TREDJELANDSBORGER)
+    }
+
+    @Test
+    fun `Sjekk statsborgerskap med EU-medlemskap`() {
+
+        every { integrasjonClient.hentStatsborgerskap(Ident("0011")) }.returns(
+                listOf(
+                        Statsborgerskap("DEU",
+                                        gyldigFraOgMed = null,
+                                        gyldigTilOgMed = null)
+                )
+        )
+
+        val statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident("0011"), tilfeldigPerson())
+
+        assertThat(statsborgerskap.size == 1)
+        assertStatsborgerskap(statsborgerskap[0], "DEU", null, null, Medlemskap.EØS)
+    }
+
     private fun assertStatsborgerskap(statsborgerskap: GrStatsborgerskap,
                                       landkode: String,
                                       fom: LocalDate?,
@@ -113,11 +149,11 @@ internal class StatsborgerskapServiceTest {
         val beskrivelsePolen = BeskrivelseDto("POL", "")
         val betydningPolen = BetydningDto(FOM_2004, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelsePolen))
         val beskrivelseTyskland = BeskrivelseDto("DEU", "")
-        val betydningTyskland = BetydningDto(FOM_1990, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseTyskland))
+        val betydningTyskland = BetydningDto(FOM_1900, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseTyskland))
         val beskrivelseDanmark = BeskrivelseDto("DEN", "")
         val betydningDanmark = BetydningDto(FOM_1990, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseDanmark))
         val beskrivelseUK = BeskrivelseDto("GBR", "")
-        val betydningUK = BetydningDto(FOM_1990, TOM_2010, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseUK))
+        val betydningUK = BetydningDto(FOM_1900, TOM_2010, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseUK))
 
         val kodeverkLand = KodeverkDto(mapOf(
                 "POL" to listOf(betydningPolen),
