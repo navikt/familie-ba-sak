@@ -146,12 +146,12 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun hentStatsborgerskap(ident: Ident): List<Statsborgerskap> {
-        val uri = URI.create("$integrasjonUri/personopplysning/statborgerskap/BAR")
+        val uri = URI.create("$integrasjonUri/personopplysning/statsborgerskap/BAR")
 
         return try {
             postForEntity<Ressurs<List<Statsborgerskap>>>(uri, ident).getDataOrThrow()
         } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av statborgerskap", e, uri, ident.ident)
+            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av statsborgerskap", e, uri, ident.ident)
         }
     }
 
