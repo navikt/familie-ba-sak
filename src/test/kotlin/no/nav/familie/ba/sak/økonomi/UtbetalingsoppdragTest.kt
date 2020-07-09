@@ -85,7 +85,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                  660,
                                  "2026-05-01",
                                  "2027-06-30",
-                                 dato("2026-05-01"))
+                                 opphørFom)
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0],
                                  id + 2,
                                  null,

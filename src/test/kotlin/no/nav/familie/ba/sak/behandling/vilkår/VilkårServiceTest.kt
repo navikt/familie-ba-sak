@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 
 
 @SpringBootTest
@@ -214,6 +216,63 @@ class VilkårServiceTest(
         }
     }
 
+    @Test
+    fun `Peker til behandling oppdateres ved vurdering av revurdering`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val forrigeBehandlingSomErIverksatt =
+                behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
+                                                                                   bekreftEndringerViaFrontend = true,
+                                                                                   forrigeBehandling = forrigeBehandlingSomErIverksatt)
+
+        val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
+        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
+
+        behandlingResultatService.oppdater(behandlingResultat)
+        behandling.steg = StegType.BEHANDLING_AVSLUTTET
+        behandlingService.lagre(behandling)
+
+        val barnFnr2 = randomFnr()
+
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+
+        val personopplysningGrunnlag2 =
+                lagTestPersonopplysningGrunnlag(behandling2.id, fnr, listOf(barnFnr, barnFnr2))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
+
+        val behandlingResultat2 = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling2,
+                                                                                    bekreftEndringerViaFrontend = true,
+                                                                                    forrigeBehandling = behandling)
+
+        Assertions.assertEquals(3, behandlingResultat2.personResultater.size)
+
+        val personResultat = behandlingResultat2.personResultater.find { it.personIdent == barnFnr }!!
+        val borMedSøkerVilkår = personResultat.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
+        Assertions.assertEquals(behandling.id, borMedSøkerVilkår.behandlingId)
+
+        VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
+                                                     RestVilkårResultat(borMedSøkerVilkår.id,
+                                                                        Vilkår.BOR_MED_SØKER,
+                                                                        Resultat.JA,
+                                                                        LocalDate.of(2010, 6, 2),
+                                                                        LocalDate.of(2011, 9, 1),
+                                                                        ""))
+
+        val behandlingResultatEtterEndring = behandlingResultatService.oppdater(behandlingResultat2)
+        val personResultatEtterEndring = behandlingResultatEtterEndring.personResultater.find { it.personIdent == barnFnr }!!
+        val borMedSøkerVilkårEtterEndring = personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
+        Assertions.assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
+    }
 
     @Test
     fun `Valider gyldige vilkårspermutasjoner for barn og søker`() {

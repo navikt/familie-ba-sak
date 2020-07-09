@@ -77,6 +77,7 @@ class VilkårService(
             )
             val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
             personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, fakta, evalueringer))
+
             personResultat
         }.toSet()
 
@@ -109,7 +110,6 @@ class VilkårService(
             }
         }
     }
-
 
     fun genererInitieltBehandlingResultatFraAnnenBehandling(behandling: Behandling, annenBehandling: Behandling): BehandlingResultat {
         val initieltBehandlingResultat = genererInitieltBehandlingResultat(behandling = behandling)
@@ -168,17 +168,6 @@ class VilkårService(
             vilkårListe
         }.toSet())
         return personResultat
-    }
-
-    private fun hentIdentifikatorForEvaluering(evaluering: Evaluering): String? {
-        return if (enumValues<Vilkår>().map { it.name }.contains(evaluering.identifikator))
-            evaluering.identifikator
-        else if (!evaluering.children.isEmpty())
-            hentIdentifikatorForEvaluering(evaluering.children.first())
-        else {
-            LOG.warn("Internal Error: Illegal Identifikator for Evaluering")
-            null
-        }
     }
 
     private fun spesifikasjonerForPerson(person: Person, behandlingKategori: BehandlingKategori): Spesifikasjon<Fakta> {
