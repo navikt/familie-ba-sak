@@ -90,9 +90,9 @@ internal fun giftEllerPartnerskap(fakta: Fakta): Evaluering =
         }
 
 fun finnNåværendeMedlemskap(fakta: Fakta): List<Medlemskap> =
-        fakta.personForVurdering.statsborgerskap?.filter {
-            it.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
-            it.gyldigPeriode?.tom?.isAfter(LocalDate.now()) ?: true
+        fakta.personForVurdering.statsborgerskap?.filter {statsborgerskap ->
+            statsborgerskap.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
+            statsborgerskap.gyldigPeriode?.tom?.isAfter(LocalDate.now()) ?: true
         }
                 ?.map { it.medlemskap } ?: error("Person har ikke noe statsborgerskap.")
 

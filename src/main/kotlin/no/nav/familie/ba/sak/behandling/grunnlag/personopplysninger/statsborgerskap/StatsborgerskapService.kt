@@ -37,7 +37,7 @@ class StatsborgerskapService(
             }.sortedWith(fomComparator)
 
     private fun hentStatsborgerskapMedMedlemskap(statsborgerskap: Statsborgerskap, person: Person): List<GrStatsborgerskap> {
-        if (erNordisk(statsborgerskap.land)) {
+        if (statsborgerskap.erNordiskLand()) {
             return listOf(GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = statsborgerskap.gyldigFraOgMed,
                                                                                  tom = statsborgerskap.gyldigTilOgMed),
                                             landkode = statsborgerskap.land,
@@ -77,9 +77,9 @@ class StatsborgerskapService(
                     ?.filter {
                         it.isAfter(LocalDate.parse("1900-01-02")) &&
                         it.isBefore(LocalDate.parse("9990-01-01"))
-                    }?.filter {
-                        (fra == null || it > fra ) &&
-                        (til == null || it < til )
+                    }?.filter {datoForEndringIMedlemskap ->
+                        (fra == null || datoForEndringIMedlemskap > fra ) &&
+                        (til == null || datoForEndringIMedlemskap < til )
                     } ?: emptyList()
 
 
@@ -87,9 +87,9 @@ class StatsborgerskapService(
                                perioderEØSLand: List<BetydningDto>?,
                                gyldigFraOgMed: LocalDate?): Medlemskap =
             when {
-                erNordisk(statsborgerskap.land) -> Medlemskap.NORDEN
+                statsborgerskap.erNordiskLand() -> Medlemskap.NORDEN
                 erEØS(perioderEØSLand, gyldigFraOgMed) -> Medlemskap.EØS
-                erTredjeland(statsborgerskap.land) -> Medlemskap.TREDJELANDSBORGER
+                statsborgerskap.erTredjeland() -> Medlemskap.TREDJELANDSBORGER
                 else -> Medlemskap.UKJENT
             }
 
@@ -100,14 +100,14 @@ class StatsborgerskapService(
                                     it.gyldigTil >= fraDato)
             } ?: false
 
-    private fun erNordisk(landkode: String): Boolean = Norden.values().map { it.name }.contains(landkode)
-
-    private fun erTredjeland(landkode: String): Boolean = landkode != LANDKODE_UKJENT
-
     companion object {
         const val LANDKODE_UKJENT = "XUK"
     }
 }
+
+fun Statsborgerskap.erNordiskLand() = Norden.values().map { it.name }.contains(this.land)
+
+fun Statsborgerskap.erTredjeland() = this.land != StatsborgerskapService.LANDKODE_UKJENT
 
 enum class Norden {
     NOR,
