@@ -62,23 +62,24 @@ internal fun bosattINorge(fakta: Fakta): Evaluering =
                 ?.let { evalueringJa("Person bosatt i Norge", Vilkår.BOSATT_I_RIKET, fakta.personForVurdering.type) }
                 ?: evalueringNei("Person er ikke bosatt i Norge", Vilkår.BOSATT_I_RIKET, fakta.personForVurdering.type)
 
-internal fun lovligOpphold(fakta: Fakta): Evaluering =
-    with(finnNåværendeMedlemskap(fakta)) {
+internal fun lovligOpphold(fakta: Fakta): Evaluering {
+    if (fakta.personForVurdering.type == PersonType.BARN) {
+        Evaluering.kanskje("Ikke separat oppholdsvurdering for barnet ved automatisk vedtak.")
+    }
+
+    return with(finnNåværendeMedlemskap(fakta)) {
         when {
             contains(Medlemskap.NORDEN) -> evalueringJa("Er nordisk statsborger.",
                                                         Vilkår.LOVLIG_OPPHOLD,
-                                                        fakta.personForVurdering.type.name.plus("Er nordisk statsborger"))
-            contains(Medlemskap.EØS) -> evalueringJa("Er EØS borger.",
-                                                     Vilkår.LOVLIG_OPPHOLD,
-                                                     fakta.personForVurdering.type.name.plus("Er eøsborger"))
-            contains(Medlemskap.TREDJELANDSBORGER) -> evalueringJa("Tredjelandsborger med lovlig opphold.",
-                                                                   Vilkår.LOVLIG_OPPHOLD,
-                                                                   fakta.personForVurdering.type.name.plus("Tredjelandsborger med lovlig opphold"))
-            else -> evalueringJa("Person har lovlig opphold.", Vilkår.LOVLIG_OPPHOLD, fakta.personForVurdering.type)
+                                                        PersonType.SØKER)
+            contains(Medlemskap.EØS) -> Evaluering.kanskje("Er EØS borger.")
+            contains(Medlemskap.TREDJELANDSBORGER) -> Evaluering.kanskje("Tredjelandsborger med lovlig opphold.")
+            else -> Evaluering.kanskje("Person har lovlig opphold.")
         }
     }
+}
 
-internal fun giftEllerPartneskap(fakta: Fakta): Evaluering =
+internal fun giftEllerPartnerskap(fakta: Fakta): Evaluering =
         when (fakta.personForVurdering.sivilstand) {
             SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER, SIVILSTAND.UOPPGITT ->
                 evalueringNei("Person er gift eller har registrert partner", Vilkår.GIFT_PARTNERSKAP, fakta.personForVurdering.type)
