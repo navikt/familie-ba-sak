@@ -72,8 +72,11 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
             contains(Medlemskap.NORDEN) -> evalueringJa("Er nordisk statsborger.",
                                                         Vilkår.LOVLIG_OPPHOLD,
                                                         PersonType.SØKER)
+            //TODO: Implementeres av TEA-1532
             contains(Medlemskap.EØS) -> Evaluering.kanskje("Er EØS borger.")
+            //TODO: Implementeres av TEA-1533
             contains(Medlemskap.TREDJELANDSBORGER) -> Evaluering.kanskje("Tredjelandsborger med lovlig opphold.")
+            //TODO: Implementeres av TEA-1534
             else -> Evaluering.kanskje("Person har lovlig opphold.")
         }
     }
