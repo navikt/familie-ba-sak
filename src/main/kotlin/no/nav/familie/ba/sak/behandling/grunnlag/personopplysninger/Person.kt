@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -54,8 +55,10 @@ data class Person(
         val bostedsadresse: GrBostedsadresse? = null,
 
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
-        val statsborgerskap: List<GrStatsborgerskap>? = null
+        val statsborgerskap: List<GrStatsborgerskap>? = null,
 
+        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        val opphold: List<GrOpphold>? = null
 ) : BaseEntitet() {
 
     override fun toString(): String {
