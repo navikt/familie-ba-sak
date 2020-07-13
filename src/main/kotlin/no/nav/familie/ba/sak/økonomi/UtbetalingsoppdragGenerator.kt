@@ -77,9 +77,9 @@ class UtbetalingsoppdragGenerator(
 
         val utbetalingsperiodeMal =
                 if (erFullstendigOpphør)
-                    UtbetalingsperiodeMal(vedtak, andelerForKjeding.flatten(), true, vedtak.forrigeVedtakId!!)
+                    UtbetalingsperiodeMal(vedtak, andelerForKjeding.flatten(), true)
                 else
-                    UtbetalingsperiodeMal(vedtak)
+                    UtbetalingsperiodeMal(vedtak) // TODO: Kan også være endring på eksisterende periode ellers
 
         val utbetalingsperioder = andelerForKjeding
                 .flatMap { kjede: List<AndelTilkjentYtelse> ->

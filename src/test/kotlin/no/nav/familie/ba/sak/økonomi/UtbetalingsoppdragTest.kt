@@ -67,11 +67,10 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
 
-        val id = vedtak.id * 1000
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], id + 0, null, 660, "2019-04-01", "2023-03-31")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], id + 1, id + 0, 660, "2026-05-01", "2027-06-30")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], id + 2, null, 1054, "2019-03-01", "2037-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], 0, null, 660, "2019-04-01", "2023-03-31")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], 1, 0, 660, "2026-05-01", "2027-06-30")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], 2, null, 1054, "2019-03-01", "2037-02-28")
     }
 
     @Test
@@ -107,18 +106,17 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
 
-        val id = vedtak.id * 1000
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0],
-                                 id + 1,
-                                 id + 0,
+                                 1,
+                                 0,
                                  660,
                                  "2026-05-01",
                                  "2027-06-30",
                                  opphørFom)
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0],
-                                 id + 2,
+                                 2,
                                  null,
                                  1054,
                                  "2019-03-01",
@@ -147,18 +145,17 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
 
-        val id = vedtak.id * 1000
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0],
-                                 id,
+                                 0,
                                  null,
                                  1054,
                                  "2010-03-01",
                                  "2030-02-28",
                                  opphørFom)
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![1],
-                                 id + 1,
+                                 1,
                                  null,
                                  1054,
                                  "2025-01-01",
@@ -201,11 +198,10 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
 
-        val id = vedtak.id * 1000
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], id + 0, null, 660, "2019-04-01", "2023-03-31")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], id + 1, id + 0, 660, "2026-05-01", "2027-06-30")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], id + 2, null, 1054, "2019-03-01", "2037-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], 0, null, 660, "2019-04-01", "2023-03-31")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], 1, 0, 660, "2026-05-01", "2027-06-30")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], 2, null, 1054, "2019-03-01", "2037-02-28")
     }
 
     @Test
@@ -223,21 +219,6 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                                               behandlingResultatType,
                                                               true,
                                                               andelerTilkjentYtelse)
-        }
-    }
-
-    @Test
-    fun `skal ikke tillate for stor offset på periodeId`() {
-        val vedtak = lagVedtak()
-
-        val utbetalingsperiodeMal = UtbetalingsperiodeMal(vedtak)
-        val behandling = lagBehandling()
-        val andelTilkjentYtelse = lagAndelTilkjentYtelse("2019-04-01", "2023-03-31", SMÅBARNSTILLEGG, 660, behandling)
-
-        utbetalingsperiodeMal.lagPeriodeFraAndel(andelTilkjentYtelse, 999, null) //OK
-
-        assertThrows<IllegalArgumentException> {
-            utbetalingsperiodeMal.lagPeriodeFraAndel(andelTilkjentYtelse, 1000, 999)
         }
     }
 
