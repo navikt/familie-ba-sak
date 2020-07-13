@@ -28,8 +28,6 @@ class ØkonomiService(
                                               forrigeBehandlingId: Long): Pair<List<AndelTilkjentYtelse>, List<AndelTilkjentYtelse>> {
         val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandlingId).toSet()
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId).toSet()
-
-        // TODO: Kan intersecte og så filtrere på intersection, men blir ikke mer effektivt.
         val andelerSomErNye = oppdatertTilstand.subtractAndeler(forrigeTilstand).toList()
         val andelerSomOpphøres = forrigeTilstand.subtractAndeler(oppdatertTilstand).toList()
         return Pair(andelerSomErNye, andelerSomOpphøres)

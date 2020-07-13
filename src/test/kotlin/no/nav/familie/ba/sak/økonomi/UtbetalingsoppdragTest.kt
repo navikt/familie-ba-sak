@@ -74,7 +74,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
     }
 
     @Test
-    fun `skal opprette et opphør med felles løpende periodeId og separat kjeding på to personer`() {
+    fun `skal opprette et fullstendig opphør med felles løpende periodeId og separat kjeding på to personer`() {
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling = behandling)
         val personMedFlerePerioder = tilfeldigPerson()
@@ -101,7 +101,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                                                   opphørVedtak,
                                                                   behandlingResultatType,
                                                                   false,
-                                                                  andelerTilkjentYtelse)
+                                                                  opphørteAndeler = andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -125,7 +125,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
     }
 
     @Test
-    fun `skal opprette et opphør hvor periodens fom-dato er opphørsdato når denne er senere`() {
+    fun `skal opprette et fullstendig opphør hvor periodens fom-dato er opphørsdato når denne er senere`() {
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling)
         val andelerTilkjentYtelse = listOf(
@@ -140,7 +140,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                                                   opphørVedtak,
                                                                   behandlingResultatType,
                                                                   false,
-                                                                  andelerTilkjentYtelse)
+                                                                  opphørteAndeler = andelerTilkjentYtelse)
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)

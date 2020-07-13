@@ -14,7 +14,6 @@ data class UtbetalingsperiodeMal(
         val erEndringPåEksisterendePeriode: Boolean = false
 ) {
     // TODO: Dobbeltsjekk at vi ikke trenger 1_000-sjekk
-
     fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse,
                            periodeIdOffset: Int,
                            forrigePeriodeIdOffset: Int?): Utbetalingsperiode =

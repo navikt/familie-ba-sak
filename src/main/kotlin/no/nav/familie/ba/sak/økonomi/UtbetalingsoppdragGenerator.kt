@@ -32,22 +32,30 @@ class UtbetalingsoppdragGenerator(
                               opphørteAndeler: List<AndelTilkjentYtelse> = emptyList()): Utbetalingsoppdrag {
 
         val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
+        if (erFullstendigOpphør && nyeAndeler.isNotEmpty()) {
+            throw IllegalStateException("Finnes nye andeler når behandling skal opphøres")
+        }
 
-        val nyeUtbetalingsperioder = lagUtbetalingsperioderAvAndeler(
-                andelerForKjeding = delOppIKjeder(nyeAndeler),
-                behandlingResultatType = behandlingResultatType,
-                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-                vedtak = vedtak)
-        val opphørteUtbetalingsperioder = lagUtbetalingsperioderAvAndeler(
-                andelerForKjeding = delOppIKjeder(opphørteAndeler),
-                behandlingResultatType = behandlingResultatType,
-                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-                vedtak = vedtak)
-
+        // Hos økonomi skiller man på endring på oppdragsnivå og på linjenivå (periodenivå).
+        // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre nåværende
+        // og erstatte med ny periode med oppdaterte datoer. På grunn av dette vil vi kun ha aksjonskode UEND ved fullstendig
+        // opphør, selv om vi i realiteten av og til kun endrer datoer på en eksisterende linje (endring på linjenivå).
         val aksjonskodePåOppdragsnivå =
                 if (erFørsteBehandlingPåFagsak) NY
                 else if (erFullstendigOpphør) UEND
                 else ENDR
+
+        val nyeUtbetalingsperioder = lagUtbetalingsperioderAvAndeler(
+                andelerForKjeding = delOppIKjeder(nyeAndeler),
+                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
+                vedtak = vedtak,
+                erOpphørtePerioder = false)
+        val opphørteUtbetalingsperioder = lagUtbetalingsperioderAvAndeler(
+                andelerForKjeding = delOppIKjeder(opphørteAndeler),
+                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
+                vedtak = vedtak,
+                erOpphørtePerioder = true)
+                .kunSisteHvis(erFullstendigOpphør)
 
         return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -68,18 +76,16 @@ class UtbetalingsoppdragGenerator(
 
     private fun lagUtbetalingsperioderAvAndeler(andelerForKjeding: List<List<AndelTilkjentYtelse>>,
                                                 vedtak: Vedtak,
-                                                behandlingResultatType: BehandlingResultatType,
-                                                erFørsteBehandlingPåFagsak: Boolean): List<Utbetalingsperiode> {
+                                                erFørsteBehandlingPåFagsak: Boolean,
+                                                erOpphørtePerioder: Boolean): List<Utbetalingsperiode> { // TODO: erOpphørslinje ?
         val fagsakId = vedtak.behandling.fagsak.id
-        var offset = if (!erFørsteBehandlingPåFagsak) hentSisteOffsetPåFagsak(fagsakId) ?: 0 else 0
-
-        val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
+        var offset = if (!erFørsteBehandlingPåFagsak) hentSisteOffsetPåFagsak(fagsakId) ?: throw IllegalStateException("Skal finnes offset?") else 0 // TODO: Avklar om man skal starte på nytt hvis gjenopptakelse
 
         val utbetalingsperiodeMal =
-                if (erFullstendigOpphør)
+                if (erOpphørtePerioder)
                     UtbetalingsperiodeMal(vedtak, andelerForKjeding.flatten(), true)
                 else
-                    UtbetalingsperiodeMal(vedtak) // TODO: Kan også være endring på eksisterende periode ellers
+                    UtbetalingsperiodeMal(vedtak)
 
         val utbetalingsperioder = andelerForKjeding
                 .flatMap { kjede: List<AndelTilkjentYtelse> ->
@@ -100,7 +106,7 @@ class UtbetalingsoppdragGenerator(
                             andel.periodeOffset = offset.toLong()
                             offset++
                         }
-                    }.kunSisteHvis(erFullstendigOpphør)
+                    }
                 }
         lagreOppdaterteAndeler(andelerForKjeding.flatten())
         return utbetalingsperioder
