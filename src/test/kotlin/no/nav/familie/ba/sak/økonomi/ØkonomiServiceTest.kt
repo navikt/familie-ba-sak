@@ -142,4 +142,29 @@ internal class ØkonomiServiceTest {
         assertEquals(0, opphørte.size)
         assertEquals( andelerBehandling2[1], nye.first())
     }
+
+    @Test
+    fun `skal lage nye perioder når forrige behandling er et opphør`() {
+        val søker = tilfeldigPerson()
+
+        val behandling1 = lagBehandling()
+        val behandling2 = lagBehandling()
+
+        val andelerBehandling2 = listOf(
+                lagAndelTilkjentYtelse("2019-03-01",
+                                       "2037-02-28",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling1,
+                                       person = søker)
+        )
+
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling1.id) } returns emptyList()
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling2.id) } returns andelerBehandling2
+
+        val (nye, opphørte) = økonomiService.separerNyeOgOpphørteAndelerForØkonomi(behandlingId = behandling2.id, forrigeBehandlingId = behandling1.id)
+        assertEquals( 1, nye.size)
+        assertEquals(0, opphørte.size)
+        assertEquals( andelerBehandling2[0], nye.first())
+    }
 }

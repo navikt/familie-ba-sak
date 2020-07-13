@@ -18,10 +18,11 @@ data class UtbetalingsperiodeMal(
                            periodeIdOffset: Int,
                            forrigePeriodeIdOffset: Int?): Utbetalingsperiode =
             Utbetalingsperiode(
-                    erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
+                    erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode, // True gjør at oppdrag setter endringskode ENDR på linje og ikke vil referere bakover
                     opphør = if (erEndringPåEksisterendePeriode) utledOpphørPåLinje(opphørForVedtak = vedtak.opphørsdato,
                                                                                     linje = andel) else null,
                     forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() }, //TODO: Husk å skrive migreringsscript for gamle periodeIder / spesialhåndtere
+                    // TODO: forrigePeriodeId kun relevant hvis IKKE erEndringPåEksisterendePeriode? Altså for nye perioder som skal hektes på
                     periodeId = periodeIdOffset.toLong(),
                     datoForVedtak = vedtak.vedtaksdato,
                     klassifisering = andel.type.klassifisering,

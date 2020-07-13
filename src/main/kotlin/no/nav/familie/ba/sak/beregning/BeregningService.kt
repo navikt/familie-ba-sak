@@ -82,7 +82,7 @@ class BeregningService(
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
             this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxBy { it.vedtakdatoTom }!!.vedtakdatoTom
             this.stønadFom = if (erRentOpphør) null else utbetalingsoppdrag.utbetalingsperiode
-                    .filter { !it.erEndringPåEksisterendePeriode }
+                    .filter { !it.erEndringPåEksisterendePeriode } // TODO: Hva er dette for? Vil aldri finnes hvis ikke opphør?
                     .minBy { it.vedtakdatoFom }!!.vedtakdatoFom
             this.endretDato = LocalDate.now()
             this.opphørFom = opphørsdato

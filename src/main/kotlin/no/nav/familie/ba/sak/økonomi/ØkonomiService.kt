@@ -36,28 +36,29 @@ class ØkonomiService(
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId: Long, saksbehandlerId: String) {
         // TODO: https://github.com/navikt/familie-ba-sak/blob/4c78bce83387001c952bae8452b75ace1e014b61/src/main/kotlin/no/nav/familie/ba/sak/%C3%B8konomi/%C3%98konomiService.kt#L25 . Dobbeltsjekk at det er greit å fjerne parameter behandlingsId
         val vedtak = vedtakService.hent(vedtakId)
+        val nyesteBehandling = vedtak.behandling
         val behandlingResultatType =
-                if (vedtak.behandling.type == BehandlingType.TEKNISK_OPPHØR
-                    || vedtak.behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
+                if (nyesteBehandling.type == BehandlingType.TEKNISK_OPPHØR
+                    || nyesteBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
                     BehandlingResultatType.OPPHØRT
-                else behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+                else behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = nyesteBehandling.id)
 
-        val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(vedtak.behandling.fagsak.id).size == 1
+        val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(nyesteBehandling.fagsak.id).size == 1
 
         val (nyeandeler, opphørandeler) = if (erFørsteBehandlingPåFagsak) {
-            val nyeandeler = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+            val nyeandeler = beregningService.hentAndelerTilkjentYtelseForBehandling(nyesteBehandling.id)
             Pair(nyeandeler, listOf<AndelTilkjentYtelse>())
         } else {
-            // TODO: Må sørge for at man når siste behandling er opphør ikke klarer å finne noen andeler på behandling, slik at subtract resulterer i at alle er nye
-            val forrigeVedtak = vedtakService.hent(vedtak.forrigeVedtakId!!)
-            val (andelerSomErNye, andelerSomOpphøres) = separerNyeOgOpphørteAndelerForØkonomi(vedtak.behandling.id,
-                                                                                              forrigeVedtak.behandling.id)
+            val forrigeBehandling = vedtakService.hent(vedtak.forrigeVedtakId!!).behandling
+            val (andelerSomErNye, andelerSomOpphøres) = separerNyeOgOpphørteAndelerForØkonomi(nyesteBehandling.id,
+                                                                                              forrigeBehandling.id)
             if (behandlingResultatType == BehandlingResultatType.OPPHØRT
-                && (andelerSomErNye.size < 0 || andelerSomOpphøres.size == 0)) {
+                && (andelerSomErNye.isNotEmpty() || andelerSomOpphøres.isEmpty())) {
                 throw IllegalStateException("Kan ikke oppdatere tilkjent ytelse og iverksette vedtak fordi opphør inneholder nye " +
                                             "andeler eller mangler opphørte andeler.")
             }
-            Pair(beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id), emptyList()) // TODO: Skal returnere begge deler
+            Pair(beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id),
+                 beregningService.hentAndelerTilkjentYtelseForBehandling(nyesteBehandling.id))
         }
 
         val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
@@ -69,8 +70,8 @@ class ØkonomiService(
                 opphørteAndeler = opphørandeler
         )
 
-        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(vedtak.behandling, utbetalingsoppdrag)
-        iverksettOppdrag(vedtak.behandling.id, utbetalingsoppdrag)
+        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(nyesteBehandling, utbetalingsoppdrag)
+        iverksettOppdrag(nyesteBehandling.id, utbetalingsoppdrag)
     }
 
 
