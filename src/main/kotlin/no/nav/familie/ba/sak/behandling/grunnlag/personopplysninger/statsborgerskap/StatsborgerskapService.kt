@@ -32,12 +32,12 @@ class StatsborgerskapService(
             }
 
     fun hentStatsborgerskapMedMedlemskapOgHistorikk(ident: Ident, person: Person): List<GrStatsborgerskap> =
-            integrasjonClient.hentStatsborgerskap(ident).flatMap {
-                hentStatsborgerskapMedMedlemskap(it, person)
+            integrasjonClient.hentStatsborgerskap(ident).flatMap { statsborgerskap ->
+                hentStatsborgerskapMedMedlemskap(statsborgerskap, person)
             }.sortedWith(fomComparator)
 
     private fun hentStatsborgerskapMedMedlemskap(statsborgerskap: Statsborgerskap, person: Person): List<GrStatsborgerskap> {
-        if (statsborgerskap.erNordiskLand()) {
+        if (statsborgerskap.iNordiskLand()) {
             return listOf(GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = statsborgerskap.gyldigFraOgMed,
                                                                                  tom = statsborgerskap.gyldigTilOgMed),
                                             landkode = statsborgerskap.land,
@@ -45,18 +45,17 @@ class StatsborgerskapService(
                                             person = person))
         }
 
-        val perioderSomEØSLand = integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land]
-
+        val alleEØSLandInkludertHistoriske = integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land]
         val grStatsborgerskap = ArrayList<GrStatsborgerskap>()
         var datoFra = statsborgerskap.gyldigFraOgMed
 
-        hentMedlemskapsIntervaller(perioderSomEØSLand, statsborgerskap.gyldigFraOgMed, statsborgerskap.gyldigTilOgMed)
+        hentMedlemskapsIntervaller(alleEØSLandInkludertHistoriske, statsborgerskap.gyldigFraOgMed, statsborgerskap.gyldigTilOgMed)
                 .forEach {
                     grStatsborgerskap += GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = datoFra,
                                                                                                 tom = it.minusDays(1)),
                                                            landkode = statsborgerskap.land,
                                                            medlemskap = finnMedlemskap(statsborgerskap,
-                                                                                       perioderSomEØSLand,
+                                                                                       alleEØSLandInkludertHistoriske,
                                                                                        datoFra),
                                                            person = person)
                     datoFra = it
@@ -65,31 +64,32 @@ class StatsborgerskapService(
         grStatsborgerskap += GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = datoFra,
                                                                                     tom = statsborgerskap.gyldigTilOgMed),
                                                landkode = statsborgerskap.land,
-                                               medlemskap = finnMedlemskap(statsborgerskap, perioderSomEØSLand, datoFra),
+                                               medlemskap = finnMedlemskap(statsborgerskap,
+                                                                           alleEØSLandInkludertHistoriske,
+                                                                           datoFra),
                                                person = person)
 
         return grStatsborgerskap
     }
 
     private fun hentMedlemskapsIntervaller(eøsLand: List<BetydningDto>?, fra: LocalDate?, til: LocalDate?): List<LocalDate> =
-            eøsLand?.flatMap { listOf(it.gyldigFra, it.gyldigTil.plusDays(1)) }
-                    // fjern datum som betegner uendelighet i kodeverk (9999-01-01 og 1900-01-01)
-                    ?.filter {
-                        it.isAfter(LocalDate.parse("1900-01-02")) &&
-                        it.isBefore(LocalDate.parse("9990-01-01"))
-                    }?.filter {datoForEndringIMedlemskap ->
-                        (fra == null || datoForEndringIMedlemskap > fra ) &&
-                        (til == null || datoForEndringIMedlemskap < til )
-                    } ?: emptyList()
+            eøsLand?.flatMap {
+                listOf(it.gyldigFra, it.gyldigTil.plusDays(1))
+            }?.filter {datoForEndringIMedlemskap ->
+                erInnenforDatoerSombetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
+            }?.filter { datoForEndringIMedlemskap ->
+                (fra == null || datoForEndringIMedlemskap.isAfter(fra)) &&
+                (til == null || datoForEndringIMedlemskap.isBefore(til))
+            } ?: emptyList()
 
 
     private fun finnMedlemskap(statsborgerskap: Statsborgerskap,
                                perioderEØSLand: List<BetydningDto>?,
                                gyldigFraOgMed: LocalDate?): Medlemskap =
             when {
-                statsborgerskap.erNordiskLand() -> Medlemskap.NORDEN
+                statsborgerskap.iNordiskLand() -> Medlemskap.NORDEN
                 erEØS(perioderEØSLand, gyldigFraOgMed) -> Medlemskap.EØS
-                statsborgerskap.erTredjeland() -> Medlemskap.TREDJELANDSBORGER
+                statsborgerskap.iTredjeland() -> Medlemskap.TREDJELANDSBORGER
                 else -> Medlemskap.UKJENT
             }
 
@@ -100,14 +100,19 @@ class StatsborgerskapService(
                                     it.gyldigTil >= fraDato)
             } ?: false
 
+    private fun erInnenforDatoerSombetegnerUendelighetIKodeverk(dato: LocalDate) =
+            dato.isAfter(TIDLIGSTE_DATO_I_KODEVERK) && dato.isBefore(SENESTE_DATO_I_KODEVERK)
+
     companion object {
         const val LANDKODE_UKJENT = "XUK"
+        val TIDLIGSTE_DATO_I_KODEVERK: LocalDate = LocalDate.parse("1900-01-02")
+        val SENESTE_DATO_I_KODEVERK: LocalDate = LocalDate.parse("9990-01-01")
     }
 }
 
-fun Statsborgerskap.erNordiskLand() = Norden.values().map { it.name }.contains(this.land)
+fun Statsborgerskap.iNordiskLand() = Norden.values().map { it.name }.contains(this.land)
 
-fun Statsborgerskap.erTredjeland() = this.land != StatsborgerskapService.LANDKODE_UKJENT
+fun Statsborgerskap.iTredjeland() = this.land != StatsborgerskapService.LANDKODE_UKJENT
 
 enum class Norden {
     NOR,
