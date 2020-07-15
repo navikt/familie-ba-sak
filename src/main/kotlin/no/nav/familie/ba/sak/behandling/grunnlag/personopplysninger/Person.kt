@@ -59,7 +59,7 @@ data class Person(
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
-        val statsborgerskap: List<GrStatsborgerskap>? = null,
+        var statsborgerskap: List<GrStatsborgerskap>? = null,
 
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718

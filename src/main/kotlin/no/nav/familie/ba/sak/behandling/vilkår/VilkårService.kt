@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
@@ -13,7 +11,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
-import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
@@ -37,20 +34,6 @@ class VilkårService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
-
-    private val vilkårSuksessMetrics: Map<Vilkår, Counter> = initVilkårMetrikker("suksess")
-    private val vilkårFeiletMetrics: Map<Vilkår, Counter> = initVilkårMetrikker("feil")
-
-    private fun initVilkårMetrikker(type: String): Map<Vilkår, Counter> {
-        return Vilkår.values().map {
-            it to Metrics.counter("behandling.vilkår.$type",
-                                  "vilkår",
-                                  it.name,
-                                  "beskrivelse",
-                                  it.spesifikasjon.beskrivelse)
-        }.toMap()
-    }
-
     fun hentVilkårsdato(behandling: Behandling): LocalDate? {
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                  ?: error("Finner ikke behandlingsresultat på behandling ${behandling.id}")
@@ -95,7 +78,6 @@ class VilkårService(
             val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
             personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, fakta, evalueringer))
 
-            tellMetrikker(evalueringer, person.type)
             personResultat
         }.toSet()
 
@@ -128,7 +110,6 @@ class VilkårService(
             }
         }
     }
-
 
     fun genererInitieltBehandlingResultatFraAnnenBehandling(behandling: Behandling, annenBehandling: Behandling): BehandlingResultat {
         val initieltBehandlingResultat = genererInitieltBehandlingResultat(behandling = behandling)
@@ -187,39 +168,6 @@ class VilkårService(
             vilkårListe
         }.toSet())
         return personResultat
-    }
-
-    private fun hentIdentifikatorForEvaluering(evaluering: Evaluering): String? {
-        return if (enumValues<Vilkår>().map { it.name }.contains(evaluering.identifikator))
-            evaluering.identifikator
-        else if (!evaluering.children.isEmpty())
-            hentIdentifikatorForEvaluering(evaluering.children.first())
-        else {
-            LOG.warn("Internal Error: Illegal Identifikator for Evaluering")
-            null
-        }
-    }
-
-    private fun hentCounterForVilkår(resultat: Resultat, vilkår: Vilkår): Counter? {
-        return if (resultat == Resultat.JA) {
-            vilkårSuksessMetrics.get(vilkår)
-        } else if (resultat == Resultat.NEI) {
-            vilkårFeiletMetrics.get(vilkår)
-        } else {
-            LOG.warn("Internal Error: Illegal type of metrics $resultat")
-            null
-        }
-    }
-
-    fun tellMetrikker(evalueringer: List<Evaluering>, personType: PersonType) {
-        evalueringer.forEach {
-            var identifikator = hentIdentifikatorForEvaluering(it)
-            identifikator.plus("_").plus(personType.name)
-            if (identifikator != null) {
-                val counter = hentCounterForVilkår(it.resultat, Vilkår.valueOf(identifikator))
-                counter?.increment()
-            }
-        }
     }
 
     private fun spesifikasjonerForPerson(person: Person, behandlingKategori: BehandlingKategori): Spesifikasjon<Fakta> {
