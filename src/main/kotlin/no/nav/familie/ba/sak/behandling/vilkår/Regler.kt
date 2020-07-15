@@ -9,6 +9,7 @@ import no.nav.nare.core.evaluations.Evaluering
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.kontrakter.felles.personinfo.OPPHOLDSTILLATELSE
 import java.time.LocalDate
 
 internal fun barnUnder18År(fakta: Fakta): Evaluering =
@@ -74,10 +75,14 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
                                                         PersonType.SØKER)
             //TODO: Implementeres av TEA-1532
             contains(Medlemskap.EØS) -> Evaluering.kanskje("Er EØS borger.")
-            //TODO: Implementeres av TEA-1533
-            contains(Medlemskap.TREDJELANDSBORGER) -> Evaluering.kanskje("Tredjelandsborger med lovlig opphold.")
+            contains(Medlemskap.TREDJELANDSBORGER) -> {
+                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeFor(LocalDate.now()) }
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER)
+                    evalueringNei("Mor har ikke lovlig opphold", Vilkår.LOVLIG_OPPHOLD, PersonType.SØKER)
+                else evalueringJa("Er tredjelandsborger med lovlig opphold", Vilkår.LOVLIG_OPPHOLD, PersonType.SØKER)
+            }
             //TODO: Implementeres av TEA-1534
-            else -> Evaluering.kanskje("Person har lovlig opphold.")
+            else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
         }
     }
 }
