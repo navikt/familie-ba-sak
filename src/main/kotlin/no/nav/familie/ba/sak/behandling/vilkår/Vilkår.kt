@@ -39,7 +39,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "§2-4 - Gift/partnerskap",
                     identifikator = "GIFT_PARTNERSKAP",
-                    implementasjon = { giftEllerPartneskap(this) }),
+                    implementasjon = { giftEllerPartnerskap(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     BOSATT_I_RIKET(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),

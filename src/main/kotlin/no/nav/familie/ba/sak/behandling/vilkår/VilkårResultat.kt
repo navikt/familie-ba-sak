@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
@@ -38,8 +39,8 @@ class VilkårResultat(
         @Column(name = "begrunnelse", columnDefinition = "TEXT", nullable = false)
         var begrunnelse: String,
 
-        @Column(name = "fk_behandling_id", nullable = true)
-        var behandlingId: Long?,
+        @Column(name = "fk_behandling_id", nullable = false)
+        var behandlingId: Long,
 
         @Column(name = "regel_input", columnDefinition = "TEXT")
         var regelInput: String?,
@@ -53,6 +54,14 @@ class VilkårResultat(
         periodeTom = null
         begrunnelse = ""
         resultat = Resultat.KANSKJE
+    }
+
+    fun oppdater(restVilkårResultat: RestVilkårResultat) {
+        periodeFom = restVilkårResultat.periodeFom
+        periodeTom = restVilkårResultat.periodeTom
+        begrunnelse = restVilkårResultat.begrunnelse
+        resultat = restVilkårResultat.resultat
+        oppdaterPekerTilBehandling()
     }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
@@ -69,7 +78,7 @@ class VilkårResultat(
         )
     }
 
-    fun kopierMedNyPeriode(fom: LocalDate, tom: LocalDate): VilkårResultat {
+    fun kopierMedNyPeriode(fom: LocalDate, tom: LocalDate, behandlingId: Long): VilkårResultat {
         return VilkårResultat(
                 personResultat = personResultat,
                 vilkårType = vilkårType,
@@ -77,9 +86,13 @@ class VilkårResultat(
                 periodeFom = if (fom == TIDENES_MORGEN) null else fom,
                 periodeTom = if (tom == TIDENES_ENDE) null else tom,
                 begrunnelse = begrunnelse,
-                behandlingId = behandlingId,
                 regelInput = regelInput,
-                regelOutput = regelOutput
+                regelOutput = regelOutput,
+                behandlingId = behandlingId
         )
+    }
+
+    fun oppdaterPekerTilBehandling() {
+        behandlingId = personResultat!!.behandlingResultat.behandling.id
     }
 }

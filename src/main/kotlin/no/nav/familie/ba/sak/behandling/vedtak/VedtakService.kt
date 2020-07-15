@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
@@ -14,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -36,7 +36,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
                     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokumentService: DokumentService,
-                    private val fagsakService: FagsakService,
                     private val totrinnskontrollService: TotrinnskontrollService) {
 
     @Transactional
@@ -124,6 +123,19 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak)
 
         lagreOgDeaktiverGammel(vedtak)
+    }
+
+    @Transactional
+    fun leggTilStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse, fagsakId: Long) {
+        val behandling: Behandling = behandlingService.hentAktivForFagsak(fagsakId)
+                                     ?: throw Feil(message = "Finner ikke aktiv behandling på fagsak")
+
+        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+        vedtak.settStønadBrevBegrunnelse(periode = restStønadBrevBegrunnelse.periode,
+                                         begrunnelse = restStønadBrevBegrunnelse.begrunnelse)
+
+        lagreEllerOppdater(vedtak)
     }
 
     fun hentForrigeVedtak(behandling: Behandling): Vedtak? {

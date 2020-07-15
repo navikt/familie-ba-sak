@@ -29,7 +29,7 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
         val request = InfotrygdSøkRequest(søkersIdenter.map { FoedselsNr(it) }, barnasIdenter.map { FoedselsNr(it) })
 
         return try {
-            postForEntity<InfotrygdSøkResponse>(uri, request)!!.ingenTreff
+            postForEntity<InfotrygdSøkResponse>(uri, request).ingenTreff
         } catch (ex: Exception) {
             when (ex) {
                 is HttpClientErrorException -> secureLogger.error("Http feil mot infotrygd barnetrygd: httpkode: ${ex.statusCode}, feilmelding ${ex.message}", ex)

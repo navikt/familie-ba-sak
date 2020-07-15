@@ -67,10 +67,7 @@ object VilkårsvurderingUtils {
         val periodePåNyttVilkår: Periode = restVilkårResultat.toPeriode()
 
         if (vilkårResultat.id == restVilkårResultat.id) {
-            vilkårResultat.periodeFom = restVilkårResultat.periodeFom
-            vilkårResultat.periodeTom = restVilkårResultat.periodeTom
-            vilkårResultat.begrunnelse = restVilkårResultat.begrunnelse
-            vilkårResultat.resultat = restVilkårResultat.resultat
+            vilkårResultat.oppdater(restVilkårResultat)
         } else if (vilkårResultat.vilkårType == restVilkårResultat.vilkårType) {
             val periode: Periode = vilkårResultat.toPeriode()
 
@@ -87,14 +84,22 @@ object VilkårsvurderingUtils {
                 }
                 periodePåNyttVilkår.kanSplitte(periode) -> {
                     personResultat.removeVilkårResultat(vilkårResultatId = vilkårResultat.id)
-                    personResultat.addVilkårResultat(vilkårResultat.kopierMedNyPeriode(periode.fom, nyTom))
-                    personResultat.addVilkårResultat(vilkårResultat.kopierMedNyPeriode(nyFom, periode.tom))
+                    personResultat.addVilkårResultat(
+                            vilkårResultat.kopierMedNyPeriode(fom = nyFom,
+                                                              tom = periode.tom,
+                                                              behandlingId = personResultat.behandlingResultat.behandling.id))
+                    personResultat.addVilkårResultat(
+                            vilkårResultat.kopierMedNyPeriode(fom = periode.fom,
+                                                              tom = nyTom,
+                                                              behandlingId = personResultat.behandlingResultat.behandling.id))
                 }
                 periodePåNyttVilkår.kanFlytteFom(periode) -> {
                     vilkårResultat.periodeFom = nyFom
+                    vilkårResultat.oppdaterPekerTilBehandling()
                 }
                 periodePåNyttVilkår.kanFlytteTom(periode) -> {
                     vilkårResultat.periodeTom = nyTom
+                    vilkårResultat.oppdaterPekerTilBehandling()
                 }
             }
         }

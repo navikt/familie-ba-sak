@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOpphold
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
 import java.time.LocalDate
 import java.util.*
 import javax.persistence.*
@@ -50,8 +54,17 @@ data class Person(
 
         @OneToOne(cascade = [CascadeType.ALL])
         @JoinColumn
-        val bostedsadresse: GrBostedsadresse? = null
+        val bostedsadresse: GrBostedsadresse? = null,
 
+        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
+        @Fetch(value = FetchMode.SUBSELECT)
+        var statsborgerskap: List<GrStatsborgerskap>? = null,
+
+        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
+        @Fetch(value = FetchMode.SUBSELECT)
+        val opphold: List<GrOpphold>? = null
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -76,5 +89,10 @@ data class Person(
 enum class Kjønn {
     MANN, KVINNE, UKJENT
 }
+
+enum class Medlemskap {
+    NORDEN, EØS, TREDJELANDSBORGER, UKJENT
+}
+
 
 
