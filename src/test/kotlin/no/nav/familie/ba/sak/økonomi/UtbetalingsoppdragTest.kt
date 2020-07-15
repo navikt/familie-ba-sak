@@ -60,19 +60,17 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                                                   vedtak,
                                                                   behandlingResultatType,
                                                                   true,
-                                                                  utbetalingsoppdragGenerator.delOppIKjeder(andelerTilkjentYtelse))
+                                                                  ØkonomiUtils.delOppIKjederMedIdentifikator(andelerTilkjentYtelse).values.toList())
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], 0, null, 660, "2019-04-01", "2023-03-31")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], 1, 0, 660, "2026-05-01", "2027-06-30")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], 2, null, 1054, "2019-03-01", "2037-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], 0, null, 1054, "2019-03-01", "2037-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], 1, null, 660, "2019-04-01", "2023-03-31")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], 2, 1, 660, "2026-05-01", "2027-06-30")
     }
-
-    /*
-
+/*
     @Test
     fun `skal opprette et fullstendig opphør med felles løpende periodeId og separat kjeding på to personer`() {
         val behandling = lagBehandling()
@@ -101,7 +99,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                                                   opphørVedtak,
                                                                   behandlingResultatType,
                                                                   false,
-                                                                  kjedefordelteOpphørMedDato = utbetalingsoppdragGenerator.delOppIKjeder(andelerTilkjentYtelse)) //TODO: fix test
+                                                                  kjedefordelteOpphørMedDato = ) //TODO: fix test
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -123,6 +121,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                  "2037-02-28",
                                  opphørFom)
     }
+
 
     @Test
     fun `skal opprette et fullstendig opphør hvor periodens fom-dato er opphørsdato når denne er senere`() {
@@ -161,8 +160,8 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                  "2025-01-01",
                                  "2030-02-28",
                                  dato("2025-01-01"))
-    }
-*/
+    }*/
+
     @Test
     fun `skal opprette et nytt utbetalingsoppdrag med to andeler på samme person og separat kjeding for småbarnstillegg`() {
         val behandling = lagBehandling()
@@ -193,15 +192,15 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                                                                    vedtak,
                                                                                    behandlingResultatType,
                                                                                    true,
-                                                                                   utbetalingsoppdragGenerator.delOppIKjeder(andelerTilkjentYtelse))
+                                                                                   ØkonomiUtils.delOppIKjederMedIdentifikator(andelerTilkjentYtelse).values.toList())
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], 0, null, 660, "2019-04-01", "2023-03-31")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], 1, 0, 660, "2026-05-01", "2027-06-30")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], 2, null, 1054, "2019-03-01", "2037-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], 0, null, 1054, "2019-03-01", "2037-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], 1, null, 660, "2019-04-01", "2023-03-31")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], 2, 1, 660, "2026-05-01", "2027-06-30")
     }
 
     @Test
@@ -218,7 +217,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                                               vedtak,
                                                               behandlingResultatType,
                                                               true,
-                                                              utbetalingsoppdragGenerator.delOppIKjeder(andelerTilkjentYtelse))
+                                                              ØkonomiUtils.delOppIKjederMedIdentifikator(andelerTilkjentYtelse).values.toList())
         }
     }
 

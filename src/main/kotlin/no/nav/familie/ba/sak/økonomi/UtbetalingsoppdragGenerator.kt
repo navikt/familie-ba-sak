@@ -111,7 +111,7 @@ class UtbetalingsoppdragGenerator(
         // Dvs at vi for opphør vil opphøre alle og ikke trenger å vite hva forrige referanse er hos økonomi. Dette er også mer intuitivt enn sending av gamle og telling bakover hos økonmi.
 
         val utbetalingsperioder =
-                andelerForKjeding // TODO: Hvordan blir dette ved opphør? Skal ikke kjøre gjennom og øke indekser da, men korrigere siste linje med peker til første dato
+                andelerForKjeding
                         .flatMap { kjede: List<AndelTilkjentYtelse> ->
                             val ident = kjede.first().personIdent
                             val type = kjede.first().type
@@ -155,18 +155,5 @@ class UtbetalingsoppdragGenerator(
         val andelerPåFagsak = beregningService.hentAndelerTilkjentYtelseForFagsak(fagsakId)
         val sorterteAndeler = andelerPåFagsak.sortedBy { it.periodeOffset }
         return sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
-    }
-
-    fun delOppIKjeder(andelerSomSkalSplittes: List<AndelTilkjentYtelse>): List<List<AndelTilkjentYtelse>> {
-        // Separereer i lister siden småbarnstillegg og utvidet barnetrygd begge vil stå på forelder, men skal kjedes separat
-        val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
-                andelerSomSkalSplittes.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
-                    it.groupBy { andel -> andel.personIdent } // TODO: Hva skjer dersom personidenten endrer seg? Bør gruppere på en annen måte og oppdatere lagingen av utbetalingsperioder fra andeler
-                }
-        val andelerForKjeding = listOf(personMedSmåbarnstilleggAndeler.values, personerMedAndeler.values).flatten()
-        if (personMedSmåbarnstilleggAndeler.size > 1) {
-            throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
-        }
-        return andelerForKjeding
     }
 }
