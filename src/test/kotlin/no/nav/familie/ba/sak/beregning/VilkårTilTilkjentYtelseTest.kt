@@ -187,7 +187,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
         if (beløp == null || periode.isNullOrEmpty() || type.isNullOrEmpty())
             return this
 
-        val stønadPeriode = TestPeriode.parse(periode);
+        val stønadPeriode = TestPeriode.parse(periode)
 
         tilkjentYtelse.andelerTilkjentYtelse.add(
                 AndelTilkjentYtelse(
@@ -206,7 +206,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
     }
 
     fun bygg(): TilkjentYtelse {
-        return tilkjentYtelse;
+        return tilkjentYtelse
     }
 }
 

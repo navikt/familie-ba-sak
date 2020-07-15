@@ -26,7 +26,7 @@ data class Fagsak(
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {
-        return Objects.hashCode(id);
+        return Objects.hashCode(id)
     }
 
     override fun toString(): String {

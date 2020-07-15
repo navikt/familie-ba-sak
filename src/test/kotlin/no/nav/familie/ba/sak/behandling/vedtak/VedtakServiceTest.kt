@@ -237,7 +237,7 @@ class VedtakServiceTest(
         vedtak.settStønadBrevBegrunnelse(periode, begrunnelse)
 
         val endretVedtak = vedtakService.lagreEllerOppdater(vedtak)
-        Assertions.assertEquals(mapOf(periode to begrunnelse), endretVedtak.stønadBrevBegrunnelser)
+        Assertions.assertEquals(mapOf(periode.key to begrunnelse), endretVedtak.stønadBrevBegrunnelser)
         Assertions.assertEquals(1, endretVedtak.stønadBrevBegrunnelser.size)
     }
 

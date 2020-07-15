@@ -12,7 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
-class SendFeedTilInfotrygdTaskTest() {
+class SendFeedTilInfotrygdTaskTest {
 
     @Test
     fun `Legg til fødselsmelding til task`() {

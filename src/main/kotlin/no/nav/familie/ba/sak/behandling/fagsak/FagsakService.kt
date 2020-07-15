@@ -208,7 +208,7 @@ class FagsakService(
 
         //The given person and its parents may be included in the result, no matter whether they have a case.
         val assosierteFagsakDeltager = assosierteFagsakDeltagerMap.values.toMutableList()
-        val erBarn = Period.between(personInfo.fødselsdato, LocalDate.now()).getYears() < 18
+        val erBarn = Period.between(personInfo.fødselsdato, LocalDate.now()).years < 18
 
         if (assosierteFagsakDeltager.find { it.ident == personIdent } == null) {
             assosierteFagsakDeltager.add(RestFagsakDeltager(
