@@ -28,17 +28,17 @@ class ØkonomiService(
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId: Long, saksbehandlerId: String) {
         val vedtak = vedtakService.hent(vedtakId)
 
-        val nyesteBehandling = vedtak.behandling
-        val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(nyesteBehandling.id)
+        val oppdatertBehandling = vedtak.behandling
+        val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
         val oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(oppdatertTilstand)
 
         val behandlingResultatType =
-                if (nyesteBehandling.type == BehandlingType.TEKNISK_OPPHØR
-                    || nyesteBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
+                if (oppdatertBehandling.type == BehandlingType.TEKNISK_OPPHØR
+                    || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
                     BehandlingResultatType.OPPHØRT
-                else behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = nyesteBehandling.id)
+                else behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
 
-        val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(nyesteBehandling.fagsak.id).size == 1
+        val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(oppdatertBehandling.fagsak.id).size == 1
 
         val (nyeAndeler: List<List<AndelTilkjentYtelse>>, opphørAndeler: List<Pair<AndelTilkjentYtelse, LocalDate>>) =
                 if (erFørsteBehandlingPåFagsak) {
@@ -48,11 +48,11 @@ class ØkonomiService(
                     val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
                     val forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(forrigeTilstand)
 
-                    val førsteDirtyIHverKjede = ØkonomiUtils.dirtyKjedeFomOversikt(forrigeKjeder, oppdaterteKjeder)
+                    val dirtyKjedeFomOversikt = ØkonomiUtils.dirtyKjedeFomOversikt(forrigeKjeder, oppdaterteKjeder)
 
                     val andelerSomSkalLagesNye: List<List<AndelTilkjentYtelse>> =
-                            ØkonomiUtils.oppdaterteAndelerFraFørsteEndring(oppdaterteKjeder, førsteDirtyIHverKjede)
-                    val andelerSomSkaLagesOpphørAvMeDato = ØkonomiUtils.opphørteAndelerEtterDato(forrigeKjeder, førsteDirtyIHverKjede)
+                            ØkonomiUtils.oppdaterteAndelerFraFørsteEndring(oppdaterteKjeder, dirtyKjedeFomOversikt)
+                    val andelerSomSkaLagesOpphørAvMeDato = ØkonomiUtils.opphørteAndelerEtterDato(forrigeKjeder, dirtyKjedeFomOversikt)
 
                     if (behandlingResultatType == BehandlingResultatType.OPPHØRT
                         && (andelerSomSkalLagesNye.isNotEmpty() || andelerSomSkaLagesOpphørAvMeDato.isEmpty())) {
@@ -72,8 +72,8 @@ class ØkonomiService(
                 andelerTilOpphør = opphørAndeler
         )
 
-        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(nyesteBehandling, utbetalingsoppdrag)
-        iverksettOppdrag(nyesteBehandling.id, utbetalingsoppdrag)
+        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
+        iverksettOppdrag(oppdatertBehandling.id, utbetalingsoppdrag)
     }
 
     private fun iverksettOppdrag(behandlingsId: Long,

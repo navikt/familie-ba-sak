@@ -103,7 +103,7 @@ class FagsakService(
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
-                val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
                 val restVedtakPerson = lagRestVedtakPerson(andelerTilkjentYtelse, personopplysningGrunnlag)
                 vedtak.toRestVedtak(restVedtakPerson)
             }

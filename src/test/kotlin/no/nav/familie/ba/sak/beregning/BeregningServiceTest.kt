@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class BeregningServiceTest() {
+class BeregningServiceTest {
 
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     val behandlingResultatRepository = mockk<BehandlingResultatRepository>()
