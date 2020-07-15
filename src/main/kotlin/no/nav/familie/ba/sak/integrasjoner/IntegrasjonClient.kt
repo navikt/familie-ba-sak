@@ -22,10 +22,12 @@ import no.nav.familie.kontrakter.felles.arkivering.FilType
 import no.nav.familie.kontrakter.felles.distribusjon.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
 import no.nav.familie.kontrakter.felles.personinfo.Ident
+import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
 import no.nav.familie.log.NavHttpHeaders
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -141,6 +143,26 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                               navn = relasjonsinfo.navn)
         }.toSet()
         return personinfo.copy(familierelasjoner = familierelasjoner)
+    }
+
+    fun hentStatsborgerskap(ident: Ident): List<Statsborgerskap> {
+        val uri = URI.create("$integrasjonUri/personopplysning/statsborgerskap/BAR")
+
+        return try {
+            postForEntity<Ressurs<List<Statsborgerskap>>>(uri, ident).getDataOrThrow()
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av statsborgerskap", e, uri, ident.ident)
+        }
+    }
+
+    fun hentAlleEØSLand(): KodeverkDto {
+        val uri = URI.create("$integrasjonUri/kodeverk/landkoder/eea")
+
+        return try {
+            getForEntity<Ressurs<KodeverkDto>>(uri).getDataOrThrow()
+        } catch (e: RestClientException) {
+            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av landkoder eea", e, uri)
+        }
     }
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))

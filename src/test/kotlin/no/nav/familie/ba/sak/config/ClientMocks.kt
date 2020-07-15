@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personinfo.Ident
+import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -90,6 +91,14 @@ class ClientMocks {
             mockIntegrasjonClient.hentAktivPersonIdent(any())
         } answers {
             PersonIdent(randomFnr())
+        }
+
+        every {
+            mockIntegrasjonClient.hentStatsborgerskap(any())
+        } answers {
+            listOf(Statsborgerskap("NOR",
+                                   LocalDate.of(1990,1, 25),
+                                   null))
         }
 
         val identSlot = slot<Ident>()
@@ -193,6 +202,14 @@ class ClientMocks {
             mockIntegrasjonClient.hentAktivAktørId(any())
         } answers {
             randomAktørId()
+        }
+
+        every {
+            mockIntegrasjonClient.hentStatsborgerskap(any())
+        } answers {
+            listOf(Statsborgerskap("NOR",
+                                   LocalDate.of(1990,1, 25),
+                                   null))
         }
 
         val ukjentId = "43125678910"

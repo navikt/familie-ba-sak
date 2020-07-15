@@ -1,19 +1,22 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personinfo.Ident
 import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 
 @Service
 class PersongrunnlagService(
         private val personRepository: PersonRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val integrasjonClient: IntegrasjonClient
+        private val integrasjonClient: IntegrasjonClient,
+        private val statsborgerskapService: StatsborgerskapService
 ) {
 
     fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
@@ -48,6 +51,7 @@ class PersongrunnlagService(
 
         val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
         val aktørId = integrasjonClient.hentAktivAktørId(Ident(fødselsnummer))
+
         val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
                            type = PersonType.SØKER,
                            personopplysningGrunnlag = personopplysningGrunnlag,
@@ -57,7 +61,8 @@ class PersongrunnlagService(
                            bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
-        )
+        ).also { it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)}
+
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
         secureLogger.info("Setter persongrunnlag med søker: ${fødselsnummer} og barn: ${barnasFødselsnummer}")
@@ -69,7 +74,7 @@ class PersongrunnlagService(
                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
         return barnasFødselsnummer.map { nyttBarn ->
             val personinfo = integrasjonClient.hentPersoninfoFor(nyttBarn)
-            personRepository.save(Person(personIdent = PersonIdent(nyttBarn),
+            Person(personIdent = PersonIdent(nyttBarn),
                                          type = PersonType.BARN,
                                          personopplysningGrunnlag = personopplysningGrunnlag,
                                          fødselsdato = personinfo.fødselsdato,
@@ -78,7 +83,7 @@ class PersongrunnlagService(
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                                          bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                                          sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
-            ))
+            ).also { it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(nyttBarn), it)}
         }
     }
 
