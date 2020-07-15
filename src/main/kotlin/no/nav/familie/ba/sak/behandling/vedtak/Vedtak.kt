@@ -33,7 +33,7 @@ data class Vedtak(
         var stønadBrevPdF: ByteArray? = null,
 
         @Column(name = "stonad_brev_metadata", columnDefinition = "TEXT")
-        var stønadBrevMetadata: String = objectMapper.writeValueAsString(StønadBrevMetadata()),
+        var stønadBrevMetadata: String? = objectMapper.writeValueAsString(StønadBrevMetadata()),
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
@@ -51,29 +51,29 @@ data class Vedtak(
 
     fun hentStønadBrevMetadata(): StønadBrevMetadata? {
         return when {
-            stønadBrevMetadata.isBlank() -> null
-            else -> objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata)
+            stønadBrevMetadata.isNullOrBlank() -> null
+            else -> objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!)
         }
     }
 
     val stønadBrevBegrunnelser: Map<String, String>
         get() {
-            return if (stønadBrevMetadata.isBlank()) {
+            return if (stønadBrevMetadata.isNullOrBlank()) {
                 emptyMap()
             } else {
-                objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata).begrunnelser
+                objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!).begrunnelser
             }
         }
 
     fun settStønadBrevBegrunnelse(periode: Periode, begrunnelse: String) {
-        val metadata: StønadBrevMetadata = when (stønadBrevMetadata.isBlank()) {
+        val metadata: StønadBrevMetadata = when (stønadBrevMetadata.isNullOrBlank()) {
             true -> {
                 StønadBrevMetadata(
                         begrunnelser = mutableMapOf(periode.hash to begrunnelse)
                 )
             }
             false -> {
-                val metadata: StønadBrevMetadata = objectMapper.readValue(stønadBrevMetadata)
+                val metadata: StønadBrevMetadata = objectMapper.readValue(stønadBrevMetadata!!)
                 metadata.begrunnelser[periode.hash] = begrunnelse
                 metadata
             }
