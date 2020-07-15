@@ -69,12 +69,12 @@ data class Vedtak(
         val metadata: StønadBrevMetadata = when (stønadBrevMetadata.isBlank()) {
             true -> {
                 StønadBrevMetadata(
-                        begrunnelser = mutableMapOf(periode.key to begrunnelse)
+                        begrunnelser = mutableMapOf(periode.hash to begrunnelse)
                 )
             }
             false -> {
                 val metadata: StønadBrevMetadata = objectMapper.readValue(stønadBrevMetadata)
-                metadata.begrunnelser[periode.key] = begrunnelse
+                metadata.begrunnelser[periode.hash] = begrunnelse
                 metadata
             }
         }

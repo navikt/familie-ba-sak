@@ -85,7 +85,7 @@ class MalerService(
                                                 restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
                                             })
 
-            val begrunnelse: String = vedtak.stønadBrevBegrunnelser[Periode(it.periodeFom!!, it.periodeTom!!).key]
+            val begrunnelse: String = vedtak.stønadBrevBegrunnelser[Periode(it.periodeFom!!, it.periodeTom!!).hash]
                                       ?: "Ikke satt"
 
             DuFårSeksjon(

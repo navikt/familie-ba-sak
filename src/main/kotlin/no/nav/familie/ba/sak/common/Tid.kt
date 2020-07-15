@@ -63,7 +63,7 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
 }
 
 data class Periode(val fom: LocalDate, val tom: LocalDate) {
-    val key get() = "${fom}_${tom}"
+    val hash get() = "${fom}_${tom}"
 }
 
 fun VilkårResultat.toPeriode(): Periode {
