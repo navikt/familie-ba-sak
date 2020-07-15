@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.dokument
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
@@ -78,6 +79,7 @@ class MalerService(
         innvilget.duFaar = beregningOversikt.map {
             val barnasFødselsdatoer =
                     Utils.slåSammen(it.beregningDetaljer
+                                            .filter { restBeregningDetalj -> restBeregningDetalj.person.type == PersonType.BARN }
                                             .sortedBy { restBeregningDetalj -> restBeregningDetalj.person.fødselsdato }
                                             .map { restBeregningDetalj ->
                                                 restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
