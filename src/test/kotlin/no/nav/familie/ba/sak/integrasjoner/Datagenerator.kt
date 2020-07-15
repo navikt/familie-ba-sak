@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner
 
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.journalpost.*
@@ -50,6 +51,7 @@ fun lagTestOppgaveDTO(oppgaveId: Long,
                       tildeltEnhetsnr: String? = "4820"): Oppgave {
     return Oppgave(id = oppgaveId,
                    aktoerId = "1234",
+                   fnr = ClientMocks.søkerFnr[0],
                    journalpostId = "1234",
                    tildeltEnhetsnr = tildeltEnhetsnr,
                    tilordnetRessurs = tildeltRessurs,
