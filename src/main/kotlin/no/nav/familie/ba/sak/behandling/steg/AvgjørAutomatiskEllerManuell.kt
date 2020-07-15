@@ -35,12 +35,14 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
 
         oppdaterMetrikker(evaluering)
 
+        /*
         if (evaluering.resultat == Resultat.JA) {
             // TODO Fortsett med vilkårsvurdering
         } else {
             // TODO Ikke fortsett med vilkårsvurdering, og opprett oppgave
             // opprettOppgave(behandling)
         }
+        */
 
         return hentNesteStegForNormalFlyt(behandling)
     }

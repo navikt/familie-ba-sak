@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.beregning
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
+import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
+import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -9,10 +13,12 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.fpsak.tidsserie.LocalDateInterval
+import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 import java.time.YearMonth
 
-object TilkjentYtelseService {
+object TilkjentYtelseUtils {
 
     fun beregnTilkjentYtelse(behandlingResultat: BehandlingResultat,
                              sakType: SakType,
@@ -91,6 +97,54 @@ object TilkjentYtelseService {
             YearMonth.from(tilOgMed.minusMonths(1))
         else
             YearMonth.from(tilOgMed)
+    }
+
+    fun hentBeregningOversikt(tilkjentYtelseForBehandling: TilkjentYtelse, personopplysningGrunnlag: PersonopplysningGrunnlag)
+            : List<RestBeregningOversikt> {
+        if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
+
+        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
+
+        return utbetalingsPerioder.toSegments()
+                .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
+                .map { segment ->
+                    val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
+                        segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
+                    }
+                    mapTilRestBeregningOversikt(segment,
+                                                andelerForSegment,
+                                                tilkjentYtelseForBehandling.behandling,
+                                                personopplysningGrunnlag)
+                }
+    }
+
+    private fun mapTilRestBeregningOversikt(segment: LocalDateSegment<Int>,
+                                            andelerForSegment: List<AndelTilkjentYtelse>,
+                                            behandling: Behandling,
+                                            personopplysningGrunnlag: PersonopplysningGrunnlag): RestBeregningOversikt {
+        return RestBeregningOversikt(
+                periodeFom = segment.fom,
+                periodeTom = segment.tom,
+                ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
+                utbetaltPerMnd = segment.value,
+                antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.id == andel.personId } },
+                sakstype = behandling.kategori,
+                beregningDetaljer = andelerForSegment.map { andel ->
+                    val personForAndel = personopplysningGrunnlag.personer.find { person -> andel.personId == person.id }
+                                         ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel med personId ${andel.personId}")
+                    RestBeregningDetalj(
+                            person = RestPerson(
+                                    type = personForAndel.type,
+                                    kjønn = personForAndel.kjønn,
+                                    navn = personForAndel.navn,
+                                    fødselsdato = personForAndel.fødselsdato,
+                                    personIdent = personForAndel.personIdent.ident
+                            ),
+                            ytelseType = andel.type,
+                            utbetaltPerMnd = andel.beløp
+                    )
+                }
+        )
     }
 }
 

@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -31,6 +32,7 @@ class VilkårController(
                                                            vilkårId = vilkaarId,
                                                            restPersonResultat = restPersonResultat)
 
+        settSteg(behandlingId)
         return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
     }
 
@@ -39,9 +41,10 @@ class VilkårController(
                     @PathVariable vilkaarId: Long,
                     @RequestBody personIdent: String): ResponseEntity<Ressurs<List<RestPersonResultat>>> {
         val nyVilkårsvurdering = vilkårService.deleteVilkår(behandlingId = behandlingId,
-                                                           vilkårId = vilkaarId,
-                                                           personIdent = personIdent)
+                                                            vilkårId = vilkaarId,
+                                                            personIdent = personIdent)
 
+        settSteg(behandlingId)
         return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
     }
 
@@ -49,6 +52,8 @@ class VilkårController(
     fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår):
             ResponseEntity<Ressurs<List<RestPersonResultat>>> {
         val nyVilkårsvurdering = vilkårService.postVilkår(behandlingId, restNyttVilkår)
+
+        settSteg(behandlingId)
         return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
     }
 
@@ -58,6 +63,10 @@ class VilkårController(
         stegService.håndterVilkårsvurdering(behandling)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+    }
+
+    fun settSteg(behandlingId: Long) {
+        behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingId, steg = StegType.VILKÅRSVURDERING)
     }
 }
 

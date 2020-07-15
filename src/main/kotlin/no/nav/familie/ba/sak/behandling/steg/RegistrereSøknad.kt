@@ -18,7 +18,7 @@ class RegistrereSøknad(
                                       data: SøknadDTO): StegType {
         val aktivSøknadGrunnlagFinnes = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id) != null
 
-        val innsendtSøknad = data.writeValueAsString();
+        val innsendtSøknad = data.writeValueAsString()
 
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)
         søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
