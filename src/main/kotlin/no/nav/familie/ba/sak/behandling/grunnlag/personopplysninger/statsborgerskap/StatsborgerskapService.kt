@@ -76,7 +76,7 @@ class StatsborgerskapService(
             eøsLand?.flatMap {
                 listOf(it.gyldigFra, it.gyldigTil.plusDays(1))
             }?.filter {datoForEndringIMedlemskap ->
-                erInnenforDatoerSombetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
+                erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
             }?.filter { datoForEndringIMedlemskap ->
                 (fra == null || datoForEndringIMedlemskap.isAfter(fra)) &&
                 (til == null || datoForEndringIMedlemskap.isBefore(til))
@@ -100,7 +100,7 @@ class StatsborgerskapService(
                                     it.gyldigTil >= fraDato)
             } ?: false
 
-    private fun erInnenforDatoerSombetegnerUendelighetIKodeverk(dato: LocalDate) =
+    private fun erInnenforDatoerSomBetegnerUendelighetIKodeverk(dato: LocalDate) =
             dato.isAfter(TIDLIGSTE_DATO_I_KODEVERK) && dato.isBefore(SENESTE_DATO_I_KODEVERK)
 
     companion object {
