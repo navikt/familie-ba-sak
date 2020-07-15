@@ -1,38 +1,50 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class UtbetalingsoppdragGenerator(
-        val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-        val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        val fagsakService: FagsakService) {
+        val persongrunnlagService: PersongrunnlagService,
+        val beregningService: BeregningService) {
 
-    //Lager utbetalingsoppdrag direkte fra AndelTilkjentYtelse. Kobler sammen alle perioder som gjelder samme barn i en kjede,
-    // bortsett ra småbarnstillegg som må ha sin egen kjede fordi det er en egen klasse i OS
-    // PeriodeId = Vedtak.id * 1000 + offset
-    // Beholder bare siste utbetalingsperiode hvis det er opphør.
+    /**
+     * Lager utbetalingsoppdrag av AndelTilkjentYtelse. Kobler sammen alle perioder som gjelder samme person i en kjede,
+     * bortsett fra småbarnstillegg og utvidet barnetrygd som separeres i to kjeder for søker.
+     * Sender kun siste utbetalingsperiode (med opphørsdato) hvis det er opphør.
+     *
+     * @param[saksbehandlerId] settes på oppdragsnivå
+     * @param[vedtak] for å hente fagsakid, behandlingid, vedtaksdato, ident, og evt opphørsdato
+     * @param[behandlingResultatType] for å sjekke om fullstendig opphør
+     * @param[erFørsteBehandlingPåFagsak] brukes til å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
+     * @param[nyeAndeler] én liste per kjede, hvor andeler er helt nye, har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
+     * @param[opphørteAndeler] et par per kjede, hvor par består av siste andel i kjeden og opphørsdato (tidligste dirty i kjeden)
+     * @return Utbetalingsoppdrag for vedtak
+     */
     fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                               vedtak: Vedtak,
                               behandlingResultatType: BehandlingResultatType,
                               erFørsteBehandlingPåFagsak: Boolean,
                               nyeAndeler: List<AndelTilkjentYtelse> = emptyList(),
-                              opphørteAndeler: List<AndelTilkjentYtelse> = emptyList()): Utbetalingsoppdrag {
+                              opphørteAndeler: List<AndelTilkjentYtelse> = emptyList(),
+                              nyeAndeler2: List<List<AndelTilkjentYtelse>> = emptyList(),
+                              opphørteAndeler2: List<Pair<AndelTilkjentYtelse, LocalDate>> = emptyList()): Utbetalingsoppdrag {
 
         val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
-        if (erFullstendigOpphør && nyeAndeler.isNotEmpty()) {
+        if (erFullstendigOpphør && nyeAndeler.isNotEmpty()) {// TODO: Bør også sjekke at erFullstendigOpphør inneholder akkurat antall personer på ytelse + småbarn evt
             throw IllegalStateException("Finnes nye andeler når behandling skal opphøres")
         }
 
@@ -45,16 +57,23 @@ class UtbetalingsoppdragGenerator(
                 else if (erFullstendigOpphør) UEND
                 else ENDR
 
-        val nyeUtbetalingsperioder = lagUtbetalingsperioderAvAndeler(
-                andelerForKjeding = delOppIKjeder(nyeAndeler),
-                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-                vedtak = vedtak,
-                erOpphørslinjer = false)
-        val opphørteUtbetalingsperioder = lagUtbetalingsperioderAvAndeler(
-                andelerForKjeding = delOppIKjeder(opphørteAndeler),
-                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-                vedtak = vedtak,
-                erOpphørslinjer = true)
+        val nyeUtbetalingsperioder = if (nyeAndeler.isNotEmpty())
+            lagUtbetalingsperioderAvAndeler(
+                    andelerForKjeding = delOppIKjeder(nyeAndeler),
+                    erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
+                    vedtak = vedtak) else emptyList()
+
+        val opphørteUtbetalingsperioder = if (opphørteAndeler.isNotEmpty())
+            lagUtbetalingsperioderAvAndeler(
+                    andelerForKjeding = delOppIKjeder(opphørteAndeler),
+                    erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
+                    vedtak = vedtak) else emptyList()
+        /*
+        val opphørteUtbetalingsperioder = if (opphørteAndeler.isNotEmpty())
+            lagOpphørsperioderAvAndeler( // TODO: "Ryddelinjer" og fullt opphør
+                    opphørteAndeler,
+                    vedtak = vedtak) else emptyList()
+        */
 
         return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -73,19 +92,23 @@ class UtbetalingsoppdragGenerator(
         }
     }
 
+    private fun lagOpphørsperioderAvAndeler(andelerMedDato: List<Pair<AndelTilkjentYtelse, LocalDate>>,
+                                            vedtak: Vedtak): List<Utbetalingsperiode> {
+        val utbetalingsperiodeMal = UtbetalingsperiodeMal(vedtak, true)
+        return andelerMedDato.map { (opphørsandel, opphørsdato) ->
+            utbetalingsperiodeMal.lagPeriodeFraAndel(opphørsandel, opphørsandel.periodeOffset!!.toInt(), null, opphørsdato)
+        }
+    }
+
+
     private fun lagUtbetalingsperioderAvAndeler(andelerForKjeding: List<List<AndelTilkjentYtelse>>,
                                                 vedtak: Vedtak,
-                                                erFørsteBehandlingPåFagsak: Boolean,
-                                                erOpphørslinjer: Boolean): List<Utbetalingsperiode> {
+                                                erFørsteBehandlingPåFagsak: Boolean): List<Utbetalingsperiode> {
         val fagsakId = vedtak.behandling.fagsak.id
         var offset = if (!erFørsteBehandlingPåFagsak) hentSisteOffsetPåFagsak(fagsakId)
                                                       ?: throw IllegalStateException("Skal finnes offset?") else 0
 
-        val utbetalingsperiodeMal =
-                if (erOpphørslinjer)
-                    UtbetalingsperiodeMal(vedtak, andelerForKjeding.flatten(), true)
-                else
-                    UtbetalingsperiodeMal(vedtak)
+        val utbetalingsperiodeMal = UtbetalingsperiodeMal(vedtak)
 
         // TODO: Tidligere ville man begynne med samme utgangspunkt som siste behandling og telle null, 0, 1 osv så man endte med identiske indekser som sist og så valgte den samme.
         // I realiteten genererte man alltid et identisk resultat og valgte den siste.
@@ -100,7 +123,7 @@ class UtbetalingsoppdragGenerator(
                         .flatMap { kjede: List<AndelTilkjentYtelse> ->
                             val ident = kjede.first().personIdent
                             val type = kjede.first().type
-                            val erSøker = PersonType.SØKER == hentPersontypeForPerson(ident, kjede.first().behandlingId)
+                            val erSøker = erSøkerPåBehandling(ident, vedtak.behandling)
                             var forrigeOffsetPåPersonHvisFunnet: Int? = null
                             if (!erFørsteBehandlingPåFagsak) {
                                 forrigeOffsetPåPersonHvisFunnet = if (erSøker) {
@@ -117,18 +140,15 @@ class UtbetalingsoppdragGenerator(
                                 }
                             }
                         }
-        lagreOppdaterteAndeler(andelerForKjeding.flatten())
+        beregningService.lagreOppdaterteAndelerTilkjentYtelse(andelerForKjeding.flatten())
         return utbetalingsperioder
     }
 
-    fun hentPersontypeForPerson(personIdent: String, behandlingId: Long): PersonType {
-        val personopplysningsgrunnlag =
-                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
-        return personopplysningsgrunnlag!!.personer.find { it.personIdent.ident == personIdent }!!.type
-    }
+    fun erSøkerPåBehandling(ident: String, behandling: Behandling): Boolean =
+            persongrunnlagService.hentSøker(behandling)!!.personIdent.ident == ident
 
     fun hentSisteOffsetForPerson(fagsakId: Long, personIdent: String, ytelseType: YtelseType? = null): Int? {
-        val andelerPåFagsak = fagsakService.hentAndelerPåFagsak(fagsakId)
+        val andelerPåFagsak = beregningService.hentAndelerTilkjentYtelseForFagsak(fagsakId)
         val sorterteAndeler = andelerPåFagsak
                 .filter { it.personIdent == personIdent }
                 .sortedBy { it.periodeOffset }
@@ -140,13 +160,9 @@ class UtbetalingsoppdragGenerator(
     }
 
     fun hentSisteOffsetPåFagsak(fagsakId: Long): Int? {
-        val andelerPåFagsak = fagsakService.hentAndelerPåFagsak(fagsakId)
+        val andelerPåFagsak = beregningService.hentAndelerTilkjentYtelseForFagsak(fagsakId)
         val sorterteAndeler = andelerPåFagsak.sortedBy { it.periodeOffset }
         return sorterteAndeler.lastOrNull()?.periodeOffset?.toInt()
-    }
-
-    fun lagreOppdaterteAndeler(andeler: List<AndelTilkjentYtelse>) {
-        andelTilkjentYtelseRepository.saveAll(andeler)
     }
 
     fun delOppIKjeder(andelerSomSkalSplittes: List<AndelTilkjentYtelse>): List<List<AndelTilkjentYtelse>> {

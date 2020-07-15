@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -25,10 +26,21 @@ class BeregningService(
         private val fagsakService: FagsakService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-        private val behandlingResultatRepository: BehandlingResultatRepository
+        private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val behandlingRepository: BehandlingRepository
 ) {
+
+    fun hentAndelerTilkjentYtelseForFagsak(fagsakId: Long): List<AndelTilkjentYtelse> {
+        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlinger.map { it.id }.toList())
+    }
+
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
+    }
+
+    fun lagreOppdaterteAndelerTilkjentYtelse(andeler: List<AndelTilkjentYtelse>) {
+        andelTilkjentYtelseRepository.saveAll(andeler)
     }
 
     fun hentTilkjentYtelseForBehandling(behandlingId: Long): TilkjentYtelse {

@@ -137,7 +137,6 @@ class FagsakService(
         lagre(fagsak)
     }
 
-
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
         val personIdent = PersonIdent(fødselsnummer)
         return hentEllerOpprettFagsak(personIdent)
@@ -150,11 +149,6 @@ class FagsakService(
 
     fun hentLøpendeFagsaker(): List<Fagsak> {
         return fagsakRepository.finnLøpendeFagsaker()
-    }
-
-    fun hentAndelerPåFagsak(fagsakId: Long): List<AndelTilkjentYtelse> {
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
-        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlinger.map { it.id }.toList())
     }
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {

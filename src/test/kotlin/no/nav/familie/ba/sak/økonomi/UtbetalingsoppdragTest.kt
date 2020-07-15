@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.økonomi
 
 import io.mockk.*
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -24,16 +22,16 @@ internal class UtbetalingsoppdragPeriodiseringTest {
 
     @BeforeAll
     fun setUp() {
-        utbetalingsoppdragGenerator = spyk(UtbetalingsoppdragGenerator(mockk<AndelTilkjentYtelseRepository>(),
-                                                                       mockk<PersonopplysningGrunnlagRepository>(),
-                                                                       mockk<FagsakService>()))
+        val beregningService = mockk<BeregningService>()
+        utbetalingsoppdragGenerator =
+                spyk(UtbetalingsoppdragGenerator(mockk<PersongrunnlagService>(), beregningService))
 
         every { utbetalingsoppdragGenerator.hentSisteOffsetForPerson(any(), any()) } returns null
         every { utbetalingsoppdragGenerator.hentSisteOffsetForPerson(any(), any(), any()) } returns null
         every { utbetalingsoppdragGenerator.hentSisteOffsetPåFagsak(any()) } returns (if (sisteOppdatertePersonsAndeler.isCaptured) sisteOppdatertePersonsAndeler.captured.maxBy { it.periodeOffset!! }?.periodeOffset?.toInt() else null)
-        every { utbetalingsoppdragGenerator.lagreOppdaterteAndeler(capture(sisteOppdatertePersonsAndeler)) } just Runs
+        every { beregningService.lagreOppdaterteAndelerTilkjentYtelse(capture(sisteOppdatertePersonsAndeler)) } just Runs
         // Persontype er uvesentlig for nåværende tester da vi ikke tester offsets på tvers av behandlinger
-        every { utbetalingsoppdragGenerator.hentPersontypeForPerson(any(), any()) } returns PersonType.BARN
+        every { utbetalingsoppdragGenerator.erSøkerPåBehandling(any(), any()) } returns false
     }
 
     @Test

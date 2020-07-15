@@ -10,17 +10,18 @@ import java.time.LocalDate
 
 data class UtbetalingsperiodeMal(
         val vedtak: Vedtak,
-        val andeler: List<AndelTilkjentYtelse>? = null,
         val erEndringPåEksisterendePeriode: Boolean = false
 ) {
+
     // TODO: Dobbeltsjekk at vi ikke trenger 1_000-sjekk
     fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse,
                            periodeIdOffset: Int,
-                           forrigePeriodeIdOffset: Int?): Utbetalingsperiode =
+                           forrigePeriodeIdOffset: Int?,
+                           opphørIKjede: LocalDate? = null): Utbetalingsperiode =
             Utbetalingsperiode(
                     erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode, // True gjør at oppdrag setter endringskode ENDR på linje og ikke vil referere bakover
                     opphør = if (erEndringPåEksisterendePeriode) utledOpphørPåLinje(opphørForVedtak = vedtak.opphørsdato,
-                                                                                    linje = andel) else null,
+                                                                                    opphørForLinje = opphørIKjede!!) else null,
                     forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() }, //TODO: Husk å skrive migreringsscript for gamle periodeIder / spesialhåndtere
                     // TODO: forrigePeriodeId kun relevant hvis IKKE erEndringPåEksisterendePeriode? Altså for nye perioder som skal hektes på
                     periodeId = periodeIdOffset.toLong(),
@@ -34,16 +35,12 @@ data class UtbetalingsperiodeMal(
                     behandlingId = vedtak.behandling.id
             )
 
-    fun tidligsteFomDatoIKjede(andel: AndelTilkjentYtelse): LocalDate {
-        return andeler!!.filter { it.type == andel.type && it.personIdent == andel.personIdent }
-                .minBy { it.stønadFom }!!.stønadFom
-    }
 
-    fun utledOpphørPåLinje(opphørForVedtak: LocalDate?, linje: AndelTilkjentYtelse): Opphør? {
+    fun utledOpphørPåLinje(opphørForVedtak: LocalDate?, opphørForLinje: LocalDate): Opphør? {
         return if (opphørForVedtak != null) {
-            Opphør(senesteDatoAv(opphørForVedtak, tidligsteFomDatoIKjede(linje)))
+            Opphør(senesteDatoAv(opphørForVedtak, opphørForLinje))
         } else {
-            Opphør(linje.stønadFom)
+            Opphør(opphørForLinje)
         }
     }
 }
