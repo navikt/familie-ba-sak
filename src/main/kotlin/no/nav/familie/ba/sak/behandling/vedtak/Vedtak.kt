@@ -1,9 +1,13 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
 import javax.persistence.*
+
 
 @Entity(name = "Vedtak")
 @Table(name = "VEDTAK")
@@ -28,6 +32,9 @@ data class Vedtak(
         @Column(name = "stonad_brev_pdf", nullable = true)
         var stønadBrevPdF: ByteArray? = null,
 
+        @Column(name = "stonad_brev_metadata", columnDefinition = "TEXT")
+        var stønadBrevMetadata: String? = objectMapper.writeValueAsString(StønadBrevMetadata()),
+
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
@@ -41,4 +48,41 @@ data class Vedtak(
     override fun toString(): String {
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
     }
+
+    fun hentStønadBrevMetadata(): StønadBrevMetadata? {
+        return when {
+            stønadBrevMetadata.isNullOrBlank() -> null
+            else -> objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!)
+        }
+    }
+
+    val stønadBrevBegrunnelser: Map<String, String>
+        get() {
+            return if (stønadBrevMetadata.isNullOrBlank()) {
+                emptyMap()
+            } else {
+                objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!).begrunnelser
+            }
+        }
+
+    fun settStønadBrevBegrunnelse(periode: Periode, begrunnelse: String) {
+        val metadata: StønadBrevMetadata = when (stønadBrevMetadata.isNullOrBlank()) {
+            true -> {
+                StønadBrevMetadata(
+                        begrunnelser = mutableMapOf(periode.hash to begrunnelse)
+                )
+            }
+            false -> {
+                val metadata: StønadBrevMetadata = objectMapper.readValue(stønadBrevMetadata!!)
+                metadata.begrunnelser[periode.hash] = begrunnelse
+                metadata
+            }
+        }
+
+        stønadBrevMetadata = objectMapper.writeValueAsString(metadata)
+    }
 }
+
+data class StønadBrevMetadata(
+        var begrunnelser: MutableMap<String, String> = mutableMapOf()
+)

@@ -18,15 +18,15 @@ class StatsborgerskapService(
     val fomComparator =
             Comparator { stb1: GrStatsborgerskap, stb2: GrStatsborgerskap
                 ->
-                val fom1 = stb1.gyldigPeriode?.fom ?: null
-                val fom2 = stb2.gyldigPeriode?.fom ?: null
+                val fom1 = stb1.gyldigPeriode?.fom
+                val fom2 = stb2.gyldigPeriode?.fom
 
                 if (fom1 == null && fom2 == null) {
                     return@Comparator 0
                 } else if (fom1 == null) {
-                    return@Comparator -1;
+                    return@Comparator -1
                 } else if (fom2 == null) {
-                    return@Comparator 1;
+                    return@Comparator 1
                 }
                 fom1.compareTo(fom2)
             }

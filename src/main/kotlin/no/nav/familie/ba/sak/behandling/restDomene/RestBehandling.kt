@@ -23,8 +23,9 @@ data class RestBehandling(val aktiv: Boolean,
                           val underkategori: BehandlingUnderkategori,
                           val personResultater: List<RestPersonResultat>,
                           val samletResultat: BehandlingResultatType,
-                          val vedtakForBehandling: List<RestVedtak?>,
+                          val vedtakForBehandling: List<RestVedtak>,
                           val totrinnskontroll: RestTotrinnskontroll?,
+                          val beregningOversikt: List<RestBeregningOversikt>,
                           val endretAv: String)
 
 data class RestPersonResultat(

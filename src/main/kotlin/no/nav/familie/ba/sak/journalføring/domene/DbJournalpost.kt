@@ -29,6 +29,6 @@ data class DbJournalpost(
         val journalpostId: String
 ) {
         override fun hashCode(): Int {
-                return Objects.hashCode(id);
+                return Objects.hashCode(id)
         }
 }
