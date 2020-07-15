@@ -26,12 +26,11 @@ class ØkonomiService(
 ) {
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId: Long, saksbehandlerId: String) {
-        // TODO: https://github.com/navikt/familie-ba-sak/blob/4c78bce83387001c952bae8452b75ace1e014b61/src/main/kotlin/no/nav/familie/ba/sak/%C3%B8konomi/%C3%98konomiService.kt#L25 . Dobbeltsjekk at det er greit å fjerne parameter behandlingsId
         val vedtak = vedtakService.hent(vedtakId)
 
         val nyesteBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(nyesteBehandling.id)
-        val nyeKjeder = ØkonomiUtils.delOppIKjederMedIdentifikator(oppdatertTilstand)
+        val oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(oppdatertTilstand)
 
         val behandlingResultatType =
                 if (nyesteBehandling.type == BehandlingType.TEKNISK_OPPHØR
@@ -43,16 +42,16 @@ class ØkonomiService(
 
         val (nyeAndeler: List<List<AndelTilkjentYtelse>>, opphørAndeler: List<Pair<AndelTilkjentYtelse, LocalDate>>) =
                 if (erFørsteBehandlingPåFagsak) {
-                    Pair(nyeKjeder.values.toList(), listOf<Pair<AndelTilkjentYtelse, LocalDate>>())
+                    Pair(oppdaterteKjeder.values.toList(), listOf<Pair<AndelTilkjentYtelse, LocalDate>>())
                 } else {
                     val forrigeBehandling = vedtakService.hent(vedtak.forrigeVedtakId!!).behandling
                     val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
-                    val forrigeKjeder = ØkonomiUtils.delOppIKjederMedIdentifikator(forrigeTilstand)
+                    val forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(forrigeTilstand)
 
-                    val førsteDirtyIHverKjede = ØkonomiUtils.finnFørsteDirtyIHverKjede(forrigeKjeder, nyeKjeder)
+                    val førsteDirtyIHverKjede = ØkonomiUtils.dirtyKjedeFomOversikt(forrigeKjeder, oppdaterteKjeder)
 
                     val andelerSomSkalLagesNye: List<List<AndelTilkjentYtelse>> =
-                            ØkonomiUtils.oppdaterteAndelerFraFørsteEndring(nyeKjeder, førsteDirtyIHverKjede)
+                            ØkonomiUtils.oppdaterteAndelerFraFørsteEndring(oppdaterteKjeder, førsteDirtyIHverKjede)
                     val andelerSomSkaLagesOpphørAvMeDato = ØkonomiUtils.opphørteAndelerEtterDato(forrigeKjeder, førsteDirtyIHverKjede)
 
                     if (behandlingResultatType == BehandlingResultatType.OPPHØRT
@@ -69,8 +68,8 @@ class ØkonomiService(
                 vedtak,
                 behandlingResultatType,
                 erFørsteBehandlingPåFagsak,
-                kjedefordelteNyeAndeler = nyeAndeler,
-                kjedefordelteOpphørMedDato = opphørAndeler
+                andelerTilOpprettelse = nyeAndeler,
+                andelerTilOpphør = opphørAndeler
         )
 
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(nyesteBehandling, utbetalingsoppdrag)
