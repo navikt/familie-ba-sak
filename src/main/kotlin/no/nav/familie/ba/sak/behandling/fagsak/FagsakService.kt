@@ -2,12 +2,14 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
@@ -29,12 +31,13 @@ class FagsakService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakRepository: FagsakRepository,
         private val fagsakPersonRepository: FagsakPersonRepository,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val persongrunnlagService: PersongrunnlagService,
         private val personRepository: PersonRepository,
         private val behandlingRepository: BehandlingRepository,
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakRepository: VedtakRepository,
         private val totrinnskontrollRepository: TotrinnskontrollRepository,
+        private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val integrasjonClient: IntegrasjonClient) {
 
     @Transactional
@@ -93,12 +96,11 @@ class FagsakService(
         return Ressurs.success(data = null)
     }
 
-    fun lagRestBehandlinger(fagsak: Fagsak): List<RestBehandling> {
+    private fun lagRestBehandlinger(fagsak: Fagsak): List<RestBehandling> {
         val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
 
         return behandlinger.map { behandling ->
-            val personopplysningGrunnlag =
-                    behandling.id.let { id -> personopplysningGrunnlagRepository.findByBehandlingAndAktiv(id) }
+            val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
                 val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
@@ -107,6 +109,8 @@ class FagsakService(
             }
 
             val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+
+            val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId = behandling.id)
 
             RestBehandling(
                     aktiv = behandling.aktiv,
@@ -124,7 +128,11 @@ class FagsakService(
                     kategori = behandling.kategori,
                     underkategori = behandling.underkategori,
                     endretAv = behandling.endretAv,
-                    totrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll()
+                    totrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll(),
+                    beregningOversikt = if (tilkjentYtelse == null || personopplysningGrunnlag == null) emptyList() else
+                        TilkjentYtelseUtils.hentBeregningOversikt(
+                                tilkjentYtelseForBehandling = tilkjentYtelse,
+                                personopplysningGrunnlag = personopplysningGrunnlag)
             )
         }
     }

@@ -310,7 +310,7 @@ class BehandlingIntegrationTest {
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
-                .flatMap { it!!.personBeregninger }
+                .flatMap { it.personBeregninger }
                 .associateBy({ it.personIdent }, { it.ytelsePerioder[0] })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
@@ -376,7 +376,7 @@ class BehandlingIntegrationTest {
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
-                .flatMap { it!!.personBeregninger }
+                .flatMap { it.personBeregninger }
                 .associateBy({ it.personIdent }, { it.ytelsePerioder[0] })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)

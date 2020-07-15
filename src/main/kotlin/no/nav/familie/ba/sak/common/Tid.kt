@@ -62,7 +62,9 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
     return this.fom.isBetween(other) && this.tom.isSameOrAfter(other.tom)
 }
 
-data class Periode(val fom: LocalDate, val tom: LocalDate)
+data class Periode(val fom: LocalDate, val tom: LocalDate) {
+    val key get() = "${fom}_${tom}"
+}
 
 fun VilkårResultat.toPeriode(): Periode {
     return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"),

@@ -213,7 +213,7 @@ class VilkårService(
 
     fun tellMetrikker(evalueringer: List<Evaluering>, personType: PersonType) {
         evalueringer.forEach {
-            var identifikator = hentIdentifikatorForEvaluering(it)
+            val identifikator = hentIdentifikatorForEvaluering(it)
             identifikator.plus("_").plus(personType.name)
             if (identifikator != null) {
                 val counter = hentCounterForVilkår(it.resultat, Vilkår.valueOf(identifikator))

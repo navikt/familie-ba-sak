@@ -36,8 +36,6 @@ class JournalføringServiceTest(
 
 ) {
 
-
-
     @Test
     fun `lagrer journalpostreferanse til behandling og fagsak til journalpost`() {
 
@@ -60,7 +58,7 @@ class JournalføringServiceTest(
     fun `ferdigstill skal oppdatere journalpost med GENERELL_SAKSTYPE hvis knyttTilFagsak er false`() {
         val søkerFnr = randomFnr()
         val fagsak = fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerFnr))
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
                 .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")

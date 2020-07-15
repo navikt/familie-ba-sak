@@ -59,7 +59,7 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingResultat.behandling.id, søker, barn1)
 
-        val faktiskTilkjentYtelse = TilkjentYtelseService.beregnTilkjentYtelse(
+        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 behandlingResultat = behandlingResultat,
                 sakType = SakType.valueOf(sakType),
                 personopplysningGrunnlag = personopplysningGrunnlag
@@ -122,7 +122,7 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingResultat.behandling.id, søker, barn1, barn2)
 
-        val faktiskTilkjentYtelse = TilkjentYtelseService.beregnTilkjentYtelse(
+        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 behandlingResultat = behandlingResultat,
                 sakType = SakType.NASJONAL,
                 personopplysningGrunnlag = personopplysningGrunnlag

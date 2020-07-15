@@ -8,15 +8,15 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
+import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.client.Norg2RestClient
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
+import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class MalerService(
@@ -54,19 +54,16 @@ class MalerService(
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
         val behandling = vedtak.behandling
         val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling)
-        val barna = persongrunnlagService.hentBarna(behandling)
 
-        val andelTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
-        val utbetalingsperioder = beregnUtbetalingsperioderUtenKlassifisering(andelTilkjentYtelse.toSet())
-        val beløp = utbetalingsperioder.toSegments()
-                            .find { segment -> segment.fom <= LocalDate.now() && segment.tom >= LocalDate.now() }?.value
-                    ?: utbetalingsperioder.toSegments().first().value
-                    ?: error("Finner ikke beløp for vedtaksbrev")
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+                                       ?: throw Feil("Finner ikke persongrunnlag ved mapping til brevfelter")
+
+        val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelseForBehandling = tilkjentYtelse,
+                                                                          personopplysningGrunnlag = personopplysningGrunnlag)
 
         val vilkårsdato = vilkårService.hentVilkårsdato(behandling = behandling)
                           ?: error("Finner ikke vilkårsdato for vedtaksbrev")
-
-        val barnasFødselsdatoer = Utils.slåSammen(barna.sortedBy { it.fødselsdato }.map { it.fødselsdato.tilKortString() })
 
         val innvilget = Innvilget(
                 enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
@@ -75,15 +72,29 @@ class MalerService(
                 saksbehandler = totrinnskontroll.saksbehandler,
                 beslutter = totrinnskontroll.beslutter
                             ?: totrinnskontroll.saksbehandler,
-                barnasFodselsdatoer = barnasFødselsdatoer,
-                virkningsdato = utbetalingsperioder.minLocalDate.førsteDagIInneværendeMåned().tilDagMånedÅr(),
-                vilkårsdato = vilkårsdato.tilDagMånedÅr(),
-                vedtaksdato = vedtak.vedtaksdato.tilKortString(),
-                belop = Utils.formaterBeløp(beløp),
-                antallBarn = barna.size,
-                flereBarn = barna.size > 1,
                 hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11"))
         )
+
+        innvilget.duFaar = beregningOversikt.map {
+            val barnasFødselsdatoer =
+                    Utils.slåSammen(it.beregningDetaljer
+                                            .sortedBy { restBeregningDetalj -> restBeregningDetalj.person.fødselsdato }
+                                            .map { restBeregningDetalj ->
+                                                restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
+                                            })
+
+            val begrunnelse: String = vedtak.stønadBrevBegrunnelser[Periode(it.periodeFom!!, it.periodeTom!!).key]
+                                      ?: "Ikke satt"
+
+            DuFårSeksjon(
+                    fom = it.periodeFom.tilDagMånedÅr(),
+                    tom = it.periodeTom.tilDagMånedÅr(),
+                    belop = Utils.formaterBeløp(it.utbetaltPerMnd),
+                    antallBarn = it.antallBarn,
+                    barnasFodselsdatoer = barnasFødselsdatoer,
+                    begrunnelser = listOf(begrunnelse)
+            )
+        }
 
         return objectMapper.writeValueAsString(innvilget)
     }
