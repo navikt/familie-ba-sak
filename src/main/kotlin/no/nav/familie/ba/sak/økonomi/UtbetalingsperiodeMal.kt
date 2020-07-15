@@ -8,22 +8,37 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.math.BigDecimal
 import java.time.LocalDate
 
+/**
+ * Lager mal for generering av utbetalingsperioder med tilpasset setting av verdier basert på parametre
+ *
+ * @param[vedtak] for vedtakdato og opphørsdato hvis satt
+ * @param[erEndringPåEksisterendePeriode] ved true vil oppdrag sette asksjonskode ENDR på linje og ikke referere bakover
+ * @return mal med tilpasset lagPeriodeFraAndel
+ */
 data class UtbetalingsperiodeMal(
         val vedtak: Vedtak,
         val erEndringPåEksisterendePeriode: Boolean = false
 ) {
 
     // TODO: Dobbeltsjekk at vi ikke trenger 1_000-sjekk
+    /**
+     * Lager utbetalingsperioder som legges på utbetalingsoppdrag. En utbetalingsperiode tilsvarer linjer hos økonomi
+     *
+     * @param[andel] andel som skal mappes til periode
+     * @param[periodeIdOffset] brukes til å synce våre linjer med det som ligger hos økonomi
+     * @param[forrigePeriodeIdOffset] peker til forrige i kjeden. Kun relevant når IKKE erEndringPåEksisterendePeriode
+     * @param[opphørKjedeFom] fom-dato fra tidligste periode i kjede med endring
+     * @return Periode til utbetalingsoppdrag
+     */
     fun lagPeriodeFraAndel(andel: AndelTilkjentYtelse,
                            periodeIdOffset: Int,
                            forrigePeriodeIdOffset: Int?,
-                           opphørIKjede: LocalDate? = null): Utbetalingsperiode =
+                           opphørKjedeFom: LocalDate? = null): Utbetalingsperiode =
             Utbetalingsperiode(
-                    erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode, // True gjør at oppdrag setter endringskode ENDR på linje og ikke vil referere bakover
+                    erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
                     opphør = if (erEndringPåEksisterendePeriode) utledOpphørPåLinje(opphørForVedtak = vedtak.opphørsdato,
-                                                                                    opphørForLinje = opphørIKjede!!) else null,
+                                                                                    opphørForLinje = opphørKjedeFom!!) else null,
                     forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() }, //TODO: Husk å skrive migreringsscript for gamle periodeIder / spesialhåndtere
-                    // TODO: forrigePeriodeId kun relevant hvis IKKE erEndringPåEksisterendePeriode? Altså for nye perioder som skal hektes på
                     periodeId = periodeIdOffset.toLong(),
                     datoForVedtak = vedtak.vedtaksdato,
                     klassifisering = andel.type.klassifisering,

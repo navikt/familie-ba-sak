@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -15,6 +13,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+
 
 @Component
 class UtbetalingsoppdragGenerator(
@@ -31,20 +30,18 @@ class UtbetalingsoppdragGenerator(
      * @param[behandlingResultatType] for å sjekke om fullstendig opphør
      * @param[erFørsteBehandlingPåFagsak] brukes til å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
      * @param[nyeAndeler] én liste per kjede, hvor andeler er helt nye, har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
-     * @param[opphørteAndeler] et par per kjede, hvor par består av siste andel i kjeden og opphørsdato (tidligste dirty i kjeden)
+     * @param[opphørteAndeler] et par per kjede, hvor par består av siste andel i kjeden og
      * @return Utbetalingsoppdrag for vedtak
      */
     fun lagUtbetalingsoppdrag(saksbehandlerId: String,
                               vedtak: Vedtak,
                               behandlingResultatType: BehandlingResultatType,
                               erFørsteBehandlingPåFagsak: Boolean,
-                              nyeAndeler: List<AndelTilkjentYtelse> = emptyList(),
-                              opphørteAndeler: List<AndelTilkjentYtelse> = emptyList(),
-                              nyeAndeler2: List<List<AndelTilkjentYtelse>> = emptyList(),
-                              opphørteAndeler2: List<Pair<AndelTilkjentYtelse, LocalDate>> = emptyList()): Utbetalingsoppdrag {
+                              kjedefordelteNyeAndeler: List<List<AndelTilkjentYtelse>> = emptyList(),
+                              kjedefordelteOpphørMedDato: List<Pair<AndelTilkjentYtelse, LocalDate>> = emptyList()): Utbetalingsoppdrag {
 
         val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
-        if (erFullstendigOpphør && nyeAndeler.isNotEmpty()) {// TODO: Bør også sjekke at erFullstendigOpphør inneholder akkurat antall personer på ytelse + småbarn evt
+        if (erFullstendigOpphør && kjedefordelteNyeAndeler.isNotEmpty()) {// TODO: Bør også sjekke at erFullstendigOpphør inneholder akkurat antall personer på ytelse + småbarn evt
             throw IllegalStateException("Finnes nye andeler når behandling skal opphøres")
         }
 
@@ -57,23 +54,16 @@ class UtbetalingsoppdragGenerator(
                 else if (erFullstendigOpphør) UEND
                 else ENDR
 
-        val nyeUtbetalingsperioder = if (nyeAndeler.isNotEmpty())
+        val nyeUtbetalingsperioder = if (kjedefordelteNyeAndeler.isNotEmpty())
             lagUtbetalingsperioderAvAndeler(
-                    andelerForKjeding = delOppIKjeder(nyeAndeler),
+                    andelerForKjeding = kjedefordelteNyeAndeler,
                     erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                     vedtak = vedtak) else emptyList()
 
-        val opphørteUtbetalingsperioder = if (opphørteAndeler.isNotEmpty())
-            lagUtbetalingsperioderAvAndeler(
-                    andelerForKjeding = delOppIKjeder(opphørteAndeler),
-                    erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-                    vedtak = vedtak) else emptyList()
-        /*
-        val opphørteUtbetalingsperioder = if (opphørteAndeler.isNotEmpty())
+        val opphørteUtbetalingsperioder = if (kjedefordelteOpphørMedDato.isNotEmpty())
             lagOpphørsperioderAvAndeler( // TODO: "Ryddelinjer" og fullt opphør
-                    opphørteAndeler,
+                    kjedefordelteOpphørMedDato,
                     vedtak = vedtak) else emptyList()
-        */
 
         return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -95,11 +85,13 @@ class UtbetalingsoppdragGenerator(
     private fun lagOpphørsperioderAvAndeler(andelerMedDato: List<Pair<AndelTilkjentYtelse, LocalDate>>,
                                             vedtak: Vedtak): List<Utbetalingsperiode> {
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(vedtak, true)
-        return andelerMedDato.map { (opphørsandel, opphørsdato) ->
-            utbetalingsperiodeMal.lagPeriodeFraAndel(opphørsandel, opphørsandel.periodeOffset!!.toInt(), null, opphørsdato)
+        return andelerMedDato.map { (sisteAndelIKjede, opphørKjedeFom) ->
+            utbetalingsperiodeMal.lagPeriodeFraAndel(andel = sisteAndelIKjede,
+                                                     periodeIdOffset = sisteAndelIKjede.periodeOffset!!.toInt(),
+                                                     forrigePeriodeIdOffset = null,
+                                                     opphørKjedeFom = opphørKjedeFom)
         }
     }
-
 
     private fun lagUtbetalingsperioderAvAndeler(andelerForKjeding: List<List<AndelTilkjentYtelse>>,
                                                 vedtak: Vedtak,
