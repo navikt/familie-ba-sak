@@ -36,7 +36,13 @@ class ØkonomiService(
                 if (oppdatertBehandling.type == BehandlingType.TEKNISK_OPPHØR
                     || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
                     BehandlingResultatType.OPPHØRT
-                else behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
+                else { // TODO: Sjekk inntil støtte for delvis innvilgelse. Kan da erstatte med behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
+                    val hentetBehandlingResultatType =
+                            behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
+                    if (hentetBehandlingResultatType == BehandlingResultatType.OPPHØRT && oppdatertTilstand.isNotEmpty()) {
+                        BehandlingResultatType.DELVIS_INNVILGET
+                    } else hentetBehandlingResultatType
+                }
 
         val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(oppdatertBehandling.fagsak.id).size == 1
 
@@ -52,7 +58,8 @@ class ØkonomiService(
 
                     val andelerSomSkalLagesNye: List<List<AndelTilkjentYtelse>> =
                             ØkonomiUtils.oppdaterteAndelerFraFørsteEndring(oppdaterteKjeder, dirtyKjedeFomOversikt)
-                    val andelerSomSkaLagesOpphørAvMeDato = ØkonomiUtils.opphørteAndelerEtterDato(forrigeKjeder, dirtyKjedeFomOversikt)
+                    val andelerSomSkaLagesOpphørAvMeDato =
+                            ØkonomiUtils.opphørteAndelerEtterDato(forrigeKjeder, dirtyKjedeFomOversikt)
 
                     if (behandlingResultatType == BehandlingResultatType.OPPHØRT
                         && (andelerSomSkalLagesNye.isNotEmpty() || andelerSomSkaLagesOpphørAvMeDato.isEmpty())) {

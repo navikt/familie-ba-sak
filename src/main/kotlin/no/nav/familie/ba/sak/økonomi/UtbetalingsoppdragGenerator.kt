@@ -39,9 +39,6 @@ class UtbetalingsoppdragGenerator(
                               andelerTilOpphør: List<Pair<AndelTilkjentYtelse, LocalDate>> = emptyList()): Utbetalingsoppdrag {
 
         val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
-        if (erFullstendigOpphør && andelerTilOpprettelse.isNotEmpty()) {
-            throw IllegalStateException("Finnes nye andeler når behandling skal opphøres")
-        }
 
         // Hos økonomi skiller man på endring på oppdragsnivå og på linjenivå (periodenivå).
         // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
