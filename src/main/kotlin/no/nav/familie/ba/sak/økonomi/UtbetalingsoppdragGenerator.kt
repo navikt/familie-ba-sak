@@ -50,7 +50,9 @@ class UtbetalingsoppdragGenerator(
                 else ENDR
 
         val dirtyKjedeFomOversikt = ØkonomiUtils.dirtyKjedeFomOversikt(forrigeKjeder, oppdaterteKjeder)
-        val sisteOffsetIKjedeOversikt = ØkonomiUtils.sisteOffsetForHverKjede(forrigeKjeder, dirtyKjedeFomOversikt)
+        val sisteBeståendeOffsetIKjedeOversikt =
+                ØkonomiUtils.sisteBeståendeOffsetForHverKjede(forrigeKjeder, dirtyKjedeFomOversikt)
+        val sisteOffsetForFagsak = hentSisteOffsetForFagsak(forrigeKjeder)
 
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
                 ØkonomiUtils.oppdaterteAndelerFraFørsteEndring(oppdaterteKjeder, dirtyKjedeFomOversikt)
@@ -68,7 +70,8 @@ class UtbetalingsoppdragGenerator(
                     andeler = andelerTilOpprettelse,
                     erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                     vedtak = vedtak,
-                    sisteOffsetIKjedeOversikt = sisteOffsetIKjedeOversikt) else emptyList()
+                    sisteBeståendeOffsetIKjedeOversikt = sisteBeståendeOffsetIKjedeOversikt,
+                    sisteOffsetPåFagsak = sisteOffsetForFagsak) else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
             lagUtbetalingsperioderForOpphør(
@@ -99,10 +102,11 @@ class UtbetalingsoppdragGenerator(
     fun lagUtbetalingsperioderForOpprettelse(andeler: List<List<AndelTilkjentYtelse>>,
                                              vedtak: Vedtak,
                                              erFørsteBehandlingPåFagsak: Boolean,
-                                             sisteOffsetIKjedeOversikt: Map<String, Int>): List<Utbetalingsperiode> {
+                                             sisteBeståendeOffsetIKjedeOversikt: Map<String, Int>,
+                                             sisteOffsetPåFagsak: Int? = null): List<Utbetalingsperiode> {
         var offset =
                 if (!erFørsteBehandlingPåFagsak)
-                    hentSisteOffsetForFagsak(sisteOffsetIKjedeOversikt)
+                    sisteOffsetPåFagsak
                     ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
                 else 0
 
@@ -115,9 +119,9 @@ class UtbetalingsoppdragGenerator(
                     var forrigeOffsetIKjede: Int? = null
                     if (!erFørsteBehandlingPåFagsak) {
                         forrigeOffsetIKjede = if (ytelseType == YtelseType.SMÅBARNSTILLEGG) {
-                            sisteOffsetIKjedeOversikt[ident + ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX]
+                            sisteBeståendeOffsetIKjedeOversikt[ident + ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX]
                         } else {
-                            sisteOffsetIKjedeOversikt[ident]
+                            sisteBeståendeOffsetIKjedeOversikt[ident]
                         }
                     }
                     kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
@@ -135,5 +139,7 @@ class UtbetalingsoppdragGenerator(
     fun personErSøkerPåBehandling(ident: String, behandling: Behandling): Boolean =
             persongrunnlagService.hentSøker(behandling)!!.personIdent.ident == ident
 
-    fun hentSisteOffsetForFagsak(sisteOffsetIKjedeOversikt: Map<String, Int>): Int? = sisteOffsetIKjedeOversikt.values.max()
+    fun hentSisteOffsetForFagsak(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>): Int? =
+            forrigeKjeder.values.flatten().maxBy { it.stønadFom }?.periodeOffset?.toInt()
+
 }

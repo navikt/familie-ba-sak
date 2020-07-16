@@ -85,8 +85,8 @@ object ØkonomiUtils {
                 Pair(sisteAndelIKjede, dirtyKjedeFomOversikt[kjedeIdentifikator]!!)
             }
 
-    fun sisteOffsetForHverKjede(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
-                                dirtyKjedeFomOversikt: Map<String, LocalDate>): Map<String, Int> {
+    fun sisteBeståendeOffsetForHverKjede(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
+                                         dirtyKjedeFomOversikt: Map<String, LocalDate>): Map<String, Int> {
         val personerMedBeståendeOgDirty =
                 forrigeKjeder
                         .filter { it.key in dirtyKjedeFomOversikt.keys }
