@@ -23,11 +23,8 @@ internal class UtbetalingsoppdragPeriodiseringTest {
     @BeforeAll
     fun setUp() {
         val beregningService = mockk<BeregningService>()
-        utbetalingsoppdragGenerator =
-                spyk(UtbetalingsoppdragGenerator(mockk<PersongrunnlagService>(), beregningService))
+        utbetalingsoppdragGenerator = spyk(UtbetalingsoppdragGenerator(mockk<PersongrunnlagService>(), beregningService))
 
-        every { utbetalingsoppdragGenerator.hentSisteOffsetForPerson(any(), any()) } returns null
-        every { utbetalingsoppdragGenerator.hentSisteOffsetForPerson(any(), any(), any()) } returns null
         every { utbetalingsoppdragGenerator.hentSisteOffsetForFagsak(any()) } returns (if (sisteOppdatertePersonsAndeler.isCaptured) sisteOppdatertePersonsAndeler.captured.maxBy { it.periodeOffset!! }?.periodeOffset?.toInt() else null)
         every { beregningService.lagreOppdaterteAndelerTilkjentYtelse(capture(sisteOppdatertePersonsAndeler)) } just Runs
         // Persontype er uvesentlig for nåværende tester da vi ikke tester offsets på tvers av behandlinger
@@ -60,7 +57,8 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                                                   vedtak,
                                                                   behandlingResultatType,
                                                                   true,
-                                                                  ØkonomiUtils.kjedeinndelteAndeler(andelerTilkjentYtelse).values.toList())
+                                                                  oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                                                          andelerTilkjentYtelse))
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -97,16 +95,14 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         val opphørFom = now()
         val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = opphørFom)
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
-        val somkjede = ØkonomiUtils.kjedeinndelteAndeler(andelerTilkjentYtelse)
-        val map = ØkonomiUtils.dirtyKjedeFomOversikt(forrigeKjeder = somkjede, nyeKjeder = emptyMap())
+
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
                                                                   opphørVedtak,
                                                                   behandlingResultatType,
                                                                   false,
-                                                                  andelerTilOpphør = ØkonomiUtils.opphørteAndelerEtterDato(
-                                                                          somkjede,
-                                                                          map))
+                                                                  forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                                                          andelerTilkjentYtelse))
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -142,16 +138,13 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = opphørFom)
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
 
-        val somkjede = ØkonomiUtils.kjedeinndelteAndeler(andelerTilkjentYtelse)
-        val map = ØkonomiUtils.dirtyKjedeFomOversikt(forrigeKjeder = somkjede, nyeKjeder = emptyMap())
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
                                                                   opphørVedtak,
                                                                   behandlingResultatType,
                                                                   false,
-                                                                  andelerTilOpphør = ØkonomiUtils.opphørteAndelerEtterDato(
-                                                                          somkjede,
-                                                                          map))
+                                                                  forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                                                          andelerTilkjentYtelse))
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -204,8 +197,8 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                                                                    vedtak,
                                                                                    behandlingResultatType,
                                                                                    true,
-                                                                                   ØkonomiUtils.kjedeinndelteAndeler(
-                                                                                           andelerTilkjentYtelse).values.toList())
+                                                                                   oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                                                                           andelerTilkjentYtelse))
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -230,7 +223,8 @@ internal class UtbetalingsoppdragPeriodiseringTest {
                                                               vedtak,
                                                               behandlingResultatType,
                                                               true,
-                                                              ØkonomiUtils.kjedeinndelteAndeler(andelerTilkjentYtelse).values.toList())
+                                                              oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                                                      andelerTilkjentYtelse))
         }
     }
 

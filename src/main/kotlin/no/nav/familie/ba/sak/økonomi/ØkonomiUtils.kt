@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import java.time.LocalDate
 
 object ØkonomiUtils {
@@ -16,8 +17,6 @@ object ØkonomiUtils {
      * @return ident med kjedegruppe.
      */
     fun kjedeinndelteAndeler(andelerForInndeling: List<AndelTilkjentYtelse>): Map<String, List<AndelTilkjentYtelse>> {
-        val SMÅBARNSTILLEGG_SUFFIX = "_SMÅBARNSTILLEGG"
-
         val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
                 andelerForInndeling.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
                     it.groupBy { andel -> andel.personIdent } // TODO: Hva skjer dersom personidenten endrer seg? Bør gruppere på en annen måte og oppdatere lagingen av utbetalingsperioder fra andeler
@@ -46,13 +45,14 @@ object ØkonomiUtils {
                               nyeKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, LocalDate> {
         val allePersoner = forrigeKjeder.keys.union(nyeKjeder.keys)
 
-        return allePersoner.associate { person ->
+        val dirtyKjedeFomOversikt = allePersoner.associate { person ->
             val kjedeDirtyFom = finnFørsteDirtyIKjede(
                     forrigeKjede = forrigeKjeder[person],
                     oppdatertKjede = nyeKjeder[person])
-                    .stønadFom
+                    ?.stønadFom
             person to kjedeDirtyFom
         }
+        return dirtyKjedeFomOversikt.filter { it.value != null } as Map<String, LocalDate>
     }
 
     /**
@@ -64,11 +64,11 @@ object ØkonomiUtils {
      * @return Første andel som ikke finnes i snitt
      */
     private fun finnFørsteDirtyIKjede(forrigeKjede: List<AndelTilkjentYtelse>?,
-                                      oppdatertKjede: List<AndelTilkjentYtelse>?): AndelTilkjentYtelse {
+                                      oppdatertKjede: List<AndelTilkjentYtelse>?): AndelTilkjentYtelse? {
         val forrige = forrigeKjede?.toSet() ?: emptySet()
         val oppdatert = oppdatertKjede?.toSet() ?: emptySet()
         val alleAndelerMedEndring = forrige.disjunkteAndeler(oppdatert)
-        return alleAndelerMedEndring.sortedBy { it.stønadFom }.first()
+        return alleAndelerMedEndring.sortedBy { it.stønadFom }.firstOrNull()
     }
 
     fun oppdaterteAndelerFraFørsteEndring(oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
@@ -84,6 +84,21 @@ object ØkonomiUtils {
                 val sisteAndelIKjede = kjedeAndeler.sortedBy { it.stønadFom }.last()
                 Pair(sisteAndelIKjede, dirtyKjedeFomOversikt[kjedeIdentifikator]!!)
             }
+
+    fun sisteOffsetForHverKjede(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
+                                dirtyKjedeFomOversikt: Map<String, LocalDate>): Map<String, Int> {
+        val personerMedBeståendeOgDirty =
+                forrigeKjeder
+                        .filter { it.key in dirtyKjedeFomOversikt.keys }
+                        .mapValues { (personSomHarEndring, personsForrigeAndeler) ->
+                            personsForrigeAndeler
+                                    .sortedBy { it.stønadFom }
+                                    .filter { it.stønadFom.isSameOrBefore(dirtyKjedeFomOversikt[personSomHarEndring]!!) }
+                        }.filter { (personSomHarEndring, andelerFørOppbygging) -> andelerFørOppbygging.isNotEmpty() }
+                        .toMap()
+
+        return personerMedBeståendeOgDirty.mapValues { it.value.maxBy { it.stønadFom }!!.periodeOffset!!.toInt() }
+    }
 
     private fun Set<AndelTilkjentYtelse>.subtractAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
         val andelerKunIDenne = mutableSetOf<AndelTilkjentYtelse>()
@@ -103,5 +118,7 @@ object ØkonomiUtils {
         val andelerKunIAnnen = other.subtractAndeler(this)
         return andelerKunIDenne.union(andelerKunIAnnen)
     }
+
+    val SMÅBARNSTILLEGG_SUFFIX = "_SMÅBARNSTILLEGG"
 }
 

@@ -46,38 +46,27 @@ class ØkonomiService(
 
         val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(oppdatertBehandling.fagsak.id).size == 1
 
-        val (nyeAndeler: List<List<AndelTilkjentYtelse>>, opphørAndeler: List<Pair<AndelTilkjentYtelse, LocalDate>>) =
+        val utbetalingsoppdrag: Utbetalingsoppdrag =
                 if (erFørsteBehandlingPåFagsak) {
-                    Pair(oppdaterteKjeder.values.toList(), listOf<Pair<AndelTilkjentYtelse, LocalDate>>())
+                    utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                            saksbehandlerId,
+                            vedtak,
+                            behandlingResultatType,
+                            erFørsteBehandlingPåFagsak,
+                            oppdaterteKjeder = oppdaterteKjeder)
                 } else {
                     val forrigeBehandling = vedtakService.hent(vedtak.forrigeVedtakId!!).behandling
                     val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
                     val forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(forrigeTilstand)
 
-                    val dirtyKjedeFomOversikt = ØkonomiUtils.dirtyKjedeFomOversikt(forrigeKjeder, oppdaterteKjeder)
-
-                    val andelerSomSkalLagesNye: List<List<AndelTilkjentYtelse>> =
-                            ØkonomiUtils.oppdaterteAndelerFraFørsteEndring(oppdaterteKjeder, dirtyKjedeFomOversikt)
-                    val andelerSomSkaLagesOpphørAvMeDato =
-                            ØkonomiUtils.opphørteAndelerEtterDato(forrigeKjeder, dirtyKjedeFomOversikt)
-
-                    if (behandlingResultatType == BehandlingResultatType.OPPHØRT
-                        && (andelerSomSkalLagesNye.isNotEmpty() || andelerSomSkaLagesOpphørAvMeDato.isEmpty())) {
-                        throw IllegalStateException("Kan ikke oppdatere tilkjent ytelse og iverksette vedtak fordi opphør inneholder nye " +
-                                                    "andeler eller mangler opphørte andeler.")
-                    }
-                    Pair(andelerSomSkalLagesNye,
-                         andelerSomSkaLagesOpphørAvMeDato)
+                    utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                            saksbehandlerId,
+                            vedtak,
+                            behandlingResultatType,
+                            erFørsteBehandlingPåFagsak,
+                            forrigeKjeder = forrigeKjeder,
+                            oppdaterteKjeder = oppdaterteKjeder)
                 }
-
-        val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
-                saksbehandlerId,
-                vedtak,
-                behandlingResultatType,
-                erFørsteBehandlingPåFagsak,
-                andelerTilOpprettelse = nyeAndeler,
-                andelerTilOpphør = opphørAndeler
-        )
 
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
         iverksettOppdrag(oppdatertBehandling.id, utbetalingsoppdrag)
