@@ -30,12 +30,6 @@ class BeregningService(
         private val behandlingRepository: BehandlingRepository
 ) {
 
-
-    fun hentAndelerTilkjentYtelseForFagsak(fagsakId: Long): List<AndelTilkjentYtelse> {
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
-        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlinger.map { it.id }.toList())
-    }
-
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
     }

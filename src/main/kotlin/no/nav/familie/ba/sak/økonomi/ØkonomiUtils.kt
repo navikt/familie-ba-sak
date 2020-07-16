@@ -93,7 +93,7 @@ object ØkonomiUtils {
                         .mapValues { (personSomHarEndring, personsForrigeAndeler) ->
                             personsForrigeAndeler
                                     .sortedBy { it.stønadFom }
-                                    .filter { it.stønadFom.isSameOrBefore(dirtyKjedeFomOversikt[personSomHarEndring]!!) }
+                                    .filter { it.stønadFom.isBefore(dirtyKjedeFomOversikt[personSomHarEndring]!!) }
                         }.filter { (personSomHarEndring, andelerFørOppbygging) -> andelerFørOppbygging.isNotEmpty() }
                         .toMap()
 
