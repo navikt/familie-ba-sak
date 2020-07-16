@@ -103,6 +103,6 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     }
 
     companion object {
-        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
