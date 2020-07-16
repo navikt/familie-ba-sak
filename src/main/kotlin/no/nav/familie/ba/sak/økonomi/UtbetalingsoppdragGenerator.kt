@@ -140,6 +140,9 @@ class UtbetalingsoppdragGenerator(
             persongrunnlagService.hentSøker(behandling)!!.personIdent.ident == ident
 
     fun hentSisteOffsetForFagsak(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>): Int? =
-            forrigeKjeder.values.flatten().maxBy { it.stønadFom }?.periodeOffset?.toInt()
+            forrigeKjeder.values
+                    .flatten()
+                    .filter { it.periodeOffset != null }
+                    .maxBy { it.periodeOffset!! }?.periodeOffset?.toInt()
 
 }

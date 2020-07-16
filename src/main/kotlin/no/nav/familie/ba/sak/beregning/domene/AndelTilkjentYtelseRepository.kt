@@ -12,7 +12,4 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     @Modifying
     @Query(value = "DELETE FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId")
     fun slettAlleAndelerTilkjentYtelseForBehandling(behandlingId: Long)
-
-    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.personIdent IN :personIdenter")
-    fun finnAndelerTilkjentYtelseForPersoner(personIdenter: List<String>): List<AndelTilkjentYtelse>
 }
