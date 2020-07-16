@@ -98,7 +98,7 @@ class BeregningService(
                     .filter { !it.erEndringPåEksisterendePeriode } // TODO: Hva er dette for? Vil aldri finnes hvis ikke opphør?
                     .minBy { it.vedtakdatoFom }!!.vedtakdatoFom
             this.endretDato = LocalDate.now()
-            this.opphørFom = opphørsdato
+            this.opphørFom = opphørsdato // TODO: Vil nå settes på delvis innvilgede siden det ikke støttes
         }
     }
 }
