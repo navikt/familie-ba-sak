@@ -11,13 +11,4 @@ data class DatoIntervallEntitet(
 
         @Column(name = "tom")
         val tom: LocalDate? = null
-) {
-        fun erInnenfor(dato: LocalDate): Boolean {
-                return when {
-                        fom == null && tom == null -> true
-                        fom == null -> dato.isSameOrBefore(tom!!)
-                        tom == null -> dato.isSameOrAfter(fom)
-                        else -> dato.isSameOrAfter(fom) && dato.isSameOrBefore(tom)
-                }
-        }
-}
+)

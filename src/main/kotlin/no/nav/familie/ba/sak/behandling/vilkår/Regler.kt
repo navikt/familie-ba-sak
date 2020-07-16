@@ -72,14 +72,16 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
         when {
             contains(Medlemskap.NORDEN) -> evalueringJa("Er nordisk statsborger.",
                                                         Vilkår.LOVLIG_OPPHOLD,
-                                                        PersonType.SØKER)
+                                                        fakta.personForVurdering.type)
             //TODO: Implementeres av TEA-1532
             contains(Medlemskap.EØS) -> Evaluering.kanskje("Er EØS borger.")
             contains(Medlemskap.TREDJELANDSBORGER) -> {
-                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeFor(LocalDate.now()) }
+                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER)
-                    evalueringNei("Mor har ikke lovlig opphold", Vilkår.LOVLIG_OPPHOLD, PersonType.SØKER)
-                else evalueringJa("Er tredjelandsborger med lovlig opphold", Vilkår.LOVLIG_OPPHOLD, PersonType.SØKER)
+                    evalueringNei("${fakta.personForVurdering.type} har ikke lovlig opphold",
+                                  Vilkår.LOVLIG_OPPHOLD, fakta.personForVurdering.type)
+                else evalueringJa("Er tredjelandsborger med lovlig opphold",
+                                  Vilkår.LOVLIG_OPPHOLD, fakta.personForVurdering.type)
             }
             //TODO: Implementeres av TEA-1534
             else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
