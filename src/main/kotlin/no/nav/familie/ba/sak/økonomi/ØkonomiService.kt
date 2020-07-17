@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -21,7 +22,8 @@ class ØkonomiService(
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
-        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
+        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
+        private val fagsakService: FagsakService
 ) {
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId: Long, saksbehandlerId: String) {
@@ -44,6 +46,7 @@ class ØkonomiService(
                 }
 
         val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(oppdatertBehandling.fagsak.id).size == 1
+        //val erFørsteBehandlingPåFagsak = fagsakService.hentFagsakerSendtTilØkonomi().isEmpty() // TODO: Økonomiservicetest klarer kun kjøre separat
 
         val utbetalingsoppdrag: Utbetalingsoppdrag =
                 if (erFørsteBehandlingPåFagsak) {
