@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.pdl
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.http.util.UriUtil
-import no.nav.familie.integrasjoner.felles.OppslagException
-import no.nav.familie.integrasjoner.felles.graphqlCompatible
-import no.nav.familie.integrasjoner.personopplysning.internal.*
 import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -59,22 +59,24 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                 }.fold(
                         onSuccess = { it },
                         onFailure = {
-                            throw OppslagException("Fant ikke forespurte data på person.",
-                                                   "PdlRestClient",
-                                                   OppslagException.Level.MEDIUM,
-                                                   HttpStatus.NOT_FOUND,
-                                                   it,
-                                                   personIdent)
+                            throw Feil(message ="Fant ikke forespurte data på person.",
+                                       frontendFeilmelding = "Kunne ikke slå opp data for person $personIdent",
+                                       httpStatus = HttpStatus.NOT_FOUND,
+                                       throwable = it)
                         }
                 )
             } else {
-                throw pdlOppslagException(feilmelding = "Feil ved oppslag på person: ${response?.errorMessages()}",
-                                          personIdent = personIdent)
+                throw Feil(message = "Feil ved oppslag på person: ${response?.errorMessages()}",
+                           frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response?.errorMessages()}",
+                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
             }
         } catch (e: Exception) {
             when (e) {
-                is OppslagException -> throw e
-                else -> throw pdlOppslagException(personIdent, error = e)
+                is Feil -> throw e
+                else -> throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                                   frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
+                                   httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                                   throwable = e)
             }
         }
     }
@@ -99,9 +101,9 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         if (response != null && !response.harFeil()) {
             return response
         }
-        throw pdlOppslagException(personIdent,
-                                  HttpStatus.NOT_FOUND,
-                                  feilmelding = "Fant ikke identer for person: " + response?.errorMessages())
+        throw Feil(message = "Fant ikke identer for person: ${response?.errorMessages()}",
+                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response?.errorMessages()}",
+                   httpStatus = HttpStatus.NOT_FOUND)
     }
 
     fun hentDødsfall(personIdent: String, tema: String): List<Doedsfall> {
@@ -110,13 +112,16 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         val response = try {
             postForEntity<PdlDødsfallResponse>(pdlUri, pdlPersonRequest, httpHeaders(tema))
         } catch (e: Exception) {
-            throw pdlOppslagException(personIdent, error = e)
+            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                       frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                       throwable = e)
         }
 
         if (response == null || response.harFeil()) {
-            throw pdlOppslagException(personIdent,
-                                      HttpStatus.NOT_FOUND,
-                                      feilmelding = "Fant ikke data på person: " + response?.errorMessages())
+            throw Feil(message = "Fant ikke data på person: ${response?.errorMessages()}",
+                       frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response?.errorMessages()}",
+                       httpStatus = HttpStatus.NOT_FOUND)
         }
 
         return response.data.person!!.doedsfall
@@ -128,31 +133,19 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         val response = try {
             postForEntity<PdlVergeResponse>(pdlUri, pdlPersonRequest, httpHeaders(tema))
         } catch (e: Exception) {
-            throw pdlOppslagException(personIdent, error = e)
+            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                       frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                       throwable = e)
         }
 
         if (response == null || response.harFeil()) {
-            throw pdlOppslagException(personIdent,
-                                      HttpStatus.NOT_FOUND,
-                                      feilmelding = "Fant ikke data på person: " + response?.errorMessages())
+            throw Feil(message = "Fant ikke data på person: ${response?.errorMessages()}",
+                       frontendFeilmelding = "Fant ikke data på person $personIdent: ${response?.errorMessages()}",
+                       httpStatus = HttpStatus.NOT_FOUND)
         }
 
         return response.data.person!!.vergemaalEllerFremtidsfullmakt
-    }
-
-    private fun pdlOppslagException(personIdent: String,
-                                    httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                                    error: Throwable? = null,
-                                    feilmelding: String = "Feil ved oppslag på person. Gav feil: ${error?.message}")
-            : OppslagException {
-
-        responsFailure.increment()
-        return OppslagException(feilmelding,
-                                "PdlRestClient",
-                                OppslagException.Level.MEDIUM,
-                                httpStatus,
-                                error,
-                                personIdent)
     }
 
     fun hentStatsborgerskap(ident: String, tema: String): List<Statsborgerskap> {
@@ -162,19 +155,18 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         val response = try {
             postForEntity<PdlStatsborgerskapResponse>(pdlUri, pdlPersonRequest, httpHeaders(tema))
         } catch (e: Exception) {
-            throw pdlOppslagException(ident, error = e)
+            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                       frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                       throwable = e)
         }
 
         if (response == null || response.harFeil()) {
-            throw pdlOppslagException(ident,
-                                      HttpStatus.NOT_FOUND,
-                                      feilmelding = "Fant ikke data på person: " + response?.errorMessages())
+            throw Feil(message = "Fant ikke data på person: ${response?.errorMessages()}",
+                       frontendFeilmelding = "Fant ikke identer for person $ident: ${response?.errorMessages()}",
+                       httpStatus = HttpStatus.NOT_FOUND)
         }
-
-
-
         return response.data.person!!.statsborgerskap
-
     }
 
     companion object {
@@ -189,5 +181,9 @@ enum class PersonInfoQuery(val graphQL: String) {
 
 private fun hentGraphqlQuery(pdlResource: String): String {
     return PersonInfoQuery::class.java.getResource("/pdl/$pdlResource.graphql").readText().graphqlCompatible()
+}
+
+private fun String.graphqlCompatible(): String {
+    return StringUtils.normalizeSpace(this.replace("\n", ""))
 }
 
