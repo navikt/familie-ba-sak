@@ -107,8 +107,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         // TODO: Midlertidig fiks før støtte for delvis innvilget
         val behandlingResultatType = midlertidigUtledBehandlingResultatType(
-                hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id),
-                oppdatertTilstand = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id)))
+                hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id))
         //val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
 
         val vedtak = Vedtak(
