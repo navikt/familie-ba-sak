@@ -7,13 +7,12 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
+import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class ØkonomiService(
@@ -37,16 +36,12 @@ class ØkonomiService(
                     || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
                     BehandlingResultatType.OPPHØRT
                 else {
+                    // TODO: Midlertidig fiks før støtte for delvis innvilget
+                    midlertidigUtledBehandlingResultatType(
+                            oppdatertTilstand = oppdatertTilstand,
+                            hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(
+                                    behandlingId = oppdatertBehandling.id))
                     //behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
-                    // TODO: Tilpasset fastsettelse av BehandlingResultatType inntil støtte for delvis innvilgelse.
-                    //  Fastsettelse nedenfor løser generering av utbetalingsoppdrag til økonomi, men det vil fortsatt se rart ut
-                    //  frontend og i database vil det bli satt opphørsdato på TilkjentYtelse-nivå frem til støtte for delvis.
-                    // (settes i populerTilkjentYtelse i BeregningService)
-                    val hentetBehandlingResultatType =
-                            behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
-                    if (hentetBehandlingResultatType == BehandlingResultatType.OPPHØRT && oppdatertTilstand.isNotEmpty()) {
-                        BehandlingResultatType.DELVIS_INNVILGET
-                    } else hentetBehandlingResultatType
                 }
 
         val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(oppdatertBehandling.fagsak.id).size == 1
