@@ -118,7 +118,7 @@ class BeregningServiceIntegrationTest {
 
         val fnr = randomFnr()
         val dagensDato = LocalDate.now()
-        val opphørFomBarn1 = LocalDate.of(2020,5,1)
+        val opphørFomBarn1 = LocalDate.of(2020, 5, 1)
         val revurderingFomBarn1 = LocalDate.of(2020, 7, 1)
         val fomDatoBarn1 = LocalDate.of(2020, 1, 1)
         val tomDatoBarn1 = fomDatoBarn1.plusYears(18).sisteDagIMåned()
@@ -173,7 +173,12 @@ class BeregningServiceIntegrationTest {
         val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.personIdent.ident
 
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, dato_2020_01_01, dato_2020_01_01.plusYears(17))
+        behandlingResultat.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat,
+                                                                                  søkerFnr,
+                                                                                  barn1Fnr,
+                                                                                  barn2Fnr,
+                                                                                  dato_2020_01_01,
+                                                                                  dato_2020_01_01.plusYears(17))
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)

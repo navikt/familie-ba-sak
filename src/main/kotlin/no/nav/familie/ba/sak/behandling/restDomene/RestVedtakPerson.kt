@@ -9,10 +9,10 @@ data class RestVedtakPerson(
         val personIdent: String?,
         val beløp: Int,
         val stønadFom: LocalDate,
-        val ytelsePerioder : List<RestYtelsePeriode>
+        val ytelsePerioder: List<RestYtelsePeriode>
 )
 
-data class RestYtelsePeriode (
+data class RestYtelsePeriode(
         val beløp: Int,
         val stønadFom: LocalDate,
         val stønadTom: LocalDate,
@@ -20,7 +20,7 @@ data class RestYtelsePeriode (
 )
 
 fun lagRestVedtakPerson(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, personopplysningGrunnlag: PersonopplysningGrunnlag?)
-        : List<RestVedtakPerson>{
+        : List<RestVedtakPerson> {
 
     return andelerTilkjentYtelse.groupBy { it.personIdent }
             .map { andelerForPerson ->
@@ -30,7 +30,12 @@ fun lagRestVedtakPerson(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, person
                         personIdent = personopplysningGrunnlag?.personer?.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
                         beløp = andeler.map { it.beløp }.sum(),
                         stønadFom = andeler.map { it.stønadFom }.min() ?: LocalDate.MIN,
-                        ytelsePerioder = andeler.map { it1->RestYtelsePeriode(it1.beløp, it1.stønadFom, it1.stønadTom, it1.type) }
+                        ytelsePerioder = andeler.map { it1 ->
+                            RestYtelsePeriode(it1.beløp,
+                                              it1.stønadFom,
+                                              it1.stønadTom,
+                                              it1.type)
+                        }
                 )
             }
 }
