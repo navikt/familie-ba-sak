@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
 import java.time.LocalDate
 
 object ØkonomiUtils {
@@ -38,17 +37,17 @@ object ØkonomiUtils {
      * Personident er identifikator for hver kjede, men unntak av småbarnstillegg som vil være en egen "person".
      *
      * @param[forrigeKjeder] forrige behandlings tilstand
-     * @param[nyeKjeder] nåværende tilstand
+     * @param[oppdaterteKjeder] nåværende tilstand
      * @return map med personident og f.o.m.-dato for første endrede andel for person
      */
     fun dirtyKjedeFomOversikt(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
-                              nyeKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, LocalDate> {
-        val allePersoner = forrigeKjeder.keys.union(nyeKjeder.keys)
+                              oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, LocalDate> {
+        val allePersoner = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
 
         val dirtyKjedeFomOversikt = allePersoner.associate { person ->
             val kjedeDirtyFom = finnFørsteDirtyIKjede(
                     forrigeKjede = forrigeKjeder[person],
-                    oppdatertKjede = nyeKjeder[person])
+                    oppdatertKjede = oppdaterteKjeder[person])
                     ?.stønadFom
             person to kjedeDirtyFom
         }
