@@ -1,0 +1,34 @@
+{
+  "data": {
+    "person": {
+      "navn": [
+        {
+          "fornavn": "ENGASJERT",
+          "etternavn": "FYR"
+        }
+      ],
+      "foedsel": [
+        {
+          "foedselsdato": null
+        }
+      ],
+      "kjoenn": [
+        {
+          "kjoenn": "MANN"
+        }
+      ],
+      "bostedsadresse": [],
+      "sivilstand": [
+        {
+          "type": "UGIFT"
+        }
+      ],
+      "familierelasjoner": [],
+      "adressebeskyttelse": [
+        {
+          "gradering": "UGRADERT"
+        }
+      ]
+    }
+  }
+}

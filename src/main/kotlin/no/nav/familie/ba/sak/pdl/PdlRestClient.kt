@@ -59,7 +59,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                 }.fold(
                         onSuccess = { it },
                         onFailure = {
-                            throw Feil(message ="Fant ikke forespurte data på person.",
+                            throw Feil(message = "Fant ikke forespurte data på person.",
                                        frontendFeilmelding = "Kunne ikke slå opp data for person $personIdent",
                                        httpStatus = HttpStatus.NOT_FOUND,
                                        throwable = it)
@@ -97,12 +97,9 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                                              pdlPersonRequest,
                                                              httpHeaders(tema))
 
-
-        if (response != null && !response.harFeil()) {
-            return response
-        }
-        throw Feil(message = "Fant ikke identer for person: ${response?.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response?.errorMessages()}",
+        if (!response.harFeil()) return response
+        throw Feil(message = "Fant ikke identer for person: ${response.errorMessages()}",
+                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
@@ -118,13 +115,11 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                        throwable = e)
         }
 
-        if (response == null || response.harFeil()) {
-            throw Feil(message = "Fant ikke data på person: ${response?.errorMessages()}",
-                       frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response?.errorMessages()}",
-                       httpStatus = HttpStatus.NOT_FOUND)
-        }
+        if (!response.harFeil()) return response.data.person!!.doedsfall
+        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
+                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
+                   httpStatus = HttpStatus.NOT_FOUND)
 
-        return response.data.person!!.doedsfall
     }
 
     fun hentVergemaalEllerFremtidsfullmakt(personIdent: String, tema: String): List<VergemaalEllerFremtidsfullmakt> {
@@ -139,13 +134,10 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                        throwable = e)
         }
 
-        if (response == null || response.harFeil()) {
-            throw Feil(message = "Fant ikke data på person: ${response?.errorMessages()}",
-                       frontendFeilmelding = "Fant ikke data på person $personIdent: ${response?.errorMessages()}",
-                       httpStatus = HttpStatus.NOT_FOUND)
-        }
-
-        return response.data.person!!.vergemaalEllerFremtidsfullmakt
+        if (!response.harFeil()) return response.data.person!!.vergemaalEllerFremtidsfullmakt
+        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
+                   frontendFeilmelding = "Fant ikke data på person $personIdent: ${response.errorMessages()}",
+                   httpStatus = HttpStatus.NOT_FOUND)
     }
 
     fun hentStatsborgerskap(ident: String, tema: String): List<Statsborgerskap> {
@@ -161,12 +153,10 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                        throwable = e)
         }
 
-        if (response == null || response.harFeil()) {
-            throw Feil(message = "Fant ikke data på person: ${response?.errorMessages()}",
-                       frontendFeilmelding = "Fant ikke identer for person $ident: ${response?.errorMessages()}",
-                       httpStatus = HttpStatus.NOT_FOUND)
-        }
-        return response.data.person!!.statsborgerskap
+        if (!response.harFeil()) return response.data.person!!.statsborgerskap
+        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
+                   frontendFeilmelding = "Fant ikke identer for person $ident: ${response.errorMessages()}",
+                   httpStatus = HttpStatus.NOT_FOUND)
     }
 
     companion object {

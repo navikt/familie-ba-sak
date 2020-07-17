@@ -21,7 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-sts")
+@ActiveProfiles("postgres", "mock-dokgen")
 @Tag("integration")
 class ToTrinnKontrollTest(
         @Autowired
