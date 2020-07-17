@@ -38,7 +38,7 @@ data class UtbetalingsperiodeMal(
                     erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
                     opphør = if (erEndringPåEksisterendePeriode) utledOpphørPåLinje(opphørForVedtak = vedtak.opphørsdato,
                                                                                     opphørForLinje = opphørKjedeFom!!) else null,
-                    forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() }, //TODO: Husk å skrive migreringsscript for gamle periodeIder / spesialhåndtere
+                    forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() },
                     periodeId = periodeIdOffset.toLong(),
                     datoForVedtak = vedtak.vedtaksdato,
                     klassifisering = andel.type.klassifisering,

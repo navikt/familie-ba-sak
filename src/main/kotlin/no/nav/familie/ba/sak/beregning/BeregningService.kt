@@ -89,10 +89,10 @@ class BeregningService(
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
             this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxBy { it.vedtakdatoTom }!!.vedtakdatoTom
             this.stønadFom = if (erRentOpphør) null else utbetalingsoppdrag.utbetalingsperiode
-                    .filter { !it.erEndringPåEksisterendePeriode } // TODO: Hva er dette for? Vil aldri finnes hvis ikke opphør?
+                    .filter { !it.erEndringPåEksisterendePeriode }
                     .minBy { it.vedtakdatoFom }!!.vedtakdatoFom
             this.endretDato = LocalDate.now()
-            this.opphørFom = opphørsdato // TODO: Vil nå settes på delvis innvilgede siden det ikke støttes
+            this.opphørFom = opphørsdato
         }
     }
 }

@@ -36,7 +36,12 @@ class ØkonomiService(
                 if (oppdatertBehandling.type == BehandlingType.TEKNISK_OPPHØR
                     || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
                     BehandlingResultatType.OPPHØRT
-                else { // TODO: Sjekk inntil støtte for delvis innvilgelse. Kan da erstatte med behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
+                else {
+                    //behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
+                    // TODO: Tilpasset inntil støtte for delvis innvilgelse. Tilpasset fastsettelse av BehandlingResultatType
+                    //  nedenfor løser generering av utbetalingsoppdrag til økonomi, men det vil fortsatt se rart ut frontend
+                    //  og i database vil det bli satt opphørsdato på TilkjentYtelse-nivå frem til støtte for delvis.
+                    // (settes i populerTilkjentYtelse i BeregningService)
                     val hentetBehandlingResultatType =
                             behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
                     if (hentetBehandlingResultatType == BehandlingResultatType.OPPHØRT && oppdatertTilstand.isNotEmpty()) {
