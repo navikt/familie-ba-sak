@@ -73,7 +73,6 @@ object TilkjentYtelseUtils {
                                     AndelTilkjentYtelse(
                                             behandlingId = behandlingResultat.behandling.id,
                                             tilkjentYtelse = tilkjentYtelse,
-                                            personId = person.id,
                                             personIdent = person.personIdent.ident,
                                             stønadFom = beløpsperiode.fraOgMed.atDay(1),
                                             stønadTom = beløpsperiode.tilOgMed.atEndOfMonth(),
@@ -127,11 +126,12 @@ object TilkjentYtelseUtils {
                 periodeTom = segment.tom,
                 ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
                 utbetaltPerMnd = segment.value,
-                antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.id == andel.personId } },
+                antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
                 sakstype = behandling.kategori,
                 beregningDetaljer = andelerForSegment.map { andel ->
-                    val personForAndel = personopplysningGrunnlag.personer.find { person -> andel.personId == person.id }
-                                         ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel med personId ${andel.personId}")
+                    val personForAndel =
+                            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                            ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                     RestBeregningDetalj(
                             person = RestPerson(
                                     type = personForAndel.type,

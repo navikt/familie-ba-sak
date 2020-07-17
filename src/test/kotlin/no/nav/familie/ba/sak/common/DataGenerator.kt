@@ -23,14 +23,15 @@ import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
+import kotlin.math.abs
 import kotlin.random.Random
 
 fun randomFnr(): String = UUID.randomUUID().toString()
 fun randomAktørId(): AktørId = AktørId(UUID.randomUUID().toString())
 
-private var gjeldendeVedtakId: Long = Random.nextLong()
-private var gjeldendeBehandlingId: Long = Random.nextLong()
-private var gjeldendePersonId: Long = Random.nextLong()
+private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
+private var gjeldendeBehandlingId: Long = abs(Random.nextLong(10000000))
+private var gjeldendePersonId: Long = abs(Random.nextLong(10000000))
 private val id_inkrement = 50
 
 fun nesteVedtakId(): Long {
@@ -90,16 +91,17 @@ fun lagAndelTilkjentYtelse(fom: String,
                            ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
                            beløp: Int = sats(ytelseType),
                            behandling: Behandling = lagBehandling(),
-                           person: Person = tilfeldigPerson()): AndelTilkjentYtelse {
+                           person: Person = tilfeldigPerson(),
+                           periodeIdOffset: Long? = null): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
-            personId = person.id,
             personIdent = person.personIdent.ident,
             behandlingId = behandling.id,
             tilkjentYtelse = lagInitiellTilkjentYtelse(behandling),
             beløp = beløp,
             stønadFom = dato(fom),
             stønadTom = dato(tom),
-            type = ytelseType
+            type = ytelseType,
+            periodeOffset = periodeIdOffset
     )
 }
 
