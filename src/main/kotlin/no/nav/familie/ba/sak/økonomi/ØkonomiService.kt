@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -31,7 +32,7 @@ class ØkonomiService(
 
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
-        val oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(oppdatertTilstand)
+        val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
         val behandlingResultatType =
                 if (oppdatertBehandling.type == BehandlingType.TEKNISK_OPPHØR
@@ -59,7 +60,8 @@ class ØkonomiService(
                 } else {
                     val forrigeBehandling = vedtakService.hent(vedtak.forrigeVedtakId!!).behandling
                     val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
-                    val forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(forrigeTilstand)
+                    // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
+                    val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
                     utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                             saksbehandlerId,

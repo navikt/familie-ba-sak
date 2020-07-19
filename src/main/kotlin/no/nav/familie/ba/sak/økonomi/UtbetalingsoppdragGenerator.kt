@@ -8,6 +8,10 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpprettelse
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -49,15 +53,13 @@ class UtbetalingsoppdragGenerator(
                 else if (erFullstendigOpphør) UEND
                 else ENDR
 
-        val dirtyKjedeFomOversikt = ØkonomiUtils.dirtyKjedeFomOversikt(forrigeKjeder, oppdaterteKjeder)
-        val sisteBeståendeOffsetIKjedeOversikt =
-                ØkonomiUtils.sisteBeståendeOffsetForHverKjede(forrigeKjeder, dirtyKjedeFomOversikt)
-        val sisteOffsetForFagsak = hentSisteOffsetForFagsak(forrigeKjeder)
+        val sisteBeståenAndelIHverKjede = sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
+        val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxBy { it.periodeOffset!! }?.periodeOffset?.toInt()
 
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
-                ØkonomiUtils.oppdaterteAndelerFraFørsteEndring(oppdaterteKjeder, dirtyKjedeFomOversikt)
+                andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
         val andelerTilOpphør =
-                ØkonomiUtils.opphørteAndelerEtterDato(forrigeKjeder, dirtyKjedeFomOversikt)
+                andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede)
 
         if (behandlingResultatType == BehandlingResultatType.OPPHØRT
             && (andelerTilOpprettelse.isNotEmpty() || andelerTilOpphør.isEmpty())) {
@@ -70,8 +72,10 @@ class UtbetalingsoppdragGenerator(
                     andeler = andelerTilOpprettelse,
                     erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                     vedtak = vedtak,
-                    sisteBeståendeOffsetIKjedeOversikt = sisteBeståendeOffsetIKjedeOversikt,
-                    sisteOffsetPåFagsak = sisteOffsetForFagsak) else emptyList()
+                    sisteBeståendeOffsetIKjedeOversikt = sisteBeståenAndelIHverKjede.filter { it.value != null }.mapValues {
+                        it.value?.periodeOffset?.toInt() ?: throw IllegalStateException("Bestående andel i kjede skal ha offset")
+                    },
+                    sisteOffsetPåFagsak = sisteOffsetPåFagsak) else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
             lagUtbetalingsperioderForOpphør(
@@ -119,7 +123,7 @@ class UtbetalingsoppdragGenerator(
                     var forrigeOffsetIKjede: Int? = null
                     if (!erFørsteBehandlingPåFagsak) {
                         forrigeOffsetIKjede = if (ytelseType == YtelseType.SMÅBARNSTILLEGG) {
-                            sisteBeståendeOffsetIKjedeOversikt[ident + ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX]
+                            sisteBeståendeOffsetIKjedeOversikt[ident + SMÅBARNSTILLEGG_SUFFIX]
                         } else {
                             sisteBeståendeOffsetIKjedeOversikt[ident]
                         }
