@@ -23,14 +23,14 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     BOR_MED_SØKER(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
             spesifikasjon = Spesifikasjon<Fakta>(
-                    beskrivelse = "§2-2 - Bor med søker",
-                    identifikator = "BOR_MED_SØKER",
+                    beskrivelse = "§2-2 - Bor med søker: har samme adresse",
+                    identifikator = "BOR_MED_SØKER:SAMME_ADRESSE",
                     implementasjon = { barnBorMedSøker(this) })
-                    og Spesifikasjon(beskrivelse = "§2-2 - Bor med søker: Har eksakt en søker",
-                                     identifikator = "BOR_MED_SØKER",
+                    og Spesifikasjon(beskrivelse = "§2-2 - Bor med søker: har eksakt en søker",
+                                     identifikator = "BOR_MED_SØKER:EN_SØKER",
                                      implementasjon = { harEnSøker(this) })
                     og Spesifikasjon(beskrivelse = "§2-2 - Bor med søker: søker må være mor",
-                                     identifikator = "BOR_MED_SØKER",
+                                     identifikator = "BOR_MED_SØKER:SØKER_ER_MOR",
                                      implementasjon = { søkerErMor(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
 

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
@@ -45,9 +46,11 @@ class VilkårServiceTest(
         private val stegService: StegService,
 
         @Autowired
+        private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
+
+        @Autowired
         private val databaseCleanupService: DatabaseCleanupService
 ) {
-
 
     @BeforeAll
     fun init() {
@@ -55,7 +58,7 @@ class VilkårServiceTest(
     }
 
     @Test
-    fun `vilkårsvurdering med kun JA blir innvilget`() {
+    fun `vilkårsvurdering med kun JA automatisk behandlet blir innvilget`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -75,14 +78,6 @@ class VilkårServiceTest(
 
         val behandlingSteg: Vilkårsvurdering = stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         Assertions.assertNotNull(behandlingSteg)
-
-        Assertions.assertThrows(Feil::class.java) { behandlingSteg.postValiderSteg(behandling) }
-
-        val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
-
-        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
-
-        behandlingResultatService.oppdater(behandlingResultat)
 
         Assertions.assertDoesNotThrow { behandlingSteg.postValiderSteg(behandling) }
     }
@@ -204,11 +199,10 @@ class VilkårServiceTest(
                 if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) {
                     Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
                 } else {
+                    Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
                     if (personResultat.personIdent == barnFnr2) {
-                        Assertions.assertEquals(Resultat.KANSKJE, vilkårResultat.resultat)
                         Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
                     } else {
-                        Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
                         Assertions.assertEquals(behandling.id, vilkårResultat.behandlingId)
                     }
                 }
@@ -270,8 +264,52 @@ class VilkårServiceTest(
 
         val behandlingResultatEtterEndring = behandlingResultatService.oppdater(behandlingResultat2)
         val personResultatEtterEndring = behandlingResultatEtterEndring.personResultater.find { it.personIdent == barnFnr }!!
-        val borMedSøkerVilkårEtterEndring = personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
+        val borMedSøkerVilkårEtterEndring =
+                personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         Assertions.assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
+    }
+
+    @Test
+    fun `Innvilget vilkårsvurdering skal generere metrikker`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
+                                                                                   bekreftEndringerViaFrontend = true)
+        Assertions.assertEquals(2, behandlingResultat.personResultater.size)
+
+        val bosattIRiketMetrikkSøkerJa = vilkårsvurderingMetrics.hentCounter(vilkår = Vilkår.BOSATT_I_RIKET.name,
+                                                                             resultat = Resultat.JA,
+                                                                             personType = PersonType.SØKER,
+                                                                             behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
+
+        Assertions.assertEquals(1, bosattIRiketMetrikkSøkerJa?.count()?.toInt())
+
+        val bosattIRiketMetrikkBarnJa = vilkårsvurderingMetrics.hentCounter(vilkår = Vilkår.BOSATT_I_RIKET.name,
+                                                                            resultat = Resultat.JA,
+                                                                            personType = PersonType.BARN,
+                                                                            behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
+        Assertions.assertEquals(1, bosattIRiketMetrikkBarnJa?.count()?.toInt())
+
+        val bosattIRiketMetrikkSøkerNei = vilkårsvurderingMetrics.hentCounter(vilkår = Vilkår.BOSATT_I_RIKET.name,
+                                                                              resultat = Resultat.NEI,
+                                                                              personType = PersonType.SØKER,
+                                                                              behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
+
+        Assertions.assertEquals(0, bosattIRiketMetrikkSøkerNei?.count()?.toInt())
+
+        val bosattIRiketMetrikkBarnNei = vilkårsvurderingMetrics.hentCounter(vilkår = Vilkår.BOSATT_I_RIKET.name,
+                                                                             resultat = Resultat.NEI,
+                                                                             personType = PersonType.BARN,
+                                                                             behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
+        Assertions.assertEquals(0, bosattIRiketMetrikkBarnNei?.count()?.toInt())
     }
 
     @Test
