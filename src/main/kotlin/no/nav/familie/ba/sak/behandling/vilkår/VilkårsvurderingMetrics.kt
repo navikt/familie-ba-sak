@@ -65,11 +65,4 @@ class VilkårsvurderingMetrics {
             evaluering.children.forEach { økTellereForEvaluering(it, personType, behandlingOpprinnelse) }
         }
     }
-
-    fun hentCounter(vilkår: String,
-                    personType: PersonType,
-                    resultat: Resultat,
-                    behandlingOpprinnelse: BehandlingOpprinnelse): Counter? {
-        return vilkårsvurderingUtfall[vilkårNøkkel(vilkår, personType, resultat, behandlingOpprinnelse)]
-    }
 }

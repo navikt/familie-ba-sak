@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
@@ -10,7 +9,10 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
@@ -44,9 +46,6 @@ class VilkårServiceTest(
 
         @Autowired
         private val stegService: StegService,
-
-        @Autowired
-        private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService
@@ -267,49 +266,6 @@ class VilkårServiceTest(
         val borMedSøkerVilkårEtterEndring =
                 personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         Assertions.assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
-    }
-
-    @Test
-    fun `Innvilget vilkårsvurdering skal generere metrikker`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                                                   bekreftEndringerViaFrontend = true)
-        Assertions.assertEquals(2, behandlingResultat.personResultater.size)
-
-        val bosattIRiketMetrikkSøkerJa = vilkårsvurderingMetrics.hentCounter(vilkår = Vilkår.BOSATT_I_RIKET.name,
-                                                                             resultat = Resultat.JA,
-                                                                             personType = PersonType.SØKER,
-                                                                             behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
-
-        Assertions.assertTrue(1 <= bosattIRiketMetrikkSøkerJa?.count()?.toInt()!!)
-
-        val bosattIRiketMetrikkBarnJa = vilkårsvurderingMetrics.hentCounter(vilkår = Vilkår.BOSATT_I_RIKET.name,
-                                                                            resultat = Resultat.JA,
-                                                                            personType = PersonType.BARN,
-                                                                            behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
-        Assertions.assertTrue(1 <= bosattIRiketMetrikkBarnJa?.count()?.toInt()!!)
-
-        val bosattIRiketMetrikkSøkerNei = vilkårsvurderingMetrics.hentCounter(vilkår = Vilkår.BOSATT_I_RIKET.name,
-                                                                              resultat = Resultat.NEI,
-                                                                              personType = PersonType.SØKER,
-                                                                              behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
-
-        Assertions.assertEquals(0, bosattIRiketMetrikkSøkerNei?.count()?.toInt())
-
-        val bosattIRiketMetrikkBarnNei = vilkårsvurderingMetrics.hentCounter(vilkår = Vilkår.BOSATT_I_RIKET.name,
-                                                                             resultat = Resultat.NEI,
-                                                                             personType = PersonType.BARN,
-                                                                             behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
-        Assertions.assertEquals(0, bosattIRiketMetrikkBarnNei?.count()?.toInt())
     }
 
     @Test
