@@ -290,13 +290,13 @@ class VilkårServiceTest(
                                                                              personType = PersonType.SØKER,
                                                                              behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
 
-        Assertions.assertTrue(1 >= bosattIRiketMetrikkSøkerJa?.count()?.toInt()!!)
+        Assertions.assertTrue(1 <= bosattIRiketMetrikkSøkerJa?.count()?.toInt()!!)
 
         val bosattIRiketMetrikkBarnJa = vilkårsvurderingMetrics.hentCounter(vilkår = Vilkår.BOSATT_I_RIKET.name,
                                                                             resultat = Resultat.JA,
                                                                             personType = PersonType.BARN,
                                                                             behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
-        Assertions.assertTrue(1 >= bosattIRiketMetrikkBarnJa?.count()?.toInt()!!)
+        Assertions.assertTrue(1 <= bosattIRiketMetrikkBarnJa?.count()?.toInt()!!)
 
         val bosattIRiketMetrikkSøkerNei = vilkårsvurderingMetrics.hentCounter(vilkår = Vilkår.BOSATT_I_RIKET.name,
                                                                               resultat = Resultat.NEI,
