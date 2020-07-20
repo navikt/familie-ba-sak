@@ -254,7 +254,7 @@ class ClientMocks {
                                           kjønn = Kjønn.KVINNE,
                                           navn = "Mor Moresen"),
                 søkerFnr[1] to Personinfo(fødselsdato = LocalDate.of(1995, 2, 19),
-                                          bostedsadresse = bostedsadresse,
+                                          bostedsadresse = null,
                                           sivilstand = SIVILSTAND.GIFT,
                                           kjønn = Kjønn.MANN,
                                           navn = "Far Faresen"),

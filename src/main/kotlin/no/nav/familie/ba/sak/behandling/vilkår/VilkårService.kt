@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPers
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPut
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.nare.core.evaluations.Evaluering
+import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -203,6 +204,10 @@ class VilkårService(
                                  fakta: Fakta,
                                  evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
 
+        val aktivBehandlingResultat =
+                behandlingResultatService.hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id)
+        val kjørMetrikker = aktivBehandlingResultat == null
+
         return evalueringer.map { child ->
             val fom =
                     if (person.type === PersonType.BARN)
@@ -218,16 +223,31 @@ class VilkårService(
             val tom: LocalDate? =
                     if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
 
-            vilkårsvurderingMetrics.økTellereForEvaluering(evaluering = child,
-                                                           personType = person.type,
-                                                           behandlingOpprinnelse = personResultat.behandlingResultat.behandling.opprinnelse)
+            if (kjørMetrikker) {
+                vilkårsvurderingMetrics.økTellereForEvaluering(evaluering = child,
+                                                               personType = person.type,
+                                                               behandlingOpprinnelse = personResultat.behandlingResultat.behandling.opprinnelse)
+            }
+
+            var begrunnelse = "Vurdert og satt automatisk"
+
+            if (child.resultat == Resultat.NEI) {
+                if (child.children.isNotEmpty())
+                    child.children.forEach {
+                        if (it.resultat == Resultat.NEI) {
+                            begrunnelse = "$begrunnelse\n\t- ${it.begrunnelse}"
+                        }
+                    }
+                else
+                    begrunnelse = "$begrunnelse\n\t- ${child.begrunnelse}"
+            }
 
             VilkårResultat(personResultat = personResultat,
                            resultat = child.resultat,
                            vilkårType = vilkår,
                            periodeFom = fom,
                            periodeTom = tom,
-                           begrunnelse = "Vurdert og satt automatisk",
+                           begrunnelse = begrunnelse,
                            behandlingId = personResultat.behandlingResultat.behandling.id,
                            regelInput = fakta.toJson(),
                            regelOutput = child.toJson()
