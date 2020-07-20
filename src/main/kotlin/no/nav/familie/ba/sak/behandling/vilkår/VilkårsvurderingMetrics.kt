@@ -31,8 +31,8 @@ class VilkårsvurderingMetrics {
                           resultat: Resultat,
                           behandlingOpprinnelse: BehandlingOpprinnelse) {
         if (spesifikasjon.children.isEmpty()) {
-            val counter = Metrics.counter("familie.ba.behandling.vilkår.${spesifikasjon.identifikator}",
-                                          "vilkår",
+            val counter = Metrics.counter("familie.ba.behandling.vilkaarsvurdering",
+                                          "vilkaar",
                                           spesifikasjon.identifikator,
                                           "personType",
                                           personType.name,
