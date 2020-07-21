@@ -195,15 +195,11 @@ class VilkårServiceTest(
 
         behandlingResultat2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
-                if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) {
-                    Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
+                Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
+                if (personResultat.personIdent == barnFnr2) {
+                    Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
-                    Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
-                    if (personResultat.personIdent == barnFnr2) {
-                        Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
-                    } else {
-                        Assertions.assertEquals(behandling.id, vilkårResultat.behandlingId)
-                    }
+                    Assertions.assertEquals(behandling.id, vilkårResultat.behandlingId)
                 }
             }
         }
