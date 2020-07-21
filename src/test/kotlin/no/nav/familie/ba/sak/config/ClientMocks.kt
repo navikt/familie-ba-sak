@@ -16,8 +16,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.personinfo.Ident
-import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
+import no.nav.familie.kontrakter.felles.personinfo.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -37,7 +36,10 @@ class ClientMocks {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
 
-        every { mockIntegrasjonClient.hentJournalpost(any()) } answers { success(lagTestJournalpost(søkerFnr[0], UUID.randomUUID().toString())) }
+        every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
+            success(lagTestJournalpost(søkerFnr[0],
+                                       UUID.randomUUID().toString()))
+        }
 
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 lagTestOppgaveDTO(1L)
@@ -97,7 +99,7 @@ class ClientMocks {
             mockIntegrasjonClient.hentStatsborgerskap(any())
         } answers {
             listOf(Statsborgerskap("NOR",
-                                   LocalDate.of(1990,1, 25),
+                                   LocalDate.of(1990, 1, 25),
                                    null))
         }
 
@@ -208,7 +210,7 @@ class ClientMocks {
             mockIntegrasjonClient.hentStatsborgerskap(any())
         } answers {
             listOf(Statsborgerskap("NOR",
-                                   LocalDate.of(1990,1, 25),
+                                   LocalDate.of(1990, 1, 25),
                                    null))
         }
 
@@ -240,11 +242,32 @@ class ClientMocks {
     companion object {
         val søkerFnr = arrayOf("12345678910", "11223344556")
         val barnFnr = arrayOf("01101800033", "01101900033")
+        val bostedsadresse = Bostedsadresse(
+                matrikkeladresse = Matrikkeladresse(matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
+                                                    postnummer = "0202", kommunenummer = "2231")
+        )
+
         val personInfo = mapOf(
-                søkerFnr[0] to Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
-                søkerFnr[1] to Personinfo(fødselsdato = LocalDate.of(1995, 2, 19), kjønn = Kjønn.MANN, navn = "Far Faresen"),
-                barnFnr[0] to Personinfo(fødselsdato = LocalDate.now().minusYears(1), kjønn = Kjønn.MANN, navn = "Gutten Barnesen"),
-                barnFnr[1] to Personinfo(fødselsdato = LocalDate.now(), kjønn = Kjønn.KVINNE, navn = "Jenta Barnesen")
+                søkerFnr[0] to Personinfo(fødselsdato = LocalDate.of(1990, 2, 19),
+                                          bostedsadresse = bostedsadresse,
+                                          sivilstand = SIVILSTAND.GIFT,
+                                          kjønn = Kjønn.KVINNE,
+                                          navn = "Mor Moresen"),
+                søkerFnr[1] to Personinfo(fødselsdato = LocalDate.of(1995, 2, 19),
+                                          bostedsadresse = null,
+                                          sivilstand = SIVILSTAND.GIFT,
+                                          kjønn = Kjønn.MANN,
+                                          navn = "Far Faresen"),
+                barnFnr[0] to Personinfo(fødselsdato = LocalDate.now().minusYears(1),
+                                         bostedsadresse = bostedsadresse,
+                                         sivilstand = SIVILSTAND.UGIFT,
+                                         kjønn = Kjønn.MANN,
+                                         navn = "Gutten Barnesen"),
+                barnFnr[1] to Personinfo(fødselsdato = LocalDate.now(),
+                                         bostedsadresse = bostedsadresse,
+                                         sivilstand = SIVILSTAND.UGIFT,
+                                         kjønn = Kjønn.KVINNE,
+                                         navn = "Jenta Barnesen")
         )
     }
 
