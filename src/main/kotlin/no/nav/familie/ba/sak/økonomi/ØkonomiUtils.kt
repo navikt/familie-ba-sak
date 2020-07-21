@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse.Companion.snittAndeler
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import java.lang.IllegalStateException
 import java.time.LocalDate
 
 object ØkonomiUtils {
@@ -89,11 +90,18 @@ object ØkonomiUtils {
             forrigeKjeder
                     .mapValues { (person, forrigeAndeler) -> forrigeAndeler.filter { altIKjedeOpphøres(person,sisteBeståendeAndelIHverKjede) || andelOpphøres(person, it, sisteBeståendeAndelIHverKjede) } }
                     .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
-                    .mapValues { it.value.sortedBy { it.stønadFom } }
+                    .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
                     .map { (_, kjedeEtterFørsteEndring) ->
                         Pair(kjedeEtterFørsteEndring.last(),
                              kjedeEtterFørsteEndring.first().stønadFom)
                     }
+
+    fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<String, List<AndelTilkjentYtelse>>)
+            : Map<String, Int> =
+            andelerFraForrigeBehandling.map { (personIdent, forrigeKjede) ->
+                personIdent to (forrigeKjede.maxBy { andel -> andel.periodeOffset!! }?.periodeOffset?.toInt()
+                                ?: throw IllegalStateException("Andel i kjede skal ha offset"))
+            }.toMap()
 
     private fun altIKjedeOpphøres(kjedeidentifikator: String, sisteBeståendeAndelIHverKjede :Map<String, AndelTilkjentYtelse?>): Boolean = sisteBeståendeAndelIHverKjede[kjedeidentifikator] == null
     private fun andelOpphøres(kjedeidentifikator: String, andel: AndelTilkjentYtelse, sisteBeståendeAndelIHverKjede :Map<String, AndelTilkjentYtelse?>): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
