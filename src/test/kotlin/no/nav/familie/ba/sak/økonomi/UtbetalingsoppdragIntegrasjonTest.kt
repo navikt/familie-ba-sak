@@ -1,8 +1,13 @@
 package no.nav.familie.ba.sak.økonomi
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
@@ -19,13 +24,18 @@ import java.time.LocalDate.now
 @SpringBootTest
 @ActiveProfiles("dev")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled
 class UtbetalingsoppdragIntegrasjonTest(
         @Autowired
         private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
         private val beregningService: BeregningService,
+
+        @Autowired
+        private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val fagsakService: FagsakService,
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService
@@ -41,9 +51,10 @@ class UtbetalingsoppdragIntegrasjonTest(
 
     @Test
     fun `skal opprette et nytt utbetalingsoppdrag med felles løpende periodeId og separat kjeding på to personer`() {
-        val behandling = lagBehandling()
-        val vedtak = lagVedtak(behandling = behandling)
         val personMedFlerePerioder = tilfeldigPerson()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(personMedFlerePerioder.personIdent.ident)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val vedtak = lagVedtak(behandling = behandling)
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val andelerTilkjentYtelse = listOf(
                 lagAndelTilkjentYtelse("2019-04-01",
@@ -60,7 +71,14 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        behandling,
                                        person = personMedFlerePerioder,
                                        tilkjentYtelse = tilkjentYtelse),
-                lagAndelTilkjentYtelse("2019-03-01", "2037-02-28", ORDINÆR_BARNETRYGD, 1054, behandling))
+                lagAndelTilkjentYtelse("2019-03-01",
+                                       "2037-02-28",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       tilkjentYtelse = tilkjentYtelse)
+        )
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
         val utbetalingsoppdrag =
@@ -179,20 +197,60 @@ class UtbetalingsoppdragIntegrasjonTest(
     }
 
     @Test
+    @Disabled
     fun `skal opprette revurdering med opphør og gjenoppbygging`() {
-        val behandling = lagBehandling()
-        val behandling2 = lagBehandling()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val vedtak = lagVedtak(behandling)
         val fomDatoSomEndres = "2033-01-01"
         val andelerFørstegangsbehandling = listOf(
-                lagAndelTilkjentYtelse("2020-01-01", "2030-01-01", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 0),
-                lagAndelTilkjentYtelse(fomDatoSomEndres, "2035-01-01", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 1),
-                lagAndelTilkjentYtelse("2037-01-01", "2040-01-01", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 2))
+                lagAndelTilkjentYtelse("2020-01-01",
+                                       "2029-12-31",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 0,
+                                       tilkjentYtelse = tilkjentYtelse),
+                lagAndelTilkjentYtelse(fomDatoSomEndres,
+                                       "2034-12-31",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 1,
+                                       tilkjentYtelse = tilkjentYtelse),
+                lagAndelTilkjentYtelse("2037-01-01",
+                                       "2039-12-31",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 2,
+                                       tilkjentYtelse = tilkjentYtelse))
 
         val andelerRevurdering = listOf(
-                lagAndelTilkjentYtelse("2020-01-01", "2030-01-01", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 0),
-                lagAndelTilkjentYtelse("2034-01-01", "2035-01-01", ORDINÆR_BARNETRYGD, 1054, behandling2, periodeIdOffset = 3),
-                lagAndelTilkjentYtelse("2037-01-01", "2040-01-01", ORDINÆR_BARNETRYGD, 1054, behandling2, periodeIdOffset = 4))
+                lagAndelTilkjentYtelse("2020-01-01",
+                                       "2029-12-31",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 0,
+                                       tilkjentYtelse = tilkjentYtelse),
+                lagAndelTilkjentYtelse("2034-01-01",
+                                       "2035-01-01",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling2,
+                                       periodeIdOffset = 3,
+                                       tilkjentYtelse = tilkjentYtelse2),
+                lagAndelTilkjentYtelse("2037-01-01",
+                                       "2040-01-01",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling2,
+                                       periodeIdOffset = 4,
+                                       tilkjentYtelse = tilkjentYtelse2))
 
         val behandlingResultatType = BehandlingResultatType.DELVIS_INNVILGET
 
@@ -213,8 +271,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                                  2,
                                  null,
                                  1054,
-                                 "2020-01-01",
-                                 "2030-01-01",
+                                 "2037-01-01",
+                                 "2040-01-01",
                                  dato(fomDatoSomEndres))
         assertUtbetalingsperiode(utbetalingsoppdrag.utbetalingsperiode[1],
                                  3,
@@ -232,9 +290,10 @@ class UtbetalingsoppdragIntegrasjonTest(
 
     @Test
     fun `skal opprette et nytt utbetalingsoppdrag med to andeler på samme person og separat kjeding for småbarnstillegg`() {
-        val behandling = lagBehandling()
-        val vedtak = lagVedtak(behandling = behandling)
         val personMedFlerePerioder = tilfeldigPerson()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(personMedFlerePerioder.personIdent.ident)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val vedtak = lagVedtak(behandling = behandling)
         val andelerTilkjentYtelse = listOf(
                 lagAndelTilkjentYtelse("2019-04-01",
                                        "2023-03-31",

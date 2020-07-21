@@ -26,7 +26,7 @@ internal class UtbetalingsoppdragPeriodiseringTest {
         utbetalingsoppdragGenerator = spyk(UtbetalingsoppdragGenerator(mockk<PersongrunnlagService>(), beregningService))
 
         every { utbetalingsoppdragGenerator.hentSisteOffsetForFagsak(any()) } returns (if (sisteOppdatertePersonsAndeler.isCaptured) sisteOppdatertePersonsAndeler.captured.maxBy { it.periodeOffset!! }?.periodeOffset?.toInt() else null)
-        every { beregningService.lagreOppdaterteAndelerTilkjentYtelse(capture(sisteOppdatertePersonsAndeler)) } just Runs
+        every { beregningService.lagreOppdaterteAndelerTilkjentYtelse(any()) } just Runs
         // Persontype er uvesentlig for nåværende tester da vi ikke tester offsets på tvers av behandlinger
         every { utbetalingsoppdragGenerator.personErSøkerPåBehandling(any(), any()) } returns false
     }

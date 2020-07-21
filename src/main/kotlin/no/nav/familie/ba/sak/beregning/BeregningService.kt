@@ -34,8 +34,8 @@ class BeregningService(
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
     }
 
-    fun lagreOppdaterteAndelerTilkjentYtelse(andeler: List<AndelTilkjentYtelse>) {
-        andelTilkjentYtelseRepository.saveAll(andeler)
+    fun lagreOppdaterteAndelerTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) {
+        tilkjentYtelseRepository.save(tilkjentYtelse)
     }
 
     fun hentTilkjentYtelseForBehandling(behandlingId: Long): TilkjentYtelse {

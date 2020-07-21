@@ -132,11 +132,12 @@ class UtbetalingsoppdragGenerator(
                         val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
                         utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
                             andel.periodeOffset = offset.toLong()
+
                             offset++
                         }
                     }
                 }
-        beregningService.lagreOppdaterteAndelerTilkjentYtelse(andeler.flatten())
+        beregningService.lagreOppdaterteAndelerTilkjentYtelse(andeler.flatten().first().tilkjentYtelse)
         return utbetalingsperioder
     }
 
