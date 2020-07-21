@@ -46,8 +46,8 @@ object ØkonomiUtils {
     fun sisteBeståendeAndelPerKjede(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
                                     oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, AndelTilkjentYtelse?> {
         val allePersoner = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
-        return allePersoner.associate { kjedeIdentifikator ->
-            kjedeIdentifikator to sisteBeståendeAndelIKjede(
+        return allePersoner.associateWith { kjedeIdentifikator ->
+            sisteBeståendeAndelIKjede(
                     forrigeKjede = forrigeKjeder[kjedeIdentifikator],
                     oppdatertKjede = oppdaterteKjeder[kjedeIdentifikator])
         }

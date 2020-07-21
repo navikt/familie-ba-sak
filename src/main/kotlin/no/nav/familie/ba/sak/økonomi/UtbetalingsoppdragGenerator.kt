@@ -56,10 +56,10 @@ class UtbetalingsoppdragGenerator(
         val sisteBeståenAndelIHverKjede = sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
         val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxBy { it.periodeOffset!! }?.periodeOffset?.toInt()
 
-        val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
-                andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
         val andelerTilOpphør =
                 andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede)
+        val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
+                andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
         if (behandlingResultatType == BehandlingResultatType.OPPHØRT
             && (andelerTilOpprettelse.isNotEmpty() || andelerTilOpphør.isEmpty())) {
@@ -72,9 +72,11 @@ class UtbetalingsoppdragGenerator(
                     andeler = andelerTilOpprettelse,
                     erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                     vedtak = vedtak,
-                    sisteBeståendeOffsetIKjedeOversikt = sisteBeståenAndelIHverKjede.filter { it.value != null }.mapValues {
-                        it.value?.periodeOffset?.toInt() ?: throw IllegalStateException("Bestående andel i kjede skal ha offset")
-                    },
+                    // TODO: Hvis man ikke har opphørsandeler, feks ved helt ny periode lenger frem i tid enn eksisterende andeler, så må siste bestående offset settes til noe annet
+                    sisteBeståendeOffsetIKjedeOversikt = andelerTilOpphør.map { (andel, _) ->
+                        andel.personIdent to (andel.periodeOffset?.toInt()
+                                              ?: throw IllegalStateException("Bestående andel i kjede skal ha offset"))
+                    }.toMap(),
                     sisteOffsetPåFagsak = sisteOffsetPåFagsak) else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
@@ -98,7 +100,7 @@ class UtbetalingsoppdragGenerator(
         return andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
             utbetalingsperiodeMal.lagPeriodeFraAndel(andel = sisteAndelIKjede,
                                                      periodeIdOffset = sisteAndelIKjede.periodeOffset!!.toInt(),
-                                                     forrigePeriodeIdOffset = null,
+                                                     forrigePeriodeIdOffset = sisteAndelIKjede.forrigePeriodeOffset?.toInt(),
                                                      opphørKjedeFom = opphørKjedeFom)
         }
     }
@@ -132,7 +134,7 @@ class UtbetalingsoppdragGenerator(
                         val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
                         utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
                             andel.periodeOffset = offset.toLong()
-
+                            andel.forrigePeriodeOffset = forrigeOffset?.toLong()
                             offset++
                         }
                     }

@@ -1,20 +1,17 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -197,13 +194,13 @@ class UtbetalingsoppdragIntegrasjonTest(
     }
 
     @Test
-    @Disabled
     fun `skal opprette revurdering med opphør og gjenoppbygging`() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
+        val person = tilfeldigPerson()
         val vedtak = lagVedtak(behandling)
         val fomDatoSomEndres = "2033-01-01"
         val andelerFørstegangsbehandling = listOf(
@@ -213,6 +210,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        1054,
                                        behandling,
                                        periodeIdOffset = 0,
+                                       person = person,
                                        tilkjentYtelse = tilkjentYtelse),
                 lagAndelTilkjentYtelse(fomDatoSomEndres,
                                        "2034-12-31",
@@ -220,6 +218,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        1054,
                                        behandling,
                                        periodeIdOffset = 1,
+                                       person = person,
                                        tilkjentYtelse = tilkjentYtelse),
                 lagAndelTilkjentYtelse("2037-01-01",
                                        "2039-12-31",
@@ -227,7 +226,15 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        1054,
                                        behandling,
                                        periodeIdOffset = 2,
+                                       person = person,
                                        tilkjentYtelse = tilkjentYtelse))
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
+                                                          vedtak,
+                                                          BehandlingResultatType.INNVILGET,
+                                                          true,
+                                                          oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                                                  andelerFørstegangsbehandling))
 
         val andelerRevurdering = listOf(
                 lagAndelTilkjentYtelse("2020-01-01",
@@ -236,21 +243,25 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        1054,
                                        behandling,
                                        periodeIdOffset = 0,
+                                       person = person,
                                        tilkjentYtelse = tilkjentYtelse),
                 lagAndelTilkjentYtelse("2034-01-01",
-                                       "2035-01-01",
+                                       "2034-12-31",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling2,
                                        periodeIdOffset = 3,
+                                       person = person,
                                        tilkjentYtelse = tilkjentYtelse2),
                 lagAndelTilkjentYtelse("2037-01-01",
-                                       "2040-01-01",
+                                       "2039-12-31",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
                                        behandling2,
                                        periodeIdOffset = 4,
+                                       person = person,
                                        tilkjentYtelse = tilkjentYtelse2))
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
         val behandlingResultatType = BehandlingResultatType.DELVIS_INNVILGET
 
@@ -267,25 +278,31 @@ class UtbetalingsoppdragIntegrasjonTest(
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
 
-        assertUtbetalingsperiode(utbetalingsoppdrag.utbetalingsperiode[0],
+        val opphørsperiode = utbetalingsoppdrag.utbetalingsperiode.find { it.opphør != null }
+        assertNotNull(opphørsperiode)
+        val nyeUtbetalingsPerioderSortert =
+                utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør == null }.sortedBy { it.vedtakdatoFom }
+        assertEquals(2, nyeUtbetalingsPerioderSortert.size)
+
+        assertUtbetalingsperiode(opphørsperiode!!,
                                  2,
-                                 null,
+                                 1,
                                  1054,
                                  "2037-01-01",
-                                 "2040-01-01",
+                                 "2039-12-31",
                                  dato(fomDatoSomEndres))
-        assertUtbetalingsperiode(utbetalingsoppdrag.utbetalingsperiode[1],
+        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.first(),
                                  3,
-                                 0,
+                                 2,
                                  1054,
                                  "2034-01-01",
-                                 "2035-01-01")
-        assertUtbetalingsperiode(utbetalingsoppdrag.utbetalingsperiode[2],
+                                 "2034-12-31")
+        assertUtbetalingsperiode(nyeUtbetalingsPerioderSortert.last(),
                                  4,
                                  3,
                                  1054,
                                  "2037-01-01",
-                                 "2040-02-28")
+                                 "2039-12-31")
     }
 
     @Test
