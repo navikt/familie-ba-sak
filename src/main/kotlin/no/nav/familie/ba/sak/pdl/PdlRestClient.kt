@@ -18,7 +18,7 @@ import java.net.URI
 
 @Service
 class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
-                    @Qualifier("sts") val restTemplate: RestOperations,
+                    @Qualifier("jwtBearer") val restTemplate: RestOperations,
                     private val stsRestClient: StsRestClient)
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
@@ -27,7 +27,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
     private val hentIdenterQuery = hentGraphqlQuery("hentIdenter")
 
-    fun hentPerson(personIdent: String, tema: String, personInfoQuery: PersonInfoQuery): Person {
+    fun hentPerson(personIdent: String, tema: String, personInfoQuery: PersonInfoQuery): PersonInfo {
 
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = personInfoQuery.graphQL)
@@ -35,7 +35,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
             val response = postForEntity<PdlHentPersonResponse>(pdlUri,
                                                                 pdlPersonRequest,
                                                                 httpHeaders(tema))
-            if (response != null && !response.harFeil()) {
+            if (!response.harFeil()) {
                 return Result.runCatching {
                     val familierelasjoner: Set<Familierelasjon> =
                             when (personInfoQuery) {
@@ -43,18 +43,18 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                 PersonInfoQuery.MED_RELASJONER -> {
                                     response.data.person!!.familierelasjoner.map { relasjon ->
                                         Familierelasjon(personIdent = Personident(id = relasjon.relatertPersonsIdent),
-                                                        relasjonsrolle = relasjon.relatertPersonsRolle.toString())
+                                                        relasjonsrolle = relasjon.relatertPersonsRolle)
                                     }.toSet()
                                 }
                             }
                     response.data.person!!.let {
-                        Person(fødselsdato = it.foedsel.first().foedselsdato!!,
-                               navn = it.navn.first().fulltNavn(),
-                               kjønn = it.kjoenn.first().kjoenn.toString(),
-                               familierelasjoner = familierelasjoner,
-                               adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
-                               bostedsadresse = it.bostedsadresse.firstOrNull(),
-                               sivilstand = it.sivilstand.firstOrNull()?.type)
+                        PersonInfo(fødselsdato = it.foedsel.first().foedselsdato!!,
+                                   navn = it.navn.first().fulltNavn(),
+                                   kjønn = it.kjoenn.first().kjoenn,
+                                   familierelasjoner = familierelasjoner,
+                                   adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
+                                   bostedsadresse = it.bostedsadresse.firstOrNull(),
+                                   sivilstand = it.sivilstand.firstOrNull()?.type)
                     }
                 }.fold(
                         onSuccess = { it },
@@ -66,8 +66,8 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                         }
                 )
             } else {
-                throw Feil(message = "Feil ved oppslag på person: ${response?.errorMessages()}",
-                           frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response?.errorMessages()}",
+                throw Feil(message = "Feil ved oppslag på person: ${response.errorMessages()}",
+                           frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response.errorMessages()}",
                            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
             }
         } catch (e: Exception) {

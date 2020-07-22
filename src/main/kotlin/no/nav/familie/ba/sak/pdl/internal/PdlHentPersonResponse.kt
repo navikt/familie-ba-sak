@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.pdl.internal
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
+import java.time.LocalDate
 
 data class PdlHentPersonResponse(val data: PdlPerson,
                                  val errors: List<PdlError>?) {
@@ -28,7 +30,7 @@ data class PdlPersonData(val foedsel: List<PdlFødselsDato>,
                          val sivilstand: List<Sivilstand?>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlFødselsDato(val foedselsdato: String?)
+data class PdlFødselsDato(val foedselsdato: LocalDate?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlError(val message: String)
@@ -47,7 +49,7 @@ data class PdlNavn(val fornavn: String,
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlKjoenn(val kjoenn: KJØNN)
+data class PdlKjoenn(val kjoenn: Kjønn)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlFamilierelasjon(val relatertPersonsIdent: String,
@@ -62,12 +64,6 @@ data class Adressebeskyttelse(
 data class Sivilstand(
         val type: SIVILSTAND
 )
-
-enum class KJØNN {
-    MANN,
-    KVINNE,
-    UKJENT
-}
 
 enum class FAMILIERELASJONSROLLE {
     BARN,

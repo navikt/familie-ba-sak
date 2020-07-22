@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -20,7 +21,8 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class OppgaveController(val oppgaveService: OppgaveService,
                         val fagsakService: FagsakService,
-                        val integrasjonClient: IntegrasjonClient) {
+                        val integrasjonClient: IntegrasjonClient,
+                        val personopplysningerService: PersonopplysningerService) {
 
     @PostMapping(path = ["/hent-oppgaver"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -79,7 +81,7 @@ class OppgaveController(val oppgaveService: OppgaveService,
                     oppgave = oppgave,
                     journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!).data
                                                                                ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
-                    person = personIdent?.ident?.let { integrasjonClient.hentPersoninfoFor(it).toRestPersonInfo(it) },
+                    person = personIdent?.ident?.let { personopplysningerService.hentPersoninfoFor(it).toRestPersonInfo(it) },
                     fagsak = fagsak
             ))
         }.fold(

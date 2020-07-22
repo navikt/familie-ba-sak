@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
@@ -94,6 +96,9 @@ class BehandlingIntegrationTest {
 
     @Autowired
     lateinit var integrasjonClient: IntegrasjonClient
+
+    @Autowired
+    lateinit var personopplysningerService: PersonopplysningerService
 
     @Autowired
     lateinit var loggService: LoggService
@@ -414,7 +419,7 @@ class BehandlingIntegrationTest {
 
         val barn2BostedKommune = "Oslo"
 
-        every { integrasjonClient.hentPersoninfoFor(søkerFnr) } returns Personinfo(
+        every { personopplysningerService.hentPersoninfoFor(søkerFnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Mor",
@@ -431,7 +436,7 @@ class BehandlingIntegrationTest {
                 sivilstand = null
         )
 
-        every { integrasjonClient.hentPersoninfoFor(barn1Fnr) } returns Personinfo(
+        every { personopplysningerService.hentPersoninfoFor(barn1Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Gutt",
@@ -442,7 +447,7 @@ class BehandlingIntegrationTest {
                 sivilstand = null
         )
 
-        every { integrasjonClient.hentPersoninfoFor(barn2Fnr) } returns Personinfo(
+        every { personopplysningerService.hentPersoninfoFor(barn2Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2012, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Jente",
@@ -452,7 +457,7 @@ class BehandlingIntegrationTest {
                 sivilstand = null
         )
 
-        every { integrasjonClient.hentPersoninfoFor(barn3Fnr) } returns Personinfo(
+        every { personopplysningerService.hentPersoninfoFor(barn3Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2013, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Jente2",

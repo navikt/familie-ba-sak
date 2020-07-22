@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.oppgave.*
 import no.nav.familie.kontrakter.felles.personinfo.Ident
 import org.slf4j.LoggerFactory
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter
 
 @Service
 class OppgaveService(private val integrasjonClient: IntegrasjonClient,
+                     private val personopplysningerService: PersonopplysningerService,
                      private val behandlingRepository: BehandlingRepository,
                      private val oppgaveRepository: OppgaveRepository,
                      private val arbeidsfordelingService: ArbeidsfordelingService) {
@@ -38,7 +40,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
             eksisterendeOppgave.gsakId
         } else {
             val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
-            val aktorId = integrasjonClient.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
+            val aktorId = personopplysningerService.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
             val opprettOppgave = OpprettOppgave(
                     ident = OppgaveIdent(ident = aktorId, type = IdentType.Aktør),
                     saksId = fagsakId.toString(),

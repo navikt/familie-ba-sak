@@ -26,8 +26,6 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
-import no.nav.familie.kontrakter.felles.personinfo.Ident
-import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
 import no.nav.familie.log.NavHttpHeaders
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -76,6 +74,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
+    /*
     fun hentAktivAktørId(ident: Ident): AktørId {
         val identer = hentIdenter(ident).filter { !it.historisk && it.gruppe == "AKTORID" }.map { it.ident }
         if (identer.isEmpty()) error("Finner ingen aktiv aktørId for ident")
@@ -154,7 +153,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av statsborgerskap", e, uri, ident.ident)
         }
     }
-
+*/
     fun hentAlleEØSLand(): KodeverkDto {
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/eea")
 
@@ -165,6 +164,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
+    /*
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     private fun hentPersoninfo(personIdent: String, medRelasjoner: Boolean): Personinfo {
         logger.info("Henter personinfo fra $integrasjonUri")
@@ -188,6 +188,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
         }
     }
+*/
 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {

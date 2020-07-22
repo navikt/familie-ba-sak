@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -37,6 +39,9 @@ class ArbeidsfordelingServiceTest {
     lateinit var integrasjonClient: IntegrasjonClient
 
     @MockK
+    lateinit var personopplysningerService: PersonopplysningerService
+
+    @MockK
     lateinit var oppgaveRepository: OppgaveRepository
 
     @InjectMockKs
@@ -47,7 +52,7 @@ class ArbeidsfordelingServiceTest {
         val fagsak = defaultFagsak
 
         every { integrasjonClient.hentBehandlendeEnhet(any()) } returns listOf()
-        every { integrasjonClient.hentPersoninfoFor(any()) } returns Personinfo(LocalDate.now())
+        every { personopplysningerService.hentPersoninfoFor(any()) } returns PersonInfo(LocalDate.now())
         every { behandlingService.hentAktivForFagsak(any()) } returns Behandling(
                 fagsak = fagsak,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -73,7 +78,7 @@ class ArbeidsfordelingServiceTest {
         every { integrasjonClient.finnOppgaveMedId(any()) } returns lagTestOppgaveDTO(oppgaveId = 123L, tildeltEnhetsnr = "4820")
         every { integrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("9999",
                                                                                                       "Ukjent"))
-        every { integrasjonClient.hentPersoninfoFor(any()) } returns Personinfo(LocalDate.now())
+        every { personopplysningerService.hentPersoninfoFor(any()) } returns PersonInfo(LocalDate.now())
         every { behandlingService.hentAktivForFagsak(any()) } returns behandling
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) }
                 .returns(PersonopplysningGrunnlag(behandlingId = behandling.id))
@@ -93,7 +98,7 @@ class ArbeidsfordelingServiceTest {
 
         every { integrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("9999",
                                                                                                       "Ukjent"))
-        every { integrasjonClient.hentPersoninfoFor(any()) } returns Personinfo(LocalDate.now())
+        every { personopplysningerService.hentPersoninfoFor(any()) } returns PersonInfo(LocalDate.now())
         every { behandlingService.hentAktivForFagsak(any()) } returns behandling
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) }
                 .returns(PersonopplysningGrunnlag(behandlingId = behandling.id))
@@ -112,7 +117,7 @@ class ArbeidsfordelingServiceTest {
         } returns null
 
         every { integrasjonClient.hentBehandlendeEnhet(any()) } returns emptyList()
-        every { integrasjonClient.hentPersoninfoFor(any()) } returns Personinfo(LocalDate.now())
+        every { personopplysningerService.hentPersoninfoFor(any()) } returns PersonInfo(LocalDate.now())
         every { behandlingService.hentAktivForFagsak(any()) } returns behandling
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) }
                 .returns(PersonopplysningGrunnlag(behandlingId = behandling.id))

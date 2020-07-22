@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
 import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -51,6 +52,8 @@ class IntergrasjonTjenesteTest {
     @Qualifier("integrasjonClient")
     lateinit var integrasjonClient: IntegrasjonClient
 
+    lateinit var personopplysningerService: PersonopplysningerService
+
     @AfterEach
     fun cleanUp() {
         MDC.clear()
@@ -82,7 +85,7 @@ class IntergrasjonTjenesteTest {
         stubFor(post("/api/personopplysning/identer/BAR/historikk").willReturn(
                 okJson(objectMapper.writeValueAsString(success(listOf(IdentInformasjon("1234", false, "AKTORID")))))))
 
-        val identerResponse = integrasjonClient.hentIdenter(Ident("12345678910"))
+        val identerResponse = personopplysningerService.hentIdenter(Ident("12345678910"))
 
         assertThat(identerResponse.first().ident).isEqualTo("1234")
         verify(anyRequestedFor(anyUrl())
@@ -287,7 +290,7 @@ class IntergrasjonTjenesteTest {
         stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(
                 okJson(objectMapper.writeValueAsString(success(Personinfo(fødselsdato = LocalDate.now()))))))
 
-        val personinfo = integrasjonClient.hentPersoninfoFor("12")
+        val personinfo = personopplysningerService.hentPersoninfoFor("12")
         assertThat(personinfo.fødselsdato).isEqualTo(LocalDate.now())
 
         verify(getRequestedFor(urlEqualTo("/api/personopplysning/v1/info/BAR"))
@@ -300,7 +303,7 @@ class IntergrasjonTjenesteTest {
         stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(aResponse().withStatus(404)))
 
         assertThrows<HttpClientErrorException> {
-            integrasjonClient.hentPersoninfoFor("12345678910")
+            personopplysningerService.hentPersoninfoFor("12345678910")
         }
     }
 
@@ -310,7 +313,7 @@ class IntergrasjonTjenesteTest {
         stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(aResponse().withStatus(400)))
 
         assertThrows<IntegrasjonException> {
-            integrasjonClient.hentPersoninfoFor("12345678910")
+            personopplysningerService.hentPersoninfoFor("12345678910")
         }
     }
 

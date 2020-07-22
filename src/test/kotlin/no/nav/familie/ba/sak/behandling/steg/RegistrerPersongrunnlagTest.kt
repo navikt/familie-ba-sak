@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,6 +41,9 @@ class RegistrerPersongrunnlagTest(
         private val integrasjonClient: IntegrasjonClient,
 
         @Autowired
+        private val personopplysningerService: PersonopplysningerService,
+
+        @Autowired
         private val databaseCleanupService: DatabaseCleanupService
 ) {
 
@@ -55,8 +60,8 @@ class RegistrerPersongrunnlagTest(
         val barn2Id = randomFnr()
 
         every {
-            integrasjonClient.hentPersoninfoFor(any())
-        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+            personopplysningerService.hentPersoninfoFor(any())
+        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
@@ -82,8 +87,8 @@ class RegistrerPersongrunnlagTest(
         val barn2Id = randomFnr()
 
         every {
-            integrasjonClient.hentPersoninfoFor(any())
-        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+            personopplysningerService.hentPersoninfoFor(any())
+        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =

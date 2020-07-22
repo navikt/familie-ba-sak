@@ -12,7 +12,8 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
@@ -38,13 +39,14 @@ class FagsakService(
         private val vedtakRepository: VedtakRepository,
         private val totrinnskontrollRepository: TotrinnskontrollRepository,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-        private val integrasjonClient: IntegrasjonClient) {
+        private val integrasjonClient: IntegrasjonClient,
+        private val personopplysningerService: PersonopplysningerService) {
 
     @Transactional
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
         val personIdent = when {
             fagsakRequest.personIdent !== null -> PersonIdent(fagsakRequest.personIdent)
-            fagsakRequest.aktørId !== null -> integrasjonClient.hentAktivPersonIdent(Ident(fagsakRequest.aktørId))
+            fagsakRequest.aktørId !== null -> personopplysningerService.hentAktivPersonIdent(Ident(fagsakRequest.aktørId))
             else -> throw Feil(
                     "Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak.",
                     "Fagsak er forsøkt opprettet uten ident. Dette er en systemfeil, vennligst ta kontakt med systemansvarlig.",
@@ -59,7 +61,7 @@ class FagsakService(
 
     @Transactional
     fun hentEllerOpprettFagsak(personIdent: PersonIdent): Fagsak {
-        val identer = integrasjonClient.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
+        val identer = personopplysningerService.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
         var fagsak = fagsakPersonRepository.finnFagsak(personIdenter = identer)
         if (fagsak == null) {
             fagsak = Fagsak().also {
@@ -151,7 +153,7 @@ class FagsakService(
     }
 
     fun hent(personIdent: PersonIdent): Fagsak? {
-        val identer = integrasjonClient.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
+        val identer = personopplysningerService.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
         return fagsakPersonRepository.finnFagsak(identer)
     }
 
@@ -162,7 +164,7 @@ class FagsakService(
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
         val personer = personRepository.findByPersonIdent(PersonIdent(personIdent))
         val personInfo = runCatching {
-            integrasjonClient.hentPersoninfoFor(personIdent)
+            personopplysningerService.hentPersoninfoFor(personIdent)
         }.fold(
                 onSuccess = { it },
                 onFailure = {
@@ -186,7 +188,7 @@ class FagsakService(
                     //get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
                     val søkerInfo = if (behandling.fagsak.hentAktivIdent().ident == personIdent) personInfo else
                         runCatching {
-                            integrasjonClient.hentPersoninfoFor(behandling.fagsak.hentAktivIdent().ident)
+                            personopplysningerService.hentPersoninfoFor(behandling.fagsak.hentAktivIdent().ident)
                         }.fold(
                                 onSuccess = { it },
                                 onFailure = {
@@ -227,7 +229,7 @@ class FagsakService(
             }.forEach {
                 if (assosierteFagsakDeltager.find({ d -> d.ident == it.personIdent.id }) == null) {
                     val forelderInfo = runCatching {
-                        integrasjonClient.hentPersoninfoFor(it.personIdent.id)
+                        personopplysningerService.hentPersoninfoFor(it.personIdent.id)
                     }.fold(
                             onSuccess = { it },
                             onFailure = {
