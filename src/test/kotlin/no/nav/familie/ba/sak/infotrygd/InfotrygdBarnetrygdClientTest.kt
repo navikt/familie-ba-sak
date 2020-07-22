@@ -21,7 +21,6 @@ import java.net.URI
 @AutoConfigureWireMock(port = 0)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
-@Disabled
 class InfotrygdBarnetrygdClientTest {
 
     @Autowired
@@ -43,6 +42,7 @@ class InfotrygdBarnetrygdClientTest {
         )
     }
 
+    /*
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr`() {
         stubFor(post("/api/infotrygd/barnetrygd/personsok").willReturn(okJson(objectMapper.writeValueAsString(
@@ -60,7 +60,6 @@ class InfotrygdBarnetrygdClientTest {
         Assertions.assertEquals(true, finnesIkkeHosInfotrygd)
     }
 
-    /*
     Denne testen er en kopi av tilsvarende test i InfotrygdFeedClientTest.
     Testen kjører med suksess lokalt, men feiler på byggeserveren med en RuntimeException i AbstractRestClient.executeMedMetrics.
 
