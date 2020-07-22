@@ -23,8 +23,7 @@ class ØkonomiService(
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
-        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
-        private val fagsakService: FagsakService
+        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
 ) {
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId: Long, saksbehandlerId: String) {
@@ -46,16 +45,16 @@ class ØkonomiService(
                     //behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
                 }
 
-        val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(oppdatertBehandling.fagsak.id).size == 1
-        //val erFørsteBehandlingPåFagsak = fagsakService.hentFagsakerSendtTilØkonomi().isEmpty() // TODO: Økonomiservicetest klarer kun kjøre separat
+        val erFørsteIverksatteBehandlingPåFagsak =
+                beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
 
         val utbetalingsoppdrag: Utbetalingsoppdrag =
-                if (erFørsteBehandlingPåFagsak) {
+                if (erFørsteIverksatteBehandlingPåFagsak) {
                     utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                             saksbehandlerId,
                             vedtak,
                             behandlingResultatType,
-                            erFørsteBehandlingPåFagsak,
+                            erFørsteIverksatteBehandlingPåFagsak,
                             oppdaterteKjeder = oppdaterteKjeder)
                 } else {
                     val forrigeBehandling = vedtakService.hent(vedtak.forrigeVedtakId!!).behandling
@@ -67,7 +66,7 @@ class ØkonomiService(
                             saksbehandlerId,
                             vedtak,
                             behandlingResultatType,
-                            erFørsteBehandlingPåFagsak,
+                            erFørsteIverksatteBehandlingPåFagsak,
                             forrigeKjeder = forrigeKjeder,
                             oppdaterteKjeder = oppdaterteKjeder)
                 }

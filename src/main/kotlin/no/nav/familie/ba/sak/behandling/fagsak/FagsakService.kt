@@ -159,10 +159,6 @@ class FagsakService(
         return fagsakRepository.finnLøpendeFagsaker()
     }
 
-    fun hentFagsakerSendtTilØkonomi(): List<Fagsak> {
-        return fagsakRepository.finnFagsakerSendtTilØkonomi()
-    }
-
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
         val personer = personRepository.findByPersonIdent(PersonIdent(personIdent))
         val personInfo = runCatching {

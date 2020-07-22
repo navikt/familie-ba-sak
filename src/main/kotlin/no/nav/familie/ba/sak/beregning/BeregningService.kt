@@ -42,6 +42,12 @@ class BeregningService(
         return tilkjentYtelseRepository.findByBehandling(behandlingId)
     }
 
+
+    fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
+        val iverksatteBehandlinger = behandlingRepository.findByFagsakAndFerdigstiltOrIverksatt(fagsakId)
+        return iverksatteBehandlinger.mapNotNull { b -> tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(b.id) }
+    }
+
     @Transactional
     fun oppdaterBehandlingMedBeregning(behandling: Behandling,
                                        personopplysningGrunnlag: PersonopplysningGrunnlag): Ressurs<RestFagsak> {
