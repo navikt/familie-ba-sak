@@ -21,6 +21,7 @@ import java.net.URI
 @AutoConfigureWireMock(port = 0)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
+@Disabled
 class InfotrygdBarnetrygdClientTest {
 
     @Autowired
