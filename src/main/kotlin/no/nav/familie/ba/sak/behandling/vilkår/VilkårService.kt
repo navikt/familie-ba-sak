@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -32,8 +31,10 @@ class VilkårService(
         private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val søknadGrunnlagService: SøknadGrunnlagService
+        private val søknadGrunnlagService: SøknadGrunnlagService,
+        private val vilkårsvurderingMetrics: VilkårsvurderingMetrics
 ) {
+
     fun hentVilkårsdato(behandling: Behandling): LocalDate? {
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                  ?: error("Finner ikke behandlingsresultat på behandling ${behandling.id}")
@@ -50,154 +51,6 @@ class VilkårService(
 
     fun hentVilkårsvurdering(behandlingId: Long): BehandlingResultat? {
         return behandlingResultatService.hentAktivForBehandling(behandlingId = behandlingId)
-    }
-
-    fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
-        val behandling = behandlingService.hent(behandlingId)
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
-                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
-        val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
-        if (barna.size != 1) {
-            throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde ett barn, men inneholder ${barna.size}")
-        }
-
-        val barnet = barna.first()
-
-        val behandlingResultat = BehandlingResultat(
-                behandling = behandlingService.hent(behandlingId),
-                aktiv = true)
-
-        behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
-            val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
-                                                personIdent = person.personIdent.ident)
-            val spesifikasjonerForPerson = spesifikasjonerForPerson(person, behandling.kategori)
-            val fakta = Fakta(personForVurdering = person)
-            val evaluering = spesifikasjonerForPerson.evaluer(
-                    fakta
-            )
-            val evalueringer = if (evaluering.children.isEmpty()) listOf(evaluering) else evaluering.children
-            personResultat.setVilkårResultater(vilkårResultater(personResultat, barnet, fakta, evalueringer))
-
-            personResultat
-        }.toSet()
-
-        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
-    }
-
-    fun initierVilkårvurderingForBehandling(behandling: Behandling, bekreftEndringerViaFrontend: Boolean, forrigeBehandling: Behandling?): BehandlingResultat {
-        val initieltBehandlingResultat = genererInitieltBehandlingResultat(behandling = behandling)
-        val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
-
-        return if (forrigeBehandling != null && aktivBehandlingResultat == null) {
-            val behandlingResultat =
-                    genererInitieltBehandlingResultatFraAnnenBehandling(behandling = behandling, annenBehandling = forrigeBehandling)
-            return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = false)
-        } else {
-            if (aktivBehandlingResultat != null) {
-                val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
-                        initieltBehandlingResultat = initieltBehandlingResultat,
-                        aktivtBehandlingResultat = aktivBehandlingResultat
-                )
-
-                if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
-                    throw Feil(message = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
-                               frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
-                    )
-                }
-                return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = initieltSomErOppdatert, loggHendelse = false)
-            } else {
-                behandlingResultatService.lagreInitielt(initieltBehandlingResultat)
-            }
-        }
-    }
-
-    fun genererInitieltBehandlingResultatFraAnnenBehandling(behandling: Behandling, annenBehandling: Behandling): BehandlingResultat {
-        val initieltBehandlingResultat = genererInitieltBehandlingResultat(behandling = behandling)
-
-        val forrigeBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = annenBehandling.id)
-                                        ?: throw Feil(message = "Finner ikke behandlingsresultat fra annen behandling.")
-        val (oppdatert) = flyttResultaterTilInitielt(aktivtBehandlingResultat = forrigeBehandlingResultat,
-                                                     initieltBehandlingResultat = initieltBehandlingResultat)
-        return oppdatert
-    }
-
-    private fun genererInitieltBehandlingResultat(behandling: Behandling): BehandlingResultat {
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                                       ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling $behandling")
-
-        val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
-
-        val behandlingResultat = BehandlingResultat(behandling = behandling)
-        behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
-            val personResultat =
-                    lagPersonResultat(person = person, behandlingResultat = behandlingResultat, søknadDTO = søknadDTO)
-            personResultat
-        }.toSet()
-
-        return behandlingResultat
-    }
-
-    private fun lagPersonResultat(person: Person, behandlingResultat: BehandlingResultat, søknadDTO: SøknadDTO?): PersonResultat {
-        val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
-                                            personIdent = person.personIdent.ident)
-
-        val sakType = hentSakType(behandlingKategori = behandlingResultat.behandling.kategori, søknadDTO = søknadDTO)
-
-        val relevanteVilkår = Vilkår.hentVilkårFor(person.type, sakType)
-        personResultat.setVilkårResultater(relevanteVilkår.flatMap { vilkår ->
-            val vilkårListe = mutableListOf<VilkårResultat>()
-            if (vilkår == Vilkår.UNDER_18_ÅR) {
-                vilkårListe.add(VilkårResultat(personResultat = personResultat,
-                                               resultat = Resultat.JA,
-                                               vilkårType = vilkår,
-                                               periodeFom = person.fødselsdato,
-                                               periodeTom = person.fødselsdato.plusYears(18),
-                                               begrunnelse = "Vurdert og satt automatisk",
-                                               behandlingId = behandlingResultat.behandling.id,
-                                               regelInput = null,
-                                               regelOutput = null))
-            } else {
-                vilkårListe.add(VilkårResultat(personResultat = personResultat,
-                                               resultat = Resultat.KANSKJE,
-                                               vilkårType = vilkår,
-                                               begrunnelse = "",
-                                               behandlingId = behandlingResultat.behandling.id,
-                                               regelInput = null,
-                                               regelOutput = null))
-            }
-            vilkårListe
-        }.toSet())
-        return personResultat
-    }
-
-    private fun spesifikasjonerForPerson(person: Person, behandlingKategori: BehandlingKategori): Spesifikasjon<Fakta> {
-        val relevanteVilkår = Vilkår.hentVilkårFor(person.type, SakType.valueOfType(behandlingKategori))
-
-        return relevanteVilkår
-                .map { vilkår -> vilkår.spesifikasjon }
-                .reduce { samledeVilkår, vilkår -> samledeVilkår og vilkår }
-    }
-
-    private fun vilkårResultater(personResultat: PersonResultat,
-                                 barnet: Person,
-                                 fakta: Fakta,
-                                 evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
-
-        return evalueringer.map { child ->
-            val tom: LocalDate? =
-                    if (Vilkår.valueOf(child.identifikator) == Vilkår.UNDER_18_ÅR) barnet.fødselsdato.plusYears(18) else null
-
-            VilkårResultat(personResultat = personResultat,
-                           resultat = child.resultat,
-                           vilkårType = Vilkår.valueOf(child.identifikator),
-                           periodeFom = barnet.fødselsdato,
-                           periodeTom = tom,
-                           begrunnelse = "",
-                           behandlingId = personResultat.behandlingResultat.behandling.id,
-                           regelInput = fakta.toJson(),
-                           regelOutput = child.toJson()
-            )
-        }.toSortedSet(PersonResultat.comparator)
     }
 
     @Transactional
@@ -247,6 +100,159 @@ class VilkårService(
         muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
 
         return behandlingResultatService.oppdater(behandlingResultat).personResultater.map { it.tilRestPersonResultat() }
+    }
+
+    fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
+                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
+        val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
+        if (barna.size != 1) {
+            throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde ett barn, men inneholder ${barna.size}")
+        }
+
+        val behandlingResultat = BehandlingResultat(
+                behandling = behandlingService.hent(behandlingId),
+                aktiv = true)
+
+        lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat, søknadDTO = null)
+
+        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
+    }
+
+    fun initierVilkårvurderingForBehandling(behandling: Behandling,
+                                            bekreftEndringerViaFrontend: Boolean,
+                                            forrigeBehandling: Behandling? = null): BehandlingResultat {
+        val initieltBehandlingResultat = genererInitieltBehandlingResultat(behandling = behandling)
+        val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
+
+        return if (forrigeBehandling != null && aktivBehandlingResultat == null) {
+            val behandlingResultat =
+                    genererInitieltBehandlingResultatFraAnnenBehandling(behandling = behandling,
+                                                                        annenBehandling = forrigeBehandling)
+            return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat,
+                                                                      loggHendelse = false)
+        } else {
+            if (aktivBehandlingResultat != null) {
+                val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
+                        initieltBehandlingResultat = initieltBehandlingResultat,
+                        aktivtBehandlingResultat = aktivBehandlingResultat
+                )
+
+                if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
+                    throw Feil(message = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
+                               frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
+                    )
+                }
+                return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = initieltSomErOppdatert,
+                                                                          loggHendelse = false)
+            } else {
+                behandlingResultatService.lagreInitielt(initieltBehandlingResultat)
+            }
+        }
+    }
+
+    fun genererInitieltBehandlingResultatFraAnnenBehandling(behandling: Behandling,
+                                                            annenBehandling: Behandling): BehandlingResultat {
+        val initieltBehandlingResultat = genererInitieltBehandlingResultat(behandling = behandling)
+
+        val forrigeBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = annenBehandling.id)
+                                        ?: throw Feil(message = "Finner ikke behandlingsresultat fra annen behandling.")
+        val (oppdatert) = flyttResultaterTilInitielt(aktivtBehandlingResultat = forrigeBehandlingResultat,
+                                                     initieltBehandlingResultat = initieltBehandlingResultat)
+        return oppdatert
+    }
+
+    private fun genererInitieltBehandlingResultat(behandling: Behandling): BehandlingResultat {
+        val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
+
+        val behandlingResultat = BehandlingResultat(behandling = behandling)
+        lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat, søknadDTO = søknadDTO)
+
+        return behandlingResultat
+    }
+
+    private fun lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat: BehandlingResultat, søknadDTO: SøknadDTO?) {
+        val personopplysningGrunnlag =
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingResultat.behandling.id)
+                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${behandlingResultat.behandling.id}")
+
+        behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
+            val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
+                                                personIdent = person.personIdent.ident)
+
+            val sakType = hentSakType(behandlingKategori = behandlingResultat.behandling.kategori, søknadDTO = søknadDTO)
+
+            val spesifikasjonererForPerson = spesifikasjonerForPerson(person, sakType)
+            val fakta = Fakta(personForVurdering = person)
+            val evalueringerForVilkår = spesifikasjonererForPerson.map { it.evaluer(fakta) }
+
+            personResultat.setVilkårResultater(vilkårResultater(personResultat, person, fakta, evalueringerForVilkår))
+
+            personResultat
+        }.toSet()
+    }
+
+    private fun spesifikasjonerForPerson(person: Person, sakType: SakType): List<Spesifikasjon<Fakta>> {
+        val relevanteVilkår = Vilkår.hentVilkårFor(person.type, sakType)
+
+        return relevanteVilkår
+                .map { vilkår -> vilkår.spesifikasjon }
+    }
+
+    private fun vilkårResultater(personResultat: PersonResultat,
+                                 person: Person,
+                                 fakta: Fakta,
+                                 evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
+
+        val aktivBehandlingResultat =
+                behandlingResultatService.hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id)
+        val kjørMetrikker = aktivBehandlingResultat == null
+
+        return evalueringer.map { child ->
+            val fom =
+                    if (person.type === PersonType.BARN)
+                        person.fødselsdato
+                    else LocalDate.now()
+
+            val vilkår =
+                    if (child.identifikator == "" && child.children.isNotEmpty())
+                        Vilkår.valueOf(child.children.first().identifikator.split(":")[0])
+                    else
+                        Vilkår.valueOf(child.identifikator.split(":")[0])
+
+            val tom: LocalDate? =
+                    if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
+
+            if (kjørMetrikker) {
+                vilkårsvurderingMetrics.økTellereForEvaluering(evaluering = child,
+                                                               personType = person.type,
+                                                               behandlingOpprinnelse = personResultat.behandlingResultat.behandling.opprinnelse)
+            }
+
+            var begrunnelse = "Vurdert og satt automatisk"
+
+            if (child.resultat == Resultat.NEI) {
+                if (child.children.isNotEmpty())
+                    child.children.forEach {
+                        if (it.resultat == Resultat.NEI) {
+                            begrunnelse = "$begrunnelse\n\t- ${it.begrunnelse}"
+                        }
+                    }
+                else
+                    begrunnelse = "$begrunnelse\n\t- ${child.begrunnelse}"
+            }
+
+            VilkårResultat(personResultat = personResultat,
+                           resultat = child.resultat,
+                           vilkårType = vilkår,
+                           periodeFom = fom,
+                           periodeTom = tom,
+                           begrunnelse = begrunnelse,
+                           behandlingId = personResultat.behandlingResultat.behandling.id,
+                           regelInput = fakta.toJson(),
+                           regelOutput = child.toJson()
+            )
+        }.toSortedSet(PersonResultat.comparator)
     }
 
     companion object {

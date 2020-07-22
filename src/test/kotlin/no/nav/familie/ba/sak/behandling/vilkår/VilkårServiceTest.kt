@@ -9,7 +9,10 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
@@ -48,14 +51,13 @@ class VilkårServiceTest(
         private val databaseCleanupService: DatabaseCleanupService
 ) {
 
-
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
     }
 
     @Test
-    fun `vilkårsvurdering med kun JA blir innvilget`() {
+    fun `vilkårsvurdering med kun JA automatisk behandlet blir innvilget`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -75,14 +77,6 @@ class VilkårServiceTest(
 
         val behandlingSteg: Vilkårsvurdering = stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         Assertions.assertNotNull(behandlingSteg)
-
-        Assertions.assertThrows(Feil::class.java) { behandlingSteg.postValiderSteg(behandling) }
-
-        val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
-
-        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
-
-        behandlingResultatService.oppdater(behandlingResultat)
 
         Assertions.assertDoesNotThrow { behandlingSteg.postValiderSteg(behandling) }
     }
@@ -201,16 +195,11 @@ class VilkårServiceTest(
 
         behandlingResultat2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
-                if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) {
-                    Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
+                Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
+                if (personResultat.personIdent == barnFnr2) {
+                    Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
-                    if (personResultat.personIdent == barnFnr2) {
-                        Assertions.assertEquals(Resultat.KANSKJE, vilkårResultat.resultat)
-                        Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
-                    } else {
-                        Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
-                        Assertions.assertEquals(behandling.id, vilkårResultat.behandlingId)
-                    }
+                    Assertions.assertEquals(behandling.id, vilkårResultat.behandlingId)
                 }
             }
         }
@@ -270,7 +259,8 @@ class VilkårServiceTest(
 
         val behandlingResultatEtterEndring = behandlingResultatService.oppdater(behandlingResultat2)
         val personResultatEtterEndring = behandlingResultatEtterEndring.personResultater.find { it.personIdent == barnFnr }!!
-        val borMedSøkerVilkårEtterEndring = personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
+        val borMedSøkerVilkårEtterEndring =
+                personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         Assertions.assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
     }
 
