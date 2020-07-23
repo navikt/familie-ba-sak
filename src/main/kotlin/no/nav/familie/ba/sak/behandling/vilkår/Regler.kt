@@ -78,6 +78,8 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
 
 internal fun giftEllerPartnerskap(fakta: Fakta): Evaluering =
         when (fakta.personForVurdering.sivilstand) {
+            SIVILSTAND.UOPPGITT ->
+                Evaluering.kanskje("Person er mangler informasjon om sivilstand.")
             SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER, SIVILSTAND.UOPPGITT ->
                 Evaluering.nei("Person er gift eller har registrert partner")
             else -> Evaluering.ja("Person er ikke gift eller har registrert partner")
