@@ -202,7 +202,9 @@ internal class ØkonomiUtilsTest {
                 andelerTilOpprettelse(oppdaterteKjeder = kjederBehandling2,
                                       sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede)
         val andelerTilOpphørMedDato =
-                andelerTilOpphørMedDato(forrigeKjeder = kjederBehandling1, sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede)
+                andelerTilOpphørMedDato(forrigeKjeder = kjederBehandling1,
+                                        oppdaterteKjeder = kjederBehandling2,
+                                        sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede)
 
         assertEquals(1, andelerTilOpprettelse.size)
         assertEquals(2, andelerTilOpprettelse.first().size)
@@ -243,7 +245,9 @@ internal class ØkonomiUtilsTest {
                 andelerTilOpprettelse(oppdaterteKjeder = kjederBehandling2,
                                       sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede)
         val andelerTilOpphørMedDato =
-                andelerTilOpphørMedDato(forrigeKjeder = kjederBehandling1, sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede)
+                andelerTilOpphørMedDato(forrigeKjeder = kjederBehandling1,
+                                        oppdaterteKjeder = kjederBehandling2,
+                                        sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede)
 
         assertEquals(2, andelerTilOpprettelse.size)
         assertEquals(1, andelerTilOpphørMedDato.size)

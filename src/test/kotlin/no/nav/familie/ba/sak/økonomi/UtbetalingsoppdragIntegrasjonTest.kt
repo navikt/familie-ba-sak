@@ -194,7 +194,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     }
 
     @Test
-    fun `skal opprette revurdering med opphør og gjenoppbygging`() {
+    fun `skal opprette revurdering med endring på eksisterende periode`() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
@@ -303,6 +303,78 @@ class UtbetalingsoppdragIntegrasjonTest(
                                  1054,
                                  "2037-01-01",
                                  "2039-12-31")
+    }
+
+    @Test
+    fun `Skal opprette revurdering med nytt barn`() {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
+        val person = tilfeldigPerson()
+        val vedtak = lagVedtak(behandling)
+        val andelerFørstegangsbehandling = listOf(
+                lagAndelTilkjentYtelse("2020-01-01",
+                                       "2029-12-31",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 0,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse),
+                lagAndelTilkjentYtelse("2033-01-01",
+                                       "2034-12-31",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling,
+                                       periodeIdOffset = 1,
+                                       person = person,
+                                       tilkjentYtelse = tilkjentYtelse))
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
+                                                          vedtak,
+                                                          BehandlingResultatType.INNVILGET,
+                                                          true,
+                                                          oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                                                  andelerFørstegangsbehandling))
+
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
+        val nyPerson = tilfeldigPerson()
+        val vedtak2 = lagVedtak(behandling2)
+        val andelerRevurdering = listOf(
+                lagAndelTilkjentYtelse("2022-01-01",
+                                       "2034-12-31",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling2,
+                                       periodeIdOffset = 2,
+                                       person = nyPerson,
+                                       tilkjentYtelse = tilkjentYtelse2),
+                lagAndelTilkjentYtelse("2037-01-01",
+                                       "2039-12-31",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       behandling2,
+                                       periodeIdOffset = 3,
+                                       person = nyPerson,
+                                       tilkjentYtelse = tilkjentYtelse2))
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
+
+        val utbetalingsoppdrag =
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
+                                                                  vedtak2,
+                                                                  BehandlingResultatType.INNVILGET,
+                                                                  false,
+                                                                  forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                                                          andelerFørstegangsbehandling),
+                                                                  oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                                                          andelerRevurdering))
+
+        assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
+        assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
+        val sorterteUtbetalingsperioder = utbetalingsoppdrag.utbetalingsperiode.sortedBy { it.periodeId }
+        assertUtbetalingsperiode(sorterteUtbetalingsperioder.first(), 2, null, 1054, "2022-01-01", "2034-12-31")
+        assertUtbetalingsperiode(sorterteUtbetalingsperioder.last(), 3, 2, 1054, "2037-01-01", "2039-12-31")
     }
 
     @Test

@@ -58,7 +58,7 @@ class UtbetalingsoppdragGenerator(
         val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxBy { it.periodeOffset!! }?.periodeOffset?.toInt()
 
         val andelerTilOpphør =
-                andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede)
+                andelerTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder, sisteBeståenAndelIHverKjede)
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
                 andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
