@@ -231,11 +231,16 @@ class VilkårService(
 
             var begrunnelse = "Vurdert og satt automatisk"
 
-            if (child.resultat == Resultat.NEI) {
+            if (child.resultat == Resultat.NEI || child.resultat == Resultat.KANSKJE) {
                 if (child.children.isNotEmpty())
                     child.children.forEach {
-                        if (it.resultat == Resultat.NEI) {
-                            begrunnelse = "$begrunnelse\n\t- ${it.begrunnelse}"
+                        if (it.begrunnelse.isNotBlank()) {
+                            when (it.resultat) {
+                                Resultat.NEI ->
+                                    begrunnelse = "$begrunnelse\n\t- nei: ${it.begrunnelse}"
+                                Resultat.KANSKJE ->
+                                    begrunnelse = "$begrunnelse\n\t- kanskje: ${it.begrunnelse}"
+                            }
                         }
                     }
                 else

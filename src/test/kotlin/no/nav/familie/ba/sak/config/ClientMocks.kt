@@ -260,7 +260,7 @@ class ClientMocks {
                                           navn = "Far Faresen"),
                 barnFnr[0] to Personinfo(fødselsdato = LocalDate.now().minusYears(10),
                                          bostedsadresse = bostedsadresse,
-                                         sivilstand = SIVILSTAND.UGIFT,
+                                         sivilstand = SIVILSTAND.UOPPGITT,
                                          kjønn = Kjønn.MANN,
                                          navn = "Gutten Barnesen"),
                 barnFnr[1] to Personinfo(fødselsdato = LocalDate.now().minusYears(5),
