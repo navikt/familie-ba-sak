@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
-import no.nav.familie.kontrakter.felles.personinfo.UkjentBosted
+import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import javax.persistence.Column
 import javax.persistence.DiscriminatorValue
 import javax.persistence.Entity
