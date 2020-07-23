@@ -28,6 +28,9 @@ data class AndelTilkjentYtelse(
         @Column(name = "periode_offset")
         var periodeOffset: Long? = null,
 
+        @Column(name = "forrige_periode_offset")
+        var forrigePeriodeOffset: Long? = null,
+
         @Column(name = "belop", nullable = false)
         val beløp: Int,
 
