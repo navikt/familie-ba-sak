@@ -34,7 +34,7 @@ class BeregningService(
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
     }
 
-    fun lagreOppdaterteAndelerTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) {
+    fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) {
         tilkjentYtelseRepository.save(tilkjentYtelse)
     }
 
@@ -45,7 +45,7 @@ class BeregningService(
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndFerdigstiltOrIverksatt(fagsakId)
-        return iverksatteBehandlinger.mapNotNull { b -> tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(b.id) }
+        return iverksatteBehandlinger.mapNotNull { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(it.id) }
     }
 
     @Transactional

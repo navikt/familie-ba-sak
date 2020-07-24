@@ -136,7 +136,7 @@ class UtbetalingsoppdragGenerator(
                         }
                     }
                 }
-        beregningService.lagreOppdaterteAndelerTilkjentYtelse(andeler.flatten().first().tilkjentYtelse)
+        beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(andeler.flatten().first().tilkjentYtelse)
         return utbetalingsperioder
     }
 

@@ -105,8 +105,7 @@ object ØkonomiUtils {
                         .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
                         .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
                         .map { (_, kjedeEtterFørsteEndring) ->
-                            Pair(kjedeEtterFørsteEndring.last(),
-                                 kjedeEtterFørsteEndring.first().stønadFom)
+                            kjedeEtterFørsteEndring.last() to kjedeEtterFørsteEndring.first().stønadFom
                         }
             }
 

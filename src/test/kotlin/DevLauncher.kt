@@ -5,7 +5,7 @@ object DevLauncher {
     @JvmStatic
     fun main(args: Array<String>) {
         val app = SpringApplicationBuilder(ApplicationConfig::class.java)
-                .profiles("postgres",
+                .profiles("dev",
                           "mock-dokgen-java",
                           "mock-iverksett",
                           "mock-infotrygd-feed",
