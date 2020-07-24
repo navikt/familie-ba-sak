@@ -30,7 +30,7 @@ data class PdlPersonData(val foedsel: List<PdlFødselsDato>,
                          val sivilstand: List<Sivilstand?>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlFødselsDato(val foedselsdato: LocalDate?)
+data class PdlFødselsDato(val foedselsdato: String?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlError(val message: String)

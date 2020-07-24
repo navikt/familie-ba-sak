@@ -11,8 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.domene.IdentInformasjon
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
 import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -52,6 +50,7 @@ class IntergrasjonTjenesteTest {
     @Qualifier("integrasjonClient")
     lateinit var integrasjonClient: IntegrasjonClient
 
+    @Autowired
     lateinit var personopplysningerService: PersonopplysningerService
 
     @AfterEach
@@ -77,19 +76,6 @@ class IntergrasjonTjenesteTest {
                        .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("opprettOppgave"))
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
                        .withRequestBody(equalToJson(objectMapper.writeValueAsString(request))))
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Hent indenter skal returnere liste av identer`() {
-        stubFor(post("/api/personopplysning/identer/BAR/historikk").willReturn(
-                okJson(objectMapper.writeValueAsString(success(listOf(IdentInformasjon("1234", false, "AKTORID")))))))
-
-        val identerResponse = personopplysningerService.hentIdenter(Ident("12345678910"))
-
-        assertThat(identerResponse.first().ident).isEqualTo("1234")
-        verify(anyRequestedFor(anyUrl())
-                       .withRequestBody(equalTo("{\"ident\":\"12345678910\"}")))
     }
 
     @Test
@@ -283,39 +269,6 @@ class IntergrasjonTjenesteTest {
         verify(getRequestedFor(urlEqualTo("/api/journalpost?journalpostId=$journalpostId")))
     }
 
-
-    @Test
-    @Tag("integration")
-    fun `hentPerson returnerer OK`() {
-        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(
-                okJson(objectMapper.writeValueAsString(success(Personinfo(fødselsdato = LocalDate.now()))))))
-
-        val personinfo = personopplysningerService.hentPersoninfoFor("12")
-        assertThat(personinfo.fødselsdato).isEqualTo(LocalDate.now())
-
-        verify(getRequestedFor(urlEqualTo("/api/personopplysning/v1/info/BAR"))
-                       .withHeader("Nav-Personident", equalTo("12")))
-    }
-
-    @Test
-    @Tag("integration")
-    fun `hentPerson ikke funnet`() {
-        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(aResponse().withStatus(404)))
-
-        assertThrows<HttpClientErrorException> {
-            personopplysningerService.hentPersoninfoFor("12345678910")
-        }
-    }
-
-    @Test
-    @Tag("integration")
-    fun `hentPerson feil`() {
-        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(aResponse().withStatus(400)))
-
-        assertThrows<IntegrasjonException> {
-            personopplysningerService.hentPersoninfoFor("12345678910")
-        }
-    }
 
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> {
         return success(ArkiverDokumentResponse(mockJournalpostForVedtakId, true))

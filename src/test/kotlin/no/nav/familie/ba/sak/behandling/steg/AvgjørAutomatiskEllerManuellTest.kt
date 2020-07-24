@@ -40,6 +40,7 @@ class AvgjørAutomatiskEllerManuellTest {
     fun setUp() {
         integrasjonClient = mockk()
         taskRepository = mockk()
+        personopplysningerService= mockk()
         personopplysningGrunnlagRepository = mockk()
         featureToggleService = mockk()
 

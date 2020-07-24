@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -22,14 +22,14 @@ class DeserializeTest {
         assertThat(getPersoninfo("UKJENT").kjønn).isEqualTo(Kjønn.UKJENT)
     }
 
-    private fun getPersoninfo(kjønn: String): Personinfo {
+    private fun getPersoninfo(kjønn: String): PersonInfo {
         val json = """
             {
                 "kjønn": "$kjønn",
                 "fødselsdato": "1982-08-05"
               }
         """.trimIndent()
-        return mapper.readValue(json, Personinfo::class.java)
+        return mapper.readValue(json, PersonInfo::class.java)
     }
 }
 

@@ -15,6 +15,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.time.LocalDate
 
 @Service
 class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
@@ -48,7 +49,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                 }
                             }
                     response.data.person!!.let {
-                        PersonInfo(fødselsdato = it.foedsel.first().foedselsdato!!,
+                        PersonInfo(fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato!!),
                                    navn = it.navn.first().fulltNavn(),
                                    kjønn = it.kjoenn.first().kjoenn,
                                    familierelasjoner = familierelasjoner,

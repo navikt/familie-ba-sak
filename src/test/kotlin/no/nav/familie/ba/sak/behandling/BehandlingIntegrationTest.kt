@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
@@ -124,7 +123,7 @@ class BehandlingIntegrationTest {
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
                         .willReturn(aResponse()
                                             .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(LocalDate.of(2019,
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(PersonInfo(LocalDate.of(2019,
                                                                                                                               1,
                                                                                                                               1)))))))
     }
