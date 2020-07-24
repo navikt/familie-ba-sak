@@ -19,7 +19,9 @@ class VilkårsvurderingMetrics {
             Resultat.values().forEach { resultat ->
                 BehandlingOpprinnelse.values().forEach { behandlingOpprinnelse ->
                     PersonType.values().forEach { personType ->
-                        genererMetrikkMap(it.spesifikasjon, personType, resultat, behandlingOpprinnelse)
+                        if (it.parterDetteGjelderFor.contains(personType)) {
+                            genererMetrikkMap(it.spesifikasjon, personType, resultat, behandlingOpprinnelse)
+                        }
                     }
                 }
             }
@@ -27,9 +29,9 @@ class VilkårsvurderingMetrics {
     }
 
     private fun genererMetrikkMap(spesifikasjon: Spesifikasjon<Fakta>,
-                          personType: PersonType,
-                          resultat: Resultat,
-                          behandlingOpprinnelse: BehandlingOpprinnelse) {
+                                  personType: PersonType,
+                                  resultat: Resultat,
+                                  behandlingOpprinnelse: BehandlingOpprinnelse) {
         if (spesifikasjon.children.isEmpty()) {
             val counter = Metrics.counter("familie.ba.behandling.vilkaarsvurdering",
                                           "vilkaar",
