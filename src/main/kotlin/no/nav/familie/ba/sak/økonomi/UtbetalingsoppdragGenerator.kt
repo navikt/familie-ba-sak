@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring.*
@@ -56,10 +57,10 @@ class UtbetalingsoppdragGenerator(
         val sisteBeståenAndelIHverKjede = sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
         val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxBy { it.periodeOffset!! }?.periodeOffset?.toInt()
 
+        val andelerTilOpphør =
+                andelerTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder, sisteBeståenAndelIHverKjede)
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
                 andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
-        val andelerTilOpphør =
-                andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede)
 
         if (behandlingResultatType == BehandlingResultatType.OPPHØRT
             && (andelerTilOpprettelse.isNotEmpty() || andelerTilOpphør.isEmpty())) {
@@ -72,9 +73,7 @@ class UtbetalingsoppdragGenerator(
                     andeler = andelerTilOpprettelse,
                     erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                     vedtak = vedtak,
-                    sisteBeståendeOffsetIKjedeOversikt = sisteBeståenAndelIHverKjede.filter { it.value != null }.mapValues {
-                        it.value?.periodeOffset?.toInt() ?: throw IllegalStateException("Bestående andel i kjede skal ha offset")
-                    },
+                    sisteOffsetIKjedeOversikt = gjeldendeForrigeOffsetForKjede(forrigeKjeder),
                     sisteOffsetPåFagsak = sisteOffsetPåFagsak) else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
@@ -98,7 +97,7 @@ class UtbetalingsoppdragGenerator(
         return andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
             utbetalingsperiodeMal.lagPeriodeFraAndel(andel = sisteAndelIKjede,
                                                      periodeIdOffset = sisteAndelIKjede.periodeOffset!!.toInt(),
-                                                     forrigePeriodeIdOffset = null,
+                                                     forrigePeriodeIdOffset = sisteAndelIKjede.forrigePeriodeOffset?.toInt(),
                                                      opphørKjedeFom = opphørKjedeFom)
         }
     }
@@ -106,7 +105,7 @@ class UtbetalingsoppdragGenerator(
     fun lagUtbetalingsperioderForOpprettelse(andeler: List<List<AndelTilkjentYtelse>>,
                                              vedtak: Vedtak,
                                              erFørsteBehandlingPåFagsak: Boolean,
-                                             sisteBeståendeOffsetIKjedeOversikt: Map<String, Int>,
+                                             sisteOffsetIKjedeOversikt: Map<String, Int>,
                                              sisteOffsetPåFagsak: Int? = null): List<Utbetalingsperiode> {
         var offset =
                 if (!erFørsteBehandlingPåFagsak)
@@ -116,27 +115,28 @@ class UtbetalingsoppdragGenerator(
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(vedtak)
 
-        val utbetalingsperioder =
-                andeler.flatMap { kjede: List<AndelTilkjentYtelse> ->
+        val utbetalingsperioder = andeler.filter { kjede -> kjede.isNotEmpty() }
+                .flatMap { kjede: List<AndelTilkjentYtelse> ->
                     val ident = kjede.first().personIdent
                     val ytelseType = kjede.first().type
                     var forrigeOffsetIKjede: Int? = null
                     if (!erFørsteBehandlingPåFagsak) {
                         forrigeOffsetIKjede = if (ytelseType == YtelseType.SMÅBARNSTILLEGG) {
-                            sisteBeståendeOffsetIKjedeOversikt[ident + SMÅBARNSTILLEGG_SUFFIX]
+                            sisteOffsetIKjedeOversikt[ident + SMÅBARNSTILLEGG_SUFFIX]
                         } else {
-                            sisteBeståendeOffsetIKjedeOversikt[ident]
+                            sisteOffsetIKjedeOversikt[ident]
                         }
                     }
                     kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
                         val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
                         utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
                             andel.periodeOffset = offset.toLong()
+                            andel.forrigePeriodeOffset = forrigeOffset?.toLong()
                             offset++
                         }
                     }
                 }
-        beregningService.lagreOppdaterteAndelerTilkjentYtelse(andeler.flatten())
+        beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(andeler.flatten().first().tilkjentYtelse)
         return utbetalingsperioder
     }
 

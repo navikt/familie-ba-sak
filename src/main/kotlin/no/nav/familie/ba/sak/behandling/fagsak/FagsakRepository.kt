@@ -28,8 +28,4 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f from Fagsak f WHERE f.status = 'LØPENDE'")
     fun finnLøpendeFagsaker(): List<Fagsak>
-
-    @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f from Fagsak f WHERE f.status <> 'OPPRETTET'")
-    fun finnFagsakerSendtTilØkonomi(): List<Fagsak>
 }
