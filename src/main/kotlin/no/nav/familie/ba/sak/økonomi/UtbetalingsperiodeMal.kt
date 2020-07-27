@@ -20,7 +20,6 @@ data class UtbetalingsperiodeMal(
         val erEndringPåEksisterendePeriode: Boolean = false
 ) {
 
-    // TODO: Dobbeltsjekk at vi ikke trenger 1_000-sjekk
     /**
      * Lager utbetalingsperioder som legges på utbetalingsoppdrag. En utbetalingsperiode tilsvarer linjer hos økonomi
      *
