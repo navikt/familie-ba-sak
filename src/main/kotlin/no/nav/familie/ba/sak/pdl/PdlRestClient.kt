@@ -7,6 +7,8 @@ import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.logging.LogFactory
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -30,14 +32,16 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
     fun hentPerson(personIdent: String, tema: String, personInfoQuery: PersonInfoQuery): PersonInfo {
 
+        LOG.info("Enter PdlRestClient::hentPerson() tema= ${tema} personInfoQuery= ${personInfoQuery}")
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = personInfoQuery.graphQL)
         try {
+            LOG.info("postForEntity PDL URI= ${pdlUri}")
             val response = postForEntity<PdlHentPersonResponse>(pdlUri,
                                                                 pdlPersonRequest,
                                                                 httpHeaders(tema))
             if (!response.harFeil()) {
-                return Result.runCatching {
+                val personInfo = Result.runCatching {
                     val familierelasjoner: Set<Familierelasjon> =
                             when (personInfoQuery) {
                                 PersonInfoQuery.ENKEL -> emptySet()
@@ -66,6 +70,9 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                        throwable = it)
                         }
                 )
+
+                LOG.info("Leave PdlRestClient::hentPerson() personInfo.navn= ${personInfo.navn}")
+                return personInfo
             } else {
                 throw Feil(message = "Feil ved oppslag på person: ${response.errorMessages()}",
                            frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response.errorMessages()}",
@@ -162,6 +169,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
     companion object {
         private const val PATH_GRAPHQL = "graphql"
+        val LOG = LoggerFactory.getLogger(PdlRestClient::class.java)
     }
 }
 

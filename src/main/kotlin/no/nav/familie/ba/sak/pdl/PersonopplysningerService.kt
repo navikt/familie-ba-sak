@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.context.annotation.ApplicationScope
 
@@ -13,6 +14,7 @@ import org.springframework.web.context.annotation.ApplicationScope
 class PersonopplysningerService(private val pdlRestClient: PdlRestClient) {
 
     fun hentPersoninfoFor(personIdent: String): PersonInfo {
+        LOG.info("Enter PersonopplysningerService::hentPersoninfoFor()")
         val personinfo = hentPersoninfo(personIdent, PersonInfoQuery.MED_RELASJONER)
         val familierelasjoner = personinfo.familierelasjoner.map {
             val relasjonsinfo = hentPersoninfo(it.personIdent.id, PersonInfoQuery.ENKEL)
@@ -21,11 +23,15 @@ class PersonopplysningerService(private val pdlRestClient: PdlRestClient) {
                             fødselsdato = relasjonsinfo.fødselsdato,
                             navn = relasjonsinfo.navn)
         }.toSet()
+        LOG.info("Leave PersonopplysningerService::hentPersoninfoFor()")
         return personinfo.copy(familierelasjoner = familierelasjoner)
     }
 
     fun hentPersoninfo(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
-        return pdlRestClient.hentPerson(personIdent, "BAR", personInfoQuery)
+        LOG.info("Enter PersonopplysningerService::hentPersoninfo() personInfoQuery=${personInfoQuery}")
+        val person= pdlRestClient.hentPerson(personIdent, "BAR", personInfoQuery)
+        LOG.info("Leave PersonopplysningerService::hentPersoninfo() person.navn=${person.navn}")
+        return person
     }
 
     fun hentAktivAktørId(ident: Ident): AktørId {
@@ -92,6 +98,7 @@ class PersonopplysningerService(private val pdlRestClient: PdlRestClient) {
 
     companion object {
         const val PERSON = "PERSON"
+        val LOG = LoggerFactory.getLogger(PersonopplysningerService::class.java)
     }
 }
 
