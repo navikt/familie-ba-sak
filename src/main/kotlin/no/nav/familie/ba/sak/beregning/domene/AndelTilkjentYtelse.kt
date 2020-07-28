@@ -80,8 +80,10 @@ data class AndelTilkjentYtelse(
 
     companion object {
 
-        // Merk at det søkes snitt på visse attributter (erTilsvarendeForUtbetaling)
-        // og man kun returnerer objekter fra receiver (ikke other)
+        /**
+         * Merk at det søkes snitt på visse attributter (erTilsvarendeForUtbetaling)
+         * og man kun returnerer objekter fra receiver (ikke other)
+         */
         fun Set<AndelTilkjentYtelse>.snittAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
             val andelerKunIDenne = this.subtractAndeler(other)
             return this.subtractAndeler(andelerKunIDenne)
@@ -94,16 +96,9 @@ data class AndelTilkjentYtelse(
         }
 
         private fun Set<AndelTilkjentYtelse>.subtractAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
-            val andelerKunIDenne = mutableSetOf<AndelTilkjentYtelse>()
-            this.forEach letEtterTilsvarende@{ a ->
-                other.forEach { b ->
-                    if (a.erTilsvarendeForUtbetaling(b)) {
-                        return@letEtterTilsvarende
-                    }
-                }
-                andelerKunIDenne.add(a)
-            }
-            return andelerKunIDenne
+            return this.filter { a ->
+                other.none { b -> a.erTilsvarendeForUtbetaling(b) }
+            }.toSet()
         }
     }
 }
