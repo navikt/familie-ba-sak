@@ -92,11 +92,13 @@ fun lagAndelTilkjentYtelse(fom: String,
                            beløp: Int = sats(ytelseType),
                            behandling: Behandling = lagBehandling(),
                            person: Person = tilfeldigPerson(),
-                           periodeIdOffset: Long? = null): AndelTilkjentYtelse {
+                           periodeIdOffset: Long? = null,
+                           tilkjentYtelse: TilkjentYtelse? = null): AndelTilkjentYtelse {
+
     return AndelTilkjentYtelse(
             personIdent = person.personIdent.ident,
             behandlingId = behandling.id,
-            tilkjentYtelse = lagInitiellTilkjentYtelse(behandling),
+            tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
             beløp = beløp,
             stønadFom = dato(fom),
             stønadTom = dato(tom),

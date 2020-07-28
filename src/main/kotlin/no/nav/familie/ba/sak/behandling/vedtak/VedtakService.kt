@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -49,7 +50,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                               ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling $gjeldendeBehandlingsId")
 
         val gjeldendeAndelerTilkjentYtelse =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(gjeldendeBehandlingsId)
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(gjeldendeBehandlingsId))
         if (gjeldendeAndelerTilkjentYtelse.isEmpty()) {
             return Ressurs.failure(
                     "Fant ikke andeler tilkjent ytelse tilknyttet behandling $gjeldendeBehandlingsId")
@@ -103,7 +104,11 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
         val forrigeVedtak = hentForrigeVedtak(behandling = behandling)
-        val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
+
+        // TODO: Midlertidig fiks før støtte for delvis innvilget
+        val behandlingResultatType = midlertidigUtledBehandlingResultatType(
+                hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id))
+        //val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
 
         val vedtak = Vedtak(
                 behandling = behandling,

@@ -70,12 +70,36 @@ data class AndelTilkjentYtelse(
                "beløp = $beløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
     }
 
-    fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
+    private fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (this.personIdent == other.personIdent
-                && this.stønadFom == other.stønadFom
-                && this.stønadTom == other.stønadTom
-                && this.beløp == other.beløp
-                && this.type == other.type)
+               && this.stønadFom == other.stønadFom
+               && this.stønadTom == other.stønadTom
+               && this.beløp == other.beløp
+               && this.type == other.type)
+    }
+
+    companion object {
+
+        /**
+         * Merk at det søkes snitt på visse attributter (erTilsvarendeForUtbetaling)
+         * og man kun returnerer objekter fra receiver (ikke other)
+         */
+        fun Set<AndelTilkjentYtelse>.snittAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
+            val andelerKunIDenne = this.subtractAndeler(other)
+            return this.subtractAndeler(andelerKunIDenne)
+        }
+
+        fun Set<AndelTilkjentYtelse>.disjunkteAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
+            val andelerKunIDenne = this.subtractAndeler(other)
+            val andelerKunIAnnen = other.subtractAndeler(this)
+            return andelerKunIDenne.union(andelerKunIAnnen)
+        }
+
+        private fun Set<AndelTilkjentYtelse>.subtractAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
+            return this.filter { a ->
+                other.none { b -> a.erTilsvarendeForUtbetaling(b) }
+            }.toSet()
+        }
     }
 }
 
