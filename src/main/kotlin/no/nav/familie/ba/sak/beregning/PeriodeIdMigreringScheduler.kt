@@ -14,7 +14,7 @@ class PeriodeIdMigreringScheduler(private val beregningService: BeregningService
                                   private val fagsakService: FagsakService,
                                   private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
-    @Scheduled(cron = CRON_HVERT10MIN)
+    @Scheduled(cron = CRON_ENDAGIMND)
     fun populerPeriodeOffsetOgForrigePeriodeOffsetFraUtbetalingsoppdrag() {
         LOG.info("Kjører migreringsjobb for periodeid")
         val tilkjentYtelser = fagsakService.hentAlleFagsaker()
