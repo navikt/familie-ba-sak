@@ -50,7 +50,7 @@ data class UtbetalingsperiodeMal(
             )
 
 
-    fun utledOpphørPåLinje(opphørForVedtak: LocalDate?, opphørForLinje: LocalDate): Opphør? {
+    private fun utledOpphørPåLinje(opphørForVedtak: LocalDate?, opphørForLinje: LocalDate): Opphør? {
         return if (opphørForVedtak != null) {
             Opphør(senesteDatoAv(opphørForVedtak, opphørForLinje))
         } else {
