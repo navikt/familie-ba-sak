@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
-import no.nav.familie.kontrakter.felles.personinfo.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -18,7 +18,7 @@ class FødselshendelseServiceTest {
     val barn1Fnr = "12345678911"
     val barn2Fnr = "12345678912"
 
-    val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock, infotrygdBarnetrygdClientMock, personopplysningerServiceMock)
+    val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock, infotrygdBarnetrygdClientMock, integrasjonClientMock)
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer false`() {

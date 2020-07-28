@@ -129,9 +129,8 @@ object TilkjentYtelseUtils {
                 antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
                 sakstype = behandling.kategori,
                 beregningDetaljer = andelerForSegment.map { andel ->
-                    val personForAndel =
-                            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
-                            ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+                    val personForAndel = personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                                         ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                     RestBeregningDetalj(
                             person = RestPerson(
                                     type = personForAndel.type,

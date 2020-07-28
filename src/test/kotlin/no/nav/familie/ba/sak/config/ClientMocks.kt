@@ -19,8 +19,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.personinfo.Ident
-import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
+import no.nav.familie.kontrakter.felles.personopplysning.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -118,6 +117,10 @@ class ClientMocks {
     fun mockIntegrasjonClient(): IntegrasjonClient {
 
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
+        every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
+            success(lagTestJournalpost(søkerFnr[0],
+                                       UUID.randomUUID().toString()))
+        }
 
         every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
             success(lagTestJournalpost(søkerFnr[0],
@@ -176,66 +179,66 @@ class ClientMocks {
     @Profile("test-søk")
     @Primary
     @Bean
-    fun mockPDL(): PersonopplysningerService {
-        val mockPersonopplysningerService = mockk<PersonopplysningerService>()
+    fun mockPDL(): IntegrasjonClient {
+        val mockIntegrasjonClient = mockk<IntegrasjonClient>()
 
         val farId = "12345678910"
         val morId = "21345678910"
         val barnId = "31245678910"
 
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(farId)
-        } returns PersonInfo(fødselsdato = LocalDate.of(1969, 5, 1), kjønn = Kjønn.MANN, navn = "Far Mocksen")
+            mockIntegrasjonClient.hentPersoninfoFor(farId)
+        } returns Personinfo(fødselsdato = LocalDate.of(1969, 5, 1), kjønn = Kjønn.MANN, navn = "Far Mocksen")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(morId)
-        } returns PersonInfo(fødselsdato = LocalDate.of(1979, 5, 1), kjønn = Kjønn.KVINNE, navn = "Mor Mocksen")
+            mockIntegrasjonClient.hentPersoninfoFor(morId)
+        } returns Personinfo(fødselsdato = LocalDate.of(1979, 5, 1), kjønn = Kjønn.KVINNE, navn = "Mor Mocksen")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(barnId)
-        } returns PersonInfo(fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
+            mockIntegrasjonClient.hentPersoninfoFor(barnId)
+        } returns Personinfo(fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
                              familierelasjoner = setOf(
-                                     Familierelasjon(Personident(farId),
+                                     Familierelasjoner(Personident(farId),
                                                        FAMILIERELASJONSROLLE.FAR,
                                                        "Far Mocksen",
                                                        LocalDate.of(1969, 5, 1)),
-                                     Familierelasjon(Personident(morId),
+                                     Familierelasjoner(Personident(morId),
                                                        FAMILIERELASJONSROLLE.MOR,
                                                        "Mor Mocksen",
                                                        LocalDate.of(1979, 5, 1))
                              ))
 
         every {
-            mockPersonopplysningerService.hentIdenter(any())
+            mockIntegrasjonClient.hentIdenter(any())
         } answers {
             listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
         }
 
         every {
-            mockPersonopplysningerService.hentAktivAktørId(any())
+            mockIntegrasjonClient.hentAktivAktørId(any())
         } answers {
             randomAktørId()
         }
 
         every {
-            mockPersonopplysningerService.hentStatsborgerskap(any())
+            mockIntegrasjonClient.hentStatsborgerskap(any())
         } answers {
             listOf(Statsborgerskap("NOR",
-                                   LocalDate.of(1990, 1, 25),
+                                   LocalDate.of(1990,1, 25),
                                    null))
         }
 
         val ukjentId = "43125678910"
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(ukjentId)
+            mockIntegrasjonClient.hentPersoninfoFor(ukjentId)
         } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "ikke funnet")
 
         val feilId = "41235678910"
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(feilId)
+            mockIntegrasjonClient.hentPersoninfoFor(feilId)
         } throws IntegrasjonException("feil id")
 
-        return mockPersonopplysningerService
+        return mockIntegrasjonClient
     }
 
     @Bean
@@ -253,13 +256,32 @@ class ClientMocks {
     companion object {
         val søkerFnr = arrayOf("12345678910", "11223344556")
         val barnFnr = arrayOf("01101800033", "01101900033")
+        val bostedsadresse = Bostedsadresse(
+                matrikkeladresse = Matrikkeladresse(matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
+                                                    postnummer = "0202", kommunenummer = "2231")
+        )
+
         val personInfo = mapOf(
-                søkerFnr[0] to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen"),
-                søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19), kjønn = Kjønn.MANN, navn = "Far Faresen"),
-                barnFnr[0] to PersonInfo(fødselsdato = LocalDate.now().minusYears(1),
+                søkerFnr[0] to Personinfo(fødselsdato = LocalDate.of(1990, 2, 19),
+                                          bostedsadresse = bostedsadresse,
+                                          sivilstand = SIVILSTAND.GIFT,
+                                          kjønn = Kjønn.KVINNE,
+                                          navn = "Mor Moresen"),
+                søkerFnr[1] to Personinfo(fødselsdato = LocalDate.of(1995, 2, 19),
+                                          bostedsadresse = null,
+                                          sivilstand = SIVILSTAND.GIFT,
+                                          kjønn = Kjønn.MANN,
+                                          navn = "Far Faresen"),
+                barnFnr[0] to Personinfo(fødselsdato = LocalDate.now().minusYears(1),
+                                         bostedsadresse = bostedsadresse,
+                                         sivilstand = SIVILSTAND.UOPPGITT,
                                          kjønn = Kjønn.MANN,
                                          navn = "Gutten Barnesen"),
-                barnFnr[1] to PersonInfo(fødselsdato = LocalDate.now(), kjønn = Kjønn.KVINNE, navn = "Jenta Barnesen")
+                barnFnr[1] to Personinfo(fødselsdato = LocalDate.now(),
+                                         bostedsadresse = bostedsadresse,
+                                         sivilstand = SIVILSTAND.UGIFT,
+                                         kjønn = Kjønn.KVINNE,
+                                         navn = "Jenta Barnesen")
         )
     }
 

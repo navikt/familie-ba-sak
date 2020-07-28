@@ -15,4 +15,7 @@ interface TilkjentYtelseRepository: JpaRepository<TilkjentYtelse, Long> {
 
     @Query("SELECT ty FROM TilkjentYtelse ty JOIN ty.behandling b WHERE b.id = :behandlingId")
     fun findByBehandlingOptional(behandlingId: Long): TilkjentYtelse?
+
+    @Query("SELECT ty FROM TilkjentYtelse ty JOIN ty.behandling b WHERE b.id = :behandlingId AND ty.utbetalingsoppdrag is not null")
+    fun findByBehandlingAndHasUtbetalingsoppdrag(behandlingId: Long): TilkjentYtelse?
 }

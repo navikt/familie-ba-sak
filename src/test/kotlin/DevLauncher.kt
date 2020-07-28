@@ -6,7 +6,6 @@ object DevLauncher {
     fun main(args: Array<String>) {
         val app = SpringApplicationBuilder(ApplicationConfig::class.java)
                 .profiles("dev",
-                          "mock-totrinnkontroll",
                           "mock-dokgen-java",
                           "mock-iverksett",
                           "mock-infotrygd-feed",
