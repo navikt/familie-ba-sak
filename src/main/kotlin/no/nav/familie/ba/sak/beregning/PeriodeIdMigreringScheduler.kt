@@ -26,7 +26,8 @@ class PeriodeIdMigreringScheduler(private val beregningService: BeregningService
             it.andelerTilkjentYtelse.forEach { andel ->
                 val matchendeUtbetalingsperiode =
                         utbetalingsperioder.find { utbetalingsperiode -> andel.stønadFom == utbetalingsperiode.vedtakdatoFom
-                                                                         && andel.stønadTom == utbetalingsperiode.vedtakdatoTom }
+                                                                         && andel.stønadTom == utbetalingsperiode.vedtakdatoTom
+                                                                         && andel.beløp == utbetalingsperiode.sats.toInt() }
                 andel.periodeOffset = matchendeUtbetalingsperiode?.periodeId
                 andel.forrigePeriodeOffset = matchendeUtbetalingsperiode?.forrigePeriodeId
             }
