@@ -32,8 +32,8 @@ class UtbetalingsoppdragGenerator(
      * @param[vedtak] for å hente fagsakid, behandlingid, vedtaksdato, ident, og evt opphørsdato
      * @param[behandlingResultatType] for å sjekke om fullstendig opphør
      * @param[erFørsteBehandlingPåFagsak] for å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
-     * @param[nyeAndeler] én liste per kjede, hvor andeler er helt nye, har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
-     * @param[opphørteAndeler] et par per kjede, hvor par består av siste andel i kjeden og
+     * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye, har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
+     * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
      * @return Utbetalingsoppdrag for vedtak
      */
     fun lagUtbetalingsoppdrag(saksbehandlerId: String,
@@ -139,14 +139,4 @@ class UtbetalingsoppdragGenerator(
         beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(andeler.flatten().first().tilkjentYtelse)
         return utbetalingsperioder
     }
-
-    fun personErSøkerPåBehandling(ident: String, behandling: Behandling): Boolean =
-            persongrunnlagService.hentSøker(behandling)!!.personIdent.ident == ident
-
-    fun hentSisteOffsetForFagsak(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>): Int? =
-            forrigeKjeder.values
-                    .flatten()
-                    .filter { it.periodeOffset != null }
-                    .maxBy { it.periodeOffset!! }?.periodeOffset?.toInt()
-
 }

@@ -29,7 +29,7 @@ object ØkonomiUtils {
             throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
         } else if (personMedSmåbarnstilleggAndeler.size == 1) {
             val søkerIdent = personMedSmåbarnstilleggAndeler.keys.first()
-            andelerForKjeding.put(søkerIdent + SMÅBARNSTILLEGG_SUFFIX, personMedSmåbarnstilleggAndeler[søkerIdent]!!)
+            andelerForKjeding[søkerIdent + SMÅBARNSTILLEGG_SUFFIX] = personMedSmåbarnstilleggAndeler[søkerIdent]!!
         }
         return andelerForKjeding
     }

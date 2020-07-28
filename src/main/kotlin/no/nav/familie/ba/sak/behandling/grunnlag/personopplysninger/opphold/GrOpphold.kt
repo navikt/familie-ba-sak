@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.kontrakter.felles.personinfo.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import javax.persistence.*
 
 @Entity(name = "GrOpphold")
