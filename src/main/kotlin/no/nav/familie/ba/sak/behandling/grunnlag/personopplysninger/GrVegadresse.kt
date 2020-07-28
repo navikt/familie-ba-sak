@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
-import no.nav.familie.kontrakter.felles.personinfo.Vegadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.DiscriminatorValue

@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgers
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.felles.personinfo.Ident
-import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service

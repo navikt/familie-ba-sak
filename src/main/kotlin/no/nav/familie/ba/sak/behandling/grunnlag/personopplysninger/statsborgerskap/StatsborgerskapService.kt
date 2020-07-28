@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
-import no.nav.familie.kontrakter.felles.personinfo.Ident
-import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 

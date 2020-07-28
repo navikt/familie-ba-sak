@@ -29,10 +29,10 @@ import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedt
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personinfo.Matrikkeladresse
-import no.nav.familie.kontrakter.felles.personinfo.UkjentBosted
-import no.nav.familie.kontrakter.felles.personinfo.Vegadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Resultat
