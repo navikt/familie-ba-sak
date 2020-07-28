@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.pdl.internal
 
-import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 
 data class PdlStatsborgerskapResponse(val data: Data,
                                       val errors: List<PdlError>?) {

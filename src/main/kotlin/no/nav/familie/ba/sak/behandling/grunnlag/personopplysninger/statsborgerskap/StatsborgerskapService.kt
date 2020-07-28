@@ -34,7 +34,7 @@ class StatsborgerskapService(
             }
 
     fun hentStatsborgerskapMedMedlemskapOgHistorikk(ident: Ident, person: Person): List<GrStatsborgerskap> =
-            personopplysningerService.hentStatsborgerskap(ident).flatMap { statsborgerskap ->
+            personopplysningerService.hentStatsborgerskap(ident).flatMap { statsborgerskap: Statsborgerskap ->
                 hentStatsborgerskapMedMedlemskap(statsborgerskap, person)
             }.sortedWith(fomComparator)
 

@@ -179,66 +179,66 @@ class ClientMocks {
     @Profile("test-søk")
     @Primary
     @Bean
-    fun mockPDL(): IntegrasjonClient {
-        val mockIntegrasjonClient = mockk<IntegrasjonClient>()
+    fun mockPDL(): PersonopplysningerService {
+        val mockPersonopplysningerService = mockk<PersonopplysningerService>()
 
         val farId = "12345678910"
         val morId = "21345678910"
         val barnId = "31245678910"
 
         every {
-            mockIntegrasjonClient.hentPersoninfoFor(farId)
-        } returns Personinfo(fødselsdato = LocalDate.of(1969, 5, 1), kjønn = Kjønn.MANN, navn = "Far Mocksen")
+            mockPersonopplysningerService.hentPersoninfoFor(farId)
+        } returns PersonInfo(fødselsdato = LocalDate.of(1969, 5, 1), kjønn = Kjønn.MANN, navn = "Far Mocksen")
 
         every {
-            mockIntegrasjonClient.hentPersoninfoFor(morId)
-        } returns Personinfo(fødselsdato = LocalDate.of(1979, 5, 1), kjønn = Kjønn.KVINNE, navn = "Mor Mocksen")
+            mockPersonopplysningerService.hentPersoninfoFor(morId)
+        } returns PersonInfo(fødselsdato = LocalDate.of(1979, 5, 1), kjønn = Kjønn.KVINNE, navn = "Mor Mocksen")
 
         every {
-            mockIntegrasjonClient.hentPersoninfoFor(barnId)
-        } returns Personinfo(fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
+            mockPersonopplysningerService.hentPersoninfoFor(barnId)
+        } returns PersonInfo(fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
                              familierelasjoner = setOf(
-                                     Familierelasjoner(Personident(farId),
-                                                       FAMILIERELASJONSROLLE.FAR,
-                                                       "Far Mocksen",
-                                                       LocalDate.of(1969, 5, 1)),
-                                     Familierelasjoner(Personident(morId),
-                                                       FAMILIERELASJONSROLLE.MOR,
-                                                       "Mor Mocksen",
-                                                       LocalDate.of(1979, 5, 1))
+                                     Familierelasjon(Personident(farId),
+                                                     FAMILIERELASJONSROLLE.FAR,
+                                                     "Far Mocksen",
+                                                     LocalDate.of(1969, 5, 1)),
+                                     Familierelasjon(Personident(morId),
+                                                     FAMILIERELASJONSROLLE.MOR,
+                                                     "Mor Mocksen",
+                                                     LocalDate.of(1979, 5, 1))
                              ))
 
         every {
-            mockIntegrasjonClient.hentIdenter(any())
+            mockPersonopplysningerService.hentIdenter(any())
         } answers {
             listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
         }
 
         every {
-            mockIntegrasjonClient.hentAktivAktørId(any())
+            mockPersonopplysningerService.hentAktivAktørId(any())
         } answers {
             randomAktørId()
         }
 
         every {
-            mockIntegrasjonClient.hentStatsborgerskap(any())
+            mockPersonopplysningerService.hentStatsborgerskap(any())
         } answers {
             listOf(Statsborgerskap("NOR",
-                                   LocalDate.of(1990,1, 25),
+                                   LocalDate.of(1990, 1, 25),
                                    null))
         }
 
         val ukjentId = "43125678910"
         every {
-            mockIntegrasjonClient.hentPersoninfoFor(ukjentId)
+            mockPersonopplysningerService.hentPersoninfoFor(ukjentId)
         } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "ikke funnet")
 
         val feilId = "41235678910"
         every {
-            mockIntegrasjonClient.hentPersoninfoFor(feilId)
+            mockPersonopplysningerService.hentPersoninfoFor(feilId)
         } throws IntegrasjonException("feil id")
 
-        return mockIntegrasjonClient
+        return mockPersonopplysningerService
     }
 
     @Bean
@@ -262,22 +262,22 @@ class ClientMocks {
         )
 
         val personInfo = mapOf(
-                søkerFnr[0] to Personinfo(fødselsdato = LocalDate.of(1990, 2, 19),
+                søkerFnr[0] to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
                                           bostedsadresse = bostedsadresse,
                                           sivilstand = SIVILSTAND.GIFT,
                                           kjønn = Kjønn.KVINNE,
                                           navn = "Mor Moresen"),
-                søkerFnr[1] to Personinfo(fødselsdato = LocalDate.of(1995, 2, 19),
+                søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19),
                                           bostedsadresse = null,
                                           sivilstand = SIVILSTAND.GIFT,
                                           kjønn = Kjønn.MANN,
                                           navn = "Far Faresen"),
-                barnFnr[0] to Personinfo(fødselsdato = LocalDate.now().minusYears(1),
+                barnFnr[0] to PersonInfo(fødselsdato = LocalDate.now().minusYears(1),
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UOPPGITT,
                                          kjønn = Kjønn.MANN,
                                          navn = "Gutten Barnesen"),
-                barnFnr[1] to Personinfo(fødselsdato = LocalDate.now(),
+                barnFnr[1] to PersonInfo(fødselsdato = LocalDate.now(),
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UGIFT,
                                          kjønn = Kjønn.KVINNE,

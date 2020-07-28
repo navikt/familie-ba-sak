@@ -18,7 +18,7 @@ class FødselshendelseServiceTest {
     val barn1Fnr = "12345678911"
     val barn2Fnr = "12345678912"
 
-    val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock, infotrygdBarnetrygdClientMock, integrasjonClientMock)
+    val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock, infotrygdBarnetrygdClientMock, personopplysningerServiceMock)
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer false`() {

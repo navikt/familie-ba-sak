@@ -2,9 +2,8 @@ package no.nav.familie.ba.sak.pdl.internal
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
-import java.time.LocalDate
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 
 data class PdlHentPersonResponse(val data: PdlPerson,
                                  val errors: List<PdlError>?) {
