@@ -14,9 +14,9 @@ class PeriodeIdMigreringScheduler(private val beregningService: BeregningService
                                   private val fagsakService: FagsakService,
                                   private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
-    @Scheduled(cron = "0 0 8 1 * ?")
+    @Scheduled(cron = CRON_HVERT10MIN)
     fun populerPeriodeOffsetOgForrigePeriodeOffsetFraUtbetalingsoppdrag() {
-
+        LOG.info("Kjører migreringsjobb for periodeid")
         val tilkjentYtelser = fagsakService.hentAlleFagsaker()
                 .flatMap { beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(it.id) }
 
@@ -40,5 +40,8 @@ class PeriodeIdMigreringScheduler(private val beregningService: BeregningService
 
     companion object {
         private val LOG = LoggerFactory.getLogger(PeriodeIdMigreringScheduler::class.java)
+
+        private const val CRON_ENDAGIMND = "0 0 8 1 * ?"
+        private const val CRON_HVERT10MIN = "0 */10 * * * *"
     }
 }
