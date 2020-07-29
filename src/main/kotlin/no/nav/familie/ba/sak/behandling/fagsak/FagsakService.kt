@@ -146,6 +146,9 @@ class FagsakService(
         lagre(fagsak)
     }
 
+    fun hentAlleFagsaker(): List<Fagsak> {
+        return fagsakRepository.findAll()
+    }
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
         val personIdent = PersonIdent(fødselsnummer)
