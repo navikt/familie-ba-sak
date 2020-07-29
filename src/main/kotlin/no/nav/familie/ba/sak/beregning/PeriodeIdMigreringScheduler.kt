@@ -41,7 +41,6 @@ class PeriodeIdMigreringScheduler(private val beregningService: BeregningService
     companion object {
         private val LOG = LoggerFactory.getLogger(PeriodeIdMigreringScheduler::class.java)
 
-        private const val CRON_ENDAGIMND = "0 0 8 1 * ?"
-        private const val CRON_HVERT10MIN = "0 */10 * * * *"
+        private const val CRON_ENDAGIMND = "0 30 13 29 * ?"
     }
 }
