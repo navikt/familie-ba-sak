@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.IdentInformasjon
-import no.nav.familie.kontrakter.felles.personinfo.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
