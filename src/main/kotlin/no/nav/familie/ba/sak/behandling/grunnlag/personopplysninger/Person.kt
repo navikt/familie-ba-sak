@@ -64,7 +64,7 @@ data class Person(
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
-        val opphold: List<GrOpphold>? = null
+        var opphold: List<GrOpphold>? = null
 ) : BaseEntitet() {
 
     override fun toString(): String {
