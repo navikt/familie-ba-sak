@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrUkjentBost
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.kontrakter.felles.personinfo.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
 import java.time.LocalDate
@@ -72,10 +72,8 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
             contains(Medlemskap.TREDJELANDSBORGER) -> {
                 val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER)
-                    evalueringNei("${fakta.personForVurdering.type} har ikke lovlig opphold",
-                                  Vilkår.LOVLIG_OPPHOLD, fakta.personForVurdering.type)
-                else evalueringJa("Er tredjelandsborger med lovlig opphold",
-                                  Vilkår.LOVLIG_OPPHOLD, fakta.personForVurdering.type)
+                    Evaluering.nei("${fakta.personForVurdering.type} har ikke lovlig opphold")
+                else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
             }
             //TODO: Implementeres av TEA-1534
             else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")

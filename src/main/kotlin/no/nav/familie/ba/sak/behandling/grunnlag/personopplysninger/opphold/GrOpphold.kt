@@ -4,9 +4,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.erInnenfor
-import no.nav.familie.kontrakter.felles.personinfo.OPPHOLDSTILLATELSE
-import java.time.LocalDate
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import java.time.LocalDate
 import javax.persistence.*
 
 @Entity(name = "GrOpphold")
