@@ -17,7 +17,7 @@ import kotlin.reflect.full.findAnnotation
  * @author Sebastien Dubois
  */
 @Service
-@Profile("dev", "e2e")
+@Profile("dev", "e2e", "postgres")
 class DatabaseCleanupService(
         private val entityManager: EntityManager,
         private val environment: Environment
@@ -49,7 +49,7 @@ class DatabaseCleanupService(
     fun truncate() {
         logger.info("Truncating tables: $tableNames")
         entityManager.flush()
-        if (environment.activeProfiles.contains("e2e")) {
+        if (environment.activeProfiles.contains("e2e") || environment.activeProfiles.contains("postgres")) {
             tableNames.forEach { tableName ->
                 entityManager.createNativeQuery("TRUNCATE TABLE $tableName CASCADE").executeUpdate()
             }
