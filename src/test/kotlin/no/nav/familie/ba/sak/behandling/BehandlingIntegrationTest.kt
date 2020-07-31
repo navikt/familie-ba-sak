@@ -397,10 +397,10 @@ class BehandlingIntegrationTest {
 
     @Test
     fun `Hent en persons bostedsadresse fra PDL og lagre den i database`() {
-        val søkerFnr = ClientMocks.søkerFnr[0]
-        val barn1Fnr = ClientMocks.barnFnr[0]
-        val barn2Fnr = ClientMocks.barnFnr[1]
-        val barn3Fnr = ClientMocks.søkerFnr[1]
+        val søkerFnr = randomFnr()
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
+        val barn3Fnr = randomFnr()
 
         val matrikkelId = 123456L
         val søkerHusnummer = "12"
