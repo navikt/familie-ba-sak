@@ -415,7 +415,6 @@ class BehandlingIntegrationTest {
         val barn1Tilleggsnavn = "whoknows"
         val barn1Postnummer = "3333"
         val barn1Kommunenummer = "3233"
-
         val barn2BostedKommune = "Oslo"
 
         every { personopplysningerService.hentPersoninfoFor(søkerFnr) } returns PersonInfo(
