@@ -14,7 +14,6 @@ import org.springframework.web.context.annotation.ApplicationScope
 class PersonopplysningerService(private val pdlRestClient: PdlRestClient) {
 
     fun hentPersoninfoFor(personIdent: String): PersonInfo {
-        LOG.info("Enter PersonopplysningerService::hentPersoninfoFor()")
         val personinfo = hentPersoninfo(personIdent, PersonInfoQuery.MED_RELASJONER)
         val familierelasjoner = personinfo.familierelasjoner.map {
             val relasjonsinfo = hentPersoninfo(it.personIdent.id, PersonInfoQuery.ENKEL)
@@ -23,14 +22,11 @@ class PersonopplysningerService(private val pdlRestClient: PdlRestClient) {
                             fødselsdato = relasjonsinfo.fødselsdato,
                             navn = relasjonsinfo.navn)
         }.toSet()
-        LOG.info("Leave PersonopplysningerService::hentPersoninfoFor()")
         return personinfo.copy(familierelasjoner = familierelasjoner)
     }
 
     fun hentPersoninfo(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
-        LOG.info("Enter PersonopplysningerService::hentPersoninfo() personInfoQuery=${personInfoQuery}")
         val person= pdlRestClient.hentPerson(personIdent, "BAR", personInfoQuery)
-        LOG.info("Leave PersonopplysningerService::hentPersoninfo() person.navn=${person.navn}")
         return person
     }
 
@@ -52,7 +48,8 @@ class PersonopplysningerService(private val pdlRestClient: PdlRestClient) {
     }
 
     fun hentIdenter(ident: Ident): List<IdentInformasjon> {
-        return hentIdenter(ident.ident, "BAR", true)
+        val identer= hentIdenter(ident.ident, "BAR", true)
+        return identer
     }
 
     fun hentIdenter(personIdent: String, tema: String, historikk: Boolean): List<IdentInformasjon> {

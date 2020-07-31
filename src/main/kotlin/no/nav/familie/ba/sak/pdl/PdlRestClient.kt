@@ -21,7 +21,7 @@ import java.time.LocalDate
 
 @Service
 class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
-                    @Qualifier("jwtBearer") val restTemplate: RestOperations,
+                    @Qualifier("sts") val restTemplate: RestOperations,
                     private val stsRestClient: StsRestClient)
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
@@ -32,11 +32,9 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
     fun hentPerson(personIdent: String, tema: String, personInfoQuery: PersonInfoQuery): PersonInfo {
 
-        LOG.info("Enter PdlRestClient::hentPerson() tema= ${tema} personInfoQuery= ${personInfoQuery}")
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = personInfoQuery.graphQL)
         try {
-            LOG.info("postForEntity PDL URI= ${pdlUri}")
             val response = postForEntity<PdlHentPersonResponse>(pdlUri,
                                                                 pdlPersonRequest,
                                                                 httpHeaders(tema))
@@ -70,8 +68,6 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                        throwable = it)
                         }
                 )
-
-                LOG.info("Leave PdlRestClient::hentPerson() personInfo.navn= ${personInfo.navn}")
                 return personInfo
             } else {
                 throw Feil(message = "Feil ved oppslag på person: ${response.errorMessages()}",
