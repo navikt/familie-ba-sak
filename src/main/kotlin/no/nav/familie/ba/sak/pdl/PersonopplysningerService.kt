@@ -103,3 +103,4 @@ data class DødsfallResponse(val erDød: Boolean,
                             val dødsdato: String?)
 
 data class VergeResponse(val harVerge: Boolean)
+
