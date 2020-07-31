@@ -26,7 +26,7 @@ class PersonopplysningerService(private val pdlRestClient: PdlRestClient) {
     }
 
     fun hentPersoninfo(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
-        val person= pdlRestClient.hentPerson(personIdent, "BAR", personInfoQuery)
+        val person = pdlRestClient.hentPerson(personIdent, "BAR", personInfoQuery)
         return person
     }
 
@@ -48,7 +48,7 @@ class PersonopplysningerService(private val pdlRestClient: PdlRestClient) {
     }
 
     fun hentIdenter(ident: Ident): List<IdentInformasjon> {
-        val identer= hentIdenter(ident.ident, "BAR", true)
+        val identer = hentIdenter(ident.ident, "BAR", true)
         return identer
     }
 
