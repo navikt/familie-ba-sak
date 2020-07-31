@@ -25,11 +25,11 @@ class PdlTestConfig {
 
         every {
             klient.hentPerson(any(), any(), any())
-        } returns PersonInfo(fødselsdato = LocalDate.of(1980,5, 12),
+        } returns PersonInfo(fødselsdato = LocalDate.of(1980, 5, 12),
                              navn = "Kari Normann",
                              kjønn = Kjønn.KVINNE,
                              familierelasjoner = setOf(Familierelasjon(personIdent = Personident(id = "12345678910"),
-                                                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN)),
+                                                                       relasjonsrolle = FAMILIERELASJONSROLLE.BARN)),
                              adressebeskyttelseGradering = null,
                              sivilstand = SIVILSTAND.UGIFT)
         return klient
