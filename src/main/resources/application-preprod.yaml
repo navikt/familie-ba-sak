@@ -62,7 +62,7 @@ FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
 FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.dev-adeo.no
 NORG2_BASE_URL: https://app-q1.adeo.no/norg2
-STS_URL: https://sts-q2.preprod.local/SecurityTokenServiceProvider/
+STS_URL: https://security-token-service.nais.preprod.local/rest/v1/sts/token
 PDL_URL: http://pdl-api
 CREDENTIAL_USERNAME: srvfamilie-ba-sak
 CREDENTIAL_PASSWORD: ${SRVUSER_BA_SAK_SECRET}
