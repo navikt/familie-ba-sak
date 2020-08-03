@@ -91,8 +91,8 @@ fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean): List<PeriodeResult
                             it.vilkårType,
                             it.resultat,
                             it.begrunnelse,
-                            it.periodeFom?.withDayOfMonth(1),
-                            it.periodeTom?.sisteDagIMåned())
+                            if (brukMåned) it.periodeFom?.withDayOfMonth(1) else it.periodeFom,
+                            if (brukMåned) it.periodeTom?.sisteDagIMåned() else it.periodeTom)
                 }.toSet()
         )
     }
