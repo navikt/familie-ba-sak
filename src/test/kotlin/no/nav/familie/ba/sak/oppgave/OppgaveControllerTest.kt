@@ -23,6 +23,12 @@ class OppgaveControllerTest {
     lateinit var oppgaveService: OppgaveService
 
     @MockK
+    lateinit var personopplysningerService: PersonopplysningerService
+
+    @MockK
+    lateinit var integrasjonClient: IntegrasjonClient
+
+    @MockK
     lateinit var fagsakService: FagsakService
 
     @InjectMockKs
