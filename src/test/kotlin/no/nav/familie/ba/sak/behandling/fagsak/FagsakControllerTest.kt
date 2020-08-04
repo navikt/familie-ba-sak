@@ -4,7 +4,8 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.IdentInformasjon
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -31,7 +32,11 @@ class FagsakControllerTest(
         private val fagsakController: FagsakController,
 
         @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient
+        private val mockIntegrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val mockPersonopplysningerService: PersonopplysningerService
+
 ) {
 
     @Test
@@ -40,7 +45,7 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         every {
-            mockIntegrasjonClient.hentIdenter(Ident(fnr))
+            mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
@@ -65,7 +70,7 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         every {
-            mockIntegrasjonClient.hentIdenter(Ident(fnr))
+            mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } returns listOf(
                 IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
@@ -86,7 +91,7 @@ class FagsakControllerTest(
         val nyttFnr = randomFnr()
 
         every {
-            mockIntegrasjonClient.hentIdenter(Ident(fnr))
+            mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } returns listOf(
                 IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
@@ -95,7 +100,7 @@ class FagsakControllerTest(
         assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.hentAktivIdent()?.ident)
 
         every {
-            mockIntegrasjonClient.hentIdenter(Ident(nyttFnr))
+            mockPersonopplysningerService.hentIdenter(Ident(nyttFnr))
         } returns listOf(
                 IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"),
                 IdentInformasjon(ident = nyttFnr, historisk = false, gruppe = "FOLKEREGISTERIDENT"))
@@ -114,7 +119,7 @@ class FagsakControllerTest(
         val aktørId = randomAktørId()
 
         every {
-            mockIntegrasjonClient.hentAktivPersonIdent(Ident(aktørId.id))
+            mockPersonopplysningerService.hentAktivPersonIdent(Ident(aktørId.id))
         } returns PersonIdent("123")
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(

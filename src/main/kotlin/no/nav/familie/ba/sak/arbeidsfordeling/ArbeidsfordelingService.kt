@@ -6,9 +6,10 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
 
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Service
 class ArbeidsfordelingService(private val behandlingService: BehandlingService,
                               private val oppgaveRepository: OppgaveRepository,
                               private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-                              private val integrasjonClient: IntegrasjonClient) {
+                              private val integrasjonClient: IntegrasjonClient,
+                              private val personopplysningerService: PersonopplysningerService) {
 
     /**
      * Bruker oppgaveRepository og integrasjonClient for å unngå dependency cycle.
@@ -58,7 +60,7 @@ class ArbeidsfordelingService(private val behandlingService: BehandlingService,
 
     private fun identMedAdressebeskyttelse(ident: String) = IdentMedAdressebeskyttelse(
             ident = ident,
-            adressebeskyttelsegradering = integrasjonClient.hentPersoninfoFor(ident).adressebeskyttelseGradering)
+            adressebeskyttelsegradering = personopplysningerService.hentPersoninfoFor(ident).adressebeskyttelseGradering)
 
     data class IdentMedAdressebeskyttelse(
             val ident: String,

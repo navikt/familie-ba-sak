@@ -63,6 +63,10 @@ FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner:8085/api
 NORG2_BASE_URL: http://familie-mock-server:1337/rest/api/norg2
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed:8092/api
 FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: dummy
+STS_URL: http://nav-auth-mock:8200/nais-sts/token
+PDL_URL: http://familie-mock-server:1337/rest/api/pdl
+CREDENTIAL_USERNAME: srvfamilie-ba-sak
+CREDENTIAL_PASSWORD: ${SRVUSER_BA_SAK_SECRET}
 
 #Unleash
 NAIS_APP_NAME: ""

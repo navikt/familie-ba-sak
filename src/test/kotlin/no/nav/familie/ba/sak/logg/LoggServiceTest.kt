@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -31,7 +32,7 @@ class LoggServiceTest(
         private val stegService: StegService,
 
         @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient,
+        private val mockPersonopplysningerService: PersonopplysningerService,
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService
@@ -86,7 +87,7 @@ class LoggServiceTest(
         val søkersIdent = randomFnr()
         val barnetsIdent = randomFnr()
 
-        mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkersIdent, barnetsIdent)
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkersIdent, barnetsIdent)
 
         val behandling = stegService.håndterNyBehandlingFraHendelse(NyBehandlingHendelse(
                 søkersIdent = søkersIdent,

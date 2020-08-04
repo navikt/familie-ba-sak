@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
@@ -12,7 +13,8 @@ import java.time.LocalDate
 
 @Service
 class StatsborgerskapService(
-        private val integrasjonClient: IntegrasjonClient
+        private val integrasjonClient: IntegrasjonClient,
+        private val personopplysningerService: PersonopplysningerService
 ) {
 
     val fomComparator =
@@ -32,7 +34,7 @@ class StatsborgerskapService(
             }
 
     fun hentStatsborgerskapMedMedlemskapOgHistorikk(ident: Ident, person: Person): List<GrStatsborgerskap> =
-            integrasjonClient.hentStatsborgerskap(ident).flatMap { statsborgerskap ->
+            personopplysningerService.hentStatsborgerskap(ident).flatMap { statsborgerskap: Statsborgerskap ->
                 hentStatsborgerskapMedMedlemskap(statsborgerskap, person)
             }.sortedWith(fomComparator)
 

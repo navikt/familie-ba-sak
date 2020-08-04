@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.filtreringsregler
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.nare.core.evaluations.Resultat
 import org.assertj.core.api.Assertions.assertThat
@@ -16,7 +16,7 @@ internal class FiltreringsreglerTest {
     fun `Regelevaluering skal resultere i Ja`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<Personinfo> = listOf()
+        val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
@@ -28,7 +28,7 @@ internal class FiltreringsreglerTest {
     fun `Regelevaluering skal resultere i NEI når mor har D-nummer`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = dnummer)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<Personinfo> = listOf()
+        val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
@@ -43,7 +43,7 @@ internal class FiltreringsreglerTest {
     fun `Regelevaluering skal resultere i NEI når barnet har D-nummer`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = dnummer)
-        val restenAvBarna: List<Personinfo> = listOf()
+        val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
@@ -58,7 +58,7 @@ internal class FiltreringsreglerTest {
     fun `Regelevaluering skal resultere i NEI når barnet er over 6 måneder`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barnet = tilfeldigPerson(LocalDate.now().minusYears(1)).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<Personinfo> = listOf()
+        val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
@@ -73,7 +73,7 @@ internal class FiltreringsreglerTest {
     fun `Regelevaluering skal resultere i NEI når mor er under 18 år`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(17)).copy(personIdent = gyldigFnr)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<Personinfo> = listOf()
+        val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
@@ -88,7 +88,7 @@ internal class FiltreringsreglerTest {
     fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige barn ble født`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<Personinfo> = listOf(Personinfo(LocalDate.now().minusMonths(4)))
+        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(4)))
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
@@ -103,7 +103,7 @@ internal class FiltreringsreglerTest {
     fun `Regelevaluering skal resultere i NEI når det er registrert dødsfall på mor`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<Personinfo> = listOf()
+        val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = false, barnetLever = true, morHarVerge = false))
@@ -118,7 +118,7 @@ internal class FiltreringsreglerTest {
     fun `Regelevaluering skal resultere i NEI når det er registrert dødsfall på barnet`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<Personinfo> = listOf()
+        val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = false, morHarVerge = false))
@@ -133,7 +133,7 @@ internal class FiltreringsreglerTest {
     fun `Regelevaluering skal resultere i NEI når mor har verge`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<Personinfo> = listOf()
+        val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = true))

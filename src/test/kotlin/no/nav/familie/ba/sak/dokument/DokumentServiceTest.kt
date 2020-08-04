@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.TEST_PDF
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -70,7 +70,7 @@ class DokumentServiceTest(
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(Personinfo(
+                        .withBody(objectMapper.writeValueAsString(Ressurs.success(PersonInfo(
                                 LocalDate.of(2019,
                                         1,
                                         1)))))))

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -16,7 +17,8 @@ class PersongrunnlagService(
         private val personRepository: PersonRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val integrasjonClient: IntegrasjonClient,
-        private val statsborgerskapService: StatsborgerskapService
+        private val statsborgerskapService: StatsborgerskapService,
+        private val personopplysningerService: PersonopplysningerService
 ) {
 
     fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
@@ -49,8 +51,8 @@ class PersongrunnlagService(
                                                      behandling: Behandling) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        val personinfo = integrasjonClient.hentPersoninfoFor(fødselsnummer)
-        val aktørId = integrasjonClient.hentAktivAktørId(Ident(fødselsnummer))
+        val personinfo = personopplysningerService.hentPersoninfoFor(fødselsnummer)
+        val aktørId = personopplysningerService.hentAktivAktørId(Ident(fødselsnummer))
 
         val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
                            type = PersonType.SØKER,
@@ -73,12 +75,12 @@ class PersongrunnlagService(
     private fun hentBarn(barnasFødselsnummer: List<String>,
                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
         return barnasFødselsnummer.map { nyttBarn ->
-            val personinfo = integrasjonClient.hentPersoninfoFor(nyttBarn)
+            val personinfo = personopplysningerService.hentPersoninfoFor(nyttBarn)
             Person(personIdent = PersonIdent(nyttBarn),
                                          type = PersonType.BARN,
                                          personopplysningGrunnlag = personopplysningGrunnlag,
                                          fødselsdato = personinfo.fødselsdato,
-                                         aktørId = integrasjonClient.hentAktivAktørId(Ident(nyttBarn)),
+                                         aktørId = personopplysningerService.hentAktivAktørId(Ident(nyttBarn)),
                                          navn = personinfo.navn ?: "",
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                                          bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),

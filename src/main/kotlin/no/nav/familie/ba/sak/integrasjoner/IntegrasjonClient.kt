@@ -76,85 +76,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    fun hentAktivAktørId(ident: Ident): AktørId {
-        val identer = hentIdenter(ident).filter { !it.historisk && it.gruppe == "AKTORID" }.map { it.ident }
-        if (identer.isEmpty()) error("Finner ingen aktiv aktørId for ident")
-        return AktørId(identer.first())
-    }
-
-    fun hentAktivPersonIdent(ident: Ident): PersonIdent {
-        val identer = hentIdenter(ident).filter { !it.historisk && it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
-        if (identer.isEmpty()) error("Finner ingen aktiv personIdent for ident")
-        return PersonIdent(identer.first())
-    }
-
-    fun hentIdenter(ident: Ident): List<IdentInformasjon> {
-        val uri = URI.create("$integrasjonUri/personopplysning/identer/BAR/historikk")
-        log.info("Henter identhistorikk fra $uri")
-        return try {
-            val response = postForEntity<Ressurs<List<IdentInformasjon>>>(uri, ident)
-            response.getDataOrThrow()
-        } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av identer", e, uri, ident.ident)
-        }
-    }
-
-    fun hentDødsfall(ident: Ident): DødsfallData {
-        val uri = URI.create("$integrasjonUri/personopplysning/doedsfall/BAR")
-        log.info("Henter informasjon om dødsfall fra $uri")
-
-        return exchange(
-                networkRequest = {
-                    postForEntity<Ressurs<DødsfallData>>(uri, ident)
-                },
-                onFailure = {
-                    IntegrasjonException("Kall mot integrasjon feilet ved uthenting av data om dødsfall. response=${responseBody(
-                            it)}",
-                                         it,
-                                         uri)
-                }
-        )
-    }
-
-    fun hentVergeData(ident: Ident): VergeData {
-        val uri = URI.create("$integrasjonUri/personopplysning/harVerge/BAR")
-        log.info("Henter informasjon om verge fra $uri")
-
-        return exchange(
-                networkRequest = {
-                    postForEntity<Ressurs<VergeData>>(uri, ident)
-                },
-                onFailure = {
-                    IntegrasjonException("Kall mot integrasjon feilet ved uthenting av data om verge. response=${responseBody(it)}",
-                                         it,
-                                         uri)
-                }
-        )
-    }
-
-
-    fun hentPersoninfoFor(personIdent: String): Personinfo {
-        val personinfo = hentPersoninfo(personIdent, medRelasjoner = true)
-        val familierelasjoner = personinfo.familierelasjoner.map {
-            val relasjonsinfo = hentPersoninfo(it.personIdent.id, medRelasjoner = false)
-            Familierelasjoner(personIdent = it.personIdent,
-                              relasjonsrolle = it.relasjonsrolle,
-                              fødselsdato = relasjonsinfo.fødselsdato,
-                              navn = relasjonsinfo.navn)
-        }.toSet()
-        return personinfo.copy(familierelasjoner = familierelasjoner)
-    }
-
-    fun hentStatsborgerskap(ident: Ident): List<Statsborgerskap> {
-        val uri = URI.create("$integrasjonUri/personopplysning/statsborgerskap/BAR")
-
-        return try {
-            postForEntity<Ressurs<List<Statsborgerskap>>>(uri, ident).getDataOrThrow()
-        } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av statsborgerskap", e, uri, ident.ident)
-        }
-    }
-
     fun hentAlleEØSLand(): KodeverkDto {
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/eea")
 
@@ -162,30 +83,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
             getForEntity<Ressurs<KodeverkDto>>(uri).getDataOrThrow()
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av landkoder eea", e, uri)
-        }
-    }
-
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
-    private fun hentPersoninfo(personIdent: String, medRelasjoner: Boolean): Personinfo {
-        logger.info("Henter personinfo fra $integrasjonUri")
-
-        val uri = if (medRelasjoner) URI.create("$integrasjonUri/personopplysning/v1/info/BAR")
-        else URI.create("$integrasjonUri/personopplysning/v1/infoEnkel/BAR")
-
-        return try {
-            val response = getForEntity<Ressurs<Personinfo>>(uri, HttpHeaders().medPersonident(personIdent))
-            assertGenerelleSuksessKriterier(response)
-
-            secureLogger.info("Personinfo fra $uri for {}: {}", personIdent, response.data)
-            response.data!!
-        } catch (e: HttpClientErrorException) {
-            if (e.statusCode === HttpStatus.NOT_FOUND) {
-                throw e
-            } else {
-                throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
-            }
-        } catch (e: Exception) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personinfo", e, uri, personIdent)
         }
     }
 

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.oppgave.*
@@ -27,6 +28,9 @@ class OppgaveServiceTest {
 
     @MockK
     lateinit var integrasjonClient: IntegrasjonClient
+
+    @MockK
+    lateinit var personopplysningerService: PersonopplysningerService
 
     @MockK
     lateinit var arbeidsfordelingService: ArbeidsfordelingService
@@ -54,7 +58,7 @@ class OppgaveServiceTest {
                     every { enhetId } returns ENHETSNUMMER
                 }
         )
-        every { integrasjonClient.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
+        every { personopplysningerService.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
@@ -82,7 +86,7 @@ class OppgaveServiceTest {
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
         val slot = slot<OpprettOppgave>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
-        every { integrasjonClient.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
+        every { personopplysningerService.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 

@@ -7,7 +7,8 @@ import no.nav.familie.ba.sak.behandling.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -21,6 +22,7 @@ import java.time.LocalDate
 
 @Service
 class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val integrasjonClient: IntegrasjonClient,
+                                                                private val personopplysningerService: PersonopplysningerService,
                                                                 private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
                                                                 private val taskRepository: TaskRepository,
                                                                 private val featureToggleService: FeatureToggleService)
@@ -56,15 +58,15 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
                 ?: throw java.lang.IllegalStateException("Barnets ident er ikke tilstede i personopplysningsgrunnlaget.")
 
         val restenAvBarna =
-                integrasjonClient.hentPersoninfoFor(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
+                personopplysningerService.hentPersoninfoFor(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
                     it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && it.personIdent.id != barnet.personIdent.ident
                 }.map {
-                    integrasjonClient.hentPersoninfoFor(it.personIdent.id)
+                    personopplysningerService.hentPersoninfoFor(it.personIdent.id)
                 }
 
-        val morLever = !integrasjonClient.hentDødsfall(Ident(mor.personIdent.ident)).erDød
-        val barnetLever = !integrasjonClient.hentDødsfall(Ident(barnet.personIdent.ident)).erDød
-        val morHarVerge = integrasjonClient.hentVergeData(Ident(mor.personIdent.ident)).harVerge
+        val morLever = !personopplysningerService.hentDødsfall(Ident(mor.personIdent.ident)).erDød
+        val barnetLever = !personopplysningerService.hentDødsfall(Ident(barnet.personIdent.ident)).erDød
+        val morHarVerge = personopplysningerService.hentVergeData(Ident(mor.personIdent.ident)).harVerge
 
         return Fakta(mor, barnet, restenAvBarna, morLever, barnetLever, morHarVerge)
     }

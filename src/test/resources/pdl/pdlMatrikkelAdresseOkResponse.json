@@ -1,0 +1,46 @@
+{
+  "data": {
+    "person": {
+      "navn": [
+        {
+          "fornavn": "ENGASJERT",
+          "etternavn": "FYR"
+        }
+      ],
+      "foedsel": [
+        {
+          "foedselsdato": "1955-09-13"
+        }
+      ],
+      "kjoenn": [
+        {
+          "kjoenn": "MANN"
+        }
+      ],
+      "bostedsadresse": [
+        {
+          "matrikkeladresse": {
+            "matrikkelId": "2147483649",
+            "postnummer": "0274"
+          }
+        }
+      ],
+      "sivilstand": [
+        {
+          "type": "UGIFT"
+        }
+      ],
+      "familierelasjoner": [
+        {
+          "relatertPersonsIdent": "12345678910",
+          "relatertPersonsRolle": "BARN"
+        }
+      ],
+      "adressebeskyttelse": [
+        {
+          "gradering": "UGRADERT"
+        }
+      ]
+    }
+  }
+}

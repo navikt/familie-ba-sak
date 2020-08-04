@@ -91,3 +91,7 @@ spring:
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
 FAMILIE_BA_SAK_API_URL: http://localhost:8086/api
+STS_URL: "dummy"
+PDL_URL: "dummy"
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw

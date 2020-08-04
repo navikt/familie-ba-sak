@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
@@ -58,7 +59,7 @@ class StegServiceTest(
         private val fagsakService: FagsakService,
 
         @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient,
+        private val mockPersonopplysningerService: PersonopplysningerService,
 
         @Autowired
         private val behandlingResultatService: BehandlingResultatService,
@@ -81,7 +82,7 @@ class StegServiceTest(
         val annenPartIdent = randomFnr()
         val barnFnr = randomFnr()
 
-        mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -238,7 +239,7 @@ class StegServiceTest(
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
-        mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -261,7 +262,7 @@ class StegServiceTest(
         val annenPartIdent = randomFnr()
         val barnFnr = randomFnr()
 
-        mockHentPersoninfoForMedIdenter(mockIntegrasjonClient, søkerFnr, barnFnr)
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
 
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
