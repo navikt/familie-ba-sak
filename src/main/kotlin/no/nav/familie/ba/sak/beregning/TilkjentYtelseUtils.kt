@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
@@ -30,13 +31,13 @@ object TilkjentYtelseUtils {
         val søkerMap = personopplysningGrunnlag.søker
                 .associateBy { it.personIdent.ident }
 
-        val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater(brukMåned = true).filter {
+        val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater(brukMåned = false).filter {
             søkerMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.SØKER,
                     sakType
             )
         }
-        val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater(brukMåned = true).filter {
+        val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater(brukMåned = false).filter {
             identBarnMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.BARN,
                     sakType
@@ -56,17 +57,17 @@ object TilkjentYtelseUtils {
                             .flatMap { overlappendePerioderesultatSøker ->
                                 val person = identBarnMap[periodeResultatBarn.personIdent]
                                              ?: error("Finner ikke barn på map over barna i behandlingen")
-                                val stønadFom =
+                                val oppfyltFom =
                                         maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
-                                val stønadTom =
+                                val oppfyltTom =
                                         minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
-                                val stønadTomKommerFra18ÅrsVilkår =
-                                        stønadTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
+                                val oppfyltTomKommerFra18ÅrsVilkår =
+                                        oppfyltTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
                                 val beløpsperioder = SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
-                                        stønadFraOgMed = settRiktigStønadFom(stønadFom),
-                                        stønadTilOgMed = settRiktigStønadTom(stønadTomKommerFra18ÅrsVilkår,
-                                                                             stønadTom)
+                                        stønadFraOgMed = settRiktigStønadFom(oppfyltFom),
+                                        stønadTilOgMed = settRiktigStønadTom(oppfyltTomKommerFra18ÅrsVilkår,
+                                                                             oppfyltTom)
                                 )
 
                                 beløpsperioder.map { beløpsperiode ->
@@ -89,13 +90,13 @@ object TilkjentYtelseUtils {
     }
 
     private fun settRiktigStønadFom(fraOgMed: LocalDate): YearMonth =
-            YearMonth.from(fraOgMed.plusMonths(1))
+            YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
 
     private fun settRiktigStønadTom(erBarnetrygdTil18ÅrsDag: Boolean, tilOgMed: LocalDate): YearMonth {
         return if (erBarnetrygdTil18ÅrsDag)
-            YearMonth.from(tilOgMed.minusMonths(1))
+            YearMonth.from(tilOgMed.minusMonths(1).sisteDagIMåned())
         else
-            YearMonth.from(tilOgMed)
+            YearMonth.from(tilOgMed.sisteDagIMåned())
     }
 
     fun hentBeregningOversikt(tilkjentYtelseForBehandling: TilkjentYtelse, personopplysningGrunnlag: PersonopplysningGrunnlag)
