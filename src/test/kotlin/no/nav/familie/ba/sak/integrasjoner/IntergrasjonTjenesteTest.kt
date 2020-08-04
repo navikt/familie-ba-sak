@@ -50,9 +50,6 @@ class IntergrasjonTjenesteTest {
     @Qualifier("integrasjonClient")
     lateinit var integrasjonClient: IntegrasjonClient
 
-    @Autowired
-    lateinit var personopplysningerService: PersonopplysningerService
-
     @AfterEach
     fun cleanUp() {
         MDC.clear()

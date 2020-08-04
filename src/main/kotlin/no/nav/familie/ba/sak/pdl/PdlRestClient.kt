@@ -7,7 +7,6 @@ import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
-import org.apache.commons.logging.LogFactory
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -39,7 +38,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                                                 pdlPersonRequest,
                                                                 httpHeaders(tema))
             if (!response.harFeil()) {
-                val personInfo = Result.runCatching {
+                return Result.runCatching {
                     val familierelasjoner: Set<Familierelasjon> =
                             when (personInfoQuery) {
                                 PersonInfoQuery.ENKEL -> emptySet()
@@ -68,7 +67,6 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                                        throwable = it)
                         }
                 )
-                return personInfo
             } else {
                 throw Feil(message = "Feil ved oppslag på person: ${response.errorMessages()}",
                            frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response.errorMessages()}",
