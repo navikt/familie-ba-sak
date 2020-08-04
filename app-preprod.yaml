@@ -23,6 +23,9 @@ spec:
     path: /internal/prometheus
   vault:
     enabled: true
+    paths:
+      - kvPath: /serviceuser/prod/srvfamilie-ba-sak
+        mountPath: /var/run/secrets/srvfamilie-ba-sak
   replicas:
     min: 2
     max: 2
@@ -43,3 +46,5 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: preprod
+    - name: SRVUSER_BA_SAK_SECRET
+      value: /run/secrets/srvfamilie-ba-sak/password
