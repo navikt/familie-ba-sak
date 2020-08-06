@@ -34,8 +34,7 @@ class IverksettMotOppdrag(private val økonomiService: ØkonomiService,
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: IverksettingTaskDTO): StegType {
-        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(data.behandlingsId,
-                                                               data.vedtaksId,
+        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(data.vedtaksId,
                                                                data.saksbehandlerId)
 
         return hentNesteStegForNormalFlyt(behandling)

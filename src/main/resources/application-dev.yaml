@@ -80,6 +80,10 @@ spring:
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://localhost:8092/api
 FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://localhost:8093
+STS_URL: "dummy"
+PDL_URL: "dummy"
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw
 
 #Unleash
 UNLEASH_API_URL: http://localhost

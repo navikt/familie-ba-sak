@@ -21,6 +21,7 @@ class JacksonJsonConfig {
             OM.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
             OM.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
             OM.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            OM.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
             OM.setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY)
             OM.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             OM.registerModule(JavaTimeModule())

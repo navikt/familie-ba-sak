@@ -11,21 +11,20 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.domene.IdentInformasjon
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
 import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
 import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentResponse
-import no.nav.familie.kontrakter.felles.arkivering.Dokument
-import no.nav.familie.kontrakter.felles.arkivering.FilType
+import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
+import no.nav.familie.kontrakter.felles.dokarkiv.FilType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
-import no.nav.familie.kontrakter.felles.personinfo.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -74,19 +73,6 @@ class IntergrasjonTjenesteTest {
                        .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("opprettOppgave"))
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
                        .withRequestBody(equalToJson(objectMapper.writeValueAsString(request))))
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Hent indenter skal returnere liste av identer`() {
-        stubFor(post("/api/personopplysning/identer/BAR/historikk").willReturn(
-                okJson(objectMapper.writeValueAsString(success(listOf(IdentInformasjon("1234", false, "AKTORID")))))))
-
-        val identerResponse = integrasjonClient.hentIdenter(Ident("12345678910"))
-
-        assertThat(identerResponse.first().ident).isEqualTo("1234")
-        verify(anyRequestedFor(anyUrl())
-                       .withRequestBody(equalTo("{\"ident\":\"12345678910\"}")))
     }
 
     @Test
@@ -280,39 +266,6 @@ class IntergrasjonTjenesteTest {
         verify(getRequestedFor(urlEqualTo("/api/journalpost?journalpostId=$journalpostId")))
     }
 
-
-    @Test
-    @Tag("integration")
-    fun `hentPerson returnerer OK`() {
-        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(
-                okJson(objectMapper.writeValueAsString(success(Personinfo(fødselsdato = LocalDate.now()))))))
-
-        val personinfo = integrasjonClient.hentPersoninfoFor("12")
-        assertThat(personinfo.fødselsdato).isEqualTo(LocalDate.now())
-
-        verify(getRequestedFor(urlEqualTo("/api/personopplysning/v1/info/BAR"))
-                       .withHeader("Nav-Personident", equalTo("12")))
-    }
-
-    @Test
-    @Tag("integration")
-    fun `hentPerson ikke funnet`() {
-        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(aResponse().withStatus(404)))
-
-        assertThrows<HttpClientErrorException> {
-            integrasjonClient.hentPersoninfoFor("12345678910")
-        }
-    }
-
-    @Test
-    @Tag("integration")
-    fun `hentPerson feil`() {
-        stubFor(get(urlMatching("/api/personopplysning/v1/info/BAR")).willReturn(aResponse().withStatus(400)))
-
-        assertThrows<IntegrasjonException> {
-            integrasjonClient.hentPersoninfoFor("12345678910")
-        }
-    }
 
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> {
         return success(ArkiverDokumentResponse(mockJournalpostForVedtakId, true))

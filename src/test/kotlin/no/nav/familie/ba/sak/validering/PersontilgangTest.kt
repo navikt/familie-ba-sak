@@ -5,8 +5,8 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.restDomene.RestFamilierelasjon
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
+import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -54,18 +54,18 @@ class PersontilgangTest {
     private fun restPersonInfo(): RestPersonInfo {
         val familierelasjoner = listOf(
                 RestFamilierelasjon(personIdent = "123",
-                                                                                                   navn = "",
-                                                                                                   relasjonRolle = FAMILIERELASJONSROLLE.BARN,
-                                                                                                   fødselsdato = null),
+                                    navn = "",
+                                    relasjonRolle = FAMILIERELASJONSROLLE.BARN,
+                                    fødselsdato = null),
                 RestFamilierelasjon(personIdent = "456",
-                                                                                                   navn = "",
-                                                                                                   relasjonRolle = FAMILIERELASJONSROLLE.BARN,
-                                                                                                   fødselsdato = null)
+                                    navn = "",
+                                    relasjonRolle = FAMILIERELASJONSROLLE.BARN,
+                                    fødselsdato = null)
         )
         return RestPersonInfo(personIdent = "789",
-                                                                                             navn = "",
-                                                                                             kjønn = null,
-                                                                                             fødselsdato = LocalDate.now(),
-                                                                                             familierelasjoner = familierelasjoner)
+                              navn = "",
+                              kjønn = null,
+                              fødselsdato = LocalDate.now(),
+                              familierelasjoner = familierelasjoner)
     }
 }

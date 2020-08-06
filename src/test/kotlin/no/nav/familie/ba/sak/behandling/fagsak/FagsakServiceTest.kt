@@ -13,10 +13,11 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
-import no.nav.familie.ba.sak.integrasjoner.domene.Personident
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.pdl.internal.Personident
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,6 +41,9 @@ class FagsakServiceTest(
 
         @Autowired
         private val integrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val personopplysningerService: PersonopplysningerService,
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService
@@ -79,40 +83,40 @@ class FagsakServiceTest(
         val barn3Fnr = randomFnr()
 
         every {
-            integrasjonClient.hentPersoninfoFor(eq(barn1Fnr))
-        } returns Personinfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "barn1")
+            personopplysningerService.hentPersoninfoFor(eq(barn1Fnr))
+        } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "barn1")
 
         every {
-            integrasjonClient.hentPersoninfoFor(eq(barn2Fnr))
-        } returns Personinfo(fødselsdato = LocalDate.of(2019, 5, 1),
+            personopplysningerService.hentPersoninfoFor(eq(barn2Fnr))
+        } returns PersonInfo(fødselsdato = LocalDate.of(2019, 5, 1),
                              kjønn = Kjønn.MANN,
                              navn = "barn2"
                              ,
-                             familierelasjoner = setOf(Familierelasjoner(Personident(søker1Fnr),
-                                                                         FAMILIERELASJONSROLLE.MEDMOR,
-                                                                         "søker1",
-                                                                         LocalDate.of(1990, 2, 19))
+                             familierelasjoner = setOf(Familierelasjon(Personident(søker1Fnr),
+                                                                       FAMILIERELASJONSROLLE.MEDMOR,
+                                                                       "søker1",
+                                                                       LocalDate.of(1990, 2, 19))
                                                        ,
-                                                       Familierelasjoner(Personident(søker3Fnr),
+                                                       Familierelasjon(Personident(søker3Fnr),
                                                                          FAMILIERELASJONSROLLE.MEDMOR,
                                                                          "søker3",
                                                                          LocalDate.of(1990, 1, 10))))
 
         every {
-            integrasjonClient.hentPersoninfoFor(eq(barn3Fnr))
-        } returns Personinfo(fødselsdato = LocalDate.of(2017, 3, 1), kjønn = Kjønn.KVINNE, navn = "barn3")
+            personopplysningerService.hentPersoninfoFor(eq(barn3Fnr))
+        } returns PersonInfo(fødselsdato = LocalDate.of(2017, 3, 1), kjønn = Kjønn.KVINNE, navn = "barn3")
 
         every {
-            integrasjonClient.hentPersoninfoFor(eq(søker1Fnr))
-        } returns Personinfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+            personopplysningerService.hentPersoninfoFor(eq(søker1Fnr))
+        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            integrasjonClient.hentPersoninfoFor(eq(søker2Fnr))
-        } returns Personinfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
+            personopplysningerService.hentPersoninfoFor(eq(søker2Fnr))
+        } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
 
         every {
-            integrasjonClient.hentPersoninfoFor(eq(søker3Fnr))
-        } returns Personinfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3")
+            personopplysningerService.hentPersoninfoFor(eq(søker3Fnr))
+        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3")
 
         val fagsak0 = fagsakService.hentEllerOpprettFagsak(FagsakRequest(
                 søker1Fnr

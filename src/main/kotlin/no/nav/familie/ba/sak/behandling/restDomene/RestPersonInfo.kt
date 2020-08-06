@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.integrasjoner.domene.FAMILIERELASJONSROLLE
-import no.nav.familie.ba.sak.integrasjoner.domene.Familierelasjoner
-import no.nav.familie.ba.sak.integrasjoner.domene.Personinfo
+import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
+import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
+import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import java.time.LocalDate
 
 data class RestPersonInfo(
@@ -21,14 +21,14 @@ data class RestFamilierelasjon(
         val fødselsdato: LocalDate?
 )
 
-fun Familierelasjoner.toRestFamilieRelasjon() = RestFamilierelasjon(
+fun Familierelasjon.toRestFamilieRelasjon() = RestFamilierelasjon(
         personIdent = this.personIdent.id,
         relasjonRolle = this.relasjonsrolle,
         navn = this.navn ?: "",
         fødselsdato = this.fødselsdato
 )
 
-fun Personinfo.toRestPersonInfo(personIdent: String) = RestPersonInfo(
+fun PersonInfo.toRestPersonInfo(personIdent: String) = RestPersonInfo(
         personIdent = personIdent,
         fødselsdato = this.fødselsdato,
         navn = this.navn,

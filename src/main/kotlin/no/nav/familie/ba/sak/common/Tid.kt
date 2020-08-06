@@ -81,4 +81,13 @@ fun RestVilkårResultat.toPeriode(): Periode {
             tom = this.periodeTom ?: TIDENES_ENDE)
 }
 
+fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
+    return when {
+        fom == null && tom == null -> true
+        fom == null -> dato.isSameOrBefore(tom!!)
+        tom == null -> dato.isSameOrAfter(fom)
+        else -> dato.isSameOrAfter(fom) && dato.isSameOrBefore(tom)
+    }
+}
+
 

@@ -3,11 +3,14 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
+import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -19,36 +22,58 @@ class ØkonomiService(
         private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService,
-        private val beregningService: BeregningService
+        private val beregningService: BeregningService,
+        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
 ) {
 
-    fun oppdaterTilkjentYtelseOgIverksettVedtak(behandlingsId: Long, vedtakId: Long, saksbehandlerId: String) {
+    fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId: Long, saksbehandlerId: String) {
         val vedtak = vedtakService.hent(vedtakId)
+
+        val oppdatertBehandling = vedtak.behandling
+        val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
+        val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
+
         val behandlingResultatType =
-                if (vedtak.behandling.type == BehandlingType.TEKNISK_OPPHØR
-                    || vedtak.behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
+                if (oppdatertBehandling.type == BehandlingType.TEKNISK_OPPHØR
+                    || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
                     BehandlingResultatType.OPPHØRT
-                else behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+                else {
+                    // TODO: Midlertidig fiks før støtte for delvis innvilget
+                    midlertidigUtledBehandlingResultatType(
+                            hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(
+                                    behandlingId = oppdatertBehandling.id))
+                    //behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
+                }
 
-        val andelerTilkjentYtelse = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) {
-            val forrigeVedtak = vedtakService.hent(vedtak.forrigeVedtakId!!)
-            beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeVedtak.behandling.id)
-        } else beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingsId)
+        val erFørsteIverksatteBehandlingPåFagsak =
+                beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
 
-        val erFørsteBehandlingPåFagsak = behandlingService.hentBehandlinger(vedtak.behandling.fagsak.id).size == 1
+        val utbetalingsoppdrag: Utbetalingsoppdrag =
+                if (erFørsteIverksatteBehandlingPåFagsak) {
+                    utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                            saksbehandlerId,
+                            vedtak,
+                            behandlingResultatType,
+                            erFørsteIverksatteBehandlingPåFagsak,
+                            oppdaterteKjeder = oppdaterteKjeder)
+                } else {
+                    val forrigeBehandling = vedtakService.hent(vedtak.forrigeVedtakId!!).behandling
+                    val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
+                    // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
+                    val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(
-                saksbehandlerId,
-                vedtak,
-                behandlingResultatType,
-                erFørsteBehandlingPåFagsak,
-                andelerTilkjentYtelse
-        )
+                    utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                            saksbehandlerId,
+                            vedtak,
+                            behandlingResultatType,
+                            erFørsteIverksatteBehandlingPåFagsak,
+                            forrigeKjeder = forrigeKjeder,
+                            oppdaterteKjeder = oppdaterteKjeder)
+                }
 
-        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(vedtak.behandling, utbetalingsoppdrag)
-        iverksettOppdrag(vedtak.behandling.id, utbetalingsoppdrag)
+        beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
+        iverksettOppdrag(oppdatertBehandling.id, utbetalingsoppdrag)
     }
-
 
     private fun iverksettOppdrag(behandlingsId: Long,
                                  utbetalingsoppdrag: Utbetalingsoppdrag) {
@@ -70,7 +95,6 @@ class ØkonomiService(
                 .fold(
                         onSuccess = {
                             assertGenerelleSuksessKriterier(it.body)
-
                             return it.body?.data!!
                         },
                         onFailure = {
@@ -78,5 +102,5 @@ class ØkonomiService(
                         }
                 )
     }
-
 }
+

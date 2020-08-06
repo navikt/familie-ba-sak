@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.kontrakter.felles.personinfo.OPPHOLDSTILLATELSE
+import no.nav.familie.ba.sak.common.erInnenfor
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import java.time.LocalDate
 import javax.persistence.*
 
 @Entity(name = "GrOpphold")
@@ -26,6 +28,11 @@ data class GrOpphold(
         @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
         val person: Person
 ) : BaseEntitet() {
+
+    fun gjeldendeNå(): Boolean {
+        if (gyldigPeriode == null) return true
+        return gyldigPeriode.erInnenfor(LocalDate.now())
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -55,10 +55,12 @@ class StegService(
 
     @Transactional
     fun håndterNyBehandlingFraHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.søkersIdent)
+        val ident = nyBehandling.morsIdent
+                    ?: (nyBehandling.søkersIdent ?: error("Fant ingen gyldig ident på mor/søker"))
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(ident)
 
         val behandling = behandlingService.opprettBehandling(NyBehandling(
-                søkersIdent = nyBehandling.søkersIdent,
+                søkersIdent = ident,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -68,7 +70,7 @@ class StegService(
         loggService.opprettFødselshendelseLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
-                                     RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                     RegistrerPersongrunnlagDTO(ident = ident,
                                                                 barnasIdenter = nyBehandling.barnasIdenter,
                                                                 bekreftEndringerViaFrontend = true))
     }

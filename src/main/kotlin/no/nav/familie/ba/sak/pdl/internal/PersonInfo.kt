@@ -1,29 +1,27 @@
-package no.nav.familie.ba.sak.integrasjoner.domene
+package no.nav.familie.ba.sak.pdl.internal
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.kontrakter.felles.personinfo.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personinfo.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.LocalDate
 
-@JsonIgnoreProperties
-data class Personinfo(
-        var fødselsdato: LocalDate,
-        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
+data class PersonInfo(
+        val fødselsdato: LocalDate,
         val navn: String? = null,
         @JsonDeserialize(using = KjonnDeserializer::class)
         val kjønn: Kjønn? = null,
-        val familierelasjoner: Set<Familierelasjoner> = emptySet(),
+        val familierelasjoner: Set<Familierelasjon> = emptySet(),
+        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         val bostedsadresse: Bostedsadresse? = null,
         val sivilstand: SIVILSTAND? = null
 )
 
-data class Familierelasjoner(
+data class Familierelasjon(
         val personIdent: Personident,
         val relasjonsrolle: FAMILIERELASJONSROLLE,
         val navn: String? = null,
@@ -34,25 +32,10 @@ data class Personident(
         val id: String
 )
 
-enum class ADRESSEBESKYTTELSEGRADERING {
-    STRENGT_FORTROLIG_UTLAND, // Kode 19
-    FORTROLIG, // Kode 7
-    STRENGT_FORTROLIG, // Kode 6
-    UGRADERT
-}
-
-data class IdentInformasjon(val ident: String,
-                            val historisk: Boolean,
-                            val gruppe: String)
-
-enum class FAMILIERELASJONSROLLE { BARN, FAR, MEDMOR, MOR }
-
-
 data class DødsfallData(val erDød: Boolean,
-                            val dødsdato: String?)
+                        val dødsdato: String?)
 
 data class VergeData(val harVerge: Boolean)
-
 
 class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
     override fun deserialize(jp: JsonParser?, p1: DeserializationContext?): Kjønn {
@@ -64,3 +47,4 @@ class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
         }
     }
 }
+

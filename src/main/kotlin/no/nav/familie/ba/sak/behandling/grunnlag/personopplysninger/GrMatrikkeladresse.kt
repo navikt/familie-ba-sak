@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
-import no.nav.familie.kontrakter.felles.personinfo.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.DiscriminatorValue

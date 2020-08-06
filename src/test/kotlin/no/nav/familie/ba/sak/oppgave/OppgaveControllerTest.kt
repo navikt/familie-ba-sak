@@ -7,6 +7,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Tema
@@ -22,14 +23,16 @@ class OppgaveControllerTest {
     lateinit var oppgaveService: OppgaveService
 
     @MockK
+    lateinit var personopplysningerService: PersonopplysningerService
+
+    @MockK
+    lateinit var integrasjonClient: IntegrasjonClient
+
+    @MockK
     lateinit var fagsakService: FagsakService
 
     @InjectMockKs
     lateinit var oppgaveController: OppgaveController
-
-    // Trengs for autowiring av oppgave service
-    @MockK
-    lateinit var integrasjonClient: IntegrasjonClient
 
     @Test
     fun `Tildeling av oppgave til saksbehandler skal returnere OK og sende med OppgaveId i respons`() {

@@ -5,12 +5,13 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
-import no.nav.familie.kontrakter.felles.personinfo.Ident
-import no.nav.familie.kontrakter.felles.personinfo.Statsborgerskap
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,18 +31,21 @@ internal class StatsborgerskapServiceTest {
     val TOM_9999 = LocalDate.of(9999, Month.DECEMBER, 31)
 
     private val integrasjonClient = mockk<IntegrasjonClient>()
+
+    private val personopplysningerService= mockk<PersonopplysningerService>()
+
     private lateinit var statsborgerskapService: StatsborgerskapService
 
     @BeforeEach
     fun setUp() {
-        statsborgerskapService = StatsborgerskapService(integrasjonClient)
+        statsborgerskapService = StatsborgerskapService(integrasjonClient, personopplysningerService)
         initEuKodeverk()
     }
 
     @Test
     fun `Sjekk dobbel statsborgerskap for Tredjeland, EØS og NORDEN`() {
 
-        every { integrasjonClient.hentStatsborgerskap(Ident("0011")) }.returns(
+        every { personopplysningerService.hentStatsborgerskap(Ident("0011")) }.returns(
                 listOf(
                         Statsborgerskap("POL",
                                         gyldigFraOgMed = FOM_1990,
@@ -62,7 +66,7 @@ internal class StatsborgerskapServiceTest {
 
     @Test
     fun `Sjekk statsborgerskap perioder for Norden og ukjent`() {
-        every { integrasjonClient.hentStatsborgerskap(Ident("0011")) }.returns(
+        every { personopplysningerService.hentStatsborgerskap(Ident("0011")) }.returns(
                 listOf(
                         Statsborgerskap("XUK",
                                         gyldigFraOgMed = FOM_1990,
@@ -83,7 +87,7 @@ internal class StatsborgerskapServiceTest {
     @Test
     fun `Sjekk statsborgerskap perioder for exit eøs`() {
 
-        every { integrasjonClient.hentStatsborgerskap(Ident("0011")) }.returns(
+        every { personopplysningerService.hentStatsborgerskap(Ident("0011")) }.returns(
                 listOf(
                         Statsborgerskap("GBR",
                                         gyldigFraOgMed = FOM_1990,
@@ -101,7 +105,7 @@ internal class StatsborgerskapServiceTest {
     @Test
     fun `Sjekk statsborgerskap med gyldig fra dato null`() {
 
-        every { integrasjonClient.hentStatsborgerskap(Ident("0011")) }.returns(
+        every { personopplysningerService.hentStatsborgerskap(Ident("0011")) }.returns(
                 listOf(
                         Statsborgerskap("GBR",
                                         gyldigFraOgMed = null,
@@ -119,7 +123,7 @@ internal class StatsborgerskapServiceTest {
     @Test
     fun `Sjekk statsborgerskap med EU-medlemskap`() {
 
-        every { integrasjonClient.hentStatsborgerskap(Ident("0011")) }.returns(
+        every { personopplysningerService.hentStatsborgerskap(Ident("0011")) }.returns(
                 listOf(
                         Statsborgerskap("DEU",
                                         gyldigFraOgMed = null,

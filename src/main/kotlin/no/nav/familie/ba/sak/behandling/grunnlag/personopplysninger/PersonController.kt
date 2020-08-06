@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.behandling.restDomene.toRestPersonInfo
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/person")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class PersonController(private val integrasjonClient: IntegrasjonClient) {
+class PersonController(private val personopplysningerService: PersonopplysningerService) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -28,7 +29,7 @@ class PersonController(private val integrasjonClient: IntegrasjonClient) {
     @PersontilgangConstraint
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         return Result.runCatching {
-            integrasjonClient.hentPersoninfoFor(personIdent)
+            personopplysningerService.hentPersoninfoFor(personIdent)
         }
                 .fold(
                         onFailure = {
