@@ -68,6 +68,10 @@ class VedtakController(
         val behandling = behandlingService.hentAktivForFagsak(fagsakId)
                          ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
 
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+        vedtak!!.vedtaksdato = LocalDate.now()
+        vedtakService.lagreEllerOppdater(vedtak!!)
+
         return Result.runCatching { stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak) }
                 .fold(
                         onSuccess = {
