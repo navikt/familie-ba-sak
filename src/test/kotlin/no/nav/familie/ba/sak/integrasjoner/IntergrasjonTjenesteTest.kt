@@ -10,10 +10,9 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_DO
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
-import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.domene.*
 import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
 import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
-import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -24,7 +23,6 @@ import no.nav.familie.kontrakter.felles.dokarkiv.FilType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -36,8 +34,8 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
+import kotlin.random.Random
 
 
 @SpringBootTest(classes = [ApplicationConfig::class], properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
@@ -264,6 +262,41 @@ class IntergrasjonTjenesteTest {
         assertThat(oppgave.data?.bruker?.id).isEqualTo(fnr)
 
         verify(getRequestedFor(urlEqualTo("/api/journalpost?journalpostId=$journalpostId")))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `skal hente arbeidsforhold for person`() {
+        val fnr = randomFnr()
+
+        var arbeidsforhold = listOf(Arbeidsforhold(
+                navArbeidsforholdId = Random.nextLong(),
+                arbeidstaker = Arbeidstaker("Person", fnr),
+                arbeidsgiver = Arbeidsgiver("Organisasjon", "998877665"),
+                ansettelsesperiode = Ansettelsesperiode(Periode(fom = LocalDate.now().minusYears(1)))
+        ))
+
+        stubFor(post("/api/aareg/arbeidsforhold").willReturn(okJson(objectMapper.writeValueAsString(success(arbeidsforhold)))))
+
+        val response = integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now())
+
+        assertThat(response).hasSize(1)
+        assertThat(response.first().arbeidstaker?.offentligIdent).isEqualTo(fnr)
+        assertThat(response.first().arbeidsgiver?.organisasjonsnummer).isEqualTo("998877665")
+        assertThat(response.first().ansettelsesperiode?.periode?.fom).isEqualTo(LocalDate.now().minusYears(1))
+    }
+
+    @Test
+    @Tag("integration")
+    fun `skal kaste integrasjonsfeil mot arbeidsforhold`() {
+        val fnr = randomFnr()
+
+        stubFor(post("/api/aareg/arbeidsforhold").willReturn(status(500)))
+
+        assertThatThrownBy {
+            integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now())
+        }.isInstanceOf(IntegrasjonException::class.java)
+                .hasMessageContaining("Kall mot integrasjon feilet ved henting av arbeidsforhold.")
     }
 
 
