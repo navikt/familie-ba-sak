@@ -1,6 +1,7 @@
-package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
+package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import javax.persistence.*
@@ -19,10 +20,10 @@ data class GrArbeidsforhold(
         val periode: DatoIntervallEntitet? = null,
 
         @Column(name = "arbeidsgiver_id")
-        val arbeidsgiverId: String,
+        val arbeidsgiverId: String?,
 
         @Column(name = "arbeidsgiver_type")
-        val arbeidsgiverType: String,
+        val arbeidsgiverType: String?,
 
         @JsonIgnore
         @ManyToOne(optional = false)
