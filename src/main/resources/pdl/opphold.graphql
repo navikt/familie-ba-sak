@@ -1,0 +1,11 @@
+query($ident: ID!) {
+    person: hentPerson(ident: $ident) {
+        opphold {
+            type
+            oppholdFra
+            oppholdTil
+            folkeregistermetadata
+            metadata
+        }
+    }
+}
