@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -24,6 +25,8 @@ class BehandleFødselshendelseTask(
             stegService.regelkjørBehandling(behandleFødselshendelseTaskDTO.nyBehandling)
         } catch (e: KontrollertRollbackException) {
             LOG.info("Rollback utført. Data ikke persistert.")
+        } catch (e: Feil) {
+            LOG.warn("BehandleFødselshendelseTask kastet feil ${e.frontendFeilmelding}")
         }
     }
 
