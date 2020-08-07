@@ -269,10 +269,10 @@ class IntergrasjonTjenesteTest {
     fun `skal hente arbeidsforhold for person`() {
         val fnr = randomFnr()
 
-        var arbeidsforhold = listOf(Arbeidsforhold(
+        val arbeidsforhold = listOf(Arbeidsforhold(
                 navArbeidsforholdId = Random.nextLong(),
                 arbeidstaker = Arbeidstaker("Person", fnr),
-                arbeidsgiver = Arbeidsgiver("Organisasjon", "998877665"),
+                arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "998877665"),
                 ansettelsesperiode = Ansettelsesperiode(Periode(fom = LocalDate.now().minusYears(1)))
         ))
 
