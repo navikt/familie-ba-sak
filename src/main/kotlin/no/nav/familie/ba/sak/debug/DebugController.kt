@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.debug
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.pdl.PdlRestClient
 import no.nav.familie.ba.sak.pdl.PersonInfoQuery
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PdlHentIdenterResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequest
 import no.nav.familie.ba.sak.pdl.internal.PdlPersonRequestVariables
 import no.nav.familie.http.util.UriUtil
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
 import org.apache.commons.lang3.StringUtils
@@ -25,23 +28,29 @@ import java.net.URI
 @RequestMapping("/debug")
 @Unprotected
 class DebugController(
-        @Qualifier("sts") val restTemplate: RestOperations
+        @Qualifier("sts") val restTemplate: RestOperations,
+        val personopplysningerService: PersonopplysningerService
 ) {
 
     @GetMapping("version")
-    fun version(): String{
+    fun version(): String {
         return "debug v-1"
     }
 
     @GetMapping("invoke")
-    fun invoke(): String{
-        val hentIdenterQuery= StringUtils.normalizeSpace(PersonInfoQuery::class.java.getResource("/pdl/hentIdenter.graphql").readText().replace("\n", ""))
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables("01101800033"),
-                                                query = hentIdenterQuery)
-        LOG.info("Post http://familie-mock-server:1337/rest/api/pdl/graphql")
-        val response= restTemplate.postForEntity<PdlHentIdenterResponse>("http://familie-mock-server:1337/rest/api/pdl/graphql", pdlPersonRequest, PdlHentIdenterResponse::class.java, httpHeaders("BAR"))
-        LOG.info("Response ${response.statusCode} ${response.toString()}")
-        return response.toString()
+    fun invoke(): String? {
+        LOG.info(personopplysningerService.toString())
+        LOG.info(personopplysningerService.pdlRestClient.toString())
+        val residencePermit = Result.runCatching {
+            val personInfo = personopplysningerService.hentPersoninfoFor("17128822658")
+            val objectMapper = ObjectMapper()
+            "${objectMapper.writeValueAsString(personInfo)} ${objectMapper.writeValueAsString(personopplysningerService.hentOpphold(
+                    "17128822658"))}"
+        }.fold(
+                onSuccess = { it },
+                onFailure = { it.message }
+        )
+        return residencePermit
     }
 
     private fun httpHeaders(tema: String): HttpHeaders {
