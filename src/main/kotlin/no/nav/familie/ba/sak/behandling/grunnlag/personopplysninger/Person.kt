@@ -64,7 +64,12 @@ data class Person(
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
-        var opphold: List<GrOpphold>? = null
+        var opphold: List<GrOpphold>? = null,
+
+        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
+        @Fetch(value = FetchMode.SUBSELECT)
+        var arbeidsforhold: List<GrArbeidsforhold>? = null
 ) : BaseEntitet() {
 
     override fun toString(): String {

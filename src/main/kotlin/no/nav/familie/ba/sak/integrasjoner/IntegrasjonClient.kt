@@ -4,14 +4,16 @@ import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
-import no.nav.familie.ba.sak.integrasjoner.domene.*
+import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
+import no.nav.familie.ba.sak.integrasjoner.domene.ArbeidsforholdRequest
+import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
 import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -26,24 +28,22 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.log.NavHttpHeaders
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
+import java.time.LocalDate
 
 @Component
 class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
@@ -103,6 +103,26 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                                         uri)
         } catch (e: RestClientException) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri)
+        }
+    }
+
+
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    fun hentArbeidsforhold(ident: String, ansettelsesperiodeFom: LocalDate): List<Arbeidsforhold> {
+
+        val uri = UriComponentsBuilder.fromUri(integrasjonUri)
+                .pathSegment("aareg", "arbeidsforhold")
+                .build().toUri()
+
+        return try {
+            val response = postForEntity<Ressurs<List<Arbeidsforhold>>>(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom))
+            response.getDataOrThrow()
+        } catch (e: RestClientException) {
+            var feilmelding = "Kall mot integrasjon feilet ved henting av arbeidsforhold."
+            if (e is HttpStatusCodeException && e.responseBodyAsString.isNotEmpty()) {
+                feilmelding += " body=${e.responseBodyAsString}"
+            }
+            throw IntegrasjonException(feilmelding, e, uri, ident)
         }
     }
 
