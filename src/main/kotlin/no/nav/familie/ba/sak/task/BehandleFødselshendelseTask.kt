@@ -9,6 +9,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
@@ -26,7 +27,7 @@ class BehandleFødselshendelseTask(
         } catch (e: KontrollertRollbackException) {
             LOG.info("Rollback utført. Data ikke persistert.")
         } catch (e: Feil) {
-            LOG.warn("BehandleFødselshendelseTask kastet feil ${e.frontendFeilmelding}")
+            LOG.info("FødselshendelseTask kjørte med Feil=${e.frontendFeilmelding}")
         }
     }
 
@@ -37,7 +38,10 @@ class BehandleFødselshendelseTask(
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO)
+                    payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
+                    properties = Properties().apply {
+                        this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
+                    }
             )
         }
     }
