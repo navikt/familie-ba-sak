@@ -20,7 +20,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("dev")
 @Tag("integration")
-@Disabled
 class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
                                       @Autowired private val featureToggleService: FeatureToggleService,
                                       @Autowired private val fagsakRepository: FagsakRepository,
