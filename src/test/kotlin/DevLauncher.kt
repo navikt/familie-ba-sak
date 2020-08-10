@@ -10,7 +10,8 @@ object DevLauncher {
                           "mock-iverksett",
                           "mock-infotrygd-feed",
                           "mock-infotrygd-barnetrygd",
-                          "mock-sts"
+                          "mock-sts",
+                          "mock-pdl"
                 )
         app.run(*args)
     }
