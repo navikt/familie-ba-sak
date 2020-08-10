@@ -39,12 +39,6 @@ class StatsborgerskapService(
                 hentStatsborgerskapMedMedlemskap(statsborgerskap, person)
             }.sortedWith(fomComparator)
 
-    fun hentOpphold(person: Person): List<GrOpphold> =
-            personopplysningerService.hentOpphold(person.personIdent.ident).map { GrOpphold(gyldigPeriode = DatoIntervallEntitet(fom = it.oppholdFra,
-                                                                                                                    tom = it.oppholdTil),
-            type = it.type,
-            person = person)}
-
     private fun hentStatsborgerskapMedMedlemskap(statsborgerskap: Statsborgerskap, person: Person): List<GrStatsborgerskap> {
         if (statsborgerskap.iNordiskLand()) {
             return listOf(GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(fom = statsborgerskap.gyldigFraOgMed,

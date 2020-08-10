@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -18,6 +19,7 @@ class PersongrunnlagService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val integrasjonClient: IntegrasjonClient,
         private val statsborgerskapService: StatsborgerskapService,
+        private val oppholdService: OppholdService,
         private val personopplysningerService: PersonopplysningerService
 ) {
 
@@ -65,7 +67,7 @@ class PersongrunnlagService(
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
         ).also {
             it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
-            it.opphold = statsborgerskapService.hentOpphold(it)
+            it.opphold = oppholdService.hentOpphold(it)
         }
 
         personopplysningGrunnlag.personer.add(søker)
@@ -90,7 +92,7 @@ class PersongrunnlagService(
                                          sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
             ).also {
                 it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(nyttBarn), it)
-                it.opphold = statsborgerskapService.hentOpphold(it)
+                it.opphold = oppholdService.hentOpphold(it)
             }
         }
     }
