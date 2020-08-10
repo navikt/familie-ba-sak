@@ -53,7 +53,7 @@ import javax.transaction.Transactional
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class BehandlingIntegrationTest {

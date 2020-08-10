@@ -33,7 +33,7 @@ import java.util.*
 class ClientMocks {
 
     @Bean
-    @Profile("!test-søk")
+    @Profile("mock-pdl")
     @Primary
     fun mockPersonopplysningerService(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
@@ -56,6 +56,14 @@ class ClientMocks {
             listOf(Statsborgerskap("NOR",
                                    LocalDate.of(1990, 1, 25),
                                    null))
+        }
+
+        every {
+            mockPersonopplysningerService.hentOpphold(any())
+        } answers {
+            listOf(Opphold(type= OPPHOLDSTILLATELSE.PERMANENT,
+                           oppholdFra =  LocalDate.of(1990, 1, 25),
+                           oppholdTil = LocalDate.of(2999, 1, 1)))
         }
 
         val identSlot = slot<Ident>()
@@ -176,7 +184,7 @@ class ClientMocks {
         return mockIntegrasjonClient
     }
 
-    @Profile("test-søk")
+    @Profile("mock-pdl-test-søk")
     @Primary
     @Bean
     fun mockPDL(): PersonopplysningerService {
@@ -226,6 +234,14 @@ class ClientMocks {
             listOf(Statsborgerskap("NOR",
                                    LocalDate.of(1990, 1, 25),
                                    null))
+        }
+
+        every {
+            mockPersonopplysningerService.hentOpphold(any())
+        } answers {
+            listOf(Opphold(type= OPPHOLDSTILLATELSE.PERMANENT,
+                           oppholdFra =  LocalDate.of(1990, 1, 25),
+                           oppholdTil = LocalDate.of(2999, 1, 1)))
         }
 
         val ukjentId = "43125678910"

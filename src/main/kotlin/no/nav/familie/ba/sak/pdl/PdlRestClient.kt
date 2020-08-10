@@ -174,7 +174,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                        throwable = e)
         }
 
-        if (!response.harFeil()) return response.data.person!!.opphold
+        if (!response.harFeil()) return response.data!!.person!!.opphold!!
         throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
                    frontendFeilmelding = "Fant ikke identer for person $ident: ${response.errorMessages()}",
                    httpStatus = HttpStatus.NOT_FOUND)

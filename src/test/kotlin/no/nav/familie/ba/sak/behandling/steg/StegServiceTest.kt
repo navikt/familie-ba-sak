@@ -40,7 +40,7 @@ import org.springframework.test.context.ActiveProfiles
 
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-iverksett")
+@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-iverksett", "mock-pdl")
 @TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired

@@ -26,7 +26,7 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("dev", "mock-pdl")
 @Tag("integration")
 @TestInstance(Lifecycle.PER_CLASS)
 class FagsakServiceTest(

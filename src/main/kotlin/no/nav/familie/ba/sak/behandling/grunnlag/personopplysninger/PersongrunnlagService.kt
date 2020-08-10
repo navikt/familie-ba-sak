@@ -63,7 +63,10 @@ class PersongrunnlagService(
                            bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
-        ).also { it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)}
+        ).also {
+            it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
+            it.opphold = statsborgerskapService.hentOpphold(it)
+        }
 
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
@@ -85,7 +88,10 @@ class PersongrunnlagService(
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                                          bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                                          sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
-            ).also { it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(nyttBarn), it)}
+            ).also {
+                it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(nyttBarn), it)
+                it.opphold = statsborgerskapService.hentOpphold(it)
+            }
         }
     }
 

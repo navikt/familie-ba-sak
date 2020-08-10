@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.pdl.internal
 
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 
-data class PdlOppholdResponse(val data: Data,
+data class PdlOppholdResponse(val data: Data?,
                                       val errors: List<PdlError>?) {
 
     fun harFeil(): Boolean {
@@ -14,5 +14,5 @@ data class PdlOppholdResponse(val data: Data,
     }
 
     class Data(val person: Person?)
-    class Person(val opphold: List<Opphold>)
+    class Person(val opphold: List<Opphold>?)
 }

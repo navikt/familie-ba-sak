@@ -4,8 +4,6 @@ query($ident: ID!) {
             type
             oppholdFra
             oppholdTil
-            folkeregistermetadata
-            metadata
         }
     }
 }
