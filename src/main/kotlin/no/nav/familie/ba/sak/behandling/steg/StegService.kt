@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
@@ -269,7 +270,7 @@ class StegService(
         }.toMap()
     }
 
-    @Transactional(noRollbackFor = [Feil::class])
+    @Transactional(noRollbackFor = [VilkårsvurderingFeil::class])
     fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
         var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
         behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling, nyBehandling.barnasIdenter[0])
