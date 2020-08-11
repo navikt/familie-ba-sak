@@ -54,8 +54,8 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
 }
 
 internal fun bosattINorge(fakta: Fakta): Evaluering =
-// En person med registrert bostedsadresse er bosatt i Norge.
-// En person som mangler registrert bostedsadresse er utflyttet.
+        // En person med registrert bostedsadresse er bosatt i Norge.
+        // En person som mangler registrert bostedsadresse er utflyttet.
         // See: https://navikt.github.io/pdl/#_utflytting
         fakta.personForVurdering.bostedsadresse
                 ?.let { Evaluering.ja("Person bosatt i Norge") }
@@ -88,7 +88,10 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
 internal fun giftEllerPartnerskap(fakta: Fakta): Evaluering =
         when (fakta.personForVurdering.sivilstand) {
             SIVILSTAND.UOPPGITT ->
-                Evaluering.kanskje("Person mangler informasjon om sivilstand.")
+                if (fakta.behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+                    Evaluering.ja("Person mangler informasjon om sivilstand.")
+                else
+                    Evaluering.kanskje("Person mangler informasjon om sivilstand.")
             SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER, SIVILSTAND.UOPPGITT ->
                 Evaluering.nei("Person er gift eller har registrert partner")
             else -> Evaluering.ja("Person er ikke gift eller har registrert partner")
