@@ -139,7 +139,7 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                        kjønn = Kjønn.KVINNE,
                        bostedsadresse = bostedsadresse,
                        sivilstand = SIVILSTAND.GIFT
-                       ).apply { statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = this)) }
+    ).apply { statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = this)) }
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
@@ -151,7 +151,9 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      navn = "",
                                                      kjønn = Kjønn.MANN,
                                                      bostedsadresse = bostedsadresse,
-                                                     sivilstand = SIVILSTAND.UGIFT))
+                                                     sivilstand = SIVILSTAND.UGIFT).apply {
+            statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = this))
+        })
     }
     return personopplysningGrunnlag
 }

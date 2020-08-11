@@ -81,7 +81,8 @@ class VilkårVurderingTest(
         assertEquals(setOf(Vilkår.UNDER_18_ÅR,
                            Vilkår.BOR_MED_SØKER,
                            Vilkår.GIFT_PARTNERSKAP,
-                           Vilkår.BOSATT_I_RIKET),
+                           Vilkår.BOSATT_I_RIKET,
+                           Vilkår.LOVLIG_OPPHOLD),
                      vilkårForNasjonal)
     }
 
@@ -168,7 +169,9 @@ class VilkårVurderingTest(
                                                      fødselsdato = LocalDate.of(1980, 1, 1), //Over 18år
                                                      navn = "",
                                                      kjønn = Kjønn.MANN,
-                                                     sivilstand = SIVILSTAND.UGIFT))
+                                                     sivilstand = SIVILSTAND.UGIFT).apply {
+            statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = this))
+        })
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
