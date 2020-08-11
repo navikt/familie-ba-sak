@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -18,6 +19,7 @@ class PersongrunnlagService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val integrasjonClient: IntegrasjonClient,
         private val statsborgerskapService: StatsborgerskapService,
+        private val arbeidsforholdService: ArbeidsforholdService,
         private val personopplysningerService: PersonopplysningerService
 ) {
 
@@ -63,7 +65,10 @@ class PersongrunnlagService(
                            bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
-        ).also { it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)}
+        ).also {
+            it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
+            it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(fødselsnummer), it)
+        }
 
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
