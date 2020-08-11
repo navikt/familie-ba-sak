@@ -23,8 +23,8 @@ data class Vedtak(
         @Column(name = "ansvarlig_enhet", nullable = true)
         var ansvarligEnhet: String? = null,
 
-        @Column(name = "vedtaksdato", nullable = false)
-        var vedtaksdato: LocalDate,
+        @Column(name = "vedtaksdato", nullable = true)
+        var vedtaksdato: LocalDate? = null,
 
         @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
         var stønadBrevMarkdown: String = "",
