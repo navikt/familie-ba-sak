@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrUkjentBosted
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
@@ -61,8 +62,9 @@ internal fun bosattINorge(fakta: Fakta): Evaluering =
         ?: Evaluering.nei("Person er ikke bosatt i Norge")
 
 internal fun lovligOpphold(fakta: Fakta): Evaluering {
-    if (fakta.personForVurdering.type == PersonType.BARN) {
-        Evaluering.kanskje("Ikke separat oppholdsvurdering for barnet ved automatisk vedtak.")
+    if (fakta.behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE &&
+        fakta.personForVurdering.type == PersonType.BARN) {
+        return Evaluering.ja("Ikke separat oppholdsvurdering for barnet ved automatisk vedtak.")
     }
 
     return with(finnNåværendeMedlemskap(fakta)) {

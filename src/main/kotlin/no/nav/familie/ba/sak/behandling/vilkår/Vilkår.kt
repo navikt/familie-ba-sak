@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
+import no.nav.familie.ba.sak.journalføring.domene.Sakstype
 import no.nav.nare.core.specifications.Spesifikasjon
 import java.time.LocalDate
 
@@ -50,6 +51,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     LOVLIG_OPPHOLD(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
+            //gjelderKunFor = listOf<SakType>(SakType.EØS, SakType.TREDJELANDSBORGER),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "§4-2 - Lovlig opphold",
                     identifikator = "LOVLIG_OPPHOLD",

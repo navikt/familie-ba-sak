@@ -183,7 +183,7 @@ class VilkårService(
             val sakType = hentSakType(behandlingKategori = behandlingResultat.behandling.kategori, søknadDTO = søknadDTO)
 
             val spesifikasjonererForPerson = spesifikasjonerForPerson(person, sakType)
-            val fakta = Fakta(personForVurdering = person)
+            val fakta = Fakta(personForVurdering = person, behandlingOpprinnelse = behandlingResultat.behandling.opprinnelse)
             val evalueringerForVilkår = spesifikasjonererForPerson.map { it.evaluer(fakta) }
 
             personResultat.setVilkårResultater(vilkårResultater(personResultat, person, fakta, evalueringerForVilkår))

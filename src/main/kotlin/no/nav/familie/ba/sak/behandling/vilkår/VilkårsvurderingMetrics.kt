@@ -74,6 +74,7 @@ class VilkårsvurderingMetrics {
                                                 evaluering.resultat,
                                                 behandlingOpprinnelse)]?.increment()
         } else {
+
             evaluering.children.forEach { økTellereForEvaluering(it, personType, behandlingOpprinnelse) }
         }
     }

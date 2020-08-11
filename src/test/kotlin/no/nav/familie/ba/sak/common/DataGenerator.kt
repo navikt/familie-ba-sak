@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import java.time.YearMonth
@@ -137,7 +138,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                        navn = "",
                        kjønn = Kjønn.KVINNE,
                        bostedsadresse = bostedsadresse,
-                       sivilstand = SIVILSTAND.GIFT)
+                       sivilstand = SIVILSTAND.GIFT
+                       ).apply { statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = this)) }
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
