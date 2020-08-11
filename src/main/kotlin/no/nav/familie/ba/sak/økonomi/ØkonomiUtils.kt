@@ -54,6 +54,7 @@ object ØkonomiUtils {
                     ?.sortedBy { it.periodeOffset }?.lastOrNull()
         }
     }
+
     private fun beståendeAndelerIKjede(forrigeKjede: List<AndelTilkjentYtelse>?,
                                        oppdatertKjede: List<AndelTilkjentYtelse>?): List<AndelTilkjentYtelse>? {
         val forrige = forrigeKjede?.toSet() ?: emptySet()
@@ -73,15 +74,17 @@ object ØkonomiUtils {
     fun oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
                                           forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, List<AndelTilkjentYtelse>> {
         oppdaterteKjeder
-                .filter { forrigeKjeder.containsKey(it.key) }
                 .forEach { (kjedeIdentifikator, oppdatertKjede) ->
-                    val forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator)
-                    val beståendeFraForrige = beståendeAndelerIKjede(forrigeKjede = forrigeKjede, oppdatertKjede = oppdatertKjede)
-                    beståendeFraForrige?.forEach { bestående ->
-                        val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
-                                                  ?: error("Bestående fra skal finnes i oppdatert")
-                        beståendeIOppdatert.periodeOffset = bestående.periodeOffset
-                        beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
+                    if (forrigeKjeder.containsKey(kjedeIdentifikator)) {
+                        val forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator)
+                        val beståendeFraForrige =
+                                beståendeAndelerIKjede(forrigeKjede = forrigeKjede, oppdatertKjede = oppdatertKjede)
+                        beståendeFraForrige?.forEach { bestående ->
+                            val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+                                                      ?: error("Bestående fra skal finnes i oppdatert")
+                            beståendeIOppdatert.periodeOffset = bestående.periodeOffset
+                            beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
+                        }
                     }
                 }
         return oppdaterteKjeder

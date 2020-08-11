@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -62,7 +63,7 @@ class ØkonomiService(
                     // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
                     val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
-                    ØkonomiUtils.oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
+                    oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
                     beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilstand.first().tilkjentYtelse)
 
                     utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
