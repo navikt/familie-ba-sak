@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -8,6 +9,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
@@ -24,6 +26,8 @@ class BehandleFødselshendelseTask(
             stegService.regelkjørBehandling(behandleFødselshendelseTaskDTO.nyBehandling)
         } catch (e: KontrollertRollbackException) {
             LOG.info("Rollback utført. Data ikke persistert.")
+        } catch (e: Feil) {
+            LOG.info("FødselshendelseTask kjørte med Feil=${e.frontendFeilmelding}")
         }
     }
 
@@ -34,7 +38,10 @@ class BehandleFødselshendelseTask(
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO)
+                    payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
+                    properties = Properties().apply {
+                        this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
+                    }
             )
         }
     }
