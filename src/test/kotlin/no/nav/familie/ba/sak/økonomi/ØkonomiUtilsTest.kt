@@ -5,9 +5,11 @@ import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ØkonomiUtilsTest {
@@ -252,5 +254,46 @@ internal class ØkonomiUtilsTest {
         assertEquals(2, andelerTilOpprettelse.size)
         assertEquals(1, andelerTilOpphørMedDato.size)
         assertEquals(dato("2019-04-01"), andelerTilOpphørMedDato.first().second)
+    }
+
+    @Test
+    fun `skal oppdatere offset på bestående behandler i oppdaterte kjeder`() {
+        val person = tilfeldigPerson()
+        val person2 = tilfeldigPerson()
+
+        val kjederBehandling1 = kjedeinndelteAndeler(listOf(
+                lagAndelTilkjentYtelse("2019-04-01",
+                                       "2020-01-01",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       periodeIdOffset = 0,
+                                       forrigeperiodeIdOffset = 1,
+                                       person = person),
+                lagAndelTilkjentYtelse("2019-04-01",
+                                       "2020-01-01",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       periodeIdOffset = 2,
+                                       forrigeperiodeIdOffset = 3,
+                                       person = person2)))
+        val kjederBehandling2 = kjedeinndelteAndeler(listOf(
+                lagAndelTilkjentYtelse("2019-04-01",
+                                       "2020-01-01",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       person = person),
+                lagAndelTilkjentYtelse("2019-12-12",
+                                       "2020-01-01",
+                                       ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       person = person2)))
+
+        val oppdaterte =
+                oppdaterBeståendeAndelerMedOffset(forrigeKjeder = kjederBehandling1, oppdaterteKjeder = kjederBehandling2)
+
+        assertEquals(0, oppdaterte.getValue(person.personIdent.ident).first().periodeOffset)
+        assertEquals(1, oppdaterte.getValue(person.personIdent.ident).first().forrigePeriodeOffset)
+        assertEquals(null, oppdaterte.getValue(person2.personIdent.ident).first().periodeOffset)
+        assertEquals(null, oppdaterte.getValue(person2.personIdent.ident).first().forrigePeriodeOffset)
     }
 }

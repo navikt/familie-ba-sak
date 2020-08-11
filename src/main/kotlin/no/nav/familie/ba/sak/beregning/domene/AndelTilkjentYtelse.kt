@@ -70,7 +70,7 @@ data class AndelTilkjentYtelse(
                "beløp = $beløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
     }
 
-    private fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
+    fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (this.personIdent == other.personIdent
                && this.stønadFom == other.stønadFom
                && this.stønadTom == other.stønadTom
