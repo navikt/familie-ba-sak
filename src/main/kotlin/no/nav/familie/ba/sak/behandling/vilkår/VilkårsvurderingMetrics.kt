@@ -27,14 +27,14 @@ class VilkårsvurderingMetrics {
             }
         }
 
-        LovligOppholdAvslagÅrsaker.values().map {årsak ->
+        LovligOppholdAvslagÅrsaker.values().map { årsak ->
             PersonType.values().filter { it !== PersonType.ANNENPART }.forEach { personType ->
-                        lovligOppholdAvslagÅrsaker[personType.name + årsak.name] = Metrics.counter("familie.ba.behandling.lovligopphold",
-                                                                              "aarsak",
-                                                                              årsak.name,
-                                                                              "personType",
-                                                                              personType.name)
-                    }
+                lovligOppholdAvslagÅrsaker[personType.name + årsak.name] = Metrics.counter("familie.ba.behandling.lovligopphold",
+                                                                                           "aarsak",
+                                                                                           årsak.name,
+                                                                                           "personType",
+                                                                                           personType.name)
+            }
         }
     }
 
