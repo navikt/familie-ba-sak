@@ -25,7 +25,7 @@
         <felles-kontrakter.version>2.0_20200723115650_db71799</felles-kontrakter.version>
         <felles.version>1.20200624154125_0d8ff39</felles.version>
         <mockk.version>1.9.3</mockk.version>
-        <token-validation-spring.version>1.1.6</token-validation-spring.version>
+        <token-validation-spring.version>1.2.0</token-validation-spring.version>
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
@@ -73,12 +73,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
-            <version>2.11.0</version>
+            <version>2.11.2</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>6.4.4</version>
+            <version>6.5.3</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.vault</groupId>
