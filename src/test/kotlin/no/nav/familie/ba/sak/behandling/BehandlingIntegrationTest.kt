@@ -38,7 +38,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Resultat
-import org.apache.commons.lang3.StringUtils
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -51,10 +50,10 @@ import java.time.LocalDate
 import javax.transaction.Transactional
 
 
-@SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api", "PDL_URL=http://localhost:28085/api"])
+@SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-sts")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class BehandlingIntegrationTest {
@@ -421,7 +420,7 @@ class BehandlingIntegrationTest {
         val barn1Kommunenummer = "3233"
         val barn2BostedKommune = "Oslo"
 
-        val personInfo = PersonInfo(
+        every { personopplysningerService.hentPersoninfoFor(søkerFnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Mor",
@@ -438,40 +437,36 @@ class BehandlingIntegrationTest {
                 sivilstand = null
         )
 
-        //every { personopplysningerService.hentPersoninfoFor(søkerFnr) } returns personInfo
+        every { personopplysningerService.hentPersoninfoFor(barn1Fnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(2009, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Gutt",
+                kjønn = Kjønn.MANN,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId, barn1Bruksenhetsnummer, barn1Tilleggsnavn,
+                                                                                    barn1Postnummer, barn1Kommunenummer)),
+                sivilstand = null
+        )
 
-//        every { personopplysningerService.hentPersoninfoFor(barn1Fnr) } returns PersonInfo(
-//                fødselsdato = LocalDate.of(2009, 1, 1),
-//                adressebeskyttelseGradering = null,
-//                navn = "Gutt",
-//                kjønn = Kjønn.MANN,
-//                familierelasjoner = emptySet(),
-//                bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId, barn1Bruksenhetsnummer, barn1Tilleggsnavn,
-//                                                                                    barn1Postnummer, barn1Kommunenummer)),
-//                sivilstand = null
-//        )
-//
-//        every { personopplysningerService.hentPersoninfoFor(barn2Fnr) } returns PersonInfo(
-//                fødselsdato = LocalDate.of(2012, 1, 1),
-//                adressebeskyttelseGradering = null,
-//                navn = "Jente",
-//                kjønn = Kjønn.KVINNE,
-//                familierelasjoner = emptySet(),
-//                bostedsadresse = Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)),
-//                sivilstand = null
-//        )
-//
-//        every { personopplysningerService.hentPersoninfoFor(barn3Fnr) } returns PersonInfo(
-//                fødselsdato = LocalDate.of(2013, 1, 1),
-//                adressebeskyttelseGradering = null,
-//                navn = "Jente2",
-//                kjønn = Kjønn.KVINNE,
-//                familierelasjoner = emptySet(),
-//                bostedsadresse = Bostedsadresse(),
-//                sivilstand = null
-//        )
+        every { personopplysningerService.hentPersoninfoFor(barn2Fnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(2012, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Jente",
+                kjønn = Kjønn.KVINNE,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)),
+                sivilstand = null
+        )
 
-        lagMockForPdl("hentIdenter.graphql", readfile("pdlAktorIdResponse.json"))
+        every { personopplysningerService.hentPersoninfoFor(barn3Fnr) } returns PersonInfo(
+                fødselsdato = LocalDate.of(2013, 1, 1),
+                adressebeskyttelseGradering = null,
+                navn = "Jente2",
+                kjønn = Kjønn.KVINNE,
+                familierelasjoner = emptySet(),
+                bostedsadresse = Bostedsadresse(),
+                sivilstand = null
+        )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
@@ -510,37 +505,4 @@ class BehandlingIntegrationTest {
             }
         }
     }
-
-    private fun lagMockForPdl(graphqlQueryFilnavn: String, mockResponse: String) {
-//        mockServerRule.client
-//                .`when`(HttpRequest.request()
-//                                .withMethod("POST")
-//                                .withPath("/rest/pdl/graphql")
-//                                .withBody(gyldigRequest(graphqlQueryFilnavn))
-//                )
-//                .respond(HttpResponse.response().withBody(readfile(jsonResponseFilnavn))
-//                                 .withHeaders(Header("Content-Type", "application/json")))
-        stubFor(post(urlEqualTo("/api/graphql"))
-                        .withRequestBody(equalToJson(gyldigRequest(graphqlQueryFilnavn)))
-                        .willReturn(aResponse()
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(mockResponse)))
-    }
-
-    private fun gyldigRequest(filnavn: String): String {
-        return readfile("pdlGyldigRequest.json")
-                .replace(
-                        "GRAPHQL-PLACEHOLDER",
-                        readfile(filnavn).graphqlCompatible()
-                )
-    }
-
-    private fun readfile(filnavn: String): String {
-        return this::class.java.getResource("/pdl/$filnavn").readText()
-    }
-
-    private fun String.graphqlCompatible(): String {
-        return StringUtils.normalizeSpace(this.replace("\n", ""))
-    }
-
 }
