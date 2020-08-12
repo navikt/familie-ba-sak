@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 data class RestVedtak(
         val aktiv: Boolean,
-        val vedtaksdato: LocalDate,
+        val vedtaksdato: LocalDate?,
         val personBeregninger: List<RestVedtakPerson>,
         val stønadBrevMetadata: StønadBrevMetadata?,
         val id: Long

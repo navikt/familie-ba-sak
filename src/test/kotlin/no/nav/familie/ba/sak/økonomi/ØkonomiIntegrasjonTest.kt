@@ -104,6 +104,8 @@ class ØkonomiIntegrasjonTest {
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
+        vedtak!!.vedtaksdato = LocalDate.now()
+        vedtakService.lagreEllerOppdater(vedtak!!)
 
         val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 

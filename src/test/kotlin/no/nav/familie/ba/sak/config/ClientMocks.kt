@@ -181,6 +181,8 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
+        every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
+
         return mockIntegrasjonClient
     }
 

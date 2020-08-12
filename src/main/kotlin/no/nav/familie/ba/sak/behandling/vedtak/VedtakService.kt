@@ -112,7 +112,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val vedtak = Vedtak(
                 behandling = behandling,
-                vedtaksdato = LocalDate.now(),
                 forrigeVedtakId = forrigeVedtak?.id,
                 ansvarligEnhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling),
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) LocalDate.now()

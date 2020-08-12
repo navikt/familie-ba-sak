@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -267,7 +269,7 @@ class StegService(
         }.toMap()
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = [Feil::class])
     fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
         var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
         behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling, nyBehandling.barnasIdenter[0])
