@@ -11,8 +11,10 @@ import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -327,7 +329,7 @@ class VilkårVurderingTest(
     @Test
     fun `Sjekk at barn er ugift`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        var barn = genererPerson(PersonType.BARN, personopplysningGrunnlag)
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag)
         personopplysningGrunnlag.personer.add(barn)
 
         assertEquals(Resultat.JA, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(Fakta(barn)).resultat)
@@ -336,7 +338,7 @@ class VilkårVurderingTest(
     @Test
     fun `Negativ vurdering - barn er gift`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        var barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(barn)
 
         assertEquals(Resultat.NEI, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(Fakta(barn)).resultat)
@@ -346,7 +348,7 @@ class VilkårVurderingTest(
     fun `Sjekk at søker er bosatt i norge`() {
         val ukjentbosted = GrUkjentBosted("Oslo")
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        var søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(søker)
 
         assertEquals(Resultat.JA, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(søker)).resultat)
@@ -355,7 +357,7 @@ class VilkårVurderingTest(
     @Test
     fun `Negativ vurdering - søker er ikke bosatt i norge`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        var søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(søker)
 
         assertEquals(Resultat.NEI, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(søker)).resultat)
@@ -365,7 +367,7 @@ class VilkårVurderingTest(
     fun `Sjekk at mor er bosatt i norge`() {
         val ukjentbosted = GrUkjentBosted("Oslo")
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        var barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(barn)
 
         assertEquals(Resultat.JA, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(barn)).resultat)
@@ -374,7 +376,7 @@ class VilkårVurderingTest(
     @Test
     fun `Negativ vurdering - mor er ikke bosatt i norge`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        var barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(barn)
 
         assertEquals(Resultat.NEI, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(barn)).resultat)
@@ -383,7 +385,7 @@ class VilkårVurderingTest(
     @Test
     fun `Lovlig opphold - nordisk statsborger`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        var person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        val person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
                 .also {
                     it.statsborgerskap =
                             listOf(
@@ -414,18 +416,17 @@ class VilkårVurderingTest(
                             )
                 }
 
-        val medlemskap = finnNåværendeMedlemskap(Fakta(person))
+        val medlemskap = finnNåværendeMedlemskap(person)
 
         assertEquals(2, medlemskap.size)
         assertEquals(Medlemskap.NORDEN, medlemskap[0])
         assertEquals(Medlemskap.EØS, medlemskap[1])
     }
 
-
     @Test
     fun `Mor er fra EØS og har et løpende arbeidsforhold - lovlig opphold, skal evalueres til Ja`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        val person = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
                 .also {
                     it.statsborgerskap = listOf(
                             GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
@@ -443,5 +444,33 @@ class VilkårVurderingTest(
 
         assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
         assertEquals("Mor er EØS-borger og har et løpende arbeidsforhold i Norge.", Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+    }
+
+    @Test
+    fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er fra norden - lovlig opphold, skal evalueres til Ja`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
+        val person = genererPerson(PersonType.SØKER, personopplysningGrunnlag, GrBostedsadresse.fraBostedsadresse(bostedsadresse), sivilstand = SIVILSTAND.GIFT)
+                .also {
+                    it.statsborgerskap = listOf(
+                            GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                                    landkode = "BEL",
+                                    medlemskap = Medlemskap.EØS,
+                                    person = it)
+                    )
+                }
+        val annenForelder = genererPerson(PersonType.ANNENPART, personopplysningGrunnlag, GrBostedsadresse.fraBostedsadresse(bostedsadresse), sivilstand = SIVILSTAND.GIFT)
+                .also {
+                    it.statsborgerskap = listOf(
+                            GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                                    landkode = "DNK",
+                                    medlemskap = Medlemskap.NORDEN,
+                                    person = it)
+                    )
+                }
+        person.personopplysningGrunnlag.personer.add(annenForelder)
+
+        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals("Annen forelder er norsk eller nordisk statsborger.", Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
     }
 }

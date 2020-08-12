@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrUkjentBosted
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -65,7 +62,7 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
         Evaluering.kanskje("Ikke separat oppholdsvurdering for barnet ved automatisk vedtak.")
     }
 
-    return with(finnNåværendeMedlemskap(fakta)) {
+    return with(finnNåværendeMedlemskap(fakta.personForVurdering)) {
         when {
             contains(Medlemskap.NORDEN) -> Evaluering.ja("Er nordisk statsborger.")
             //TODO: Implementeres av TEA-1532
@@ -93,8 +90,8 @@ internal fun giftEllerPartnerskap(fakta: Fakta): Evaluering =
             else -> Evaluering.ja("Person er ikke gift eller har registrert partner")
         }
 
-fun finnNåværendeMedlemskap(fakta: Fakta): List<Medlemskap> =
-        fakta.personForVurdering.statsborgerskap?.filter { statsborgerskap ->
+fun finnNåværendeMedlemskap(person: Person): List<Medlemskap> =
+        person.statsborgerskap?.filter { statsborgerskap ->
             statsborgerskap.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
             statsborgerskap.gyldigPeriode?.tom?.isAfter(LocalDate.now()) ?: true
         }
@@ -107,27 +104,26 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
     return if (morHarLøpendeArbeidsforhold(fakta)) {
         Evaluering.ja("Mor er EØS-borger og har et løpende arbeidsforhold i Norge.")
     } else {
-        if (registrertAnnenForelderPåBarn()) {
-            if (morOgAnnenforelderHarFellesBosted()) {
-                when (statsborgerskapAnnenForelder()) {
-                    Medlemskap.NORDEN -> { /* Evaluering.ja("Annen forelder er norsk eller nordisk statsborger.") */ }
-                    Medlemskap.EØS -> {
-                            if (annenForelderHarLøpendeArbeidsforhold()) {
-                                // Evaluering.ja("Annen forelder har et løpende arbeidsforhold i Norge.")
-                            } else {
-                                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta)
-                            }
+        if (annenForelderEksistererOgBorMedMor(fakta)) {
+            with (statsborgerskapAnnenForelder(fakta)) {
+                when {
+                    contains(Medlemskap.NORDEN) -> Evaluering.ja("Annen forelder er norsk eller nordisk statsborger.")
+                    contains(Medlemskap.EØS) -> {
+                        if (annenForelderHarLøpendeArbeidsforhold()) {
+                            Evaluering.kanskje("annen forelder har løpende arbeidsforhold: ikke implementert")
+                            // Evaluering.ja("Annen forelder har et løpende arbeidsforhold i Norge.")
+                        } else {
+                            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta)
+                        }
                     }
-                    Medlemskap.TREDJELANDSBORGER -> { /* Evaluering.nei("Annen forelder er tredjelandsborger.") */ }
-                    Medlemskap.UKJENT -> { /* Evaluering.nei("Annen forelder er uten statsborgerskap.") */ }
+                    contains(Medlemskap.TREDJELANDSBORGER) -> Evaluering.nei("Annen forelder er tredjelandsborger.")
+                    contains(Medlemskap.UKJENT) -> Evaluering.nei("Annen forelder er uten statsborgerskap.")
+                    else -> { Evaluering.nei("Statsborgerskap for annen forelder kan ikke avgjøres.")}
                 }
-            } else {
-                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta)
             }
         } else {
             sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta)
         }
-        Evaluering.kanskje("resten av regelverk ikke implementert.")
     }
 }
 
@@ -148,9 +144,22 @@ fun morHarLøpendeArbeidsforhold(fakta: Fakta): Boolean = fakta.personForVurderi
     it.periode?.tom == null || it.periode.tom >= LocalDate.now()
 } ?: false
 
-fun registrertAnnenForelderPåBarn(): Boolean = true // ikke implementert
-fun morOgAnnenforelderHarFellesBosted(): Boolean = true // ikke implementert
-fun statsborgerskapAnnenForelder(): Medlemskap = Medlemskap.NORDEN // ikke implementert
+fun annenForelderEksistererOgBorMedMor(fakta: Fakta): Boolean {
+    val annenForelder = fakta.personForVurdering.personopplysningGrunnlag.personer.filter { it.type == PersonType.ANNENPART }.firstOrNull()
+    if (annenForelder == null) {
+        return false
+    } else {
+        return fakta.personForVurdering.bostedsadresse != null
+                && fakta.personForVurdering.bostedsadresse !is GrUkjentBosted
+                && fakta.personForVurdering.bostedsadresse == annenForelder.bostedsadresse
+    }
+}
+
+fun statsborgerskapAnnenForelder(fakta: Fakta): List<Medlemskap> {
+    val annenForelder = fakta.personForVurdering.personopplysningGrunnlag.personer.filter { it.type == PersonType.ANNENPART }.first()
+    return finnNåværendeMedlemskap(annenForelder)
+}
+
 fun annenForelderHarLøpendeArbeidsforhold(): Boolean = true // ikke implementert
 fun morHarBoddINorgeIMerEnn5År(): Boolean = true // ikke implementert
 fun morHarJobbetINorgeSiste5År(): Boolean = true // ikke implementert
