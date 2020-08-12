@@ -3,34 +3,24 @@ package no.nav.familie.ba.sak.behandling.steg
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalStateException
 import java.time.LocalDate
 
 class AvgjørAutomatiskEllerManuellTest {
 
     private lateinit var avgjørAutomatiskEllerManuell: AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser
-    private lateinit var integrasjonClient: IntegrasjonClient
     private lateinit var personopplysningerService: PersonopplysningerService
     private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
-    private lateinit var taskRepository: TaskRepository
-    private lateinit var featureToggleService: FeatureToggleService
 
     val behandling = lagBehandling().copy(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -38,17 +28,12 @@ class AvgjørAutomatiskEllerManuellTest {
 
     @BeforeEach
     fun setUp() {
-        integrasjonClient = mockk()
-        taskRepository = mockk()
-        personopplysningerService= mockk()
+        personopplysningerService = mockk()
         personopplysningGrunnlagRepository = mockk()
-        featureToggleService = mockk()
 
         avgjørAutomatiskEllerManuell = AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(
                 personopplysningerService,
-                personopplysningGrunnlagRepository,
-                taskRepository,
-                featureToggleService)
+                personopplysningGrunnlagRepository)
     }
 
     @Test
@@ -75,6 +60,5 @@ class AvgjørAutomatiskEllerManuellTest {
         every { personopplysningerService.hentPersoninfoFor("12345678913") } returns PersonInfo(LocalDate.now().minusYears(4))
         every { personopplysningerService.hentDødsfall(any()) } returns DødsfallData(false, null)
         every { personopplysningerService.hentVergeData(any()) } returns VergeData(false)
-        every { featureToggleService.isEnabled(any()) } returns false
     }
 }

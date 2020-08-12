@@ -6,26 +6,18 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.familie.ba.sak.task.OpprettOppgaveTask
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val personopplysningerService: PersonopplysningerService,
-                                                                private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-                                                                private val taskRepository: TaskRepository,
-                                                                private val featureToggleService: FeatureToggleService)
+                                                                private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository)
     : BehandlingSteg<String> {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
