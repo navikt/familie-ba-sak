@@ -5,9 +5,11 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
@@ -382,11 +384,13 @@ class VilkårVurderingTest(
     fun `Lovlig opphold - nordisk statsborger`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         var person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
-                .also { it.statsborgerskap =
-                        listOf(
-                                GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = LocalDate.now().minusYears(1))
-                                , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it)
-                        )
+                .also {
+                    it.statsborgerskap =
+                            listOf(
+                                    GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null,
+                                                                                           fom = LocalDate.now().minusYears(1))
+                                                      , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it)
+                            )
                 }
 
         assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
@@ -396,15 +400,18 @@ class VilkårVurderingTest(
     fun `Lovlig opphold - valider at alle gjeldende medlemskap blir returnert`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
-                .also { it.statsborgerskap =
-                        listOf(
-                                GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null)
-                                , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it),
-                               GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = LocalDate.now().minusYears(1))
-                                , landkode = "DEU", medlemskap = Medlemskap.EØS, person = it),
-                               GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = LocalDate.now().minusYears(2), fom = LocalDate.now().minusYears(2))
-                                , landkode = "POL", medlemskap = Medlemskap.EØS, person = it)
-                        )
+                .also {
+                    it.statsborgerskap =
+                            listOf(
+                                    GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null)
+                                                      , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it),
+                                    GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null,
+                                                                                           fom = LocalDate.now().minusYears(1))
+                                                      , landkode = "DEU", medlemskap = Medlemskap.EØS, person = it),
+                                    GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = LocalDate.now().minusYears(2),
+                                                                                           fom = LocalDate.now().minusYears(2))
+                                                      , landkode = "POL", medlemskap = Medlemskap.EØS, person = it)
+                            )
                 }
 
         val medlemskap = finnNåværendeMedlemskap(Fakta(person))
@@ -412,5 +419,64 @@ class VilkårVurderingTest(
         assertEquals(2, medlemskap.size)
         assertEquals(Medlemskap.NORDEN, medlemskap[0])
         assertEquals(Medlemskap.EØS, medlemskap[1])
+    }
+
+
+    @Test
+    fun `Lovlig opphold - mor er fra EØS - har gyldig arbeidsforhold - skal evaluere til Ja`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+                .also {
+                    it.statsborgerskap = listOf(
+                            GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                                              landkode = "BEL",
+                                              medlemskap = Medlemskap.EØS,
+                                              person = it)
+                    )
+                    it.arbeidsforhold = listOf(
+                            GrArbeidsforhold(periode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                                             arbeidsgiverId = "998877665",
+                                             arbeidsgiverType = "Organisasjon",
+                                             person = it)
+                    )
+                }
+
+        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals("Er EØS borger.", Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+    }
+
+    @Test
+    fun `Lovlig opphold - EØS - mor er fra EØS - annen forelder bor ikke på samme adressse - Evaluering Kanskje`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+                .also {
+                    it.statsborgerskap = listOf(
+                            GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                                              landkode = "BEL",
+                                              medlemskap = Medlemskap.EØS,
+                                              person = it)
+                    )
+                }
+
+        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals("Far er ", Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+    }
+
+
+    @Test
+    fun `Lovlig opphold - EØS - mor er fra EØS og har ikke gyldig arbeidsforhold - annen forelder er fra Norden og bor på samme adressse - skal evalures til ja`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        var person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+                .also {
+                    it.statsborgerskap = listOf(
+                            GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                                              landkode = "BEL",
+                                              medlemskap = Medlemskap.EØS,
+                                              person = it)
+                    )
+                }
+
+        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals("Far er ", Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
     }
 }

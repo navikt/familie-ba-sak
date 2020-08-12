@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforho
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 
 @Service
@@ -72,6 +72,12 @@ class PersongrunnlagService(
 
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
+
+
+        val farEllerMedmor = personinfo.familierelasjoner.filter { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }.firstOrNull()
+        if (farEllerMedmor != null) {
+            personopplysningGrunnlag.personer.add(hentFarEllerMedmor(farEllerMedmor.personIdent.id, personopplysningGrunnlag))
+        }
         secureLogger.info("Setter persongrunnlag med søker: ${fødselsnummer} og barn: ${barnasFødselsnummer}")
         secureLogger.info("Barna på persongrunnlaget som lagres: ${personopplysningGrunnlag.barna.map { it.personIdent.ident }}")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -92,6 +98,27 @@ class PersongrunnlagService(
                                          sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
             ).also { it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(nyttBarn), it)}
         }
+    }
+
+    private fun hentFarEllerMedmor(annenPartFødselsnummer: String,
+                                   personopplysningGrunnlag: PersonopplysningGrunnlag): Person {
+
+            val personinfo = personopplysningerService.hentPersoninfoFor(annenPartFødselsnummer)
+            val person = Person(personIdent = PersonIdent(annenPartFødselsnummer),
+                   type = PersonType.ANNENPART,
+                   personopplysningGrunnlag = personopplysningGrunnlag,
+                   fødselsdato = personinfo.fødselsdato,
+                   aktørId = personopplysningerService.hentAktivAktørId(Ident(annenPartFødselsnummer)),
+                   navn = personinfo.navn ?: "",
+                   kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+                   bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
+                   sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
+            ).also {
+                it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(annenPartFødselsnummer), it)
+                it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(annenPartFødselsnummer), it)
+            }
+
+        return person
     }
 
     companion object {
