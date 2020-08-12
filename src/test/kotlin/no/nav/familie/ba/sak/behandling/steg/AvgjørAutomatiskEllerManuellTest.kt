@@ -45,7 +45,6 @@ class AvgjørAutomatiskEllerManuellTest {
         featureToggleService = mockk()
 
         avgjørAutomatiskEllerManuell = AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(
-                integrasjonClient,
                 personopplysningerService,
                 personopplysningGrunnlagRepository,
                 taskRepository,
