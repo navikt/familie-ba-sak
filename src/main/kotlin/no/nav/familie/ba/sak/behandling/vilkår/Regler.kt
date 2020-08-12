@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
+import java.lang.RuntimeException
 import java.time.LocalDate
 
 internal fun barnUnder18År(fakta: Fakta): Evaluering =
@@ -69,48 +70,7 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
             contains(Medlemskap.NORDEN) -> Evaluering.ja("Er nordisk statsborger.")
             //TODO: Implementeres av TEA-1532
             contains(Medlemskap.EØS) -> {
-//                Kontroll av lovlig opphold når mor er statsborger i et EØS-land (unntatt norsk eller nordisk):
-//                Kontroller mot aa-registeret om mor er registrert med et løpende arbeidsforhold i Norge (arbeidsforhold som ikke er avsluttet).
-//                Dersom ja, sett vilkåret til oppfylt og fortsett vilkårsvurdering.
-//                Dersom nei: Kontrollere mot PDL om det er registrert far på barnet og at barnets mor og far har felles bostedsadresse i Norge
-//                        Dersom ja, hent opplysninger om fars statsborgerskap fra PDL og fortsett til punkt 4
-//                Dersom nei, fortsett til punkt 5
-//                Fars statsborgerskap:
-//                Dersom fars statsborgerskap er norsk eller nordisk: sett vilkåret til oppfylt og fortsett vilkårsvurdering.
-//                Dersom fars statsborgerskap er EØS: kontroller mot aa-registeret om far er registrert med et løpende arbeidsforhold i Norge (arbeidsforhold som ikke er avsluttet).
-//                Hvis ja, sett vilkåret til oppfylt og fortsett vilkårsvurdering
-//                Hvis nei, fortsett til punkt 5
-//                Dersom fars statsborgerskap er tredjelandsborger: fortsett til punkt 6
-//                Dersom far er uten statsborgerskap eller statsløs: fortsette til punkt 6
-//                Kontroller mot PDL om mor har hatt bostedsadresse i Norge i mer enn 5 år
-//                Hvis ja: kontroller mot aa-registeret om mor har hatt arbeidsforhold i Norge i de 5 siste årene
-//                Hvis ja: sett vilkåret til oppfylt og fortsett vilkårsvurdering
-//                        Hvis nei: fortsett til punkt 6
-//                Hvis nei: fortsett til punkt 6
-//                Opprette oppgave til manuell saksbehandling. Oppgaven til manuell behandling må oppgi årsak til at den falt ut. Årsakstekst: "Mor har ikke lovlig opphold"
-
-                val arbeidsforhold =
-                        fakta.personForVurdering.arbeidsforhold?.any { it.periode?.tom == null || it.periode?.tom < LocalDate.now() }
-
-                //Sjekk om søker er statsborger og har arbeidsforhold
-                if (arbeidsforhold == null || arbeidsforhold == false) {
-                    //sjekke om det er registrert en annen forelder
-                    val annenForelder = fakta.personForVurdering.personopplysningGrunnlag.personer.filter { it.type == PersonType.ANNENPART }.firstOrNull()
-
-                    if (annenForelder != null) {
-                        //bor far og søker på samme sted.
-                        //   -> hvis far er norsk eller nordisk --> Evaluering.Ja
-                        //      hvis far er fra EØS -> Sjekk aareg 5 år tilbake -> Evaluering Ja
-                    } else {
-                        //mor skal ha bostedsadresse i mer enn 5 år -> Evaluering.Ja
-                        //else Evaluering.Nei
-                    }
-
-                    Evaluering.nei("Er ikke EØS borger.")
-                } else {
-                    Evaluering.ja("Er EØS borger.")
-                }
-
+                sjekkLovligOppholdForEØSBorger(fakta)
             }
             contains(Medlemskap.TREDJELANDSBORGER) -> {
                 val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
@@ -142,3 +102,55 @@ fun finnNåværendeMedlemskap(fakta: Fakta): List<Medlemskap> =
 
 
 fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
+
+private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
+    return if (morHarLøpendeArbeidsforhold(fakta)) {
+        Evaluering.ja("Mor er EØS-borger og har et løpende arbeidsforhold i Norge.")
+    } else {
+        if (registrertAnnenForelderPåBarn()) {
+            if (morOgAnnenforelderHarFellesBosted()) {
+                when (statsborgerskapAnnenForelder()) {
+                    Medlemskap.NORDEN -> { /* Evaluering.ja("Annen forelder er norsk eller nordisk statsborger.") */ }
+                    Medlemskap.EØS -> {
+                            if (annenForelderHarLøpendeArbeidsforhold()) {
+                                // Evaluering.ja("Annen forelder har et løpende arbeidsforhold i Norge.")
+                            } else {
+                                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta)
+                            }
+                    }
+                    Medlemskap.TREDJELANDSBORGER -> { /* Evaluering.nei("Annen forelder er tredjelandsborger.") */ }
+                    Medlemskap.UKJENT -> { /* Evaluering.nei("Annen forelder er uten statsborgerskap.") */ }
+                }
+            } else {
+                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta)
+            }
+        } else {
+            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta)
+        }
+        Evaluering.kanskje("resten av regelverk ikke implementert.")
+    }
+}
+
+private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Evaluering {
+    if (morHarBoddINorgeIMerEnn5År()) {
+        if (morHarJobbetINorgeSiste5År()) {
+            // Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
+        } else {
+            // Evaluering.nei("Mor har ikke jobbet kontinuerlig i Norge siste 5 år.")
+        }
+    } else {
+        // Evaluering.nei("Mor har ikke bodd i Norge sammenhengende i mer enn 5 år.")
+    }
+    return Evaluering.kanskje("ikke implementert")
+}
+
+fun morHarLøpendeArbeidsforhold(fakta: Fakta): Boolean = fakta.personForVurdering.arbeidsforhold?.any {
+    it.periode?.tom == null || it.periode.tom >= LocalDate.now()
+} ?: false
+
+fun registrertAnnenForelderPåBarn(): Boolean = true // ikke implementert
+fun morOgAnnenforelderHarFellesBosted(): Boolean = true // ikke implementert
+fun statsborgerskapAnnenForelder(): Medlemskap = Medlemskap.NORDEN // ikke implementert
+fun annenForelderHarLøpendeArbeidsforhold(): Boolean = true // ikke implementert
+fun morHarBoddINorgeIMerEnn5År(): Boolean = true // ikke implementert
+fun morHarJobbetINorgeSiste5År(): Boolean = true // ikke implementert

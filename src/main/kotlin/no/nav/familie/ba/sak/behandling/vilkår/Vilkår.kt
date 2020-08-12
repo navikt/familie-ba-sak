@@ -21,7 +21,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     implementasjon = { barnUnder18År(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     BOR_MED_SØKER(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN, PersonType.ANNENPART),
+            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
             spesifikasjon = Spesifikasjon<Fakta>(
                     beskrivelse = "§2-2 - Bor med søker: har samme adresse",
                     identifikator = "BOR_MED_SØKER:SAMME_ADRESSE",
