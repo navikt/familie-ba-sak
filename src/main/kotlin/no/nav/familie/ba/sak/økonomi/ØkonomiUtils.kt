@@ -61,7 +61,7 @@ object ØkonomiUtils {
         val oppdatert = oppdatertKjede?.toSet() ?: emptySet()
         val førsteEndring = forrige.disjunkteAndeler(oppdatert).sortedBy { it.stønadFom }.firstOrNull()?.stønadFom
         return if (førsteEndring != null) forrige.snittAndeler(oppdatert)
-                .filter { it.stønadFom.isBefore(førsteEndring) } else forrigeKjede
+                .filter { it.stønadFom.isBefore(førsteEndring) } else forrigeKjede ?: emptyList()
     }
 
     /**
@@ -81,7 +81,7 @@ object ØkonomiUtils {
                                 beståendeAndelerIKjede(forrigeKjede = forrigeKjede, oppdatertKjede = oppdatertKjede)
                         beståendeFraForrige?.forEach { bestående ->
                             val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
-                                                      ?: error("Bestående fra skal finnes i oppdatert")
+                                                      ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
                             beståendeIOppdatert.periodeOffset = bestående.periodeOffset
                             beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
                         }

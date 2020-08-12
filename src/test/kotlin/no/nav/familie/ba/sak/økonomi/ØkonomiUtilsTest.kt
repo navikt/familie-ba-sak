@@ -266,15 +266,15 @@ internal class ØkonomiUtilsTest {
                                        "2020-01-01",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
-                                       periodeIdOffset = 0,
-                                       forrigeperiodeIdOffset = 1,
+                                       periodeIdOffset = 1,
+                                       forrigeperiodeIdOffset = 0,
                                        person = person),
                 lagAndelTilkjentYtelse("2019-04-01",
                                        "2020-01-01",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
-                                       periodeIdOffset = 2,
-                                       forrigeperiodeIdOffset = 3,
+                                       periodeIdOffset = 3,
+                                       forrigeperiodeIdOffset = 2,
                                        person = person2)))
         val kjederBehandling2 = kjedeinndelteAndeler(listOf(
                 lagAndelTilkjentYtelse("2019-04-01",
@@ -291,8 +291,8 @@ internal class ØkonomiUtilsTest {
         val oppdaterte =
                 oppdaterBeståendeAndelerMedOffset(forrigeKjeder = kjederBehandling1, oppdaterteKjeder = kjederBehandling2)
 
-        assertEquals(0, oppdaterte.getValue(person.personIdent.ident).first().periodeOffset)
-        assertEquals(1, oppdaterte.getValue(person.personIdent.ident).first().forrigePeriodeOffset)
+        assertEquals(1, oppdaterte.getValue(person.personIdent.ident).first().periodeOffset)
+        assertEquals(0, oppdaterte.getValue(person.personIdent.ident).first().forrigePeriodeOffset)
         assertEquals(null, oppdaterte.getValue(person2.personIdent.ident).first().periodeOffset)
         assertEquals(null, oppdaterte.getValue(person2.personIdent.ident).first().forrigePeriodeOffset)
     }
