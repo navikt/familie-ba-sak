@@ -1,32 +1,39 @@
 package no.nav.familie.ba.sak.behandling.steg
 
+import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.familie.ba.sak.task.OpprettOppgaveTask
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
-class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val integrasjonClient: IntegrasjonClient,
-                                                                private val personopplysningerService: PersonopplysningerService,
-                                                                private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-                                                                private val taskRepository: TaskRepository,
-                                                                private val featureToggleService: FeatureToggleService)
+class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val personopplysningerService: PersonopplysningerService,
+                                                                private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository)
     : BehandlingSteg<String> {
+
+    val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
+
+    init {
+        Filtreringsregler.values().map {
+            Resultat.values().forEach { resultat ->
+                filtreringsreglerMetrics[it.spesifikasjon.identifikator + resultat.name] =
+                        Metrics.counter("familie.ba.sak.filtreringsregler.utfall",
+                                        "resultat",
+                                        resultat.name,
+                                        "beskrivelse",
+                                        it.spesifikasjon.beskrivelse)
+            }
+        }
+    }
 
     override fun stegType(): StegType {
         return StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER
@@ -72,33 +79,12 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val in
     }
 
     private fun oppdaterMetrikker(evaluering: Evaluering) {
-        evaluering.children.forEach {
-            if (it.resultat == Resultat.NEI) {
-                Metrics.counter(
-                        "barnetrygd.hendelse.filtreringsregler.negativt.utfall",
-                        "begrunnelse",
-                        it.begrunnelse
-                ).increment()
-            }
-        }
-
-        when (evaluering.resultat) {
-            Resultat.JA -> Metrics.counter("barnetrygd.hendelse.filtreringsregler.behandles.automatisk").increment()
-            Resultat.NEI -> Metrics.counter("barnetrygd.hendelse.filtreringsregler.manuell.behandling").increment()
-            else -> {}
-        }
-    }
-
-    private fun opprettOppgave(behandling: Behandling) {
-        if (featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")) {
-            val nyTask = OpprettOppgaveTask.opprettTask(
-                    behandlingId = behandling.id,
-                    oppgavetype = Oppgavetype.BehandleSak,
-                    fristForFerdigstillelse = LocalDate.now()
-            )
-            taskRepository.save(nyTask)
+        if (evaluering.children.isEmpty()) {
+            filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]?.increment()
         } else {
-            Vilkårsvurdering.LOG.info("Lag opprettOppgaveTask er skrudd av i miljø")
+            evaluering.children.forEach {
+                filtreringsreglerMetrics[it.identifikator + it.resultat.name]?.increment()
+            }
         }
     }
 
