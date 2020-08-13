@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -56,7 +55,7 @@ class StegService(
     }
 
     @Transactional
-    fun håndterNyBehandlingFraHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
+    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
         val ident = nyBehandling.morsIdent
                     ?: (nyBehandling.søkersIdent ?: error("Fant ingen gyldig ident på mor/søker"))
         fagsakService.hentEllerOpprettFagsakForPersonIdent(ident)
@@ -269,11 +268,15 @@ class StegService(
         }.toMap()
     }
 
-    @Transactional(noRollbackFor = [Feil::class])
-    fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
-        var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
+    fun kjørFiltreringsreglerForFødselshendelse(behandling: Behandling) {
         behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling, nyBehandling.barnasIdenter[0])
-        behandling = håndterVilkårsvurdering(behandling)
+
+    }
+
+    @Transactional(noRollbackFor = [Feil::class])
+    fun regelkjørBehandling(behandling: Behandling) {
+
+        val oppdatertBehandling = håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
         val samletResultat = behandlingResultat?.hentSamletResultat()
 
