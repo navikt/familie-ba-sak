@@ -20,7 +20,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
                                     val fagsakService: FagsakService,
                                     val taskRepository: TaskRepository) {
 
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 0 17 * * *")
     fun utførKonsistensavstemming() {
         val dagensDato = LocalDate.now()
         val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dagensDato) ?: return
