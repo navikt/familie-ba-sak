@@ -50,7 +50,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     LOVLIG_OPPHOLD(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
-            gjelderKunFor = listOf<SakType>(SakType.EØS, SakType.TREDJELANDSBORGER),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "§4-2 - Lovlig opphold",
                     identifikator = "LOVLIG_OPPHOLD",

@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
@@ -138,6 +140,14 @@ class LovligOppholdVilkårTest {
         assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
     }
 
+    @Test
+    fun `Lovlig opphold gir resultat JA for barn ved fødselshendelse`() {
+        val fakta = Fakta(personForVurdering = barn, behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+
+        val evaluering = vilkår.spesifikasjon.evaluer(fakta)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+    }
+
     private fun fakta(oppholdstillatelse: OPPHOLDSTILLATELSE, periode: DatoIntervallEntitet?): Fakta {
         return Fakta(personForVurdering = tredjelandsborger.copy(
                 statsborgerskap = listOf(GrStatsborgerskap(
@@ -148,7 +158,7 @@ class LovligOppholdVilkårTest {
 
     companion object {
         val vilkår = Vilkår.LOVLIG_OPPHOLD
-        val tredjelandsborger = tilfeldigPerson().apply {
+        val tredjelandsborger = tilfeldigPerson(personType = PersonType.SØKER).apply {
             statsborgerskap = listOf(GrStatsborgerskap(
                     landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = this))
         }
@@ -164,5 +174,6 @@ class LovligOppholdVilkårTest {
             statsborgerskap= emptyList()
         }
 
+        val barn = tilfeldigPerson(personType = PersonType.BARN)
     }
 }

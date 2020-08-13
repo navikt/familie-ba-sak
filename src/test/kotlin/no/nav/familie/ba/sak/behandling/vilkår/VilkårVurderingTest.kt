@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
-import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -82,7 +81,8 @@ class VilkårVurderingTest(
         assertEquals(setOf(Vilkår.UNDER_18_ÅR,
                            Vilkår.BOR_MED_SØKER,
                            Vilkår.GIFT_PARTNERSKAP,
-                           Vilkår.BOSATT_I_RIKET),
+                           Vilkår.BOSATT_I_RIKET,
+                           Vilkår.LOVLIG_OPPHOLD),
                      vilkårForNasjonal)
     }
 
@@ -169,7 +169,9 @@ class VilkårVurderingTest(
                                                      fødselsdato = LocalDate.of(1980, 1, 1), //Over 18år
                                                      navn = "",
                                                      kjønn = Kjønn.MANN,
-                                                     sivilstand = SIVILSTAND.UGIFT))
+                                                     sivilstand = SIVILSTAND.UGIFT).apply {
+            statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = this))
+        })
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)

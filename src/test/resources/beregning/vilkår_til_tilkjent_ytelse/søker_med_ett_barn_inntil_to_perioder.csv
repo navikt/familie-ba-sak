@@ -2,9 +2,9 @@ sakType;søkerPeriode1;søkerVilkår1;søkerPeriode2;søkerVilkår2;barn1Periode
 NASJONAL;;;;;;;;;;;;;;;
 NASJONAL;;;;;2021-09 – 2034-05;Under 18;;;;;;;;;
 NASJONAL;2020-09 – 2022-05;Gift;;;;;;;;;;;;;
-NASJONAL;2020-09 – 2022-05;Bosatt;;;2021-09 – 2034-05;Gift, bosatt, under 18, bor med søker;;;;1054;2021-10-01 - 2022-05-31;ORDINÆR_BARNETRYGD;;;
-NASJONAL;2020-09 – 2022-05;Bosatt;2022-06 – 2024-11;Bosatt;2018-09 – 2021-07;Gift, bosatt, under 18, bor med søker;2023-02 – 2027-04;Gift, bosatt, under 18, bor med søker;;1054;2020-10-01 – 2021-06-30;ORDINÆR_BARNETRYGD;1054;2023-03-01 – 2024-11-30;ORDINÆR_BARNETRYGD
-NASJONAL;2020-09 – 2034-05;Bosatt;;;2020-09 – 2034-05;Gift, bosatt, under 18, bor med søker;;;;1054;2020-10-01 – 2034-04-30;ORDINÆR_BARNETRYGD;;;
-NASJONAL;2022-09 – 2034-05;Bosatt;;;2018-09 – 2024-07;Gift, bosatt, under 18, bor med søker;2027-02 – 2037-10;Gift, bosatt, under 18, bor med søker;;1054;2022-10-01 – 2024-06-30;ORDINÆR_BARNETRYGD;1054;2027-03-01 – 2034-05-31;ORDINÆR_BARNETRYGD
+NASJONAL;2020-09 – 2022-05;Bosatt, opphold;;;2021-09 – 2034-05;Gift, bosatt, opphold, under 18, bor med søker;;;;1054;2021-10-01 - 2022-05-31;ORDINÆR_BARNETRYGD;;;
+NASJONAL;2020-09 – 2022-05;Bosatt, opphold;2022-06 – 2024-11;Bosatt, opphold;2018-09 – 2021-07;Gift, bosatt, opphold, under 18, bor med søker;2023-02 – 2027-04;Gift, bosatt, opphold, under 18, bor med søker;;1054;2020-10-01 – 2021-06-30;ORDINÆR_BARNETRYGD;1054;2023-03-01 – 2024-11-30;ORDINÆR_BARNETRYGD
+NASJONAL;2020-09 – 2034-05;Bosatt, opphold;;;2020-09 – 2034-05;Gift, bosatt, opphold, under 18, bor med søker;;;;1054;2020-10-01 – 2034-04-30;ORDINÆR_BARNETRYGD;;;
+NASJONAL;2022-09 – 2034-05;Bosatt, opphold;;;2018-09 – 2024-07;Gift, bosatt, opphold, under 18, bor med søker;2027-02 – 2037-10;Gift, bosatt, opphold, under 18, bor med søker;;1054;2022-10-01 – 2024-06-30;ORDINÆR_BARNETRYGD;1054;2027-03-01 – 2034-05-31;ORDINÆR_BARNETRYGD
 EØS;2020-09 – 2034-05;Bosatt;;;2020-09 – 2034-05;Gift, bosatt, under 18, bor med søker;;;;;;;;;
 EØS;2020-09 – 2034-05;Bosatt, opphold;;;2020-09 – 2034-05;Gift, bosatt, opphold, under 18, bor med søker;;;;1054;2020-10-01 - 2034-04-30;ORDINÆR_BARNETRYGD;;;

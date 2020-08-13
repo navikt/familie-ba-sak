@@ -168,13 +168,6 @@ class StegServiceTest(
     }
 
     @Test
-    fun `Skal initiere vilkår for lovlig opphold basert på søkertype`() {
-        assertLovligOppholdForTypeSøker(TypeSøker.TREDJELANDSBORGER, true)
-        assertLovligOppholdForTypeSøker(TypeSøker.EØS_BORGER, true)
-        assertLovligOppholdForTypeSøker(TypeSøker.ORDINÆR, false)
-    }
-
-    @Test
     fun `Skal feile når man prøver å håndtere feil steg`() {
         val søkerFnr = randomFnr()
 
