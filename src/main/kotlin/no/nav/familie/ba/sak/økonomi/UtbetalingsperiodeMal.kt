@@ -39,7 +39,7 @@ data class UtbetalingsperiodeMal(
                                                                                     opphørForLinje = opphørKjedeFom!!) else null,
                     forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() },
                     periodeId = periodeIdOffset.toLong(),
-                    datoForVedtak = vedtak.vedtaksdato,
+                    datoForVedtak = vedtak?.vedtaksdato ?: error("Prøver å lage utbetalingsperiode uten vedtaksdato"),
                     klassifisering = andel.type.klassifisering,
                     vedtakdatoFom = andel.stønadFom,
                     vedtakdatoTom = andel.stønadTom,
