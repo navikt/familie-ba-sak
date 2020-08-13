@@ -435,43 +435,133 @@ class VilkårVurderingTest(
                                               medlemskap = Medlemskap.EØS,
                                               person = it)
                     )
-                    it.arbeidsforhold = listOf(
-                            GrArbeidsforhold(periode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
-                                             arbeidsgiverId = "998877665",
-                                             arbeidsgiverType = "Organisasjon",
-                                             person = it)
-                    )
+                    it.arbeidsforhold = løpendeArbeidsforhold(it)
                 }
 
         assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
-        assertEquals("Mor er EØS-borger og har et løpende arbeidsforhold i Norge.", Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+        assertEquals("Mor er EØS-borger og har et løpende arbeidsforhold i Norge.",
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
     }
 
     @Test
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er fra norden - lovlig opphold, skal evalueres til Ja`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
-        val person = genererPerson(PersonType.SØKER, personopplysningGrunnlag, GrBostedsadresse.fraBostedsadresse(bostedsadresse), sivilstand = SIVILSTAND.GIFT)
+        val person = genererPerson(PersonType.SØKER,
+                                   personopplysningGrunnlag,
+                                   GrBostedsadresse.fraBostedsadresse(bostedsadresse),
+                                   sivilstand = SIVILSTAND.GIFT)
                 .also {
                     it.statsborgerskap = listOf(
                             GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
-                                    landkode = "BEL",
-                                    medlemskap = Medlemskap.EØS,
-                                    person = it)
+                                              landkode = "BEL",
+                                              medlemskap = Medlemskap.EØS,
+                                              person = it)
                     )
                 }
-        val annenForelder = genererPerson(PersonType.ANNENPART, personopplysningGrunnlag, GrBostedsadresse.fraBostedsadresse(bostedsadresse), sivilstand = SIVILSTAND.GIFT)
-                .also {
-                    it.statsborgerskap = listOf(
-                            GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
-                                    landkode = "DNK",
-                                    medlemskap = Medlemskap.NORDEN,
-                                    person = it)
-                    )
-                }
+        val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.NORDEN)
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
         assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
-        assertEquals("Annen forelder er norsk eller nordisk statsborger.", Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+        assertEquals("Annen forelder er norsk eller nordisk statsborger.",
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
     }
+
+    @Test
+    fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er tredjelandsborger - lovlig opphold, skal evalueres til Nei`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
+        val person = genererPerson(PersonType.SØKER,
+                                   personopplysningGrunnlag,
+                                   GrBostedsadresse.fraBostedsadresse(bostedsadresse),
+                                   sivilstand = SIVILSTAND.GIFT)
+                .also {
+                    it.statsborgerskap = listOf(
+                            GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                                              landkode = "BEL",
+                                              medlemskap = Medlemskap.EØS,
+                                              person = it)
+                    )
+                }
+        val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.TREDJELANDSBORGER)
+
+        person.personopplysningGrunnlag.personer.add(annenForelder)
+
+        assertEquals(Resultat.NEI, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals("Annen forelder er tredjelandsborger.",
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+    }
+
+    @Test
+    fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er statsløs - lovlig opphold, skal evalueres til Nei`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
+        val person = genererPerson(PersonType.SØKER,
+                                   personopplysningGrunnlag,
+                                   GrBostedsadresse.fraBostedsadresse(bostedsadresse),
+                                   sivilstand = SIVILSTAND.GIFT)
+                .also {
+                    it.statsborgerskap = listOf(
+                            GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                                              landkode = "BEL",
+                                              medlemskap = Medlemskap.EØS,
+                                              person = it)
+                    )
+                }
+        val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.UKJENT)
+        person.personopplysningGrunnlag.personer.add(annenForelder)
+
+        assertEquals(Resultat.NEI, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals("Annen forelder er uten statsborgerskap.",
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+    }
+
+
+    @Test
+    fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder fra EØS som har løpende arbeidsforhold - lovlig opphold, skal evalueres til Ja`() {
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val bostedsadresse = Bostedsadresse(Vegadresse(0, null, null, "32E", null, null, null, null), null, null)
+        val person = genererPerson(PersonType.SØKER,
+                                   personopplysningGrunnlag,
+                                   GrBostedsadresse.fraBostedsadresse(bostedsadresse),
+                                   sivilstand = SIVILSTAND.GIFT)
+                .also {
+                    it.statsborgerskap = listOf(
+                            GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                                              landkode = "BEL",
+                                              medlemskap = Medlemskap.EØS,
+                                              person = it)
+                    )
+                }
+        val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.EØS)
+                .also { it.arbeidsforhold = løpendeArbeidsforhold(it) }
+        person.personopplysningGrunnlag.personer.add(annenForelder)
+
+        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals("Annen forelder er fra EØS og har et løpende arbeidsforhold i Norge.",
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+    }
+
+    private fun opprettAnnenForelder(personopplysningGrunnlag: PersonopplysningGrunnlag,
+                                     bostedsadresse: Bostedsadresse, medlemskap: Medlemskap): Person {
+        return genererPerson(PersonType.ANNENPART,
+                             personopplysningGrunnlag,
+                             GrBostedsadresse.fraBostedsadresse(bostedsadresse),
+                             sivilstand = SIVILSTAND.GIFT)
+                .also {
+                    it.statsborgerskap = listOf(
+                            GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                                              landkode = "LOL",
+                                              medlemskap = medlemskap,
+                                              person = it)
+                    )
+                }
+    }
+
+    private fun løpendeArbeidsforhold(person: Person) = listOf(GrArbeidsforhold(periode = DatoIntervallEntitet(LocalDate.now()
+                                                                                                                       .minusYears(
+                                                                                                                               1)),
+                                                                                arbeidsgiverId = "998877665",
+                                                                                arbeidsgiverType = "Organisasjon",
+                                                                                person = person))
 }

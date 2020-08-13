@@ -107,7 +107,7 @@ fun finnNåværendeMedlemskap(person: Person): List<Medlemskap> =
 fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
 
 private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
-    return if (morHarLøpendeArbeidsforhold(fakta)) {
+    return if (personHarLøpendeArbeidsforhold(fakta.personForVurdering)) {
         Evaluering.ja("Mor er EØS-borger og har et løpende arbeidsforhold i Norge.")
     } else {
         if (annenForelderEksistererOgBorMedMor(fakta)) {
@@ -115,9 +115,8 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
                 when {
                     contains(Medlemskap.NORDEN) -> Evaluering.ja("Annen forelder er norsk eller nordisk statsborger.")
                     contains(Medlemskap.EØS) -> {
-                        if (annenForelderHarLøpendeArbeidsforhold()) {
-                            Evaluering.kanskje("annen forelder har løpende arbeidsforhold: ikke implementert")
-                            // Evaluering.ja("Annen forelder har et løpende arbeidsforhold i Norge.")
+                        if (personHarLøpendeArbeidsforhold(hentAnnenForelder(fakta).first())) {
+                            Evaluering.ja("Annen forelder er fra EØS og har et løpende arbeidsforhold i Norge.")
                         } else {
                             sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta)
                         }
@@ -148,28 +147,30 @@ private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Eva
     return Evaluering.kanskje("ikke implementert")
 }
 
-fun morHarLøpendeArbeidsforhold(fakta: Fakta): Boolean = fakta.personForVurdering.arbeidsforhold?.any {
+fun personHarLøpendeArbeidsforhold(personForVurdering: Person): Boolean = personForVurdering.arbeidsforhold?.any {
     it.periode?.tom == null || it.periode.tom >= LocalDate.now()
 } ?: false
 
 fun annenForelderEksistererOgBorMedMor(fakta: Fakta): Boolean {
-    val annenForelder =
-            fakta.personForVurdering.personopplysningGrunnlag.personer.filter { it.type == PersonType.ANNENPART }.firstOrNull()
-    if (annenForelder == null) {
-        return false
+    val annenForelder = hentAnnenForelder(fakta).firstOrNull()
+    return if (annenForelder == null) {
+        false
     } else {
-        return fakta.personForVurdering.bostedsadresse != null
-               && fakta.personForVurdering.bostedsadresse !is GrUkjentBosted
-               && fakta.personForVurdering.bostedsadresse == annenForelder.bostedsadresse
+        fakta.personForVurdering.bostedsadresse != null
+        && fakta.personForVurdering.bostedsadresse !is GrUkjentBosted
+        && fakta.personForVurdering.bostedsadresse == annenForelder.bostedsadresse
     }
 }
 
 fun statsborgerskapAnnenForelder(fakta: Fakta): List<Medlemskap> {
     val annenForelder =
-            fakta.personForVurdering.personopplysningGrunnlag.personer.filter { it.type == PersonType.ANNENPART }.first()
+            hentAnnenForelder(fakta).first()
     return finnNåværendeMedlemskap(annenForelder)
 }
 
-fun annenForelderHarLøpendeArbeidsforhold(): Boolean = true // ikke implementert
+private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopplysningGrunnlag.personer.filter {
+    it.type == PersonType.ANNENPART
+}
+
 fun morHarBoddINorgeIMerEnn5År(): Boolean = true // ikke implementert
 fun morHarJobbetINorgeSiste5År(): Boolean = true // ikke implementert
