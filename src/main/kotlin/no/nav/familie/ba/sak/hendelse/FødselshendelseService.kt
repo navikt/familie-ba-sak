@@ -13,8 +13,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
                              private val personopplysningerService: PersonopplysningerService) {
 
-    val finnesHosInfotrygdCounter: Counter = Metrics.counter("fødselshendelse.mor.eller.barn.finnes.i.infotrygd")
-    val finnesIkkeHosInfotrygdCounter: Counter = Metrics.counter("fødselshendelse.mor.eller.barn.finnes.ikke.i.infotrygd")
+    val harSakIInfotrygdCounter: Counter = Metrics.counter("fødselshendelse.mor.eller.barn.er.tilknyttet.sak.i.infotrygd")
+    val harIkkeSakIInfotrygdCounter: Counter = Metrics.counter("fødselshendelse.mor.eller.barn.er.ikke.tilknyttet.sak.i.infotrygd")
 
     fun fødselshendelseSkalBehandlesHosInfotrygd(morsIdent: String, barnasIdenter: List<String>): Boolean {
 
@@ -29,8 +29,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         val harLøpendeInfotrygdsak = infotrygdBarnetrygdClient.harLøpendeInfotrygdsak(morsIdenter, alleBarnasIdenter)
         when (harLøpendeInfotrygdsak) {
-            true -> finnesHosInfotrygdCounter.increment()
-            false -> finnesIkkeHosInfotrygdCounter.increment()
+            true -> harSakIInfotrygdCounter.increment()
+            false -> harIkkeSakIInfotrygdCounter.increment()
         }
 
         return harLøpendeInfotrygdsak
