@@ -81,8 +81,10 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
             }
             isEmpty() || contains(Medlemskap.UKJENT) || contains(Medlemskap.STATSLØS) -> {
                 val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER)
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER){
+                    økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
                     Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
+                }
                 else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
             }
             else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")

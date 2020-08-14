@@ -174,9 +174,17 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                        throwable = e)
         }
 
-        if (!response.harFeil()) return response.data!!.person!!.opphold!!
+        if (!response.harFeil()){
+            if(response.data == null || response.data.person== null || response.data.person.opphold== null){
+                throw Feil(message = "Ugyldig response (null) når hent opphold fra PDL.",
+                           frontendFeilmelding = "Feilet med å hent opphold for person $ident",
+                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+            return response.data.person.opphold
+        }
+
         throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke identer for person $ident: ${response.errorMessages()}",
+                   frontendFeilmelding = "Fant ikke opphold for person $ident: ${response.errorMessages()}",
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
