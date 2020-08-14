@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.time.LocalDate.now
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("dev", "mock-pdl")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UtbetalingsoppdragIntegrasjonTest(
         @Autowired

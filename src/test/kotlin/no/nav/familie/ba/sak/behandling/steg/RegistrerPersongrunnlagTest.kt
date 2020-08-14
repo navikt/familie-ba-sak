@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("dev", "mock-pdl")
 @TestInstance(Lifecycle.PER_CLASS)
 @DirtiesContext
 class RegistrerPersongrunnlagTest(

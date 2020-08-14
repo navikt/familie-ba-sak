@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -11,7 +12,7 @@ import org.springframework.web.context.annotation.ApplicationScope
 
 @Service
 @ApplicationScope
-class PersonopplysningerService(private val pdlRestClient: PdlRestClient) {
+class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
 
     fun hentPersoninfoFor(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfo(personIdent, PersonInfoQuery.MED_RELASJONER)
@@ -92,6 +93,7 @@ class PersonopplysningerService(private val pdlRestClient: PdlRestClient) {
     fun hentStatsborgerskap(ident: String, tema: String): List<Statsborgerskap> =
             pdlRestClient.hentStatsborgerskap(ident, tema)
 
+    fun hentOpphold(ident: String): List<Opphold> = pdlRestClient.hentOpphold(ident, "BAR")
 
     companion object {
         const val PERSON = "PERSON"
