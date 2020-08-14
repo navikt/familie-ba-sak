@@ -91,23 +91,23 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
-        val behandling = lagBehandling()
-        val vedtak = lagVedtak(behandling = behandling)
-        every { featureToggleServiceMock.isEnabled(any()) } returns false
-        every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns BehandlingResultatType.INNVILGET
-        every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
-        every { evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(), any()) } returns Evaluering.ja("")
-        every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
+        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
-        verify(exactly = 1) { IverksettMotOppdragTask.opprettTask(any<Behandling>(), any<Vedtak>(), any<String>()) }
+        verify(exactly = 1) { IverksettMotOppdragTask.opprettTask(any(), any(), any()) }
         verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
     }
 
+
     @Test
     fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og toggle er skrudd av`() {
+        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.AVSLÅTT)
 
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
+
+        verify(exactly = 1) { OpprettOppgaveTask.opprettTask(any(), any(), any()) }
+        verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
     }
 
     @Test
@@ -118,6 +118,22 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal ikke kjøre vilkårsvurdering når filtreringsregler gir avslag`() {
 
+    }
+
+    private fun initMockk(vilkårsvurderingsResultat: BehandlingResultatType) {
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling = behandling)
+        every { featureToggleServiceMock.isEnabled(any()) } returns false
+        every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
+        every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
+        every { evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(), any()) } returns Evaluering.ja("")
+        every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
+
+        mockkObject(IverksettMotOppdragTask.Companion)
+        every { IverksettMotOppdragTask.opprettTask(any(), any(), any()) } returns Task.nyTask(IverksettMotOppdragTask.TASK_STEP_TYPE, "")
+
+        mockkObject(OpprettOppgaveTask.Companion)
+        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
     }
 
     companion object {
