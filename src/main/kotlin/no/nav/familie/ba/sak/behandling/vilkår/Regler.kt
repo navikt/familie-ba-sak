@@ -91,7 +91,7 @@ internal fun giftEllerPartnerskap(fakta: Fakta): Evaluering =
                     Evaluering.ja("Person mangler informasjon om sivilstand.")
                 else
                     Evaluering.kanskje("Person mangler informasjon om sivilstand.")
-            SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER, SIVILSTAND.UOPPGITT ->
+            SIVILSTAND.GIFT, SIVILSTAND.REGISTRERT_PARTNER ->
                 Evaluering.nei("Person er gift eller har registrert partner")
             else -> Evaluering.ja("Person er ikke gift eller har registrert partner")
         }
@@ -135,7 +135,8 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
 }
 
 private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Evaluering {
-    if (morHarBoddINorgeIMerEnn5År()) {
+    // Regelflytramme. Utkommentert pga. at SonarCube flagger dette som en bug. Rammen skal benyttes når reglene er implementert.
+    /*if (morHarBoddINorgeIMerEnn5År()) {
         if (morHarJobbetINorgeSiste5År()) {
             // Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
         } else {
@@ -143,7 +144,7 @@ private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Eva
         }
     } else {
         // Evaluering.nei("Mor har ikke bodd i Norge sammenhengende i mer enn 5 år.")
-    }
+    }*/
     return Evaluering.kanskje("ikke implementert")
 }
 
