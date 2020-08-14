@@ -176,8 +176,8 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
         if (!response.harFeil()){
             if(response.data == null || response.data.person== null || response.data.person.opphold== null){
-                throw Feil(message = "Ugyldig response (null) når hent opphold fra PDL.",
-                           frontendFeilmelding = "Feilet med å hent opphold for person $ident",
+                throw Feil(message = "Ugyldig response (null) fra PDL ved henting av opphold.",
+                           frontendFeilmelding = "Feilet ved henting av opphold for person $ident",
                            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
             }
             return response.data.person.opphold
