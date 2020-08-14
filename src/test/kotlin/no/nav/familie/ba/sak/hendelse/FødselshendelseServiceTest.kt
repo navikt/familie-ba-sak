@@ -21,9 +21,9 @@ class FødselshendelseServiceTest {
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock, infotrygdBarnetrygdClientMock, personopplysningerServiceMock)
 
     @Test
-    fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer false`() {
+    fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer true`() {
         every { personopplysningerServiceMock.hentIdenter(any()) } returns listOf(IdentInformasjon(søkerFnr, false, "FOLKEREGISTERIDENT"))
-        every { infotrygdBarnetrygdClientMock.finnesIkkeHosInfotrygd(any(), any()) } returns false
+        every { infotrygdBarnetrygdClientMock.harLøpendeInfotrygdsak(any(), any()) } returns true
 
         val skalBehandlesHosInfotrygd = fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
 
@@ -37,7 +37,7 @@ class FødselshendelseServiceTest {
         every { personopplysningerServiceMock.hentIdenter(Ident(barn1Fnr)) } returns listOf(IdentInformasjon(barn1Fnr, false, "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
-        every { infotrygdBarnetrygdClientMock.finnesIkkeHosInfotrygd(capture(slot), any()) } returns false
+        every { infotrygdBarnetrygdClientMock.harLøpendeInfotrygdsak(capture(slot), any()) } returns false
 
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
 
@@ -54,7 +54,7 @@ class FødselshendelseServiceTest {
         every { personopplysningerServiceMock.hentIdenter(Ident(barn2Fnr)) } returns listOf(IdentInformasjon(barn2Fnr, false, "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
-        every { infotrygdBarnetrygdClientMock.finnesIkkeHosInfotrygd(any(), capture(slot)) } returns false
+        every { infotrygdBarnetrygdClientMock.harLøpendeInfotrygdsak(any(), capture(slot)) } returns false
 
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr, barn2Fnr))
 

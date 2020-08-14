@@ -19,17 +19,17 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
                                 private val environment: Environment)
     : AbstractRestClient(restOperations, "infotrygd_barnetrygd") {
 
-    fun finnesIkkeHosInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String>): Boolean {
+    fun harLøpendeInfotrygdsak(søkersIdenter: List<String>, barnasIdenter: List<String>): Boolean {
         if (environment.activeProfiles.contains("e2e")) {
             return true
         }
 
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/personsok")
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/lopendeSak")
 
         val request = InfotrygdSøkRequest(søkersIdenter.map { FoedselsNr(it) }, barnasIdenter.map { FoedselsNr(it) })
 
         return try {
-            postForEntity<InfotrygdSøkResponse>(uri, request).ingenTreff
+            !postForEntity<InfotrygdSøkResponse>(uri, request).ingenTreff
         } catch (ex: Exception) {
             when (ex) {
                 is HttpClientErrorException -> secureLogger.error("Http feil mot infotrygd barnetrygd: httpkode: ${ex.statusCode}, feilmelding ${ex.message}", ex)

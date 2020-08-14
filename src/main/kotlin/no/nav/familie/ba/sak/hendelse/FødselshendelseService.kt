@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.stereotype.Service
@@ -28,13 +27,13 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                     .map { identinfo -> identinfo.ident }
         }
 
-        val finnesHosInfotrygd = !infotrygdBarnetrygdClient.finnesIkkeHosInfotrygd(morsIdenter, alleBarnasIdenter)
-        when (finnesHosInfotrygd) {
+        val harLøpendeInfotrygdsak = infotrygdBarnetrygdClient.harLøpendeInfotrygdsak(morsIdenter, alleBarnasIdenter)
+        when (harLøpendeInfotrygdsak) {
             true -> finnesHosInfotrygdCounter.increment()
             false -> finnesIkkeHosInfotrygdCounter.increment()
         }
 
-        return finnesHosInfotrygd
+        return harLøpendeInfotrygdsak
     }
 
     fun sendTilInfotrygdFeed(barnIdenter: List<String>) {
