@@ -65,7 +65,7 @@ class Vilkårsvurdering(
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.GODKJENT)
 
-            val aktivtBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
+            /*val aktivtBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
                     ?: throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
 
             if (aktivtBehandlingResultat.hentSamletResultat() != BehandlingResultatType.INNVILGET
@@ -79,7 +79,7 @@ class Vilkårsvurdering(
                 taskRepository.save(nyTask)
             } else {
                 LOG.info("Lag opprettOppgaveTask er skrudd av i miljø eller behandlingen av fødselshendelsen var innvilget")
-            }
+            }*/
         }
 
         return hentNesteStegForNormalFlyt(behandling)

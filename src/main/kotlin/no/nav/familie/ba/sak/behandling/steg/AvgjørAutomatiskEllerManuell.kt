@@ -40,9 +40,7 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val pe
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, data))
-
-        oppdaterMetrikker(evaluering)
+        evaluerFiltreringsRegler(behandling, data)
 
         /*
         if (evaluering.resultat == Resultat.JA) {
@@ -54,6 +52,12 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val pe
         */
 
         return hentNesteStegForNormalFlyt(behandling)
+    }
+
+    fun evaluerFiltreringsRegler(behandling: Behandling, barnetsIdent: String): Evaluering {
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, barnetsIdent))
+        oppdaterMetrikker(evaluering)
+        return evaluering
     }
 
     private fun lagFaktaObjekt(behandling: Behandling, barnetsIdent: String): Fakta {

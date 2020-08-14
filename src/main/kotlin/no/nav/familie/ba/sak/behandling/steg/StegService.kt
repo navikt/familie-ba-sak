@@ -7,11 +7,13 @@ import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -19,7 +21,10 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.KontrollertRollbackException
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.nare.core.evaluations.Evaluering
+import no.nav.nare.core.evaluations.Resultat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -268,22 +273,39 @@ class StegService(
         }.toMap()
     }
 
-    fun kjørFiltreringsreglerForFødselshendelse(behandling: Behandling) {
-        behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling, nyBehandling.barnasIdenter[0])
+    fun evaluerFiltreringsReglerForFødselshendelse(behandling: Behandling, barnetsIdent: String): Evaluering =
+            hentBehandlingStegAvgjørAutomatiskBehandling().evaluerFiltreringsRegler(behandling, barnetsIdent)
 
-    }
+    private fun hentBehandlingStegAvgjørAutomatiskBehandling(): AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser =
+        hentBehandlingSteg(StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER)
+                as AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser
 
-    @Transactional(noRollbackFor = [Feil::class])
-    fun regelkjørBehandling(behandling: Behandling) {
-
-        val oppdatertBehandling = håndterVilkårsvurdering(behandling)
+    fun evaluerVilkårForFødselshendelse(behandling: Behandling, søkersIdent: String?): BehandlingResultatType? {
+        håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
         val samletResultat = behandlingResultat?.hentSamletResultat()
 
-        secureLogger.info("Behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
+        secureLogger.info("Behandling med søkerident $søkersIdent fullført med resultat: $samletResultat")
 
-        if (featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
-            throw KontrollertRollbackException()
+        return samletResultat
+    }
+
+    fun hånterEvalueringsResultat(filtreringsEvaluering: Evaluering, vilkårsvurderingsEvaluering: BehandlingResultatType?) {
+        if (filtreringsEvaluering.resultat != Resultat.JA) {
+            // TODO legg til teller
+        }
+
+        if (vilkårsvurderingsEvaluering != BehandlingResultatType.INNVILGET
+                && featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")
+                && !featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
+            val nyTask = OpprettOppgaveTask.opprettTask(
+                                    behandlingId = behandling.id,
+                                    oppgavetype = Oppgavetype.BehandleSak,
+                                    fristForFerdigstillelse = LocalDate.now()
+                )
+            taskRepository.save(nyTask)
+        } else {
+            LOG.info("Lag opprettOppgaveTask er skrudd av i miljø eller behandlingen av fødselshendelsen var innvilget")
         }
     }
 
