@@ -1,15 +1,27 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse
 
 import io.mockk.*
+import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.nare.core.evaluations.Evaluering
+import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -75,5 +87,40 @@ class FødselshendelseServiceTest {
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr, barn2Fnr))
 
         Assertions.assertEquals(3, slot.captured.size)
+    }
+
+    @Test
+    fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling = behandling)
+        every { featureToggleServiceMock.isEnabled(any()) } returns false
+        every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns BehandlingResultatType.INNVILGET
+        every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
+        every { evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(), any()) } returns Evaluering.ja("")
+        every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
+
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
+
+        verify(exactly = 1) { IverksettMotOppdragTask.opprettTask(any<Behandling>(), any<Vedtak>(), any<String>()) }
+        verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
+    }
+
+    @Test
+    fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og toggle er skrudd av`() {
+
+    }
+
+    @Test
+    fun `Skal kaste KontrollertRollbackException når toggle er skrudd på`() {
+
+    }
+
+    @Test
+    fun `Skal ikke kjøre vilkårsvurdering når filtreringsregler gir avslag`() {
+
+    }
+
+    companion object {
+        val fødselshendelseBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
     }
 }
