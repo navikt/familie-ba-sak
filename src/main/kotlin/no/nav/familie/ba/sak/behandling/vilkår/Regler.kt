@@ -79,7 +79,14 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
                     Evaluering.nei("${fakta.personForVurdering.type} har ikke lovlig opphold")
                 } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
             }
-            //TODO: Implementeres av TEA-1534
+            isEmpty() || contains(Medlemskap.UKJENT) || contains(Medlemskap.STATSLØS) -> {
+                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER){
+                    økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
+                    Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
+                }
+                else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
+            }
             else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
         }
     }
@@ -102,7 +109,7 @@ fun finnNåværendeMedlemskap(fakta: Fakta): List<Medlemskap> =
             statsborgerskap.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
             statsborgerskap.gyldigPeriode?.tom?.isAfter(LocalDate.now()) ?: true
         }
-                ?.map { it.medlemskap } ?: error("Person har ikke noe statsborgerskap.")
+                ?.map { it.medlemskap } ?: emptyList()
 
 
 fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)

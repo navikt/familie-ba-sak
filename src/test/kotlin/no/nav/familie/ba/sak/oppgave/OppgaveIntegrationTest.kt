@@ -29,7 +29,7 @@ import java.time.LocalDate
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres")
+@ActiveProfiles("postgres", "mock-pdl")
 @Tag("integration")
 class OppgaveIntegrationTest {
 

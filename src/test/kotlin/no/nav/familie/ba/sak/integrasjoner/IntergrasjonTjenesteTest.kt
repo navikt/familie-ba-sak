@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedle
 import no.nav.familie.ba.sak.integrasjoner.domene.*
 import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
 import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -39,7 +40,7 @@ import kotlin.random.Random
 
 
 @SpringBootTest(classes = [ApplicationConfig::class], properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
-@ActiveProfiles("dev", "integrasjonstest", "mock-oauth")
+@ActiveProfiles("dev", "integrasjonstest", "mock-oauth", "mock-pdl")
 @AutoConfigureWireMock(port = 28085)
 @TestInstance(Lifecycle.PER_CLASS)
 class IntergrasjonTjenesteTest {
@@ -47,6 +48,9 @@ class IntergrasjonTjenesteTest {
     @Autowired
     @Qualifier("integrasjonClient")
     lateinit var integrasjonClient: IntegrasjonClient
+
+    @Autowired
+    lateinit var personopplysningerService: PersonopplysningerService
 
     @AfterEach
     fun cleanUp() {

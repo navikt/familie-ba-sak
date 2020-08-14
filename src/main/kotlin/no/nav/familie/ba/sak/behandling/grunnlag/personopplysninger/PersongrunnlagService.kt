@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -19,6 +20,7 @@ class PersongrunnlagService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val integrasjonClient: IntegrasjonClient,
         private val statsborgerskapService: StatsborgerskapService,
+        private val oppholdService: OppholdService,
         private val arbeidsforholdService: ArbeidsforholdService,
         private val personopplysningerService: PersonopplysningerService
 ) {
@@ -67,6 +69,7 @@ class PersongrunnlagService(
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
         ).also {
             it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
+            it.opphold = oppholdService.hentOpphold(it)
             it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(fødselsnummer), it)
         }
 
@@ -90,7 +93,10 @@ class PersongrunnlagService(
                                          kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                                          bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                                          sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
-            ).also { it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(nyttBarn), it)}
+            ).also {
+                it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(nyttBarn), it)
+                it.opphold = oppholdService.hentOpphold(it)
+            }
         }
     }
 

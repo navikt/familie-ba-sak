@@ -11,7 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev")
+@ActiveProfiles("dev", "mock-pdl")
 @Tag("integration")
 class FeatureToggleServiceTest(
         @Autowired
