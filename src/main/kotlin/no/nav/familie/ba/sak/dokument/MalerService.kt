@@ -33,7 +33,7 @@ class MalerService(
                          behandlingResultatType: BehandlingResultatType): MalMedData {
 
         val søkersStatsborgerskap = persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap?: error("Finner ikke søker på behandling")
-        // val medlemskap = TODO: fortsett her
+        // val medlemskap = TODO: fortsett her. Bruk finnNåværendeMedlemskap, men refaktorer sånn at den returnerer ET medlemskap.
 
         return MalMedData(
                 mal = malNavnForTypeSøkerOgResultatType(søknad?.typeSøker, behandlingResultatType),
