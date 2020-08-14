@@ -17,7 +17,7 @@ import org.springframework.web.client.HttpClientErrorException
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev", "test-søk")
+@ActiveProfiles("dev", "mock-pdl-test-søk")
 @Tag("integration")
 class SøkFagsakNegativeTest {
 

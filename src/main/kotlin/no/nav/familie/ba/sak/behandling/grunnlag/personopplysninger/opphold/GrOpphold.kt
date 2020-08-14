@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
@@ -23,7 +24,8 @@ data class GrOpphold(
 
         @Column(name = "type", nullable = false)
         val type: OPPHOLDSTILLATELSE,
-        
+
+        @JsonIgnore
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
         val person: Person
