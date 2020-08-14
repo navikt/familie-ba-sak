@@ -42,11 +42,6 @@ enum class StegType(val rekkefølge: Int,
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UNDERKJENT_AV_BESLUTTER)),
-    AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER(
-            rekkefølge = 2,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET)
-    ),
     VILKÅRSVURDERING(
             rekkefølge = 3,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
@@ -105,9 +100,14 @@ enum class StegType(val rekkefølge: Int,
                       behandlingOpprinnelse: BehandlingOpprinnelse? = null): StegType {
         return if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER
-                AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
+                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                 else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
             }
         } else {
