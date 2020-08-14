@@ -5,10 +5,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
-import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -24,7 +22,6 @@ import java.time.LocalDate
 class BeregningService(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakService: FagsakService,
-        private val søknadGrunnlagService: SøknadGrunnlagService,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val behandlingRepository: BehandlingRepository
@@ -57,11 +54,8 @@ class BeregningService(
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
                                  ?: throw IllegalStateException("Kunne ikke hente behandlingsresultat for behandling med id ${behandling.id}")
 
-        val søknadDTO = søknadGrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.hentSøknadDto()
-        val sakType = hentSakType(behandlingKategori = behandling.kategori, søknadDTO = søknadDTO)
-
         val tilkjentYtelse = TilkjentYtelseUtils
-                .beregnTilkjentYtelse(behandlingResultat, sakType, personopplysningGrunnlag)
+                .beregnTilkjentYtelse(behandlingResultat, personopplysningGrunnlag)
 
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
@@ -80,7 +74,7 @@ class BeregningService(
         val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
         var opphørsdato: LocalDate? = null
         if (erRentOpphør) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.map { it.opphør!!.opphørDatoFom }.sorted().first()
+            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.map { it.opphør!!.opphørDatoFom }.min()!!
         }
 
         if (behandling.type == BehandlingType.REVURDERING) {

@@ -18,14 +18,14 @@ data class PeriodeResultat(
         val vilkårResultater: Set<PeriodeVilkår>
 ) {
 
-    fun allePåkrevdeVilkårErOppfylt(personType: PersonType, sakType: SakType): Boolean {
-        val alleVilkår = Vilkår.hentVilkårFor(personType, sakType)
+    fun allePåkrevdeVilkårErOppfylt(personType: PersonType): Boolean {
+        val alleVilkår = Vilkår.hentVilkårFor(personType)
         return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
                && vilkårResultater.all { it.resultat == Resultat.JA }
     }
 
-    fun allePåkrevdeVilkårVurdert(personType: PersonType, sakType: SakType): Boolean {
-        val alleVilkår = Vilkår.hentVilkårFor(personType, sakType)
+    fun allePåkrevdeVilkårVurdert(personType: PersonType): Boolean {
+        val alleVilkår = Vilkår.hentVilkårFor(personType)
         return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
                && vilkårResultater.all { it.resultat != Resultat.KANSKJE && it.periodeFom != null }
     }

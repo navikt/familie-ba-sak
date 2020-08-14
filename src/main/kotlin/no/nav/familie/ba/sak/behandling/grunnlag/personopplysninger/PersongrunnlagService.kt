@@ -3,21 +3,17 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 
 @Service
 class PersongrunnlagService(
-        private val personRepository: PersonRepository,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val integrasjonClient: IntegrasjonClient,
         private val statsborgerskapService: StatsborgerskapService,
         private val arbeidsforholdService: ArbeidsforholdService,
         private val personopplysningerService: PersonopplysningerService

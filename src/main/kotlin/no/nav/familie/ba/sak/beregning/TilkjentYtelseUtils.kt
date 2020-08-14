@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
 import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.SakType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
@@ -22,7 +21,6 @@ import java.time.YearMonth
 object TilkjentYtelseUtils {
 
     fun beregnTilkjentYtelse(behandlingResultat: BehandlingResultat,
-                             sakType: SakType,
                              personopplysningGrunnlag: PersonopplysningGrunnlag): TilkjentYtelse {
 
         val identBarnMap = personopplysningGrunnlag.barna
@@ -33,14 +31,12 @@ object TilkjentYtelseUtils {
 
         val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater(brukMåned = false).filter {
             søkerMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
-                    PersonType.SØKER,
-                    sakType
+                    PersonType.SØKER
             )
         }
         val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater(brukMåned = false).filter {
             identBarnMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
-                    PersonType.BARN,
-                    sakType
+                    PersonType.BARN
             )
         }
 

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker.TREDJELANDSBORGER
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
+import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.client.Norg2RestClient
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class MalerService(
-        private val vilkårService: VilkårService,
         private val totrinnskontrollService: TotrinnskontrollService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
@@ -31,6 +31,9 @@ class MalerService(
     fun mapTilBrevfelter(vedtak: Vedtak,
                          søknad: SøknadDTO?,
                          behandlingResultatType: BehandlingResultatType): MalMedData {
+
+        val søkersStatsborgerskap = persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap?: error("Finner ikke søker på behandling")
+        // val medlemskap = TODO: fortsett her
 
         return MalMedData(
                 mal = malNavnForTypeSøkerOgResultatType(søknad?.typeSøker, behandlingResultatType),
@@ -62,9 +65,6 @@ class MalerService(
 
         val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelseForBehandling = tilkjentYtelse,
                                                                           personopplysningGrunnlag = personopplysningGrunnlag)
-
-        val vilkårsdato = vilkårService.hentVilkårsdato(behandling = behandling)
-                          ?: error("Finner ikke vilkårsdato for vedtaksbrev")
 
         val innvilget = Innvilget(
                 enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn

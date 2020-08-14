@@ -14,7 +14,6 @@ data class SøknadDTO(
         val versjon: String = "1",
         val kategori: BehandlingKategori,
         val underkategori: BehandlingUnderkategori,
-        val typeSøker: TypeSøker = TypeSøker.ORDINÆR,
         val søkerMedOpplysninger: SøkerMedOpplysninger,
         val barnaMedOpplysninger: List<BarnMedOpplysninger>,
         val annenPartIdent: String
