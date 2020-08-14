@@ -257,6 +257,16 @@ class PeriodeMapperTest {
                                      behandlingId = behandlingResultat.behandling.id,
                                      regelInput = null,
                                      regelOutput = null
+                      ),
+                      VilkårResultat(personResultat = personResultat,
+                                     vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                     resultat = Resultat.JA,
+                                     periodeFom = periodeFom,
+                                     periodeTom = null,
+                                     begrunnelse = "",
+                                     behandlingId = behandlingResultat.behandling.id,
+                                     regelInput = null,
+                                     regelOutput = null
                       ))
         )
 

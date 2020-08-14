@@ -26,6 +26,16 @@ class VilkårsvurderingMetrics {
                 }
             }
         }
+
+        LovligOppholdAvslagÅrsaker.values().map { årsak ->
+            PersonType.values().filter { it !== PersonType.ANNENPART }.forEach { personType ->
+                lovligOppholdAvslagÅrsaker[personType.name + årsak.name] = Metrics.counter("familie.ba.behandling.lovligopphold",
+                                                                                           "aarsak",
+                                                                                           årsak.name,
+                                                                                           "personType",
+                                                                                           personType.name)
+            }
+        }
     }
 
     private fun genererMetrikkMap(spesifikasjon: Spesifikasjon<Fakta>,
@@ -67,4 +77,19 @@ class VilkårsvurderingMetrics {
             evaluering.children.forEach { økTellereForEvaluering(it, personType, behandlingOpprinnelse) }
         }
     }
+
+    companion object {
+        val lovligOppholdAvslagÅrsaker = mutableMapOf<String, Counter>()
+
+        fun økTellerForLovligOpphold(årsak: LovligOppholdAvslagÅrsaker, personType: PersonType) {
+            lovligOppholdAvslagÅrsaker[personType.name + årsak.name]?.increment()
+        }
+    }
+}
+
+enum class LovligOppholdAvslagÅrsaker {
+    TREDJELANDSBORGER,
+    EØS,
+    STATSLØS,
+    BOSTEDSADRESSE
 }
