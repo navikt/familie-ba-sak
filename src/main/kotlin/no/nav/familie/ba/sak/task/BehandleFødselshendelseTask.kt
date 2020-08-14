@@ -27,13 +27,15 @@ class BehandleFødselshendelseTask(
         } catch (e: KontrollertRollbackException) {
             LOG.info("Rollback utført. Data ikke persistert.")
         } catch (e: Feil) {
-            LOG.info("FødselshendelseTask kjørte med Feil=${e.frontendFeilmelding}")
+            LOG.info("FødselshendelseTask kjørte med Feil=${e.message}")
+            secureLogger.info("FødselshendelseTask kjørte med Feil=${e.frontendFeilmelding}", e)
         }
     }
 
     companion object {
         const val TASK_STEP_TYPE = "behandleFødselshendelseTask"
         val LOG = LoggerFactory.getLogger(this::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(
