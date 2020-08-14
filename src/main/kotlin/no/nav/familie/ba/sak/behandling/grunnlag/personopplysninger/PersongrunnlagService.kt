@@ -73,7 +73,7 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        hentFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
+        leggTilFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
 
         secureLogger.info("Setter persongrunnlag med søker: ${fødselsnummer} og barn: ${barnasFødselsnummer}")
         secureLogger.info("Barna på persongrunnlaget som lagres: ${personopplysningGrunnlag.barna.map { it.personIdent.ident }}")
@@ -97,8 +97,8 @@ class PersongrunnlagService(
         }
     }
 
-    private fun hentFarEllerMedmor(barnetsFødselsnummer: String,
-                                   personopplysningGrunnlag: PersonopplysningGrunnlag) {
+    private fun leggTilFarEllerMedmor(barnetsFødselsnummer: String,
+                                      personopplysningGrunnlag: PersonopplysningGrunnlag) {
         val barnPersoninfo = personopplysningerService.hentPersoninfoFor(barnetsFødselsnummer)
         val farEllerMedmor = barnPersoninfo.familierelasjoner.filter { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }.firstOrNull()
         if (farEllerMedmor != null) {
