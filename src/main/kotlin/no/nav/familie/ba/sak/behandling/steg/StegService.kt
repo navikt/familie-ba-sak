@@ -76,11 +76,8 @@ class StegService(
     fun evaluerVilkårForFødselshendelse(behandling: Behandling, søkersIdent: String?): BehandlingResultatType? {
         håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
-        val samletResultat = behandlingResultat?.hentSamletResultat()
-
-        secureLogger.info("Behandling med søkerident $søkersIdent fullført med resultat: $samletResultat")
-
-        return samletResultat
+        return behandlingResultat?.hentSamletResultat()
+                .also { secureLogger.info("Behandling med søkerident $søkersIdent fullført med resultat: $it") }
     }
 
     @Transactional
