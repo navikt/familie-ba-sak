@@ -122,7 +122,7 @@ fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
             contains(Medlemskap.EØS) -> Medlemskap.EØS
             contains(Medlemskap.TREDJELANDSBORGER) -> Medlemskap.TREDJELANDSBORGER
             contains(Medlemskap.STATSLØS) -> Medlemskap.STATSLØS
-            contains(Medlemskap.UKJENT) || isEmpty() -> Medlemskap.UKJENT
+            contains(Medlemskap.UKJENT) || isEmpty() -> Medlemskap.UKJENT //TODO: Usikker på om dette blir rett. Vi ønsker at både Medlemskap.STATLØS, Medlemskap.UKJENT og isEmpty() skal fanges, men dette er jo ikke nødvendigvis det samme som ukjent, men mangel på statsborgerskap på nåværende tidspunkt.
             else -> null
         }
     }
