@@ -68,17 +68,17 @@ data class Periode(val fom: LocalDate, val tom: LocalDate) {
 
 fun VilkårResultat.toPeriode(): Periode {
     return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"),
-            tom = this.periodeTom ?: TIDENES_ENDE)
+                   tom = this.periodeTom ?: TIDENES_ENDE)
 }
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
     return (other.toPeriode().fom.monthValue - this.toPeriode().tom.monthValue <= 1) &&
-            this.toPeriode().tom.year == other.toPeriode().fom.year
+           this.toPeriode().tom.year == other.toPeriode().fom.year
 }
 
 fun RestVilkårResultat.toPeriode(): Periode {
     return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"),
-            tom = this.periodeTom ?: TIDENES_ENDE)
+                   tom = this.periodeTom ?: TIDENES_ENDE)
 }
 
 fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
@@ -88,6 +88,34 @@ fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
         tom == null -> dato.isSameOrAfter(fom)
         else -> dato.isSameOrAfter(fom) && dato.isSameOrBefore(tom)
     }
+}
+
+fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): List<DatoIntervallEntitet> {
+    val map: NavigableMap<LocalDate, LocalDate?> =
+            TreeMap()
+    for (periode in input) {
+        if (periode.fom != null && !map.containsKey(periode.fom)) {
+            map[periode.fom] = periode.tom
+        }
+    }
+    val result = mutableListOf<DatoIntervallEntitet>()
+    var prevIntervall: DatoIntervallEntitet? = null
+    for ((key, value) in map) {
+        prevIntervall = if (prevIntervall != null && prevIntervall.erInnenfor(key)) {
+            val fom = prevIntervall.fom
+            val tom =
+                    if (prevIntervall.tom == null) null else (if (value != null && prevIntervall.tom!!.isAfter(value)) prevIntervall.tom else value)
+            result.remove(prevIntervall)
+            val nyttIntervall = DatoIntervallEntitet(fom, tom)
+            result.add(nyttIntervall)
+            nyttIntervall
+        } else {
+            val nyttIntervall = DatoIntervallEntitet(key, value)
+            result.add(nyttIntervall)
+            nyttIntervall
+        }
+    }
+    return result.toMutableList()
 }
 
 
