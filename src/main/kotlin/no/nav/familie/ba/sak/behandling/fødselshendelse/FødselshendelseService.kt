@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
@@ -63,7 +64,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         infotrygdFeedService.sendTilInfotrygdFeed(barnIdenter)
     }
 
-    @Transactional(noRollbackFor = [Feil::class])
+    @Transactional(noRollbackFor = [VilkårsvurderingFeil::class])
     fun opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling: NyBehandlingHendelse) {
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
