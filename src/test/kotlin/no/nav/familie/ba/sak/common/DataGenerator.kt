@@ -94,6 +94,7 @@ fun lagAndelTilkjentYtelse(fom: String,
                            behandling: Behandling = lagBehandling(),
                            person: Person = tilfeldigPerson(),
                            periodeIdOffset: Long? = null,
+                           forrigeperiodeIdOffset: Long? = null,
                            tilkjentYtelse: TilkjentYtelse? = null): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
@@ -104,7 +105,8 @@ fun lagAndelTilkjentYtelse(fom: String,
             stønadFom = dato(fom),
             stønadTom = dato(tom),
             type = ytelseType,
-            periodeOffset = periodeIdOffset
+            periodeOffset = periodeIdOffset,
+            forrigePeriodeOffset = forrigeperiodeIdOffset
     )
 }
 

@@ -67,6 +67,7 @@ private fun kombinerVerdier(lhs: LocalDateTimeline<List<VilkårResultat>>,
 }
 
 fun lagTidslinjeMedOverlappendePerioder(tidslinjer: List<LocalDateTimeline<VilkårResultat>>): LocalDateTimeline<List<VilkårResultat>> {
+    if (tidslinjer.isEmpty()) return LocalDateTimeline(emptyList())
     val førsteSegment = tidslinjer.first().toSegments().first()
     val initiellSammenlagt =
             LocalDateTimeline(listOf(LocalDateSegment(førsteSegment.fom, førsteSegment.tom, listOf(førsteSegment.value))))

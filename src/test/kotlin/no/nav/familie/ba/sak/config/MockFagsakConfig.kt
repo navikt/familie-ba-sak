@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 
 @Component
-@Profile("test-søk")
+@Profile("mock-pdl-test-søk")
 class MockFagsakConfig (
         @Autowired
         private val fagsakService: FagsakService,

@@ -97,7 +97,7 @@ enum class Kjønn {
 }
 
 enum class Medlemskap {
-    NORDEN, EØS, TREDJELANDSBORGER, UKJENT
+    NORDEN, EØS, TREDJELANDSBORGER, STATSLØS, UKJENT
 }
 
 

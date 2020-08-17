@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
+import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
@@ -135,7 +136,7 @@ class Vilkårsvurdering(
             }
 
             if (listeAvFeil.isNotEmpty()) {
-                throw Feil(message = "Validering av vilkårsvurdering feilet for behandling ${behandling.id}",
+                throw VilkårsvurderingFeil(message = "Validering av vilkårsvurdering feilet for behandling ${behandling.id}",
                         frontendFeilmelding = RessursUtils.lagFrontendMelding("Vilkårsvurderingen er ugyldig med følgende feil:",
                                 listeAvFeil)
                 )

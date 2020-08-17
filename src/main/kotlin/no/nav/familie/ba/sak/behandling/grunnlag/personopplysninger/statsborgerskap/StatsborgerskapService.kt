@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborger
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -92,6 +93,7 @@ class StatsborgerskapService(
                 statsborgerskap.iNordiskLand() -> Medlemskap.NORDEN
                 erEØS(perioderEØSLand, gyldigFraOgMed) -> Medlemskap.EØS
                 statsborgerskap.iTredjeland() -> Medlemskap.TREDJELANDSBORGER
+                statsborgerskap.erStatsløs() -> Medlemskap.STATSLØS
                 else -> Medlemskap.UKJENT
             }
 
@@ -107,6 +109,7 @@ class StatsborgerskapService(
 
     companion object {
         const val LANDKODE_UKJENT = "XUK"
+        const val LANDKODE_STATSLØS = "XXX"
         val TIDLIGSTE_DATO_I_KODEVERK: LocalDate = LocalDate.parse("1900-01-02")
         val SENESTE_DATO_I_KODEVERK: LocalDate = LocalDate.parse("9990-01-01")
     }
@@ -115,6 +118,8 @@ class StatsborgerskapService(
 fun Statsborgerskap.iNordiskLand() = Norden.values().map { it.name }.contains(this.land)
 
 fun Statsborgerskap.iTredjeland() = this.land != StatsborgerskapService.LANDKODE_UKJENT
+
+fun Statsborgerskap.erStatsløs() = this.land == StatsborgerskapService.LANDKODE_STATSLØS
 
 enum class Norden {
     NOR,
