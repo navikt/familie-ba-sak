@@ -106,7 +106,6 @@ internal class TidTest {
         assertFalse(førsteVilkårResultat.erEtterfølgendePeriode(ikkeEtterfølgendeVilkårResultat))
     }
 
-
     @Test
     fun `skal slå sammen overlappende perioder til en periode og bruke laveste fom og beholde tom fra periode 3`() {
         val periode1 = DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2005,9,2))
@@ -135,6 +134,35 @@ internal class TidTest {
                 .contains(periode1)
                 .contains(DatoIntervallEntitet(LocalDate.of(2005, 10, 1), LocalDate.of(2018,5,20)))
                 .contains(currentPeriode)
+    }
+
+    @Test
+    fun `skal slå sammen overlappende perioder med samme startdato`() {
+        val result = slåSammenOverlappendePerioder(listOf(
+                DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2004,2,1)),
+                DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2004,3,1)),
+                DatoIntervallEntitet(LocalDate.of(2005,1,1), LocalDate.of(2005,3,1)),
+                DatoIntervallEntitet(LocalDate.of(2005,1,1), LocalDate.of(2005,2,1))
+        ))
+
+        Assertions.assertThat(result)
+                .hasSize(2)
+                .contains(DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2004,3,1)))
+                .contains(DatoIntervallEntitet(LocalDate.of(2005,1,1), LocalDate.of(2005,3,1)))
+
+    }
+
+    @Test
+    fun `skal ikke slå sammen perioder som ligger inntil hverandre`() {
+        val result = slåSammenOverlappendePerioder(listOf(
+                DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2004,1,31)),
+                DatoIntervallEntitet(LocalDate.of(2004,2,1), LocalDate.of(2004,2,28))
+        ))
+
+        Assertions.assertThat(result)
+                .hasSize(2)
+                .contains(DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2004,1,31)))
+                .contains(DatoIntervallEntitet(LocalDate.of(2004,2,1), LocalDate.of(2004,2,28)))
     }
 
     @Test

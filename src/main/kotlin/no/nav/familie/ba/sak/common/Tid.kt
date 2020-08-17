@@ -94,7 +94,8 @@ fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): Lis
     val map: NavigableMap<LocalDate, LocalDate?> =
             TreeMap()
     for (periode in input) {
-        if (periode.fom != null && !map.containsKey(periode.fom)) {
+        if (periode.fom != null
+                && (!map.containsKey(periode.fom) || periode.tom == null || periode.tom.isAfter(map[periode.fom]))) {
             map[periode.fom] = periode.tom
         }
     }
@@ -115,7 +116,7 @@ fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): Lis
             nyttIntervall
         }
     }
-    return result.toMutableList()
+    return result
 }
 
 
