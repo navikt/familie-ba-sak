@@ -8,5 +8,8 @@ fun main(args: Array<String>) {
                                                                      "mock-dokgen-java",
                                                                      "mock-iverksett",
                                                                      "mock-infotrygd-feed",
-                                                                     "mock-infotrygd-barnetrygd").run(*args)
+                                                                     "mock-infotrygd-barnetrygd",
+                                                                     "mock-sts",
+                                                                     "mock-pdl"
+    ).run(*args)
 }

@@ -26,7 +26,7 @@ import java.time.LocalDate
 
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("dev", "mock-pdl")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårServiceTest(
         @Autowired

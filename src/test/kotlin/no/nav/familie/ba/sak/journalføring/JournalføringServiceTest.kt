@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("dev", "mock-pdl")
 @Tag("integration")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalføringServiceTest(

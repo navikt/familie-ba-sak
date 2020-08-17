@@ -22,7 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev", "mock-dokgen")
+@ActiveProfiles("dev", "mock-dokgen", "mock-pdl")
 @Tag("integration")
 class FagsakControllerTest(
         @Autowired

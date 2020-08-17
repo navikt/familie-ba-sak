@@ -20,7 +20,7 @@ import java.net.URI
 
 
 @SpringBootTest(classes = [ApplicationConfig::class])
-@ActiveProfiles("dev", "integrasjonstest", "mock-oauth")
+@ActiveProfiles("dev", "integrasjonstest", "mock-oauth", "mock-pdl")
 @AutoConfigureWireMock(port = 0)
 @TestInstance(Lifecycle.PER_CLASS)
 class InfotrygdFeedClientTest {

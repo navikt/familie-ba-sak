@@ -48,18 +48,46 @@ object ØkonomiUtils {
                                     oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, AndelTilkjentYtelse?> {
         val allePersoner = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
         return allePersoner.associateWith { kjedeIdentifikator ->
-            sisteBeståendeAndelIKjede(
+            beståendeAndelerIKjede(
                     forrigeKjede = forrigeKjeder[kjedeIdentifikator],
                     oppdatertKjede = oppdaterteKjeder[kjedeIdentifikator])
+                    ?.sortedBy { it.periodeOffset }?.lastOrNull()
         }
     }
-    private fun sisteBeståendeAndelIKjede(forrigeKjede: List<AndelTilkjentYtelse>?,
-                                  oppdatertKjede: List<AndelTilkjentYtelse>?): AndelTilkjentYtelse? {
+
+    private fun beståendeAndelerIKjede(forrigeKjede: List<AndelTilkjentYtelse>?,
+                                       oppdatertKjede: List<AndelTilkjentYtelse>?): List<AndelTilkjentYtelse>? {
         val forrige = forrigeKjede?.toSet() ?: emptySet()
         val oppdatert = oppdatertKjede?.toSet() ?: emptySet()
-        val førsteEndring= forrige.disjunkteAndeler(oppdatert).sortedBy { it.stønadFom }.firstOrNull()?.stønadFom
-        val består = if (førsteEndring != null) forrige.snittAndeler(oppdatert).filter { it.stønadFom.isBefore(førsteEndring) } else forrige
-        return består.sortedBy { it.periodeOffset }.lastOrNull()
+        val førsteEndring = forrige.disjunkteAndeler(oppdatert).sortedBy { it.stønadFom }.firstOrNull()?.stønadFom
+        return if (førsteEndring != null) forrige.snittAndeler(oppdatert)
+                .filter { it.stønadFom.isBefore(førsteEndring) } else forrigeKjede ?: emptyList()
+    }
+
+    /**
+     * Setter eksisterende offset på andeler som skal bestå
+     *
+     * @param[forrigeKjeder] forrige behandlings tilstand
+     * @param[oppdaterteKjeder] nåværende tilstand
+     * @return map med personident og oppdaterte kjeder
+     */
+    fun oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
+                                          forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, List<AndelTilkjentYtelse>> {
+        oppdaterteKjeder
+                .forEach { (kjedeIdentifikator, oppdatertKjede) ->
+                    if (forrigeKjeder.containsKey(kjedeIdentifikator)) {
+                        val forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator)
+                        val beståendeFraForrige =
+                                beståendeAndelerIKjede(forrigeKjede = forrigeKjede, oppdatertKjede = oppdatertKjede)
+                        beståendeFraForrige?.forEach { bestående ->
+                            val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+                                                      ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
+                            beståendeIOppdatert.periodeOffset = bestående.periodeOffset
+                            beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
+                        }
+                    }
+                }
+        return oppdaterteKjeder
     }
 
     /**
@@ -116,8 +144,12 @@ object ØkonomiUtils {
                                 ?: throw IllegalStateException("Andel i kjede skal ha offset"))
             }.toMap()
 
-    private fun altIKjedeOpphøres(kjedeidentifikator: String, sisteBeståendeAndelIHverKjede :Map<String, AndelTilkjentYtelse?>): Boolean = sisteBeståendeAndelIHverKjede[kjedeidentifikator] == null
-    private fun andelOpphøres(kjedeidentifikator: String, andel: AndelTilkjentYtelse, sisteBeståendeAndelIHverKjede :Map<String, AndelTilkjentYtelse?>): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
+    private fun altIKjedeOpphøres(kjedeidentifikator: String,
+                                  sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>): Boolean = sisteBeståendeAndelIHverKjede[kjedeidentifikator] == null
+
+    private fun andelOpphøres(kjedeidentifikator: String,
+                              andel: AndelTilkjentYtelse,
+                              sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
 
     val SMÅBARNSTILLEGG_SUFFIX = "_SMÅBARNSTILLEGG"
 }

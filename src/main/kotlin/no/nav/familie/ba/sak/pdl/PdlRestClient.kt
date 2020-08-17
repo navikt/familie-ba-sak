@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.http.util.UriUtil
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
@@ -158,6 +159,32 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         if (!response.harFeil()) return response.data.person!!.statsborgerskap
         throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
                    frontendFeilmelding = "Fant ikke identer for person $ident: ${response.errorMessages()}",
+                   httpStatus = HttpStatus.NOT_FOUND)
+    }
+
+    fun hentOpphold(ident: String, tema: String): List<Opphold>{
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
+                                                query = hentGraphqlQuery("opphold"))
+        val response = try {
+            postForEntity<PdlOppholdResponse>(pdlUri, pdlPersonRequest, httpHeaders(tema))
+        } catch (e: Exception) {
+            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                       frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                       throwable = e)
+        }
+
+        if (!response.harFeil()){
+            if(response.data == null || response.data.person== null || response.data.person.opphold== null){
+                throw Feil(message = "Ugyldig response (null) fra PDL ved henting av opphold.",
+                           frontendFeilmelding = "Feilet ved henting av opphold for person $ident",
+                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+            return response.data.person.opphold
+        }
+
+        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
+                   frontendFeilmelding = "Fant ikke opphold for person $ident: ${response.errorMessages()}",
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
