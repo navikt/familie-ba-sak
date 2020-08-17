@@ -238,7 +238,7 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
 
     if (lagFullstendigVilkårResultat) {
         personResultat.setVilkårResultater(
-                Vilkår.hentVilkårFor(personType, SakType.NASJONAL).map {
+                Vilkår.hentVilkårFor(personType).map {
                     VilkårResultat(personResultat = personResultat,
                                    periodeFom = periodeFom,
                                    periodeTom = periodeTom,

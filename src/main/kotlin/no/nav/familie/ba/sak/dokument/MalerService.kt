@@ -1,14 +1,12 @@
 package no.nav.familie.ba.sak.dokument
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
-import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker.TREDJELANDSBORGER
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
+import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.client.Norg2RestClient
@@ -29,14 +27,14 @@ class MalerService(
 ) {
 
     fun mapTilBrevfelter(vedtak: Vedtak,
-                         søknad: SøknadDTO?,
                          behandlingResultatType: BehandlingResultatType): MalMedData {
 
-        val søkersStatsborgerskap = persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap?: error("Finner ikke søker på behandling")
-        // val medlemskap = TODO: fortsett her. Bruk finnNåværendeMedlemskap, men refaktorer sånn at den returnerer ET medlemskap.
+        val statsborgerskap = persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap?: error("Finner ikke søker på behandling")
+        val medlemskap = finnNåværendeMedlemskap(statsborgerskap)
+        val sterkesteMedlemskap = finnSterkesteMedlemskap(medlemskap)
 
         return MalMedData(
-                mal = malNavnForTypeSøkerOgResultatType(søknad?.typeSøker, behandlingResultatType),
+                mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap, behandlingResultatType),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
                     BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
@@ -112,10 +110,10 @@ class MalerService(
     }
 
     companion object {
-        fun malNavnForTypeSøkerOgResultatType(typeSøker: TypeSøker?,
-                                              resultatType: BehandlingResultatType): String {
-            return when (typeSøker) {
-                TREDJELANDSBORGER -> "${resultatType.brevMal}-Tredjelandsborger"
+        fun malNavnForMedlemskapOgResultatType(medlemskap: Medlemskap?,
+                                               resultatType: BehandlingResultatType): String {
+            return when (medlemskap) {
+                Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-Tredjelandsborger"
                 else -> resultatType.brevMal
             }
         }

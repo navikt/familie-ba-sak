@@ -44,51 +44,16 @@ class VilkårVurderingTest(
     }
 
     @Test
-    fun `Hent relevante vilkår for persontype BARN`() {
-        val relevanteVilkår = Vilkår.hentVilkårForPart(PersonType.BARN)
-        val relevanteVilkårForDato = Vilkår.hentVilkårForPart(PersonType.BARN, LocalDate.now())
-        val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR,
-                                  Vilkår.BOR_MED_SØKER,
-                                  Vilkår.GIFT_PARTNERSKAP,
-                                  Vilkår.BOSATT_I_RIKET,
-                                  Vilkår.LOVLIG_OPPHOLD)
-        assertEquals(vilkårForBarn, relevanteVilkår)
-        assertEquals(vilkårForBarn, relevanteVilkårForDato)
-    }
-
-    @Test
     fun `Hent relevante vilkår for persontype SØKER`() {
-        val relevanteVilkår = Vilkår.hentVilkårForPart(PersonType.SØKER)
+        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.SØKER)
         val vilkårForSøker = setOf(Vilkår.BOSATT_I_RIKET,
                                    Vilkår.LOVLIG_OPPHOLD)
         assertEquals(vilkårForSøker, relevanteVilkår)
     }
 
     @Test
-    fun `Hent relevante vilkår for saktype EØS`() {
-        val vilkårForEøs = Vilkår.hentVilkårForSakstype(SakType.valueOfType(BehandlingKategori.EØS))
-        assertEquals(setOf(Vilkår.UNDER_18_ÅR,
-                           Vilkår.BOR_MED_SØKER,
-                           Vilkår.GIFT_PARTNERSKAP,
-                           Vilkår.BOSATT_I_RIKET,
-                           Vilkår.LOVLIG_OPPHOLD),
-                     vilkårForEøs)
-    }
-
-    @Test
-    fun `Hent relevante vilkår for saktype Nasjonal`() {
-        val vilkårForNasjonal = Vilkår.hentVilkårForSakstype(SakType.valueOfType(BehandlingKategori.NASJONAL))
-        assertEquals(setOf(Vilkår.UNDER_18_ÅR,
-                           Vilkår.BOR_MED_SØKER,
-                           Vilkår.GIFT_PARTNERSKAP,
-                           Vilkår.BOSATT_I_RIKET,
-                           Vilkår.LOVLIG_OPPHOLD),
-                     vilkårForNasjonal)
-    }
-
-    @Test
-    fun `Hent relevante vilkår for persontype og saktype`() {
-        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN, SakType.EØS)
+    fun `Hent relevante vilkår for persontype BARN`() {
+        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN)
         val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR,
                                   Vilkår.BOR_MED_SØKER,
                                   Vilkår.GIFT_PARTNERSKAP,
@@ -195,8 +160,8 @@ class VilkårVurderingTest(
         val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
 
         val forventetAntallVurderteVilkår =
-                Vilkår.hentVilkårFor(PersonType.BARN, SakType.valueOfType(BehandlingKategori.NASJONAL)).size +
-                Vilkår.hentVilkårFor(PersonType.SØKER, SakType.valueOfType(BehandlingKategori.NASJONAL)).size
+                Vilkår.hentVilkårFor(PersonType.BARN).size +
+                Vilkår.hentVilkårFor(PersonType.SØKER).size
         assertEquals(forventetAntallVurderteVilkår,
                      behandlingResultat.personResultater.flatMap { personResultat -> personResultat.vilkårResultater }.size)
     }
@@ -409,10 +374,21 @@ class VilkårVurderingTest(
                         )
                 }
 
-        val medlemskap = finnNåværendeMedlemskap(Fakta(person))
+        val medlemskap = finnNåværendeMedlemskap(Fakta(person).personForVurdering.statsborgerskap)
 
         assertEquals(2, medlemskap.size)
         assertEquals(Medlemskap.NORDEN, medlemskap[0])
         assertEquals(Medlemskap.EØS, medlemskap[1])
+    }
+
+    @Test
+    fun `Lovlig opphold - valider at sterkeste medlemskap blir returnert`() {
+        val medlemskapNorden = listOf(Medlemskap.TREDJELANDSBORGER, Medlemskap.NORDEN, Medlemskap.UKJENT)
+        val medlemskapUkjent = listOf(Medlemskap.UKJENT)
+        val medlemskapIngen = emptyList<Medlemskap>()
+
+        assertEquals(Medlemskap.NORDEN, finnSterkesteMedlemskap(medlemskapNorden))
+        assertEquals(Medlemskap.UKJENT, finnSterkesteMedlemskap(medlemskapUkjent))
+        assertEquals(null, finnSterkesteMedlemskap(medlemskapIngen))
     }
 }

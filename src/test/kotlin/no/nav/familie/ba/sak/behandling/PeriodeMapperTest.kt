@@ -275,8 +275,8 @@ class PeriodeMapperTest {
 
         Assertions.assertEquals(3, periodeResultater.size)
 
-        Assertions.assertFalse(periodeResultater.first().allePåkrevdeVilkårErOppfylt(PersonType.BARN, SakType.NASJONAL))
-        Assertions.assertFalse(periodeResultater.last().allePåkrevdeVilkårErOppfylt(PersonType.BARN, SakType.NASJONAL))
-        Assertions.assertTrue(periodeResultater[1].allePåkrevdeVilkårErOppfylt(PersonType.BARN, SakType.NASJONAL))
+        Assertions.assertFalse(periodeResultater.first().allePåkrevdeVilkårErOppfylt(PersonType.BARN))
+        Assertions.assertFalse(periodeResultater.last().allePåkrevdeVilkårErOppfylt(PersonType.BARN))
+        Assertions.assertTrue(periodeResultater[1].allePåkrevdeVilkårErOppfylt(PersonType.BARN))
     }
 }
