@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -14,16 +12,16 @@ import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Evaluering
-import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class FødselshendelseServiceTest {
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
@@ -91,7 +89,9 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
-        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET)
+        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
+                  filtreringResultat = Evaluering.ja(""),
+                  toggleVerdi = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -102,7 +102,9 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og toggle er skrudd av`() {
-        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.AVSLÅTT)
+        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.AVSLÅTT,
+                  filtreringResultat = Evaluering.ja(""),
+                  toggleVerdi = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -112,28 +114,46 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `Skal kaste KontrollertRollbackException når toggle er skrudd på`() {
+        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
+                  filtreringResultat = Evaluering.ja(""),
+                  toggleVerdi = true)
 
+        assertThrows<KontrollertRollbackException> {
+            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
+        }
+        verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
+        verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
     }
 
     @Test
-    fun `Skal ikke kjøre vilkårsvurdering når filtreringsregler gir avslag`() {
+    fun `Skal ikke kjøre vilkårsvurdering og lage oppgave når filtreringsregler gir avslag`() {
+        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
+                  filtreringResultat = Evaluering.nei(""),
+                  toggleVerdi = false)
 
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
+
+        verify(exactly = 0) { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) }
+        verify(exactly = 1) { OpprettOppgaveTask.opprettTask(any(), any(), any()) }
+        verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
     }
 
-    private fun initMockk(vilkårsvurderingsResultat: BehandlingResultatType) {
+    private fun initMockk(vilkårsvurderingsResultat: BehandlingResultatType, filtreringResultat: Evaluering, toggleVerdi: Boolean) {
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling = behandling)
-        every { featureToggleServiceMock.isEnabled(any()) } returns false
+        val opprettOppgaveTask = Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+        every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
-        every { evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(), any()) } returns Evaluering.ja("")
+        every { evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(), any()) } returns filtreringResultat
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
+        every { taskRepositoryMock.save(any()) } returns opprettOppgaveTask
 
         mockkObject(IverksettMotOppdragTask.Companion)
         every { IverksettMotOppdragTask.opprettTask(any(), any(), any()) } returns Task.nyTask(IverksettMotOppdragTask.TASK_STEP_TYPE, "")
 
         mockkObject(OpprettOppgaveTask.Companion)
-        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
     }
 
     companion object {
