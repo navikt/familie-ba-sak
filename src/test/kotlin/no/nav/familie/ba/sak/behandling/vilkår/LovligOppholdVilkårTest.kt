@@ -30,7 +30,7 @@ class LovligOppholdVilkårTest {
         assertThat(ukjentStatsborgerskapEvaluering.resultat).isEqualTo(Resultat.NEI)
 
         val tomtStatsborgerskapEvaluering = vilkår.spesifikasjon.evaluer(Fakta(personForVurdering = personMedTomtStatsborgerskap))
-        assertThat(tomtStatsborgerskapEvaluering.resultat).isEqualTo(Resultat.NEI)
+        assertThat(tomtStatsborgerskapEvaluering.resultat).isEqualTo(Resultat.KANSKJE)
     }
 
     @Test
@@ -65,7 +65,7 @@ class LovligOppholdVilkårTest {
             opphold= listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
         })
         evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        assertThat(evaluering.resultat).isEqualTo(Resultat.KANSKJE)
 
         fakta= Fakta(personForVurdering = statsløsPerson.copy(
         ).apply {
