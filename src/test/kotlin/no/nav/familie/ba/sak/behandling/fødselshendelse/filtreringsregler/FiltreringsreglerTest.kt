@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.filtreringsregler
+package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo

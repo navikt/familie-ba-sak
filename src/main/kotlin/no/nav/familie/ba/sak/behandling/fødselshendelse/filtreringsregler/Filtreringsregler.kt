@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.filtreringsregler
+package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 
 import no.nav.nare.core.specifications.Spesifikasjon
 

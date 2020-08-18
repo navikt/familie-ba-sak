@@ -1,11 +1,14 @@
-package no.nav.familie.ba.sak.behandling.steg
+package no.nav.familie.ba.sak.behandling.fødselshendelse
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.filtreringsregler.Fakta
-import no.nav.familie.ba.sak.behandling.filtreringsregler.Filtreringsregler
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -16,9 +19,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val personopplysningerService: PersonopplysningerService,
-                                                                private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository)
-    : BehandlingSteg<String> {
+class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysningerService: PersonopplysningerService,
+                                                 private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
 
@@ -35,25 +37,10 @@ class AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(private val pe
         }
     }
 
-    override fun stegType(): StegType {
-        return StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER
-    }
-
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, data))
-
+    fun evaluerFiltreringsregler(behandling: Behandling, barnetsIdent: String): Evaluering {
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, barnetsIdent))
         oppdaterMetrikker(evaluering)
-
-        /*
-        if (evaluering.resultat == Resultat.JA) {
-            // TODO Fortsett med vilkårsvurdering
-        } else {
-            // TODO Ikke fortsett med vilkårsvurdering, og opprett oppgave
-            // opprettOppgave(behandling)
-        }
-        */
-
-        return hentNesteStegForNormalFlyt(behandling)
+        return evaluering
     }
 
     private fun lagFaktaObjekt(behandling: Behandling, barnetsIdent: String): Fakta {

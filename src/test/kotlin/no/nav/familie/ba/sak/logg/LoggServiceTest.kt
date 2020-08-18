@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
@@ -89,7 +88,7 @@ class LoggServiceTest(
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkersIdent, barnetsIdent)
 
-        val behandling = stegService.håndterNyBehandlingFraHendelse(NyBehandlingHendelse(
+        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
                 søkersIdent = søkersIdent,
                 barnasIdenter = listOf(barnetsIdent)
         ))
