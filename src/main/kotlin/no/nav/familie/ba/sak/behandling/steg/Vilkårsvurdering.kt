@@ -16,16 +16,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.common.toPeriode
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.task.OpprettOppgaveTask
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Resultat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 
 @Service
 class Vilkårsvurdering(
@@ -34,9 +29,7 @@ class Vilkårsvurdering(
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
         private val behandlingResultatService: BehandlingResultatService,
-        private val behandlingService: BehandlingService,
-        private val featureToggleService: FeatureToggleService,
-        private val taskRepository: TaskRepository
+        private val behandlingService: BehandlingService
 ) : BehandlingSteg<String> {
 
     @Transactional
@@ -62,22 +55,6 @@ class Vilkårsvurdering(
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.GODKJENT)
-
-            val aktivtBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
-                    ?: throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
-
-            if (aktivtBehandlingResultat.hentSamletResultat() != BehandlingResultatType.INNVILGET
-                    && featureToggleService.isEnabled("familie-ba-sak.lag-oppgave")
-                    && !featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
-                val nyTask = OpprettOppgaveTask.opprettTask(
-                        behandlingId = behandling.id,
-                        oppgavetype = Oppgavetype.BehandleSak,
-                        fristForFerdigstillelse = LocalDate.now()
-                )
-                taskRepository.save(nyTask)
-            } else {
-                LOG.info("Lag opprettOppgaveTask er skrudd av i miljø eller behandlingen av fødselshendelsen var innvilget")
-            }
         }
 
         return hentNesteStegForNormalFlyt(behandling)
