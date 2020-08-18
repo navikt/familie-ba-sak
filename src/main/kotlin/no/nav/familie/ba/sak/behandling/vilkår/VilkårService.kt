@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -166,8 +167,10 @@ class VilkårService(
         val søknadDTO = søknadGrunnlagService.hentAktiv(behandling.id)?.hentSøknadDto()
 
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat, søknadDTO = søknadDTO)
 
+        if (behandling.opprinnelse == BehandlingOpprinnelse.MANUELL) {
+            lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat, søknadDTO = søknadDTO)
+        }
         return behandlingResultat
     }
 
