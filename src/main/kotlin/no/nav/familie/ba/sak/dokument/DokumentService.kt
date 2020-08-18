@@ -42,7 +42,6 @@ class DokumentService(
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr())
 
             val malMedData = malerService.mapTilBrevfelter(vedtak,
-                                                           søknad,
                                                            behandlingResultatType
             )
             dokGenKlient.lagPdfForMal(malMedData, headerFelter)
