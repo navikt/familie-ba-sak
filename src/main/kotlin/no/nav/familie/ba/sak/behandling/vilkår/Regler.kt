@@ -11,7 +11,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
 import java.time.Duration
 import java.time.LocalDate
-import java.time.Period
 
 internal fun barnUnder18År(fakta: Fakta): Evaluering =
         if (fakta.alder < 18)
