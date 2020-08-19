@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
@@ -63,7 +62,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         infotrygdFeedService.sendTilInfotrygdFeed(barnIdenter)
     }
 
-    @Transactional(noRollbackFor = [VilkårsvurderingFeil::class])
+    @Transactional
     fun opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling: NyBehandlingHendelse) {
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
@@ -82,7 +81,9 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             else -> stansetIAutomatiskVilkårsvurderingCounter.increment()
         }
 
-        if (!fødselshendelseSkalRullesTilbake()) {
+        if (fødselshendelseSkalRullesTilbake()) {
+            throw KontrollertRollbackException()
+        } else {
             if (resultatAvFiltrering !== Resultat.JA || resultatAvVilkårsvurdering !== BehandlingResultatType.INNVILGET) {
                 opprettOppgaveForManuellBehandling(behandlingId = behandling.id)
             } else {
@@ -90,8 +91,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
                 IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
             }
-        } else {
-            throw KontrollertRollbackException()
+
         }
     }
 
