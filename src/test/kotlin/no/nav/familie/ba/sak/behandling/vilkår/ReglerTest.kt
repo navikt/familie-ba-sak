@@ -41,45 +41,63 @@ class ReglerTest {
     }
 
     @Test
-    fun `negative foo`() {
+    fun `skal returnere usant dersom arbeidsforhold er null eller listen av arbeidsforhold er tom`() {
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(null)))).isFalse()
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(emptyList())))).isFalse()
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
-                listOf(
-                        DatoIntervallEntitet(fom= LocalDate.now().minusDays(2), tom= LocalDate.now()),
-                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(94))
-                )
-        )))).isFalse()
+    }
+
+    @Test
+    fun `intervaller fra starten av 5-års-perioden skal evalueres på korrekt vis`() {
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom= LocalDate.now().minusYears(5).plusDays(91), tom= null)
                 )
         )))).isFalse()
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
-                listOf(
-                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(91))
-                )
-        )))).isFalse()
-    }
-
-    @Test
-    fun `foo`(){
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
-                listOf(
-                        DatoIntervallEntitet(fom= LocalDate.now().minusDays(2), tom= LocalDate.now()),
-                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(93))
-                )
-        )))).isTrue()
 
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom= LocalDate.now().minusYears(5).plusDays(90), tom= null)
                 )
         )))).isTrue()
+    }
+
+    @Test
+    fun `intervaller i slutten av 5-års-perioden skal evalueres på korrekt vis`() {
+        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+                listOf(
+                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(91))
+                )
+        )))).isFalse()
 
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(90))
+                )
+        )))).isTrue()
+    }
+
+    @Test
+    fun `intervallet mellom to arbeidsperioder skal evalueres på korrekt vis`() {
+        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+                listOf(
+                        DatoIntervallEntitet(fom= LocalDate.now().minusDays(2), tom= LocalDate.now()),
+                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(94))
+                )
+        )))).isFalse()
+
+        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+                listOf(
+                        DatoIntervallEntitet(fom= LocalDate.now().minusDays(2), tom= LocalDate.now()),
+                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(93))
+                )
+        )))).isTrue()
+    }
+
+    @Test
+    fun `arbeidsforhold som startet fra før 5 år siden skal tas med i beregningen`() {
+        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+                listOf(
+                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(8))
                 )
         )))).isTrue()
     }

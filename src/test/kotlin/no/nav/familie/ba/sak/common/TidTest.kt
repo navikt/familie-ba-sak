@@ -180,7 +180,7 @@ internal class TidTest {
     }
 
     @Test
-    fun `skal slå sammen perioder til en perioder hvor første periode har tom som null`() {
+    fun `skal slå sammen perioder til én periode hvor første periode har tom som null`() {
         val periode1 = DatoIntervallEntitet(LocalDate.of(2004,1,1), null)
         val intervall2 = DatoIntervallEntitet(LocalDate.of(2005,10,1), LocalDate.of(2015,5,20))
 
@@ -202,7 +202,7 @@ internal class TidTest {
     }
 
     @Test
-    fun `rename this`() {
+    fun `det skal kun finnes en periode med tom = null  etter sammenslåing`() {
         val result = slåSammenOverlappendePerioder(listOf(
                 DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2004,1,1)),
                 DatoIntervallEntitet(LocalDate.of(2005,1,1), null),
@@ -210,8 +210,8 @@ internal class TidTest {
                 DatoIntervallEntitet(LocalDate.of(2006,1,1), null),
                 DatoIntervallEntitet(LocalDate.of(2006,5,1), LocalDate.of(2006,6,1))
                 ))
-        Assertions.assertThat(result)
-                .hasSize(2)
+        Assertions.assertThat(result).hasSize(2)
+        Assertions.assertThat(result.filter { it.tom != null}).hasSize(1)
     }
 
     private fun dato(s: String): LocalDate {

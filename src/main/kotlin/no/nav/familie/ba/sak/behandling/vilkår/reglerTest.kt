@@ -203,16 +203,16 @@ fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
                     LocalDate.now().plusDays(1),
                     LocalDate.now().plusDays(1))))
 
-    val sammenPerioder = slåSammenOverlappendePerioder(perioder).sortedBy { it.fom }
+    val sammenslåttePerioder = slåSammenOverlappendePerioder(perioder).sortedBy { it.fom }
 
-    val maxGapBetweenAdjacentPeriods = sammenPerioder.zipWithNext().fold(0L) { max, pairs ->
-        val gap = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1) , pairs.second.fom!!.atStartOfDay()).toDays()
-        if (gap > max) {
-            gap
+    val maksimumAvstandMellomToPerioder = sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
+        val avstand = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1) , pairs.second.fom!!.atStartOfDay()).toDays()
+        if (avstand > maksimumAvstand) {
+            avstand
         } else {
-            max
+            maksimumAvstand
         }
     }
 
-    return maxGapBetweenAdjacentPeriods <= 90
+    return maksimumAvstandMellomToPerioder <= 90
 }
