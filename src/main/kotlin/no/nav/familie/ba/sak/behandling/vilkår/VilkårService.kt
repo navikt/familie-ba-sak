@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -155,8 +156,10 @@ class VilkårService(
 
     private fun genererInitieltBehandlingResultat(behandling: Behandling): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(behandling = behandling)
-        lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
 
+        if (behandling.opprinnelse == BehandlingOpprinnelse.MANUELL) {
+            lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
+        }
         return behandlingResultat
     }
 
