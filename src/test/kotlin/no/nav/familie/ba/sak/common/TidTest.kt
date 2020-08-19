@@ -192,12 +192,26 @@ internal class TidTest {
     }
 
     @Test
-    fun `slå sammen perioder skal skippe hvis fom er null`() {
+    fun `hopp over perioder som ikke har fra-dato`() {
         val periode1 = DatoIntervallEntitet(null, null)
+        val periode2 = DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2004,1,5))
 
-        val result = slåSammenOverlappendePerioder(listOf( periode1))
+        val result = slåSammenOverlappendePerioder(listOf(periode1, periode2))
         Assertions.assertThat(result)
-                .hasSize(0)
+                .hasSize(1)
+    }
+
+    @Test
+    fun `rename this`() {
+        val result = slåSammenOverlappendePerioder(listOf(
+                DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2004,1,1)),
+                DatoIntervallEntitet(LocalDate.of(2005,1,1), null),
+                DatoIntervallEntitet(LocalDate.of(2005,5,1), LocalDate.of(2005,6,1)),
+                DatoIntervallEntitet(LocalDate.of(2006,1,1), null),
+                DatoIntervallEntitet(LocalDate.of(2006,5,1), LocalDate.of(2006,6,1))
+                ))
+        Assertions.assertThat(result)
+                .hasSize(2)
     }
 
     private fun dato(s: String): LocalDate {

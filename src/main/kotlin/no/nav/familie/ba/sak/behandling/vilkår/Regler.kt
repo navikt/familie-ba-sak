@@ -3,11 +3,14 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOpphold
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
 import java.time.LocalDate
+import java.time.Period
 
 internal fun barnUnder18År(fakta: Fakta): Evaluering =
         if (fakta.alder < 18)
@@ -148,6 +151,7 @@ private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Eva
             // Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
         } else {
             // Evaluering.nei("Mor har ikke jobbet kontinuerlig i Norge siste 5 år.")
+
         }
     } else {
         // Evaluering.nei("Mor har ikke bodd i Norge sammenhengende i mer enn 5 år.")
@@ -181,4 +185,37 @@ private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopp
 }
 
 fun morHarBoddINorgeIMerEnn5År(): Boolean = true // ikke implementert
-fun morHarJobbetINorgeSiste5År(): Boolean = true // ikke implementert
+
+fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
+    if (fakta.personForVurdering.arbeidsforhold == null) {
+        return false
+    }
+
+    fakta.personForVurdering.arbeidsforhold!!.map {
+        it.periode
+    }.filterNotNull().toMutableList()
+            .addAll(listOf(
+                    DatoIntervallEntitet(
+                            LocalDate.now().minusYears(5).minusDays(1),
+                            LocalDate.now().minusYears(5).minusDays(1)),
+                    DatoIntervallEntitet(
+                            LocalDate.now().plusDays(1),
+                            LocalDate.now().plusDays(1))))
+
+    val perioder = slåSammenOverlappendePerioder(fakta.personForVurdering.arbeidsforhold!!.map {
+        it.periode
+    }.filterNotNull())
+
+    val perioder2 = perioder.sortedBy { it.fom }
+
+    val maxGapBetweenAdjacentPeriods = perioder2.zipWithNext().fold(0) { max, pairs ->
+        val gap = Period.between(pairs.first.tom!!, pairs.second.fom!!).days
+        if (gap > max) {
+            gap
+        } else {
+            max
+        }
+    }
+
+    return maxGapBetweenAdjacentPeriods <= 90
+}
