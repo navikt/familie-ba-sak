@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOpphold
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -193,6 +194,10 @@ fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
     val perioder = fakta.personForVurdering.arbeidsforhold!!.map {
         it.periode
     }.filterNotNull().toMutableList()
+
+    if (perioder.any { it.fom == null }) {
+        throw Feil("F.o.m. mangler i et arbeidsforhold. Dette er påkrevet.")
+    }
 
     perioder.addAll(listOf(
             DatoIntervallEntitet(
