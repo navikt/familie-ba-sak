@@ -50,13 +50,13 @@ class ReglerTest {
     fun `intervaller fra starten av 5-års-perioden skal evalueres på korrekt vis`() {
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
-                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5).plusDays(91), tom= null)
+                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5).plusDays(91), tom = null)
                 )
         )))).isFalse()
 
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
-                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5).plusDays(90), tom= null)
+                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5).plusDays(90), tom = null)
                 )
         )))).isTrue()
     }
@@ -65,13 +65,13 @@ class ReglerTest {
     fun `intervaller i slutten av 5-års-perioden skal evalueres på korrekt vis`() {
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
-                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(91))
+                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(91))
                 )
         )))).isFalse()
 
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
-                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(90))
+                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(90))
                 )
         )))).isTrue()
     }
@@ -80,15 +80,15 @@ class ReglerTest {
     fun `intervallet mellom to arbeidsperioder skal evalueres på korrekt vis`() {
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
-                        DatoIntervallEntitet(fom= LocalDate.now().minusDays(2), tom= LocalDate.now()),
-                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(94))
+                        DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
+                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(94))
                 )
         )))).isFalse()
 
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
-                        DatoIntervallEntitet(fom= LocalDate.now().minusDays(2), tom= LocalDate.now()),
-                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(5), tom= LocalDate.now().minusDays(93))
+                        DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
+                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(93))
                 )
         )))).isTrue()
     }
@@ -97,7 +97,7 @@ class ReglerTest {
     fun `arbeidsforhold som startet fra før 5 år siden skal tas med i beregningen`() {
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
-                        DatoIntervallEntitet(fom= LocalDate.now().minusYears(8))
+                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(8))
                 )
         )))).isTrue()
     }
