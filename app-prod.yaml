@@ -24,7 +24,7 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: /serviceuser/prod/srvfamilie-ba-sak
+      - kvPath: /serviceuser/data/prod/srvfamilie-ba-sak
         mountPath: /var/run/secrets/srvfamilie-ba-sak
   replicas:
     min: 2
