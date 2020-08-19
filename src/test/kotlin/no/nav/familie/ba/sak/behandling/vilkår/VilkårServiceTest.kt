@@ -272,12 +272,12 @@ class VilkårServiceTest(
                 Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.LOVLIG_OPPHOLD
-        ), Vilkår.hentVilkårForPart(PersonType.BARN))
+        ), Vilkår.hentVilkårFor(PersonType.BARN))
 
         Assertions.assertEquals(setOf(
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.LOVLIG_OPPHOLD
-        ), Vilkår.hentVilkårForPart(PersonType.SØKER))
+        ), Vilkår.hentVilkårFor(PersonType.SØKER))
     }
 }
 
