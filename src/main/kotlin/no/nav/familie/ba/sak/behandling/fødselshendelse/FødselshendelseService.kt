@@ -89,6 +89,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             } else {
                 val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                              ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+                vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
                 IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
             }
         } else {

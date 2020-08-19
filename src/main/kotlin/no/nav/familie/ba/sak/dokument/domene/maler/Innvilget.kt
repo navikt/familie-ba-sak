@@ -8,6 +8,11 @@ data class Innvilget(
         var duFaar: List<DuFårSeksjon> = emptyList()
 )
 
+data class InnvilgetAutovedtak(
+        val belop: String,
+        val hjemmel: String
+)
+
 data class DuFårSeksjon(
         val fom: String,
         val tom: String,

@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -14,6 +16,7 @@ import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
+import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
@@ -55,7 +58,6 @@ class MalerService(
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
         val behandling = vedtak.behandling
-        val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling)
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
@@ -63,6 +65,17 @@ class MalerService(
 
         val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelseForBehandling = tilkjentYtelse,
                                                                           personopplysningGrunnlag = personopplysningGrunnlag)
+
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+            val flettefelter = if (behandling.type == BehandlingType.REVURDERING) {
+                InnvilgetAutovedtak(belop = Utils.formaterBeløp(1), hjemmel = "hjemmel")
+            } else {
+                InnvilgetAutovedtak(belop = Utils.formaterBeløp(1), hjemmel = "hjemmel")
+            }
+            return objectMapper.writeValueAsString(flettefelter)
+        }
+
+        val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling)
 
         val innvilget = Innvilget(
                 enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
