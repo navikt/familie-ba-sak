@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
@@ -356,8 +355,10 @@ class VilkårVurderingTest(
                     it.statsborgerskap =
                             listOf(
                                     GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null,
-                                                                                           fom = LocalDate.now().minusYears(1))
-                                                      , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it)
+                                                                                           fom = LocalDate.now().minusYears(1)),
+                                                      landkode = "DNK",
+                                                      medlemskap = Medlemskap.NORDEN,
+                                                      person = it)
                             )
                 }
 
@@ -371,14 +372,20 @@ class VilkårVurderingTest(
                 .also {
                     it.statsborgerskap =
                             listOf(
-                                    GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null)
-                                                      , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it),
+                                    GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null),
+                                                      landkode = "DNK",
+                                                      medlemskap = Medlemskap.NORDEN,
+                                                      person = it),
                                     GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null,
-                                                                                           fom = LocalDate.now().minusYears(1))
-                                                      , landkode = "DEU", medlemskap = Medlemskap.EØS, person = it),
+                                                                                           fom = LocalDate.now().minusYears(1)),
+                                                      landkode = "DEU",
+                                                      medlemskap = Medlemskap.EØS,
+                                                      person = it),
                                     GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = LocalDate.now().minusYears(2),
-                                                                                           fom = LocalDate.now().minusYears(2))
-                                                      , landkode = "POL", medlemskap = Medlemskap.EØS, person = it)
+                                                                                           fom = LocalDate.now().minusYears(2)),
+                                                      landkode = "POL",
+                                                      medlemskap = Medlemskap.EØS,
+                                                      person = it)
                             )
                 }
 
@@ -414,9 +421,10 @@ class VilkårVurderingTest(
                     it.arbeidsforhold = løpendeArbeidsforhold(it)
                 }
 
-        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        val evaluering = Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person))
+        assertEquals(Resultat.JA, evaluering.resultat)
         assertEquals("Mor er EØS-borger og har et løpende arbeidsforhold i Norge.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+                     evaluering.begrunnelse)
     }
 
     @Test
@@ -438,9 +446,10 @@ class VilkårVurderingTest(
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.NORDEN)
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        val evaluering = Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person))
+        assertEquals(Resultat.JA, evaluering.resultat)
         assertEquals("Annen forelder er norsk eller nordisk statsborger.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+                     evaluering.begrunnelse)
     }
 
     @Test
@@ -463,9 +472,10 @@ class VilkårVurderingTest(
 
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.NEI, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        val evaluering = Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person))
+        assertEquals(Resultat.NEI, evaluering.resultat)
         assertEquals("Annen forelder er tredjelandsborger.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+                     evaluering.begrunnelse)
     }
 
     @Test
@@ -487,9 +497,10 @@ class VilkårVurderingTest(
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.UKJENT)
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.NEI, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        val evaluering = Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person))
+        assertEquals(Resultat.NEI, evaluering.resultat)
         assertEquals("Annen forelder er uten statsborgerskap.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+                     evaluering.begrunnelse)
     }
 
 
@@ -513,9 +524,10 @@ class VilkårVurderingTest(
                 .also { it.arbeidsforhold = løpendeArbeidsforhold(it) }
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        val evaluering = Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person))
+        assertEquals(Resultat.JA, evaluering.resultat)
         assertEquals("Annen forelder er fra EØS og har et løpende arbeidsforhold i Norge.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+                     evaluering.begrunnelse)
     }
 
     private fun opprettAnnenForelder(personopplysningGrunnlag: PersonopplysningGrunnlag,

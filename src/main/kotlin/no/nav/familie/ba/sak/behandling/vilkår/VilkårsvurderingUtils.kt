@@ -105,7 +105,7 @@ object VilkårsvurderingUtils {
         }
     }
 
-    fun fyllHullForVilkårResultater(personResultat: PersonResultat) {
+    private fun fyllHullForVilkårResultater(personResultat: PersonResultat) {
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toSortedSet(PersonResultat.comparator)
 
         kopiAvVilkårResultater.forEachIndexed { index, vilkårResultat ->
@@ -199,10 +199,10 @@ object VilkårsvurderingUtils {
         return Pair(initieltBehandlingResultat, aktivtBehandlingResultat)
     }
 
-    fun lagUvurdertVilkårsresultat(personResultat: PersonResultat,
-                                   vilkårType: Vilkår,
-                                   fom: LocalDate? = null,
-                                   tom: LocalDate? = null): VilkårResultat {
+    private fun lagUvurdertVilkårsresultat(personResultat: PersonResultat,
+                                           vilkårType: Vilkår,
+                                           fom: LocalDate? = null,
+                                           tom: LocalDate? = null): VilkårResultat {
         return VilkårResultat(personResultat = personResultat,
                               vilkårType = vilkårType,
                               resultat = Resultat.KANSKJE,

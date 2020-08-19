@@ -90,4 +90,12 @@ fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
     }
 }
 
+fun Periode.erInnenfor(dato: LocalDate): Boolean {
+    return when {
+        fom == TIDENES_MORGEN && tom == TIDENES_ENDE -> true
+        fom == TIDENES_MORGEN -> dato.isSameOrBefore(tom)
+        tom == TIDENES_ENDE -> dato.isSameOrAfter(fom)
+        else -> dato.isSameOrAfter(fom) && dato.isSameOrBefore(tom)
+    }
+}
 

@@ -8,6 +8,7 @@ import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -175,7 +176,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         }
 
         if (!response.harFeil()){
-            if(response.data == null || response.data.person== null || response.data.person.opphold== null){
+            if(response.data?.person?.opphold == null){
                 throw Feil(message = "Ugyldig response (null) fra PDL ved henting av opphold.",
                            frontendFeilmelding = "Feilet ved henting av opphold for person $ident",
                            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)

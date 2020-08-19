@@ -7,11 +7,11 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
-import no.nav.familie.ba.sak.behandling.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -57,7 +57,7 @@ class BehandlingController(private val fagsakService: FagsakService,
                 onSuccess = {
                     val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
                     antallManuelleBehandlingerOpprettet[nyBehandling.behandlingType]?.increment()
-                    return restFagsak
+                    restFagsak
                 },
                 onFailure = {
                     throw it
@@ -69,8 +69,6 @@ class BehandlingController(private val fagsakService: FagsakService,
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
         return Result.runCatching {
-
-
             val ident = nyBehandling.morsIdent
                         ?: (nyBehandling.søkersIdent ?: error("Fant ingen gyldig ident på mor/søker"))
             val skalBehandlesHosInfotrygd =

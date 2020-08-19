@@ -14,6 +14,9 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPers
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPut
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
@@ -42,7 +45,8 @@ class VilkårService(
         }.periodeFom
     }
 
-    fun hentVilkårsvurdering(behandlingId: Long): BehandlingResultat? = behandlingResultatService.hentAktivForBehandling(behandlingId = behandlingId)
+    fun hentVilkårsvurdering(behandlingId: Long): BehandlingResultat? = behandlingResultatService.hentAktivForBehandling(
+            behandlingId = behandlingId)
 
     @Transactional
     fun endreVilkår(behandlingId: Long,
@@ -165,13 +169,35 @@ class VilkårService(
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingResultat.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${behandlingResultat.behandling.id}")
 
+
+
         behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
             val spesifikasjonererForPerson = spesifikasjonerForPerson(person)
             val fakta = Fakta(personForVurdering = person, behandlingOpprinnelse = behandlingResultat.behandling.opprinnelse)
-            val evalueringerForVilkår = spesifikasjonererForPerson.map { it.evaluer(fakta) }
+            val evalueringerForVilkår = spesifikasjonererForPerson.map {
+                val vilkår =
+                        if (it.identifikator == "" && it.children.isNotEmpty())
+                            Vilkår.valueOf(it.children.first().identifikator.split(":")[0])
+                        else
+                            Vilkår.valueOf(it.identifikator.split(":")[0])
+
+                val minLocalDate =
+                        if (person.type == PersonType.BARN)
+                            person.fødselsdato
+                        else
+                            personopplysningGrunnlag.barna.minBy { barn -> barn.fødselsdato }!!.fødselsdato
+
+                val perioder = vilkår.genererPerioder(fakta, minLocalDate)
+
+                perioder.map { periode ->
+                    val evaluering = it.evaluer(fakta.copy(periode = periode))
+
+                    Pair(periode, evaluering)
+                }
+            }
 
             personResultat.setVilkårResultater(vilkårResultater(personResultat, person, fakta, evalueringerForVilkår))
 
@@ -179,70 +205,69 @@ class VilkårService(
         }.toSet()
     }
 
-    private fun spesifikasjonerForPerson(person: Person): List<Spesifikasjon<Fakta>> = Vilkår.hentVilkårFor(person.type).map { vilkår -> vilkår.spesifikasjon}
+    private fun spesifikasjonerForPerson(person: Person): List<Spesifikasjon<Fakta>> = Vilkår.hentVilkårFor(person.type)
+            .map { vilkår -> vilkår.spesifikasjon }
 
     private fun vilkårResultater(personResultat: PersonResultat,
                                  person: Person,
                                  fakta: Fakta,
-                                 evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
+                                 evalueringer: List<List<Pair<Periode, Evaluering>>>): SortedSet<VilkårResultat> {
 
         val aktivBehandlingResultat =
                 behandlingResultatService.hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id)
         val kjørMetrikker = aktivBehandlingResultat == null
 
-        return evalueringer.map { child ->
-            val fom =
-                    if (person.type === PersonType.BARN)
-                        person.fødselsdato
-                    else LocalDate.now()
+        return evalueringer.map { listeAvPeriodeOgEvaluering ->
+            listeAvPeriodeOgEvaluering.map { pair ->
+                val periode = pair.first
+                val child = pair.second
 
-            val vilkår =
-                    if (child.identifikator == "" && child.children.isNotEmpty())
-                        Vilkår.valueOf(child.children.first().identifikator.split(":")[0])
-                    else
-                        Vilkår.valueOf(child.identifikator.split(":")[0])
+                val vilkår =
+                        if (child.identifikator == "" && child.children.isNotEmpty())
+                            Vilkår.valueOf(child.children.first().identifikator.split(":")[0])
+                        else
+                            Vilkår.valueOf(child.identifikator.split(":")[0])
 
-            val tom: LocalDate? =
-                    if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
+                if (kjørMetrikker) {
+                    vilkårsvurderingMetrics.økTellereForEvaluering(evaluering = child,
+                                                                   personType = person.type,
+                                                                   behandlingOpprinnelse = personResultat.behandlingResultat.behandling.opprinnelse)
+                }
 
-            if (kjørMetrikker) {
-                vilkårsvurderingMetrics.økTellereForEvaluering(evaluering = child,
-                                                               personType = person.type,
-                                                               behandlingOpprinnelse = personResultat.behandlingResultat.behandling.opprinnelse)
-            }
+                var begrunnelse = "Vurdert og satt automatisk"
 
-            var begrunnelse = "Vurdert og satt automatisk"
-
-            if (child.resultat == Resultat.NEI || child.resultat == Resultat.KANSKJE) {
-                if (child.children.isNotEmpty())
-                    child.children.forEach {
-                        if (it.begrunnelse.isNotBlank()) {
-                            when (it.resultat) {
-                                Resultat.NEI ->
-                                    begrunnelse = "$begrunnelse\n\t- nei: ${it.begrunnelse}"
-                                Resultat.KANSKJE ->
-                                    begrunnelse = "$begrunnelse\n\t- kanskje: ${it.begrunnelse}"
+                if (child.resultat == Resultat.NEI || child.resultat == Resultat.KANSKJE) {
+                    if (child.children.isNotEmpty())
+                        child.children.forEach {
+                            if (it.begrunnelse.isNotBlank()) {
+                                when (it.resultat) {
+                                    Resultat.NEI ->
+                                        begrunnelse = "$begrunnelse\n\t- nei: ${it.begrunnelse}"
+                                    Resultat.KANSKJE ->
+                                        begrunnelse = "$begrunnelse\n\t- kanskje: ${it.begrunnelse}"
+                                }
                             }
                         }
-                    }
-                else
-                    begrunnelse = "$begrunnelse\n\t- ${child.begrunnelse}"
-            }
+                    else
+                        begrunnelse = "$begrunnelse\n\t- ${child.begrunnelse}"
+                }
 
-            VilkårResultat(personResultat = personResultat,
-                           resultat = child.resultat,
-                           vilkårType = vilkår,
-                           periodeFom = fom,
-                           periodeTom = tom,
-                           begrunnelse = begrunnelse,
-                           behandlingId = personResultat.behandlingResultat.behandling.id,
-                           regelInput = fakta.toJson(),
-                           regelOutput = child.toJson()
-            )
-        }.toSortedSet(PersonResultat.comparator)
+                VilkårResultat(personResultat = personResultat,
+                               resultat = child.resultat,
+                               vilkårType = vilkår,
+                               periodeFom = if (periode.fom == TIDENES_MORGEN) null else periode.fom,
+                               periodeTom = if (periode.tom == TIDENES_ENDE) null else periode.tom,
+                               begrunnelse = begrunnelse,
+                               behandlingId = personResultat.behandlingResultat.behandling.id,
+                               regelInput = fakta.toJson(),
+                               regelOutput = child.toJson()
+                )
+            }
+        }.flatten().toSortedSet(PersonResultat.comparator)
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

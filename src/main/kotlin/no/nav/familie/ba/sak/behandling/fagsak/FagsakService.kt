@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -39,7 +38,6 @@ class FagsakService(
         private val vedtakRepository: VedtakRepository,
         private val totrinnskontrollRepository: TotrinnskontrollRepository,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-        private val integrasjonClient: IntegrasjonClient,
         private val personopplysningerService: PersonopplysningerService) {
 
     @Transactional
@@ -68,7 +66,7 @@ class FagsakService(
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
-        } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent.equals(personIdent) }) {
+        } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent == personIdent }) {
             fagsak.also {
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
                 lagre(it)
@@ -227,7 +225,7 @@ class FagsakService(
                 it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MOR
                 || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR
             }.forEach {
-                if (assosierteFagsakDeltager.find({ d -> d.ident == it.personIdent.id }) == null) {
+                if (assosierteFagsakDeltager.find { d -> d.ident == it.personIdent.id } == null) {
                     val forelderInfo = runCatching {
                         personopplysningerService.hentPersoninfoFor(it.personIdent.id)
                     }.fold(

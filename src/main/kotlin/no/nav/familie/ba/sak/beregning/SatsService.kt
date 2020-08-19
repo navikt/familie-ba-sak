@@ -29,7 +29,7 @@ object SatsService {
                 .map { BeløpPeriode(it.beløp,it.gyldigFom.toYearMonth() ,it.gyldigTom.toYearMonth()) }
                 .filter { it.fraOgMed <= maxSatsGyldigFraOgMed }
                 .map { BeløpPeriode(it.beløp, maxOf(it.fraOgMed, stønadFraOgMed), minOf(it.tilOgMed, stønadTilOgMed)) }
-                .filter({ it.fraOgMed <= it.tilOgMed })
+                .filter { it.fraOgMed <= it.tilOgMed }
     }
 
     private fun finnAlleSatserFor(type: SatsType) : List<Sats> = satser.filter { it.type==type }
@@ -40,5 +40,5 @@ object SatsService {
             val tilOgMed: YearMonth
     )
 
-    fun LocalDate.toYearMonth() = YearMonth.from(this)
+    private fun LocalDate.toYearMonth(): YearMonth = YearMonth.from(this)
 }

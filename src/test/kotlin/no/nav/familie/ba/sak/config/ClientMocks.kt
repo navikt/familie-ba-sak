@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.config
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.euKodeverk
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -50,19 +51,34 @@ class ClientMocks {
             PersonIdent(randomFnr())
         }
 
+        val statsborgerskapSlot = slot<Ident>()
         every {
-            mockPersonopplysningerService.hentStatsborgerskap(any())
+            mockPersonopplysningerService.hentStatsborgerskap(capture(statsborgerskapSlot))
         } answers {
-            listOf(Statsborgerskap("NOR",
-                                   LocalDate.of(1990, 1, 25),
+            val person = personInfo[statsborgerskapSlot.captured.ident]
+
+            listOf(Statsborgerskap("USA",
+                                   LocalDate.of(2000,
+                                                1,
+                                                25),
+                                   LocalDate.of(2015,
+                                                1,
+                                                24)),
+                   Statsborgerskap("NOR",
+                                   if (person != null && person.navn!!.contains("Barn"))
+                                       person.fødselsdato
+                                   else
+                                       LocalDate.of(2015,
+                                                    1,
+                                                    25),
                                    null))
         }
 
         every {
             mockPersonopplysningerService.hentOpphold(any())
         } answers {
-            listOf(Opphold(type= OPPHOLDSTILLATELSE.PERMANENT,
-                           oppholdFra =  LocalDate.of(1990, 1, 25),
+            listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
+                           oppholdFra = LocalDate.of(2015, 1, 25),
                            oppholdTil = LocalDate.of(2999, 1, 1)))
         }
 
@@ -98,25 +114,25 @@ class ClientMocks {
                                         navn = personInfo.getValue(barnFnr[0]).navn,
                                         fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
                         Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                          navn = personInfo.getValue(barnFnr[1]).navn,
-                                          fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[1]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
                         Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
         every {
             mockPersonopplysningerService.hentPersoninfoFor(eq(søkerFnr[1]))
         } returns personInfo.getValue(søkerFnr[1]).copy(
                 familierelasjoner = setOf(
                         Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                          navn = personInfo.getValue(barnFnr[0]).navn,
-                                          fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[0]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
                         Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                          navn = personInfo.getValue(barnFnr[1]).navn,
-                                          fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[1]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
                         Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
         return mockPersonopplysningerService
     }
 
@@ -183,6 +199,8 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
 
+        every { mockIntegrasjonClient.hentAlleEØSLand() } returns euKodeverk()
+
         return mockIntegrasjonClient
     }
 
@@ -241,8 +259,8 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentOpphold(any())
         } answers {
-            listOf(Opphold(type= OPPHOLDSTILLATELSE.PERMANENT,
-                           oppholdFra =  LocalDate.of(1990, 1, 25),
+            listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
+                           oppholdFra = LocalDate.of(1990, 1, 25),
                            oppholdTil = LocalDate.of(2999, 1, 1)))
         }
 
@@ -272,6 +290,7 @@ class ClientMocks {
     }
 
     companion object {
+
         val søkerFnr = arrayOf("12345678910", "11223344556")
         val barnFnr = arrayOf("01101800033", "01101900033")
         val bostedsadresse = Bostedsadresse(
@@ -290,7 +309,7 @@ class ClientMocks {
                                           sivilstand = SIVILSTAND.GIFT,
                                           kjønn = Kjønn.MANN,
                                           navn = "Far Faresen"),
-                barnFnr[0] to PersonInfo(fødselsdato = LocalDate.now().minusYears(1),
+                barnFnr[0] to PersonInfo(fødselsdato = LocalDate.now().minusYears(10),
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UOPPGITT,
                                          kjønn = Kjønn.MANN,

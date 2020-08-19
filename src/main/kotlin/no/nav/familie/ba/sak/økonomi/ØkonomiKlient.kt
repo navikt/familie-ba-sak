@@ -80,6 +80,6 @@ class ØkonomiKlient(
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/konsistensavstemming/$FAGSYSTEM/?avstemmingsdato=$avstemmingsdato"),
                 HttpMethod.POST,
-                HttpEntity<List<OppdragIdForFagsystem>>(oppdragTilAvstemming, headers))
+                HttpEntity(oppdragTilAvstemming, headers))
     }
 }

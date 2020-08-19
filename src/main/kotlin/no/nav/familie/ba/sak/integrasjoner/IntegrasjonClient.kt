@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
@@ -269,7 +268,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 throw IntegrasjonException("Kall mot integrasjon feilet ved hentOppgaver. response=$message",
                                            e,
                                            uri,
-                                           "behandlingstema: ${behandlingstema}, oppgavetype: ${oppgavetype}, enhet: ${enhet}, saksbehandler: ${saksbehandler}")
+                                           "behandlingstema: $behandlingstema, oppgavetype: $oppgavetype, enhet: $enhet, saksbehandler: $saksbehandler")
             }
         }
     }
@@ -410,6 +409,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     companion object {
+
         private val logger = LoggerFactory.getLogger(this::class.java)
         const val VEDTAK_DOKUMENT_TYPE = "BARNETRYGD_VEDTAK"
         const val VEDLEGG_DOKUMENT_TYPE = "BARNETRYGD_VEDLEGG"

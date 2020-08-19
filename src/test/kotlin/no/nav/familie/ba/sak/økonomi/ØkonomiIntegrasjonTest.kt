@@ -73,11 +73,13 @@ class ØkonomiIntegrasjonTest {
         val stønadTom = stønadFom.plusYears(17)
 
         val responseBody = Ressurs.Companion.success("ok")
-        stubFor(get(urlEqualTo("/api/aktoer/v1"))
-                        .willReturn(aResponse()
-                                            .withStatus(200)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success(mapOf("aktørId" to 1L))))))
+        stubFor(get(urlEqualTo("/api/aktoer/v1")).willReturn(
+                aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success(mapOf("aktørId" to 1L)))))
+        )
+
         stubFor(post(anyUrl())
                         .willReturn(aResponse()
                                             .withStatus(200)
@@ -86,7 +88,7 @@ class ØkonomiIntegrasjonTest {
 
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val behandlingResultat = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
 
@@ -105,13 +107,13 @@ class ØkonomiIntegrasjonTest {
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
         vedtak!!.vedtaksdato = LocalDate.now()
-        vedtakService.lagreEllerOppdater(vedtak!!)
+        vedtakService.lagreEllerOppdater(vedtak)
 
         val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
-        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak!!.id, "ansvarligSaksbehandler")
+        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak.id, "ansvarligSaksbehandler")
 
         val oppdatertBehandling = behandlingService.hent(behandling.id)
         Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling.status)

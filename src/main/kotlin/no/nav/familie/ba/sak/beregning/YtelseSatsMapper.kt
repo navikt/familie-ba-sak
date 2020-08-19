@@ -9,10 +9,10 @@ object YtelseSatsMapper {
 
     fun map(ytelseType: YtelseType, barnetsAlder: Int?=null): SatsType? {
 
-        if((barnetsAlder ?: Int.MAX_VALUE) <= MAX_ALDER_TILLEGG_ORDINÆR_BARNETRYGD && ytelseType == YtelseType.ORDINÆR_BARNETRYGD) {
-            return SatsType.TILLEGG_ORBA
+        return if((barnetsAlder ?: Int.MAX_VALUE) <= MAX_ALDER_TILLEGG_ORDINÆR_BARNETRYGD && ytelseType == YtelseType.ORDINÆR_BARNETRYGD) {
+            SatsType.TILLEGG_ORBA
         } else {
-            return map(ytelseType)
+            map(ytelseType)
         }
     }
 

@@ -125,7 +125,7 @@ class VedtakServiceTest(
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertNull(hentetVedtak!!.vedtaksdato)
-        Assertions.assertEquals(null, hentetVedtak?.stønadBrevPdF)
+        Assertions.assertEquals(null, hentetVedtak.stønadBrevPdF)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(totrinnskontroll)

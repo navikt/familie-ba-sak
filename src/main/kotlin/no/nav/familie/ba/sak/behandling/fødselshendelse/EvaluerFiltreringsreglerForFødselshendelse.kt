@@ -6,9 +6,6 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -48,8 +45,8 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         val mor = personopplysningGrunnlag.søker[0]
-        val barnet = personopplysningGrunnlag.barna.filter { it.personIdent.ident == barnetsIdent }.firstOrNull()
-                ?: throw java.lang.IllegalStateException("Barnets ident er ikke tilstede i personopplysningsgrunnlaget.")
+        val barnet = personopplysningGrunnlag.barna.firstOrNull { it.personIdent.ident == barnetsIdent }
+                     ?: throw java.lang.IllegalStateException("Barnets ident er ikke tilstede i personopplysningsgrunnlaget.")
 
         val restenAvBarna =
                 personopplysningerService.hentPersoninfoFor(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {

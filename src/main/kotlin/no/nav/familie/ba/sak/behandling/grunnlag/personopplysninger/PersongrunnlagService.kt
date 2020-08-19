@@ -75,7 +75,7 @@ class PersongrunnlagService(
 
         leggTilFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
 
-        secureLogger.info("Setter persongrunnlag med søker: ${fødselsnummer} og barn: ${barnasFødselsnummer}")
+        secureLogger.info("Setter persongrunnlag med søker: $fødselsnummer og barn: $barnasFødselsnummer")
         secureLogger.info("Barna på persongrunnlaget som lagres: ${personopplysningGrunnlag.barna.map { it.personIdent.ident }}")
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
@@ -103,7 +103,8 @@ class PersongrunnlagService(
     private fun leggTilFarEllerMedmor(barnetsFødselsnummer: String,
                                       personopplysningGrunnlag: PersonopplysningGrunnlag) {
         val barnPersoninfo = personopplysningerService.hentPersoninfoFor(barnetsFødselsnummer)
-        val farEllerMedmor = barnPersoninfo.familierelasjoner.filter { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }.firstOrNull()
+        val farEllerMedmor =
+                barnPersoninfo.familierelasjoner.firstOrNull { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }
         if (farEllerMedmor != null) {
             val annenPartFødselsnummer = farEllerMedmor.personIdent.id
             val personinfo = personopplysningerService.hentPersoninfoFor(annenPartFødselsnummer)

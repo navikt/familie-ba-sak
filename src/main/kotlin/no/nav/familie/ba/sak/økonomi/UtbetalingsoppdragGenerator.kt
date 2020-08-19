@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
-import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -49,9 +49,11 @@ class UtbetalingsoppdragGenerator(
         // På grunn av dette vil vi på oppdragsnivå kun ha aksjonskode UEND ved fullstendig opphør, selv om vi i realiteten av
         // og til kun endrer datoer på en eksisterende linje (endring på linjenivå).
         val aksjonskodePåOppdragsnivå =
-                if (erFørsteBehandlingPåFagsak) NY
-                else if (erFullstendigOpphør) UEND
-                else ENDR
+                when {
+                    erFørsteBehandlingPåFagsak -> NY
+                    erFullstendigOpphør -> UEND
+                    else -> ENDR
+                }
 
         val sisteBeståenAndelIHverKjede = sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
         val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxBy { it.periodeOffset!! }?.periodeOffset?.toInt()

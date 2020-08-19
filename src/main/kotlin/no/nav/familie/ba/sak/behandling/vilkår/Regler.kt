@@ -1,24 +1,25 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrUkjentBosted
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOpphold
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.erInnenfor
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
 import java.time.LocalDate
 
+/**
+ * Kan alltid settes til ja fordi perioden for vilkåret bestemmes av når barnet er under 18 år.
+ * Ergo vil man alltid få én periode innvilget mens barnet er 0-18 år.
+ */
 internal fun barnUnder18År(fakta: Fakta): Evaluering =
-        if (fakta.alder < 18)
-            Evaluering.ja("Barn er under 18 år")
-        else
-            Evaluering.nei("Barn er ikke under 18 år")
+        Evaluering.ja("Barn er under 18 år")
 
 internal fun harEnSøker(fakta: Fakta): Evaluering {
     val barn = fakta.personForVurdering
@@ -69,30 +70,33 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
         return Evaluering.ja("Ikke separat oppholdsvurdering for barnet ved automatisk vedtak.")
     }
 
-    val nåværendeMedlemskap = finnNåværendeMedlemskap(fakta.personForVurdering.statsborgerskap)
+    val medlemskapForPeriode = finnMedlemskap(fakta.personForVurdering.statsborgerskap, fakta.periode)
 
-    return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
-            Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
-            //TODO: Implementeres av TEA-1532
-            Medlemskap.EØS -> {
-                sjekkLovligOppholdForEØSBorger(fakta)
-            }
-            Medlemskap.TREDJELANDSBORGER -> {
-                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                    økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.TREDJELANDSBORGER, fakta.personForVurdering.type)
-                    Evaluering.nei("${fakta.personForVurdering.type} har ikke lovlig opphold")
-                } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
-            }
-            Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
-                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER){
-                    økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
-                    Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
-                }
-                else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
-            }
-            else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
+    return when (finnSterkesteMedlemskap(medlemskapForPeriode)) {
+        Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
+        //TODO: Implementeres av TEA-1532
+        Medlemskap.EØS -> {
+            sjekkLovligOppholdForEØSBorger(fakta)
+        }
+        Medlemskap.TREDJELANDSBORGER -> {
+            val opphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeForPeriode(fakta.periode) }
+            if (opphold == null || opphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
+                if (fakta.periode.erInnenfor(LocalDate.now())) økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.TREDJELANDSBORGER,
+                                                                                        fakta.personForVurdering.type)
+
+                Evaluering.nei("Har ikke lovlig opphold")
+            } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
+        }
+        Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
+            val opphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeForPeriode(fakta.periode) }
+            if (opphold == null || opphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
+                if (fakta.periode.erInnenfor(LocalDate.now())) økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS,
+                                                                                        fakta.personForVurdering.type)
+
+                Evaluering.nei("Er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
+            } else Evaluering.ja("Er statsløs eller mangler statsborgerskap, og har lovlig opphold")
+        }
+        else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
     }
 }
 
@@ -115,6 +119,13 @@ fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<M
         }
                 ?.map { it.medlemskap } ?: emptyList()
 
+fun finnMedlemskap(statsborgerskap: List<GrStatsborgerskap>?, periode: Periode): List<Medlemskap> =
+        statsborgerskap?.filter {
+            it.gyldigPeriode?.fom?.isSameOrAfter(periode.fom) ?: true &&
+            it.gyldigPeriode?.tom?.isSameOrBefore(periode.tom) ?: true
+        }
+                ?.map { it.medlemskap } ?: emptyList()
+
 fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
     return with(medlemskap) {
         when {
@@ -132,7 +143,7 @@ fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
 fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
 
 private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
-    return if (personHarLøpendeArbeidsforhold(fakta.personForVurdering)) {
+    return if (personHarLøpendeArbeidsforholdForPeriode(fakta.personForVurdering, fakta.periode)) {
         Evaluering.ja("Mor er EØS-borger og har et løpende arbeidsforhold i Norge.")
     } else {
         if (annenForelderEksistererOgBorMedMor(fakta)) {
@@ -140,7 +151,7 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
                 when {
                     contains(Medlemskap.NORDEN) -> Evaluering.ja("Annen forelder er norsk eller nordisk statsborger.")
                     contains(Medlemskap.EØS) -> {
-                        if (personHarLøpendeArbeidsforhold(hentAnnenForelder(fakta).first())) {
+                        if (personHarLøpendeArbeidsforholdForPeriode(hentAnnenForelder(fakta).first(), fakta.periode)) {
                             Evaluering.ja("Annen forelder er fra EØS og har et løpende arbeidsforhold i Norge.")
                         } else {
                             sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta)
@@ -173,8 +184,9 @@ private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Eva
     return Evaluering.kanskje("ikke implementert")
 }
 
-fun personHarLøpendeArbeidsforhold(personForVurdering: Person): Boolean = personForVurdering.arbeidsforhold?.any {
-    it.periode?.tom == null || it.periode.tom >= LocalDate.now()
+fun personHarLøpendeArbeidsforholdForPeriode(personForVurdering: Person,
+                                             periode: Periode): Boolean = personForVurdering.arbeidsforhold?.any {
+    it.periode?.tom == null || (it.periode.erInnenfor(periode.tom) && it.periode.erInnenfor(periode.fom))
 } ?: false
 
 fun annenForelderEksistererOgBorMedMor(fakta: Fakta): Boolean {
@@ -191,7 +203,7 @@ fun annenForelderEksistererOgBorMedMor(fakta: Fakta): Boolean {
 fun statsborgerskapAnnenForelder(fakta: Fakta): List<Medlemskap> {
     val annenForelder =
             hentAnnenForelder(fakta).first()
-    return finnNåværendeMedlemskap(annenForelder.statsborgerskap)
+    return finnMedlemskap(annenForelder.statsborgerskap, fakta.periode)
 }
 
 private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopplysningGrunnlag.personer.filter {

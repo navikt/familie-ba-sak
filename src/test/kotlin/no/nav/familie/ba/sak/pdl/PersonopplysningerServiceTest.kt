@@ -31,7 +31,7 @@ class PersonopplysningerServiceTest {
     fun `hentPersoninfoFor() skal return riktig personinfo`(){
         val personInfo= personopplysningerService.hentPersoninfoFor(ID_MOR_MED_XXX_STATSBORGERSKAP)
 
-        assert(LocalDate.of(1955, 9, 13).equals(personInfo.fødselsdato))
+        assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
     }
 
     @Test
@@ -49,8 +49,7 @@ class PersonopplysningerServiceTest {
     }
 
     companion object{
-        val ID_MOR_MED_XXX_STATSBORGERSKAP= "22345678901"
-        val ID_BARN= "32345678901"
+        const val ID_MOR_MED_XXX_STATSBORGERSKAP= "22345678901"
 
         private fun gyldigRequest(queryFilnavn: String, requestFilnavn: String): String {
             return readfile(requestFilnavn)
