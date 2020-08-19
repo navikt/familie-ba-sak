@@ -47,3 +47,4 @@ spec:
       value: prod
     - name: SRVUSER_BA_SAK_SECRET
       value: /run/secrets/srvfamilie-ba-sak/password
+
