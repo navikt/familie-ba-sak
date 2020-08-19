@@ -1,6 +1,11 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrUkjentBosted
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOpphold
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
@@ -67,21 +72,22 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
         return Evaluering.ja("Ikke separat oppholdsvurdering for barnet ved automatisk vedtak.")
     }
 
-    return with(finnNåværendeMedlemskap(fakta.personForVurdering)) {
-        when {
-            contains(Medlemskap.NORDEN) -> Evaluering.ja("Er nordisk statsborger.")
+    val nåværendeMedlemskap = finnNåværendeMedlemskap(fakta.personForVurdering.statsborgerskap)
+
+    return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
+            Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
             //TODO: Implementeres av TEA-1532
-            contains(Medlemskap.EØS) -> {
+            Medlemskap.EØS -> {
                 sjekkLovligOppholdForEØSBorger(fakta)
             }
-            contains(Medlemskap.TREDJELANDSBORGER) -> {
+            Medlemskap.TREDJELANDSBORGER -> {
                 val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.TREDJELANDSBORGER, fakta.personForVurdering.type)
                     Evaluering.nei("${fakta.personForVurdering.type} har ikke lovlig opphold")
                 } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
             }
-            isEmpty() || contains(Medlemskap.UKJENT) || contains(Medlemskap.STATSLØS) -> {
+            Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
                 val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
@@ -89,7 +95,6 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
                 } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
             }
             else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
-        }
     }
 }
 
@@ -105,12 +110,25 @@ internal fun giftEllerPartnerskap(fakta: Fakta): Evaluering =
             else -> Evaluering.ja("Person er ikke gift eller har registrert partner")
         }
 
-fun finnNåværendeMedlemskap(person: Person): List<Medlemskap> =
-        person.statsborgerskap?.filter { statsborgerskap ->
-            statsborgerskap.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
-            statsborgerskap.gyldigPeriode?.tom?.isAfter(LocalDate.now()) ?: true
+fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> =
+        statsborgerskap?.filter {
+            it.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
+            it.gyldigPeriode?.tom?.isAfter(LocalDate.now()) ?: true
         }
                 ?.map { it.medlemskap } ?: emptyList()
+
+fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
+    return with(medlemskap) {
+        when {
+            contains(Medlemskap.NORDEN) -> Medlemskap.NORDEN
+            contains(Medlemskap.EØS) -> Medlemskap.EØS
+            contains(Medlemskap.TREDJELANDSBORGER) -> Medlemskap.TREDJELANDSBORGER
+            contains(Medlemskap.STATSLØS) -> Medlemskap.STATSLØS
+            contains(Medlemskap.UKJENT) -> Medlemskap.UKJENT
+            else -> null
+        }
+    }
+}
 
 
 fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
@@ -176,7 +194,7 @@ fun annenForelderEksistererOgBorMedMor(fakta: Fakta): Boolean {
 fun statsborgerskapAnnenForelder(fakta: Fakta): List<Medlemskap> {
     val annenForelder =
             hentAnnenForelder(fakta).first()
-    return finnNåværendeMedlemskap(annenForelder)
+    return finnNåværendeMedlemskap(annenForelder.statsborgerskap)
 }
 
 private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopplysningGrunnlag.personer.filter {

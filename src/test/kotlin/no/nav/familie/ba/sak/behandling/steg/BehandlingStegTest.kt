@@ -45,8 +45,13 @@ class BehandlingStegTest {
         }
         val riktigRekkefølgeForFødselshendelser = listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
-                StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER,
-                StegType.VILKÅRSVURDERING)
+                StegType.VILKÅRSVURDERING,
+                StegType.IVERKSETT_MOT_OPPDRAG,
+                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+                StegType.JOURNALFØR_VEDTAKSBREV,
+                StegType.DISTRIBUER_VEDTAKSBREV,
+                StegType.FERDIGSTILLE_BEHANDLING,
+                StegType.BEHANDLING_AVSLUTTET)
         steg = initSteg(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
         riktigRekkefølgeForFødselshendelser.forEach {
             assertEquals(steg, it)

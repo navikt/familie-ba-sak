@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.behandling.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -15,15 +15,13 @@ import java.util.*
 @TaskStepBeskrivelse(taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
                      beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
                      maxAntallFeil = 3)
-class BehandleFødselshendelseTask(
-        private val stegService: StegService
-) : AsyncTaskStep {
+class BehandleFødselshendelseTask(private val fødselshendelseService: FødselshendelseService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
         try {
             LOG.info("Kjører BehandleFødselshendelseTask")
-            stegService.regelkjørBehandling(behandleFødselshendelseTaskDTO.nyBehandling)
+            fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(behandleFødselshendelseTaskDTO.nyBehandling)
         } catch (e: KontrollertRollbackException) {
             LOG.info("Rollback utført. Data ikke persistert.")
         } catch (e: Feil) {

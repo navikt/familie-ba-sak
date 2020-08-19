@@ -12,18 +12,14 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
-import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -33,7 +29,6 @@ class StegService(
         private val steg: List<BehandlingSteg<*>>,
         private val loggService: LoggService,
         private val rolleConfig: RolleConfig,
-        private val featureToggleService: FeatureToggleService,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
@@ -57,7 +52,7 @@ class StegService(
     }
 
     @Transactional
-    fun håndterNyBehandlingFraHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
+    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
         val ident = nyBehandling.morsIdent
                     ?: (nyBehandling.søkersIdent ?: error("Fant ingen gyldig ident på mor/søker"))
         fagsakService.hentEllerOpprettFagsakForPersonIdent(ident)
@@ -76,6 +71,13 @@ class StegService(
                                      RegistrerPersongrunnlagDTO(ident = ident,
                                                                 barnasIdenter = nyBehandling.barnasIdenter,
                                                                 bekreftEndringerViaFrontend = true))
+    }
+
+    fun evaluerVilkårForFødselshendelse(behandling: Behandling, søkersIdent: String?): BehandlingResultatType? {
+        håndterVilkårsvurdering(behandling)
+        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
+        return behandlingResultat?.hentSamletResultat()
+                .also { secureLogger.info("Behandling med søkerident $søkersIdent fullført med resultat: $it") }
     }
 
     @Transactional
@@ -191,16 +193,6 @@ class StegService(
         }
     }
 
-    fun håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling: Behandling, barnetsIdent: String): Behandling {
-        val behandlingSteg: AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser =
-                hentBehandlingSteg(StegType.AVGJØR_AUTOMATISK_ELLER_MANUELL_BEHANDLING_FOR_FØDSELSHENDELSER)
-                        as AvgjørAutomatiskEllerManuellBehandlingForFødselshendelser
-
-        return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, barnetsIdent)
-        }
-    }
-
     // Generelle stegmetoder
     private fun håndterSteg(behandling: Behandling,
                             behandlingSteg: BehandlingSteg<*>,
@@ -268,21 +260,6 @@ class StegService(
                                              "beskrivelse",
                                              it.stegType().displayName())
         }.toMap()
-    }
-
-    @Transactional(noRollbackFor = [VilkårsvurderingFeil::class])
-    fun regelkjørBehandling(nyBehandling: NyBehandlingHendelse) {
-        var behandling = håndterNyBehandlingFraHendelse(nyBehandling)
-        behandling = håndterAvgjørAutomatiskEllerManuellBehandlingForFødselshendelser(behandling, nyBehandling.barnasIdenter[0])
-        behandling = håndterVilkårsvurdering(behandling)
-        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
-        val samletResultat = behandlingResultat?.hentSamletResultat()
-
-        secureLogger.info("Behandling med søkerident ${nyBehandling.søkersIdent} fullført med resultat: $samletResultat")
-
-        if (featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")) {
-            throw KontrollertRollbackException()
-        }
     }
 
     companion object {
