@@ -32,7 +32,6 @@ class DokumentService(
         return Result.runCatching {
             val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
                         ?: error("Finner ikke søker på vedtaket")
-            val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
 
             val behandlingResultatType =
                     behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)

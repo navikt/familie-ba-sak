@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -20,6 +19,7 @@ import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
+import java.time.Period
 
 @Service
 class MalerService(
@@ -66,21 +66,36 @@ class MalerService(
         val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelseForBehandling = tilkjentYtelse,
                                                                           personopplysningGrunnlag = personopplysningGrunnlag)
 
+        val enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
+        else throw Feil(message = "Ansvarlig enhet er ikke satt ved generering av brev",
+                        frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev")
+
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            val flettefelter = if (behandling.type == BehandlingType.REVURDERING) {
-                InnvilgetAutovedtak(belop = Utils.formaterBeløp(1), hjemmel = "hjemmel")
-            } else {
-                InnvilgetAutovedtak(belop = Utils.formaterBeløp(1), hjemmel = "hjemmel")
+            var etterbetalingsbeløp = 0
+            beregningOversikt.filter { it.periodeFom !== null && it.periodeFom <= vedtak.vedtaksdato }.map {
+                val antallMnd: Int = Period.between(it.periodeFom, it.periodeTom).months
+                etterbetalingsbeløp += antallMnd * it.utbetaltPerMnd
             }
+
+            val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker[0].navn,
+                                                   fodselsnummer = behandling.fagsak.hentAktivIdent().ident,
+                                                   fodselsdato = personopplysningGrunnlag.barna.map { it.fødselsdato }
+                                                           .joinToString(" og "),
+                                                   belop = Utils.formaterBeløp(beregningOversikt.first().utbetaltPerMnd),
+                                                   antallBarn = personopplysningGrunnlag.barna.size,
+                                                   virkningstidspunkt = vedtak.vedtaksdato?.tilMånedÅr()
+                                                                        ?: throw Feil(message = "Vedtaksdato er ikke satt ved brevgenerering",
+                                                                                      frontendFeilmelding = "Vedtaksdato er ikke satt ved brevgenerering"),
+                                                   enhet = enhet,
+                                                   erEtterbetaling = etterbetalingsbeløp > 0,
+                                                   etterbetalingsbelop = Utils.formaterBeløp(etterbetalingsbeløp))
             return objectMapper.writeValueAsString(flettefelter)
         }
 
         val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling)
 
         val innvilget = Innvilget(
-                enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
-                else throw Feil(message = "Ansvarlig enhet er ikke satt ved generering av brev",
-                                frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev"),
+                enhet = enhet,
                 saksbehandler = totrinnskontroll.saksbehandler,
                 beslutter = totrinnskontroll.beslutter
                             ?: totrinnskontroll.saksbehandler,

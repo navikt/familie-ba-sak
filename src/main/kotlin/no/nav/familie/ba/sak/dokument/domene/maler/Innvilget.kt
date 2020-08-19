@@ -9,8 +9,16 @@ data class Innvilget(
 )
 
 data class InnvilgetAutovedtak(
+        val navn: String,
+        val fodselsnummer: String,
+        val fodselsdato: String,
+        val virkningstidspunkt: String,
         val belop: String,
-        val hjemmel: String
+        val etterbetalingsbelop: String? = null,
+        val antallBarn: Int,
+        val erEtterbetaling: Boolean = false,
+        val erBehandletAutomatisk: Boolean = true,
+        val enhet: String
 )
 
 data class DuFårSeksjon(
