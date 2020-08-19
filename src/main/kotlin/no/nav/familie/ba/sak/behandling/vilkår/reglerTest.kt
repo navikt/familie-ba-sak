@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
+import java.time.Duration
 import java.time.LocalDate
 import java.time.Period
 
@@ -83,11 +84,10 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
             }
             isEmpty() || contains(Medlemskap.UKJENT) || contains(Medlemskap.STATSLØS) -> {
                 val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER){
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
                     Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
-                }
-                else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
+                } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
             }
             else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
         }
@@ -191,25 +191,22 @@ fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
         return false
     }
 
-    fakta.personForVurdering.arbeidsforhold!!.map {
+    val perioder = fakta.personForVurdering.arbeidsforhold!!.map {
         it.periode
     }.filterNotNull().toMutableList()
-            .addAll(listOf(
-                    DatoIntervallEntitet(
-                            LocalDate.now().minusYears(5).minusDays(1),
-                            LocalDate.now().minusYears(5).minusDays(1)),
-                    DatoIntervallEntitet(
-                            LocalDate.now().plusDays(1),
-                            LocalDate.now().plusDays(1))))
 
-    val perioder = slåSammenOverlappendePerioder(fakta.personForVurdering.arbeidsforhold!!.map {
-        it.periode
-    }.filterNotNull())
+    perioder.addAll(listOf(
+            DatoIntervallEntitet(
+                    LocalDate.now().minusYears(5).minusDays(1),
+                    LocalDate.now().minusYears(5).minusDays(1)),
+            DatoIntervallEntitet(
+                    LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(1))))
 
-    val perioder2 = perioder.sortedBy { it.fom }
+    val sammenPerioder = slåSammenOverlappendePerioder(perioder).sortedBy { it.fom }
 
-    val maxGapBetweenAdjacentPeriods = perioder2.zipWithNext().fold(0) { max, pairs ->
-        val gap = Period.between(pairs.first.tom!!, pairs.second.fom!!).days
+    val maxGapBetweenAdjacentPeriods = sammenPerioder.zipWithNext().fold(0L) { max, pairs ->
+        val gap = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1) , pairs.second.fom!!.atStartOfDay()).toDays()
         if (gap > max) {
             gap
         } else {
