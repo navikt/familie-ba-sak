@@ -1,15 +1,11 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
 import no.nav.nare.core.specifications.Spesifikasjon
 import java.time.LocalDate
 
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
-                  val gjelderKunFor: List<SakType> = emptyList(),
                   val spesifikasjon: Spesifikasjon<Fakta>,
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
@@ -61,22 +57,9 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     }
 
     companion object {
-        fun hentVilkårForPart(personType: PersonType) = values()
-                .filter { personType in it.parterDetteGjelderFor }.toSet()
-
-        fun hentVilkårForPart(personType: PersonType, vurderingsDato: LocalDate) = values()
-                .filter {
-                    personType in it.parterDetteGjelderFor
-                    && it.gyldigVilkårsperiode.gyldigFor(vurderingsDato)
-                }.toSet()
-
-        fun hentVilkårForSakstype(sakstype: SakType) = values()
-                .filter { it.gjelderKunFor.isEmpty() || sakstype in it.gjelderKunFor }.toSet()
-
-        fun hentVilkårFor(personType: PersonType, sakstype: SakType): Set<Vilkår> {
+        fun hentVilkårFor(personType: PersonType): Set<Vilkår> {
             return values().filter {
                 personType in it.parterDetteGjelderFor
-                && (it.gjelderKunFor.isEmpty() || sakstype in it.gjelderKunFor)
             }.toSet()
         }
     }
@@ -92,24 +75,4 @@ data class GyldigVilkårsperiode(
     }
 }
 
-enum class SakType {
-    EØS, NASJONAL, TREDJELANDSBORGER;
-
-    companion object {
-        fun valueOfType(type: Any): SakType {
-            return when (type) {
-                BehandlingKategori.EØS -> EØS
-                BehandlingKategori.NASJONAL -> NASJONAL
-                else -> throw IllegalArgumentException("Finner ingen mapping til SakType for $type")
-            }
-        }
-
-        fun hentSakType(behandlingKategori: BehandlingKategori, søknadDTO: SøknadDTO?): SakType {
-            return if (behandlingKategori == BehandlingKategori.NASJONAL &&
-                       (søknadDTO?.typeSøker == TypeSøker.TREDJELANDSBORGER || søknadDTO?.typeSøker == TypeSøker.EØS_BORGER)) {
-                TREDJELANDSBORGER
-            } else valueOfType(behandlingKategori)
-        }
-    }
-}
 

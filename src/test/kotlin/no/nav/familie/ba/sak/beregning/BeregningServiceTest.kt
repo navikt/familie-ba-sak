@@ -35,7 +35,6 @@ class BeregningServiceTest {
 
         beregningService = BeregningService(andelTilkjentYtelseRepository,
                                             fagsakService,
-                                            søknadGrunnlagService,
                                             tilkjentYtelseRepository,
                                             behandlingResultatRepository,
                                             behandlingRepository)

@@ -7,10 +7,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.vilkår.SakType.Companion.hentSakType
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Feil
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class Vilkårsvurdering(
-        private val søknadGrunnlagService: SøknadGrunnlagService,
         private val vilkårService: VilkårService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
@@ -77,15 +75,9 @@ class Vilkårsvurdering(
 
             val periodeResultater = behandlingResultat.periodeResultater(brukMåned = false)
 
-            val søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()
-            val sakType = hentSakType(behandlingKategori = behandling.kategori, søknadDTO = søknadDTO)
-
-
             val harGyldigePerioder = periodeResultater.any { periodeResultat ->
-                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER,
-                        sakType) &&
-                        periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN,
-                                sakType)
+                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER) &&
+                        periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN)
             }
 
             when {
