@@ -9,28 +9,28 @@ import org.junit.jupiter.api.Test
 class MalerServiceTest {
 
     @Test
-    fun `Skal returnere malnavn Innvilget-Tredjelandsborger for medlemskap TREDJELANDSBORGER og resultat INNVILGET`() {
+    fun `Skal returnere malnavn innvilget-tredjelandsborger for medlemskap TREDJELANDSBORGER og resultat INNVILGET`() {
 
         val malNavn = MalerService.malNavnForMedlemskapOgResultatType(Medlemskap.TREDJELANDSBORGER,
                                                                      BehandlingResultatType.INNVILGET)
 
-        assertEquals(malNavn, "Innvilget-Tredjelandsborger")
+        assertEquals(malNavn, "innvilget-tredjelandsborger")
     }
 
     @Test
-    fun `Skal returnere malnavn Innvilget for medlemskap NORDEN og resultat INNVILGET`() {
+    fun `Skal returnere malnavn innvilget for medlemskap NORDEN og resultat INNVILGET`() {
 
         val malNavn = MalerService.malNavnForMedlemskapOgResultatType(Medlemskap.NORDEN,
                                                                      BehandlingResultatType.INNVILGET)
 
-        assertEquals(malNavn, "Innvilget")
+        assertEquals(malNavn, "innvilget")
     }
 
     @Test
-    fun `Skal returnere malnavn Innvilget for resultat INNVILGET når medlemskap er null`() {
+    fun `Skal returnere malnavn innvilget for resultat INNVILGET når medlemskap er null`() {
         val malNavn = MalerService.malNavnForMedlemskapOgResultatType(null,
                                                                      BehandlingResultatType.INNVILGET)
 
-        assertEquals(malNavn, "Innvilget")
+        assertEquals(malNavn, "innvilget")
     }
 }
