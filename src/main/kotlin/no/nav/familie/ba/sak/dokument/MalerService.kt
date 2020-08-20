@@ -37,7 +37,7 @@ class MalerService(
         val sterkesteMedlemskap = finnSterkesteMedlemskap(medlemskap)
 
         return MalMedData(
-                mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap, behandlingResultatType),
+                mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap, behandlingResultatType, vedtak.behandling.opprinnelse),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
                     BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
@@ -77,12 +77,17 @@ class MalerService(
                 etterbetalingsbeløp += antallMnd * it.utbetaltPerMnd
             }
 
+            val antallBarn = personopplysningGrunnlag.barna.size
+            val fødselsdatoListe = personopplysningGrunnlag.barna.map { it.fødselsdato.tilKortString() }
             val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker[0].navn,
                                                    fodselsnummer = behandling.fagsak.hentAktivIdent().ident,
-                                                   fodselsdato = personopplysningGrunnlag.barna.map { it.fødselsdato }
-                                                           .joinToString(" og "),
+                                                   fodselsdato = when (antallBarn) {
+                                                       1 -> fødselsdatoListe.first()
+                                                       else -> fødselsdatoListe.joinToString(limit = antallBarn - 1,
+                                                                                             postfix = " og ").plus(fødselsdatoListe.last())
+                                                   },
                                                    belop = Utils.formaterBeløp(beregningOversikt.first().utbetaltPerMnd),
-                                                   antallBarn = personopplysningGrunnlag.barna.size,
+                                                   antallBarn = antallBarn,
                                                    virkningstidspunkt = vedtak.vedtaksdato?.tilMånedÅr()
                                                                         ?: throw Feil(message = "Vedtaksdato er ikke satt ved brevgenerering",
                                                                                       frontendFeilmelding = "Vedtaksdato er ikke satt ved brevgenerering"),
@@ -139,7 +144,11 @@ class MalerService(
 
     companion object {
         fun malNavnForMedlemskapOgResultatType(medlemskap: Medlemskap?,
-                                               resultatType: BehandlingResultatType): String {
+                                               resultatType: BehandlingResultatType,
+                                               opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL): String {
+            if (opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+                return "${resultatType.brevMal}-Autovedtak"
+            }
             return when (medlemskap) {
                 Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-Tredjelandsborger"
                 else -> resultatType.brevMal
