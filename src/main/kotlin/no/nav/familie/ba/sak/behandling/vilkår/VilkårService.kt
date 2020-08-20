@@ -191,7 +191,9 @@ class VilkårService(
 
         val aktivBehandlingResultat =
                 behandlingResultatService.hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id)
-        val kjørMetrikker = aktivBehandlingResultat == null
+        val kjørMetrikker = aktivBehandlingResultat == null ||
+                            behandlingService.hent(personResultat.behandlingResultat.behandling.id).opprinnelse ==
+                            BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
 
         return evalueringer.map { child ->
             val fom =
