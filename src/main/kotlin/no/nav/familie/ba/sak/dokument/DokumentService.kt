@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.Feil
@@ -18,8 +16,7 @@ class DokumentService(
         private val behandlingResultatService: BehandlingResultatService,
         private val dokGenKlient: DokGenKlient,
         private val malerService: MalerService,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val søknadGrunnlagService: SøknadGrunnlagRepository
+        private val persongrunnlagService: PersongrunnlagService
 ) {
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
@@ -32,7 +29,6 @@ class DokumentService(
         return Result.runCatching {
             val søker = persongrunnlagService.hentSøker(behandling = vedtak.behandling)
                         ?: error("Finner ikke søker på vedtaket")
-            val søknad: SøknadDTO? = søknadGrunnlagService.hentAktiv(vedtak.behandling.id)?.hentSøknadDto()
 
             val behandlingResultatType =
                     behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
@@ -41,8 +37,8 @@ class DokumentService(
                                                     navn = søker.navn,
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr())
 
-            val malMedData = malerService.mapTilBrevfelter(vedtak,
-                                                           behandlingResultatType
+            val malMedData = malerService.mapTilVedtakBrevfelter(vedtak,
+                                                                 behandlingResultatType
             )
             dokGenKlient.lagPdfForMal(malMedData, headerFelter)
         }

@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.dokument
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -13,7 +15,9 @@ import no.nav.familie.ba.sak.client.Norg2RestClient
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
+import no.nav.familie.ba.sak.dokument.domene.maler.InnhenteOpplysninger
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
@@ -23,13 +27,15 @@ class MalerService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val norg2RestClient: Norg2RestClient
+        private val norg2RestClient: Norg2RestClient,
+        private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
 
-    fun mapTilBrevfelter(vedtak: Vedtak,
-                         behandlingResultatType: BehandlingResultatType): MalMedData {
+    fun mapTilVedtakBrevfelter(vedtak: Vedtak,
+                               behandlingResultatType: BehandlingResultatType): MalMedData {
 
-        val statsborgerskap = persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap?: error("Finner ikke søker på behandling")
+        val statsborgerskap =
+                persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap ?: error("Finner ikke søker på behandling")
         val medlemskap = finnNåværendeMedlemskap(statsborgerskap)
         val sterkesteMedlemskap = finnSterkesteMedlemskap(medlemskap)
 
@@ -43,6 +49,22 @@ class MalerService(
                 }
         )
     }
+
+    fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling,
+                                             behandlingResultatType: BehandlingResultatType): MalMedData {
+        val enhetskode = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
+        val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
+                soknadDato = "",
+                fritekst = "",
+                enhet = norg2RestClient.hentEnhet(enhetskode).navn,
+                saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
+        ))
+        return MalMedData(
+                mal = "innhente-opplysninger",
+                fletteFelter = felter
+        )
+    }
+
 
     private fun mapTilOpphørtBrevFelter(vedtak: Vedtak): String {
         val behandling = vedtak.behandling
