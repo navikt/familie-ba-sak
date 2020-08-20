@@ -56,7 +56,7 @@ data class Vedtak(
         }
     }
 
-    val stønadBrevBegrunnelser: Map<String, String>
+    val stønadBrevBegrunnelser: Map<String, Map<String, String>>
         get() {
             return if (stønadBrevMetadata.isNullOrBlank()) {
                 emptyMap()
@@ -65,17 +65,24 @@ data class Vedtak(
             }
         }
 
-    fun settStønadBrevBegrunnelse(periode: Periode, begrunnelse: String) {
+    fun settStønadBrevBegrunnelse(periode: Periode, begrunnelse: String, begrunnelseId: String) {
         val metadata: StønadBrevMetadata = when (stønadBrevMetadata.isNullOrBlank()) {
             true -> {
+                var begrunnelseMedId = mutableMapOf(begrunnelseId to begrunnelse)
                 StønadBrevMetadata(
-                        begrunnelser = mutableMapOf(periode.hash to begrunnelse)
+                        begrunnelser = mutableMapOf(periode.hash to begrunnelseMedId)
                 )
             }
             false -> {
                 val metadata: StønadBrevMetadata = objectMapper.readValue(stønadBrevMetadata!!)
-                metadata.begrunnelser[periode.hash] = begrunnelse
-                metadata
+                if(metadata.begrunnelser[periode.hash] === null) {
+                    var begrunnelseMedId = mutableMapOf(begrunnelseId to begrunnelse)
+                    metadata.begrunnelser[periode.hash] = begrunnelseMedId
+                    metadata
+                } else {
+                    metadata.begrunnelser[periode.hash]!![begrunnelseId] = begrunnelse
+                    metadata
+                }
             }
         }
 
@@ -84,5 +91,5 @@ data class Vedtak(
 }
 
 data class StønadBrevMetadata(
-        var begrunnelser: MutableMap<String, String> = mutableMapOf()
+        var begrunnelser: MutableMap<String, MutableMap<String, String>> = mutableMapOf()
 )

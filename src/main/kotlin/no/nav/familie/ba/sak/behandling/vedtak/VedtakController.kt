@@ -129,7 +129,8 @@ data class RestBeslutningPåVedtak(
 
 data class RestStønadBrevBegrunnelse(
         val periode: Periode,
-        val begrunnelse: String
+        val begrunnelse: String,
+        val begrunnelseId: String
 )
 
 enum class Beslutning {

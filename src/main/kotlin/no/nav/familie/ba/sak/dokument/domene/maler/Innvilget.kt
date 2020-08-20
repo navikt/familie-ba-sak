@@ -14,5 +14,5 @@ data class DuFårSeksjon(
         val belop: String,
         val antallBarn: Int,
         val barnasFodselsdatoer: String,
-        val begrunnelser: List<String>
+        val begrunnelser: Map<String, String>
 )

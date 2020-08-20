@@ -83,8 +83,8 @@ class MalerService(
                                                 restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
                                             })
 
-            val begrunnelse: String = vedtak.stønadBrevBegrunnelser[Periode(it.periodeFom!!, it.periodeTom!!).hash]
-                                      ?: "Ikke satt"
+            val begrunnelse: Map<String, String> = vedtak.stønadBrevBegrunnelser[Periode(it.periodeFom!!, it.periodeTom!!).hash]
+                                      ?: emptyMap();
 
             DuFårSeksjon(
                     fom = it.periodeFom.tilDagMånedÅr(),
@@ -92,7 +92,7 @@ class MalerService(
                     belop = Utils.formaterBeløp(it.utbetaltPerMnd),
                     antallBarn = it.antallBarn,
                     barnasFodselsdatoer = barnasFødselsdatoer,
-                    begrunnelser = listOf(begrunnelse)
+                    begrunnelser = begrunnelse
             )
         }
 
