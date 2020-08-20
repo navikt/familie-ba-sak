@@ -183,7 +183,17 @@ private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopp
     it.type == PersonType.ANNENPART
 }
 
-fun morHarBoddINorgeIMerEnn5År(): Boolean = true // ikke implementert
+fun morHarBoddINorgeIMerEnn5År(fakta: Fakta): Boolean {
+    if(fakta.personForVurdering.bostedsadresseperiode == null){
+        return false
+    }
+
+    val perioder = fakta.personForVurdering.bostedsadresseperiode!!.map{
+        it.periode
+    }.filterNotNull()
+
+    return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 0
+}
 
 fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
     if (fakta.personForVurdering.arbeidsforhold == null) {
@@ -192,26 +202,32 @@ fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
 
     val perioder = fakta.personForVurdering.arbeidsforhold!!.map {
         it.periode
-    }.filterNotNull().toMutableList()
+    }.filterNotNull()
 
-    perioder.addAll(listOf(
-            DatoIntervallEntitet(
-                    LocalDate.now().minusYears(5).minusDays(1),
-                    LocalDate.now().minusYears(5).minusDays(1)),
-            DatoIntervallEntitet(
-                    LocalDate.now().plusDays(1),
-                    LocalDate.now().plusDays(1))))
+    return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 90
+}
 
-    val sammenslåttePerioder = slåSammenOverlappendePerioder(perioder).sortedBy { it.fom }
+private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEntitet>,
+                                                fom: LocalDate,
+                                                tom: LocalDate): Long {
+    val mutablePerioder = perioder.toMutableList().apply {
+        addAll(listOf(
+                DatoIntervallEntitet(
+                        fom.minusDays(1),
+                        fom.minusDays(1)),
+                DatoIntervallEntitet(
+                        tom.plusDays(1),
+                        tom.plusDays(1))))
+    }
 
-    val maksimumAvstandMellomToPerioder = sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
-        val avstand = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1) , pairs.second.fom!!.atStartOfDay()).toDays()
+    val sammenslåttePerioder = slåSammenOverlappendePerioder(mutablePerioder).sortedBy { it.fom }
+
+    return sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
+        val avstand = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
         if (avstand > maksimumAvstand) {
             avstand
         } else {
             maksimumAvstand
         }
     }
-
-    return maksimumAvstandMellomToPerioder <= 90
 }

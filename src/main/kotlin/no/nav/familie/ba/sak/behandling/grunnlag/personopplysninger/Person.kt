@@ -57,20 +57,26 @@ data class Person(
         @JoinColumn
         val bostedsadresse: GrBostedsadresse? = null,
 
-        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
         var statsborgerskap: List<GrStatsborgerskap>? = null,
 
-        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
         var opphold: List<GrOpphold>? = null,
 
-        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
-        var arbeidsforhold: List<GrArbeidsforhold>? = null
+        var arbeidsforhold: List<GrArbeidsforhold>? = null,
+
+        @OneToMany(cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
+        //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
+        @Fetch(value = FetchMode.SUBSELECT)
+        @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
+        var bostedsadresseperiode: List<GrBostedsadresseperiode>? = null
 ) : BaseEntitet() {
 
     override fun toString(): String {
