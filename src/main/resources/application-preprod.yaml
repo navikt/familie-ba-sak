@@ -65,7 +65,7 @@ NORG2_BASE_URL: https://app-q1.adeo.no/norg2
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
 PDL_URL: http://pdl-api
 CREDENTIAL_USERNAME: srvfamilie-ba-sak
-CREDENTIAL_PASSWORD: ${SRVUSER_BA_SAK_SECRET}
+CREDENTIAL_PASSWORD: $(cat ${SRVUSER_BA_SAK_SECRET})
 
 VEILEDER_ROLLE: "93a26831-9866-4410-927b-74ff51a9107c"
 SAKSBEHANDLER_ROLLE: "d21e00a4-969d-4b28-8782-dc818abfae65"
