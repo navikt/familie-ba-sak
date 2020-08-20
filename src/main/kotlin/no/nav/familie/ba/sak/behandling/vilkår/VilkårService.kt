@@ -176,7 +176,7 @@ class VilkårService(
             val fakta = Fakta(personForVurdering = person, behandlingOpprinnelse = behandlingResultat.behandling.opprinnelse)
             val evalueringerForVilkår = spesifikasjonererForPerson.map { it.evaluer(fakta) }
 
-            personResultat.setVilkårResultater(vilkårResultater(personResultat, person, fakta, evalueringerForVilkår))
+            personResultat.setVilkårResultater(vilkårResultater(personResultat, person, fakta, evalueringerForVilkår, behandlingResultat.behandling.opprinnelse))
 
             personResultat
         }.toSet()
@@ -187,13 +187,16 @@ class VilkårService(
     private fun vilkårResultater(personResultat: PersonResultat,
                                  person: Person,
                                  fakta: Fakta,
-                                 evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
+                                 evalueringer: List<Evaluering>,
+                                 behandlingsOpprinnelse: BehandlingOpprinnelse): SortedSet<VilkårResultat> {
 
-        val aktivBehandlingResultat =
-                behandlingResultatService.hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id)
-        val kjørMetrikker = aktivBehandlingResultat == null ||
-                            behandlingService.hent(personResultat.behandlingResultat.behandling.id).opprinnelse ==
-                            BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
+        val kjørMetrikker = if (behandlingsOpprinnelse != BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+                                    val aktivBehandling = behandlingResultatService
+                                        .hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id)
+                                    aktivBehandling == null
+                                } else {
+                                    true
+                                }
 
         return evalueringer.map { child ->
             val fom =
