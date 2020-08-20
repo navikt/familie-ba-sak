@@ -47,4 +47,4 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: preprod
     - name: SRVUSER_BA_SAK_SECRET
-      value: /run/secrets/srvfamilie-ba-sak/password
+      value: /var/run/secrets/srvfamilie-ba-sak/password

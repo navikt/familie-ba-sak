@@ -74,8 +74,6 @@ FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.adeo.no
 NORG2_BASE_URL: https://app.adeo.no/norg2
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
 PDL_URL: http://pdl-api
-CREDENTIAL_USERNAME: srvfamilie-ba-sak
-CREDENTIAL_PASSWORD: ${SRVUSER_BA_SAK_SECRET}
 
 #Unleash
 UNLEASH_API_URL: https://unleash.nais.adeo.no/api/
