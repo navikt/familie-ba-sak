@@ -97,9 +97,9 @@ class VilkårService(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
         val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
-        if (barna.size != 1) {
+        /*if (barna.size != 1) {
             throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde ett barn, men inneholder ${barna.size}")
-        }
+        }*/
 
         val behandlingResultat = BehandlingResultat(
                 behandling = behandlingService.hent(behandlingId),

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
@@ -30,6 +31,7 @@ class MalerService(
 ) {
 
     fun mapTilBrevfelter(vedtak: Vedtak,
+                         personopplysningGrunnlag: PersonopplysningGrunnlag,
                          behandlingResultatType: BehandlingResultatType): MalMedData {
 
         val statsborgerskap = persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap?: error("Finner ikke søker på behandling")
@@ -39,7 +41,7 @@ class MalerService(
         return MalMedData(
                 mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap, behandlingResultatType, vedtak.behandling.opprinnelse),
                 fletteFelter = when (behandlingResultatType) {
-                    BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
+                    BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
                     BehandlingResultatType.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak)
                     else -> error("Invalid/unsupported behandling resultat type")
@@ -56,12 +58,10 @@ class MalerService(
                "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
     }
 
-    private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak): String {
+    private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         val behandling = vedtak.behandling
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-                                       ?: throw Feil("Finner ikke persongrunnlag ved mapping til brevfelter")
 
         val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelseForBehandling = tilkjentYtelse,
                                                                           personopplysningGrunnlag = personopplysningGrunnlag)
@@ -71,7 +71,7 @@ class MalerService(
                         frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev")
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            var etterbetalingsbeløp = 0
+            var etterbetalingsbeløp = 12648
             beregningOversikt.filter { it.periodeFom !== null && it.periodeFom <= vedtak.vedtaksdato }.map {
                 val antallMnd: Int = Period.between(it.periodeFom, it.periodeTom).months
                 etterbetalingsbeløp += antallMnd * it.utbetaltPerMnd
@@ -83,14 +83,13 @@ class MalerService(
                                                    fodselsnummer = behandling.fagsak.hentAktivIdent().ident,
                                                    fodselsdato = when (antallBarn) {
                                                        1 -> fødselsdatoListe.first()
-                                                       else -> fødselsdatoListe.joinToString(limit = antallBarn - 1,
-                                                                                             postfix = " og ").plus(fødselsdatoListe.last())
+                                                       else -> fødselsdatoListe.slåSammenMedKommaOgOg()
                                                    },
                                                    belop = Utils.formaterBeløp(beregningOversikt.first().utbetaltPerMnd),
                                                    antallBarn = antallBarn,
-                                                   virkningstidspunkt = vedtak.vedtaksdato?.tilMånedÅr()
-                                                                        ?: throw Feil(message = "Vedtaksdato er ikke satt ved brevgenerering",
-                                                                                      frontendFeilmelding = "Vedtaksdato er ikke satt ved brevgenerering"),
+                                                   virkningstidspunkt = beregningOversikt.first().periodeFom?.tilMånedÅr()
+                                                                        ?: throw Feil(message = "Startdato for utbetaling for innvilget vedtak er ikke satt ved brevgenerering",
+                                                                                      frontendFeilmelding = "Startdato for utbetaling for innvilget vedtak er ikke satt ved brevgenerering"),
                                                    enhet = enhet,
                                                    erEtterbetaling = etterbetalingsbeløp > 0,
                                                    etterbetalingsbelop = Utils.formaterBeløp(etterbetalingsbeløp))

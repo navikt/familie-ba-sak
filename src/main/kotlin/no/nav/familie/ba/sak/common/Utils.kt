@@ -19,5 +19,10 @@ object Utils {
                 (hentetBehandlingResultatType == BehandlingResultatType.OPPHØRT) -> BehandlingResultatType.DELVIS_INNVILGET
                 else -> hentetBehandlingResultatType
             }
+}
 
+fun <E> List<E>.slåSammenMedKommaOgOg(): String {
+    return this.subList(0, this.size-1)
+            .joinToString(postfix = " og ")
+            .plus(this.last())
 }

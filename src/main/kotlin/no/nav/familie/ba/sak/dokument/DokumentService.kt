@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.dokument
 
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.Feil
@@ -18,8 +17,7 @@ class DokumentService(
         private val behandlingResultatService: BehandlingResultatService,
         private val dokGenKlient: DokGenKlient,
         private val malerService: MalerService,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val søknadGrunnlagService: SøknadGrunnlagRepository
+        private val persongrunnlagService: PersongrunnlagService
 ) {
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
@@ -36,11 +34,17 @@ class DokumentService(
             val behandlingResultatType =
                     behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
+            val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
+                                           ?: throw Feil("Finner ikke persongrunnlag ved generering av brev")
+
             val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
                                                     navn = søker.navn,
+                                                    antallBarn = if (vedtak.behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+                                                        personopplysningGrunnlag.barna.size else null,
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr())
 
             val malMedData = malerService.mapTilBrevfelter(vedtak,
+                                                           personopplysningGrunnlag,
                                                            behandlingResultatType
             )
             dokGenKlient.lagPdfForMal(malMedData, headerFelter)
