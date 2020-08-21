@@ -35,7 +35,8 @@ class DokumentService(
                     behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                                           ?: throw Feil("Finner ikke persongrunnlag ved generering av brev")
+                                           ?: throw Feil("Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
+                                                         "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
 
             val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
                                                     navn = søker.navn,

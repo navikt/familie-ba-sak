@@ -106,7 +106,8 @@ object TilkjentYtelseUtils {
             && it.periodeFom <= vedtak.vedtaksdato && it.periodeTom > vedtak.vedtaksdato
         }?.utbetaltPerMnd
                ?: beregningOversikt.find { it.periodeTom != null && it.periodeTom > vedtak.vedtaksdato }?.utbetaltPerMnd
-               ?: throw Feil("Finner ikke gjeldende beløp for virkningstidspunkt")
+               ?: throw Feil("Finner ikke gjeldende beløp for virkningstidspunkt",
+                             "Finner ikke gjeldende beløp for virkningstidspunkt")
     }
 
 
