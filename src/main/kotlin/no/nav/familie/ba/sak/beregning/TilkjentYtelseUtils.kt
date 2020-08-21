@@ -90,22 +90,23 @@ object TilkjentYtelseUtils {
 
     fun beregnEtterbetaling(beregningOversikt: List<RestBeregningOversikt>,
                             vedtak: Vedtak): Int {
-        var etterbetalingsbeløp = 0
         if (vedtak.vedtaksdato == null) {
             throw Feil("Vedtaket mangler vedtaksdato", "Vedtaket mangler vedtaksdato")
         }
-        beregningOversikt.filter { it.periodeFom !== null && it.periodeTom !== null && it.periodeFom <= vedtak.vedtaksdato }.map {
+        return beregningOversikt.filter { it.periodeFom !== null && it.periodeTom !== null && it.periodeFom <= vedtak.vedtaksdato }.sumBy {
             val antallMnd: Int = Period.between(it.periodeFom, minOf(vedtak.vedtaksdato!!, it.periodeTom!!.plusMonths(1)))
                     .run { this.years * 12 + this.months }
-            etterbetalingsbeløp += antallMnd * it.utbetaltPerMnd
+            antallMnd * it.utbetaltPerMnd
         }
-        return etterbetalingsbeløp
     }
 
     fun beregnNåværendeBeløp(beregningOversikt: List<RestBeregningOversikt>, vedtak: Vedtak): Int {
-        return beregningOversikt.find { it.periodeFom !== null && it.periodeTom !== null
-                                                        && it.periodeFom <= vedtak.vedtaksdato && it.periodeTom > vedtak.vedtaksdato }?.utbetaltPerMnd
-                               ?: beregningOversikt.find { it.periodeTom != null && it.periodeTom > vedtak.vedtaksdato }?.utbetaltPerMnd ?: throw Feil("Finner ikke gjeldende beløp for virkningstidspunkt")
+        return beregningOversikt.find {
+            it.periodeFom !== null && it.periodeTom !== null
+            && it.periodeFom <= vedtak.vedtaksdato && it.periodeTom > vedtak.vedtaksdato
+        }?.utbetaltPerMnd
+               ?: beregningOversikt.find { it.periodeTom != null && it.periodeTom > vedtak.vedtaksdato }?.utbetaltPerMnd
+               ?: throw Feil("Finner ikke gjeldende beløp for virkningstidspunkt")
     }
 
 
