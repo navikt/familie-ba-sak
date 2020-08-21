@@ -1,0 +1,12 @@
+{
+  "data": {
+    "person": {
+      "bostedsadresse": [
+        {
+          "gyldigFraOgMed": "2002-01-03",
+          "gyldigTilOgMed": "2002-01-04"
+        }
+      ]
+    }
+  }
+}

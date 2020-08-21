@@ -144,18 +144,15 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
 }
 
 private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Evaluering {
-    // Regelflytramme. Utkommentert pga. at SonarCube flagger dette som en bug. Rammen skal benyttes når reglene er implementert.
-    /*if (morHarBoddINorgeIMerEnn5År()) {
-        if (morHarJobbetINorgeSiste5År()) {
-            // Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
+    return if (morHarBoddINorgeIMerEnn5År(fakta)) {
+        if (morHarJobbetINorgeSiste5År(fakta)) {
+            Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
         } else {
-            // Evaluering.nei("Mor har ikke jobbet kontinuerlig i Norge siste 5 år.")
-
+            Evaluering.nei("Mor har ikke jobbet kontinuerlig i Norge siste 5 år.")
         }
     } else {
-        // Evaluering.nei("Mor har ikke bodd i Norge sammenhengende i mer enn 5 år.")
-    }*/
-    return Evaluering.kanskje("ikke implementert")
+        Evaluering.nei("Mor har ikke bodd i Norge sammenhengende i mer enn 5 år.")
+    }
 }
 
 fun personHarLøpendeArbeidsforhold(personForVurdering: Person): Boolean = personForVurdering.arbeidsforhold?.any {
@@ -184,11 +181,11 @@ private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopp
 }
 
 fun morHarBoddINorgeIMerEnn5År(fakta: Fakta): Boolean {
-    if(fakta.personForVurdering.bostedsadresseperiode == null){
+    if (fakta.personForVurdering.bostedsadresseperiode == null) {
         return false
     }
 
-    val perioder = fakta.personForVurdering.bostedsadresseperiode!!.map{
+    val perioder = fakta.personForVurdering.bostedsadresseperiode!!.map {
         it.periode
     }.filterNotNull()
 

@@ -97,7 +97,13 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
 
     fun hentOpphold(ident: String): List<Opphold> = pdlRestClient.hentOpphold(ident, "BAR")
 
-   // fun hentBostedsadresseperioder(ident : String) : List<GrBostedsadresseperiode> = pdlRestClient.hentBostedsadresseperioder(ident)
+    fun hentBostedsadresseperioder(ident : String) : List<GrBostedsadresseperiode> = pdlRestClient.hentBostedsadresseperioder(ident).map{
+        GrBostedsadresseperiode(
+                periode = DatoIntervallEntitet(
+                        fom= it.gyldigFraOgMed,
+                        tom= it.gyldigTilOgMed
+                ))
+    }
 
     companion object {
         const val PERSON = "PERSON"

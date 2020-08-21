@@ -71,6 +71,7 @@ class PersongrunnlagService(
             it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
             it.opphold = oppholdService.hentOpphold(it)
             it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(fødselsnummer), it)
+            it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
         }
 
         personopplysningGrunnlag.personer.add(søker)
@@ -99,6 +100,7 @@ class PersongrunnlagService(
             ).also {
                 it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(nyttBarn), it)
                 it.opphold = oppholdService.hentOpphold(it)
+                it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
             }
         }
     }
