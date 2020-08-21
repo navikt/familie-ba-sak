@@ -64,23 +64,25 @@ class MalerService(
 
         val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelseForBehandling = tilkjentYtelse,
                                                                           personopplysningGrunnlag = personopplysningGrunnlag)
+                .sortedBy { it.periodeFom }
 
         val enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
         else throw Feil(message = "Ansvarlig enhet er ikke satt ved generering av brev",
                         frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev")
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            var etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningOversikt, vedtak)
+            val etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningOversikt, vedtak)
 
             val antallBarn = personopplysningGrunnlag.barna.size
             val fødselsdatoListe = personopplysningGrunnlag.barna.map { it.fødselsdato.tilKortString() }
+            //TODO: Avklare hva virkningstidspunkt skal være ved etterbetaling og flere barn
             val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker[0].navn,
                                                    fodselsnummer = behandling.fagsak.hentAktivIdent().ident,
                                                    fodselsdato = when (antallBarn) {
                                                        1 -> fødselsdatoListe.first()
                                                        else -> fødselsdatoListe.slåSammenMedKommaOgOg()
                                                    },
-                                                   belop = Utils.formaterBeløp(beregningOversikt.first().utbetaltPerMnd),
+                                                   belop = Utils.formaterBeløp(TilkjentYtelseUtils.beregnNåværendeBeløp(beregningOversikt, vedtak)),
                                                    antallBarn = antallBarn,
                                                    virkningstidspunkt = beregningOversikt.first().periodeFom?.tilMånedÅr()
                                                                         ?: throw Feil(message = "Startdato for utbetaling for innvilget vedtak er ikke satt ved brevgenerering",
@@ -141,7 +143,7 @@ class MalerService(
                                                resultatType: BehandlingResultatType,
                                                opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL): String {
             if (opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-                return "${resultatType.brevMal}-Autovedtak"
+                return "${resultatType.brevMal}-autovedtak"
             }
             return when (medlemskap) {
                 Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-tredjelandsborger"

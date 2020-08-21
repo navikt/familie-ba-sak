@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -91,10 +92,16 @@ object TilkjentYtelseUtils {
                             vedtak: Vedtak): Int {
         var etterbetalingsbeløp = 0
         beregningOversikt.filter { it.periodeFom !== null && it.periodeFom <= vedtak.vedtaksdato }.map {
-            val antallMnd: Int = Period.between(it.periodeFom, it.periodeTom).months
+            val antallMnd: Int = Period.between(it.periodeFom, vedtak.vedtaksdato).run { this.years*12 + this.months }
             etterbetalingsbeløp += antallMnd * it.utbetaltPerMnd
         }
         return etterbetalingsbeløp
+    }
+
+    fun beregnNåværendeBeløp(beregningOversikt: List<RestBeregningOversikt>, vedtak: Vedtak): Int {
+        return beregningOversikt.find { it.periodeFom !== null && it.periodeTom !== null
+                                                        && it.periodeFom <= vedtak.vedtaksdato && it.periodeTom > vedtak.vedtaksdato }?.utbetaltPerMnd
+                               ?: beregningOversikt.find { it.periodeTom != null && it.periodeTom > vedtak.vedtaksdato }?.utbetaltPerMnd ?: throw Feil("Finner ikke gjeldende beløp for virkningstidspunkt")
     }
 
 

@@ -84,4 +84,44 @@ class MalerServiceTest {
         assertEquals(autovedtakBrevfelter.fodselsdato, personopplysningGrunnlag.barna.first().fødselsdato.tilKortString())
         assertEquals(autovedtakBrevfelter.erEtterbetaling, false)
     }
+
+    @Test
+    fun `test mapTilBrevfelter for innvilget autovedtak med flere barn og etterbetaling`() {
+        every { norg2RestClient.hentEnhet(any()) } returns Enhet(1L, "enhet")
+
+        val behandling = lagBehandling().copy(opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE,
+                                              fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
+                                                                                           .copy(personIdent = PersonIdent(søkerFnr[0])))))
+
+        val vedtak = lagVedtak(behandling).copy(ansvarligEnhet = "enhet")
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
+        val baseDato = LocalDate.now()
+        val barn1 = personopplysningGrunnlag.barna.first()
+        val barn2 = personopplysningGrunnlag.barna.last()
+        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(baseDato.withDayOfMonth(1).toString(),
+                                                              baseDato.plusYears(1).sisteDagIMåned().toString(),
+                                                              behandling = behandling,
+                                                              person = barn1)
+        val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(baseDato.minusYears(1).withDayOfMonth(1).toString(),
+                                                              baseDato.plusYears(1).toString(),
+                                                              behandling = behandling,
+                                                              person = barn2)
+
+        every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker.first()
+        every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
+                tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
+
+        val brevfelter = malerService.mapTilBrevfelter(vedtak, personopplysningGrunnlag, BehandlingResultatType.INNVILGET)
+
+        val autovedtakBrevfelter = objectMapper.readValue(brevfelter.fletteFelter, InnvilgetAutovedtak::class.java)
+
+        assertEquals(søkerFnr[0], autovedtakBrevfelter.fodselsnummer)
+        assertEquals(Utils.formaterBeløp(andelTilkjentYtelseBarn1.beløp + andelTilkjentYtelseBarn2.beløp), autovedtakBrevfelter.belop)
+        assertEquals(andelTilkjentYtelseBarn2.stønadFom.tilMånedÅr(), autovedtakBrevfelter.virkningstidspunkt)
+        assertEquals("${barn1.fødselsdato.tilKortString()} og ${barn2.fødselsdato.tilKortString()}", autovedtakBrevfelter.fodselsdato)
+        assertEquals(true, autovedtakBrevfelter.erEtterbetaling)
+        assertEquals("12 648", autovedtakBrevfelter.etterbetalingsbelop)
+        assertEquals(2, autovedtakBrevfelter.antallBarn)
+    }
 }
