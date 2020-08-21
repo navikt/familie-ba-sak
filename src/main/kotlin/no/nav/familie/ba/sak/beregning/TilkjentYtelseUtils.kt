@@ -91,8 +91,12 @@ object TilkjentYtelseUtils {
     fun beregnEtterbetaling(beregningOversikt: List<RestBeregningOversikt>,
                             vedtak: Vedtak): Int {
         var etterbetalingsbeløp = 0
-        beregningOversikt.filter { it.periodeFom !== null && it.periodeFom <= vedtak.vedtaksdato }.map {
-            val antallMnd: Int = Period.between(it.periodeFom, minOf(vedtak.vedtaksdato!!, it.periodeTom!!.plusMonths(1))).run { this.years*12 + this.months }
+        if (vedtak.vedtaksdato == null) {
+            throw Feil("Vedtaket mangler vedtaksdato", "Vedtaket mangler vedtaksdato")
+        }
+        beregningOversikt.filter { it.periodeFom !== null && it.periodeTom !== null && it.periodeFom <= vedtak.vedtaksdato }.map {
+            val antallMnd: Int = Period.between(it.periodeFom, minOf(vedtak.vedtaksdato!!, it.periodeTom!!.plusMonths(1)))
+                    .run { this.years * 12 + this.months }
             etterbetalingsbeløp += antallMnd * it.utbetaltPerMnd
         }
         return etterbetalingsbeløp
