@@ -65,7 +65,7 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                underkategori = BehandlingUnderkategori.ORDINÆR,
                opprinnelse = BehandlingOpprinnelse.MANUELL)
 
-fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
+fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN, kjønn: Kjønn = Kjønn.MANN) = Person(
         id = nestePersonId(),
         aktørId = randomAktørId(),
         personIdent = PersonIdent(randomFnr()),
@@ -73,7 +73,7 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: Perso
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
         navn = "",
-        kjønn = Kjønn.MANN,
+        kjønn = kjønn,
         sivilstand = SIVILSTAND.UGIFT
 )
 

@@ -49,10 +49,17 @@ data class GrVegadresse(
             return false
         }
         val otherVegadresse = other as GrVegadresse
+
         return this === other
-               || matrikkelId != null
-               && matrikkelId == otherVegadresse.matrikkelId
-               && bruksenhetsnummer == otherVegadresse.bruksenhetsnummer
+               || ((matrikkelId != null && matrikkelId == otherVegadresse.matrikkelId)
+               || ((matrikkelId == null && otherVegadresse.matrikkelId == null)
+                   && !(adressenavn == null && husnummer == null && husbokstav == null && postnummer == null)
+                   && (adressenavn == otherVegadresse.adressenavn)
+                   && (husnummer == otherVegadresse.husnummer)
+                   && (husbokstav == otherVegadresse.husbokstav)
+                   && (postnummer == otherVegadresse.postnummer)
+                  )
+              )
     }
 
     override fun hashCode(): Int {
