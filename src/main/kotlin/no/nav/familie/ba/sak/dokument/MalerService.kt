@@ -71,22 +71,14 @@ class MalerService(
                         frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev")
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            val etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningOversikt, vedtak)
-
-            val antallBarn = personopplysningGrunnlag.barna.size
-            val fødselsdatoListe = personopplysningGrunnlag.barna.map { it.fødselsdato.tilKortString() }
-            //TODO: Avklare hva virkningstidspunkt skal være ved etterbetaling og flere barn
+            val barnaSortert = personopplysningGrunnlag.barna.sortedByDescending { it.fødselsdato }
+            val etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningOversikt, vedtak, barnaSortert.first())
             val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker[0].navn,
                                                    fodselsnummer = behandling.fagsak.hentAktivIdent().ident,
-                                                   fodselsdato = when (antallBarn) {
-                                                       1 -> fødselsdatoListe.first()
-                                                       else -> fødselsdatoListe.slåSammenMedKommaOgOg()
-                                                   },
+                                                   fodselsdato = barnaSortert.map { it.fødselsdato.tilKortString() }.slåSammenMedKommaOgOg(),
                                                    belop = Utils.formaterBeløp(TilkjentYtelseUtils.beregnNåværendeBeløp(beregningOversikt, vedtak)),
-                                                   antallBarn = antallBarn,
-                                                   virkningstidspunkt = beregningOversikt.first().periodeFom?.tilMånedÅr()
-                                                                        ?: throw Feil(message = "Startdato for utbetaling for innvilget vedtak er ikke satt ved brevgenerering",
-                                                                                      frontendFeilmelding = "Startdato for utbetaling for innvilget vedtak er ikke satt ved brevgenerering"),
+                                                   antallBarn = barnaSortert.size,
+                                                   virkningstidspunkt = barnaSortert.first().fødselsdato.plusMonths(1).tilMånedÅr(),
                                                    enhet = enhet,
                                                    erEtterbetaling = etterbetalingsbeløp > 0,
                                                    etterbetalingsbelop = Utils.formaterBeløp(etterbetalingsbeløp))

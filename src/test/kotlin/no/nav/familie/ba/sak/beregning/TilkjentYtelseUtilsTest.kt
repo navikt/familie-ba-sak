@@ -28,7 +28,7 @@ class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
         val beregningsoversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelse, personopplysningGrunnlag)
 
-        val etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningsoversikt, vedtak)
+        val etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningsoversikt, vedtak, barn2)
 
         assertEquals(12648, etterbetalingsbeløp)
     }
@@ -53,7 +53,7 @@ class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
         val beregningsoversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelse, personopplysningGrunnlag)
 
-        val etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningsoversikt, vedtak)
+        val etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningsoversikt, vedtak, barn2)
 
         assertEquals(18972, etterbetalingsbeløp)
     }

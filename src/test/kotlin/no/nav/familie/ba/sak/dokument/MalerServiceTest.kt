@@ -63,12 +63,12 @@ class MalerServiceTest {
                                               fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
                                                                                            .copy(personIdent = PersonIdent(
                                                                                                    søkerFnr[0])))))
-        val vedtak = lagVedtak(behandling).copy(ansvarligEnhet = "enhet")
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList().subList(0, 1))
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
-        val baseDato = LocalDate.now()
-        val andelTilkjentYtelse = lagAndelTilkjentYtelse(baseDato.toString(),
-                                                         baseDato.plusYears(1).toString(),
+        val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
+        val vedtak = lagVedtak(behandling).copy(ansvarligEnhet = "enhet", vedtaksdato = fødselsdato.plusDays(7))
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
+                                                         fødselsdato.plusYears(18).toString(),
                                                          behandling = behandling,
                                                          person = personopplysningGrunnlag.barna.first())
 
@@ -82,7 +82,7 @@ class MalerServiceTest {
 
         assertEquals(søkerFnr[0], autovedtakBrevfelter.fodselsnummer)
         assertEquals(Utils.formaterBeløp(andelTilkjentYtelse.beløp), autovedtakBrevfelter.belop)
-        assertEquals(baseDato.tilMånedÅr(), autovedtakBrevfelter.virkningstidspunkt)
+        assertEquals(fødselsdato.plusMonths(1).tilMånedÅr(), autovedtakBrevfelter.virkningstidspunkt)
         assertEquals(personopplysningGrunnlag.barna.first().fødselsdato.tilKortString(), autovedtakBrevfelter.fodselsdato)
         assertEquals(false, autovedtakBrevfelter.erEtterbetaling)
     }
@@ -96,18 +96,17 @@ class MalerServiceTest {
                                                                                            .copy(personIdent = PersonIdent(
                                                                                                    søkerFnr[0])))))
 
-        val vedtak = lagVedtak(behandling).copy(ansvarligEnhet = "enhet")
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
-        val baseDato = LocalDate.now()
         val barn1 = personopplysningGrunnlag.barna.first()
         val barn2 = personopplysningGrunnlag.barna.last()
-        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(baseDato.withDayOfMonth(1).toString(),
-                                                              baseDato.plusYears(1).sisteDagIMåned().toString(),
+        val vedtak = lagVedtak(behandling).copy(ansvarligEnhet = "enhet", vedtaksdato = barn2.fødselsdato.plusMonths(6))
+        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
+                                                              barn1.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
                                                               behandling = behandling,
                                                               person = barn1)
-        val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(baseDato.minusYears(1).withDayOfMonth(1).toString(),
-                                                              baseDato.plusYears(1).toString(),
+        val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
+                                                              barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
                                                               behandling = behandling,
                                                               person = barn2)
 
@@ -123,7 +122,7 @@ class MalerServiceTest {
         assertEquals(Utils.formaterBeløp(andelTilkjentYtelseBarn1.beløp + andelTilkjentYtelseBarn2.beløp),
                      autovedtakBrevfelter.belop)
         assertEquals(andelTilkjentYtelseBarn2.stønadFom.tilMånedÅr(), autovedtakBrevfelter.virkningstidspunkt)
-        assertEquals("${barn1.fødselsdato.tilKortString()} og ${barn2.fødselsdato.tilKortString()}",
+        assertEquals("${barn2.fødselsdato.tilKortString()} og ${barn1.fødselsdato.tilKortString()}",
                      autovedtakBrevfelter.fodselsdato)
         assertEquals(true, autovedtakBrevfelter.erEtterbetaling)
         assertEquals("12 648", autovedtakBrevfelter.etterbetalingsbelop)

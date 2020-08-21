@@ -22,7 +22,10 @@ object Utils {
 }
 
 fun <E> List<E>.slåSammenMedKommaOgOg(): String {
-    return this.subList(0, this.size-1)
-            .joinToString(postfix = " og ")
-            .plus(this.last())
+    return when (this.size > 1) {
+        false -> this.firstOrNull()?.toString() ?: ""
+        true -> this.subList(0, this.size - 1)
+                .joinToString(postfix = " og ")
+                .plus(this.last())
+    }
 }
