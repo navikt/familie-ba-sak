@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
-import java.time.Period
 
 @Service
 class MalerService(
@@ -71,11 +70,7 @@ class MalerService(
                         frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev")
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            var etterbetalingsbeløp = 12648
-            beregningOversikt.filter { it.periodeFom !== null && it.periodeFom <= vedtak.vedtaksdato }.map {
-                val antallMnd: Int = Period.between(it.periodeFom, it.periodeTom).months
-                etterbetalingsbeløp += antallMnd * it.utbetaltPerMnd
-            }
+            var etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningOversikt, vedtak)
 
             val antallBarn = personopplysningGrunnlag.barna.size
             val fødselsdatoListe = personopplysningGrunnlag.barna.map { it.fødselsdato.tilKortString() }

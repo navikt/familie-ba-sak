@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
 import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
+import java.time.Period
 import java.time.YearMonth
 
 object TilkjentYtelseUtils {
@@ -84,6 +86,17 @@ object TilkjentYtelseUtils {
 
         return tilkjentYtelse
     }
+
+    fun beregnEtterbetaling(beregningOversikt: List<RestBeregningOversikt>,
+                            vedtak: Vedtak): Int {
+        var etterbetalingsbeløp = 0
+        beregningOversikt.filter { it.periodeFom !== null && it.periodeFom <= vedtak.vedtaksdato }.map {
+            val antallMnd: Int = Period.between(it.periodeFom, it.periodeTom).months
+            etterbetalingsbeløp += antallMnd * it.utbetaltPerMnd
+        }
+        return etterbetalingsbeløp
+    }
+
 
     private fun settRiktigStønadFom(fraOgMed: LocalDate): YearMonth =
             YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
