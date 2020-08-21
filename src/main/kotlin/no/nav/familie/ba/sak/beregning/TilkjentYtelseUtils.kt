@@ -92,7 +92,7 @@ object TilkjentYtelseUtils {
                             vedtak: Vedtak): Int {
         var etterbetalingsbeløp = 0
         beregningOversikt.filter { it.periodeFom !== null && it.periodeFom <= vedtak.vedtaksdato }.map {
-            val antallMnd: Int = Period.between(it.periodeFom, vedtak.vedtaksdato).run { this.years*12 + this.months }
+            val antallMnd: Int = Period.between(it.periodeFom, minOf(vedtak.vedtaksdato!!, it.periodeTom!!.plusMonths(1))).run { this.years*12 + this.months }
             etterbetalingsbeløp += antallMnd * it.utbetaltPerMnd
         }
         return etterbetalingsbeløp
