@@ -32,17 +32,6 @@ class VilkårService(
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics
 ) {
 
-    fun hentVilkårsdato(behandling: Behandling): LocalDate? {
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
-                                 ?: error("Finner ikke behandlingsresultat på behandling ${behandling.id}")
-
-        val periodeResultater = behandlingResultat.periodeResultater(brukMåned = false)
-        return periodeResultater.first {
-            it.allePåkrevdeVilkårErOppfylt(PersonType.SØKER) &&
-            it.allePåkrevdeVilkårErOppfylt(PersonType.BARN)
-        }.periodeFom
-    }
-
     fun hentVilkårsvurdering(behandlingId: Long): BehandlingResultat? = behandlingResultatService.hentAktivForBehandling(behandlingId = behandlingId)
 
     @Transactional
@@ -94,26 +83,19 @@ class VilkårService(
         return behandlingResultatService.oppdater(behandlingResultat).personResultater.map { it.tilRestPersonResultat() }
     }
 
-    fun vurderVilkårForFødselshendelse(behandlingId: Long): BehandlingResultat {
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
-                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
-        val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
-        if (barna.size != 1) {
-            throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde ett barn, men inneholder ${barna.size}")
-        }
-
-        val behandlingResultat = BehandlingResultat(
-                behandling = behandlingService.hent(behandlingId),
-                aktiv = true)
-
-        lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
-
-        return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
-    }
-
     fun initierVilkårvurderingForBehandling(behandling: Behandling,
                                             bekreftEndringerViaFrontend: Boolean,
                                             forrigeBehandling: Behandling? = null): BehandlingResultat {
+
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+            val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                                           ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+            val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
+            if (barna.size != 1) {
+                throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde ett barn, men inneholder ${barna.size}")
+            }
+        }
+
         val initieltBehandlingResultat = genererInitieltBehandlingResultat(behandling = behandling)
         val aktivBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)
 
@@ -157,9 +139,7 @@ class VilkårService(
     private fun genererInitieltBehandlingResultat(behandling: Behandling): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(behandling = behandling)
 
-        if (behandling.opprinnelse == BehandlingOpprinnelse.MANUELL) {
-            lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
-        }
+        lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
         return behandlingResultat
     }
 
@@ -176,7 +156,7 @@ class VilkårService(
             val fakta = Fakta(personForVurdering = person, behandlingOpprinnelse = behandlingResultat.behandling.opprinnelse)
             val evalueringerForVilkår = spesifikasjonererForPerson.map { it.evaluer(fakta) }
 
-            personResultat.setVilkårResultater(vilkårResultater(personResultat, person, fakta, evalueringerForVilkår, behandlingResultat.behandling.opprinnelse))
+            personResultat.setVilkårResultater(vilkårResultater(personResultat, person, fakta, evalueringerForVilkår))
 
             personResultat
         }.toSet()
@@ -187,16 +167,11 @@ class VilkårService(
     private fun vilkårResultater(personResultat: PersonResultat,
                                  person: Person,
                                  fakta: Fakta,
-                                 evalueringer: List<Evaluering>,
-                                 behandlingsOpprinnelse: BehandlingOpprinnelse): SortedSet<VilkårResultat> {
+                                 evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
 
-        val kjørMetrikker = if (behandlingsOpprinnelse != BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-                                    val aktivBehandling = behandlingResultatService
-                                        .hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id)
-                                    aktivBehandling == null
-                                } else {
-                                    true
-                                }
+        val aktivBehandling = behandlingResultatService
+                .hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id)
+        val kjørMetrikker = aktivBehandling == null
 
         return evalueringer.map { child ->
             val fom =

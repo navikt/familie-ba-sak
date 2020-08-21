@@ -38,12 +38,12 @@ class Vilkårsvurdering(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                 ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+            vilkårService.initierVilkårvurderingForBehandling(behandling, false)
+        }
+
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
                 ?: throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
-
-        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            vilkårService.vurderVilkårForFødselshendelse(behandling.id)
-        }
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling,
