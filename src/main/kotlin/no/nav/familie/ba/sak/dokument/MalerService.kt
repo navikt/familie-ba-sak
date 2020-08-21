@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
 import no.nav.familie.ba.sak.dokument.domene.maler.InnhenteOpplysninger
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
+import no.nav.familie.ba.sak.dokument.DokumentController.ManuelleBrevRequest
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -28,7 +30,8 @@ class MalerService(
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
         private val norg2RestClient: Norg2RestClient,
-        private val arbeidsfordelingService: ArbeidsfordelingService
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
     fun mapTilVedtakBrevfelter(vedtak: Vedtak,
@@ -50,12 +53,13 @@ class MalerService(
         )
     }
 
-    fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling,
-                                             behandlingResultatType: BehandlingResultatType): MalMedData {
+    fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manuelleBrevRequest: ManuelleBrevRequest): MalMedData {
         val enhetskode = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
+        val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt?.toString()?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
+
         val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
-                soknadDato = "",
-                fritekst = "",
+                soknadDato = søknadsDato,
+                fritekst = manuelleBrevRequest.fritekst,
                 enhet = norg2RestClient.hentEnhet(enhetskode).navn,
                 saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
         ))
