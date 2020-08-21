@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
-import no.nav.familie.ba.sak.behandling.vedtak.StønadBrevMetadata
+import no.nav.familie.ba.sak.behandling.vedtak.StønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import java.time.LocalDate
 
@@ -8,7 +8,7 @@ data class RestVedtak(
         val aktiv: Boolean,
         val vedtaksdato: LocalDate?,
         val personBeregninger: List<RestVedtakPerson>,
-        val stønadBrevMetadata: StønadBrevMetadata?,
+        val stønadBrevMetadata: MutableSet<StønadBrevBegrunnelse>,
         val id: Long
 )
 
@@ -17,5 +17,5 @@ fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
         personBeregninger = restVedtakPerson,
         vedtaksdato = this.vedtaksdato,
         id = this.id,
-        stønadBrevMetadata = this.hentStønadBrevMetadata()
+        stønadBrevMetadata = this.stønadBrevBegrunnelser
 )

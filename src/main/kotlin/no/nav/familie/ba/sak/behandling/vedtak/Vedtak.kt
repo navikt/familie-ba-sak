@@ -1,17 +1,14 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
 import javax.persistence.*
 
 
 @Entity(name = "Vedtak")
 @Table(name = "VEDTAK")
-data class Vedtak(
+class Vedtak(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_seq_generator")
         @SequenceGenerator(name = "vedtak_seq_generator", sequenceName = "vedtak_seq", allocationSize = 50)
@@ -32,9 +29,6 @@ data class Vedtak(
         @Column(name = "stonad_brev_pdf", nullable = true)
         var stønadBrevPdF: ByteArray? = null,
 
-        @Column(name = "stonad_brev_metadata", columnDefinition = "TEXT")
-        var stønadBrevMetadata: String? = objectMapper.writeValueAsString(StønadBrevMetadata()),
-
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
@@ -42,14 +36,27 @@ data class Vedtak(
         val forrigeVedtakId: Long? = null,
 
         @Column(name = "opphor_dato")
-        val opphørsdato: LocalDate? = null
+        val opphørsdato: LocalDate? = null,
+
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "vedtak",
+                   cascade = [CascadeType.ALL],
+                   orphanRemoval = true
+        )
+        val stønadBrevBegrunnelser: MutableSet<StønadBrevBegrunnelse> = mutableSetOf()
+
 ) : BaseEntitet() {
 
     override fun toString(): String {
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
     }
 
-    fun hentStønadBrevMetadata(): StønadBrevMetadata? {
+    fun addStønadBrevBegrunnelse(begrunnelse: StønadBrevBegrunnelse) {
+        stønadBrevBegrunnelser.add(begrunnelse)
+    }
+}
+
+    /*fun hentStønadBrevMetadata(): StønadBrevMetadata? {
         return when {
             stønadBrevMetadata.isNullOrBlank() -> null
             else -> objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!)
@@ -92,4 +99,4 @@ data class Vedtak(
 
 data class StønadBrevMetadata(
         var begrunnelser: MutableMap<String, MutableMap<String, String>> = mutableMapOf()
-)
+)*/

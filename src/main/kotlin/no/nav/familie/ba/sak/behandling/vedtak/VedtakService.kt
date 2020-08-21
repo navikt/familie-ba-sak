@@ -136,9 +136,14 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                      ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
-        vedtak.settStønadBrevBegrunnelse(periode = restStønadBrevBegrunnelse.periode,
-                                         begrunnelse = restStønadBrevBegrunnelse.begrunnelse,
-                                         begrunnelseId = restStønadBrevBegrunnelse.begrunnelseId)
+
+        val begrunnelse =
+                StønadBrevBegrunnelse(vedtak = vedtak,
+                                      periode = restStønadBrevBegrunnelse.periode.hash,
+                                      begrunnelse = restStønadBrevBegrunnelse.begrunnelse,
+                                      årsak = restStønadBrevBegrunnelse.årsak)
+
+        vedtak.addStønadBrevBegrunnelse(begrunnelse)
 
         lagreEllerOppdater(vedtak)
     }

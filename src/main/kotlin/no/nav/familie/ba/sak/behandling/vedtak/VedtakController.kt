@@ -35,7 +35,7 @@ class VedtakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PutMapping(path = ["/{fagsakId}/legg-til-stønad-brev-begrunnelse"])
+    @PostMapping(path = ["/{fagsakId}/legg-til-stønad-brev-begrunnelse"])
     fun leggTilStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
                                      @RequestBody
                                      restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
@@ -130,7 +130,7 @@ data class RestBeslutningPåVedtak(
 data class RestStønadBrevBegrunnelse(
         val periode: Periode,
         val begrunnelse: String,
-        val begrunnelseId: String
+        val årsak: String
 )
 
 enum class Beslutning {

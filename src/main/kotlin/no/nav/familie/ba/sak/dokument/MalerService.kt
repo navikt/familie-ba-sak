@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.vedtak.StønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
@@ -29,7 +30,8 @@ class MalerService(
     fun mapTilBrevfelter(vedtak: Vedtak,
                          behandlingResultatType: BehandlingResultatType): MalMedData {
 
-        val statsborgerskap = persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap?: error("Finner ikke søker på behandling")
+        val statsborgerskap =
+                persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap ?: error("Finner ikke søker på behandling")
         val medlemskap = finnNåværendeMedlemskap(statsborgerskap)
         val sterkesteMedlemskap = finnSterkesteMedlemskap(medlemskap)
 
@@ -83,12 +85,15 @@ class MalerService(
                                                 restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
                                             })
 
-            val begrunnelse: Map<String, String> = vedtak.stønadBrevBegrunnelser[Periode(it.periodeFom!!, it.periodeTom!!).hash]
-                                      ?: emptyMap();
+            val begrunnelse: MutableSet<StønadBrevBegrunnelse> =
+                    vedtak.stønadBrevBegrunnelser.filter { stønadBrevBegrunnelse ->
+                        stønadBrevBegrunnelse.periode === Periode(it.periodeFom!!,
+                                                                  it.periodeTom!!).hash
+                    }.toMutableSet()
 
             DuFårSeksjon(
-                    fom = it.periodeFom.tilDagMånedÅr(),
-                    tom = it.periodeTom.tilDagMånedÅr(),
+                    fom = it.periodeFom!!.tilDagMånedÅr(),
+                    tom = it.periodeTom!!.tilDagMånedÅr(),
                     belop = Utils.formaterBeløp(it.utbetaltPerMnd),
                     antallBarn = it.antallBarn,
                     barnasFodselsdatoer = barnasFødselsdatoer,

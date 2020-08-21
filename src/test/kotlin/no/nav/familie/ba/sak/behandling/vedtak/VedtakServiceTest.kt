@@ -29,7 +29,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.util.*
 
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
@@ -236,11 +235,13 @@ class VedtakServiceTest(
         Assertions.assertEquals(0, vedtak.stønadBrevBegrunnelser.size)
         val periode = Periode(LocalDate.of(2018, 1, 1), TIDENES_ENDE)
         val begrunnelse = "Mock begrunnelse"
-        val begrunnelseId = UUID.randomUUID().toString()
-        vedtak.settStønadBrevBegrunnelse(periode, begrunnelse, begrunnelseId)
+        val årsak = "Mock årsak"
+        vedtak.addStønadBrevBegrunnelse(StønadBrevBegrunnelse(periode = periode.hash,
+                                                              begrunnelse = begrunnelse,
+                                                              årsak = årsak,
+                                                              vedtak = vedtak))
 
         val endretVedtak = vedtakService.lagreEllerOppdater(vedtak)
-        Assertions.assertEquals(mapOf(periode.hash to mapOf(begrunnelseId to begrunnelse)), endretVedtak.stønadBrevBegrunnelser)
         Assertions.assertEquals(1, endretVedtak.stønadBrevBegrunnelser.size)
     }
 
