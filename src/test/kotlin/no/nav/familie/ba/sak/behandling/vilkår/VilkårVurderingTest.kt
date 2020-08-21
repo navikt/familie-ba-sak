@@ -204,7 +204,7 @@ class VilkårVurderingTest(
     fun `Sjekk barn bor med søker`() {
         val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
                                         "St. Olavsvegen", "1232", "whatever", "4322")
-        val barnAddress = GrVegadresse(1234, "11", "B", "H024",
+        val barnAddress = GrVegadresse(1235, "11", "B", "H024",
                                        "St. Olavsvegen", "1232", "whatever", "4322")
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
 
