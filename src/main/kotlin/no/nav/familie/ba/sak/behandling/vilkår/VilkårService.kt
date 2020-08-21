@@ -191,9 +191,9 @@ class VilkårService(
                                  behandlingsOpprinnelse: BehandlingOpprinnelse): SortedSet<VilkårResultat> {
 
         val kjørMetrikker = if (behandlingsOpprinnelse != BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-                                    val aktivBehandling = behandlingResultatService
+                                    val behandlingsResultat = behandlingResultatService
                                         .hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id)
-                                    aktivBehandling == null
+                                    behandlingsResultat == null
                                 } else {
                                     true
                                 }
