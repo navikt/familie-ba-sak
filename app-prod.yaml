@@ -24,7 +24,7 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: /serviceuser/prod/srvfamilie-ba-sak
+      - kvPath: /serviceuser/data/prod/srvfamilie-ba-sak
         mountPath: /var/run/secrets/srvfamilie-ba-sak
   replicas:
     min: 2
@@ -46,4 +46,5 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
     - name: SRVUSER_BA_SAK_SECRET
-      value: /run/secrets/srvfamilie-ba-sak/password
+      value: /var/run/secrets/srvfamilie-ba-sak/password
+

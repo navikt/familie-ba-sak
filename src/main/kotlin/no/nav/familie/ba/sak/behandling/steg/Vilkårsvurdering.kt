@@ -65,6 +65,8 @@ class Vilkårsvurdering(
     }
 
     override fun postValiderSteg(behandling: Behandling) {
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) return
+
         if (behandling.type != BehandlingType.TEKNISK_OPPHØR && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val behandlingResultat = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
                     ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")

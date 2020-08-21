@@ -144,7 +144,7 @@ class MalerService(
                 return "${resultatType.brevMal}-Autovedtak"
             }
             return when (medlemskap) {
-                Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-Tredjelandsborger"
+                Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-tredjelandsborger"
                 else -> resultatType.brevMal
             }
         }
