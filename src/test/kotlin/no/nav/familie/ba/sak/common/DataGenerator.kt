@@ -57,13 +57,14 @@ val defaultFagsak = Fagsak(1,
 
 fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                   behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
-                  behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+                  behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                  opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL
 ) = Behandling(id = nesteBehandlingId(),
                fagsak = fagsak,
                type = behandlingType,
                kategori = behandlingKategori,
                underkategori = BehandlingUnderkategori.ORDINÆR,
-               opprinnelse = BehandlingOpprinnelse.MANUELL)
+               opprinnelse = opprinnelse)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
         id = nestePersonId(),
