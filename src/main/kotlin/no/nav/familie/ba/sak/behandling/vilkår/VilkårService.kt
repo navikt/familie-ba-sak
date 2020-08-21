@@ -169,7 +169,7 @@ class VilkårService(
                                  fakta: Fakta,
                                  evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
 
-        val aktivBehandling = behandlingResultatService
+        val aktivBehandlingResultat = behandlingResultatService
                 .hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id)
         val kjørMetrikker = aktivBehandling == null
 
