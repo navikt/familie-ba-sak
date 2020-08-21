@@ -55,7 +55,7 @@ class DokumentController(
 
         val behandling = behandlingService.hent(behandlingId)
 
-        return if (brevMal === ManuelleBrev.INNHENTE_OPPLYSNINGER.malId) {
+        return if (brevMal == ManuelleBrev.INNHENTE_OPPLYSNINGER.malId) {
             dokumentService.genererBrevForInnhenteOpplysninger(behandling, manuelleBrevRequest).let {
                 Ressurs.success(it)
             }
