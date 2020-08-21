@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -35,6 +32,26 @@ class ReglerTest {
                         person = person,
                         arbeidsgiverId = null,
                         arbeidsgiverType = null
+                )
+            }
+        }
+    }
+
+    private fun lagSøkerMedBostedsadresseperioder(perioder: List<DatoIntervallEntitet>?): Person {
+        return Person(
+                aktørId = randomAktørId(),
+                personIdent = PersonIdent(randomFnr()),
+                type = PersonType.SØKER,
+                personopplysningGrunnlag = PersonopplysningGrunnlag(0, 0, mutableSetOf(), true),
+                fødselsdato = LocalDate.of(1991, 1, 1),
+                navn = "navn",
+                kjønn = Kjønn.KVINNE,
+                bostedsadresse = null,
+                sivilstand = SIVILSTAND.GIFT
+        ).also { person ->
+            person.bostedsadresseperiode = if (perioder == null) null else perioder.map {
+                GrBostedsadresseperiode(
+                        periode = it
                 )
             }
         }
@@ -98,6 +115,23 @@ class ReglerTest {
         assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom = LocalDate.now().minusYears(8))
+                )
+        )))).isTrue()
+    }
+
+    @Test
+    fun `intervallet mellom to bostedsadresseperioder skal evalueres på korrekt vis`() {
+        assertThat(morHarBoddINorgeIMerEnn5År(Fakta(lagSøkerMedBostedsadresseperioder(
+                listOf(
+                        DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
+                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(4))
+                )
+        )))).isFalse()
+
+        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+                listOf(
+                        DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
+                        DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(3))
                 )
         )))).isTrue()
     }

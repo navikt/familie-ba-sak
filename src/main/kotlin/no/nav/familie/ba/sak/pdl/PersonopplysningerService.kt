@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.pdl
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -95,6 +97,8 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
 
     fun hentOpphold(ident: String): List<Opphold> = pdlRestClient.hentOpphold(ident, "BAR")
 
+   // fun hentBostedsadresseperioder(ident : String) : List<GrBostedsadresseperiode> = pdlRestClient.hentBostedsadresseperioder(ident)
+
     companion object {
         const val PERSON = "PERSON"
         val LOG = LoggerFactory.getLogger(PersonopplysningerService::class.java)
@@ -105,4 +109,3 @@ data class DødsfallResponse(val erDød: Boolean,
                             val dødsdato: String?)
 
 data class VergeResponse(val harVerge: Boolean)
-

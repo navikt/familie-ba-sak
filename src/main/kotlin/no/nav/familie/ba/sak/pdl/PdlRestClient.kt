@@ -188,6 +188,32 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
+    fun hentBostedsadresseperioder(ident : String) : List<Bostedsadresseperiode>{
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
+                                                query = hentGraphqlQuery("hentBostedsadresseperioder"))
+        val response = try {
+            postForEntity<PdlBostedsadresseperioderResponse>(pdlUri, pdlPersonRequest, httpHeaders("BAR"))
+        } catch (e: Exception) {
+            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                       frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                       throwable = e)
+        }
+
+        if (!response.harFeil()){
+            if(response.data == null || response.data.person== null || response.data.person.bostedsadresse== null){
+                throw Feil(message = "Ugyldig response (null) fra PDL ved henting av bostedsadresseperioder.",
+                           frontendFeilmelding = "Feilet ved henting av bostedsadresseperioder for person $ident",
+                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+            return response.data.person.bostedsadresse
+        }
+
+        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
+                   frontendFeilmelding = "Fant ikke bostedsadresseperioder for person $ident: ${response.errorMessages()}",
+                   httpStatus = HttpStatus.NOT_FOUND)
+    }
+
     companion object {
         private const val PATH_GRAPHQL = "graphql"
         val LOG = LoggerFactory.getLogger(PdlRestClient::class.java)
