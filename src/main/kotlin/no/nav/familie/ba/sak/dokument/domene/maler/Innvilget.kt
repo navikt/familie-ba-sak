@@ -16,7 +16,6 @@ data class InnvilgetAutovedtak(
         val belop: String,
         val etterbetalingsbelop: String? = null,
         val antallBarn: Int,
-        val erEtterbetaling: Boolean = false,
         val erBehandletAutomatisk: Boolean = true,
         val enhet: String
 )

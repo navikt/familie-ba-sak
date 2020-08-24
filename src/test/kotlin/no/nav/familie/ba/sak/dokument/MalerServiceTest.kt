@@ -18,8 +18,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-
 
 class MalerServiceTest {
 
@@ -84,7 +82,7 @@ class MalerServiceTest {
         assertEquals(Utils.formaterBeløp(andelTilkjentYtelse.beløp), autovedtakBrevfelter.belop)
         assertEquals(fødselsdato.plusMonths(1).tilMånedÅr(), autovedtakBrevfelter.virkningstidspunkt)
         assertEquals(personopplysningGrunnlag.barna.first().fødselsdato.tilKortString(), autovedtakBrevfelter.fodselsdato)
-        assertEquals(false, autovedtakBrevfelter.erEtterbetaling)
+        assertEquals(null, autovedtakBrevfelter.etterbetalingsbelop)
     }
 
     @Test
@@ -124,7 +122,6 @@ class MalerServiceTest {
         assertEquals(andelTilkjentYtelseBarn2.stønadFom.tilMånedÅr(), autovedtakBrevfelter.virkningstidspunkt)
         assertEquals("${barn2.fødselsdato.tilKortString()} og ${barn1.fødselsdato.tilKortString()}",
                      autovedtakBrevfelter.fodselsdato)
-        assertEquals(true, autovedtakBrevfelter.erEtterbetaling)
         assertEquals("6 324", autovedtakBrevfelter.etterbetalingsbelop)
         assertEquals(2, autovedtakBrevfelter.antallBarn)
     }
