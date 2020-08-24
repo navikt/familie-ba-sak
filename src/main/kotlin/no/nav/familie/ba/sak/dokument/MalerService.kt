@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
 import no.nav.familie.ba.sak.dokument.domene.maler.InnhenteOpplysninger
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
-import no.nav.familie.ba.sak.dokument.DokumentController.ManuelleBrevRequest
+import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -53,13 +53,13 @@ class MalerService(
         )
     }
 
-    fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manuelleBrevRequest: ManuelleBrevRequest): MalMedData {
+    fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
         val enhetskode = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
         val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt?.toString()?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
 
         val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
                 soknadDato = søknadsDato,
-                fritekst = manuelleBrevRequest.fritekst,
+                fritekst = manueltBrevRequest.fritekst,
                 enhet = norg2RestClient.hentEnhet(enhetskode).navn,
                 saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
         ))

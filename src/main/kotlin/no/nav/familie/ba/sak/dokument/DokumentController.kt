@@ -41,22 +41,22 @@ class DokumentController(
         return dokumentService.hentBrevForVedtak(vedtak)
     }
 
-    @PostMapping(path = ["manuellebrev/{brevMal}/{behandlingId}"])
+    @PostMapping(path = ["generer-brev/{brevMal}/{behandlingId}"])
     fun genererBrev(
             @PathVariable brevMal: String,
             @PathVariable behandlingId: Long,
-            @RequestBody manuelleBrevRequest: ManuelleBrevRequest)
+            @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<ByteArray> {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev: $brevMal")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer brev: $brevMal")
 
-        if (manuelleBrevRequest.fritekst.isEmpty()) {
+        if (manueltBrevRequest.fritekst.isEmpty()) {
             return Ressurs.failure("Friteksten kan ikke være tom", "Friteksten kan ikke være tom")
         }
 
         val behandling = behandlingService.hent(behandlingId)
 
-        return if (brevMal == ManuelleBrev.INNHENTE_OPPLYSNINGER.malId) {
-            dokumentService.genererBrevForInnhenteOpplysninger(behandling, manuelleBrevRequest).let {
+        return if (ManueltBrev.values().any { it.malId == brevMal }) {
+            dokumentService.genererBrevForInnhenteOpplysninger(behandling, manueltBrevRequest).let {
                 Ressurs.success(it)
             }
         } else {
@@ -64,11 +64,58 @@ class DokumentController(
         }
     }
 
-    enum class ManuelleBrev(val malId: String) {
+    @PostMapping(path = ["generer-brev/{brevMalId}/{behandlingId}"])
+    fun genererBrev2(
+            @PathVariable brevMalId: String,
+            @PathVariable behandlingId: Long,
+            @RequestBody manueltBrevRequest: ManueltBrevRequest)
+            : Ressurs<ByteArray> {
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer brev: $brevMalId")
+
+        if (manueltBrevRequest.fritekst.isEmpty()) {
+            return Ressurs.failure("Friteksten kan ikke være tom", "Friteksten kan ikke være tom")
+        }
+
+        val behandling = behandlingService.hent(behandlingId)
+        val brevMal = ManueltBrev.values().find { it.malId == brevMalId }
+        return if (brevMal !== null) {
+            dokumentService.genererManueltBrev(behandling, brevMal, manueltBrevRequest).let {
+                Ressurs.success(it)
+            }
+        } else {
+            error("Finnes ingen støttet brevmal for type $brevMalId")
+        }
+    }
+
+    @PostMapping(path = ["generer-og-send-brev/{brevMalId}/{behandlingId}"])
+    fun genererOgSendBrev(
+            @PathVariable brevMalId: String,
+            @PathVariable behandlingId: Long,
+            @RequestBody manueltBrevRequest: ManueltBrevRequest)
+            : Ressurs<ByteArray> {
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: $brevMalId")
+
+        if (manueltBrevRequest.fritekst.isEmpty()) {
+            return Ressurs.failure("Friteksten kan ikke være tom", "Friteksten kan ikke være tom")
+        }
+
+        val behandling = behandlingService.hent(behandlingId)
+        val brevMal = ManueltBrev.values().find { it.malId == brevMalId }
+
+        return if (brevMal != null) {
+            dokumentService.genererOgSendManueltBrev(behandling, brevMal, manueltBrevRequest).let {
+                Ressurs.success(it)
+            }
+        } else {
+            error("Finnes ingen støttet brevmal for type $brevMal")
+        }
+    }
+
+    enum class ManueltBrev(val malId: String) {
         INNHENTE_OPPLYSNINGER("innhente-opplysninger")
     }
 
-    class ManuelleBrevRequest(val fritekst: String)
+    class ManueltBrevRequest(val fritekst: String)
 
     companion object {
         val LOG = LoggerFactory.getLogger(DokumentController::class.java)
