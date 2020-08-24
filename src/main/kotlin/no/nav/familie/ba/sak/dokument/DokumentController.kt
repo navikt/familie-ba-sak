@@ -70,7 +70,7 @@ class DokumentController(
             @PathVariable brevMalId: String,
             @PathVariable behandlingId: Long,
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
-            : Ressurs<ByteArray> {
+            : Ressurs<String> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: $brevMalId")
 
         if (manueltBrevRequest.fritekst.isEmpty()) {
@@ -89,9 +89,9 @@ class DokumentController(
         }
     }
 
-    enum class BrevType(val malId: String) {
-        INNHENTE_OPPLYSNINGER("innhente-opplysninger"),
-        VEDTAK("vedtak")
+    enum class BrevType(val malId: String, val arkivType: String) {
+        INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER"),
+        VEDTAK("vedtak", "BARNETRYGD_VEDTAK")
     }
 
     class ManueltBrevRequest(val fritekst: String)

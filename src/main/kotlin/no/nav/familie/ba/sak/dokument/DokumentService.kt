@@ -58,27 +58,6 @@ class DokumentService(
                 )
     }
 
-    fun genererBrevForInnhenteOpplysninger(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): ByteArray {
-        return Result.runCatching {
-            val søker = persongrunnlagService.hentSøker(behandling)
-                        ?: error("Finner ikke søker på vedtaket")
-            val malMedData = malerService.mapTilInnhenteOpplysningerBrevfelter(behandling, manueltBrevRequest)
-            val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
-                                                    navn = søker.navn,
-                                                    dokumentDato = LocalDate.now().tilDagMånedÅr())
-            dokGenKlient.lagPdfForMal(malMedData, headerFelter)
-        }.fold(
-                onSuccess = { it },
-                onFailure = {
-                    throw Feil(message = "Klarte ikke generere brev for innhente opplysninger",
-                               frontendFeilmelding = "Noe gikk galt ved generering av brev for å innhente opplysninger og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
-                               httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                               throwable = it)
-                }
-
-        )
-    }
-
     fun genererManueltBrev(behandling: Behandling,
                            brevmal: BrevType,
                            manueltBrevRequest: ManueltBrevRequest): ByteArray =
@@ -92,6 +71,7 @@ class DokumentService(
                 val malMedData = when (brevmal) {
                     BrevType.INNHENTE_OPPLYSNINGER -> malerService.mapTilInnhenteOpplysningerBrevfelter(behandling,
                                                                                                         manueltBrevRequest)
+                    else -> error("Brevmal $brevmal er ikke støttet for manuelle brev.")
                 }
                 dokGenKlient.lagPdfForMal(malMedData, headerFelter)
             }.fold(
@@ -108,11 +88,12 @@ class DokumentService(
 
     fun sendManueltBrev(behandling: Behandling,
                         brevmal: BrevType,
-                        manueltBrevRequest: ManueltBrevRequest): ByteArray {
+                        manueltBrevRequest: ManueltBrevRequest): String {
 
+        val fnr = behandling.fagsak.hentAktivIdent().ident
+        val fagsakId = "${behandling.fagsak.id}"
         val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)
-
-        //integrasjonsklient.journalfør()
+        return integrasjonClient.journalførManueltBrev(fnr, fagsakId, generertBrev, brevmal.arkivType)
         //integrasjonsklient.distribuerVedtaksbrev(journalpostid)
     }
 }

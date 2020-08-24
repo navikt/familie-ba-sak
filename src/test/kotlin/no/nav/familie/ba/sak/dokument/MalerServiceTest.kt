@@ -14,7 +14,7 @@ class MalerServiceTest {
         val malNavn = MalerService.malNavnForMedlemskapOgResultatType(Medlemskap.TREDJELANDSBORGER,
                                                                      BehandlingResultatType.INNVILGET)
 
-        assertEquals(malNavn, "Innvilget-Tredjelandsborger")
+        assertEquals("innvilget-tredjelandsborger", malNavn)
     }
 
     @Test
@@ -23,7 +23,7 @@ class MalerServiceTest {
         val malNavn = MalerService.malNavnForMedlemskapOgResultatType(Medlemskap.NORDEN,
                                                                      BehandlingResultatType.INNVILGET)
 
-        assertEquals(malNavn, "Innvilget")
+        assertEquals("innvilget", malNavn)
     }
 
     @Test
@@ -31,6 +31,6 @@ class MalerServiceTest {
         val malNavn = MalerService.malNavnForMedlemskapOgResultatType(null,
                                                                      BehandlingResultatType.INNVILGET)
 
-        assertEquals(malNavn, "Innvilget")
+        assertEquals("innvilget", malNavn)
     }
 }
