@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
+import no.nav.familie.ba.sak.dokument.DokumentController.BrevType
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -18,7 +20,8 @@ class DokumentService(
         private val behandlingResultatService: BehandlingResultatService,
         private val dokGenKlient: DokGenKlient,
         private val malerService: MalerService,
-        private val persongrunnlagService: PersongrunnlagService
+        private val persongrunnlagService: PersongrunnlagService,
+        private val integrasjonClient: IntegrasjonClient
 ) {
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
@@ -77,16 +80,19 @@ class DokumentService(
     }
 
     fun genererManueltBrev(behandling: Behandling,
-                           brevmal: DokumentController.ManueltBrev,
+                           brevmal: BrevType,
                            manueltBrevRequest: ManueltBrevRequest): ByteArray =
-            // TODO: Switch mapping på brevmaltype når flere typer støttes
             Result.runCatching {
+
                 val søker = persongrunnlagService.hentSøker(behandling)
                             ?: error("Finner ikke søker på vedtaket")
-                val malMedData = malerService.mapTilInnhenteOpplysningerBrevfelter(behandling, manueltBrevRequest)
                 val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
                                                         navn = søker.navn,
                                                         dokumentDato = LocalDate.now().tilDagMånedÅr())
+                val malMedData = when (brevmal) {
+                    BrevType.INNHENTE_OPPLYSNINGER -> malerService.mapTilInnhenteOpplysningerBrevfelter(behandling,
+                                                                                                        manueltBrevRequest)
+                }
                 dokGenKlient.lagPdfForMal(malMedData, headerFelter)
             }.fold(
                     onSuccess = { it },
@@ -101,7 +107,7 @@ class DokumentService(
 
 
     fun sendManueltBrev(behandling: Behandling,
-                        brevmal: DokumentController.ManueltBrev,
+                        brevmal: BrevType,
                         manueltBrevRequest: ManueltBrevRequest): ByteArray {
 
         val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)

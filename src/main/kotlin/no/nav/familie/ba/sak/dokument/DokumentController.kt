@@ -54,7 +54,7 @@ class DokumentController(
         }
 
         val behandling = behandlingService.hent(behandlingId)
-        val brevMal = ManueltBrev.values().find { it.malId == brevMalId }
+        val brevMal = BrevType.values().find { it.malId == brevMalId }
         return if (brevMal != null) {
             dokumentService.genererManueltBrev(behandling, brevMal, manueltBrevRequest).let {
                 Ressurs.success(it)
@@ -78,7 +78,7 @@ class DokumentController(
         }
 
         val behandling = behandlingService.hent(behandlingId)
-        val brevMal = ManueltBrev.values().find { it.malId == brevMalId }
+        val brevMal = BrevType.values().find { it.malId == brevMalId }
 
         return if (brevMal != null) {
             dokumentService.sendManueltBrev(behandling, brevMal, manueltBrevRequest).let {
@@ -89,8 +89,9 @@ class DokumentController(
         }
     }
 
-    enum class ManueltBrev(val malId: String) {
-        INNHENTE_OPPLYSNINGER("innhente-opplysninger")
+    enum class BrevType(val malId: String) {
+        INNHENTE_OPPLYSNINGER("innhente-opplysninger"),
+        VEDTAK("vedtak")
     }
 
     class ManueltBrevRequest(val fritekst: String)

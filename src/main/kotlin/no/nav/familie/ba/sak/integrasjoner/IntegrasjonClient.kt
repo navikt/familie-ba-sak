@@ -4,6 +4,7 @@ import medAktørId
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
+import no.nav.familie.ba.sak.dokument.DokumentController.BrevType
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.domene.ArbeidsforholdRequest
@@ -337,24 +338,24 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun journalFørVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak): String {
-        return lagJournalpostForVedtaksbrev(fnr, fagsakId, vedtak)
-    }
-
-    fun lagJournalpostForVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak): String {
-        val uri = URI.create("$integrasjonUri/arkiv/v2")
-        logger.info("Sender vedtak pdf til DokArkiv: $uri")
         if (vedtak.ansvarligEnhet == "9999") {
             logger.error("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, 9999")
         }
+        val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
+        val dokumenter =
+                listOf(Dokument(vedtak.stønadBrevPdF!!, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE), Dokument(vedleggPdf,
+                                                                                                                     FilType.PDFA,
+                                                                                                                     dokumentType = VEDLEGG_DOKUMENT_TYPE,
+                                                                                                                     tittel = VEDTAK_VEDLEGG_TITTEL))
+        return lagJournalpostForBrev(fnr, fagsakId, vedtak.ansvarligEnhet, dokumenter)
+    }
+
+    fun lagJournalpostForBrev(fnr: String, fagsakId: String, journalførendeEnhet: String?, dokumenter: List<Dokument>): String {
+        val uri = URI.create("$integrasjonUri/arkiv/v2")
+        logger.info("Sender vedtak pdf til DokArkiv: $uri")
 
         return Result.runCatching {
-            val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
-            val dokumenter = listOf(Dokument(vedtak.stønadBrevPdF!!, FilType.PDFA, dokumentType = VEDTAK_DOKUMENT_TYPE),
-                                    Dokument(vedleggPdf,
-                                             FilType.PDFA,
-                                             dokumentType = VEDLEGG_DOKUMENT_TYPE,
-                                             tittel = VEDTAK_VEDLEGG_TITTEL))
-            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, fagsakId, vedtak.ansvarligEnhet)
+            val arkiverDokumentRequest = ArkiverDokumentRequest(fnr, true, dokumenter, journalførendeEnhet, fagsakId) // TODO: Dobbeltsjekke hvorvidt journalførende enhet er oblig for alle
             val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(
