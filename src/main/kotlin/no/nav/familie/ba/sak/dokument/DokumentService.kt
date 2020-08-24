@@ -98,4 +98,15 @@ class DokumentService(
                     }
 
             )
+
+
+    fun sendManueltBrev(behandling: Behandling,
+                        brevmal: DokumentController.ManueltBrev,
+                        manueltBrevRequest: ManueltBrevRequest): ByteArray {
+
+        val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)
+
+        //integrasjonsklient.journalfør()
+        //integrasjonsklient.distribuerVedtaksbrev(journalpostid)
+    }
 }
