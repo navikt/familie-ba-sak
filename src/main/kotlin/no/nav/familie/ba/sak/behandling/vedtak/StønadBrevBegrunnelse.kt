@@ -25,7 +25,7 @@ data class StønadBrevBegrunnelse(
         val fom: LocalDate,
 
         @Column(name = "tom")
-        val tom: LocalDate,
+        val tom: LocalDate?,
 
         @Column(name = "begrunnelse")
         var begrunnelse: String,

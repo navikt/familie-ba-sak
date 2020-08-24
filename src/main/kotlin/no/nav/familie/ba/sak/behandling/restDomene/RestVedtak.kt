@@ -15,7 +15,7 @@ data class RestVedtak(
 data class RestStønadBrevBegrunnelse(
         val id: Long?,
         val fom: LocalDate,
-        val tom: LocalDate,
+        val tom: LocalDate?,
         val begrunnelse: String,
         val årsak: String
 )
