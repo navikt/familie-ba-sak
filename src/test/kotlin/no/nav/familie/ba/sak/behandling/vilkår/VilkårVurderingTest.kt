@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
@@ -47,51 +48,16 @@ class VilkårVurderingTest(
     }
 
     @Test
-    fun `Hent relevante vilkår for persontype BARN`() {
-        val relevanteVilkår = Vilkår.hentVilkårForPart(PersonType.BARN)
-        val relevanteVilkårForDato = Vilkår.hentVilkårForPart(PersonType.BARN, LocalDate.now())
-        val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR,
-                                  Vilkår.BOR_MED_SØKER,
-                                  Vilkår.GIFT_PARTNERSKAP,
-                                  Vilkår.BOSATT_I_RIKET,
-                                  Vilkår.LOVLIG_OPPHOLD)
-        assertEquals(vilkårForBarn, relevanteVilkår)
-        assertEquals(vilkårForBarn, relevanteVilkårForDato)
-    }
-
-    @Test
     fun `Hent relevante vilkår for persontype SØKER`() {
-        val relevanteVilkår = Vilkår.hentVilkårForPart(PersonType.SØKER)
+        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.SØKER)
         val vilkårForSøker = setOf(Vilkår.BOSATT_I_RIKET,
                                    Vilkår.LOVLIG_OPPHOLD)
         assertEquals(vilkårForSøker, relevanteVilkår)
     }
 
     @Test
-    fun `Hent relevante vilkår for saktype EØS`() {
-        val vilkårForEøs = Vilkår.hentVilkårForSakstype(SakType.valueOfType(BehandlingKategori.EØS))
-        assertEquals(setOf(Vilkår.UNDER_18_ÅR,
-                           Vilkår.BOR_MED_SØKER,
-                           Vilkår.GIFT_PARTNERSKAP,
-                           Vilkår.BOSATT_I_RIKET,
-                           Vilkår.LOVLIG_OPPHOLD),
-                     vilkårForEøs)
-    }
-
-    @Test
-    fun `Hent relevante vilkår for saktype Nasjonal`() {
-        val vilkårForNasjonal = Vilkår.hentVilkårForSakstype(SakType.valueOfType(BehandlingKategori.NASJONAL))
-        assertEquals(setOf(Vilkår.UNDER_18_ÅR,
-                           Vilkår.BOR_MED_SØKER,
-                           Vilkår.GIFT_PARTNERSKAP,
-                           Vilkår.BOSATT_I_RIKET,
-                           Vilkår.LOVLIG_OPPHOLD),
-                     vilkårForNasjonal)
-    }
-
-    @Test
-    fun `Hent relevante vilkår for persontype og saktype`() {
-        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN, SakType.EØS)
+    fun `Hent relevante vilkår for persontype BARN`() {
+        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN)
         val vilkårForBarn = setOf(Vilkår.UNDER_18_ÅR,
                                   Vilkår.BOR_MED_SØKER,
                                   Vilkår.GIFT_PARTNERSKAP,
@@ -107,7 +73,8 @@ class VilkårVurderingTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(fagsak, opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
 
@@ -124,7 +91,7 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         assertThrows<IllegalStateException> {
-            vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
+            vilkårService.initierVilkårvurderingForBehandling(behandling, false)
         }
     }
 
@@ -135,12 +102,13 @@ class VilkårVurderingTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(fagsak, opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
         assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
 
         behandlingResultat.personResultater.forEach {
@@ -162,7 +130,8 @@ class VilkårVurderingTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(fagsak, opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, emptyList())
         personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
@@ -177,7 +146,7 @@ class VilkårVurderingTest(
         })
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-        val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
 
         assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
     }
@@ -189,17 +158,18 @@ class VilkårVurderingTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(fagsak, opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val behandlingResultat = vilkårService.vurderVilkårForFødselshendelse(behandlingId = behandling.id)
+        val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
 
         val forventetAntallVurderteVilkår =
-                Vilkår.hentVilkårFor(PersonType.BARN, SakType.valueOfType(BehandlingKategori.NASJONAL)).size +
-                Vilkår.hentVilkårFor(PersonType.SØKER, SakType.valueOfType(BehandlingKategori.NASJONAL)).size
+                Vilkår.hentVilkårFor(PersonType.BARN).size +
+                Vilkår.hentVilkårFor(PersonType.SØKER).size
         assertEquals(forventetAntallVurderteVilkår,
                      behandlingResultat.personResultater.flatMap { personResultat -> personResultat.vilkårResultater }.size)
     }
@@ -417,11 +387,22 @@ class VilkårVurderingTest(
                             )
                 }
 
-        val medlemskap = finnNåværendeMedlemskap(person)
+        val medlemskap = finnNåværendeMedlemskap(Fakta(person).personForVurdering.statsborgerskap)
 
         assertEquals(2, medlemskap.size)
         assertEquals(Medlemskap.NORDEN, medlemskap[0])
         assertEquals(Medlemskap.EØS, medlemskap[1])
+    }
+
+    @Test
+    fun `Lovlig opphold - valider at sterkeste medlemskap blir returnert`() {
+        val medlemskapNorden = listOf(Medlemskap.TREDJELANDSBORGER, Medlemskap.NORDEN, Medlemskap.UKJENT)
+        val medlemskapUkjent = listOf(Medlemskap.UKJENT)
+        val medlemskapIngen = emptyList<Medlemskap>()
+
+        assertEquals(Medlemskap.NORDEN, finnSterkesteMedlemskap(medlemskapNorden))
+        assertEquals(Medlemskap.UKJENT, finnSterkesteMedlemskap(medlemskapUkjent))
+        assertEquals(null, finnSterkesteMedlemskap(medlemskapIngen))
     }
 
     @Test

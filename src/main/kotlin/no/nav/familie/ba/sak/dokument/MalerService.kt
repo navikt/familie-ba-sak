@@ -1,13 +1,12 @@
 package no.nav.familie.ba.sak.dokument
 
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker
-import no.nav.familie.ba.sak.behandling.restDomene.TypeSøker.TREDJELANDSBORGER
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
+import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
+import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.client.Norg2RestClient
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class MalerService(
-        private val vilkårService: VilkårService,
         private val totrinnskontrollService: TotrinnskontrollService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
@@ -29,11 +27,14 @@ class MalerService(
 ) {
 
     fun mapTilBrevfelter(vedtak: Vedtak,
-                         søknad: SøknadDTO?,
                          behandlingResultatType: BehandlingResultatType): MalMedData {
 
+        val statsborgerskap = persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap?: error("Finner ikke søker på behandling")
+        val medlemskap = finnNåværendeMedlemskap(statsborgerskap)
+        val sterkesteMedlemskap = finnSterkesteMedlemskap(medlemskap)
+
         return MalMedData(
-                mal = malNavnForTypeSøkerOgResultatType(søknad?.typeSøker, behandlingResultatType),
+                mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap, behandlingResultatType),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak)
                     BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
@@ -62,9 +63,6 @@ class MalerService(
 
         val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelseForBehandling = tilkjentYtelse,
                                                                           personopplysningGrunnlag = personopplysningGrunnlag)
-
-        val vilkårsdato = vilkårService.hentVilkårsdato(behandling = behandling)
-                          ?: error("Finner ikke vilkårsdato for vedtaksbrev")
 
         val innvilget = Innvilget(
                 enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
@@ -112,10 +110,10 @@ class MalerService(
     }
 
     companion object {
-        fun malNavnForTypeSøkerOgResultatType(typeSøker: TypeSøker?,
-                                              resultatType: BehandlingResultatType): String {
-            return when (typeSøker) {
-                TREDJELANDSBORGER -> "${resultatType.brevMal}-Tredjelandsborger"
+        fun malNavnForMedlemskapOgResultatType(medlemskap: Medlemskap?,
+                                               resultatType: BehandlingResultatType): String {
+            return when (medlemskap) {
+                Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-tredjelandsborger"
                 else -> resultatType.brevMal
             }
         }

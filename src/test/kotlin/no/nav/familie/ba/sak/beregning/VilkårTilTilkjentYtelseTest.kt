@@ -61,7 +61,6 @@ class VilkårTilTilkjentYtelseTest {
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 behandlingResultat = behandlingResultat,
-                sakType = SakType.valueOf(sakType),
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
 
@@ -124,7 +123,6 @@ class VilkårTilTilkjentYtelseTest {
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 behandlingResultat = behandlingResultat,
-                sakType = SakType.NASJONAL,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
 

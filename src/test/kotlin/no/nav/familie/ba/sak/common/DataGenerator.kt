@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.økonomi.sats
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 import kotlin.math.abs
@@ -51,18 +52,19 @@ fun nestePersonId(): Long {
 
 val defaultFagsak = Fagsak(1,
                            FagsakStatus.OPPRETTET).also {
-    it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr())))
+    it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr()), opprettetTidspunkt = LocalDateTime.now()))
 }
 
 fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                   behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
-                  behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+                  behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                  opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL
 ) = Behandling(id = nesteBehandlingId(),
                fagsak = fagsak,
                type = behandlingType,
                kategori = behandlingKategori,
                underkategori = BehandlingUnderkategori.ORDINÆR,
-               opprinnelse = BehandlingOpprinnelse.MANUELL)
+               opprinnelse = opprinnelse)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN) = Person(
         id = nestePersonId(),
@@ -240,7 +242,7 @@ fun lagPersonResultat(behandlingResultat: BehandlingResultat,
 
     if (lagFullstendigVilkårResultat) {
         personResultat.setVilkårResultater(
-                Vilkår.hentVilkårFor(personType, SakType.NASJONAL).map {
+                Vilkår.hentVilkårFor(personType).map {
                     VilkårResultat(personResultat = personResultat,
                                    periodeFom = periodeFom,
                                    periodeTom = periodeTom,
