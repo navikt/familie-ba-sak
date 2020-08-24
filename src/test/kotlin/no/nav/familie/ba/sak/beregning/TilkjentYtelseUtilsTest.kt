@@ -22,7 +22,7 @@ class TilkjentYtelseUtilsTest {
                                                               behandling = behandling,
                                                               person = barn1)
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(baseDato.minusYears(1).withDayOfMonth(1).toString(),
-                                                              baseDato.plusYears(1).toString(),
+                                                              baseDato.minusMonths(1).sisteDagIMåned().toString(),
                                                               behandling = behandling,
                                                               person = barn2)
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
@@ -34,7 +34,7 @@ class TilkjentYtelseUtilsTest {
     }
 
     @Test
-    fun `Skal beregne riktig etterbetaling for flere perioder tilbake i tid`() {
+    fun `Skal beregne riktig etterbetaling fordelt over flere perioder tilbake i tid`() {
         val behandling = lagBehandling()
         val baseDato = LocalDate.now()
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, ClientMocks.søkerFnr[0], ClientMocks.barnFnr.toList())
@@ -47,7 +47,7 @@ class TilkjentYtelseUtilsTest {
                                                               behandling = behandling,
                                                               person = barn1)
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(baseDato.minusYears(1).withDayOfMonth(1).toString(),
-                                                              baseDato.plusYears(1).toString(),
+                                                              baseDato.plusYears(1).sisteDagIMåned().toString(),
                                                               behandling = behandling,
                                                               person = barn2)
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
@@ -55,7 +55,7 @@ class TilkjentYtelseUtilsTest {
 
         val etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningsoversikt, vedtak, barn2)
 
-        assertEquals(18972, etterbetalingsbeløp)
+        assertEquals(13702, etterbetalingsbeløp)
     }
 
     @Test

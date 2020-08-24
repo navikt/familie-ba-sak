@@ -125,7 +125,7 @@ class MalerServiceTest {
         assertEquals("${barn2.fødselsdato.tilKortString()} og ${barn1.fødselsdato.tilKortString()}",
                      autovedtakBrevfelter.fodselsdato)
         assertEquals(true, autovedtakBrevfelter.erEtterbetaling)
-        assertEquals("12 648", autovedtakBrevfelter.etterbetalingsbelop)
+        assertEquals("6 324", autovedtakBrevfelter.etterbetalingsbelop)
         assertEquals(2, autovedtakBrevfelter.antallBarn)
     }
 }

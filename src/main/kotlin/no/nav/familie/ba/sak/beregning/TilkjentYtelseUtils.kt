@@ -98,7 +98,7 @@ object TilkjentYtelseUtils {
         return beregningOversikt.filter { it.periodeFom !== null && it.periodeTom !== null && it.periodeFom <= vedtak.vedtaksdato }
                 .filter { beregningDetaljTilPerson(yngsteBarn, it) !== null }
                 .sumBy {
-                    val antallMnd = Period.between(it.periodeFom, minOf(vedtak.vedtaksdato!!, it.periodeTom!!.plusMonths(1)))
+                    val antallMnd = Period.between(it.periodeFom, minOf(vedtak.vedtaksdato!!, it.periodeTom!!).plusMonths(1))
                             .run { this.years * 12 + this.months }
                     antallMnd * beregningDetaljTilPerson(yngsteBarn, it)!!.utbetaltPerMnd
                 }
