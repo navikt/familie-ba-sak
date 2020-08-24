@@ -53,7 +53,8 @@ data class GrVegadresse(
         return this === other
                || ((matrikkelId != null && matrikkelId == otherVegadresse.matrikkelId)
                || ((matrikkelId == null && otherVegadresse.matrikkelId == null)
-                   && !(adressenavn == null && husnummer == null && husbokstav == null && postnummer == null)
+                   && postnummer != null
+                   && !(adressenavn == null && husnummer == null && husbokstav == null)
                    && (adressenavn == otherVegadresse.adressenavn)
                    && (husnummer == otherVegadresse.husnummer)
                    && (husbokstav == otherVegadresse.husbokstav)

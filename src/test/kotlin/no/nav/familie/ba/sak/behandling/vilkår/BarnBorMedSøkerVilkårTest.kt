@@ -26,8 +26,8 @@ class BarnBorMedSøkerVilkårTest {
     }
 
     @Test
-    fun `Address som mangler attributter`() {
-        val fakta = opprettFaktaObject(adresseTomBarn, adresseTomSøker)
+    fun `Address som mangler postnummer`() {
+        val fakta = opprettFaktaObject(adresseIkkePostnummerBarn, adresseIkkePostnummerSøker)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
@@ -67,11 +67,11 @@ class BarnBorMedSøkerVilkårTest {
         val adresseMatrikkelId1barn = opprettAdresse(1234L)
         val adresseMatrikkelId2Søker = opprettAdresse(4321L)
         val adresseMatrikkelId1SøkerBruksenhetsnummer = opprettAdresse(matrikkelId = 1234L, bruksenhetsnummer = "123")
-        val adresseTomBarn = opprettAdresse()
-        val adresseTomSøker = opprettAdresse()
-        val adresseAttrBarn = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123")
-        val adresseAttrSøker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123")
-        val adresseAttr2Søker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "11")
+        val adresseIkkePostnummerBarn = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123")
+        val adresseIkkePostnummerSøker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123")
+        val adresseAttrBarn = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123", postnummer = "0245")
+        val adresseAttrSøker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123", postnummer = "0245")
+        val adresseAttr2Søker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "11", postnummer = "0245")
 
         private fun opprettAdresse(matrikkelId: Long? = null,
                                    bruksenhetsnummer: String? = null,
