@@ -132,12 +132,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     @Transactional
-    fun leggTilStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse, fagsakId: Long): List<RestStønadBrevBegrunnelse> {
-        val behandling: Behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                                     ?: throw Feil(message = "Finner ikke aktiv behandling på fagsak")
+    fun leggTilStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse,
+                                     fagsakId: Long): List<RestStønadBrevBegrunnelse> {
 
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                     ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
         val begrunnelse =
                 StønadBrevBegrunnelse(vedtak = vedtak,
@@ -146,11 +144,40 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                       begrunnelse = restStønadBrevBegrunnelse.begrunnelse,
                                       årsak = restStønadBrevBegrunnelse.årsak)
 
-        vedtak.addStønadBrevBegrunnelse(begrunnelse)
+        vedtak.leggTilStønadBrevBegrunnelse(begrunnelse)
 
         lagreEllerOppdater(vedtak)
 
-        return vedtak.stønadBrevBegrunnelser.map{
+        return vedtak.stønadBrevBegrunnelser.map {
+            it.toRestStønadBrevBegrunnelse();
+        }
+    }
+
+
+    @Transactional
+    fun endreStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse,
+                                   fagsakId: Long): List<RestStønadBrevBegrunnelse> {
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        val begrunnelse =
+                restStønadBrevBegrunnelse.id?.let {
+                    StønadBrevBegrunnelse(
+                            id = it,
+                            vedtak = vedtak,
+                            fom = restStønadBrevBegrunnelse.fom,
+                            tom = restStønadBrevBegrunnelse.tom,
+                            begrunnelse = restStønadBrevBegrunnelse.begrunnelse,
+                            årsak = restStønadBrevBegrunnelse.årsak)
+                }
+
+        if (begrunnelse != null) {
+            vedtak.endreStønadBrevBegrunnelse(begrunnelse)
+        }
+
+        lagreEllerOppdater(vedtak)
+
+        return vedtak.stønadBrevBegrunnelser.map {
             it.toRestStønadBrevBegrunnelse();
         }
     }
@@ -171,6 +198,15 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     fun hentAktivForBehandling(behandlingId: Long): Vedtak? {
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
+    }
+
+    private fun hentVedtakForAktivBehandling(fagsakId: Long): Vedtak? {
+        val behandling: Behandling = behandlingService.hentAktivForFagsak(fagsakId)
+                                     ?: throw Feil(message = "Finner ikke aktiv behandling på fagsak")
+
+        return hentAktivForBehandling(behandlingId = behandling.id)
+               ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
     }
 
     fun lagreOgDeaktiverGammel(vedtak: Vedtak): Vedtak {

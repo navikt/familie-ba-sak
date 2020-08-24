@@ -51,8 +51,17 @@ class Vedtak(
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
     }
 
-    fun addStønadBrevBegrunnelse(begrunnelse: StønadBrevBegrunnelse) {
+    fun leggTilStønadBrevBegrunnelse(begrunnelse: StønadBrevBegrunnelse) {
         stønadBrevBegrunnelser.add(begrunnelse)
+    }
+
+    fun endreStønadBrevBegrunnelse(begrunnelse: StønadBrevBegrunnelse) {
+        val begrunnelseSomSkaEndres = stønadBrevBegrunnelser.find{it.id == begrunnelse.id}
+        if(begrunnelseSomSkaEndres != null) {
+            begrunnelseSomSkaEndres.begrunnelse = begrunnelse.begrunnelse
+            begrunnelseSomSkaEndres.årsak = begrunnelse.årsak
+        }
+
     }
 }
 

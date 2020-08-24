@@ -48,8 +48,10 @@ class VedtakController(
     @PutMapping(path = ["/{fagsakId}/endre-stønad-brev-begrunnelse"])
     fun endreStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
                                    @RequestBody
-                                   restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse): ResponseEntity.BodyBuilder {
-        return ResponseEntity.ok()
+                                   restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
+        var nyStønadBrevBegrunnelser = vedtakService.endreStønadBrevBegrunnelse(fagsakId = fagsakId, restStønadBrevBegrunnelse = restStønadBrevBegrunnelse)
+
+        return ResponseEntity.ok(Ressurs.success(nyStønadBrevBegrunnelser))
     }
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
