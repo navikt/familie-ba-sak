@@ -236,7 +236,8 @@ class VedtakServiceTest(
         val periode = Periode(LocalDate.of(2018, 1, 1), TIDENES_ENDE)
         val begrunnelse = "Mock begrunnelse"
         val årsak = "Mock årsak"
-        vedtak.addStønadBrevBegrunnelse(StønadBrevBegrunnelse(periode = periode.hash,
+        vedtak.addStønadBrevBegrunnelse(StønadBrevBegrunnelse(tom = periode.tom,
+                                                              fom = periode.fom,
                                                               begrunnelse = begrunnelse,
                                                               årsak = årsak,
                                                               vedtak = vedtak))

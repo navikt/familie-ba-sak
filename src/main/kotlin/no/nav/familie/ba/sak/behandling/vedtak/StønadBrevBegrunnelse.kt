@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import java.time.LocalDate
 import javax.persistence.*
 
 
@@ -18,10 +19,13 @@ data class StønadBrevBegrunnelse(
 
         @JsonIgnore
         @ManyToOne @JoinColumn(name = "fk_vedtak_id")
-        val vedtak: Vedtak?,
+        val vedtak: Vedtak,
 
-        @Column(name = "periode", nullable = false)
-        val periode: String,
+        @Column(name = "fom")
+        val fom: LocalDate,
+
+        @Column(name = "tom")
+        val tom: LocalDate,
 
         @Column(name = "begrunnelse")
         var begrunnelse: String,

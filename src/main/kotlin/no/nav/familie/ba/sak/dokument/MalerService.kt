@@ -87,8 +87,7 @@ class MalerService(
 
             val begrunnelse: MutableSet<StønadBrevBegrunnelse> =
                     vedtak.stønadBrevBegrunnelser.filter { stønadBrevBegrunnelse ->
-                        stønadBrevBegrunnelse.periode === Periode(it.periodeFom!!,
-                                                                  it.periodeTom!!).hash
+                        stønadBrevBegrunnelse.fom == it.periodeFom && stønadBrevBegrunnelse.tom == it.periodeTom
                     }.toMutableSet()
 
             DuFårSeksjon(

@@ -8,8 +8,16 @@ data class RestVedtak(
         val aktiv: Boolean,
         val vedtaksdato: LocalDate?,
         val personBeregninger: List<RestVedtakPerson>,
-        val stønadBrevMetadata: MutableSet<StønadBrevBegrunnelse>,
+        val stønadBrevBegrunnelser: List<RestStønadBrevBegrunnelse>,
         val id: Long
+)
+
+data class RestStønadBrevBegrunnelse(
+        val id: Long?,
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val begrunnelse: String,
+        val årsak: String
 )
 
 fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
@@ -17,5 +25,21 @@ fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
         personBeregninger = restVedtakPerson,
         vedtaksdato = this.vedtaksdato,
         id = this.id,
-        stønadBrevMetadata = this.stønadBrevBegrunnelser
+        stønadBrevBegrunnelser = this.stønadBrevBegrunnelser.map { begrunnelse ->
+            RestStønadBrevBegrunnelse(id = begrunnelse.id,
+                                      fom = begrunnelse.fom,
+                                      tom = begrunnelse.tom,
+                                      begrunnelse = begrunnelse.begrunnelse,
+                                      årsak = begrunnelse.årsak)
+        }
 )
+
+fun StønadBrevBegrunnelse.toRestStønadBrevBegrunnelse() =
+        RestStønadBrevBegrunnelse(
+                id = this.id,
+                fom = this.fom,
+                tom = this.tom,
+                begrunnelse = this.begrunnelse,
+                årsak = this.årsak
+        )
+

@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.toRestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -130,7 +132,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     @Transactional
-    fun leggTilStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse, fagsakId: Long) {
+    fun leggTilStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse, fagsakId: Long): List<RestStønadBrevBegrunnelse> {
         val behandling: Behandling = behandlingService.hentAktivForFagsak(fagsakId)
                                      ?: throw Feil(message = "Finner ikke aktiv behandling på fagsak")
 
@@ -139,13 +141,18 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val begrunnelse =
                 StønadBrevBegrunnelse(vedtak = vedtak,
-                                      periode = restStønadBrevBegrunnelse.periode.hash,
+                                      fom = restStønadBrevBegrunnelse.fom,
+                                      tom = restStønadBrevBegrunnelse.tom,
                                       begrunnelse = restStønadBrevBegrunnelse.begrunnelse,
                                       årsak = restStønadBrevBegrunnelse.årsak)
 
         vedtak.addStønadBrevBegrunnelse(begrunnelse)
 
         lagreEllerOppdater(vedtak)
+
+        return vedtak.stønadBrevBegrunnelser.map{
+            it.toRestStønadBrevBegrunnelse();
+        }
     }
 
     fun hentForrigeVedtak(behandling: Behandling): Vedtak? {

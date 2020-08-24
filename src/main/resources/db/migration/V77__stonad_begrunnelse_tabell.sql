@@ -2,7 +2,8 @@ CREATE TABLE STONAD_BREV_BEGRUNNELSE
 (
     id                  bigint primary key,
     fk_vedtak_id        bigint references vedtak(id),
-    periode             VARCHAR NOT NULL,
+    fom                 TIMESTAMP(3),
+    tom                 TIMESTAMP(3),
     begrunnelse         VARCHAR,
     arsak               VARCHAR
 );
