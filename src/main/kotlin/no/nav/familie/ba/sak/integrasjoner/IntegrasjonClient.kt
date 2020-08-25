@@ -124,7 +124,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    fun distribuerVedtaksbrev(journalpostId: String) {
+    fun distribuerBrev(journalpostId: String): Ressurs<String> {
         val uri = URI.create("$integrasjonUri/dist/v1")
         logger.info("Kaller dokdist-tjeneste med journalpostId $journalpostId")
 
@@ -136,11 +136,14 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)
                     if (it.getDataOrThrow().isBlank()) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
-                    logger.info("Distribusjon av vedtaksbrev bestilt")
-                    secureLogger.info("Distribusjon av vedtaksbrev bestilt med data i responsen: ${it.data}")
+                    else {
+                        logger.info("Distribusjon av brev bestilt")
+                        secureLogger.info("Distribusjon av brev bestilt med data i responsen: ${it.data}")
+                        return it
+                    }
                 },
                 onFailure = {
-                    throw IntegrasjonException("Kall mot integrasjon feilet ved distribusjon av vedtaksbrev", it, uri, "")
+                    throw IntegrasjonException("Kall mot integrasjon feilet ved distribusjon av brev", it, uri, "")
                 }
         )
     }
@@ -346,9 +349,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         return lagJournalpostForBrev(fnr, fagsakId, vedtak.ansvarligEnhet, brev, vedlegg)
     }
 
-    fun journalførManueltBrev(fnr: String, fagsakId: String, brev: ByteArray, brevType: String): String {
+    fun journalførManueltBrev(fnr: String, fagsakId: String, journalførendeEnhet: String, brev: ByteArray, brevType: String): String {
         return lagJournalpostForBrev(fnr = fnr,
                                      fagsakId = fagsakId,
+                                     journalførendeEnhet = journalførendeEnhet,
                                      brev = listOf(Dokument(brev, FilType.PDFA, dokumentType = brevType)))
     }
 

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.dokument
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -21,7 +22,8 @@ class DokumentService(
         private val dokGenKlient: DokGenKlient,
         private val malerService: MalerService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val integrasjonClient: IntegrasjonClient
+        private val integrasjonClient: IntegrasjonClient,
+        private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
@@ -88,12 +90,19 @@ class DokumentService(
 
     fun sendManueltBrev(behandling: Behandling,
                         brevmal: BrevType,
-                        manueltBrevRequest: ManueltBrevRequest): String {
+                        manueltBrevRequest: ManueltBrevRequest): Ressurs<String> {
 
         val fnr = behandling.fagsak.hentAktivIdent().ident
         val fagsakId = "${behandling.fagsak.id}"
         val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)
-        return integrasjonClient.journalførManueltBrev(fnr, fagsakId, generertBrev, brevmal.arkivType)
-        //integrasjonsklient.distribuerVedtaksbrev(journalpostid)
+        val enhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
+
+        val journalføringsId = integrasjonClient.journalførManueltBrev(fnr = fnr,
+                                                       fagsakId = fagsakId,
+                                                       journalførendeEnhet = enhet,
+                                                       brev = generertBrev,
+                                                       brevType = brevmal.arkivType)
+
+        return integrasjonClient.distribuerBrev(journalføringsId)
     }
 }

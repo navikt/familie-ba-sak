@@ -155,7 +155,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("9999",
                                                                                                           "Ukjent"))
 
-        every { mockIntegrasjonClient.distribuerVedtaksbrev(any()) } just runs
+        every { mockIntegrasjonClient.distribuerBrev(any()) } returns success("bestillingsId")
 
         every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
 

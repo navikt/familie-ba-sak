@@ -138,7 +138,7 @@ class IntergrasjonTjenesteTest {
 
 
 
-        assertDoesNotThrow { integrasjonClient.distribuerVedtaksbrev("123456789") }
+        assertDoesNotThrow { integrasjonClient.distribuerBrev("123456789") }
         verify(postRequestedFor(anyUrl())
                        .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
@@ -154,7 +154,7 @@ class IntergrasjonTjenesteTest {
                         .withHeader("Accept", containing("json"))
                         .willReturn(okJson(objectMapper.writeValueAsString(success("")))))
 
-        assertThrows<IllegalStateException> { integrasjonClient.distribuerVedtaksbrev("123456789") }
+        assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev("123456789") }
     }
 
     @Test
@@ -164,7 +164,7 @@ class IntergrasjonTjenesteTest {
                         .withHeader("Accept", containing("json"))
                         .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>("")))))
 
-        assertThrows<IllegalStateException> { integrasjonClient.distribuerVedtaksbrev("123456789") }
+        assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev("123456789") }
     }
 
     @Test
@@ -176,7 +176,7 @@ class IntergrasjonTjenesteTest {
                                             .withStatus(400)
                                             .withHeader("Content-Type", "application/json")))
 
-        assertThrows<IntegrasjonException> { integrasjonClient.distribuerVedtaksbrev("123456789") }
+        assertThrows<IntegrasjonException> { integrasjonClient.distribuerBrev("123456789") }
     }
 
 

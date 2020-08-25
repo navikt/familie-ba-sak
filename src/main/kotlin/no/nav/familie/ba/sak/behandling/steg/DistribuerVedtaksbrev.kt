@@ -18,7 +18,7 @@ class DistribuerVedtaksbrev(
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: DistribuerVedtaksbrevDTO): StegType {
         LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
-        integrasjonClient.distribuerVedtaksbrev(data.journalpostId)
+        integrasjonClient.distribuerBrev(data.journalpostId)
         loggService.opprettDistribuertBrevLogg(behandlingId = data.behandlingId,
                                                tekst = "Vedtaksbrev er sendt til bruker")
 

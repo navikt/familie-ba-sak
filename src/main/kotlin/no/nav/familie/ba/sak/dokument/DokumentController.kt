@@ -81,9 +81,7 @@ class DokumentController(
         val brevMal = BrevType.values().find { it.malId == brevMalId }
 
         return if (brevMal != null) {
-            dokumentService.sendManueltBrev(behandling, brevMal, manueltBrevRequest).let {
-                Ressurs.success(it)
-            }
+            dokumentService.sendManueltBrev(behandling, brevMal, manueltBrevRequest)
         } else {
             error("Finnes ingen støttet brevmal for type $brevMal")
         }
