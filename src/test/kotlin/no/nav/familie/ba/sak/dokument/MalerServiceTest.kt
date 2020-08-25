@@ -122,7 +122,7 @@ class MalerServiceTest {
         assertEquals(andelTilkjentYtelseBarn2.stønadFom.tilMånedÅr(), autovedtakBrevfelter.virkningstidspunkt)
         assertEquals("${barn2.fødselsdato.tilKortString()} og ${barn1.fødselsdato.tilKortString()}",
                      autovedtakBrevfelter.fodselsdato)
-        assertEquals("6 324", autovedtakBrevfelter.etterbetalingsbelop)
+        assertEquals(null, autovedtakBrevfelter.etterbetalingsbelop) // skal sende inntil vi får hentet beløpet fra simulering
         assertEquals(2, autovedtakBrevfelter.antallBarn)
     }
 }
