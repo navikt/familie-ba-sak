@@ -141,15 +141,15 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 StønadBrevBegrunnelse(vedtak = vedtak,
                                       fom = restStønadBrevBegrunnelse.fom,
                                       tom = restStønadBrevBegrunnelse.tom,
-                                      begrunnelse = restStønadBrevBegrunnelse.begrunnelse,
-                                      årsak = restStønadBrevBegrunnelse.årsak)
+                                      resultat = restStønadBrevBegrunnelse.resultat,
+                                      begrunnelse = restStønadBrevBegrunnelse.begrunnelse)
 
         vedtak.leggTilStønadBrevBegrunnelse(begrunnelse)
 
         lagreEllerOppdater(vedtak)
 
         return vedtak.stønadBrevBegrunnelser.map {
-            it.toRestStønadBrevBegrunnelse();
+            it.toRestStønadBrevBegrunnelse()
         }
     }
 
@@ -167,12 +167,12 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                             vedtak = vedtak,
                             fom = restStønadBrevBegrunnelse.fom,
                             tom = restStønadBrevBegrunnelse.tom,
-                            begrunnelse = restStønadBrevBegrunnelse.begrunnelse,
-                            årsak = restStønadBrevBegrunnelse.årsak)
+                            resultat = restStønadBrevBegrunnelse.resultat,
+                            begrunnelse = restStønadBrevBegrunnelse.begrunnelse)
                 }
 
         if (begrunnelse != null) {
-            vedtak.endreStønadBrevBegrunnelse(begrunnelse)
+            vedtak.endreStønadBrevBegrunnelse(restStønadBrevBegrunnelse)
         }
 
         lagreEllerOppdater(vedtak)
@@ -233,6 +233,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

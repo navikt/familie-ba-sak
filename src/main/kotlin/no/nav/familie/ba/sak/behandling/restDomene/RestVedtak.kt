@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vedtak.StønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import java.time.LocalDate
 
 data class RestVedtak(
@@ -16,8 +17,8 @@ data class RestStønadBrevBegrunnelse(
         val id: Long?,
         val fom: LocalDate,
         val tom: LocalDate?,
-        val begrunnelse: String,
-        val årsak: String
+        val resultat: BehandlingResultatType,
+        val begrunnelse: String
 )
 
 fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
@@ -30,7 +31,7 @@ fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
                                       fom = begrunnelse.fom,
                                       tom = begrunnelse.tom,
                                       begrunnelse = begrunnelse.begrunnelse,
-                                      årsak = begrunnelse.årsak)
+                                      resultat = begrunnelse.resultat)
         }
 )
 
@@ -39,7 +40,7 @@ fun StønadBrevBegrunnelse.toRestStønadBrevBegrunnelse() =
                 id = this.id,
                 fom = this.fom,
                 tom = this.tom,
-                begrunnelse = this.begrunnelse,
-                årsak = this.årsak
+                resultat = this.resultat,
+                begrunnelse = this.begrunnelse
         )
 

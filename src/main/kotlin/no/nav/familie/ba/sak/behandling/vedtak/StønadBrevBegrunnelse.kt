@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -27,11 +29,10 @@ data class StønadBrevBegrunnelse(
         @Column(name = "tom")
         val tom: LocalDate?,
 
+        @Column(name = "resultat")
+        @Enumerated(EnumType.STRING)
+        var resultat: BehandlingResultatType,
+
         @Column(name = "begrunnelse")
-        var begrunnelse: String,
-
-        @Column(name = "arsak")
-        var årsak: String
-
-
+        var begrunnelse: String
 )

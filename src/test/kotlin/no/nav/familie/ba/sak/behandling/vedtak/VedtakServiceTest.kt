@@ -125,7 +125,7 @@ class VedtakServiceTest(
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertNull(hentetVedtak!!.vedtaksdato)
-        Assertions.assertEquals(null, hentetVedtak?.stønadBrevPdF)
+        Assertions.assertEquals(null, hentetVedtak.stønadBrevPdF)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(totrinnskontroll)
@@ -234,12 +234,12 @@ class VedtakServiceTest(
 
         Assertions.assertEquals(0, vedtak.stønadBrevBegrunnelser.size)
         val periode = Periode(LocalDate.of(2018, 1, 1), TIDENES_ENDE)
-        val begrunnelse = "Mock begrunnelse"
-        val årsak = "Mock årsak"
+        val resultat = BehandlingResultatType.INNVILGET
+        val begrunnelse = "Mock årsak"
         vedtak.leggTilStønadBrevBegrunnelse(StønadBrevBegrunnelse(tom = periode.tom,
                                                                   fom = periode.fom,
+                                                                  resultat = resultat,
                                                                   begrunnelse = begrunnelse,
-                                                                  årsak = årsak,
                                                                   vedtak = vedtak))
 
         val endretVedtak = vedtakService.lagreEllerOppdater(vedtak)

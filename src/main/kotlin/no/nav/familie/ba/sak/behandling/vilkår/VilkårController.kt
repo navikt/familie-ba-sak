@@ -7,8 +7,10 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -65,8 +67,21 @@ class VilkårController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
+    @GetMapping(path = ["/vilkaarsdefinisjoner"])
+    @Unprotected
+    fun vilkårsdefinisjoner(): ResponseEntity<Ressurs<Map<Vilkår, Map<BehandlingResultatType, Pair<VedtakBegrunnelse, String>>>>> {
+        Vilkår.values().map { vilkår ->
+            vilkår to vilkår.begrunnelser.map {
+                it.key to it.value.map {  }
+            }
+        }
+        return ResponseEntity.ok(Ressurs.success(Vilkår.values().toList()))
+    }
+
     fun settSteg(behandlingId: Long) {
         behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingId, steg = StegType.VILKÅRSVURDERING)
     }
 }
+
+
 

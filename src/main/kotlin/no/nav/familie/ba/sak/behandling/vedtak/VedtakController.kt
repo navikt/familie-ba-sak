@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
-import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
@@ -36,20 +35,22 @@ class VedtakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PostMapping(path = ["/{fagsakId}/legg-til-stønad-brev-begrunnelse"])
+    @PostMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse"])
     fun leggTilStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
                                      @RequestBody
                                      restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
-        var nyStønadBrevBegrunnelser = vedtakService.leggTilStønadBrevBegrunnelse(fagsakId = fagsakId, restStønadBrevBegrunnelse = restStønadBrevBegrunnelse)
+        val nyStønadBrevBegrunnelser = vedtakService.leggTilStønadBrevBegrunnelse(fagsakId = fagsakId,
+                                                                                  restStønadBrevBegrunnelse = restStønadBrevBegrunnelse)
 
         return ResponseEntity.ok(Ressurs.success(nyStønadBrevBegrunnelser))
     }
 
-    @PutMapping(path = ["/{fagsakId}/endre-stønad-brev-begrunnelse"])
+    @PutMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse"])
     fun endreStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
                                    @RequestBody
                                    restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
-        var nyStønadBrevBegrunnelser = vedtakService.endreStønadBrevBegrunnelse(fagsakId = fagsakId, restStønadBrevBegrunnelse = restStønadBrevBegrunnelse)
+        val nyStønadBrevBegrunnelser = vedtakService.endreStønadBrevBegrunnelse(fagsakId = fagsakId,
+                                                                                restStønadBrevBegrunnelse = restStønadBrevBegrunnelse)
 
         return ResponseEntity.ok(Ressurs.success(nyStønadBrevBegrunnelser))
     }
@@ -124,6 +125,7 @@ class VedtakController(
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

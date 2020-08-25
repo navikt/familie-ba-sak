@@ -4,8 +4,8 @@ CREATE TABLE STONAD_BREV_BEGRUNNELSE
     fk_vedtak_id        bigint references vedtak(id),
     fom                 TIMESTAMP(3),
     tom                 TIMESTAMP(3),
-    begrunnelse         VARCHAR,
-    arsak               VARCHAR
+    resultat            VARCHAR,
+    begrunnelse         VARCHAR
 );
 
 CREATE SEQUENCE STONAD_BREV_BEGRUNNELSE_SEQ INCREMENT BY 50 START WITH 1000000 NO CYCLE;

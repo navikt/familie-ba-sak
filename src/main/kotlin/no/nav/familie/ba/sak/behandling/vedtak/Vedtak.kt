@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import javax.persistence.*
@@ -22,9 +23,6 @@ class Vedtak(
 
         @Column(name = "vedtaksdato", nullable = true)
         var vedtaksdato: LocalDate? = null,
-
-        @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
-        var stønadBrevMarkdown: String = "",
 
         @Column(name = "stonad_brev_pdf", nullable = true)
         var stønadBrevPdF: ByteArray? = null,
@@ -55,57 +53,57 @@ class Vedtak(
         stønadBrevBegrunnelser.add(begrunnelse)
     }
 
-    fun endreStønadBrevBegrunnelse(begrunnelse: StønadBrevBegrunnelse) {
-        val begrunnelseSomSkaEndres = stønadBrevBegrunnelser.find{it.id == begrunnelse.id}
-        if(begrunnelseSomSkaEndres != null) {
-            begrunnelseSomSkaEndres.begrunnelse = begrunnelse.begrunnelse
-            begrunnelseSomSkaEndres.årsak = begrunnelse.årsak
-        }
+    fun endreStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse) {
+        val brevBegrunnelseSomSkalEndres = stønadBrevBegrunnelser.find { it.id == restStønadBrevBegrunnelse.id }
 
+        if (brevBegrunnelseSomSkalEndres != null) {
+            brevBegrunnelseSomSkalEndres.resultat = restStønadBrevBegrunnelse.resultat
+            brevBegrunnelseSomSkalEndres.begrunnelse = restStønadBrevBegrunnelse.begrunnelse
+        }
     }
 }
 
-    /*fun hentStønadBrevMetadata(): StønadBrevMetadata? {
-        return when {
-            stønadBrevMetadata.isNullOrBlank() -> null
-            else -> objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!)
+/*fun hentStønadBrevMetadata(): StønadBrevMetadata? {
+    return when {
+        stønadBrevMetadata.isNullOrBlank() -> null
+        else -> objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!)
+    }
+}
+
+val stønadBrevBegrunnelser: Map<String, Map<String, String>>
+    get() {
+        return if (stønadBrevMetadata.isNullOrBlank()) {
+            emptyMap()
+        } else {
+            objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!).begrunnelser
         }
     }
 
-    val stønadBrevBegrunnelser: Map<String, Map<String, String>>
-        get() {
-            return if (stønadBrevMetadata.isNullOrBlank()) {
-                emptyMap()
-            } else {
-                objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!).begrunnelser
-            }
+fun settStønadBrevBegrunnelse(periode: Periode, begrunnelse: String, begrunnelseId: String) {
+    val metadata: StønadBrevMetadata = when (stønadBrevMetadata.isNullOrBlank()) {
+        true -> {
+            var begrunnelseMedId = mutableMapOf(begrunnelseId to begrunnelse)
+            StønadBrevMetadata(
+                    begrunnelser = mutableMapOf(periode.hash to begrunnelseMedId)
+            )
         }
-
-    fun settStønadBrevBegrunnelse(periode: Periode, begrunnelse: String, begrunnelseId: String) {
-        val metadata: StønadBrevMetadata = when (stønadBrevMetadata.isNullOrBlank()) {
-            true -> {
+        false -> {
+            val metadata: StønadBrevMetadata = objectMapper.readValue(stønadBrevMetadata!!)
+            if(metadata.begrunnelser[periode.hash] === null) {
                 var begrunnelseMedId = mutableMapOf(begrunnelseId to begrunnelse)
-                StønadBrevMetadata(
-                        begrunnelser = mutableMapOf(periode.hash to begrunnelseMedId)
-                )
-            }
-            false -> {
-                val metadata: StønadBrevMetadata = objectMapper.readValue(stønadBrevMetadata!!)
-                if(metadata.begrunnelser[periode.hash] === null) {
-                    var begrunnelseMedId = mutableMapOf(begrunnelseId to begrunnelse)
-                    metadata.begrunnelser[periode.hash] = begrunnelseMedId
-                    metadata
-                } else {
-                    metadata.begrunnelser[periode.hash]!![begrunnelseId] = begrunnelse
-                    metadata
-                }
+                metadata.begrunnelser[periode.hash] = begrunnelseMedId
+                metadata
+            } else {
+                metadata.begrunnelser[periode.hash]!![begrunnelseId] = begrunnelse
+                metadata
             }
         }
-
-        stønadBrevMetadata = objectMapper.writeValueAsString(metadata)
     }
+
+    stønadBrevMetadata = objectMapper.writeValueAsString(metadata)
+}
 }
 
 data class StønadBrevMetadata(
-        var begrunnelser: MutableMap<String, MutableMap<String, String>> = mutableMapOf()
+    var begrunnelser: MutableMap<String, MutableMap<String, String>> = mutableMapOf()
 )*/
