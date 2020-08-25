@@ -75,26 +75,26 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
     val nåværendeMedlemskap = finnNåværendeMedlemskap(fakta.personForVurdering.statsborgerskap)
 
     return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
-            Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
-            //TODO: Implementeres av TEA-1532
-            Medlemskap.EØS -> {
-                sjekkLovligOppholdForEØSBorger(fakta)
-            }
-            Medlemskap.TREDJELANDSBORGER -> {
-                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                    økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.TREDJELANDSBORGER, fakta.personForVurdering.type)
-                    Evaluering.nei("${fakta.personForVurdering.type} har ikke lovlig opphold")
-                } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
-            }
-            Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
-                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                    økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
-                    Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
-                } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
-            }
-            else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
+        Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
+        //TODO: Implementeres av TEA-1532
+        Medlemskap.EØS -> {
+            sjekkLovligOppholdForEØSBorger(fakta)
+        }
+        Medlemskap.TREDJELANDSBORGER -> {
+            val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
+            if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
+                økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.TREDJELANDSBORGER, fakta.personForVurdering.type)
+                Evaluering.nei("${fakta.personForVurdering.type} har ikke lovlig opphold")
+            } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
+        }
+        Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
+            val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
+            if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
+                økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
+                Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
+            } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
+        }
+        else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
     }
 }
 
@@ -207,6 +207,10 @@ fun morHarBoddINorgeIMerEnn5År(fakta: Fakta): Boolean {
         it.periode
     }.filterNotNull()
 
+    if (perioder.any { it.fom == null }) {
+        return false
+    }
+
     return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 0
 }
 
@@ -218,6 +222,10 @@ fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
     val perioder = fakta.personForVurdering.arbeidsforhold!!.map {
         it.periode
     }.filterNotNull()
+
+    if (perioder.any { it.fom == null }) {
+        return false
+    }
 
     return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 90
 }

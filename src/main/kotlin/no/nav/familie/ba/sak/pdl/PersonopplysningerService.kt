@@ -100,8 +100,8 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
     fun hentBostedsadresseperioder(ident : String) : List<GrBostedsadresseperiode> = pdlRestClient.hentBostedsadresseperioder(ident).map{
         GrBostedsadresseperiode(
                 periode = DatoIntervallEntitet(
-                        fom= it.gyldigFraOgMed,
-                        tom= it.gyldigTilOgMed
+                        fom= it.gyldigFraOgMed?.toLocalDate(),
+                        tom= it.gyldigTilOgMed?.toLocalDate()
                 ))
     }
 
