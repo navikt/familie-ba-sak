@@ -91,6 +91,8 @@ spring:
       enable-auto-commit: false
     producer:
       group-id: srvc01
+      acks: all
+      retries: 3
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer

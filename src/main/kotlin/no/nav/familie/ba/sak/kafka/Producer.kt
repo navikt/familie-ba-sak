@@ -12,11 +12,10 @@ class Producer {
     lateinit var kafkaTemplate: KafkaTemplate<String, String>
     fun sendMessage(message: String?) {
         logger.info(String.format("#### -> Producing message -> %s", message))
-        kafkaTemplate!!.send(TOPIC, message)
+        kafkaTemplate.send(TOPIC, message)
     }
 
     companion object {
-
         private val logger = LoggerFactory.getLogger(Producer::class.java)
         private const val TOPIC = "aapen-barnetrygd-vedtak-v1"
     }
