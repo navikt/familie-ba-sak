@@ -3,8 +3,8 @@
     "person": {
       "bostedsadresse": [
         {
-          "gyldigFraOgMed": "2002-01-03",
-          "gyldigTilOgMed": "2002-01-04"
+          "gyldigFraOgMed": "2002-01-03T00:00:00",
+          "gyldigTilOgMed": "2002-01-04T00:00:00"
         }
       ]
     }
