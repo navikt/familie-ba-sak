@@ -121,7 +121,7 @@ class ReglerTest {
 
     @Test
     fun `intervallet mellom to bostedsadresseperioder skal evalueres på korrekt vis`() {
-        assertThat(morHarBoddINorgeIMerEnn5År(Fakta(lagSøkerMedBostedsadresseperioder(
+        assertThat(morHarBoddINorgeSiste5År(Fakta(lagSøkerMedBostedsadresseperioder(
                 listOf(
                         DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
                         DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(4))

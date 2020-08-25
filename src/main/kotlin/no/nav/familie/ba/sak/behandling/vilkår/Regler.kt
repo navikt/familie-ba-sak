@@ -162,7 +162,7 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
 }
 
 private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Evaluering {
-    return if (morHarBoddINorgeIMerEnn5År(fakta)) {
+    return if (morHarBoddINorgeSiste5År(fakta)) {
         if (morHarJobbetINorgeSiste5År(fakta)) {
             Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
         } else {
@@ -198,7 +198,7 @@ private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopp
     it.type == PersonType.ANNENPART
 }
 
-fun morHarBoddINorgeIMerEnn5År(fakta: Fakta): Boolean {
+fun morHarBoddINorgeSiste5År(fakta: Fakta): Boolean {
     if (fakta.personForVurdering.bostedsadresseperiode == null) {
         return false
     }
