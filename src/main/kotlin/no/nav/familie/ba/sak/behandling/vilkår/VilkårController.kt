@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
@@ -67,15 +67,9 @@ class VilkårController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
-    @GetMapping(path = ["/vilkaarsdefinisjoner"])
-    @Unprotected
-    fun vilkårsdefinisjoner(): ResponseEntity<Ressurs<Map<Vilkår, Map<BehandlingResultatType, Pair<VedtakBegrunnelse, String>>>>> {
-        Vilkår.values().map { vilkår ->
-            vilkår to vilkår.begrunnelser.map {
-                it.key to it.value.map {  }
-            }
-        }
-        return ResponseEntity.ok(Ressurs.success(Vilkår.values().toList()))
+    @GetMapping(path = ["/vilkaarsbegrunnelser"])
+    fun vilkårsbegrunnelser(): ResponseEntity<Ressurs<MutableMap<BehandlingResultatType, MutableList<RestVedtakBegrunnelse>>>> {
+        return ResponseEntity.ok(Ressurs.success(VilkårsvurderingUtils.hentVilkårsbegrunnelser()))
     }
 
     fun settSteg(behandlingId: Long) {

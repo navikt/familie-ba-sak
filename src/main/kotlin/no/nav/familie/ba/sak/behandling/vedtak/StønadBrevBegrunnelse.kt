@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
 import java.time.LocalDate
 import javax.persistence.*
@@ -34,5 +35,5 @@ data class StønadBrevBegrunnelse(
         var resultat: BehandlingResultatType,
 
         @Column(name = "begrunnelse")
-        var begrunnelse: String
+        var begrunnelse: VedtakBegrunnelse
 )

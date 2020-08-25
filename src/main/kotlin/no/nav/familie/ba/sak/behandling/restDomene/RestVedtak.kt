@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 import no.nav.familie.ba.sak.behandling.vedtak.StønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import java.time.LocalDate
 
 data class RestVedtak(
@@ -18,7 +19,12 @@ data class RestStønadBrevBegrunnelse(
         val fom: LocalDate,
         val tom: LocalDate?,
         val resultat: BehandlingResultatType,
-        val begrunnelse: String
+        val begrunnelse: VedtakBegrunnelse
+)
+
+data class RestVedtakBegrunnelse(
+        val id: VedtakBegrunnelse,
+        val navn: String
 )
 
 fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
