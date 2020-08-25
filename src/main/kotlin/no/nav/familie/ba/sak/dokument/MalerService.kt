@@ -119,8 +119,7 @@ class MalerService(
                                      beregningOversikt: List<RestBeregningOversikt>,
                                      enhet: String): String {
         val barnaSortert = personopplysningGrunnlag.barna.sortedByDescending { it.fødselsdato }
-        val etterbetalingsbeløp = TilkjentYtelseUtils.beregnEtterbetaling(beregningOversikt, vedtak, barnaSortert.first())
-                .takeIf { it > 0 }
+        val etterbetalingsbeløp = etterbetalingsbeløpFraSimulering().takeIf { it > 0 }
         val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker[0].navn,
                                                fodselsnummer = vedtak.behandling.fagsak.hentAktivIdent().ident,
                                                fodselsdato = Utils.slåSammen(barnaSortert.map { it.fødselsdato.tilKortString() }),
@@ -133,6 +132,9 @@ class MalerService(
                                                etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) })
         return objectMapper.writeValueAsString(flettefelter)
     }
+
+    private fun etterbetalingsbeløpFraSimulering() = 0 //TODO Må legges inn senere når simulering er implementert.
+                                                       // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
 
     private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
         val behandling = vedtak.behandling

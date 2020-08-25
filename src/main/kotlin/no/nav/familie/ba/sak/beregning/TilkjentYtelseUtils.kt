@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
@@ -19,7 +18,6 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
-import java.time.Period
 import java.time.YearMonth
 
 object TilkjentYtelseUtils {
@@ -88,26 +86,6 @@ object TilkjentYtelseUtils {
 
         return tilkjentYtelse
     }
-
-    fun beregnEtterbetaling(beregningOversikt: List<RestBeregningOversikt>,
-                            vedtak: Vedtak,
-                            yngsteBarn: Person): Int {
-        if (vedtak.vedtaksdato == null) {
-            throw Feil("Vedtaket mangler vedtaksdato", "Vedtaket mangler vedtaksdato")
-        }
-        return beregningOversikt.filter { it.periodeFom !== null && it.periodeTom !== null && it.periodeFom <= vedtak.vedtaksdato }
-                .filter { beregningDetaljTilPerson(yngsteBarn, it) !== null }
-                .sumBy {
-                    val antallMnd = Period.between(it.periodeFom, minOf(vedtak.vedtaksdato!!, it.periodeTom!!).plusMonths(1))
-                            .run { this.years * 12 + this.months }
-                    antallMnd * beregningDetaljTilPerson(yngsteBarn, it)!!.utbetaltPerMnd
-                }
-    }
-
-    private fun beregningDetaljTilPerson(person: Person,
-                                         it: RestBeregningOversikt): RestBeregningDetalj? {
-        return it.beregningDetaljer.find { it.person.personIdent == person.personIdent.ident }
-                                         }
 
     fun beregnNåværendeBeløp(beregningOversikt: List<RestBeregningOversikt>, vedtak: Vedtak): Int {
         return beregningOversikt.find {
