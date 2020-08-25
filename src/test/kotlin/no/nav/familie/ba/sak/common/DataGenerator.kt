@@ -23,7 +23,6 @@ import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
@@ -151,7 +150,7 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      personIdent = PersonIdent(it),
                                                      type = PersonType.BARN,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
-                                                     fødselsdato = LocalDate.parse(it.substring(0,6), DateTimeFormatter.ofPattern("ddMMyy")),
+                                                     fødselsdato = LocalDate.of(2019, 1, 1),
                                                      navn = "",
                                                      kjønn = Kjønn.MANN,
                                                      bostedsadresse = bostedsadresse,
