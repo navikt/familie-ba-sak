@@ -8,10 +8,14 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOpphold
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
+import java.time.Duration
 import java.time.LocalDate
 
 internal fun barnUnder18År(fakta: Fakta): Evaluering =
@@ -86,11 +90,10 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
             }
             Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
                 val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER){
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
                     Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
-                }
-                else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
+                } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
             }
             else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
     }
@@ -160,17 +163,15 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
 }
 
 private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Evaluering {
-    // Regelflytramme. Utkommentert pga. at SonarCube flagger dette som en bug. Rammen skal benyttes når reglene er implementert.
-    /*if (morHarBoddINorgeIMerEnn5År()) {
-        if (morHarJobbetINorgeSiste5År()) {
-            // Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
+    return if (morHarBoddINorgeSiste5År(fakta)) {
+        if (morHarJobbetINorgeSiste5År(fakta)) {
+            Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
         } else {
-            // Evaluering.nei("Mor har ikke jobbet kontinuerlig i Norge siste 5 år.")
+            Evaluering.nei("Mor har ikke jobbet kontinuerlig i Norge siste 5 år.")
         }
     } else {
-        // Evaluering.nei("Mor har ikke bodd i Norge sammenhengende i mer enn 5 år.")
-    }*/
-    return Evaluering.kanskje("ikke implementert")
+        Evaluering.nei("Mor har ikke bodd i Norge sammenhengende i mer enn 5 år.")
+    }
 }
 
 fun personHarLøpendeArbeidsforhold(personForVurdering: Person): Boolean = personForVurdering.arbeidsforhold?.any {
@@ -198,5 +199,59 @@ private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopp
     it.type == PersonType.ANNENPART
 }
 
-fun morHarBoddINorgeIMerEnn5År(): Boolean = true // ikke implementert
-fun morHarJobbetINorgeSiste5År(): Boolean = true // ikke implementert
+fun morHarBoddINorgeSiste5År(fakta: Fakta): Boolean {
+    if (fakta.personForVurdering.bostedsadresseperiode == null) {
+        return false
+    }
+
+    val perioder = fakta.personForVurdering.bostedsadresseperiode!!.map {
+        it.periode
+    }.filterNotNull()
+
+    if (perioder.any { it.fom == null }) {
+        return false
+    }
+
+    return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 0
+}
+
+fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
+    if (fakta.personForVurdering.arbeidsforhold == null) {
+        return false
+    }
+
+    val perioder = fakta.personForVurdering.arbeidsforhold!!.map {
+        it.periode
+    }.filterNotNull()
+
+    if (perioder.any { it.fom == null }) {
+        return false
+    }
+
+    return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 90
+}
+
+private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEntitet>,
+                                                fom: LocalDate,
+                                                tom: LocalDate): Long {
+    val mutablePerioder = perioder.toMutableList().apply {
+        addAll(listOf(
+                DatoIntervallEntitet(
+                        fom.minusDays(1),
+                        fom.minusDays(1)),
+                DatoIntervallEntitet(
+                        tom.plusDays(1),
+                        tom.plusDays(1))))
+    }
+
+    val sammenslåttePerioder = slåSammenOverlappendePerioder(mutablePerioder).sortedBy { it.fom }
+
+    return sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
+        val avstand = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
+        if (avstand > maksimumAvstand) {
+            avstand
+        } else {
+            maksimumAvstand
+        }
+    }
+}

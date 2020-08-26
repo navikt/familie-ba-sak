@@ -1,0 +1,6 @@
+query($ident: ID!) {person: hentPerson(ident: $ident) {
+    bostedsadresse(historikk: true) {
+        gyldigFraOgMed
+        gyldigTilOgMed
+    }
+}}
