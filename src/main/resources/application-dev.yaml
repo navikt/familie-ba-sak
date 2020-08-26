@@ -77,6 +77,7 @@ spring:
   flyway:
     enabled: false
   kafka:
+    bootstrap-servers: http://localhost:9092
     properties:
       security.protocol: SASL_PLAINTEXT
       sasl:
@@ -92,4 +93,3 @@ CREDENTIAL_PASSWORD: not-a-real-pw
 
 #Unleash
 UNLEASH_API_URL: http://localhost
-KAFKA_BROKERS: http://localhost:9092

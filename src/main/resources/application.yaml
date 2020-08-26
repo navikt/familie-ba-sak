@@ -26,7 +26,6 @@ spring:
   flyway:
     enabled: true
   kafka:
-    bootstrap-servers: ${KAFKA_BROKERS}
     client-id: familie-ba-sak
     properties:
       security.protocol: SASL_SSL

@@ -67,7 +67,6 @@ STS_URL: http://nav-auth-mock:8200/nais-sts/token
 PDL_URL: http://familie-mock-server:1337/rest/api/pdl
 CREDENTIAL_USERNAME: srvfamilie-ba-sak
 CREDENTIAL_PASSWORD: ${SRVUSER_BA_SAK_SECRET}
-KAFKA_BROKERS: http://localhost:9092
 
 
 #Unleash

@@ -10,7 +10,7 @@ import java.io.IOException
  * For midlertidig testbruk, skal fjernes etter testperiode.
  */
 @Service
-@Profile("preprod", "kafka-lokal")
+@Profile("kafka-lokal")
 class VedtakKafkaConsumer {
     private val logger = LoggerFactory.getLogger(VedtakKafkaProducer::class.java)
 
