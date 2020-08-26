@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.dokument.domene.maler
 
+import com.fasterxml.jackson.annotation.JsonInclude
+
 data class Innvilget(
         val enhet: String,
         val saksbehandler: String,
@@ -8,6 +10,7 @@ data class Innvilget(
         var duFaar: List<DuFårSeksjon> = emptyList()
 )
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class InnvilgetAutovedtak(
         val navn: String,
         val fodselsnummer: String,
