@@ -6,15 +6,14 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
@@ -23,6 +22,7 @@ import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -180,47 +180,36 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             } ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
 
 
-            val utgjørendeVilkårForUtbetalingsperiode = behandlingResultat.personResultater.map {
-                Pair(it,
-                     it.vilkårResultater.filter { vilkårResultat ->
-                         when {
-                             vilkårResultat.vilkårType != vilkår -> false
-                             vilkårResultat.periodeFom == null -> {
-                                 false
-                             }
-                             restStønadBrevBegrunnelse.resultat == BehandlingResultatType.INNVILGET -> {
-                                 vilkårResultat.periodeFom!!.monthValue == restStønadBrevBegrunnelse.fom.monthValue && vilkårResultat.resultat == Resultat.JA
-                             }
-                             else -> {
-                                 vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == restStønadBrevBegrunnelse.fom.monthValue && vilkårResultat.resultat == Resultat.NEI
-                             }
-                         }
-                     }
-                )
+            val personerMedUtgjørendeVilkårForUtbetalingsperiode =
+                    hentPersonerMedUtgjørendeVilkår(behandlingResultat, restStønadBrevBegrunnelse, vilkår)
+
+            if(personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
+                //TODO: Sjekk med funksjonelle hva denne teksten faktisk skal være.
+                throw Feil(message = "Begrunnelsen samsvarte ikke med vilkårsvurderingen", frontendFeilmelding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen")
             }
 
-            val gjelderSøker = utgjørendeVilkårForUtbetalingsperiode.any {
-                val person =
-                        persongrunnlagService.hentAktiv(vedtak.behandling.id)?.personer?.firstOrNull { person -> person.personIdent.ident == it.first.personIdent }
-
-                it.second.isNotEmpty() && person != null && person.type == PersonType.SØKER
+            val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
+                it.first.type == PersonType.SØKER
             }
 
-            val barnaMedVilkårSomPåvirkerUtbetaling = utgjørendeVilkårForUtbetalingsperiode.filter {
-                val person =
-                        persongrunnlagService.hentAktiv(vedtak.behandling.id)?.personer?.firstOrNull { person -> person.personIdent.ident == it.first.personIdent }
-
-                it.second.isNotEmpty() && person != null && person.type == PersonType.BARN
+            val barnaMedVilkårSomPåvirkerUtbetaling = personerMedUtgjørendeVilkårForUtbetalingsperiode.filter {
+                it.first.type == PersonType.BARN
             }.map {
-                persongrunnlagService.hentAktiv(vedtak.behandling.id)?.personer?.firstOrNull { person -> person.personIdent.ident == it.first.personIdent }
+                it.first
             }
 
-            val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it!!.fødselsdato.tilKortString() })
+            val vilkårsdato = if (personerMedUtgjørendeVilkårForUtbetalingsperiode.size == 1) {
+                personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilKortString()
+            } else {
+                restStønadBrevBegrunnelse.fom.minusMonths(1).tilMånedÅr()
+            }
 
+
+            val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
             val begrunnelse = vilkår.begrunnelser[restStønadBrevBegrunnelse.resultat]
             val begrunnelsesfunksjon = begrunnelse?.get(restStønadBrevBegrunnelse.begrunnelse!!)?.second
 
-            val begrunnelseSomSkalPersisteres = begrunnelsesfunksjon?.invoke(gjelderSøker, barnasFødselsdatoer, "")
+            val begrunnelseSomSkalPersisteres = begrunnelsesfunksjon?.invoke(gjelderSøker, barnasFødselsdatoer, vilkårsdato)
 
             vedtak.endreStønadBrevBegrunnelse(
                     restStønadBrevBegrunnelse.id,
@@ -240,6 +229,38 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         return vedtak.stønadBrevBegrunnelser.map {
             it.toRestStønadBrevBegrunnelse()
         }
+    }
+
+    private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat,
+                                                restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse,
+                                                vilkår: Vilkår): List<Pair<Person, VilkårResultat>> {
+        return behandlingResultat.personResultater.fold(mutableListOf()) { acc, personResultat ->
+            val utgjørendeVilkår = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
+                when {
+                    vilkårResultat.vilkårType != vilkår -> false
+                    vilkårResultat.periodeFom == null -> {
+                        false
+                    }
+                    restStønadBrevBegrunnelse.resultat == BehandlingResultatType.INNVILGET -> {
+                        vilkårResultat.periodeFom!!.monthValue == restStønadBrevBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
+                    }
+                    else -> {
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == restStønadBrevBegrunnelse.fom.minusMonths(
+                                1).monthValue && vilkårResultat.resultat == Resultat.NEI
+                    }
+                }
+            }
+
+            val person =
+                    persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.personer?.firstOrNull { person -> person.personIdent.ident == personResultat.personIdent }
+                    ?: throw Feil(message = "Kunne ikke finne person på personResultat")
+
+            if (utgjørendeVilkår != null) {
+                acc.add(Pair(person, utgjørendeVilkår))
+            }
+            acc
+        }
+
     }
 
     fun hentForrigeVedtak(behandling: Behandling): Vedtak? {
