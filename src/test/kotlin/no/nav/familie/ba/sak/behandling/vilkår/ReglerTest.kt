@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -53,9 +50,7 @@ class ReglerTest {
                 sivilstand = SIVILSTAND.GIFT
         ).also { person ->
             person.bostedsadresseperiode = if (perioder == null) null else perioder.map {
-                GrBostedsadresseperiode(
-                        periode = it
-                )
+                GrBostedsadresseperiode(periode = it)
             }
         }
     }
