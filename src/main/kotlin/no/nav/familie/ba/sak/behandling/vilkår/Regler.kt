@@ -163,18 +163,15 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
 }
 
 private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Evaluering {
-    // Regelflytramme. Utkommentert pga. at SonarCube flagger dette som en bug. Rammen skal benyttes når reglene er implementert.
-    /*if (morHarBoddINorgeIMerEnn5År()) {
-        if (morHarJobbetINorgeSiste5År()) {
-            // Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
+    return if (morHarBoddINorgeSiste5År(fakta)) {
+        if (morHarJobbetINorgeSiste5År(fakta)) {
+            Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
         } else {
-            // Evaluering.nei("Mor har ikke jobbet kontinuerlig i Norge siste 5 år.")
-
+            Evaluering.nei("Mor har ikke jobbet kontinuerlig i Norge siste 5 år.")
         }
     } else {
-        // Evaluering.nei("Mor har ikke bodd i Norge sammenhengende i mer enn 5 år.")
-    }*/
-    return Evaluering.kanskje("ikke implementert")
+        Evaluering.nei("Mor har ikke bodd i Norge sammenhengende i mer enn 5 år.")
+    }
 }
 
 fun personHarLøpendeArbeidsforhold(personForVurdering: Person): Boolean = personForVurdering.arbeidsforhold?.any {
@@ -202,41 +199,59 @@ private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopp
     it.type == PersonType.ANNENPART
 }
 
-fun morHarBoddINorgeIMerEnn5År(): Boolean = true // ikke implementert
+fun morHarBoddINorgeSiste5År(fakta: Fakta): Boolean {
+    if (fakta.personForVurdering.bostedsadresseperiode == null) {
+        return false
+    }
+
+    val perioder = fakta.personForVurdering.bostedsadresseperiode!!.map {
+        it.periode
+    }.filterNotNull()
+
+    if (perioder.any { it.fom == null }) {
+        return false
+    }
+
+    return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 0
+}
 
 fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
-    val maksimumTillattAvstandMellomPerioder = 90 // dager
-
     if (fakta.personForVurdering.arbeidsforhold == null) {
         return false
     }
 
-    val perioder = fakta.personForVurdering.arbeidsforhold!!.mapNotNull {
+    val perioder = fakta.personForVurdering.arbeidsforhold!!.map {
         it.periode
-    }.toMutableList()
+    }.filterNotNull()
 
     if (perioder.any { it.fom == null }) {
-        throw Feil("F.o.m. mangler i et arbeidsforhold. Dette er påkrevet.")
+        return false
     }
 
-    perioder.addAll(listOf(
-            DatoIntervallEntitet(
-                    LocalDate.now().minusYears(5).minusDays(1),
-                    LocalDate.now().minusYears(5).minusDays(1)),
-            DatoIntervallEntitet(
-                    LocalDate.now().plusDays(1),
-                    LocalDate.now().plusDays(1))))
+    return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 90
+}
 
-    val sammenslåttePerioder = slåSammenOverlappendePerioder(perioder).sortedBy { it.fom }
+private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEntitet>,
+                                                fom: LocalDate,
+                                                tom: LocalDate): Long {
+    val mutablePerioder = perioder.toMutableList().apply {
+        addAll(listOf(
+                DatoIntervallEntitet(
+                        fom.minusDays(1),
+                        fom.minusDays(1)),
+                DatoIntervallEntitet(
+                        tom.plusDays(1),
+                        tom.plusDays(1))))
+    }
 
-    val størsteAvstandMellomToPerioder = sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
-        val avstand = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1) , pairs.second.fom!!.atStartOfDay()).toDays()
+    val sammenslåttePerioder = slåSammenOverlappendePerioder(mutablePerioder).sortedBy { it.fom }
+
+    return sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
+        val avstand = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
         if (avstand > maksimumAvstand) {
             avstand
         } else {
             maksimumAvstand
         }
     }
-
-    return størsteAvstandMellomToPerioder <= maksimumTillattAvstandMellomPerioder
 }
