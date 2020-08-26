@@ -205,6 +205,8 @@ private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopp
 fun morHarBoddINorgeIMerEnn5År(): Boolean = true // ikke implementert
 
 fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
+    val maksimumTillattAvstandMellomPerioder = 90 // dager
+
     if (fakta.personForVurdering.arbeidsforhold == null) {
         return false
     }
@@ -227,7 +229,7 @@ fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
 
     val sammenslåttePerioder = slåSammenOverlappendePerioder(perioder).sortedBy { it.fom }
 
-    val maksimumAvstandMellomToPerioder = sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
+    val størsteAvstandMellomToPerioder = sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
         val avstand = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1) , pairs.second.fom!!.atStartOfDay()).toDays()
         if (avstand > maksimumAvstand) {
             avstand
@@ -236,5 +238,5 @@ fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
         }
     }
 
-    return maksimumAvstandMellomToPerioder <= 90
+    return størsteAvstandMellomToPerioder <= maksimumTillattAvstandMellomPerioder
 }
