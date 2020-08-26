@@ -58,6 +58,8 @@ VEILEDER_ROLLE: "199c2b39-e535-4ae8-ac59-8ccbee7991ae"
 SAKSBEHANDLER_ROLLE: "847e3d72-9dc1-41c3-80ff-f5d4acdd5d46"
 BESLUTTER_ROLLE: "7a271f87-39fb-468b-a9ee-6cf3c070f548"
 
+KAFKA_BROKERS: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
+
 spring:
   datasource:
     url: jdbc:postgresql://A01DBVL010.adeo.no:5432/familie-ba-sak
