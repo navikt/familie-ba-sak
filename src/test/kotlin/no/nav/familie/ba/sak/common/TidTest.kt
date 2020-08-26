@@ -124,11 +124,11 @@ internal class TidTest {
     @Test
     fun `skal slå sammen overlappende perioder til en periode og bruke laveste fom og beholde tom fra periode 2`() {
         val periode1 = DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2005,9,2))
-        val intervall2 = DatoIntervallEntitet(LocalDate.of(2005,10,1), LocalDate.of(2018,5,20))
+        val periode2 = DatoIntervallEntitet(LocalDate.of(2005,10,1), LocalDate.of(2018,5,20))
         val periode3 = DatoIntervallEntitet(LocalDate.of(2014,10,1), LocalDate.of(2015,5,20))
         val currentPeriode = DatoIntervallEntitet(LocalDate.of(2018,6,1), null)
 
-        val result = slåSammenOverlappendePerioder(listOf( intervall2, periode3, periode1, currentPeriode))
+        val result = slåSammenOverlappendePerioder(listOf( periode2, periode3, periode1, currentPeriode))
         Assertions.assertThat(result)
                 .hasSize(3)
                 .contains(periode1)
@@ -168,11 +168,11 @@ internal class TidTest {
     @Test
     fun `skal slå sammen overlappende perioder til en periode og videreføre null i tom`() {
         val periode1 = DatoIntervallEntitet(LocalDate.of(2004,1,1), LocalDate.of(2005,9,2))
-        val intervall2 = DatoIntervallEntitet(LocalDate.of(2005,10,1), LocalDate.of(2015,5,20))
+        val periode2 = DatoIntervallEntitet(LocalDate.of(2005,10,1), LocalDate.of(2015,5,20))
         val periode3 = DatoIntervallEntitet(LocalDate.of(2014,10,1), LocalDate.of(2018,5,20))
         val currentPeriode = DatoIntervallEntitet(LocalDate.of(2008,6,1), null)
 
-        val result = slåSammenOverlappendePerioder(listOf( intervall2, periode3, periode1, currentPeriode))
+        val result = slåSammenOverlappendePerioder(listOf( periode2, periode3, periode1, currentPeriode))
         Assertions.assertThat(result)
                 .hasSize(2)
                 .contains(periode1)
@@ -182,9 +182,9 @@ internal class TidTest {
     @Test
     fun `skal slå sammen perioder til én periode hvor første periode har tom som null`() {
         val periode1 = DatoIntervallEntitet(LocalDate.of(2004,1,1), null)
-        val intervall2 = DatoIntervallEntitet(LocalDate.of(2005,10,1), LocalDate.of(2015,5,20))
+        val periode2 = DatoIntervallEntitet(LocalDate.of(2005,10,1), LocalDate.of(2015,5,20))
 
-        val result = slåSammenOverlappendePerioder(listOf( periode1, intervall2))
+        val result = slåSammenOverlappendePerioder(listOf( periode1, periode2))
         Assertions.assertThat(result)
                 .hasSize(1)
                 .contains(periode1)
