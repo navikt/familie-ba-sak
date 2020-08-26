@@ -8,10 +8,14 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOpphold
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.nare.core.evaluations.Evaluering
+import java.time.Duration
 import java.time.LocalDate
 
 internal fun barnUnder18År(fakta: Fakta): Evaluering =
@@ -86,11 +90,10 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
             }
             Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
                 val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER){
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
                     Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
-                }
-                else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
+                } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
             }
             else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
     }
@@ -166,6 +169,7 @@ private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta): Eva
             // Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
         } else {
             // Evaluering.nei("Mor har ikke jobbet kontinuerlig i Norge siste 5 år.")
+
         }
     } else {
         // Evaluering.nei("Mor har ikke bodd i Norge sammenhengende i mer enn 5 år.")
@@ -199,4 +203,40 @@ private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopp
 }
 
 fun morHarBoddINorgeIMerEnn5År(): Boolean = true // ikke implementert
-fun morHarJobbetINorgeSiste5År(): Boolean = true // ikke implementert
+
+fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
+    val maksimumTillattAvstandMellomPerioder = 90 // dager
+
+    if (fakta.personForVurdering.arbeidsforhold == null) {
+        return false
+    }
+
+    val perioder = fakta.personForVurdering.arbeidsforhold!!.mapNotNull {
+        it.periode
+    }.toMutableList()
+
+    if (perioder.any { it.fom == null }) {
+        throw Feil("F.o.m. mangler i et arbeidsforhold. Dette er påkrevet.")
+    }
+
+    perioder.addAll(listOf(
+            DatoIntervallEntitet(
+                    LocalDate.now().minusYears(5).minusDays(1),
+                    LocalDate.now().minusYears(5).minusDays(1)),
+            DatoIntervallEntitet(
+                    LocalDate.now().plusDays(1),
+                    LocalDate.now().plusDays(1))))
+
+    val sammenslåttePerioder = slåSammenOverlappendePerioder(perioder).sortedBy { it.fom }
+
+    val størsteAvstandMellomToPerioder = sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
+        val avstand = Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1) , pairs.second.fom!!.atStartOfDay()).toDays()
+        if (avstand > maksimumAvstand) {
+            avstand
+        } else {
+            maksimumAvstand
+        }
+    }
+
+    return størsteAvstandMellomToPerioder <= maksimumTillattAvstandMellomPerioder
+}
