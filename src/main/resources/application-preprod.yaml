@@ -59,10 +59,6 @@ spring:
     url: jdbc:postgresql://b27dbvl009.preprod.local:5432/familie-ba-sak
   kafka:
     bootstrap-servers: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
-    properties:
-      security.protocol: SASL_PLAINTEXT
-      sasl:
-        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="igroup" password="itest";
 
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
