@@ -41,7 +41,7 @@ class DokumentController(
         return dokumentService.hentBrevForVedtak(vedtak)
     }
 
-    @PostMapping(path = ["forhåndsvis-brev/{brevMalId}/{behandlingId}"])
+    @PostMapping(path = ["forhaandsvis-brev/{brevMalId}/{behandlingId}"])
     fun hentForhåndsvisning(
             @PathVariable brevMalId: String,
             @PathVariable behandlingId: Long,

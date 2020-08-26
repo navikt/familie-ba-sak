@@ -370,7 +370,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                                                 hoveddokumentvarianter = brev,
                                                                 vedleggsdokumenter = vedlegg,
                                                                 fagsakId = fagsakId,
-                                                                journalførendeEnhet = journalførendeEnhet) // TODO: Dobbeltsjekke hvorvidt journalførende enhet er oblig for alle
+                                                                journalførendeEnhet = journalførendeEnhet)
             val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(
