@@ -211,9 +211,9 @@ fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
         return false
     }
 
-    val perioder = fakta.personForVurdering.arbeidsforhold!!.map {
+    val perioder = fakta.personForVurdering.arbeidsforhold!!.mapNotNull {
         it.periode
-    }.filterNotNull().toMutableList()
+    }.toMutableList()
 
     if (perioder.any { it.fom == null }) {
         throw Feil("F.o.m. mangler i et arbeidsforhold. Dette er påkrevet.")
