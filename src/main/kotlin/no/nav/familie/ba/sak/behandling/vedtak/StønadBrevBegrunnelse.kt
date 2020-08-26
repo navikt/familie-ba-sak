@@ -24,16 +24,16 @@ data class StønadBrevBegrunnelse(
         @ManyToOne @JoinColumn(name = "fk_vedtak_id")
         val vedtak: Vedtak,
 
-        @Column(name = "fom")
+        @Column(name = "fom", updatable = false, nullable = false)
         val fom: LocalDate,
 
-        @Column(name = "tom")
-        val tom: LocalDate?,
+        @Column(name = "tom", updatable = false, nullable = false)
+        val tom: LocalDate,
 
         @Column(name = "resultat")
         @Enumerated(EnumType.STRING)
-        var resultat: BehandlingResultatType,
+        var resultat: BehandlingResultatType?,
 
         @Column(name = "begrunnelse")
-        var begrunnelse: VedtakBegrunnelse
+        var begrunnelse: String?
 )

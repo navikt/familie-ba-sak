@@ -1,11 +1,11 @@
 CREATE TABLE STONAD_BREV_BEGRUNNELSE
 (
-    id                  bigint primary key,
+    id                  bigint primary key NOT NULL,
     fk_vedtak_id        bigint references vedtak(id),
-    fom                 TIMESTAMP(3),
-    tom                 TIMESTAMP(3),
+    fom                 TIMESTAMP(3) NOT NULL,
+    tom                 TIMESTAMP(3) NOT NULL,
     resultat            VARCHAR,
-    begrunnelse         VARCHAR
+    begrunnelse         TEXT
 );
 
 CREATE SEQUENCE STONAD_BREV_BEGRUNNELSE_SEQ INCREMENT BY 50 START WITH 1000000 NO CYCLE;

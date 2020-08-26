@@ -6,34 +6,42 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.nare.core.evaluations.Resultat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDate.now
 
 @Service
 class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService,
                     private val behandlingService: BehandlingService,
                     private val behandlingRepository: BehandlingRepository,
                     private val behandlingResultatService: BehandlingResultatService,
+                    private val persongrunnlagService: PersongrunnlagService,
                     private val loggService: LoggService,
                     private val vedtakRepository: VedtakRepository,
                     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -76,7 +84,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val nyttVedtak = Vedtak(
                 behandling = nyBehandling,
-                vedtaksdato = LocalDate.now(),
+                vedtaksdato = now(),
                 forrigeVedtakId = gjeldendeVedtak.id,
                 opphørsdato = opphørsdato
         )
@@ -87,8 +95,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val nyTilkjentYtelse = TilkjentYtelse(
                 behandling = nyBehandling,
-                opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now()
+                opprettetDato = now(),
+                endretDato = now()
         )
         tilkjentYtelseRepository.save(nyTilkjentYtelse)
 
@@ -116,7 +124,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 behandling = behandling,
                 forrigeVedtakId = forrigeVedtak?.id,
                 ansvarligEnhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling),
-                opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) LocalDate.now()
+                opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
                         .førsteDagINesteMåned() else null
         )
 
@@ -141,8 +149,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 StønadBrevBegrunnelse(vedtak = vedtak,
                                       fom = restStønadBrevBegrunnelse.fom,
                                       tom = restStønadBrevBegrunnelse.tom,
-                                      resultat = restStønadBrevBegrunnelse.resultat,
-                                      begrunnelse = restStønadBrevBegrunnelse.begrunnelse)
+                                      resultat = null,
+                                      begrunnelse = null)
 
         vedtak.leggTilStønadBrevBegrunnelse(begrunnelse)
 
@@ -160,25 +168,77 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
-        val begrunnelse =
-                restStønadBrevBegrunnelse.id?.let {
-                    StønadBrevBegrunnelse(
-                            id = it,
-                            vedtak = vedtak,
-                            fom = restStønadBrevBegrunnelse.fom,
-                            tom = restStønadBrevBegrunnelse.tom,
-                            resultat = restStønadBrevBegrunnelse.resultat,
-                            begrunnelse = restStønadBrevBegrunnelse.begrunnelse)
-                }
 
-        if (begrunnelse != null) {
-            vedtak.endreStønadBrevBegrunnelse(restStønadBrevBegrunnelse)
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(vedtak.behandling.id)
+                                 ?: throw Feil("Finner ikke behandlingsresultat ved fastsetting av begrunnelse")
+
+        if (restStønadBrevBegrunnelse.begrunnelse != null && restStønadBrevBegrunnelse.resultat != null) {
+            val vilkår = Vilkår.values().firstOrNull {
+                it.begrunnelser.filter { begrunnelse ->
+                    begrunnelse.value.contains(restStønadBrevBegrunnelse.begrunnelse)
+                }.isNotEmpty()
+            } ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
+
+
+            val utgjørendeVilkårForUtbetalingsperiode = behandlingResultat.personResultater.map {
+                Pair(it,
+                     it.vilkårResultater.filter { vilkårResultat ->
+                         when {
+                             vilkårResultat.vilkårType != vilkår -> false
+                             vilkårResultat.periodeFom == null -> {
+                                 false
+                             }
+                             restStønadBrevBegrunnelse.resultat == BehandlingResultatType.INNVILGET -> {
+                                 vilkårResultat.periodeFom!!.monthValue == restStønadBrevBegrunnelse.fom.monthValue && vilkårResultat.resultat == Resultat.JA
+                             }
+                             else -> {
+                                 vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == restStønadBrevBegrunnelse.fom.monthValue && vilkårResultat.resultat == Resultat.NEI
+                             }
+                         }
+                     }
+                )
+            }
+
+            val gjelderSøker = utgjørendeVilkårForUtbetalingsperiode.any {
+                val person =
+                        persongrunnlagService.hentAktiv(vedtak.behandling.id)?.personer?.firstOrNull { person -> person.personIdent.ident == it.first.personIdent }
+
+                it.second.isNotEmpty() && person != null && person.type == PersonType.SØKER
+            }
+
+            val barnaMedVilkårSomPåvirkerUtbetaling = utgjørendeVilkårForUtbetalingsperiode.filter {
+                val person =
+                        persongrunnlagService.hentAktiv(vedtak.behandling.id)?.personer?.firstOrNull { person -> person.personIdent.ident == it.first.personIdent }
+
+                it.second.isNotEmpty() && person != null && person.type == PersonType.BARN
+            }.map {
+                persongrunnlagService.hentAktiv(vedtak.behandling.id)?.personer?.firstOrNull { person -> person.personIdent.ident == it.first.personIdent }
+            }
+
+            val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it!!.fødselsdato.tilKortString() })
+
+            val begrunnelse = vilkår.begrunnelser[restStønadBrevBegrunnelse.resultat]
+            val begrunnelsesfunksjon = begrunnelse?.get(restStønadBrevBegrunnelse.begrunnelse!!)?.second
+
+            val begrunnelseSomSkalPersisteres = begrunnelsesfunksjon?.invoke(gjelderSøker, barnasFødselsdatoer, "")
+
+            vedtak.endreStønadBrevBegrunnelse(
+                    restStønadBrevBegrunnelse.id,
+                    restStønadBrevBegrunnelse.resultat,
+                    begrunnelseSomSkalPersisteres
+            )
+        } else {
+            vedtak.endreStønadBrevBegrunnelse(
+                    restStønadBrevBegrunnelse.id,
+                    restStønadBrevBegrunnelse.resultat,
+                    ""
+            )
         }
 
         lagreEllerOppdater(vedtak)
 
         return vedtak.stønadBrevBegrunnelser.map {
-            it.toRestStønadBrevBegrunnelse();
+            it.toRestStønadBrevBegrunnelse()
         }
     }
 
@@ -225,7 +285,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     fun besluttVedtak(vedtak: Vedtak) {
-        vedtak.vedtaksdato = LocalDate.now()
+        vedtak.vedtaksdato = now()
         oppdaterVedtakMedStønadsbrev(vedtak)
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")

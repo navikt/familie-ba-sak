@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import java.time.LocalDate
 import javax.persistence.*
@@ -53,12 +54,12 @@ class Vedtak(
         stønadBrevBegrunnelser.add(begrunnelse)
     }
 
-    fun endreStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse) {
-        val brevBegrunnelseSomSkalEndres = stønadBrevBegrunnelser.find { it.id == restStønadBrevBegrunnelse.id }
+    fun endreStønadBrevBegrunnelse(id: Long?, resultat: BehandlingResultatType?, begrunnelse: String?) {
+        val brevBegrunnelseSomSkalEndres = stønadBrevBegrunnelser.find { it.id == id }
 
         if (brevBegrunnelseSomSkalEndres != null) {
-            brevBegrunnelseSomSkalEndres.resultat = restStønadBrevBegrunnelse.resultat
-            brevBegrunnelseSomSkalEndres.begrunnelse = restStønadBrevBegrunnelse.begrunnelse
+            brevBegrunnelseSomSkalEndres.resultat = resultat
+            brevBegrunnelseSomSkalEndres.begrunnelse = begrunnelse
         }
     }
 }

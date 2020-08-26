@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.nare.core.specifications.Spesifikasjon
 import java.time.LocalDate
 
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val spesifikasjon: Spesifikasjon<Fakta>,
-                  val begrunnelser: Map<BehandlingResultatType, Map<VedtakBegrunnelse, Pair<String, (vilkårsdato: LocalDate, antallBarn: Int) -> String>>> = emptyMap(),
+                  val begrunnelser: Map<BehandlingResultatType, Map<VedtakBegrunnelse, Pair<String, (gjelderSøker: Boolean, barnasFødselsdatoer: String, vilkårsdato: String) -> String>>> = emptyMap(),
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
     UNDER_18_ÅR(
@@ -38,19 +37,19 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                                             to
                                             Pair(
                                                     "Adopsjon, surrogati: Omsorgen for barn",
-                                                    { vilkårsdato, antallBarn -> "Du får barnetrygd fordi du har omsorgen for ${if (antallBarn == 1) "barnet" else "barna"} fra ${vilkårsdato.tilDagMånedÅr()}." }
+                                                    { _, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi du har omsorgen for barn født $barnasFødselsdatoer fra $vilkårsdato." }
                                             ),
                                     VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER
                                             to
                                             Pair(
                                                     "Barn har flyttet til søker",
-                                                    { vilkårsdato, antallBarn -> "Du får barnetrygd fordi ${if (antallBarn == 1) "barnet" else "barna"} bor hos deg fra ${vilkårsdato.tilDagMånedÅr()}." }
+                                                    { _, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi barn født $barnasFødselsdatoer bor hos deg fra $vilkårsdato." }
                                             ),
                                     VedtakBegrunnelse.INNVILGET_FAST_OMSORG_FOR_BARN
                                             to
                                             Pair(
                                                     "Søker har fast omsorg for barn",
-                                                    { vilkårsdato, antallBarn -> "Du får barnetrygd fordi vi har kommet fram til at du har fått fast omsorg for ${if (antallBarn == 1) "barnet" else "barna"} fra ${vilkårsdato.tilDagMånedÅr()}." }
+                                                    { _, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi vi har kommet fram til at du har fått fast omsorg for barn født $barnasFødselsdatoer fra $vilkårsdato." }
                                             )
                             )
             ),
@@ -76,7 +75,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                                             to
                                             Pair(
                                                     "Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge",
-                                                    { vilkårsdato, antallBarn -> "Du får barnetrygd fordi du og ${if (antallBarn == 1) "barnet" else "barna"} er bosatt i Norge fra ${vilkårsdato.tilDagMånedÅr()}." }
+                                                    { gjelderSøker, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer" else ""} er bosatt i Norge fra $vilkårsdato." }
                                             )
                             )
             ),
@@ -96,19 +95,19 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                                             to
                                             Pair(
                                                     "Tredjelandsborger bosatt før lovlig opphold i Norge",
-                                                    { vilkårsdato, antallBarn -> "Du får barnetrygd fordi du og/eller ${if (antallBarn == 1) "barnet" else "barna"} har oppholdstillatelse fra ${vilkårsdato.tilDagMånedÅr()}." }
+                                                    { gjelderSøker, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer" else ""} har oppholdstillatelse fra $vilkårsdato." }
                                             ),
                                     VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                                             to
                                             Pair(
                                                     "EØS-borger: Søker har oppholdsrett",
-                                                    { vilkårsdato, _ -> "Du får barnetrygd fordi du har oppholdsrett som EØS-borger fra ${vilkårsdato.tilDagMånedÅr()}." }
+                                                    { _, _, vilkårsdato -> "Du får barnetrygd fordi du har oppholdsrett som EØS-borger fra $vilkårsdato." }
                                             ),
                                     VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_AAREG
                                             to
                                             Pair(
                                                     "EØS-borger: Søker/ektefelle/samboer arbeider eller har ytelser fra NAV",
-                                                    { _, _ -> "Du får barnetrygd fordi du/ektefellen/samboeren arbeider eller får utbetalinger fra NAV som er det samme som arbeidsinntekt." }
+                                                    { _, _, _ -> "Du får barnetrygd fordi du arbeider eller får utbetalinger fra NAV som er det samme som arbeidsinntekt." }
                                             )
                             )
             ),

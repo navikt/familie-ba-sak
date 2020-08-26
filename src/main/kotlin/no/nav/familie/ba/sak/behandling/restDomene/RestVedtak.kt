@@ -17,9 +17,9 @@ data class RestVedtak(
 data class RestStønadBrevBegrunnelse(
         val id: Long?,
         val fom: LocalDate,
-        val tom: LocalDate?,
-        val resultat: BehandlingResultatType,
-        val begrunnelse: VedtakBegrunnelse
+        val tom: LocalDate,
+        val resultat: BehandlingResultatType?,
+        var begrunnelse: VedtakBegrunnelse?
 )
 
 data class RestVedtakBegrunnelse(
@@ -27,6 +27,7 @@ data class RestVedtakBegrunnelse(
         val navn: String
 )
 
+// TODO fix begrunnelse
 fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
         aktiv = this.aktiv,
         personBeregninger = restVedtakPerson,
@@ -36,7 +37,7 @@ fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
             RestStønadBrevBegrunnelse(id = begrunnelse.id,
                                       fom = begrunnelse.fom,
                                       tom = begrunnelse.tom,
-                                      begrunnelse = begrunnelse.begrunnelse,
+                                      begrunnelse = null, //begrunnelse.begrunnelse,
                                       resultat = begrunnelse.resultat)
         }
 )
@@ -47,6 +48,6 @@ fun StønadBrevBegrunnelse.toRestStønadBrevBegrunnelse() =
                 fom = this.fom,
                 tom = this.tom,
                 resultat = this.resultat,
-                begrunnelse = this.begrunnelse
+                begrunnelse = null //this.begrunnelse
         )
 

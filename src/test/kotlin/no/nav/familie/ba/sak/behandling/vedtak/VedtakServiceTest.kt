@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
@@ -236,11 +235,10 @@ class VedtakServiceTest(
         Assertions.assertEquals(0, vedtak.stønadBrevBegrunnelser.size)
         val periode = Periode(LocalDate.of(2018, 1, 1), TIDENES_ENDE)
         val resultat = BehandlingResultatType.INNVILGET
-        val begrunnelse = VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET
         vedtak.leggTilStønadBrevBegrunnelse(StønadBrevBegrunnelse(tom = periode.tom,
                                                                   fom = periode.fom,
                                                                   resultat = resultat,
-                                                                  begrunnelse = begrunnelse,
+                                                                  begrunnelse = "Mock begrunnelse",
                                                                   vedtak = vedtak))
 
         val endretVedtak = vedtakService.lagreEllerOppdater(vedtak)
