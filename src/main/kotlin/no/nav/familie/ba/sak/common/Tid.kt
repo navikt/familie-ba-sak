@@ -104,8 +104,15 @@ fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): Lis
     for ((key, value) in map) {
         prevIntervall = if (prevIntervall != null && prevIntervall.erInnenfor(key)) {
             val fom = prevIntervall.fom
-            val tom =
-                    if (prevIntervall.tom == null) null else (if (value != null && prevIntervall.tom!!.isAfter(value)) prevIntervall.tom else value)
+            val tom = if (prevIntervall.tom == null) {
+                null
+            } else {
+                if (value != null && prevIntervall.tom!!.isAfter(value)) {
+                    prevIntervall.tom
+                } else {
+                    value
+                }
+            }
             result.remove(prevIntervall)
             val nyttIntervall = DatoIntervallEntitet(fom, tom)
             result.add(nyttIntervall)
