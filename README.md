@@ -30,3 +30,5 @@ Master-branchen blir automatisk bygget ved merge og deployet til prod.
 
 ## Kontaktinformasjon
 For NAV-interne kan henvendelser om applikasjonen rettes til #team-familie på slack. Ellers kan man opprette et issue her på github.
+
+
