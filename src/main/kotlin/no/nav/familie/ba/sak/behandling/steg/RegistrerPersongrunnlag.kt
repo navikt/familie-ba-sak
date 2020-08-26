@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
@@ -34,10 +35,11 @@ class RegistrerPersongrunnlag(
                                                                                behandling)
         }
 
-        vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
-                                                          bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
-                                                          forrigeBehandling = forrigeBehandlingSomErIverksatt)
-
+        if (behandling.opprinnelse == BehandlingOpprinnelse.MANUELL) {
+            vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
+                                                              bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
+                                                              forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        }
         return hentNesteStegForNormalFlyt(behandling)
     }
 
