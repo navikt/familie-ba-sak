@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgers
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOpphold
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -75,26 +76,26 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
     val nåværendeMedlemskap = finnNåværendeMedlemskap(fakta.personForVurdering.statsborgerskap)
 
     return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
-        Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
-        //TODO: Implementeres av TEA-1532
-        Medlemskap.EØS -> {
-            sjekkLovligOppholdForEØSBorger(fakta)
-        }
-        Medlemskap.TREDJELANDSBORGER -> {
-            val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-            if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.TREDJELANDSBORGER, fakta.personForVurdering.type)
-                Evaluering.nei("${fakta.personForVurdering.type} har ikke lovlig opphold")
-            } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
-        }
-        Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
-            val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-            if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
-                Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
-            } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
-        }
-        else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
+            Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
+            //TODO: Implementeres av TEA-1532
+            Medlemskap.EØS -> {
+                sjekkLovligOppholdForEØSBorger(fakta)
+            }
+            Medlemskap.TREDJELANDSBORGER -> {
+                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
+                    økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.TREDJELANDSBORGER, fakta.personForVurdering.type)
+                    Evaluering.nei("${fakta.personForVurdering.type} har ikke lovlig opphold")
+                } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
+            }
+            Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
+                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
+                    økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
+                    Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
+                } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
+            }
+            else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
     }
 }
 
