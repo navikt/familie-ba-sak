@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.DokumentController.BrevType
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpStatus
@@ -26,7 +27,8 @@ class DokumentService(
         private val persongrunnlagService: PersongrunnlagService,
         private val integrasjonClient: IntegrasjonClient,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val loggService: LoggService
+        private val loggService: LoggService,
+        private val journalføringService: JournalføringService
 ) {
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
@@ -101,15 +103,18 @@ class DokumentService(
         val enhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
 
         val journalføringsId = integrasjonClient.journalførManueltBrev(fnr = fnr,
-                                                       fagsakId = fagsakId,
-                                                       journalførendeEnhet = enhet,
-                                                       brev = generertBrev,
-                                                       brevType = brevmal.arkivType)
+                                                                       fagsakId = fagsakId,
+                                                                       journalførendeEnhet = enhet,
+                                                                       brev = generertBrev,
+                                                                       brevType = brevmal.arkivType)
+
+        journalføringService.lagreJournalPost(behandling, journalføringsId)
 
         val distribuertBrevRessurs = integrasjonClient.distribuerBrev(journalføringsId)
+
         loggService.opprettDistribuertBrevLogg(behandlingId = behandling.id,
-                                             tekst = "Brev for ${brevmal.malId} er sendt til bruker",
-                                             rolle = BehandlerRolle.SAKSBEHANDLER)
+                                               tekst = "Brev for ${brevmal.malId} er sendt til bruker",
+                                               rolle = BehandlerRolle.SAKSBEHANDLER)
 
         return distribuertBrevRessurs
     }

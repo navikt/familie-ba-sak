@@ -179,6 +179,10 @@ class ClientMocks {
             mockIntegrasjonClient.journalFørVedtaksbrev(eq(søkerFnr[0]), any(), any())
         } returns "Testrespons"
 
+        every {
+            mockIntegrasjonClient.journalførManueltBrev(eq(søkerFnr[0]), any(), any(), any(), any())
+        } returns "Testrespons"
+
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
         every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
