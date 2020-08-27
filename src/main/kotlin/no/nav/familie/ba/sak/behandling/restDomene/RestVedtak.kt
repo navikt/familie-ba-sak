@@ -22,6 +22,11 @@ data class RestStønadBrevBegrunnelse(
         var begrunnelse: VedtakBegrunnelse?
 )
 
+data class RestPutStønadBrevBegrunnelse(
+        val resultat: BehandlingResultatType?,
+        val begrunnelse: VedtakBegrunnelse?
+)
+
 data class RestVedtakBegrunnelse(
         val id: VedtakBegrunnelse,
         val navn: String

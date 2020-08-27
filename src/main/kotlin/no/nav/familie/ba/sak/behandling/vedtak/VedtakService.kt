@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
@@ -17,12 +18,9 @@ import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.Utils.slåSammen
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -140,15 +138,15 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     @Transactional
-    fun leggTilStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse,
+    fun leggTilStønadBrevBegrunnelse(periode: Periode,
                                      fagsakId: Long): List<RestStønadBrevBegrunnelse> {
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
         val begrunnelse =
                 StønadBrevBegrunnelse(vedtak = vedtak,
-                                      fom = restStønadBrevBegrunnelse.fom,
-                                      tom = restStønadBrevBegrunnelse.tom,
+                                      fom = periode.fom,
+                                      tom = periode.tom,
                                       resultat = null,
                                       begrunnelse = null)
 
@@ -168,7 +166,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
         val begrunnelse =
-                StønadBrevBegrunnelse(id = restStønadBrevBegrunnelse.id?: throw Feil("Innsendt begrunnelse mangler id"),
+                StønadBrevBegrunnelse(id = restStønadBrevBegrunnelse.id ?: throw Feil("Innsendt begrunnelse mangler id"),
                                       vedtak = vedtak,
                                       fom = restStønadBrevBegrunnelse.fom,
                                       tom = restStønadBrevBegrunnelse.tom,
@@ -187,8 +185,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
 
     @Transactional
-    fun endreStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse,
-                                   fagsakId: Long): List<RestStønadBrevBegrunnelse> {
+    fun endreStønadBrevBegrunnelse(restPutStønadBrevBegrunnelse: RestPutStønadBrevBegrunnelse,
+                                   fagsakId: Long, begrunnelseId: Long): List<RestStønadBrevBegrunnelse> {
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
@@ -196,16 +194,19 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(vedtak.behandling.id)
                                  ?: throw Feil("Finner ikke behandlingsresultat ved fastsetting av begrunnelse")
 
-        if (restStønadBrevBegrunnelse.begrunnelse != null && restStønadBrevBegrunnelse.resultat != null) {
+        val stønadBrevBegrunnelse = vedtak.hentStønadBrevBegrunnelse(begrunnelseId)
+                                    ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
+
+        if (restPutStønadBrevBegrunnelse.begrunnelse != null && restPutStønadBrevBegrunnelse.resultat != null) {
             val vilkår = Vilkår.values().firstOrNull {
                 it.begrunnelser.filter { begrunnelse ->
-                    begrunnelse.value.contains(restStønadBrevBegrunnelse.begrunnelse)
+                    begrunnelse.value.contains(restPutStønadBrevBegrunnelse.begrunnelse)
                 }.isNotEmpty()
             } ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
 
 
             val personerMedUtgjørendeVilkårForUtbetalingsperiode =
-                    hentPersonerMedUtgjørendeVilkår(behandlingResultat, restStønadBrevBegrunnelse, vilkår)
+                    hentPersonerMedUtgjørendeVilkår(behandlingResultat, stønadBrevBegrunnelse, vilkår)
 
             if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
                 //TODO: Sjekk med funksjonelle hva denne teksten faktisk skal være.
@@ -226,25 +227,25 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val vilkårsdato = if (personerMedUtgjørendeVilkårForUtbetalingsperiode.size == 1) {
                 personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilKortString()
             } else {
-                restStønadBrevBegrunnelse.fom.minusMonths(1).tilMånedÅr()
+                stønadBrevBegrunnelse.fom.minusMonths(1).tilMånedÅr()
             }
 
 
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
-            val begrunnelse = vilkår.begrunnelser[restStønadBrevBegrunnelse.resultat]
-            val begrunnelsesfunksjon = begrunnelse?.get(restStønadBrevBegrunnelse.begrunnelse!!)?.second
+            val begrunnelse = vilkår.begrunnelser[restPutStønadBrevBegrunnelse.resultat]
+            val begrunnelsesfunksjon = begrunnelse?.get(restPutStønadBrevBegrunnelse.begrunnelse)?.second
 
             val begrunnelseSomSkalPersisteres = begrunnelsesfunksjon?.invoke(gjelderSøker, barnasFødselsdatoer, vilkårsdato)
 
             vedtak.endreStønadBrevBegrunnelse(
-                    restStønadBrevBegrunnelse.id,
-                    restStønadBrevBegrunnelse.resultat,
+                    stønadBrevBegrunnelse.id,
+                    restPutStønadBrevBegrunnelse.resultat,
                     begrunnelseSomSkalPersisteres
             )
         } else {
             vedtak.endreStønadBrevBegrunnelse(
-                    restStønadBrevBegrunnelse.id,
-                    restStønadBrevBegrunnelse.resultat,
+                    stønadBrevBegrunnelse.id,
+                    restPutStønadBrevBegrunnelse.resultat,
                     ""
             )
         }
@@ -257,7 +258,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat,
-                                                restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse,
+                                                stønadBrevBegrunnelse: StønadBrevBegrunnelse,
                                                 vilkår: Vilkår): List<Pair<Person, VilkårResultat>> {
         return behandlingResultat.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkår = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
@@ -266,11 +267,11 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     vilkårResultat.periodeFom == null -> {
                         false
                     }
-                    restStønadBrevBegrunnelse.resultat == BehandlingResultatType.INNVILGET -> {
-                        vilkårResultat.periodeFom!!.monthValue == restStønadBrevBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
+                    stønadBrevBegrunnelse.resultat == BehandlingResultatType.INNVILGET -> {
+                        vilkårResultat.periodeFom!!.monthValue == stønadBrevBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
                     }
                     else -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == restStønadBrevBegrunnelse.fom.minusMonths(
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == stønadBrevBegrunnelse.fom.minusMonths(
                                 1).monthValue && vilkårResultat.resultat == Resultat.NEI
                     }
                 }

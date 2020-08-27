@@ -5,8 +5,10 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
@@ -38,19 +40,21 @@ class VedtakController(
     @PostMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse"])
     fun leggTilStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
                                      @RequestBody
-                                     restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
+                                     periode: Periode): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
         val nyStønadBrevBegrunnelser = vedtakService.leggTilStønadBrevBegrunnelse(fagsakId = fagsakId,
-                                                                                  restStønadBrevBegrunnelse = restStønadBrevBegrunnelse)
+                                                                                  periode = periode)
 
         return ResponseEntity.ok(Ressurs.success(nyStønadBrevBegrunnelser))
     }
 
-    @PutMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse"])
+    @PutMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse/{begrunnelseId}"])
     fun endreStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
+                                   @PathVariable begrunnelseId: Long,
                                    @RequestBody
-                                   restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
+                                   restPutStønadBrevBegrunnelse: RestPutStønadBrevBegrunnelse): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
         val nyStønadBrevBegrunnelser = vedtakService.endreStønadBrevBegrunnelse(fagsakId = fagsakId,
-                                                                                restStønadBrevBegrunnelse = restStønadBrevBegrunnelse)
+                                                                                restPutStønadBrevBegrunnelse = restPutStønadBrevBegrunnelse,
+                                                                                begrunnelseId = begrunnelseId)
 
         return ResponseEntity.ok(Ressurs.success(nyStønadBrevBegrunnelser))
     }

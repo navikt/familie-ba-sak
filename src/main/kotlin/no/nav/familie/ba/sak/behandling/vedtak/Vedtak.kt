@@ -49,9 +49,14 @@ class Vedtak(
     override fun toString(): String {
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
     }
+
     fun settStønadBrevBegrunnelser(nyeBegrunnelser: Set<StønadBrevBegrunnelse>) {
         stønadBrevBegrunnelser.clear()
         stønadBrevBegrunnelser.addAll(nyeBegrunnelser)
+    }
+
+    fun hentStønadBrevBegrunnelse(begrunnelseId: Long): StønadBrevBegrunnelse? {
+        return stønadBrevBegrunnelser.find { it.id == begrunnelseId }
     }
 
     fun leggTilStønadBrevBegrunnelse(begrunnelse: StønadBrevBegrunnelse) {
@@ -59,9 +64,8 @@ class Vedtak(
     }
 
     fun slettStønadBrevBegrunnelse(begrunnelseId: Long) {
-        stønadBrevBegrunnelser.find { it.id == begrunnelseId }
-                             ?: throw Feil(message = "Prøver å slette en begrunnelse som ikke finnes",
-                                           frontendFeilmelding = "Begrunnelsen du prøver å slette finnes ikke i systemet.")
+        hentStønadBrevBegrunnelse(begrunnelseId) ?: throw Feil(message = "Prøver å slette en begrunnelse som ikke finnes",
+                                                               frontendFeilmelding = "Begrunnelsen du prøver å slette finnes ikke i systemet.")
 
         settStønadBrevBegrunnelser(stønadBrevBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
@@ -72,6 +76,8 @@ class Vedtak(
         if (brevBegrunnelseSomSkalEndres != null) {
             brevBegrunnelseSomSkalEndres.resultat = resultat
             brevBegrunnelseSomSkalEndres.begrunnelse = begrunnelse
+        } else {
+            throw Feil(message = "Prøver å endre på en begrunnelse som ikke finnes")
         }
     }
 }
