@@ -24,7 +24,8 @@ class OpprettOppgaveTask(
         task.metadata["oppgaveId"] = oppgaveService.opprettOppgave(
                 opprettOppgaveDTO.behandlingId,
                 opprettOppgaveDTO.oppgavetype,
-                opprettOppgaveDTO.fristForFerdigstillelse
+                opprettOppgaveDTO.fristForFerdigstillelse,
+                beskrivelse = opprettOppgaveDTO.beskrivelse
         )
         taskRepository.saveAndFlush(task)
     }
@@ -32,10 +33,10 @@ class OpprettOppgaveTask(
     companion object {
         const val TASK_STEP_TYPE = "opprettOppgaveTask"
 
-        fun opprettTask(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate): Task {
+        fun opprettTask(behandlingId: Long, oppgavetype: Oppgavetype, fristForFerdigstillelse: LocalDate, beskrivelse: String? = null): Task {
             return Task.nyTask(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(OpprettOppgaveDTO(behandlingId, oppgavetype, fristForFerdigstillelse))
+                    payload = objectMapper.writeValueAsString(OpprettOppgaveDTO(behandlingId, oppgavetype, fristForFerdigstillelse, beskrivelse))
             )
         }
     }

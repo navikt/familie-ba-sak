@@ -6,5 +6,6 @@ import java.time.LocalDate
 data class OpprettOppgaveDTO (
         val behandlingId: Long,
         val oppgavetype: Oppgavetype,
-        val fristForFerdigstillelse: LocalDate
+        val fristForFerdigstillelse: LocalDate,
+        val beskrivelse: String?
 )
