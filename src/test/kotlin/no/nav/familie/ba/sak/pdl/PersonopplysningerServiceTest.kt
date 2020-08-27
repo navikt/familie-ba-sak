@@ -42,10 +42,17 @@ class PersonopplysningerServiceTest {
     }
 
     @Test
-    fun `hentOpphold() skal return riktig opphold`(){
+    fun `hentOpphold() skal returnere riktig opphold`(){
         val opphold = personopplysningerService.hentOpphold(ID_MOR_MED_XXX_STATSBORGERSKAP)
         assert(opphold.size == 1)
         assert(opphold.first().type == OPPHOLDSTILLATELSE.MIDLERTIDIG)
+    }
+
+    @Test
+    fun `hentBostedsadresseperioder() skal returnere riktige perioder`(){
+        val bostedsadresseperioder = personopplysningerService.hentBostedsadresseperioder(ID_MOR_MED_XXX_STATSBORGERSKAP)
+        assert(bostedsadresseperioder.size == 1)
+        assert(bostedsadresseperioder.first().periode?.fom != null)
     }
 
     companion object{
@@ -90,6 +97,9 @@ class PersonopplysningerServiceTest {
 
             lagMockForPdl("opphold.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
+
+            lagMockForPdl("hentBostedsadresseperioder.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
+                          readfile("PdlIntegrasjon/bostedsadresseperioderResponse.json"))
         }
 
     }

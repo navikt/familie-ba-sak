@@ -65,10 +65,10 @@ data class BehandlingResultat(
 }
 
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {
-    INNVILGET(brevMal = "Innvilget", displayName = "Innvilget"),
-    DELVIS_INNVILGET(brevMal = "Ukjent", displayName = "Delvis innvilget"),
-    AVSLÅTT(brevMal = "Avslag", displayName = "Avslått"),
-    OPPHØRT(brevMal = "Opphor", displayName = "Opphørt"),
-    HENLAGT(brevMal = "Ukjent", displayName = "Henlagt"),
-    IKKE_VURDERT(brevMal = "Ukjent", displayName = "Ikke vurdert")
+    INNVILGET(brevMal = "innvilget", displayName = "Innvilget"),
+    DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
+    AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
+    OPPHØRT(brevMal = "opphor", displayName = "Opphørt"),
+    HENLAGT(brevMal = "ukjent", displayName = "Henlagt"),
+    IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert")
 }

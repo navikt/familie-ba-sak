@@ -124,7 +124,7 @@ class MalerService(
         fun malNavnForMedlemskapOgResultatType(medlemskap: Medlemskap?,
                                                resultatType: BehandlingResultatType): String {
             return when (medlemskap) {
-                Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-Tredjelandsborger"
+                Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-tredjelandsborger"
                 else -> resultatType.brevMal
             }
         }

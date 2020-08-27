@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Feil
@@ -38,12 +37,12 @@ class Vilkårsvurdering(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                 ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+            vilkårService.initierVilkårvurderingForBehandling(behandling, true)
+        }
+
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
                 ?: throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
-
-        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            vilkårService.vurderVilkårForFødselshendelse(behandling.id)
-        }
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling,
@@ -65,6 +64,8 @@ class Vilkårsvurdering(
     }
 
     override fun postValiderSteg(behandling: Behandling) {
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) return
+
         if (behandling.type != BehandlingType.TEKNISK_OPPHØR && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val behandlingResultat = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
                     ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
