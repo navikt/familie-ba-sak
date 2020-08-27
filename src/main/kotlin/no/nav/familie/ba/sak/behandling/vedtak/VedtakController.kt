@@ -38,7 +38,7 @@ class VedtakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PostMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse"])
+    @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse"])
     fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                      @RequestBody
                                      periode: Periode): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
@@ -48,7 +48,7 @@ class VedtakController(
         return ResponseEntity.ok(Ressurs.success(nyUtbetalingBegrunnelser))
     }
 
-    @PutMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse/{utbetalingBegrunnelseId}"])
+    @PutMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/{utbetalingBegrunnelseId}"])
     fun endreUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                    @PathVariable utbetalingBegrunnelseId: Long,
                                    @RequestBody
@@ -62,7 +62,7 @@ class VedtakController(
         }))
     }
 
-    @DeleteMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse/{utbetalingBegrunnelseId}"])
+    @DeleteMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/{utbetalingBegrunnelseId}"])
     fun slettUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                    @PathVariable
                                    utbetalingBegrunnelseId: Long): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {

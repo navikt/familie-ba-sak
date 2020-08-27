@@ -92,8 +92,7 @@ class MalerService(
                         stønadBrevBegrunnelse.fom == it.periodeFom && stønadBrevBegrunnelse.tom == it.periodeTom
                     }.toMutableSet().map { utbetalingBegrunnelse ->
                         utbetalingBegrunnelse.brevBegrunnelse
-                        ?: throw Feil(message = "Utbetalingsperioden ${it.periodeFom}-${it.periodeTom} mangler begrunnelse",
-                                      frontendFeilmelding = "Utbetalingsperioden ${it.periodeFom}-${it.periodeTom} mangler begrunnelse")
+                        ?: "Ikke satt"
                     }.toList()
 
             DuFårSeksjon(
