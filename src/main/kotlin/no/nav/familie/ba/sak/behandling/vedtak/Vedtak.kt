@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -49,9 +49,21 @@ class Vedtak(
     override fun toString(): String {
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
     }
+    fun settStønadBrevBegrunnelser(nyeBegrunnelser: Set<StønadBrevBegrunnelse>) {
+        stønadBrevBegrunnelser.clear()
+        stønadBrevBegrunnelser.addAll(nyeBegrunnelser)
+    }
 
     fun leggTilStønadBrevBegrunnelse(begrunnelse: StønadBrevBegrunnelse) {
         stønadBrevBegrunnelser.add(begrunnelse)
+    }
+
+    fun slettStønadBrevBegrunnelse(begrunnelseId: Long) {
+        stønadBrevBegrunnelser.find { it.id == begrunnelseId }
+                             ?: throw Feil(message = "Prøver å slette en begrunnelse som ikke finnes",
+                                           frontendFeilmelding = "Begrunnelsen du prøver å slette finnes ikke i systemet.")
+
+        settStønadBrevBegrunnelser(stønadBrevBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
 
     fun endreStønadBrevBegrunnelse(id: Long?, resultat: BehandlingResultatType?, begrunnelse: String?) {
@@ -63,48 +75,3 @@ class Vedtak(
         }
     }
 }
-
-/*fun hentStønadBrevMetadata(): StønadBrevMetadata? {
-    return when {
-        stønadBrevMetadata.isNullOrBlank() -> null
-        else -> objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!)
-    }
-}
-
-val stønadBrevBegrunnelser: Map<String, Map<String, String>>
-    get() {
-        return if (stønadBrevMetadata.isNullOrBlank()) {
-            emptyMap()
-        } else {
-            objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!).begrunnelser
-        }
-    }
-
-fun settStønadBrevBegrunnelse(periode: Periode, begrunnelse: String, begrunnelseId: String) {
-    val metadata: StønadBrevMetadata = when (stønadBrevMetadata.isNullOrBlank()) {
-        true -> {
-            var begrunnelseMedId = mutableMapOf(begrunnelseId to begrunnelse)
-            StønadBrevMetadata(
-                    begrunnelser = mutableMapOf(periode.hash to begrunnelseMedId)
-            )
-        }
-        false -> {
-            val metadata: StønadBrevMetadata = objectMapper.readValue(stønadBrevMetadata!!)
-            if(metadata.begrunnelser[periode.hash] === null) {
-                var begrunnelseMedId = mutableMapOf(begrunnelseId to begrunnelse)
-                metadata.begrunnelser[periode.hash] = begrunnelseMedId
-                metadata
-            } else {
-                metadata.begrunnelser[periode.hash]!![begrunnelseId] = begrunnelse
-                metadata
-            }
-        }
-    }
-
-    stønadBrevMetadata = objectMapper.writeValueAsString(metadata)
-}
-}
-
-data class StønadBrevMetadata(
-    var begrunnelser: MutableMap<String, MutableMap<String, String>> = mutableMapOf()
-)*/

@@ -55,6 +55,16 @@ class VedtakController(
         return ResponseEntity.ok(Ressurs.success(nyStønadBrevBegrunnelser))
     }
 
+    @DeleteMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse"])
+    fun slettStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
+                                   @RequestBody
+                                   restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
+        val nyStønadBrevBegrunnelser = vedtakService.slettStønadBrevBegrunnelse(fagsakId = fagsakId,
+                                                                                restStønadBrevBegrunnelse = restStønadBrevBegrunnelse)
+
+        return ResponseEntity.ok(Ressurs.success(nyStønadBrevBegrunnelser))
+    }
+
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun sendBehandlingTilBeslutter(@PathVariable fagsakId: Long,
                                    @RequestParam behandlendeEnhet: String): ResponseEntity<Ressurs<RestFagsak>> {

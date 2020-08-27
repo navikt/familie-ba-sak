@@ -161,6 +161,30 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         }
     }
 
+    @Transactional
+    fun slettStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse,
+                                   fagsakId: Long): List<RestStønadBrevBegrunnelse> {
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        val begrunnelse =
+                StønadBrevBegrunnelse(id = restStønadBrevBegrunnelse.id?: throw Feil("Innsendt begrunnelse mangler id"),
+                                      vedtak = vedtak,
+                                      fom = restStønadBrevBegrunnelse.fom,
+                                      tom = restStønadBrevBegrunnelse.tom,
+                                      resultat = null,
+                                      begrunnelse = null)
+
+        vedtak.slettStønadBrevBegrunnelse(begrunnelse.id)
+
+        lagreEllerOppdater(vedtak)
+
+        return vedtak.stønadBrevBegrunnelser.map {
+            it.toRestStønadBrevBegrunnelse()
+        }
+
+    }
+
 
     @Transactional
     fun endreStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse,
@@ -183,9 +207,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                     hentPersonerMedUtgjørendeVilkår(behandlingResultat, restStønadBrevBegrunnelse, vilkår)
 
-            if(personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
+            if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
                 //TODO: Sjekk med funksjonelle hva denne teksten faktisk skal være.
-                throw Feil(message = "Begrunnelsen samsvarte ikke med vilkårsvurderingen", frontendFeilmelding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen")
+                throw Feil(message = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
+                           frontendFeilmelding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen")
             }
 
             val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
