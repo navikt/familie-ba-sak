@@ -20,7 +20,8 @@ class DistribuerVedtaksbrev(
         LOG.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
         integrasjonClient.distribuerBrev(data.journalpostId)
         loggService.opprettDistribuertBrevLogg(behandlingId = data.behandlingId,
-                                               tekst = "Vedtaksbrev er sendt til bruker")
+                                               tekst = "Vedtaksbrev er sendt til bruker",
+                                               rolle = BehandlerRolle.SYSTEM)
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
                 personIdent = data.personIdent,

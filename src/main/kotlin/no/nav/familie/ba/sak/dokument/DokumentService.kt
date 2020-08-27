@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.Feil
@@ -107,7 +108,8 @@ class DokumentService(
 
         val distribuertBrevRessurs = integrasjonClient.distribuerBrev(journalføringsId)
         loggService.opprettDistribuertBrevLogg(behandlingId = behandling.id,
-                                             tekst = "Brev for ${brevmal.malId} er sendt til bruker")
+                                             tekst = "Brev for ${brevmal.malId} er sendt til bruker",
+                                             rolle = BehandlerRolle.SAKSBEHANDLER)
 
         return distribuertBrevRessurs
     }
