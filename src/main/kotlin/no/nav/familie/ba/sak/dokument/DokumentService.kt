@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.DokumentController.BrevType
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -23,7 +24,8 @@ class DokumentService(
         private val malerService: MalerService,
         private val persongrunnlagService: PersongrunnlagService,
         private val integrasjonClient: IntegrasjonClient,
-        private val arbeidsfordelingService: ArbeidsfordelingService
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val loggService: LoggService
 ) {
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
@@ -103,6 +105,10 @@ class DokumentService(
                                                        brev = generertBrev,
                                                        brevType = brevmal.arkivType)
 
-        return integrasjonClient.distribuerBrev(journalføringsId)
+        val distribuertBrevRessurs = integrasjonClient.distribuerBrev(journalføringsId)
+        loggService.opprettDistribuertBrevLogg(behandlingId = behandling.id,
+                                             tekst = "Brev for ${brevmal.malId} er sendt til bruker")
+
+        return distribuertBrevRessurs
     }
 }
