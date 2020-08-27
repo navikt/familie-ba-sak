@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.dokument.domene.maler
 
-import no.nav.familie.ba.sak.behandling.vedtak.StønadBrevBegrunnelse
-
 data class Innvilget(
         val enhet: String,
         val saksbehandler: String,
@@ -16,5 +14,5 @@ data class DuFårSeksjon(
         val belop: String,
         val antallBarn: Int,
         val barnasFodselsdatoer: String,
-        val begrunnelser: MutableSet<StønadBrevBegrunnelse>
+        val begrunnelser: List<String>
 )

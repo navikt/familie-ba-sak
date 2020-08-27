@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
-import no.nav.familie.ba.sak.behandling.vedtak.StønadBrevBegrunnelse
+import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
@@ -10,21 +10,21 @@ data class RestVedtak(
         val aktiv: Boolean,
         val vedtaksdato: LocalDate?,
         val personBeregninger: List<RestVedtakPerson>,
-        val stønadBrevBegrunnelser: List<RestStønadBrevBegrunnelse>,
+        val utbetalingBegrunnelser: List<RestUtbetalingBegrunnelse>,
         val id: Long
 )
 
-data class RestStønadBrevBegrunnelse(
+data class RestUtbetalingBegrunnelse(
         val id: Long?,
         val fom: LocalDate,
         val tom: LocalDate,
         val resultat: BehandlingResultatType?,
-        var begrunnelse: VedtakBegrunnelse?
+        var vedtakBegrunnelse: VedtakBegrunnelse?
 )
 
-data class RestPutStønadBrevBegrunnelse(
+data class RestPutUtbetalingBegrunnelse(
         val resultat: BehandlingResultatType?,
-        val begrunnelse: VedtakBegrunnelse?
+        val vedtakBegrunnelse: VedtakBegrunnelse?
 )
 
 data class RestVedtakBegrunnelse(
@@ -32,27 +32,26 @@ data class RestVedtakBegrunnelse(
         val navn: String
 )
 
-// TODO fix begrunnelse
 fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
         aktiv = this.aktiv,
         personBeregninger = restVedtakPerson,
         vedtaksdato = this.vedtaksdato,
         id = this.id,
-        stønadBrevBegrunnelser = this.stønadBrevBegrunnelser.map { begrunnelse ->
-            RestStønadBrevBegrunnelse(id = begrunnelse.id,
-                                      fom = begrunnelse.fom,
-                                      tom = begrunnelse.tom,
-                                      begrunnelse = null, //begrunnelse.begrunnelse,
-                                      resultat = begrunnelse.resultat)
+        utbetalingBegrunnelser = this.utbetalingBegrunnelser.map { utbetalingBegrunnelse ->
+            RestUtbetalingBegrunnelse(id = utbetalingBegrunnelse.id,
+                                      fom = utbetalingBegrunnelse.fom,
+                                      tom = utbetalingBegrunnelse.tom,
+                                      vedtakBegrunnelse = utbetalingBegrunnelse.vedtakBegrunnelse,
+                                      resultat = utbetalingBegrunnelse.resultat)
         }
 )
 
-fun StønadBrevBegrunnelse.toRestStønadBrevBegrunnelse() =
-        RestStønadBrevBegrunnelse(
+fun UtbetalingBegrunnelse.toRestUtbetalingBegrunnelse() =
+        RestUtbetalingBegrunnelse(
                 id = this.id,
                 fom = this.fom,
                 tom = this.tom,
                 resultat = this.resultat,
-                begrunnelse = null //this.begrunnelse
+                vedtakBegrunnelse = this.vedtakBegrunnelse
         )
 

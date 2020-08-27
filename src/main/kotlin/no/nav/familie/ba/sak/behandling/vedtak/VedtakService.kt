@@ -10,9 +10,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.RestPutStønadBrevBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.toRestStønadBrevBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
@@ -138,55 +138,42 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     @Transactional
-    fun leggTilStønadBrevBegrunnelse(periode: Periode,
-                                     fagsakId: Long): List<RestStønadBrevBegrunnelse> {
+    fun leggTilUtbetalingBegrunnelse(periode: Periode,
+                                     fagsakId: Long): List<RestUtbetalingBegrunnelse> {
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
         val begrunnelse =
-                StønadBrevBegrunnelse(vedtak = vedtak,
+                UtbetalingBegrunnelse(vedtak = vedtak,
                                       fom = periode.fom,
-                                      tom = periode.tom,
-                                      resultat = null,
-                                      begrunnelse = null)
+                                      tom = periode.tom)
 
-        vedtak.leggTilStønadBrevBegrunnelse(begrunnelse)
+        vedtak.leggTilUtbetalingBegrunnelse(begrunnelse)
 
         lagreEllerOppdater(vedtak)
 
-        return vedtak.stønadBrevBegrunnelser.map {
-            it.toRestStønadBrevBegrunnelse()
+        return vedtak.utbetalingBegrunnelser.map {
+            it.toRestUtbetalingBegrunnelse()
         }
     }
 
     @Transactional
-    fun slettStønadBrevBegrunnelse(restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse,
-                                   fagsakId: Long): List<RestStønadBrevBegrunnelse> {
+    fun slettUtbetalingBegrunnelse(utbetalingBegrunnelseId: Long,
+                                   fagsakId: Long): List<UtbetalingBegrunnelse> {
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
-        val begrunnelse =
-                StønadBrevBegrunnelse(id = restStønadBrevBegrunnelse.id ?: throw Feil("Innsendt begrunnelse mangler id"),
-                                      vedtak = vedtak,
-                                      fom = restStønadBrevBegrunnelse.fom,
-                                      tom = restStønadBrevBegrunnelse.tom,
-                                      resultat = null,
-                                      begrunnelse = null)
-
-        vedtak.slettStønadBrevBegrunnelse(begrunnelse.id)
+        vedtak.slettUtbetalingBegrunnelse(utbetalingBegrunnelseId)
 
         lagreEllerOppdater(vedtak)
 
-        return vedtak.stønadBrevBegrunnelser.map {
-            it.toRestStønadBrevBegrunnelse()
-        }
-
+        return vedtak.utbetalingBegrunnelser.toList()
     }
 
 
     @Transactional
-    fun endreStønadBrevBegrunnelse(restPutStønadBrevBegrunnelse: RestPutStønadBrevBegrunnelse,
-                                   fagsakId: Long, begrunnelseId: Long): List<RestStønadBrevBegrunnelse> {
+    fun endreUtbetalingBegrunnelse(restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse,
+                                   fagsakId: Long, utbetalingBegrunnelseId: Long): List<UtbetalingBegrunnelse> {
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
@@ -194,24 +181,27 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(vedtak.behandling.id)
                                  ?: throw Feil("Finner ikke behandlingsresultat ved fastsetting av begrunnelse")
 
-        val stønadBrevBegrunnelse = vedtak.hentStønadBrevBegrunnelse(begrunnelseId)
+        val stønadBrevBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
                                     ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
-        if (restPutStønadBrevBegrunnelse.begrunnelse != null && restPutStønadBrevBegrunnelse.resultat != null) {
+        if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null && restPutUtbetalingBegrunnelse.resultat != null) {
             val vilkår = Vilkår.values().firstOrNull {
                 it.begrunnelser.filter { begrunnelse ->
-                    begrunnelse.value.contains(restPutStønadBrevBegrunnelse.begrunnelse)
+                    begrunnelse.value.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)
                 }.isNotEmpty()
             } ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
 
 
             val personerMedUtgjørendeVilkårForUtbetalingsperiode =
-                    hentPersonerMedUtgjørendeVilkår(behandlingResultat, stønadBrevBegrunnelse, vilkår)
+                    hentPersonerMedUtgjørendeVilkår(
+                            behandlingResultat = behandlingResultat,
+                            utbetalingBegrunnelse = stønadBrevBegrunnelse,
+                            resultat = restPutUtbetalingBegrunnelse.resultat,
+                            vilkår = vilkår)
 
             if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
-                //TODO: Sjekk med funksjonelle hva denne teksten faktisk skal være.
                 throw Feil(message = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
-                           frontendFeilmelding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen")
+                           frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
             }
 
             val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
@@ -232,33 +222,34 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
 
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
-            val begrunnelse = vilkår.begrunnelser[restPutStønadBrevBegrunnelse.resultat]
-            val begrunnelsesfunksjon = begrunnelse?.get(restPutStønadBrevBegrunnelse.begrunnelse)?.second
+            val begrunnelse = vilkår.begrunnelser[restPutUtbetalingBegrunnelse.resultat]
+            val begrunnelsesfunksjon = begrunnelse?.get(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)?.second
 
             val begrunnelseSomSkalPersisteres = begrunnelsesfunksjon?.invoke(gjelderSøker, barnasFødselsdatoer, vilkårsdato)
 
-            vedtak.endreStønadBrevBegrunnelse(
+            vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
-                    restPutStønadBrevBegrunnelse.resultat,
+                    restPutUtbetalingBegrunnelse.resultat,
+                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
                     begrunnelseSomSkalPersisteres
             )
         } else {
-            vedtak.endreStønadBrevBegrunnelse(
+            vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
-                    restPutStønadBrevBegrunnelse.resultat,
+                    restPutUtbetalingBegrunnelse.resultat,
+                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
                     ""
             )
         }
 
         lagreEllerOppdater(vedtak)
 
-        return vedtak.stønadBrevBegrunnelser.map {
-            it.toRestStønadBrevBegrunnelse()
-        }
+        return vedtak.utbetalingBegrunnelser.toList()
     }
 
     private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat,
-                                                stønadBrevBegrunnelse: StønadBrevBegrunnelse,
+                                                utbetalingBegrunnelse: UtbetalingBegrunnelse,
+                                                resultat: BehandlingResultatType,
                                                 vilkår: Vilkår): List<Pair<Person, VilkårResultat>> {
         return behandlingResultat.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkår = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
@@ -267,11 +258,11 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     vilkårResultat.periodeFom == null -> {
                         false
                     }
-                    stønadBrevBegrunnelse.resultat == BehandlingResultatType.INNVILGET -> {
-                        vilkårResultat.periodeFom!!.monthValue == stønadBrevBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
+                    resultat == BehandlingResultatType.INNVILGET -> {
+                        vilkårResultat.periodeFom!!.monthValue == utbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
                     }
                     else -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == stønadBrevBegrunnelse.fom.minusMonths(
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingBegrunnelse.fom.minusMonths(
                                 1).monthValue && vilkårResultat.resultat == Resultat.NEI
                     }
                 }

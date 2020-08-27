@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.vedtak.StønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
@@ -11,7 +10,10 @@ import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.client.Norg2RestClient
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
@@ -85,10 +87,14 @@ class MalerService(
                                                 restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
                                             })
 
-            val begrunnelse: MutableSet<StønadBrevBegrunnelse> =
-                    vedtak.stønadBrevBegrunnelser.filter { stønadBrevBegrunnelse ->
+            val begrunnelse =
+                    vedtak.utbetalingBegrunnelser.filter { stønadBrevBegrunnelse ->
                         stønadBrevBegrunnelse.fom == it.periodeFom && stønadBrevBegrunnelse.tom == it.periodeTom
-                    }.toMutableSet()
+                    }.toMutableSet().map { utbetalingBegrunnelse ->
+                        utbetalingBegrunnelse.brevBegrunnelse
+                        ?: throw Feil(message = "Utbetalingsperioden ${it.periodeFom}-${it.periodeTom} mangler begrunnelse",
+                                      frontendFeilmelding = "Utbetalingsperioden ${it.periodeFom}-${it.periodeTom} mangler begrunnelse")
+                    }.toList()
 
             DuFårSeksjon(
                     fom = it.periodeFom!!.tilDagMånedÅr(),
@@ -114,6 +120,7 @@ class MalerService(
     }
 
     companion object {
+
         fun malNavnForMedlemskapOgResultatType(medlemskap: Medlemskap?,
                                                resultatType: BehandlingResultatType): String {
             return when (medlemskap) {

@@ -9,14 +9,14 @@ import java.time.LocalDate
 import javax.persistence.*
 
 
-@Entity(name = "StønadBrevBegrunnelse")
-@Table(name = "STONAD_BREV_BEGRUNNELSE")
-data class StønadBrevBegrunnelse(
+@Entity(name = "UtbetalingBegrunnelse")
+@Table(name = "UTBETALING_BEGRUNNELSE")
+data class UtbetalingBegrunnelse(
 
         @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "stonad_brev_begrunnelse_seq_generator")
-        @SequenceGenerator(name = "stonad_brev_begrunnelse_seq_generator",
-                           sequenceName = "stonad_brev_begrunnelse_seq",
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utbetaling_begrunnelse_seq_generator")
+        @SequenceGenerator(name = "utbetaling_begrunnelse_seq_generator",
+                           sequenceName = "utbetaling_begrunnelse_seq",
                            allocationSize = 50)
         val id: Long = 0,
 
@@ -32,8 +32,12 @@ data class StønadBrevBegrunnelse(
 
         @Column(name = "resultat")
         @Enumerated(EnumType.STRING)
-        var resultat: BehandlingResultatType?,
+        var resultat: BehandlingResultatType? = null,
 
-        @Column(name = "begrunnelse")
-        var begrunnelse: String?
+        @Column(name = "vedtak_begrunnelse")
+        @Enumerated(EnumType.STRING)
+        var vedtakBegrunnelse: VedtakBegrunnelse? = null,
+
+        @Column(name = "brev_begrunnelse")
+        var brevBegrunnelse: String? = ""
 )

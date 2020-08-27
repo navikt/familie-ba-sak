@@ -75,7 +75,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                                             to
                                             Pair(
                                                     "Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge",
-                                                    { gjelderSøker, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer" else ""} er bosatt i Norge fra $vilkårsdato." }
+                                                    { gjelderSøker, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer " else ""}er bosatt i Norge fra $vilkårsdato." }
                                             )
                             )
             ),
@@ -95,7 +95,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                                             to
                                             Pair(
                                                     "Tredjelandsborger bosatt før lovlig opphold i Norge",
-                                                    { gjelderSøker, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer" else ""} har oppholdstillatelse fra $vilkårsdato." }
+                                                    { gjelderSøker, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer " else ""}har oppholdstillatelse fra $vilkårsdato." }
                                             ),
                                     VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                                             to

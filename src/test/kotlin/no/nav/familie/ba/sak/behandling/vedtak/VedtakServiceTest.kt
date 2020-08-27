@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
@@ -261,30 +260,6 @@ class VedtakServiceTest(
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligEnhet2", hentetVedtak?.ansvarligEnhet)
     }
-
-    @Test
-    @Tag("integration")
-    fun `Opprett vedtak og sett begrunnelser til stønadsbrevet`() {
-        val fnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        val vedtak = opprettNyttInvilgetVedtak(behandling, ansvarligEnhet = "ansvarligEnhet1")
-
-        Assertions.assertEquals(0, vedtak.stønadBrevBegrunnelser.size)
-        val periode = Periode(LocalDate.of(2018, 1, 1), TIDENES_ENDE)
-        val resultat = BehandlingResultatType.INNVILGET
-        vedtak.leggTilStønadBrevBegrunnelse(StønadBrevBegrunnelse(tom = periode.tom,
-                                                                  fom = periode.fom,
-                                                                  resultat = resultat,
-                                                                  begrunnelse = "Mock begrunnelse",
-                                                                  vedtak = vedtak))
-
-        val endretVedtak = vedtakService.lagreEllerOppdater(vedtak)
-        Assertions.assertEquals(1, endretVedtak.stønadBrevBegrunnelser.size)
-    }
-
 
     private fun opprettNyttInvilgetVedtak(behandling: Behandling, ansvarligEnhet: String = "ansvarligEnhet"): Vedtak {
         vedtakService.lagreOgDeaktiverGammel(Vedtak(behandling = behandling,

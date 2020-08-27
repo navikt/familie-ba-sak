@@ -5,8 +5,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestPutStønadBrevBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.RestStønadBrevBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
@@ -38,35 +39,39 @@ class VedtakController(
 ) {
 
     @PostMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse"])
-    fun leggTilStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
+    fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                      @RequestBody
-                                     periode: Periode): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
-        val nyStønadBrevBegrunnelser = vedtakService.leggTilStønadBrevBegrunnelse(fagsakId = fagsakId,
+                                     periode: Periode): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
+        val nyUtbetalingBegrunnelser = vedtakService.leggTilUtbetalingBegrunnelse(fagsakId = fagsakId,
                                                                                   periode = periode)
 
-        return ResponseEntity.ok(Ressurs.success(nyStønadBrevBegrunnelser))
+        return ResponseEntity.ok(Ressurs.success(nyUtbetalingBegrunnelser))
     }
 
-    @PutMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse/{begrunnelseId}"])
-    fun endreStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
-                                   @PathVariable begrunnelseId: Long,
+    @PutMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse/{utbetalingBegrunnelseId}"])
+    fun endreUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
+                                   @PathVariable utbetalingBegrunnelseId: Long,
                                    @RequestBody
-                                   restPutStønadBrevBegrunnelse: RestPutStønadBrevBegrunnelse): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
-        val nyStønadBrevBegrunnelser = vedtakService.endreStønadBrevBegrunnelse(fagsakId = fagsakId,
-                                                                                restPutStønadBrevBegrunnelse = restPutStønadBrevBegrunnelse,
-                                                                                begrunnelseId = begrunnelseId)
+                                   restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
+        val nyUtbetalingBegrunnelser = vedtakService.endreUtbetalingBegrunnelse(fagsakId = fagsakId,
+                                                                                restPutUtbetalingBegrunnelse = restPutUtbetalingBegrunnelse,
+                                                                                utbetalingBegrunnelseId = utbetalingBegrunnelseId)
 
-        return ResponseEntity.ok(Ressurs.success(nyStønadBrevBegrunnelser))
+        return ResponseEntity.ok(Ressurs.success(nyUtbetalingBegrunnelser.map {
+            it.toRestUtbetalingBegrunnelse()
+        }))
     }
 
-    @DeleteMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse"])
-    fun slettStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
-                                   @RequestBody
-                                   restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse): ResponseEntity<Ressurs<List<RestStønadBrevBegrunnelse>>> {
-        val nyStønadBrevBegrunnelser = vedtakService.slettStønadBrevBegrunnelse(fagsakId = fagsakId,
-                                                                                restStønadBrevBegrunnelse = restStønadBrevBegrunnelse)
+    @DeleteMapping(path = ["/{fagsakId}/stonad-brev-begrunnelse/{utbetalingBegrunnelseId}"])
+    fun slettUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
+                                   @PathVariable
+                                   utbetalingBegrunnelseId: Long): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
+        val nyUtbetalingBegrunnelser = vedtakService.slettUtbetalingBegrunnelse(fagsakId = fagsakId,
+                                                                                utbetalingBegrunnelseId = utbetalingBegrunnelseId)
 
-        return ResponseEntity.ok(Ressurs.success(nyStønadBrevBegrunnelser))
+        return ResponseEntity.ok(Ressurs.success(nyUtbetalingBegrunnelser.map {
+            it.toRestUtbetalingBegrunnelse()
+        }))
     }
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
