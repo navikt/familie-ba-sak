@@ -19,6 +19,7 @@ class DokumentController(
         private val vedtakService: VedtakService,
         private val behandlingService: BehandlingService
 ) {
+
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")

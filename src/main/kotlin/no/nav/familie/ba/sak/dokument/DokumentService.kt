@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.dokument
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -30,6 +32,10 @@ class DokumentService(
         private val loggService: LoggService,
         private val journalføringService: JournalføringService
 ) {
+
+
+    private val antallAutomatiskeBrevSendt: Map<BrevType, Counter> = initSendtBrevMetrikker("automatisk")
+    private val antallManuelleBrevSendt: Map<BrevType, Counter> = initSendtBrevMetrikker("manuelt")
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         val pdf = vedtak.stønadBrevPdF
@@ -109,13 +115,30 @@ class DokumentService(
                                                                        brevType = brevmal.arkivType)
 
         journalføringService.lagreJournalPost(behandling, journalføringsId)
-
         val distribuertBrevRessurs = integrasjonClient.distribuerBrev(journalføringsId)
 
         loggService.opprettDistribuertBrevLogg(behandlingId = behandling.id,
                                                tekst = "Brev for ${brevmal.malId} er sendt til bruker",
                                                rolle = BehandlerRolle.SAKSBEHANDLER)
+        antallManuelleBrevSendt[brevmal]?.increment()
 
         return distribuertBrevRessurs
+    }
+
+    fun sendVedtaksbrev(journalpostId: String,
+                        behandlingId: Long) {
+
+        integrasjonClient.distribuerBrev(journalpostId)
+        loggService.opprettDistribuertBrevLogg(behandlingId = behandlingId,
+                                               tekst = "Vedtaksbrev er sendt til bruker",
+                                               rolle = BehandlerRolle.SYSTEM)
+        antallAutomatiskeBrevSendt[BrevType.VEDTAK]?.increment()
+    }
+
+    private fun initSendtBrevMetrikker(type: String): Map<BrevType, Counter> {
+        return BrevType.values().map {
+            it to Metrics.counter("brev.sendt.$type",
+                                  "brevmalId", it.malId) // TODO: Usikker på om dette er nødvendig
+        }.toMap()
     }
 }
