@@ -173,10 +173,11 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     @Transactional
     fun slettUtbetalingBegrunnelser(behandlingId: Long) {
         val vedtak = hentAktivForBehandling(behandlingId)
-                     ?: error("Finner ikke aktiv vedtak på behandling $behandlingId")
 
-        vedtak.slettUtbetalingBegrunnelser()
-        lagreEllerOppdater(vedtak)
+        if (vedtak != null) {
+            vedtak.slettUtbetalingBegrunnelser()
+            lagreEllerOppdater(vedtak)
+        }
     }
 
 
