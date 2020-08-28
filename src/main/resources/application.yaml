@@ -25,6 +25,25 @@ spring:
           use_jdbc_metadata_defaults: false
   flyway:
     enabled: true
+  kafka:
+    client-id: familie-ba-sak
+    properties:
+      security.protocol: SASL_SSL
+      sasl:
+        mechanism: PLAIN
+        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${CREDENTIAL_USERNAME}" password="${CREDENTIAL_PASSWORD}";
+    consumer:
+      group-id: srvfamilie-ba-sak
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+    producer:
+      group-id: srvfamilie-ba-sak
+      acks: 1
+      retries: 3
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 logging:
   config: "classpath:logback-spring.xml"
