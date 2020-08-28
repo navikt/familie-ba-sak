@@ -1,15 +1,35 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
-import no.nav.familie.ba.sak.behandling.vedtak.StønadBrevMetadata
+import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
 import java.time.LocalDate
 
 data class RestVedtak(
         val aktiv: Boolean,
         val vedtaksdato: LocalDate?,
         val personBeregninger: List<RestVedtakPerson>,
-        val stønadBrevMetadata: StønadBrevMetadata?,
+        val utbetalingBegrunnelser: List<RestUtbetalingBegrunnelse>,
         val id: Long
+)
+
+data class RestUtbetalingBegrunnelse(
+        val id: Long?,
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val resultat: BehandlingResultatType?,
+        var behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse?
+)
+
+data class RestPutUtbetalingBegrunnelse(
+        val resultat: BehandlingResultatType?,
+        val behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse?
+)
+
+data class RestVedtakBegrunnelse(
+        val id: BehandlingresultatOgVilkårBegrunnelse,
+        val navn: String
 )
 
 fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
@@ -17,5 +37,17 @@ fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
         personBeregninger = restVedtakPerson,
         vedtaksdato = this.vedtaksdato,
         id = this.id,
-        stønadBrevMetadata = this.hentStønadBrevMetadata()
+        utbetalingBegrunnelser = this.utbetalingBegrunnelser.map {
+                it.toRestUtbetalingBegrunnelse()
+        }
 )
+
+fun UtbetalingBegrunnelse.toRestUtbetalingBegrunnelse() =
+        RestUtbetalingBegrunnelse(
+                id = this.id,
+                fom = this.fom,
+                tom = this.tom,
+                resultat = this.resultat,
+                behandlingresultatOgVilkårBegrunnelse = this.behandlingresultatOgVilkårBegrunnelse
+        )
+
