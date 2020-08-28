@@ -4,7 +4,7 @@ interface IVedtakBegrunnelse {
     fun hentBeskrivelse(gjelderSøker: Boolean = false, barnasFødselsdatoer: String, vilkårsdato: String): String
 }
 
-enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
+enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
 
         override fun hentBeskrivelse(gjelderSøker: Boolean, barnasFødselsdatoer: String, vilkårsdato: String): String {

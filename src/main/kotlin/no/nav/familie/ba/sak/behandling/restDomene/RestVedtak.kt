@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
 import java.time.LocalDate
 
 data class RestVedtak(
@@ -19,16 +19,16 @@ data class RestUtbetalingBegrunnelse(
         val fom: LocalDate,
         val tom: LocalDate,
         val resultat: BehandlingResultatType?,
-        var vedtakBegrunnelse: VedtakBegrunnelse?
+        var behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse?
 )
 
 data class RestPutUtbetalingBegrunnelse(
         val resultat: BehandlingResultatType?,
-        val vedtakBegrunnelse: VedtakBegrunnelse?
+        val behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse?
 )
 
 data class RestVedtakBegrunnelse(
-        val id: VedtakBegrunnelse,
+        val id: BehandlingresultatOgVilkårBegrunnelse,
         val navn: String
 )
 
@@ -48,6 +48,6 @@ fun UtbetalingBegrunnelse.toRestUtbetalingBegrunnelse() =
                 fom = this.fom,
                 tom = this.tom,
                 resultat = this.resultat,
-                vedtakBegrunnelse = this.vedtakBegrunnelse
+                behandlingresultatOgVilkårBegrunnelse = this.behandlingresultatOgVilkårBegrunnelse
         )
 

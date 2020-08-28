@@ -194,10 +194,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val stønadBrevBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
                                     ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
-        if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null && restPutUtbetalingBegrunnelse.resultat != null) {
+        if (restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse != null && restPutUtbetalingBegrunnelse.resultat != null) {
             val vilkår = Vilkår.values().firstOrNull {
                 it.begrunnelser.filter { begrunnelse ->
-                    begrunnelse.value.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)
+                    begrunnelse.value.contains(restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse)
                 }.isNotEmpty()
             } ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
 
@@ -234,19 +234,19 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
 
             val begrunnelseSomSkalPersisteres =
-                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(gjelderSøker, barnasFødselsdatoer, vilkårsdato)
+                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse.hentBeskrivelse(gjelderSøker, barnasFødselsdatoer, vilkårsdato)
 
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
                     restPutUtbetalingBegrunnelse.resultat,
-                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
+                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse,
                     begrunnelseSomSkalPersisteres
             )
         } else {
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
                     restPutUtbetalingBegrunnelse.resultat,
-                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
+                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse,
                     ""
             )
         }
