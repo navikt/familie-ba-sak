@@ -95,3 +95,5 @@ STS_URL: "dummy"
 PDL_URL: "dummy"
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
+
+KAFKA_BROKERS: http://localhost:9092

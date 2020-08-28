@@ -76,6 +76,12 @@ spring:
       ddl-auto: create
   flyway:
     enabled: false
+  kafka:
+    bootstrap-servers: http://localhost:9092
+    properties:
+      security.protocol: SASL_PLAINTEXT
+      sasl:
+        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="igroup" password="itest";
 
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://localhost:8092/api
