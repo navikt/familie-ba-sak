@@ -71,6 +71,10 @@ class Vedtak(
         settUtbetalingBegrunnelser(utbetalingBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
 
+    fun slettUtbetalingBegrunnelser() {
+        settUtbetalingBegrunnelser(mutableSetOf())
+    }
+
     fun endreUtbetalingBegrunnelse(id: Long?,
                                    resultat: BehandlingResultatType?,
                                    vedtakBegrunnelse: VedtakBegrunnelse?,

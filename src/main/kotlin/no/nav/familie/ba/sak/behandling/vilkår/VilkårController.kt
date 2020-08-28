@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*
 class VilkårController(
         private val vilkårService: VilkårService,
         private val behandlingService: BehandlingService,
+        private val vedtakService: VedtakService,
         private val stegService: StegService,
         private val fagsakService: FagsakService
 ) {
@@ -34,7 +35,7 @@ class VilkårController(
                                                            vilkårId = vilkaarId,
                                                            restPersonResultat = restPersonResultat)
 
-        settSteg(behandlingId)
+        settStegOgSlettUtbetalingBegrunnelser(behandlingId)
         return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
     }
 
@@ -46,7 +47,7 @@ class VilkårController(
                                                             vilkårId = vilkaarId,
                                                             personIdent = personIdent)
 
-        settSteg(behandlingId)
+        settStegOgSlettUtbetalingBegrunnelser(behandlingId)
         return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
     }
 
@@ -55,7 +56,7 @@ class VilkårController(
             ResponseEntity<Ressurs<List<RestPersonResultat>>> {
         val nyVilkårsvurdering = vilkårService.postVilkår(behandlingId, restNyttVilkår)
 
-        settSteg(behandlingId)
+        settStegOgSlettUtbetalingBegrunnelser(behandlingId)
         return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
     }
 
@@ -72,8 +73,9 @@ class VilkårController(
         return ResponseEntity.ok(Ressurs.success(VilkårsvurderingUtils.hentVilkårsbegrunnelser()))
     }
 
-    fun settSteg(behandlingId: Long) {
+    fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
         behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingId, steg = StegType.VILKÅRSVURDERING)
+        vedtakService.slettUtbetalingBegrunnelser(behandlingId)
     }
 }
 
