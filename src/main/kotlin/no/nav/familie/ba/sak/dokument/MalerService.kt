@@ -38,7 +38,7 @@ class MalerService(
                                behandlingResultatType: BehandlingResultatType): MalMedData {
 
         val statsborgerskap =
-                persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap ?: error("Finner ikke søker på behandling")
+                persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap ?: error("Kan ikke hente statsborgerskap for søker på behandling")
         val medlemskap = finnNåværendeMedlemskap(statsborgerskap)
         val sterkesteMedlemskap = finnSterkesteMedlemskap(medlemskap)
 
