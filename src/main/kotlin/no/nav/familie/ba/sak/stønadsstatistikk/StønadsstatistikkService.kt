@@ -10,10 +10,10 @@ import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifiseri
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.eksterne.kontrakter.Person
-import no.nav.familie.eksterne.kontrakter.UtbetalingsDetalj
-import no.nav.familie.eksterne.kontrakter.Utbetalingsperiode
-import no.nav.familie.eksterne.kontrakter.Vedtak
+import no.nav.familie.eksterne.kontrakter.PersonDVH
+import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVH
+import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVH
+import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.springframework.stereotype.Service
@@ -26,14 +26,14 @@ class StønadsstatistikkService(private val behandlingRepository: BehandlingRepo
                                private val vedtakService: VedtakService) {
 
 
-    fun hentVedtak(behandlingId: Long): Vedtak {
+    fun hentVedtak(behandlingId: Long): VedtakDVH {
 
         val behandling = behandlingRepository.getOne(behandlingId)
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)
 
 
-        return Vedtak(fagsakId = behandling.fagsak.id.toString(),
+        return VedtakDVH(fagsakId = behandling.fagsak.id.toString(),
                 behandlingsId = behandlingId.toString(),
                 tidspunktVedtak = vedtakService.hentAktivForBehandling(behandlingId)!!.vedtaksdato!!,
                 personIdent = behandling.fagsak.hentAktivIdent().ident,
@@ -42,7 +42,7 @@ class StønadsstatistikkService(private val behandlingRepository: BehandlingRepo
 
 
     private fun hentUtbetalingsperioder(tilkjentYtelseForBehandling: TilkjentYtelse, personopplysningGrunnlag: PersonopplysningGrunnlag)
-            : List<Utbetalingsperiode> {
+            : List<UtbetalingsperiodeDVH> {
         if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
 
         val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
@@ -64,8 +64,8 @@ class StønadsstatistikkService(private val behandlingRepository: BehandlingRepo
     private fun mapTilUtbetalingsPeriode(segment: LocalDateSegment<Int>,
                                          andelerForSegment: List<AndelTilkjentYtelse>,
                                          behandling: Behandling,
-                                         personopplysningGrunnlag: PersonopplysningGrunnlag): Utbetalingsperiode {
-        return Utbetalingsperiode(
+                                         personopplysningGrunnlag: PersonopplysningGrunnlag): UtbetalingsperiodeDVH {
+        return UtbetalingsperiodeDVH(
                 hjemmel = "Ikke implementert",
                 stønadFom = segment.fom,
                 stønadTom = segment.tom,
@@ -73,8 +73,8 @@ class StønadsstatistikkService(private val behandlingRepository: BehandlingRepo
                 utbetalingsDetaljer = andelerForSegment.map { andel ->
                     val personForAndel = personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
                             ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
-                    UtbetalingsDetalj(
-                            person = Person(
+                    UtbetalingsDetaljDVH(
+                            person = PersonDVH(
                                     rolle = personForAndel.type.name,
                                     statsborgerskap = emptyList(), // TODO lag liste med statsborgerskap
                                     bostedsland = "Norge", //TODO hvor finner vi bostedsland?
