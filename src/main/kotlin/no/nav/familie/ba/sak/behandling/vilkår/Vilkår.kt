@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val spesifikasjon: Spesifikasjon<Fakta>,
-                  val begrunnelser: Map<BehandlingResultatType, Map<VedtakBegrunnelse, Pair<String, (gjelderSøker: Boolean, barnasFødselsdatoer: String, vilkårsdato: String) -> String>>> = emptyMap(),
+                  val begrunnelser: Map<BehandlingResultatType, List<VedtakBegrunnelse>> = emptyMap(),
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
     UNDER_18_ÅR(
@@ -32,25 +32,10 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             begrunnelser = mapOf(
                     BehandlingResultatType.INNVILGET
                             to
-                            mapOf(
-                                    VedtakBegrunnelse.INNVILGET_OMSORG_FOR_BARN
-                                            to
-                                            Pair(
-                                                    "Adopsjon, surrogati: Omsorgen for barn",
-                                                    { _, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi du har omsorgen for barn født $barnasFødselsdatoer fra $vilkårsdato." }
-                                            ),
-                                    VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER
-                                            to
-                                            Pair(
-                                                    "Barn har flyttet til søker",
-                                                    { _, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi barn født $barnasFødselsdatoer bor hos deg fra $vilkårsdato." }
-                                            ),
+                            listOf(
+                                    VedtakBegrunnelse.INNVILGET_OMSORG_FOR_BARN,
+                                    VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER,
                                     VedtakBegrunnelse.INNVILGET_FAST_OMSORG_FOR_BARN
-                                            to
-                                            Pair(
-                                                    "Søker har fast omsorg for barn",
-                                                    { _, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi vi har kommet fram til at du har fått fast omsorg for barn født $barnasFødselsdatoer fra $vilkårsdato." }
-                                            )
                             )
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
@@ -70,13 +55,8 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             begrunnelser = mapOf(
                     BehandlingResultatType.INNVILGET
                             to
-                            mapOf(
+                            listOf(
                                     VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET
-                                            to
-                                            Pair(
-                                                    "Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge",
-                                                    { gjelderSøker, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer " else ""}er bosatt i Norge fra $vilkårsdato." }
-                                            )
                             )
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
@@ -90,25 +70,10 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             begrunnelser = mapOf(
                     BehandlingResultatType.INNVILGET
                             to
-                            mapOf(
-                                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE
-                                            to
-                                            Pair(
-                                                    "Tredjelandsborger bosatt før lovlig opphold i Norge",
-                                                    { gjelderSøker, barnasFødselsdatoer, vilkårsdato -> "Du får barnetrygd fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer " else ""}har oppholdstillatelse fra $vilkårsdato." }
-                                            ),
-                                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
-                                            to
-                                            Pair(
-                                                    "EØS-borger: Søker har oppholdsrett",
-                                                    { _, _, vilkårsdato -> "Du får barnetrygd fordi du har oppholdsrett som EØS-borger fra $vilkårsdato." }
-                                            ),
+                            listOf(
+                                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER,
                                     VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_AAREG
-                                            to
-                                            Pair(
-                                                    "EØS-borger: Søker/ektefelle/samboer arbeider eller har ytelser fra NAV",
-                                                    { _, _, _ -> "Du får barnetrygd fordi du arbeider eller får utbetalinger fra NAV som er det samme som arbeidsinntekt." }
-                                            )
                             )
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode());
@@ -125,16 +90,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             }.toSet()
         }
     }
-}
-
-enum class VedtakBegrunnelse {
-    INNVILGET_BOSATT_I_RIKTET,
-    INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-    INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER,
-    INNVILGET_LOVLIG_OPPHOLD_AAREG,
-    INNVILGET_OMSORG_FOR_BARN,
-    INNVILGET_BOR_HOS_SØKER,
-    INNVILGET_FAST_OMSORG_FOR_BARN,
 }
 
 data class GyldigVilkårsperiode(

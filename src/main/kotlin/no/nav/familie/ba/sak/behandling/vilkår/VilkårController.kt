@@ -69,7 +69,7 @@ class VilkårController(
     }
 
     @GetMapping(path = ["/vilkaarsbegrunnelser"])
-    fun vilkårsbegrunnelser(): ResponseEntity<Ressurs<MutableMap<BehandlingResultatType, MutableList<RestVedtakBegrunnelse>>>> {
+    fun hentTeksterForVilkårsbegrunnelser(): ResponseEntity<Ressurs<MutableMap<BehandlingResultatType, MutableList<RestVedtakBegrunnelse>>>> {
         return ResponseEntity.ok(Ressurs.success(VilkårsvurderingUtils.hentVilkårsbegrunnelser()))
     }
 

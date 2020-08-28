@@ -232,10 +232,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
 
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
-            val begrunnelse = vilkår.begrunnelser[restPutUtbetalingBegrunnelse.resultat]
-            val begrunnelsesfunksjon = begrunnelse?.get(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)?.second
 
-            val begrunnelseSomSkalPersisteres = begrunnelsesfunksjon?.invoke(gjelderSøker, barnasFødselsdatoer, vilkårsdato)
+            val begrunnelseSomSkalPersisteres =
+                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(gjelderSøker, barnasFødselsdatoer, vilkårsdato)
 
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,

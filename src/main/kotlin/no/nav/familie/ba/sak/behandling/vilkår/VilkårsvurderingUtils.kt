@@ -242,8 +242,8 @@ object VilkårsvurderingUtils {
                 if (begrunnelserForVilkår != null) {
                     vilkårBegrunnelser[behandlingResultatType]!!.addAll(begrunnelserForVilkår.map {
                         RestVedtakBegrunnelse(
-                                id = it.key,
-                                navn = it.value.first
+                                id = it,
+                                navn = it.tittel
                         )
                     })
                 }

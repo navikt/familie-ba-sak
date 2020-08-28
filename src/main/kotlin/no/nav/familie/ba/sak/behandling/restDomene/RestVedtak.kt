@@ -37,12 +37,8 @@ fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
         personBeregninger = restVedtakPerson,
         vedtaksdato = this.vedtaksdato,
         id = this.id,
-        utbetalingBegrunnelser = this.utbetalingBegrunnelser.map { utbetalingBegrunnelse ->
-            RestUtbetalingBegrunnelse(id = utbetalingBegrunnelse.id,
-                                      fom = utbetalingBegrunnelse.fom,
-                                      tom = utbetalingBegrunnelse.tom,
-                                      vedtakBegrunnelse = utbetalingBegrunnelse.vedtakBegrunnelse,
-                                      resultat = utbetalingBegrunnelse.resultat)
+        utbetalingBegrunnelser = this.utbetalingBegrunnelser.map {
+                it.toRestUtbetalingBegrunnelse()
         }
 )
 
