@@ -5,6 +5,9 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
@@ -35,13 +38,40 @@ class VedtakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PutMapping(path = ["/{fagsakId}/legg-til-stønad-brev-begrunnelse"])
-    fun leggTilStønadBrevBegrunnelse(@PathVariable fagsakId: Long,
+    @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse"])
+    fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                      @RequestBody
-                                     restStønadBrevBegrunnelse: RestStønadBrevBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
-        vedtakService.leggTilStønadBrevBegrunnelse(fagsakId = fagsakId, restStønadBrevBegrunnelse = restStønadBrevBegrunnelse)
+                                     periode: Periode): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
+        val nyUtbetalingBegrunnelser = vedtakService.leggTilUtbetalingBegrunnelse(fagsakId = fagsakId,
+                                                                                  periode = periode)
 
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
+        return ResponseEntity.ok(Ressurs.success(nyUtbetalingBegrunnelser))
+    }
+
+    @PutMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/{utbetalingBegrunnelseId}"])
+    fun endreUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
+                                   @PathVariable utbetalingBegrunnelseId: Long,
+                                   @RequestBody
+                                   restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
+        val nyUtbetalingBegrunnelser = vedtakService.endreUtbetalingBegrunnelse(fagsakId = fagsakId,
+                                                                                restPutUtbetalingBegrunnelse = restPutUtbetalingBegrunnelse,
+                                                                                utbetalingBegrunnelseId = utbetalingBegrunnelseId)
+
+        return ResponseEntity.ok(Ressurs.success(nyUtbetalingBegrunnelser.map {
+            it.toRestUtbetalingBegrunnelse()
+        }))
+    }
+
+    @DeleteMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/{utbetalingBegrunnelseId}"])
+    fun slettUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
+                                   @PathVariable
+                                   utbetalingBegrunnelseId: Long): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
+        val nyUtbetalingBegrunnelser = vedtakService.slettUtbetalingBegrunnelse(fagsakId = fagsakId,
+                                                                                utbetalingBegrunnelseId = utbetalingBegrunnelseId)
+
+        return ResponseEntity.ok(Ressurs.success(nyUtbetalingBegrunnelser.map {
+            it.toRestUtbetalingBegrunnelse()
+        }))
     }
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -114,6 +144,7 @@ class VedtakController(
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
@@ -127,13 +158,9 @@ data class RestBeslutningPåVedtak(
         val begrunnelse: String? = null
 )
 
-data class RestStønadBrevBegrunnelse(
-        val periode: Periode,
-        val begrunnelse: String
-)
-
 enum class Beslutning {
-    GODKJENT, UNDERKJENT;
+    GODKJENT,
+    UNDERKJENT;
 
     fun erGodkjent() = this == GODKJENT
 }

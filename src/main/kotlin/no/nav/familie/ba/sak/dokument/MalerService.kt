@@ -10,7 +10,10 @@ import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.client.Norg2RestClient
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
@@ -29,7 +32,8 @@ class MalerService(
     fun mapTilBrevfelter(vedtak: Vedtak,
                          behandlingResultatType: BehandlingResultatType): MalMedData {
 
-        val statsborgerskap = persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap?: error("Finner ikke søker på behandling")
+        val statsborgerskap =
+                persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap ?: error("Finner ikke søker på behandling")
         val medlemskap = finnNåværendeMedlemskap(statsborgerskap)
         val sterkesteMedlemskap = finnSterkesteMedlemskap(medlemskap)
 
@@ -83,16 +87,21 @@ class MalerService(
                                                 restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
                                             })
 
-            val begrunnelse: String = vedtak.stønadBrevBegrunnelser[Periode(it.periodeFom!!, it.periodeTom!!).hash]
-                                      ?: "Ikke satt"
+            val begrunnelse =
+                    vedtak.utbetalingBegrunnelser.filter { stønadBrevBegrunnelse ->
+                        stønadBrevBegrunnelse.fom == it.periodeFom && stønadBrevBegrunnelse.tom == it.periodeTom
+                    }.toMutableSet().map { utbetalingBegrunnelse ->
+                        utbetalingBegrunnelse.brevBegrunnelse
+                        ?: "Ikke satt"
+                    }.toList()
 
             DuFårSeksjon(
-                    fom = it.periodeFom.tilDagMånedÅr(),
-                    tom = it.periodeTom.tilDagMånedÅr(),
+                    fom = it.periodeFom!!.tilDagMånedÅr(),
+                    tom = it.periodeTom!!.tilDagMånedÅr(),
                     belop = Utils.formaterBeløp(it.utbetaltPerMnd),
                     antallBarn = it.antallBarn,
                     barnasFodselsdatoer = barnasFødselsdatoer,
-                    begrunnelser = listOf(begrunnelse)
+                    begrunnelser = begrunnelse
             )
         }
 
@@ -110,6 +119,7 @@ class MalerService(
     }
 
     companion object {
+
         fun malNavnForMedlemskapOgResultatType(medlemskap: Medlemskap?,
                                                resultatType: BehandlingResultatType): String {
             return when (medlemskap) {
