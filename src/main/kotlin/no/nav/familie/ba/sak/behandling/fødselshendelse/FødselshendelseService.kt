@@ -67,8 +67,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
         val resultatAvFiltrering =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter[0])
-                        .resultat
+            evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter[0])
+                    .resultat
         var resultatAvVilkårsvurdering: BehandlingResultatType? = null
 
         if (resultatAvFiltrering == Resultat.JA) {
@@ -89,6 +89,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             } else {
                 val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                              ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+                vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
                 IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
             }
 
