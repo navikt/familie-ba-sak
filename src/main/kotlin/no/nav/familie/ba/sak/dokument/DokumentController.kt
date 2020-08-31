@@ -48,7 +48,7 @@ class DokumentController(
             @PathVariable behandlingId: Long,
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
             : Ressurs<ByteArray> {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer brev: $brevMalId")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: $brevMalId")
 
         if (manueltBrevRequest.fritekst.isEmpty()) {
             return Ressurs.failure("Friteksten kan ikke være tom", "Friteksten kan ikke være tom")
