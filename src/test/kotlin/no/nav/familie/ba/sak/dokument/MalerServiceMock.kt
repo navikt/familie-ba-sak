@@ -17,7 +17,7 @@ class MalerServiceMock {
     fun mockMalerService(): MalerService {
         val mockMalerService = mockk<MalerService>()
 
-        every { mockMalerService.mapTilBrevfelter(any(), any(), any()) } returns MalMedData(mal = "mock", fletteFelter = "")
+        every { mockMalerService.mapTilVedtakBrevfelter(any(), any()) } returns MalMedData(mal = "mock", fletteFelter = "")
 
         return mockMalerService
     }
