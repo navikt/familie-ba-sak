@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.dokument
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.client.Enhet
@@ -24,8 +26,10 @@ class MalerServiceTest {
     private val norg2RestClient: Norg2RestClient = mockk()
     private val beregningService: BeregningService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
+    private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
+    private val søknadGrunnlagService: SøknadGrunnlagService = mockk()
 
-    private val malerService: MalerService = MalerService(mockk(), beregningService, persongrunnlagService, norg2RestClient)
+    private val malerService: MalerService = MalerService(mockk(), beregningService, persongrunnlagService, norg2RestClient, arbeidsfordelingService, søknadGrunnlagService)
 
     @Test
     fun `Skal returnere malnavn innvilget-tredjelandsborger for medlemskap TREDJELANDSBORGER og resultat INNVILGET`() {
@@ -54,7 +58,7 @@ class MalerServiceTest {
     }
 
     @Test
-    fun `test mapTilBrevfelter for innvilget autovedtak med ett barn`() {
+    fun `test mapTilInnvilgetBrevfelter for innvilget autovedtak med ett barn`() {
         every { norg2RestClient.hentEnhet(any()) } returns Enhet(1L, "enhet")
 
         val behandling = lagBehandling().copy(opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE,
@@ -73,10 +77,11 @@ class MalerServiceTest {
                                                          person = personopplysningGrunnlag.barna.first())
 
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker.first()
+        every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns tilkjentYtelse.copy(
                 andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
 
-        val brevfelter = malerService.mapTilBrevfelter(vedtak, personopplysningGrunnlag, BehandlingResultatType.INNVILGET)
+        val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultatType.INNVILGET)
 
         val autovedtakBrevfelter = objectMapper.readValue(brevfelter.fletteFelter, InnvilgetAutovedtak::class.java)
 
@@ -88,7 +93,7 @@ class MalerServiceTest {
     }
 
     @Test
-    fun `test mapTilBrevfelter for innvilget autovedtak med flere barn og etterbetaling`() {
+    fun `test mapTilVedtakBrevfelter for innvilget autovedtak med flere barn og etterbetaling`() {
         every { norg2RestClient.hentEnhet(any()) } returns Enhet(1L, "enhet")
 
         val behandling = lagBehandling().copy(opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE,
@@ -113,10 +118,11 @@ class MalerServiceTest {
                                                               person = barn2)
 
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker.first()
+        every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
                 tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
 
-        val brevfelter = malerService.mapTilBrevfelter(vedtak, personopplysningGrunnlag, BehandlingResultatType.INNVILGET)
+        val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultatType.INNVILGET)
 
         val autovedtakBrevfelter = objectMapper.readValue(brevfelter.fletteFelter, InnvilgetAutovedtak::class.java)
 
