@@ -140,7 +140,7 @@ class DokumentService(
     private fun initSendtBrevMetrikker(type: String): Map<BrevType, Counter> {
         return BrevType.values().map {
             it to Metrics.counter("brev.sendt.$type",
-                                  "brevmalId", it.malId) // TODO: Usikker på om dette er nødvendig
+                                  "brevmalId", it.malId)
         }.toMap()
     }
 }
