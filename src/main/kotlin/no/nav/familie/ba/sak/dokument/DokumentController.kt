@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -61,7 +62,8 @@ class DokumentController(
                 Ressurs.success(it)
             }
         } else {
-            error("Finnes ingen støttet brevmal for type $brevMalId")
+            throw Feil(message = "Finnes ingen støttet brevmal for type $brevMal",
+                       frontendFeilmelding = "Klarte ikke hente forhåndsvisning. Finnes ingen støttet brevmal for type $brevMalId")
         }
     }
 
@@ -84,7 +86,8 @@ class DokumentController(
         return if (brevMal != null) {
             dokumentService.sendManueltBrev(behandling, brevMal, manueltBrevRequest)
         } else {
-            error("Finnes ingen støttet brevmal for type $brevMal")
+            throw Feil(message = "Finnes ingen støttet brevmal for type $brevMal",
+                       frontendFeilmelding = "Klarte ikke sende brev. Finnes ingen støttet brevmal for type $brevMalId")
         }
     }
 

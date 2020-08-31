@@ -84,7 +84,8 @@ class DokumentService(
                 val malMedData = when (brevmal) {
                     BrevType.INNHENTE_OPPLYSNINGER -> malerService.mapTilInnhenteOpplysningerBrevfelter(behandling,
                                                                                                         manueltBrevRequest)
-                    else -> error("Brevmal $brevmal er ikke støttet for manuelle brev.")
+                    else -> throw Feil(message = "Brevmal $brevmal er ikke støttet for manuelle brev.",
+                               frontendFeilmelding = "Klarte ikke generere brev. Brevmal ${brevmal.malId} er ikke støttet.")
                 }
                 dokGenKlient.lagPdfForMal(malMedData, headerFelter)
             }.fold(
