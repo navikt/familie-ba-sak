@@ -91,9 +91,9 @@ class DokumentController(
         }
     }
 
-    enum class BrevType(val malId: String, val arkivType: String) {
-        INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER"),
-        VEDTAK("vedtak", "BARNETRYGD_VEDTAK")
+    enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String) {
+        INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER", "innhenting av opplysninger"),
+        VEDTAK("vedtak", "BARNETRYGD_VEDTAK", "vedtak")
     }
 
     data class ManueltBrevRequest(val fritekst: String)

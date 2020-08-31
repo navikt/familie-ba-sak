@@ -120,7 +120,7 @@ class DokumentService(
         val distribuertBrevRessurs = integrasjonClient.distribuerBrev(journalføringsId)
 
         loggService.opprettDistribuertBrevLogg(behandlingId = behandling.id,
-                                               tekst = "Brev for ${brevmal.malId} er sendt til bruker",
+                                               tekst = "Brev for ${brevmal.visningsTekst} er sendt til bruker",
                                                rolle = BehandlerRolle.SAKSBEHANDLER)
         antallManuelleBrevSendt[brevmal]?.increment()
 
