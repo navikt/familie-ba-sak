@@ -305,3 +305,5 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
     behandlingResultat.personResultater = setOf(personResultat)
     return behandlingResultat
 }
+
+

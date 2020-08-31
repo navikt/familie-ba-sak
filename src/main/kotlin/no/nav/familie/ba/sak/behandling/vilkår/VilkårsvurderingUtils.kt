@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.*
 import no.nav.nare.core.evaluations.Resultat
@@ -225,5 +226,30 @@ object VilkårsvurderingUtils {
             advarsel = advarsel.plus("\n")
         }
         return advarsel
+    }
+
+    fun hentVilkårsbegrunnelser(): MutableMap<BehandlingResultatType, MutableList<RestVedtakBegrunnelse>> {
+        val vilkårBegrunnelser = mutableMapOf<BehandlingResultatType, MutableList<RestVedtakBegrunnelse>>()
+
+        Vilkår.values().forEach { vilkår ->
+            BehandlingResultatType.values().forEach { behandlingResultatType ->
+                if (vilkårBegrunnelser[behandlingResultatType] == null) {
+                    vilkårBegrunnelser[behandlingResultatType] = mutableListOf()
+                }
+
+                val begrunnelserForVilkår = vilkår.begrunnelser[behandlingResultatType]
+
+                if (begrunnelserForVilkår != null) {
+                    vilkårBegrunnelser[behandlingResultatType]!!.addAll(begrunnelserForVilkår.map {
+                        RestVedtakBegrunnelse(
+                                id = it,
+                                navn = it.tittel
+                        )
+                    })
+                }
+            }
+        }
+
+        return vilkårBegrunnelser
     }
 }

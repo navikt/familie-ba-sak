@@ -7,6 +7,7 @@ import java.time.LocalDate
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val spesifikasjon: Spesifikasjon<Fakta>,
+                  val begrunnelser: Map<BehandlingResultatType, List<BehandlingresultatOgVilkårBegrunnelse>> = emptyMap(),
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
     UNDER_18_ÅR(
@@ -28,8 +29,16 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     og Spesifikasjon(beskrivelse = "§2-2 - Bor med søker: søker må være mor",
                                      identifikator = "BOR_MED_SØKER:SØKER_ER_MOR",
                                      implementasjon = { søkerErMor(this) }),
+            begrunnelser = mapOf(
+                    BehandlingResultatType.INNVILGET
+                            to
+                            listOf(
+                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_OMSORG_FOR_BARN,
+                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOR_HOS_SØKER,
+                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_FAST_OMSORG_FOR_BARN
+                            )
+            ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
-
     GIFT_PARTNERSKAP(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
             spesifikasjon = Spesifikasjon(
@@ -43,13 +52,30 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     beskrivelse = "§4-1 - Bosatt i riket",
                     identifikator = "BOSATT_I_RIKET",
                     implementasjon = { bosattINorge(this) }),
+            begrunnelser = mapOf(
+                    BehandlingResultatType.INNVILGET
+                            to
+                            listOf(
+                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOSATT_I_RIKTET
+                            )
+            ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     LOVLIG_OPPHOLD(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "§4-2 - Lovlig opphold",
                     identifikator = "LOVLIG_OPPHOLD",
-                    implementasjon = { lovligOpphold(this) }),
+                    implementasjon =
+                    { lovligOpphold(this) }),
+            begrunnelser = mapOf(
+                    BehandlingResultatType.INNVILGET
+                            to
+                            listOf(
+                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER,
+                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_AAREG
+                            )
+            ),
             gyldigVilkårsperiode = GyldigVilkårsperiode());
 
     override fun toString(): String {
@@ -57,6 +83,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     }
 
     companion object {
+
         fun hentVilkårFor(personType: PersonType): Set<Vilkår> {
             return values().filter {
                 personType in it.parterDetteGjelderFor

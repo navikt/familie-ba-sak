@@ -1,17 +1,17 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.ba.sak.common.Feil
 import java.time.LocalDate
 import javax.persistence.*
 
 
 @Entity(name = "Vedtak")
 @Table(name = "VEDTAK")
-data class Vedtak(
+class Vedtak(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtak_seq_generator")
         @SequenceGenerator(name = "vedtak_seq_generator", sequenceName = "vedtak_seq", allocationSize = 50)
@@ -26,14 +26,8 @@ data class Vedtak(
         @Column(name = "vedtaksdato", nullable = true)
         var vedtaksdato: LocalDate? = null,
 
-        @Column(name = "stonad_brev_markdown", columnDefinition = "TEXT")
-        var stønadBrevMarkdown: String = "",
-
         @Column(name = "stonad_brev_pdf", nullable = true)
         var stønadBrevPdF: ByteArray? = null,
-
-        @Column(name = "stonad_brev_metadata", columnDefinition = "TEXT")
-        var stønadBrevMetadata: String? = objectMapper.writeValueAsString(StønadBrevMetadata()),
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
@@ -42,47 +36,57 @@ data class Vedtak(
         val forrigeVedtakId: Long? = null,
 
         @Column(name = "opphor_dato")
-        val opphørsdato: LocalDate? = null
+        val opphørsdato: LocalDate? = null,
+
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "vedtak",
+                   cascade = [CascadeType.ALL],
+                   orphanRemoval = true
+        )
+        val utbetalingBegrunnelser: MutableSet<UtbetalingBegrunnelse> = mutableSetOf()
+
 ) : BaseEntitet() {
 
     override fun toString(): String {
         return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
     }
 
-    fun hentStønadBrevMetadata(): StønadBrevMetadata? {
-        return when {
-            stønadBrevMetadata.isNullOrBlank() -> null
-            else -> objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!)
-        }
+    fun settUtbetalingBegrunnelser(nyeBegrunnelser: Set<UtbetalingBegrunnelse>) {
+        utbetalingBegrunnelser.clear()
+        utbetalingBegrunnelser.addAll(nyeBegrunnelser)
     }
 
-    val stønadBrevBegrunnelser: Map<String, String>
-        get() {
-            return if (stønadBrevMetadata.isNullOrBlank()) {
-                emptyMap()
-            } else {
-                objectMapper.readValue<StønadBrevMetadata>(stønadBrevMetadata!!).begrunnelser
-            }
-        }
+    fun hentUtbetalingBegrunnelse(begrunnelseId: Long): UtbetalingBegrunnelse? {
+        return utbetalingBegrunnelser.find { it.id == begrunnelseId }
+    }
 
-    fun settStønadBrevBegrunnelse(periode: Periode, begrunnelse: String) {
-        val metadata: StønadBrevMetadata = when (stønadBrevMetadata.isNullOrBlank()) {
-            true -> {
-                StønadBrevMetadata(
-                        begrunnelser = mutableMapOf(periode.hash to begrunnelse)
-                )
-            }
-            false -> {
-                val metadata: StønadBrevMetadata = objectMapper.readValue(stønadBrevMetadata!!)
-                metadata.begrunnelser[periode.hash] = begrunnelse
-                metadata
-            }
-        }
+    fun leggTilUtbetalingBegrunnelse(begrunnelse: UtbetalingBegrunnelse) {
+        utbetalingBegrunnelser.add(begrunnelse)
+    }
 
-        stønadBrevMetadata = objectMapper.writeValueAsString(metadata)
+    fun slettUtbetalingBegrunnelse(begrunnelseId: Long) {
+        hentUtbetalingBegrunnelse(begrunnelseId) ?: throw Feil(message = "Prøver å slette en begrunnelse som ikke finnes",
+                                                               frontendFeilmelding = "Begrunnelsen du prøver å slette finnes ikke i systemet.")
+
+        settUtbetalingBegrunnelser(utbetalingBegrunnelser.filter { begrunnelseId != it.id }.toSet())
+    }
+
+    fun slettUtbetalingBegrunnelser() {
+        settUtbetalingBegrunnelser(mutableSetOf())
+    }
+
+    fun endreUtbetalingBegrunnelse(id: Long?,
+                                   resultat: BehandlingResultatType?,
+                                   behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse?,
+                                   brevBegrunnelse: String?) {
+        val utbetalingBegrunnelseSomSkalEndres = utbetalingBegrunnelser.find { it.id == id }
+
+        if (utbetalingBegrunnelseSomSkalEndres != null) {
+            utbetalingBegrunnelseSomSkalEndres.resultat = resultat
+            utbetalingBegrunnelseSomSkalEndres.behandlingresultatOgVilkårBegrunnelse = behandlingresultatOgVilkårBegrunnelse
+            utbetalingBegrunnelseSomSkalEndres.brevBegrunnelse = brevBegrunnelse
+        } else {
+            throw Feil(message = "Prøver å endre på en begrunnelse som ikke finnes")
+        }
     }
 }
-
-data class StønadBrevMetadata(
-        var begrunnelser: MutableMap<String, String> = mutableMapOf()
-)

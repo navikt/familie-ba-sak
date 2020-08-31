@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
@@ -62,10 +62,21 @@ class VedtakServiceTest(
         val totrinnskontrollService: TotrinnskontrollService,
 
         @Autowired
+        val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+
+        @Autowired
         val loggService: LoggService
 ) {
 
     lateinit var behandlingService: BehandlingService
+    lateinit var vilkårResultat1: VilkårResultat
+    lateinit var vilkårResultat2: VilkårResultat
+    lateinit var vilkårResultat3: VilkårResultat
+    lateinit var behandlingResultat: BehandlingResultat
+    lateinit var personResultat: PersonResultat
+    lateinit var vilkår: Vilkår
+    lateinit var resultat: Resultat
+    lateinit var behandling: Behandling
 
     @BeforeEach
     fun setup() {
@@ -90,6 +101,33 @@ class VedtakServiceTest(
                                                     LocalDate.of(2019,
                                                                  1,
                                                                  1)))))))
+
+        val personIdent = randomFnr()
+
+        behandling = lagBehandling()
+
+        vilkår = Vilkår.LOVLIG_OPPHOLD
+        resultat = Resultat.JA
+
+        behandlingResultat = lagBehandlingResultat(personIdent, behandling, resultat)
+
+        personResultat = PersonResultat(
+                behandlingResultat = behandlingResultat,
+                personIdent = personIdent
+        )
+
+        vilkårResultat1 = VilkårResultat(1, personResultat, vilkår, resultat,
+                                         LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
+                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
+        vilkårResultat2 = VilkårResultat(2, personResultat, vilkår, resultat,
+                                         LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
+                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
+        vilkårResultat3 = VilkårResultat(3, personResultat, vilkår, resultat,
+                                         LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
+                                         "", behandlingResultat.behandling.id, regelInput = null, regelOutput = null)
+        personResultat.setVilkårResultater(setOf(vilkårResultat1,
+                                                 vilkårResultat2,
+                                                 vilkårResultat3).toSortedSet(PersonResultat.comparator))
     }
 
     @Test
@@ -125,7 +163,7 @@ class VedtakServiceTest(
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertNull(hentetVedtak!!.vedtaksdato)
-        Assertions.assertEquals(null, hentetVedtak?.stønadBrevPdF)
+        Assertions.assertEquals(null, hentetVedtak.stønadBrevPdF)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(totrinnskontroll)
@@ -206,6 +244,7 @@ class VedtakServiceTest(
         Assertions.assertEquals(revurderingInnvilgetBehandling.id, forrigeVedtak?.behandling?.id)
     }
 
+
     @Test
     @Tag("integration")
     fun `Opprett 2 vedtak og se at det siste vedtaket får aktiv satt til true`() {
@@ -220,26 +259,6 @@ class VedtakServiceTest(
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals("ansvarligEnhet2", hentetVedtak?.ansvarligEnhet)
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Opprett vedtak og sett begrunnelser til stønadsbrevet`() {
-        val fnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        val vedtak = opprettNyttInvilgetVedtak(behandling, ansvarligEnhet = "ansvarligEnhet1")
-
-        Assertions.assertEquals(0, vedtak.stønadBrevBegrunnelser.size)
-        val periode = Periode(LocalDate.of(2018, 1, 1), TIDENES_ENDE)
-        val begrunnelse = "Mock begrunnelse"
-        vedtak.settStønadBrevBegrunnelse(periode, begrunnelse)
-
-        val endretVedtak = vedtakService.lagreEllerOppdater(vedtak)
-        Assertions.assertEquals(mapOf(periode.hash to begrunnelse), endretVedtak.stønadBrevBegrunnelser)
-        Assertions.assertEquals(1, endretVedtak.stønadBrevBegrunnelser.size)
     }
 
     private fun opprettNyttInvilgetVedtak(behandling: Behandling, ansvarligEnhet: String = "ansvarligEnhet"): Vedtak {
