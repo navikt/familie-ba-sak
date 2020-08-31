@@ -64,7 +64,9 @@ class MalerServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList().subList(0, 1))
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
-        val vedtak = lagVedtak(behandling).copy(ansvarligEnhet = "enhet", vedtaksdato = fødselsdato.plusDays(7))
+        val vedtak = lagVedtak(behandling)//.copy(ansvarligEnhet = "enhet", vedtaksdato = fødselsdato.plusDays(7))
+            vedtak.ansvarligEnhet = "enhet"
+            vedtak.vedtaksdato = fødselsdato.plusDays(7)
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                                                          fødselsdato.plusYears(18).toString(),
                                                          behandling = behandling,
@@ -98,7 +100,9 @@ class MalerServiceTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val barn1 = personopplysningGrunnlag.barna.first()
         val barn2 = personopplysningGrunnlag.barna.last()
-        val vedtak = lagVedtak(behandling).copy(ansvarligEnhet = "enhet", vedtaksdato = barn2.fødselsdato.plusMonths(6))
+        val vedtak = lagVedtak(behandling)
+            vedtak.ansvarligEnhet = "enhet"
+            vedtak.vedtaksdato = barn2.fødselsdato.plusMonths(6)
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                                                               barn1.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
                                                               behandling = behandling,
