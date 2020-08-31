@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.stønadsstatistikk
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -21,14 +21,14 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class StønadsstatistikkServiceTest {
 
-    private val behandlingRepository: BehandlingRepository = mockk()
+    private val behandlingService: BehandlingService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val beregningService: BeregningService = mockk()
     private val loggService: LoggService = mockk()
     private val vedtakService: VedtakService  = mockk()
 
     private val stønadsstatistikkService =
-            StønadsstatistikkService(behandlingRepository, persongrunnlagService, beregningService, loggService, vedtakService)
+            StønadsstatistikkService(behandlingService, persongrunnlagService, beregningService, loggService, vedtakService)
 
     @BeforeAll
     fun init() {
@@ -48,7 +48,7 @@ internal class StønadsstatistikkServiceTest {
                                                               behandling = behandling,
                                                               person = barn2)
 
-        every { behandlingRepository.getOne(any()) } returns behandling
+        every { behandlingService.hent(any()) } returns behandling
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
                 tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
