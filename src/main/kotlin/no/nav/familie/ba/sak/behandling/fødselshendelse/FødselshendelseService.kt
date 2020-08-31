@@ -94,8 +94,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         } else {
             if (evalueringAvFiltrering.resultat !== Resultat.JA || resultatAvVilkårsvurdering !== BehandlingResultatType.INNVILGET) {
                 val beskrivelse = when (resultatAvVilkårsvurdering) {
-                    null -> hentBeskrivelseFraEvaluering(evalueringAvFiltrering)
-                    else -> hentBeskrivelseFraBehandlingResultat(behandling.id)
+                    null -> hentBegrunnelseFraFiltreringsregler(evalueringAvFiltrering)
+                    else -> hentBegrunnelseFraVilkårsvurdering(behandling.id)
                 }
 
                 opprettOppgaveForManuellBehandling(behandlingId = behandling.id, beskrivelse = beskrivelse)
@@ -104,11 +104,10 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
                 IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
             }
-
         }
     }
 
-    private fun hentBeskrivelseFraBehandlingResultat(behandlingId: Long): String? {
+    private fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val søker = persongrunnlagService.hentSøker(behandling)
@@ -116,7 +115,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         if (bosattIRiketResultat?.resultat == Resultat.NEI) {
-            return "Mor er ikke bosatt i riket"
+            return "Mor er ikke bosatt i riket."
         }
 
         val harLovligOpphold = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
@@ -124,25 +123,30 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             return harLovligOpphold.begrunnelse
         }
 
-        val barna = persongrunnlagService.hentBarna(behandling)
+        persongrunnlagService.hentBarna(behandling).forEach { barn ->
+            val vilkårsresultat = behandlingResultat?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
 
-        barna.forEach { barnet ->
-            val barnetResultat = behandlingResultat?.personResultater?.find { it.personIdent == barnet.personIdent.ident }
-
-            val under18År = barnetResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
-
-            if (under18År?.resultat == Resultat.NEI) {
-                return under18År?.begrunnelse
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.NEI) {
+                return "Barnet er over 18 år."
             }
 
-            val børMedSøker = barnetResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOR_MED_SØKER }
-            if (børMedSøker?.resultat == Resultat.NEI) {
-                return børMedSøker?.begrunnelse
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOR_MED_SØKER }?.resultat == Resultat.NEI) {
+                return "Barnet er ikke bosatt med mor."
+            }
+
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }?.resultat == Resultat.NEI) {
+                return "Barnet er gift."
+            }
+
+            if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat == Resultat.NEI) {
+                return "Barnet er ikke bosatt i riket."
             }
         }
+
+        return null
     }
 
-    private fun hentBeskrivelseFraEvaluering(evaluering: Evaluering): String? =
+    private fun hentBegrunnelseFraFiltreringsregler(evaluering: Evaluering): String? =
             evaluering.children.find { it.resultat == Resultat.NEI }?.begrunnelse
 
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
