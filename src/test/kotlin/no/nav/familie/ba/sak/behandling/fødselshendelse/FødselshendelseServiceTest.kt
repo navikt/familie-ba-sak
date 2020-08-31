@@ -147,6 +147,7 @@ class FødselshendelseServiceTest {
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every { evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(), any()) } returns filtreringResultat
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
+        every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } just Runs
         every { taskRepositoryMock.save(any()) } returns opprettOppgaveTask
 
         mockkObject(IverksettMotOppdragTask.Companion)

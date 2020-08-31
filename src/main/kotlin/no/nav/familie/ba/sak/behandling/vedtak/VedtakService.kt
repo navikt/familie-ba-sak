@@ -123,7 +123,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 forrigeVedtakId = forrigeVedtak?.id,
                 ansvarligEnhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling),
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
-                        .førsteDagINesteMåned() else null
+                        .førsteDagINesteMåned() else null,
+                vedtaksdato = if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) now() else null
         )
 
         return lagreOgDeaktiverGammel(vedtak)

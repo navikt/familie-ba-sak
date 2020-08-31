@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.dokument
 
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -51,8 +52,14 @@ class DokumentService(
             val behandlingResultatType =
                     behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
 
+            val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
+                                           ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
+                                                         frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
+
             val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
                                                     navn = søker.navn,
+                                                    antallBarn = if (vedtak.behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+                                                        personopplysningGrunnlag.barna.size else null,
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr())
 
             val malMedData = malerService.mapTilVedtakBrevfelter(vedtak,
