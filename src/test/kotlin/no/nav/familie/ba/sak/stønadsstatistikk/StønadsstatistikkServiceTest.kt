@@ -13,10 +13,9 @@ import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.økonomi.sats
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -41,9 +40,9 @@ internal class StønadsstatistikkServiceTest {
         val barn1 = personopplysningGrunnlag.barna.first()
         val barn2 = personopplysningGrunnlag.barna.last()
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                              barn1.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
-                                                              behandling = behandling,
-                                                              person = barn1)
+                barn1.fødselsdato.plusYears(3).sisteDagIMåned().toString(),
+                behandling = behandling,
+                person = barn1)
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                                                               barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
                                                               behandling = behandling,

@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.stønadsstatistikk
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.eksterne.kontrakter.PersonDVH
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVH
@@ -19,7 +18,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.springframework.stereotype.Service
 
 @Service
-class StønadsstatistikkService(private val behandlingRepository: BehandlingRepository,
+class StønadsstatistikkService(private val behandlingService: BehandlingService,
                                private val persongrunnlagService: PersongrunnlagService,
                                private val beregningService: BeregningService,
                                private val loggService: LoggService,
@@ -28,40 +27,42 @@ class StønadsstatistikkService(private val behandlingRepository: BehandlingRepo
 
     fun hentVedtak(behandlingId: Long): VedtakDVH {
 
-        val behandling = behandlingRepository.getOne(behandlingId)
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)
+        val behandling = behandlingService.hent(behandlingId)
 
 
         return VedtakDVH(fagsakId = behandling.fagsak.id.toString(),
                 behandlingsId = behandlingId.toString(),
                 tidspunktVedtak = vedtakService.hentAktivForBehandling(behandlingId)!!.vedtaksdato!!,
                 personIdent = behandling.fagsak.hentAktivIdent().ident,
-                ensligForsørger = true, utbetalingsperioder = hentUtbetalingsperioder(tilkjentYtelse, persongrunnlag!!))
+                ensligForsørger = true, utbetalingsperioder = hentUtbetalingsperioder(behandlingId))
     }
 
 
-    private fun hentUtbetalingsperioder(tilkjentYtelseForBehandling: TilkjentYtelse, personopplysningGrunnlag: PersonopplysningGrunnlag)
+    private fun hentUtbetalingsperioder(behandlingId: Long)
             : List<UtbetalingsperiodeDVH> {
-        if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
 
-        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)!!
+
+        if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return emptyList()
+
+        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelse.andelerTilkjentYtelse)
 
         return utbetalingsPerioder.toSegments()
                 .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                 .map { segment ->
-                    val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
+                    val andelerForSegment = tilkjentYtelse.andelerTilkjentYtelse.filter {
                         segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
                     }
-                    mapTilUtbetalingsPeriode(segment,
+                    mapTilUtbetalingsperiode(segment,
                             andelerForSegment,
-                            tilkjentYtelseForBehandling.behandling,
-                            personopplysningGrunnlag)
+                            tilkjentYtelse.behandling,
+                            persongrunnlag)
                 }
     }
 
 
-    private fun mapTilUtbetalingsPeriode(segment: LocalDateSegment<Int>,
+    private fun mapTilUtbetalingsperiode(segment: LocalDateSegment<Int>,
                                          andelerForSegment: List<AndelTilkjentYtelse>,
                                          behandling: Behandling,
                                          personopplysningGrunnlag: PersonopplysningGrunnlag): UtbetalingsperiodeDVH {
