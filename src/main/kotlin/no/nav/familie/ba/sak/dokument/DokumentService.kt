@@ -85,7 +85,7 @@ class DokumentService(
                     BrevType.INNHENTE_OPPLYSNINGER -> malerService.mapTilInnhenteOpplysningerBrevfelter(behandling,
                                                                                                         manueltBrevRequest)
                     else -> throw Feil(message = "Brevmal $brevmal er ikke støttet for manuelle brev.",
-                               frontendFeilmelding = "Klarte ikke generere brev. Brevmal ${brevmal.malId} er ikke støttet.")
+                                       frontendFeilmelding = "Klarte ikke generere brev. Brevmal ${brevmal.malId} er ikke støttet.")
                 }
                 dokGenKlient.lagPdfForMal(malMedData, headerFelter)
             }.fold(
@@ -140,7 +140,7 @@ class DokumentService(
     private fun initSendtBrevMetrikker(type: String): Map<BrevType, Counter> {
         return BrevType.values().map {
             it to Metrics.counter("brev.sendt.$type",
-                                  "brevmalId", it.malId)
+                                  "brevmal", it.visningsTekst)
         }.toMap()
     }
 }
