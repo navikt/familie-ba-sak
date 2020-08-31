@@ -2,8 +2,11 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -32,6 +35,9 @@ class FødselshendelseServiceTest {
     val vedtakServiceMock = mockk<VedtakService>()
     val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
     val taskRepositoryMock = mockk<TaskRepository>()
+    val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
+    val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
+    val behandlingRepositoryMock = mockk<BehandlingRepository>()
 
     val søkerFnr = "12345678910"
     val barn1Fnr = "12345678911"
@@ -44,7 +50,10 @@ class FødselshendelseServiceTest {
                                                         vedtakServiceMock,
                                                         evaluerFiltreringsreglerForFødselshendelseMock,
                                                         taskRepositoryMock,
-                                                        personopplysningerServiceMock)
+                                                        personopplysningerServiceMock,
+                                                        behandlingResultatRepositoryMock,
+                                                        persongrunnlagServiceMock,
+                                                        behandlingRepositoryMock)
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer false`() {
