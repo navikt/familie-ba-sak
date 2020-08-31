@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -146,8 +147,18 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         return null
     }
 
-    private fun hentBegrunnelseFraFiltreringsregler(evaluering: Evaluering): String? =
-            evaluering.children.find { it.resultat == Resultat.NEI }?.begrunnelse
+    private fun hentBegrunnelseFraFiltreringsregler(evaluering: Evaluering): String? {
+        Filtreringsregler.values().forEach {
+            val regel = evaluering.children.find {
+                it.identifikator == Filtreringsregler.MOR_HAR_GYLDIG_FOEDSELSNUMMER.spesifikasjon.identifikator
+            }
+
+            if (regel?.resultat == Resultat.NEI) {
+                return regel.begrunnelse
+            }
+        }
+        return null
+    }
 
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
 
