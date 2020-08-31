@@ -91,12 +91,13 @@ class DokumentService(
             }.fold(
                     onSuccess = { it },
                     onFailure = {
-                        throw Feil(message = "Klarte ikke generere brev for innhente opplysninger",
-                                   frontendFeilmelding = "Noe gikk galt ved generering av brev for å innhente opplysninger og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
-                                   httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                                   throwable = it)
+                        if (it is Feil) {
+                            throw it
+                        } else throw Feil(message = "Klarte ikke generere brev for innhente opplysninger",
+                                          frontendFeilmelding = "Noe gikk galt ved generering av brev for å innhente opplysninger og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
+                                          httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                                          throwable = it)
                     }
-
             )
 
 

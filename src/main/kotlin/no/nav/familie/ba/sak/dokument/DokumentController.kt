@@ -96,7 +96,7 @@ class DokumentController(
         VEDTAK("vedtak", "BARNETRYGD_VEDTAK")
     }
 
-    class ManueltBrevRequest(val fritekst: String)
+    data class ManueltBrevRequest(val fritekst: String)
 
     companion object {
         val LOG = LoggerFactory.getLogger(DokumentController::class.java)
