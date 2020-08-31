@@ -6,12 +6,14 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Personopplys
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
 import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -84,6 +86,17 @@ object TilkjentYtelseUtils {
 
         return tilkjentYtelse
     }
+
+    fun beregnNåværendeBeløp(beregningOversikt: List<RestBeregningOversikt>, vedtak: Vedtak): Int {
+        return beregningOversikt.find {
+            it.periodeFom !== null && it.periodeTom !== null
+            && it.periodeFom <= vedtak.vedtaksdato && it.periodeTom > vedtak.vedtaksdato
+        }?.utbetaltPerMnd
+               ?: beregningOversikt.find { it.periodeTom != null && it.periodeTom > vedtak.vedtaksdato }?.utbetaltPerMnd
+               ?: throw Feil("Finner ikke gjeldende beløp for virkningstidspunkt",
+                             "Finner ikke gjeldende beløp for virkningstidspunkt")
+    }
+
 
     private fun settRiktigStønadFom(fraOgMed: LocalDate): YearMonth =
             YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
