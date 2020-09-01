@@ -3,9 +3,10 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -15,20 +16,23 @@ import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Evaluering
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 class FødselshendelseServiceTest {
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
-    val personopplysningerServiceMock= mockk<PersonopplysningerService>()
+    val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     val featureToggleServiceMock = mockk<FeatureToggleService>()
     val stegServiceMock = mockk<StegService>()
@@ -57,19 +61,28 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer false`() {
-        every { personopplysningerServiceMock.hentIdenter(any()) } returns listOf(IdentInformasjon(søkerFnr, false, "FOLKEREGISTERIDENT"))
+        every { personopplysningerServiceMock.hentIdenter(any()) } returns listOf(IdentInformasjon(søkerFnr,
+                                                                                                   false,
+                                                                                                   "FOLKEREGISTERIDENT"))
         every { infotrygdBarnetrygdClientMock.finnesIkkeHosInfotrygd(any(), any()) } returns false
 
-        val skalBehandlesHosInfotrygd = fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
+        val skalBehandlesHosInfotrygd =
+                fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
 
         Assertions.assertTrue(skalBehandlesHosInfotrygd)
     }
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal filtrere bort aktørId`() {
-        every { personopplysningerServiceMock.hentIdenter(Ident(søkerFnr)) } returns listOf(IdentInformasjon(søkerFnr, false, "FOLKEREGISTERIDENT"),
-                                                                                         IdentInformasjon("1234567890123", false, "AKTORID"))
-        every { personopplysningerServiceMock.hentIdenter(Ident(barn1Fnr)) } returns listOf(IdentInformasjon(barn1Fnr, false, "FOLKEREGISTERIDENT"))
+        every { personopplysningerServiceMock.hentIdenter(Ident(søkerFnr)) } returns listOf(IdentInformasjon(søkerFnr,
+                                                                                                             false,
+                                                                                                             "FOLKEREGISTERIDENT"),
+                                                                                            IdentInformasjon("1234567890123",
+                                                                                                             false,
+                                                                                                             "AKTORID"))
+        every { personopplysningerServiceMock.hentIdenter(Ident(barn1Fnr)) } returns listOf(IdentInformasjon(barn1Fnr,
+                                                                                                             false,
+                                                                                                             "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
         every { infotrygdBarnetrygdClientMock.finnesIkkeHosInfotrygd(capture(slot), any()) } returns false
@@ -82,11 +95,21 @@ class FødselshendelseServiceTest {
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal kollapse listen av barn til en samlet list av barn mot klienten`() {
-        every { personopplysningerServiceMock.hentIdenter(Ident(søkerFnr)) } returns listOf(IdentInformasjon(søkerFnr, false, "FOLKEREGISTERIDENT"),
-                IdentInformasjon("1234567890123", false, "AKTORID"))
-        every { personopplysningerServiceMock.hentIdenter(Ident(barn1Fnr)) } returns listOf(IdentInformasjon(barn1Fnr, false, "FOLKEREGISTERIDENT"),
-                IdentInformasjon("98765432101", false, "FOLKEREGISTERIDENT"))
-        every { personopplysningerServiceMock.hentIdenter(Ident(barn2Fnr)) } returns listOf(IdentInformasjon(barn2Fnr, false, "FOLKEREGISTERIDENT"))
+        every { personopplysningerServiceMock.hentIdenter(Ident(søkerFnr)) } returns listOf(IdentInformasjon(søkerFnr,
+                                                                                                             false,
+                                                                                                             "FOLKEREGISTERIDENT"),
+                                                                                            IdentInformasjon("1234567890123",
+                                                                                                             false,
+                                                                                                             "AKTORID"))
+        every { personopplysningerServiceMock.hentIdenter(Ident(barn1Fnr)) } returns listOf(IdentInformasjon(barn1Fnr,
+                                                                                                             false,
+                                                                                                             "FOLKEREGISTERIDENT"),
+                                                                                            IdentInformasjon("98765432101",
+                                                                                                             false,
+                                                                                                             "FOLKEREGISTERIDENT"))
+        every { personopplysningerServiceMock.hentIdenter(Ident(barn2Fnr)) } returns listOf(IdentInformasjon(barn2Fnr,
+                                                                                                             false,
+                                                                                                             "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
         every { infotrygdBarnetrygdClientMock.finnesIkkeHosInfotrygd(any(), capture(slot)) } returns false
@@ -147,19 +170,46 @@ class FødselshendelseServiceTest {
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
     }
 
-    private fun initMockk(vilkårsvurderingsResultat: BehandlingResultatType, filtreringResultat: Evaluering, toggleVerdi: Boolean) {
+    private fun initMockk(vilkårsvurderingsResultat: BehandlingResultatType,
+                          filtreringResultat: Evaluering,
+                          toggleVerdi: Boolean) {
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling = behandling)
         val opprettOppgaveTask = Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+        val behandlingResultat = BehandlingResultat(behandling = behandling, personResultater = emptySet())
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf())
+        val søker = Person(type = PersonType.SØKER,
+                           personIdent = PersonIdent("12345678910"),
+                           fødselsdato = LocalDate.of(1990, 1, 12),
+                           kjønn = Kjønn.KVINNE,
+                           personopplysningGrunnlag = personopplysningGrunnlag,
+                           sivilstand = SIVILSTAND.GIFT)
+        val barna = listOf(Person(type = PersonType.BARN,
+                                  personIdent = PersonIdent("01101800033"),
+                                  fødselsdato = LocalDate.of(2018, 1, 12),
+                                  kjønn = Kjønn.KVINNE,
+                                  personopplysningGrunnlag = personopplysningGrunnlag,
+                                  sivilstand = SIVILSTAND.UGIFT))
+        personopplysningGrunnlag.personer.addAll(barna)
+        personopplysningGrunnlag.personer.add(søker)
+
         every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every { evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(), any()) } returns filtreringResultat
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
         every { taskRepositoryMock.save(any()) } returns opprettOppgaveTask
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns behandlingResultat
+        every { persongrunnlagServiceMock.hentSøker(any()) } returns søker
+        every { persongrunnlagServiceMock.hentBarna(any()) } returns barna
+        every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling
 
         mockkObject(IverksettMotOppdragTask.Companion)
-        every { IverksettMotOppdragTask.opprettTask(any(), any(), any()) } returns Task.nyTask(IverksettMotOppdragTask.TASK_STEP_TYPE, "")
+        every {
+            IverksettMotOppdragTask.opprettTask(any(),
+                                                any(),
+                                                any())
+        } returns Task.nyTask(IverksettMotOppdragTask.TASK_STEP_TYPE, "")
 
         mockkObject(OpprettOppgaveTask.Companion)
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
