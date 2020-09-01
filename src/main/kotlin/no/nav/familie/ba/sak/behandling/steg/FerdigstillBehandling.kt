@@ -21,11 +21,12 @@ class FerdigstillBehandling(
         private val behandlingResultatService: BehandlingResultatService,
         private val loggService: LoggService
 ): BehandlingSteg<String> {
-    private val antallBehandlingerFerdigstilt: Map<BehandlingType, Counter> = BehandlingType.values().map {
-        it to Metrics.counter("behandling.ferdigstilt", "type",
+
+    private val antallBehandlingResultatTyper: Map<BehandlingResultatType, Counter> = BehandlingResultatType.values().map {
+        it to Metrics.counter("behandling.resultat", "type",
                               it.name,
                               "beskrivelse",
-                              it.visningsnavn)
+                              it.displayName)
     }.toMap()
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -44,8 +45,7 @@ class FerdigstillBehandling(
         } else {
             fagsakService.oppdaterStatus(fagsak, FagsakStatus.STANSET)
         }
-
-        antallBehandlingerFerdigstilt[behandling.type]?.increment()
+        antallBehandlingResultatTyper[behandlingResultatType]?.increment()
         loggService.opprettFerdigstillBehandling(behandling)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
         return hentNesteStegForNormalFlyt(behandling)
