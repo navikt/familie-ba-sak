@@ -33,10 +33,10 @@ class DokumentService(
         private val loggService: LoggService,
         private val journalføringService: JournalføringService
 ) {
-
-
-    private val antallAutomatiskeBrevSendt: Map<BrevType, Counter> = initSendtBrevMetrikker("automatisk")
-    private val antallManuelleBrevSendt: Map<BrevType, Counter> = initSendtBrevMetrikker("manuelt")
+    private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
+        it to Metrics.counter("brev.sendt",
+                              "brevmal", it.visningsTekst)
+    }.toMap()
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         val pdf = vedtak.stønadBrevPdF
@@ -129,7 +129,7 @@ class DokumentService(
         loggService.opprettDistribuertBrevLogg(behandlingId = behandling.id,
                                                tekst = "Brev for ${brevmal.visningsTekst} er sendt til bruker",
                                                rolle = BehandlerRolle.SAKSBEHANDLER)
-        antallManuelleBrevSendt[brevmal]?.increment()
+        antallBrevSendt[brevmal]?.increment()
 
         return distribuertBrevRessurs
     }
@@ -141,13 +141,6 @@ class DokumentService(
         loggService.opprettDistribuertBrevLogg(behandlingId = behandlingId,
                                                tekst = "Vedtaksbrev er sendt til bruker",
                                                rolle = BehandlerRolle.SYSTEM)
-        antallAutomatiskeBrevSendt[BrevType.VEDTAK]?.increment()
-    }
-
-    private fun initSendtBrevMetrikker(type: String): Map<BrevType, Counter> {
-        return BrevType.values().map {
-            it to Metrics.counter("brev.sendt.$type",
-                                  "brevmal", it.visningsTekst)
-        }.toMap()
+        antallBrevSendt[BrevType.VEDTAK]?.increment()
     }
 }
