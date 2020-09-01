@@ -59,7 +59,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     }
 
     fun sendTilInfotrygdFeed(barnIdenter: List<String>) {
-        infotrygdFeedService.sendTilInfotrygdFeed(barnIdenter)
+        infotrygdFeedService.sendFødselhendelseFeedTilInfotrygd(barnIdenter)
     }
 
     @Transactional

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedClient
-import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedDto
+import no.nav.familie.ba.sak.infotrygd.InfotrygdFødselshendelseFeedDto
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
@@ -14,18 +14,18 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendFeedTilInfotrygdTask.TASK_STEP_TYPE,
+@TaskStepBeskrivelse(taskStepType = SendFødselhendelseFeedTilInfotrygdTask.TASK_STEP_TYPE,
                      beskrivelse = "Send fødselshendelse til Infotrygd feed.")
-class SendFeedTilInfotrygdTask(
+class SendFødselhendelseFeedTilInfotrygdTask(
         private val infotrygdFeedClient: InfotrygdFeedClient) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val infotrygdFeedDto = objectMapper.readValue(task.payload, InfotrygdFeedDto::class.java)
-        infotrygdFeedClient.leggTilInfotrygdFeed(infotrygdFeedDto)
+        val infotrygdFeedDto = objectMapper.readValue(task.payload, InfotrygdFødselshendelseFeedDto::class.java)
+        infotrygdFeedClient.sendFødselhendelseFeedTilInfotrygd(infotrygdFeedDto)
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "sendFeedTilInfotrygd"
+        const val TASK_STEP_TYPE = "sendFødselmeldingsFeedTilInfotrygd"
 
         fun opprettTask(fnrBarn: String): Task {
             InfotrygdFeedService.secureLogger.info("Send fødselsmelding for $fnrBarn til Infotrygd.")
@@ -38,7 +38,7 @@ class SendFeedTilInfotrygdTask(
             }
 
             return Task.nyTask(type = TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(InfotrygdFeedDto(fnrBarn = fnrBarn)),
+                               payload = objectMapper.writeValueAsString(InfotrygdFødselshendelseFeedDto(fnrBarn = fnrBarn)),
                                properties = metadata
             )
         }

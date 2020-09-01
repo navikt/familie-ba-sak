@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
+import no.nav.familie.ba.sak.task.SendVedtakFeedTilInfotrygdTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
@@ -52,6 +53,8 @@ class StatusFraOppdrag(
                                 BehandlingStatus.IVERKSATT
                         )
 
+                        opprettTaskSendVedtakFeedTilInfotrygd(statusFraOppdragDTO.vedtaksId)
+
                         if (behandling.type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
                             && behandling.type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
                             && behandling.type !== BehandlingType.TEKNISK_OPPHØR) {
@@ -77,6 +80,10 @@ class StatusFraOppdrag(
                                "$vedtakId",
                                gammelTask.metadata)
         taskRepository.save(task)
+    }
+
+    private fun opprettTaskSendVedtakFeedTilInfotrygd(vedtakId: Long) {
+        taskRepository.save(SendVedtakFeedTilInfotrygdTask.opprettTask(vedtakId = vedtakId))
     }
 
     override fun stegType(): StegType {

@@ -48,9 +48,9 @@ class InfotrygdFeedClientTest {
     fun `skal legge til fødselsnummer i infotrygd feed`() {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(
                 okJson(objectMapper.writeValueAsString(success("Create")))))
-        val request = InfotrygdFeedDto("fnr")
+        val request = InfotrygdFødselshendelseFeedDto("fnr")
 
-        client.leggTilInfotrygdFeed(request)
+        client.sendFødselhendelseFeedTilInfotrygd(request)
 
         verify(anyRequestedFor(anyUrl())
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
@@ -63,7 +63,7 @@ class InfotrygdFeedClientTest {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
-            client.leggTilInfotrygdFeed(InfotrygdFeedDto("fnr"))
+            client.sendFødselhendelseFeedTilInfotrygd(InfotrygdFødselshendelseFeedDto("fnr"))
         }
     }
 
@@ -73,7 +73,7 @@ class InfotrygdFeedClientTest {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withBody("Create")))
 
         assertThrows<RuntimeException> {
-            client.leggTilInfotrygdFeed(InfotrygdFeedDto("fnr"))
+            client.sendFødselhendelseFeedTilInfotrygd(InfotrygdFødselshendelseFeedDto("fnr"))
         }
     }
 }

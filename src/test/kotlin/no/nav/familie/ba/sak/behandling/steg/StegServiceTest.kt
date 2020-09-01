@@ -37,7 +37,7 @@ import org.springframework.test.context.ActiveProfiles
 
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-iverksett", "mock-pdl")
+@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-iverksett", "mock-pdl", "mock-infotrygd-feed")
 @TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired
@@ -138,9 +138,12 @@ class StegServiceTest(
         ))
 
         val behandlingEtterStatusFraOppdrag = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, behandlingEtterStatusFraOppdrag.steg)
+        Assertions.assertEquals(StegType.SEND_VETAKS_FEED_TIL_INFOTRYGD, behandlingEtterStatusFraOppdrag.steg)
 
-        stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
+        val behandlingEtterSendVedtakTilInfotrygd = stegService.håndterSendVedtakfeedTilInfotrygd(behandlingEtterStatusFraOppdrag, SendVedtakFeedTilInfotrygdDTO(vedtak.id))
+        Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, behandlingEtterSendVedtakTilInfotrygd.steg)
+
+        stegService.håndterJournalførVedtaksbrev(behandlingEtterSendVedtakTilInfotrygd, JournalførVedtaksbrevDTO(
                 vedtakId = vedtak.id,
                 task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
         ))

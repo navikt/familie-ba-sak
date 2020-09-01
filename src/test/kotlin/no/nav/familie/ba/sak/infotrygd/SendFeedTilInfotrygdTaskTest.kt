@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.infotrygd
 
-import no.nav.familie.ba.sak.task.SendFeedTilInfotrygdTask
+import no.nav.familie.ba.sak.task.SendFødselhendelseFeedTilInfotrygdTask
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -17,9 +17,9 @@ class SendFeedTilInfotrygdTaskTest {
     @Test
     fun `Legg til fødselsmelding til task`() {
         val fnrBarn = "12345678910"
-        val testTask = SendFeedTilInfotrygdTask.opprettTask(fnrBarn)
+        val testTask = SendFødselhendelseFeedTilInfotrygdTask.opprettTask(fnrBarn)
 
-        val infotrygdFeedDto = objectMapper.readValue(testTask.payload, InfotrygdFeedDto::class.java)
+        val infotrygdFeedDto = objectMapper.readValue(testTask.payload, InfotrygdFødselshendelseFeedDto::class.java)
 
         Assertions.assertEquals(fnrBarn, infotrygdFeedDto.fnrBarn)
     }

@@ -64,22 +64,27 @@ enum class StegType(val rekkefølge: Int,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.SENDT_TIL_IVERKSETTING)
     ),
-    JOURNALFØR_VEDTAKSBREV(
+    SEND_VETAKS_FEED_TIL_INFOTRYGD(
             rekkefølge = 7,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
     ),
-    DISTRIBUER_VEDTAKSBREV(
+    JOURNALFØR_VEDTAKSBREV(
             rekkefølge = 8,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
     ),
-    FERDIGSTILLE_BEHANDLING(
+    DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 9,
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)
+    ),
+    FERDIGSTILLE_BEHANDLING(
+            rekkefølge = 10,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSATT)),
     BEHANDLING_AVSLUTTET(
-            rekkefølge = 10,
+            rekkefølge = 11,
             tillattFor = emptyList(),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FERDIGSTILT));
 
@@ -103,7 +108,8 @@ enum class StegType(val rekkefølge: Int,
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> SEND_VETAKS_FEED_TIL_INFOTRYGD
+                SEND_VETAKS_FEED_TIL_INFOTRYGD -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                 DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -120,7 +126,8 @@ enum class StegType(val rekkefølge: Int,
                         SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                         BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                         IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                        VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                        VENTE_PÅ_STATUS_FRA_ØKONOMI -> SEND_VETAKS_FEED_TIL_INFOTRYGD
+                        SEND_VETAKS_FEED_TIL_INFOTRYGD -> FERDIGSTILLE_BEHANDLING
                         FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                         BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                         else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
@@ -133,7 +140,8 @@ enum class StegType(val rekkefølge: Int,
                         SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                         BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                         IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                        VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                        VENTE_PÅ_STATUS_FRA_ØKONOMI -> SEND_VETAKS_FEED_TIL_INFOTRYGD
+                        SEND_VETAKS_FEED_TIL_INFOTRYGD -> JOURNALFØR_VEDTAKSBREV
                         JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                         DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                         FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET

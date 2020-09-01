@@ -174,6 +174,16 @@ class StegService(
     }
 
     @Transactional
+    fun håndterSendVedtakfeedTilInfotrygd(behandling: Behandling, sendVedtakFeedTilInfotrygdDTO: SendVedtakFeedTilInfotrygdDTO): Behandling {
+        val behandlingSteg: SendVedtakFeedTilInfotrygd =
+                hentBehandlingSteg(StegType.SEND_VETAKS_FEED_TIL_INFOTRYGD) as SendVedtakFeedTilInfotrygd
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, sendVedtakFeedTilInfotrygdDTO)
+        }
+    }
+
+    @Transactional
     fun håndterDistribuerVedtaksbrev(behandling: Behandling, distribuerVedtaksbrevDTO: DistribuerVedtaksbrevDTO): Behandling {
         val behandlingSteg: DistribuerVedtaksbrev =
                 hentBehandlingSteg(StegType.DISTRIBUER_VEDTAKSBREV) as DistribuerVedtaksbrev
