@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.eksterne.kontrakter.PersonDVH
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVH
@@ -34,7 +35,7 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                 behandlingsId = behandlingId.toString(),
                 tidspunktVedtak = vedtakService.hentAktivForBehandling(behandlingId)!!.vedtaksdato!!,
                 personIdent = behandling.fagsak.hentAktivIdent().ident,
-                ensligForsørger = false, utbetalingsperioder = hentUtbetalingsperioder(behandlingId)) //TODO implementere støtte for dette
+                ensligForsørger = utledEnsligForsørger(behandlingId), utbetalingsperioder = hentUtbetalingsperioder(behandlingId)) //TODO implementere støtte for dette
     }
 
 
@@ -61,6 +62,15 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                 }
     }
 
+
+    private fun utledEnsligForsørger(behandlingId: Long): Boolean {
+
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+        if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return false
+
+        return tilkjentYtelse.andelerTilkjentYtelse.find { it.type == YtelseType.UTVIDET_BARNETRYGD } != null
+
+    }
 
     private fun mapTilUtbetalingsperiode(segment: LocalDateSegment<Int>,
                                          andelerForSegment: List<AndelTilkjentYtelse>,
