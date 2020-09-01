@@ -34,7 +34,7 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                 behandlingsId = behandlingId.toString(),
                 tidspunktVedtak = vedtakService.hentAktivForBehandling(behandlingId)!!.vedtaksdato!!,
                 personIdent = behandling.fagsak.hentAktivIdent().ident,
-                ensligForsørger = true, utbetalingsperioder = hentUtbetalingsperioder(behandlingId))
+                ensligForsørger = false, utbetalingsperioder = hentUtbetalingsperioder(behandlingId)) //TODO implementere støtte for dette
     }
 
 
@@ -78,7 +78,7 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                             person = PersonDVH(
                                     rolle = personForAndel.type.name,
                                     statsborgerskap = emptyList(), // TODO lag liste med statsborgerskap
-                                    bostedsland = "Norge", //TODO hvor finner vi bostedsland?
+                                    bostedsland = "NO", //TODO hvor finner vi bostedsland?
                                     primærland = "IKKE IMPLMENTERT",
                                     sekundærland = "IKKE IMPLEMENTERT",
                                     delingsprosentOmsorg = 0, // TODO ikke implementert

@@ -25,7 +25,7 @@ internal class StønadsstatistikkServiceTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val beregningService: BeregningService = mockk()
     private val loggService: LoggService = mockk()
-    private val vedtakService: VedtakService  = mockk()
+    private val vedtakService: VedtakService = mockk()
 
     private val stønadsstatistikkService =
             StønadsstatistikkService(behandlingService, persongrunnlagService, beregningService, loggService, vedtakService)
@@ -41,16 +41,24 @@ internal class StønadsstatistikkServiceTest {
         val barn2 = personopplysningGrunnlag.barna.last()
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                 barn1.fødselsdato.plusYears(3).sisteDagIMåned().toString(),
+                YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = barn1)
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                              barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
-                                                              behandling = behandling,
-                                                              person = barn2)
+                barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = barn2)
+
+        val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
+                barn2.fødselsdato.plusYears(2).sisteDagIMåned().toString(),
+                YtelseType.UTVIDET_BARNETRYGD,
+                behandling = behandling,
+                person = personopplysningGrunnlag.søker.first())
 
         every { behandlingService.hent(any()) } returns behandling
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
-                tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
+                tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2, andelTilkjentYtelseSøker))
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
     }
@@ -60,7 +68,7 @@ internal class StønadsstatistikkServiceTest {
         val vedtak = stønadsstatistikkService.hentVedtak(1L)
         System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
 
-        assertEquals(2, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
-        assertEquals(2 * sats(YtelseType.ORDINÆR_BARNETRYGD), vedtak.utbetalingsperioder[0].utbetaltPerMnd)
+        assertEquals(3, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
+        assertEquals(2 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD), vedtak.utbetalingsperioder[0].utbetaltPerMnd)
     }
 }
