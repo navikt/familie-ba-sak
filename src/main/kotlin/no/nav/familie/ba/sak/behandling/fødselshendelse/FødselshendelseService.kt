@@ -108,7 +108,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
     }
 
-    private fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
+    internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val søker = persongrunnlagService.hentSøker(behandling)
@@ -147,14 +147,14 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         return null
     }
 
-    private fun hentBegrunnelseFraFiltreringsregler(evaluering: Evaluering): String? {
-        Filtreringsregler.values().forEach {
-            val regel = evaluering.children.find {
-                it.identifikator == Filtreringsregler.MOR_HAR_GYLDIG_FOEDSELSNUMMER.spesifikasjon.identifikator
+    internal fun hentBegrunnelseFraFiltreringsregler(evaluering: Evaluering): String? {
+        Filtreringsregler.values().forEach {filteringRegel->
+            val regelEvaluering = evaluering.children.find {
+                it.identifikator == filteringRegel.spesifikasjon.identifikator
             }
 
-            if (regel?.resultat == Resultat.NEI) {
-                return regel.begrunnelse
+            if(regelEvaluering?.resultat == Resultat.NEI){
+                return regelEvaluering.begrunnelse
             }
         }
         return null
