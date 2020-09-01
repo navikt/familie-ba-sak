@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.dokument
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -16,7 +19,10 @@ import no.nav.familie.ba.sak.client.Norg2RestClient
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
+import no.nav.familie.ba.sak.dokument.domene.maler.InnhenteOpplysninger
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
+import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -27,15 +33,19 @@ class MalerService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val norg2RestClient: Norg2RestClient
+        private val norg2RestClient: Norg2RestClient,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
-    fun mapTilBrevfelter(vedtak: Vedtak,
-                         personopplysningGrunnlag: PersonopplysningGrunnlag,
-                         behandlingResultatType: BehandlingResultatType): MalMedData {
+    fun mapTilVedtakBrevfelter(vedtak: Vedtak,
+                               behandlingResultatType: BehandlingResultatType): MalMedData {
 
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
+                                       ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
+                                                     frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
         val statsborgerskap =
-                persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap ?: error("Finner ikke søker på behandling")
+                persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap ?: error("Kan ikke hente statsborgerskap for søker på behandling")
         val medlemskap = finnNåværendeMedlemskap(statsborgerskap)
         val sterkesteMedlemskap = finnSterkesteMedlemskap(medlemskap)
 
@@ -47,6 +57,22 @@ class MalerService(
                     BehandlingResultatType.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak)
                     else -> error("Invalid/unsupported behandling resultat type")
                 }
+        )
+    }
+
+    fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
+        val enhetskode = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
+        val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt?.toString()?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
+
+        val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
+                soknadDato = søknadsDato,
+                fritekst = manueltBrevRequest.fritekst,
+                enhet = norg2RestClient.hentEnhet(enhetskode).navn,
+                saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
+        ))
+        return MalMedData(
+                mal = "innhente-opplysninger",
+                fletteFelter = felter
         )
     }
 

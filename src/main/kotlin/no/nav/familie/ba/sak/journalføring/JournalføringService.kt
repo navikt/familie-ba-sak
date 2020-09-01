@@ -56,6 +56,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         return sak.fagsakId ?: ""
     }
 
+    fun lagreJournalPost(behandling: Behandling, journalpostId: String) = journalføringRepository.save(DbJournalpost(behandling = behandling, journalpostId = journalpostId))
+
     fun lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder: List<String>, journalpostId: String): Pair<Sak, List<Behandling>> {
 
         val behandlinger = tilknyttedeBehandlingIder.map {
