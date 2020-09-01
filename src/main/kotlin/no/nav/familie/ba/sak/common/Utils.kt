@@ -19,5 +19,4 @@ object Utils {
                 (hentetBehandlingResultatType == BehandlingResultatType.OPPHØRT) -> BehandlingResultatType.DELVIS_INNVILGET
                 else -> hentetBehandlingResultatType
             }
-
 }

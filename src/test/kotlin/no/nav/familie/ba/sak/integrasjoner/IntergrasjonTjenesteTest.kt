@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.dokument.DokumentController.BrevType
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDLEGG_DOKUMENT_TYPE
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_DOKUMENT_TYPE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
-import no.nav.familie.kontrakter.felles.arkivering.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.FilType
@@ -107,7 +107,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Journalfør vedtaksbrev skal journalføre dokument, returnere 201 og journalpostId`() {
         MDC.put("callId", "journalfør")
-        stubFor(post("/api/arkiv/v2")
+        stubFor(post("/api/arkiv/v3")
                         .withHeader("Accept", containing("json"))
                         .willReturn(aResponse()
                                             .withStatus(201)
@@ -118,7 +118,7 @@ class IntergrasjonTjenesteTest {
         vedtak.stønadBrevPdF = mockPdf
         vedtak.ansvarligEnhet = "1"
 
-        val journalPostId = integrasjonClient.lagJournalpostForVedtaksbrev(mockFnr, mockFagsakId, vedtak)
+        val journalPostId = integrasjonClient.journalFørVedtaksbrev(mockFnr, mockFagsakId, vedtak)
 
         assertThat(journalPostId).isEqualTo(mockJournalpostForVedtakId)
         verify(anyRequestedFor(anyUrl())
@@ -138,7 +138,7 @@ class IntergrasjonTjenesteTest {
 
 
 
-        assertDoesNotThrow { integrasjonClient.distribuerVedtaksbrev("123456789") }
+        assertDoesNotThrow { integrasjonClient.distribuerBrev("123456789") }
         verify(postRequestedFor(anyUrl())
                        .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
@@ -154,7 +154,7 @@ class IntergrasjonTjenesteTest {
                         .withHeader("Accept", containing("json"))
                         .willReturn(okJson(objectMapper.writeValueAsString(success("")))))
 
-        assertThrows<IllegalStateException> { integrasjonClient.distribuerVedtaksbrev("123456789") }
+        assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev("123456789") }
     }
 
     @Test
@@ -164,7 +164,7 @@ class IntergrasjonTjenesteTest {
                         .withHeader("Accept", containing("json"))
                         .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>("")))))
 
-        assertThrows<IllegalStateException> { integrasjonClient.distribuerVedtaksbrev("123456789") }
+        assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev("123456789") }
     }
 
     @Test
@@ -176,7 +176,7 @@ class IntergrasjonTjenesteTest {
                                             .withStatus(400)
                                             .withHeader("Content-Type", "application/json")))
 
-        assertThrows<IntegrasjonException> { integrasjonClient.distribuerVedtaksbrev("123456789") }
+        assertThrows<IntegrasjonException> { integrasjonClient.distribuerBrev("123456789") }
     }
 
 
@@ -310,17 +310,21 @@ class IntergrasjonTjenesteTest {
 
     private fun forventetRequestArkiverDokument(): ArkiverDokumentRequest {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
+        val brev = listOf(Dokument(dokument = mockPdf,
+                                   filType = FilType.PDFA,
+                                   dokumentType = BrevType.VEDTAK.arkivType))
+        val vedlegg = listOf(Dokument(dokument = vedleggPdf!!,
+                               filType = FilType.PDFA,
+                               dokumentType = VEDLEGG_DOKUMENT_TYPE,
+                               tittel = VEDTAK_VEDLEGG_TITTEL))
+
         return ArkiverDokumentRequest(fnr = mockFnr,
                                       forsøkFerdigstill = true,
                                       fagsakId = mockFagsakId,
                                       journalførendeEnhet = "1",
-                                      dokumenter = listOf(Dokument(dokument = mockPdf,
-                                                                   filType = FilType.PDFA,
-                                                                   dokumentType = VEDTAK_DOKUMENT_TYPE),
-                                                          Dokument(dokument = vedleggPdf!!,
-                                                                   filType = FilType.PDFA,
-                                                                   dokumentType = VEDLEGG_DOKUMENT_TYPE,
-                                                                   tittel = VEDTAK_VEDLEGG_TITTEL)))
+                                      hoveddokumentvarianter = brev,
+                                      vedleggsdokumenter = vedlegg
+        )
     }
 
     companion object {

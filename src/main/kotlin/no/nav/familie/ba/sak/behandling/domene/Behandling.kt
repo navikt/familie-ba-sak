@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import javax.persistence.*
 
 @Entity(name = "Behandling")

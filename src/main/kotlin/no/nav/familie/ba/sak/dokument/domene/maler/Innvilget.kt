@@ -1,11 +1,26 @@
 package no.nav.familie.ba.sak.dokument.domene.maler
 
+import com.fasterxml.jackson.annotation.JsonInclude
+
 data class Innvilget(
         val enhet: String,
         val saksbehandler: String,
         val beslutter: String,
         val hjemmel: String, // "§2, 4 og 11"
         var duFaar: List<DuFårSeksjon> = emptyList()
+)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class InnvilgetAutovedtak(
+        val navn: String,
+        val fodselsnummer: String,
+        val fodselsdato: String,
+        val virkningstidspunkt: String,
+        val belop: String,
+        val etterbetalingsbelop: String? = null,
+        val antallBarn: Int,
+        val erBehandletAutomatisk: Boolean = true,
+        val enhet: String
 )
 
 data class DuFårSeksjon(

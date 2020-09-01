@@ -112,12 +112,12 @@ class LoggService(
         ))
     }
 
-    fun opprettDistribuertBrevLogg(behandlingId: Long, tekst: String) {
+    fun opprettDistribuertBrevLogg(behandlingId: Long, tekst: String, rolle: BehandlerRolle) {
         lagre(Logg(
                 behandlingId = behandlingId,
                 type = LoggType.DISTRIBUERE_BREV,
                 tittel = "Dokument er sendt",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SYSTEM),
+                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, rolle),
                 tekst = tekst
         ))
     }
