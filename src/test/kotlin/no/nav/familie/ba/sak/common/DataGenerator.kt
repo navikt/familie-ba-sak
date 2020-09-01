@@ -178,11 +178,9 @@ fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
 
-fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: List<String>): SøknadDTO {
+fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>): SøknadDTO {
     return SøknadDTO(
-            kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
-            annenPartIdent = annenPartIdent,
             søkerMedOpplysninger = SøkerMedOpplysninger(
                     ident = søkerIdent
             ),

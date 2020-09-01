@@ -10,19 +10,25 @@ data class RestRegistrerSøknad(
         val bekreftEndringerViaFrontend: Boolean
 )
 
-data class SøknadDTO(
+data class SøknadDTOGammel(
         val versjon: String = "1",
         val kategori: BehandlingKategori,
         val underkategori: BehandlingUnderkategori,
         val typeSøker: TypeSøker = TypeSøker.ORDINÆR,
-        val søkerMedOpplysninger: SøkerMedOpplysninger,
-        val barnaMedOpplysninger: List<BarnMedOpplysninger>,
+        val søkerMedOpplysninger: SøkerMedOpplysningerGammel,
+        val barnaMedOpplysninger: List<BarnMedOpplysningerGammel>,
         val annenPartIdent: String
+)
+
+data class SøknadDTO(
+        val underkategori: BehandlingUnderkategori,
+        val søkerMedOpplysninger: SøkerMedOpplysninger,
+        val barnaMedOpplysninger: List<BarnMedOpplysninger>
 )
 
 fun SøknadDTO.writeValueAsString(): String = objectMapper.writeValueAsString(this)
 
-data class SøkerMedOpplysninger(
+data class SøkerMedOpplysningerGammel(
         val ident: String,
         val oppholderSegINorge: Boolean = true,
         val harOppholdtSegINorgeSiste12Måneder: Boolean = true,
@@ -31,7 +37,11 @@ data class SøkerMedOpplysninger(
         val tilleggsopplysninger: String? = null
 )
 
-data class BarnMedOpplysninger(
+data class SøkerMedOpplysninger(
+        val ident: String
+)
+
+data class BarnMedOpplysningerGammel(
         val ident: String,
         val borMedSøker: Boolean = true,
         val oppholderSegINorge: Boolean = true,
@@ -40,6 +50,11 @@ data class BarnMedOpplysninger(
         val inkludertISøknaden: Boolean = true,
         val fødselsdato: LocalDate? = null,
         val tilleggsopplysninger: String? = null
+)
+
+data class BarnMedOpplysninger(
+        val ident: String,
+        val inkludertISøknaden: Boolean = true
 )
 
 enum class TypeSøker {

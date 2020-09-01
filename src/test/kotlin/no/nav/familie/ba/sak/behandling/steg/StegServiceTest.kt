@@ -76,7 +76,6 @@ class StegServiceTest(
     @Test
     fun `Skal håndtere steg for frontend ordinær behandling`() {
         val søkerFnr = randomFnr()
-        val annenPartIdent = randomFnr()
         val barnFnr = randomFnr()
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
@@ -88,8 +87,7 @@ class StegServiceTest(
 
         stegService.håndterSøknad(behandling,
                                   RestRegistrerSøknad(
-                                          søknad = lagSøknadDTO(annenPartIdent = annenPartIdent,
-                                                                søkerIdent = søkerFnr,
+                                          søknad = lagSøknadDTO(søkerIdent = søkerFnr,
                                                                 barnasIdenter = listOf(barnFnr)),
                                           bekreftEndringerViaFrontend = true))
 
