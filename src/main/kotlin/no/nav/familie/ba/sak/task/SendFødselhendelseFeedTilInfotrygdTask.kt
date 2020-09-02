@@ -25,10 +25,10 @@ class SendFødselhendelseFeedTilInfotrygdTask(
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "sendFødselmeldingsFeedTilInfotrygd"
+        const val TASK_STEP_TYPE = "sendFødselhendelseFeedTilInfotrygd"
 
         fun opprettTask(fnrBarn: String): Task {
-            InfotrygdFeedService.secureLogger.info("Send fødselsmelding for $fnrBarn til Infotrygd.")
+            InfotrygdFeedService.secureLogger.info("Send fødselhendelse for $fnrBarn til Infotrygd.")
 
             val metadata = Properties().apply {
                 this["personIdentBarn"] = fnrBarn

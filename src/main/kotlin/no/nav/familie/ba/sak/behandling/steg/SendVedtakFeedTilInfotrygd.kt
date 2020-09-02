@@ -19,7 +19,7 @@ class SendVedtakFeedTilInfotrygd(
         val status = behandling.status
 
         if(!(status == BehandlingStatus.IVERKSATT || status == BehandlingStatus.FERDIGSTILT) || vedtak.vedtaksdato == null) {
-            throw Exception("Behandling kan ikke avsluttes i Infotrygd om den ikke iverksatt eller ferdigstilt.")
+            throw Exception("Behandling kan ikke avsluttes i Infotrygd om den ikke er iverksatt eller ferdigstilt.")
         }
 
         val fnrStonadsmottaker = vedtak.behandling.fagsak.hentAktivIdent().ident
