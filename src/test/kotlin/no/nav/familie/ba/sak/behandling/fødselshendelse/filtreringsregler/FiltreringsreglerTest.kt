@@ -145,8 +145,8 @@ internal class FiltreringsreglerTest {
     }
 
     @Test
-    fun `Erklæring av filtreringsregler skal følge en gitt rekkefølgen`() {
-        val filtreringsreglerRekkefølgen = listOf(
+    fun `Filtreringsreglene skal følge en fagbestemt rekkefølge`() {
+        val fagbestemtFiltreringsregelrekkefølge = listOf(
                 Filtreringsregler.MOR_HAR_GYLDIG_FOEDSELSNUMMER,
                 Filtreringsregler.BARNET_HAR_GYLDIG_FOEDSELSNUMMER,
                 Filtreringsregler.BARNET_ER_UNDER_6_MND,
@@ -156,7 +156,7 @@ internal class FiltreringsreglerTest {
                 Filtreringsregler.MOR_HAR_IKKE_VERGE,
                 Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN
         )
-        assertThat(Filtreringsregler.values().zip(filtreringsreglerRekkefølgen)
+        assertThat(Filtreringsregler.values().zip(fagbestemtFiltreringsregelrekkefølge)
                            .all { (x, y) -> x == y }
         ).isTrue()
     }
