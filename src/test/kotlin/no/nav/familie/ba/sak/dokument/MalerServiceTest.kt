@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.client.Enhet
 import no.nav.familie.ba.sak.client.Norg2RestClient
 import no.nav.familie.ba.sak.common.*
@@ -72,9 +73,10 @@ class MalerServiceTest {
             vedtak.ansvarligEnhet = "enhet"
             vedtak.vedtaksdato = fødselsdato.plusDays(7)
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                         fødselsdato.plusYears(18).toString(),
-                                                         behandling = behandling,
-                                                         person = personopplysningGrunnlag.barna.first())
+                fødselsdato.plusYears(18).toString(),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = personopplysningGrunnlag.barna.first())
 
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker.first()
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
@@ -109,13 +111,15 @@ class MalerServiceTest {
             vedtak.ansvarligEnhet = "enhet"
             vedtak.vedtaksdato = barn2.fødselsdato.plusMonths(6)
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                              barn1.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
-                                                              behandling = behandling,
-                                                              person = barn1)
+                barn1.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = barn1)
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                                                              barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
-                                                              behandling = behandling,
-                                                              person = barn2)
+                barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = barn2)
 
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker.first()
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
