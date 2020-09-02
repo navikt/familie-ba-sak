@@ -31,7 +31,8 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
 
         return VedtakDVH(fagsakId = behandling.fagsak.id.toString(),
                 behandlingsId = behandlingId.toString(),
-                tidspunktVedtak = vedtakService.hentAktivForBehandling(behandlingId)!!.vedtaksdato!!,
+                tidspunktVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.vedtaksdato
+                        ?: error("Fant ikke vedtaksdato"),
                 personIdent = behandling.fagsak.hentAktivIdent().ident,
                 ensligForsørger = utledEnsligForsørger(behandlingId), utbetalingsperioder = hentUtbetalingsperioder(behandlingId)) //TODO implementere støtte for dette
     }
@@ -41,7 +42,7 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
             : List<UtbetalingsperiodeDVH> {
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)!!
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId) ?: error("Fant ikke aktivt persongrunnlag")
 
         if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return emptyList()
 
