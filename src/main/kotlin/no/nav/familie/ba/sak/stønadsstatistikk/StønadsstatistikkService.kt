@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.eksterne.kontrakter.PersonDVH
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVH
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVH
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service
 class StønadsstatistikkService(private val behandlingService: BehandlingService,
                                private val persongrunnlagService: PersongrunnlagService,
                                private val beregningService: BeregningService,
-                               private val loggService: LoggService,
                                private val vedtakService: VedtakService) {
 
 
