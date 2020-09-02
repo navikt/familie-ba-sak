@@ -31,5 +31,11 @@ abstract class GrBostedsadresse(
                 return null
             }
         }
+
+        fun erSammeAdresse(adresse: GrBostedsadresse?, andreAdresse: GrBostedsadresse?): Boolean{
+            return adresse != null &&
+            adresse !is GrUkjentBosted &&
+            adresse == andreAdresse
+        }
     }
 }

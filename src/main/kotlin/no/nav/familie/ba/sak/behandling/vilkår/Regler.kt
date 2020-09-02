@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresse.Companion.erSammeAdresse
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOpphold
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
@@ -50,9 +51,7 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
 
     return if (søker.isEmpty())
         Evaluering.nei(("Ingen søker"))
-    else if (søker.first().bostedsadresse != null &&
-             søker.first().bostedsadresse !is GrUkjentBosted &&
-             søker.first().bostedsadresse == barn.bostedsadresse)
+    else if (erSammeAdresse(søker.first().bostedsadresse, barn.bostedsadresse))
         Evaluering.ja("Barnet bor med mor")
     else
         Evaluering.nei("Barnet bor ikke med mor")
@@ -188,9 +187,7 @@ fun annenForelderRegistrert(fakta: Fakta): Boolean {
 
 fun annenForelderBorMedMor(fakta: Fakta): Boolean {
     val annenForelder = hentAnnenForelder(fakta).first()
-    return fakta.personForVurdering.bostedsadresse != null
-                && fakta.personForVurdering.bostedsadresse !is GrUkjentBosted
-                && fakta.personForVurdering.bostedsadresse == annenForelder.bostedsadresse
+    return erSammeAdresse(fakta.personForVurdering.bostedsadresse, annenForelder.bostedsadresse)
 }
 
 fun statsborgerskapAnnenForelder(fakta: Fakta): List<Medlemskap> {
