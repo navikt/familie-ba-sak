@@ -129,19 +129,19 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             val vilkårsresultat = behandlingResultat?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.NEI) {
-                return "Barnet er over 18 år."
+                return "Barnet (fødselsdato: ${barn.fødselsdato}) er over 18 år."
             }
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOR_MED_SØKER }?.resultat == Resultat.NEI) {
-                return "Barnet er ikke bosatt med mor."
+                return "Barnet (fødselsdato: ${barn.fødselsdato}) er ikke bosatt med mor."
             }
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }?.resultat == Resultat.NEI) {
-                return "Barnet er gift."
+                return "Barnet (fødselsdato: ${barn.fødselsdato}) er gift."
             }
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat == Resultat.NEI) {
-                return "Barnet er ikke bosatt i riket."
+                return "Barnet (fødselsdato: ${barn.fødselsdato}) er ikke bosatt i riket."
             }
         }
 
