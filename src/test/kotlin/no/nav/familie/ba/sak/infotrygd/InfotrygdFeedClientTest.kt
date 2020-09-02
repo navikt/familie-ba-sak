@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.infotrygd
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
@@ -63,7 +64,8 @@ class InfotrygdFeedClientTest {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
-            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
+            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(
+                    "fnr"))
         }
     }
 
@@ -73,7 +75,8 @@ class InfotrygdFeedClientTest {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withBody("Create")))
 
         assertThrows<RuntimeException> {
-            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
+            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(
+                    "fnr"))
         }
     }
 }

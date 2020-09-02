@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedClient
-import no.nav.familie.ba.sak.infotrygd.InfotrygdVedtakFeedDto
+import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.logg.LoggService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -52,8 +52,9 @@ class FerdigstillBehandling(
             fagsakService.oppdaterStatus(fagsak, FagsakStatus.STANSET)
         }
 
-        infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(hentFnrStoenadsmottaker(fagsak),
-                                                                              hentVedtaksdato(behandling.id)))
+        infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(
+                hentFnrStoenadsmottaker(fagsak),
+                hentVedtaksdato(behandling.id)))
 
         antallBehandlingerFerdigstilt[behandling.type]?.increment()
         loggService.opprettFerdigstillBehandling(behandling)

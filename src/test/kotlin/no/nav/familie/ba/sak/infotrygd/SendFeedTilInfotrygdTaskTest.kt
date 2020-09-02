@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.infotrygd
 
+import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.task.SendFeedTilInfotrygdTask
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions
