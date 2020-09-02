@@ -19,7 +19,7 @@ class SendFeedTilInfotrygdTaskTest {
         val fnrBarn = "12345678910"
         val testTask = SendFeedTilInfotrygdTask.opprettTask(fnrBarn)
 
-        val infotrygdFeedDto = objectMapper.readValue(testTask.payload, InfotrygdFeedDto::class.java)
+        val infotrygdFeedDto = objectMapper.readValue(testTask.payload, InfotrygdFødselhendelsesFeedDto::class.java)
 
         Assertions.assertEquals(fnrBarn, infotrygdFeedDto.fnrBarn)
     }

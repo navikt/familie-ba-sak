@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedClient
-import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedDto
+import no.nav.familie.ba.sak.infotrygd.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
@@ -20,8 +20,8 @@ class SendFeedTilInfotrygdTask(
         private val infotrygdFeedClient: InfotrygdFeedClient) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val infotrygdFeedDto = objectMapper.readValue(task.payload, InfotrygdFeedDto::class.java)
-        infotrygdFeedClient.leggTilInfotrygdFeed(infotrygdFeedDto)
+        val infotrygdFeedDto = objectMapper.readValue(task.payload, InfotrygdFødselhendelsesFeedDto::class.java)
+        infotrygdFeedClient.sendFødselhendelsesFeedTilInfotrygd(infotrygdFeedDto)
     }
 
     companion object {
@@ -38,7 +38,7 @@ class SendFeedTilInfotrygdTask(
             }
 
             return Task.nyTask(type = TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(InfotrygdFeedDto(fnrBarn = fnrBarn)),
+                               payload = objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = fnrBarn)),
                                properties = metadata
             )
         }

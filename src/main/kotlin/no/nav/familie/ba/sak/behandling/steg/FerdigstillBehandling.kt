@@ -6,10 +6,14 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedClient
+import no.nav.familie.ba.sak.infotrygd.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.logg.LoggService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -19,8 +23,11 @@ class FerdigstillBehandling(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
+        private val infotrygdFeedClient: InfotrygdFeedClient,
+        private val vedtakService: VedtakService,
         private val loggService: LoggService
-): BehandlingSteg<String> {
+) : BehandlingSteg<String> {
+
     private val antallBehandlingerFerdigstilt: Map<BehandlingType, Counter> = BehandlingType.values().map {
         it to Metrics.counter("behandling.ferdigstilt", "type",
                               it.name,
@@ -45,11 +52,20 @@ class FerdigstillBehandling(
             fagsakService.oppdaterStatus(fagsak, FagsakStatus.STANSET)
         }
 
+        infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(hentFnrStoenadsmottaker(fagsak),
+                                                                              hentVedtaksdato(behandling.id)))
+
         antallBehandlingerFerdigstilt[behandling.type]?.increment()
         loggService.opprettFerdigstillBehandling(behandling)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
         return hentNesteStegForNormalFlyt(behandling)
     }
+
+    private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.hentAktivIdent().ident
+
+    private fun hentVedtaksdato(behandlingsId: Long) =
+            vedtakService.hentAktivForBehandling(behandlingsId)?.vedtaksdato
+            ?: throw Exception("Aktivt vedtak eller vedtaksdato eksisterer ikke for $behandlingsId")
 
     override fun stegType(): StegType {
         return StegType.FERDIGSTILLE_BEHANDLING
