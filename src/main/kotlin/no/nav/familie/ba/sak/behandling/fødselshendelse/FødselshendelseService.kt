@@ -149,7 +149,9 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     }
 
     internal fun hentBegrunnelseFraFiltreringsregler(evaluering: Evaluering): String? {
+
         Filtreringsregler.values().forEach {filteringRegel->
+
             val regelEvaluering = evaluering.children.find {
                 it.identifikator == filteringRegel.spesifikasjon.identifikator
             }
@@ -158,6 +160,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                 return regelEvaluering.begrunnelse
             }
         }
+
         return null
     }
 
