@@ -82,15 +82,20 @@ class StegService(
 
     @Transactional
     fun håndterSøknad(behandling: Behandling,
-                      restRegistrerSøknad: RestRegistrerSøknad?,
-                      restRegistrerSøknadGammel: RestRegistrerSøknadGammel?): Behandling {
+                      restRegistrerSøknad: RestRegistrerSøknad): Behandling =
+            fullførSøknadsHåndtering(behandling = behandling, registrerSøknad = restRegistrerSøknad)
 
+    @Transactional
+    fun håndterSøknad(behandling: Behandling,
+                      restRegistrerSøknadGammel: RestRegistrerSøknadGammel): Behandling {
 
-        val registrerSøknad = if (restRegistrerSøknadGammel != null) {
-            RestRegistrerSøknad(søknad = restRegistrerSøknadGammel.søknad.toSøknadDTO(),
+        val registrerSøknad = RestRegistrerSøknad(søknad = restRegistrerSøknadGammel.søknad.toSøknadDTO(),
                                 bekreftEndringerViaFrontend = restRegistrerSøknadGammel.bekreftEndringerViaFrontend)
-        } else restRegistrerSøknad ?: throw Feil(message = "Prøver å registrere søknad, men finner ikke data.")
 
+        return fullførSøknadsHåndtering(behandling = behandling, registrerSøknad = registrerSøknad)
+    }
+
+    private fun fullførSøknadsHåndtering(behandling: Behandling, registrerSøknad: RestRegistrerSøknad): Behandling {
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
         val søknadDTO = registrerSøknad.søknad
 

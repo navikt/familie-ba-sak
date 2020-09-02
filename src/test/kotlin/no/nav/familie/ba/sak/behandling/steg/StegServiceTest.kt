@@ -89,8 +89,7 @@ class StegServiceTest(
                                   restRegistrerSøknad = RestRegistrerSøknad(
                                           søknad = lagSøknadDTO(søkerIdent = søkerFnr,
                                                                 barnasIdenter = listOf(barnFnr)),
-                                          bekreftEndringerViaFrontend = true),
-                                  restRegistrerSøknadGammel = null)
+                                          bekreftEndringerViaFrontend = true))
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)

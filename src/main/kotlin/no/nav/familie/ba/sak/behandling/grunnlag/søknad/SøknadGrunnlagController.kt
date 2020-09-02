@@ -30,7 +30,7 @@ class SøknadGrunnlagController(
         val behandling = behandlingService.hent(behandlingId = behandlingId)
 
         return Result.runCatching {
-            stegService.håndterSøknad(behandling = behandling, restRegistrerSøknadGammel = restRegistrerSøknadGammel, restRegistrerSøknad = null)
+            stegService.håndterSøknad(behandling = behandling, restRegistrerSøknadGammel = restRegistrerSøknadGammel)
         }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
@@ -65,7 +65,7 @@ class SøknadGrunnlagController(
         val behandling = behandlingService.hent(behandlingId = behandlingId)
 
         return Result.runCatching {
-            stegService.håndterSøknad(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad, restRegistrerSøknadGammel = null)
+            stegService.håndterSøknad(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
         }
                 .fold(
                         onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
