@@ -8,11 +8,11 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
+import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -81,14 +81,23 @@ class StegService(
     }
 
     @Transactional
-    fun håndterSøknad(behandling: Behandling, restRegistrerSøknad: RestRegistrerSøknad): Behandling {
+    fun håndterSøknad(behandling: Behandling,
+                      restRegistrerSøknad: RestRegistrerSøknad?,
+                      restRegistrerSøknadGammel: RestRegistrerSøknadGammel?): Behandling {
+
+
+        val registrerSøknad = if (restRegistrerSøknadGammel != null) {
+            RestRegistrerSøknad(søknad = restRegistrerSøknadGammel.søknad.toSøknadDTO(),
+                                bekreftEndringerViaFrontend = restRegistrerSøknadGammel.bekreftEndringerViaFrontend)
+        } else restRegistrerSøknad ?: throw Feil(message = "Prøver å registrere søknad, men finner ikke data.")
+
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
-        val søknadDTO = restRegistrerSøknad.søknad
+        val søknadDTO = registrerSøknad.søknad
 
         val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         val innsendtSøknad = søknadDTO.writeValueAsString()
 
-        if(aktivSøknadGrunnlag != null && innsendtSøknad == aktivSøknadGrunnlag.søknad) {
+        if (aktivSøknadGrunnlag != null && innsendtSøknad == aktivSøknadGrunnlag.søknad) {
             return behandling
         }
 
@@ -101,7 +110,7 @@ class StegService(
                 RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
                                            barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
                                                    .map { barn -> barn.ident },
-                                           bekreftEndringerViaFrontend = restRegistrerSøknad.bekreftEndringerViaFrontend))
+                                           bekreftEndringerViaFrontend = registrerSøknad.bekreftEndringerViaFrontend))
     }
 
     @Transactional

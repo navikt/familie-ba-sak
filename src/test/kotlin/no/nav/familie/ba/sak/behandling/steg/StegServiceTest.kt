@@ -85,11 +85,12 @@ class StegServiceTest(
         Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
                                          BehandlingOpprinnelse.MANUELL), behandling.steg)
 
-        stegService.håndterSøknad(behandling,
-                                  RestRegistrerSøknad(
+        stegService.håndterSøknad(behandling = behandling,
+                                  restRegistrerSøknad = RestRegistrerSøknad(
                                           søknad = lagSøknadDTO(søkerIdent = søkerFnr,
                                                                 barnasIdenter = listOf(barnFnr)),
-                                          bekreftEndringerViaFrontend = true))
+                                          bekreftEndringerViaFrontend = true),
+                                  restRegistrerSøknadGammel = null)
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
