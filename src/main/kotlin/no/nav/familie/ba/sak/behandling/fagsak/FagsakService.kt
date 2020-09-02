@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -11,7 +12,6 @@ import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -39,8 +39,10 @@ class FagsakService(
         private val vedtakRepository: VedtakRepository,
         private val totrinnskontrollRepository: TotrinnskontrollRepository,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-        private val integrasjonClient: IntegrasjonClient,
         private val personopplysningerService: PersonopplysningerService) {
+
+
+    private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
 
     @Transactional
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
@@ -73,6 +75,7 @@ class FagsakService(
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
                 lagre(it)
             }
+            antallFagsakerOpprettet.increment()
         }
         return fagsak
     }
