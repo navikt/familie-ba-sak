@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.barnFnr
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.økonomi.sats
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,11 +23,10 @@ internal class StønadsstatistikkServiceTest {
     private val behandlingService: BehandlingService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val beregningService: BeregningService = mockk()
-    private val loggService: LoggService = mockk()
     private val vedtakService: VedtakService = mockk()
 
     private val stønadsstatistikkService =
-            StønadsstatistikkService(behandlingService, persongrunnlagService, beregningService, loggService, vedtakService)
+            StønadsstatistikkService(behandlingService, persongrunnlagService, beregningService, vedtakService)
 
     @BeforeAll
     fun init() {
