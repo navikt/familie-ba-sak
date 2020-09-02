@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -61,9 +63,19 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentOpphold(any())
         } answers {
-            listOf(Opphold(type= OPPHOLDSTILLATELSE.PERMANENT,
-                           oppholdFra =  LocalDate.of(1990, 1, 25),
+            listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
+                           oppholdFra = LocalDate.of(1990, 1, 25),
                            oppholdTil = LocalDate.of(2999, 1, 1)))
+        }
+
+        every {
+            mockPersonopplysningerService.hentBostedsadresseperioder(any())
+        } answers {
+            listOf(GrBostedsadresseperiode(
+                    periode = DatoIntervallEntitet(
+                            fom = LocalDate.of(2002, 1, 4),
+                            tom = LocalDate.of(2002, 1, 5)
+                    )))
         }
 
         val identSlot = slot<Ident>()
@@ -98,25 +110,25 @@ class ClientMocks {
                                         navn = personInfo.getValue(barnFnr[0]).navn,
                                         fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
                         Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                          navn = personInfo.getValue(barnFnr[1]).navn,
-                                          fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[1]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
                         Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
         every {
             mockPersonopplysningerService.hentPersoninfoFor(eq(søkerFnr[1]))
         } returns personInfo.getValue(søkerFnr[1]).copy(
                 familierelasjoner = setOf(
                         Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                          navn = personInfo.getValue(barnFnr[0]).navn,
-                                          fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[0]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
                         Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                          navn = personInfo.getValue(barnFnr[1]).navn,
-                                          fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[1]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
                         Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
-                                          relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
         return mockPersonopplysningerService
     }
 
@@ -155,7 +167,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("9999",
                                                                                                           "Ukjent"))
 
-        every { mockIntegrasjonClient.distribuerVedtaksbrev(any()) } just runs
+        every { mockIntegrasjonClient.distribuerBrev(any()) } returns success("bestillingsId")
 
         every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
 
@@ -177,6 +189,10 @@ class ClientMocks {
 
         every {
             mockIntegrasjonClient.journalFørVedtaksbrev(eq(søkerFnr[0]), any(), any())
+        } returns "Testrespons"
+
+        every {
+            mockIntegrasjonClient.journalførManueltBrev(eq(søkerFnr[0]), any(), any(), any(), any())
         } returns "Testrespons"
 
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
@@ -241,9 +257,19 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentOpphold(any())
         } answers {
-            listOf(Opphold(type= OPPHOLDSTILLATELSE.PERMANENT,
-                           oppholdFra =  LocalDate.of(1990, 1, 25),
+            listOf(Opphold(type = OPPHOLDSTILLATELSE.PERMANENT,
+                           oppholdFra = LocalDate.of(1990, 1, 25),
                            oppholdTil = LocalDate.of(2999, 1, 1)))
+        }
+
+        every {
+            mockPersonopplysningerService.hentBostedsadresseperioder(any())
+        } answers {
+            listOf(GrBostedsadresseperiode(
+                    periode = DatoIntervallEntitet(
+                            fom = LocalDate.of(2002, 1, 4),
+                            tom = LocalDate.of(2002, 1, 5)
+                    )))
         }
 
         val ukjentId = "43125678910"
