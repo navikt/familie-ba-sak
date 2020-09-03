@@ -41,8 +41,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val persongrunnlagService: PersongrunnlagService,
                              private val behandlingRepository: BehandlingRepository) {
 
-    val finnesHosInfotrygdCounter: Counter = Metrics.counter("fødselshendelse.mor.eller.barn.finnes.i.infotrygd")
-    val finnesIkkeHosInfotrygdCounter: Counter = Metrics.counter("fødselshendelse.mor.eller.barn.finnes.ikke.i.infotrygd")
+    val finnesLøpendeSakIInfotrygd: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
+    val finnesIkkeLøpendeSakIInfotrygd: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
     val stansetIAutomatiskFiltreringCounter = Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
     val stansetIAutomatiskVilkårsvurderingCounter =
             Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
@@ -61,8 +61,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         val finnesHosInfotrygd = !infotrygdBarnetrygdClient.finnesIkkeHosInfotrygd(morsIdenter, alleBarnasIdenter)
         when (finnesHosInfotrygd) {
-            true -> finnesHosInfotrygdCounter.increment()
-            false -> finnesIkkeHosInfotrygdCounter.increment()
+            true -> finnesLøpendeSakIInfotrygd.increment()
+            false -> finnesIkkeLøpendeSakIInfotrygd.increment()
         }
 
         return finnesHosInfotrygd

@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.task
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -19,6 +21,11 @@ class OpprettOppgaveTask(
         private val oppgaveService: OppgaveService,
         private val taskRepository: TaskRepository) : AsyncTaskStep {
 
+
+    private val antallOppgaveTyper: Map<Oppgavetype, Counter> = Oppgavetype.values().map {
+        it to Metrics.counter("oppgave.opprettet", "type", it.name)
+    }.toMap()
+
     override fun doTask(task: Task) {
         val opprettOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettOppgaveTaskDTO::class.java)
         task.metadata["oppgaveId"] = oppgaveService.opprettOppgave(
@@ -28,6 +35,7 @@ class OpprettOppgaveTask(
                 beskrivelse = opprettOppgaveTaskDTO.beskrivelse
         )
         taskRepository.saveAndFlush(task)
+        antallOppgaveTyper[opprettOppgaveDTO.oppgavetype]?.increment()
     }
 
     companion object {

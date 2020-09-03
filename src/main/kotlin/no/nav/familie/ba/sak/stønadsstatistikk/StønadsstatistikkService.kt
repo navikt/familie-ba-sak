@@ -4,15 +4,13 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.eksterne.kontrakter.PersonDVH
-import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVH
-import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVH
-import no.nav.familie.eksterne.kontrakter.VedtakDVH
+import no.nav.familie.eksterne.kontrakter.*
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.springframework.stereotype.Service
@@ -34,7 +32,12 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                 tidspunktVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.vedtaksdato
                         ?: error("Fant ikke vedtaksdato"),
                 personIdent = behandling.fagsak.hentAktivIdent().ident,
-                ensligForsørger = utledEnsligForsørger(behandlingId), utbetalingsperioder = hentUtbetalingsperioder(behandlingId)) //TODO implementere støtte for dette
+                ensligForsørger = utledEnsligForsørger(behandlingId), //TODO implementere støtte for dette
+                kategori = Kategori.valueOf(behandling.kategori.name),
+                underkategori = Underkategori.valueOf(behandling.underkategori.name),
+                behandlingType = BehandlingType.valueOf(behandling.type.name),
+                behandlingOpprinnelse = BehandlingOpprinnelse.valueOf(behandling.opprinnelse.name),
+                utbetalingsperioder = hentUtbetalingsperioder(behandlingId))
     }
 
 
@@ -86,8 +89,9 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                     UtbetalingsDetaljDVH(
                             person = PersonDVH(
                                     rolle = personForAndel.type.name,
-                                    statsborgerskap = emptyList(), // TODO lag liste med statsborgerskap
-                                    bostedsland = "NO", //TODO hvor finner vi bostedsland?
+                                    statsborgerskap = personForAndel.statsborgerskap?.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode }
+                                            ?: error("Fant ingen statsborgerskap på personen"),
+                                    bostedsland = "NOR", //TODO hvor finner vi bostedsland?
                                     primærland = "IKKE IMPLMENTERT",
                                     sekundærland = "IKKE IMPLEMENTERT",
                                     delingsprosentOmsorg = 0, // TODO ikke implementert
