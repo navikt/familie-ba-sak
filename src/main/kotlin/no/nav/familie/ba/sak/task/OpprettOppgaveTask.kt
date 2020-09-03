@@ -35,7 +35,7 @@ class OpprettOppgaveTask(
                 beskrivelse = opprettOppgaveTaskDTO.beskrivelse
         )
         taskRepository.saveAndFlush(task)
-        antallOppgaveTyper[opprettOppgaveDTO.oppgavetype]?.increment()
+        antallOppgaveTyper[opprettOppgaveTaskDTO.oppgavetype]?.increment()
     }
 
     companion object {
