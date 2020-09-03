@@ -26,7 +26,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                        oppgavetype: Oppgavetype,
                        fristForFerdigstillelse: LocalDate,
                        enhetId: String? = null,
-                       tilordnetNavIdent: String? = null): String {
+                       tilordnetNavIdent: String? = null,
+                       beskrivelse: String? = null): String {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
@@ -47,7 +48,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                     tema = Tema.BAR,
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
-                    beskrivelse = lagOppgaveTekst(fagsakId),
+                    beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
                     enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
                     behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode,
                     tilordnetRessurs = tilordnetNavIdent
@@ -88,8 +89,9 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         oppgaveRepository.save(oppgave)
     }
 
-    fun lagOppgaveTekst(fagsakId: Long): String {
-        return "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
+    fun lagOppgaveTekst(fagsakId: Long, beskrivelse: String? = null): String {
+        return if (beskrivelse != null) { beskrivelse + "\n" } else { "" } +
+               "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
                "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
     }
 
