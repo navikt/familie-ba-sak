@@ -24,7 +24,7 @@ class SøknadGrunnlagTest(
         val søkerIdent = randomFnr()
         val annenPartIdent = randomFnr()
         val barnIdent = randomFnr()
-        val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, annenPartIdent = annenPartIdent, barnasIdenter = listOf(barnIdent))
+        val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
         søknadGrunnlagService.lagreOgDeaktiverGammel(SøknadGrunnlag(
                 behandlingId = behandlingId,
                 søknad = søknadDTO.writeValueAsString()
@@ -34,9 +34,7 @@ class SøknadGrunnlagTest(
         Assertions.assertNotNull(søknadGrunnlag)
         Assertions.assertEquals(behandlingId, søknadGrunnlag?.behandlingId)
         Assertions.assertEquals(true, søknadGrunnlag?.aktiv)
-        Assertions.assertEquals(annenPartIdent, søknadGrunnlag?.hentSøknadDto()?.annenPartIdent)
         Assertions.assertEquals(søkerIdent, søknadGrunnlag?.hentSøknadDto()?.søkerMedOpplysninger?.ident)
-        Assertions.assertTrue(søknadGrunnlag?.hentSøknadDto()?.søkerMedOpplysninger?.oppholderSegINorge!!)
     }
 
     @Test
@@ -45,12 +43,12 @@ class SøknadGrunnlagTest(
         val søkerIdent = randomFnr()
         val annenPartIdent = randomFnr()
         val barnIdent = randomFnr()
-        val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, annenPartIdent = annenPartIdent, barnasIdenter = listOf(barnIdent))
+        val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
 
         val søkerIdent2 = randomFnr()
         val annenPartIdent2 = randomFnr()
         val barnIdent2 = randomFnr()
-        val søknadDTO2 = lagSøknadDTO(søkerIdent = søkerIdent2, annenPartIdent = annenPartIdent2, barnasIdenter = listOf(barnIdent2))
+        val søknadDTO2 = lagSøknadDTO(søkerIdent = søkerIdent2, barnasIdenter = listOf(barnIdent2))
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(SøknadGrunnlag(
                 behandlingId = behandlingId,
@@ -66,6 +64,5 @@ class SøknadGrunnlagTest(
 
         val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId)
         Assertions.assertNotNull(aktivSøknadGrunnlag)
-        Assertions.assertEquals(annenPartIdent2, aktivSøknadGrunnlag?.hentSøknadDto()?.annenPartIdent)
     }
 }

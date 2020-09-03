@@ -81,7 +81,6 @@ class BeregningServiceTest {
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(søkerFnr,
-                                                                                               randomFnr(),
                                                                                                listOf(barn1Fnr))
 
         beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
@@ -132,7 +131,6 @@ class BeregningServiceTest {
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(søkerFnr,
-                                                                                               randomFnr(),
                                                                                                listOf(barn1Fnr))
 
         beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
@@ -188,7 +186,6 @@ class BeregningServiceTest {
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(søkerFnr,
-                                                                                               randomFnr(),
                                                                                                listOf(barn1Fnr))
 
         beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
@@ -276,7 +273,6 @@ class BeregningServiceTest {
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
         every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(søkerFnr,
-                                                                                               randomFnr(),
                                                                                                listOf(barn1Fnr, barn2Fnr))
 
         beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
