@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.familie.ba.sak.dokument.DokGenKlient
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -20,6 +22,9 @@ class DokgenTestConfig {
         val dokumentService: DokumentService = mockk()
         every { dokumentService.hentBrevForVedtak(any()) } returns success("pdf".toByteArray())
         every { dokumentService.genererBrevForVedtak(any()) } returns TEST_PDF
+        every { dokumentService.genererManueltBrev(any(), any(), any()) } returns "pdf".toByteArray()
+        every { dokumentService.sendManueltBrev(any(), any(), any()) } returns success("journalføringsId")
+        every { dokumentService.sendVedtaksbrev(any(), any()) } just runs
         return dokumentService
     }
 
