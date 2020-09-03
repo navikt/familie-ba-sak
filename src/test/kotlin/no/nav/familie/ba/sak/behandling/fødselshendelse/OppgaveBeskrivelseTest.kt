@@ -101,14 +101,14 @@ class OppgaveBeskrivelseTest {
                 barnasVilkår = TestFaktaForBarnasVilkår(under18År = false, borMedSøker = true, giftPartnerskap = false, bosattIRiket = true)
         )
         val beskrivelse2 = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
-        Assert.assertEquals("Barnet er over 18 år.", beskrivelse2)
+        Assert.assertTrue(beskrivelse2!!.contains("er over 18 år."))
 
         every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = true, lovligOpphold = true),
                 barnasVilkår = TestFaktaForBarnasVilkår(under18År = true, borMedSøker = false, giftPartnerskap = false, bosattIRiket = true)
         )
         val beskrivelse3 = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
-        Assert.assertEquals("Barnet er ikke bosatt med mor.", beskrivelse3)
+        Assert.assertTrue(beskrivelse3!!.contains("er ikke bosatt med mor."))
     }
 
     @Test
