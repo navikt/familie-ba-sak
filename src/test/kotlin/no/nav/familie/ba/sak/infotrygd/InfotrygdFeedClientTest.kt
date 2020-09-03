@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.infotrygd
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
@@ -48,9 +49,9 @@ class InfotrygdFeedClientTest {
     fun `skal legge til fødselsnummer i infotrygd feed`() {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(
                 okJson(objectMapper.writeValueAsString(success("Create")))))
-        val request = InfotrygdFeedDto("fnr")
+        val request = InfotrygdFødselhendelsesFeedDto("fnr")
 
-        client.leggTilInfotrygdFeed(request)
+        client.sendFødselhendelsesFeedTilInfotrygd(request)
 
         verify(anyRequestedFor(anyUrl())
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
@@ -63,7 +64,8 @@ class InfotrygdFeedClientTest {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
-            client.leggTilInfotrygdFeed(InfotrygdFeedDto("fnr"))
+            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(
+                    "fnr"))
         }
     }
 
@@ -73,7 +75,8 @@ class InfotrygdFeedClientTest {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withBody("Create")))
 
         assertThrows<RuntimeException> {
-            client.leggTilInfotrygdFeed(InfotrygdFeedDto("fnr"))
+            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(
+                    "fnr"))
         }
     }
 }

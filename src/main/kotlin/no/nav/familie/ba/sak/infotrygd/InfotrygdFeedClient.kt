@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.infotrygd
 
+import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
+import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.Logger
@@ -18,15 +20,19 @@ class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") privat
                           private val environment: Environment)
     : AbstractRestClient(restOperations, "infotrygd_feed") {
 
-    fun leggTilInfotrygdFeed(infotrygdFeedDto: InfotrygdFeedDto) {
+    fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) =
+        sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"), infotrygdFødselhendelsesFeedDto)
+
+    fun sendVedtakFeedTilInfotrygd(infotrygdVedtakFeedDto: InfotrygdVedtakFeedDto) =
+         sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/vedtaksmelding"), infotrygdVedtakFeedDto)
+
+    private fun sendFeedTilInfotrygd(endpoint: URI, feed: Any) {
         if (environment.activeProfiles.contains("e2e")) {
             return
         }
 
-        val uri = URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding")
-
         return Result.runCatching {
-            postForEntity<Ressurs<String>>(uri, infotrygdFeedDto)
+            postForEntity<Ressurs<String>>(endpoint, feed)
         }.fold(
                 onSuccess = {
                 },

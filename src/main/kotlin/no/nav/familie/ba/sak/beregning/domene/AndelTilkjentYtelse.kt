@@ -106,7 +106,7 @@ data class AndelTilkjentYtelse(
 
 enum class YtelseType(val klassifisering: String) {
     ORDINÆR_BARNETRYGD("BATR"),
-    UTVIDET_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD("BAUT"),
     SMÅBARNSTILLEGG("BATRSMA"),
     EØS("BATR"),
     MANUELL_VURDERING("BATR")

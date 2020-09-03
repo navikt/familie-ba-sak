@@ -11,7 +11,10 @@ import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
@@ -60,13 +63,25 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                   behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                   opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL
 ) = Behandling(id = nesteBehandlingId(),
-               fagsak = fagsak,
-               type = behandlingType,
-               kategori = behandlingKategori,
-               underkategori = BehandlingUnderkategori.ORDINÆR,
-               opprinnelse = opprinnelse)
+        fagsak = fagsak,
+        type = behandlingType,
+        kategori = behandlingKategori,
+        underkategori = BehandlingUnderkategori.ORDINÆR,
+        opprinnelse = opprinnelse)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN, kjønn: Kjønn = Kjønn.MANN) = Person(
+        id = nestePersonId(),
+        aktørId = randomAktørId(),
+        personIdent = PersonIdent(randomFnr()),
+        fødselsdato = fødselsdato,
+        type = personType,
+        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+        navn = "",
+        kjønn = kjønn,
+        sivilstand = SIVILSTAND.UGIFT
+)
+
+fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.SØKER, kjønn: Kjønn = Kjønn.MANN) = Person(
         id = nestePersonId(),
         aktørId = randomAktørId(),
         personIdent = PersonIdent(randomFnr()),
@@ -82,15 +97,15 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
               forrigeVedtak: Vedtak? = null,
               opphørsdato: LocalDate? = null) =
         Vedtak(id = nesteVedtakId(),
-               behandling = behandling,
-               vedtaksdato = LocalDate.now(),
-               forrigeVedtakId = forrigeVedtak?.id,
-               opphørsdato = opphørsdato
+                behandling = behandling,
+                vedtaksdato = LocalDate.now(),
+                forrigeVedtakId = forrigeVedtak?.id,
+                opphørsdato = opphørsdato
         )
 
 fun lagAndelTilkjentYtelse(fom: String,
                            tom: String,
-                           ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                           ytelseType: YtelseType,
                            beløp: Int = sats(ytelseType),
                            behandling: Behandling = lagBehandling(),
                            person: Person = tilfeldigPerson(),
@@ -110,6 +125,30 @@ fun lagAndelTilkjentYtelse(fom: String,
             forrigePeriodeOffset = forrigeperiodeIdOffset
     )
 }
+
+fun lagAndelTilkjentYtelseUtvidet(fom: String,
+                                  tom: String,
+                                  ytelseType: YtelseType,
+                                  beløp: Int = sats(ytelseType),
+                                  behandling: Behandling = lagBehandling(),
+                                  person: Person = tilfeldigSøker(),
+                                  periodeIdOffset: Long? = null,
+                                  forrigeperiodeIdOffset: Long? = null,
+                                  tilkjentYtelse: TilkjentYtelse? = null): AndelTilkjentYtelse {
+
+    return AndelTilkjentYtelse(
+            personIdent = person.personIdent.ident,
+            behandlingId = behandling.id,
+            tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
+            beløp = beløp,
+            stønadFom = dato(fom),
+            stønadTom = dato(tom),
+            type = ytelseType,
+            periodeOffset = periodeIdOffset,
+            forrigePeriodeOffset = forrigeperiodeIdOffset
+    )
+}
+
 
 fun lagInitiellTilkjentYtelse(behandling: Behandling): TilkjentYtelse {
     return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
@@ -178,11 +217,9 @@ fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
 
-fun lagSøknadDTO(søkerIdent: String, annenPartIdent: String, barnasIdenter: List<String>): SøknadDTO {
+fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>): SøknadDTO {
     return SøknadDTO(
-            kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
-            annenPartIdent = annenPartIdent,
             søkerMedOpplysninger = SøkerMedOpplysninger(
                     ident = søkerIdent
             ),

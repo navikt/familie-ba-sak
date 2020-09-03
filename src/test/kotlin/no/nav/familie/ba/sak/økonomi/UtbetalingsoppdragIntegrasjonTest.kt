@@ -10,8 +10,12 @@ import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -415,7 +419,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], 0, null, 1054, "2019-03-01", "2037-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BAUT"]!![0], 0, null, 1054, "2019-03-01", "2037-02-28")
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], 1, null, 660, "2019-04-01", "2023-03-31")
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], 2, 1, 660, "2026-05-01", "2027-06-30")
     }
