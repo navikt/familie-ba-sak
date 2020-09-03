@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
@@ -29,6 +29,8 @@ class FerdigstillBehandling(
                               it.displayName)
     }.toMap()
 
+    private val antallDagerBehandling: DistributionSummary = Metrics.summary("behandling.tid")
+
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {
         LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
@@ -48,6 +50,8 @@ class FerdigstillBehandling(
         antallBehandlingResultatTyper[behandlingResultatType]?.increment()
         loggService.opprettFerdigstillBehandling(behandling)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+
+        antallDagerBehandling.record(1.0)
         return hentNesteStegForNormalFlyt(behandling)
     }
 
