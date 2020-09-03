@@ -5,29 +5,29 @@ import java.time.LocalDate
 
 internal fun morHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
     return when (!erDnummer(fakta.mor.personIdent.ident)) {
-        true -> Evaluering.ja("Søker har gyldig fødselsnummer")
-        false -> Evaluering.nei("Søker har D-nummer")
+        true -> Evaluering.ja("Mor har gyldig fødselsnummer.")
+        false -> Evaluering.nei("Mor har ikke gyldig fødselsnummer.")
     }
 }
 
 internal fun barnetHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
     return when (!erDnummer(fakta.barn.personIdent.ident)) {
-        true -> Evaluering.ja("Barnet har gyldig fødselsnummer")
-        false -> Evaluering.nei("Barnet har D-nummer")
+        true -> Evaluering.ja("Barnet har gyldig fødselsnummer.")
+        false -> Evaluering.nei("Barnet har ikke gyldig fødselsnummer.")
     }
 }
 
 internal fun barnetErUnder6mnd(fakta: Fakta): Evaluering {
     return when (LocalDate.now().minusMonths(6).isBefore(fakta.barn.fødselsdato)) {
-        true -> Evaluering.ja("Barnet er under 6 måneder")
-        false -> Evaluering.nei("Barnet er over 6 måneder")
+        true -> Evaluering.ja("Barnet er under 6 måneder.")
+        false -> Evaluering.nei("Barnet er over 6 måneder.")
     }
 }
 
 internal fun morErOver18år(fakta: Fakta): Evaluering {
     return when (LocalDate.now().isAfter(fakta.mor.fødselsdato.plusYears(18))) {
-        true -> Evaluering.ja("Søker er over 18 år")
-        false -> Evaluering.nei("Søker er under 18 år")
+        true -> Evaluering.ja("Mor er over 18 år.")
+        false -> Evaluering.nei("Mor er under 18 år.")
     }
 }
 
@@ -37,29 +37,29 @@ internal fun merEnn5mndSidenForrigeBarn(fakta: Fakta): Evaluering {
         it.fødselsdato.isAfter(barnetsFødselsdato.minusMonths(5))
     }
     return when (listenAvAndreBarnUnder5måneder.isEmpty()) {
-        true -> Evaluering.ja("Mor har ikke barn som er født med mindre enn fem måneders mellomrom fra aktuelt barn.")
-        false -> Evaluering.nei("Mor har barn som er født med mindre enn fem måneders mellomrom fra aktuelt barn.")
+        true -> Evaluering.ja("Det har gått mer enn fem måneder siden forrige barn ble født.")
+        false -> Evaluering.nei("Det har gått mindre enn fem måneder siden forrige barn ble født.")
     }
 }
 
 internal fun morLever(fakta: Fakta): Evaluering {
     return when (fakta.morLever) {
-        true -> Evaluering.ja("Det er ikke registrert dødsfall på mor")
-        false -> Evaluering.nei("Det er registrert dødsfall på mor")
+        true -> Evaluering.ja("Det er ikke registrert dødsdato på mor.")
+        false -> Evaluering.nei("Det er registrert dødsdato på mor.")
     }
 }
 
 internal fun barnetLever(fakta: Fakta): Evaluering {
     return when (fakta.barnetLever) {
-        true -> Evaluering.ja("Det er ikke registrert dødsfall på barnet")
-        false -> Evaluering.nei("Det er registrert dødsfall på barnet")
+        true -> Evaluering.ja("Det er ikke registrert dødsdato på barnet")
+        false -> Evaluering.nei("Det er registrert dødsdato på barnet")
     }
 }
 
 internal fun morHarIkkeVerge(fakta: Fakta): Evaluering {
     return when (!fakta.morHarVerge) {
-        true -> Evaluering.ja("Mor har ikke verge")
-        false -> Evaluering.nei("Mor har verge")
+        true -> Evaluering.ja("Mor er myndig.")
+        false -> Evaluering.nei("Mor er umyndig.")
     }
 }
 
