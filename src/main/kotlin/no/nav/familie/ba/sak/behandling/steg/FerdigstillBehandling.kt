@@ -17,6 +17,9 @@ import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.logg.LoggService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @Service
 class FerdigstillBehandling(
@@ -62,7 +65,8 @@ class FerdigstillBehandling(
         loggService.opprettFerdigstillBehandling(behandling)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
-        antallDagerBehandling.record(1.0)
+        val dagerSidenOpprettet = ChronoUnit.DAYS.between(behandling.opprettetTidspunkt, LocalDateTime.now())
+        antallDagerBehandling.record(dagerSidenOpprettet.toDouble())
         return hentNesteStegForNormalFlyt(behandling)
     }
 
