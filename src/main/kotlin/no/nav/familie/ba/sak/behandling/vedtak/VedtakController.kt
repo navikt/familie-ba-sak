@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
@@ -41,37 +39,33 @@ class VedtakController(
     @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse"])
     fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                      @RequestBody
-                                     periode: Periode): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
-        val nyUtbetalingBegrunnelser = vedtakService.leggTilUtbetalingBegrunnelse(fagsakId = fagsakId,
-                                                                                  periode = periode)
+                                     periode: Periode): ResponseEntity<Ressurs<RestFagsak>> {
+        vedtakService.leggTilUtbetalingBegrunnelse(fagsakId = fagsakId,
+                                                   periode = periode)
 
-        return ResponseEntity.ok(Ressurs.success(nyUtbetalingBegrunnelser))
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @PutMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/{utbetalingBegrunnelseId}"])
     fun endreUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                    @PathVariable utbetalingBegrunnelseId: Long,
                                    @RequestBody
-                                   restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
-        val nyUtbetalingBegrunnelser = vedtakService.endreUtbetalingBegrunnelse(fagsakId = fagsakId,
-                                                                                restPutUtbetalingBegrunnelse = restPutUtbetalingBegrunnelse,
-                                                                                utbetalingBegrunnelseId = utbetalingBegrunnelseId)
+                                   restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse): ResponseEntity<Ressurs<RestFagsak>> {
+        vedtakService.endreUtbetalingBegrunnelse(fagsakId = fagsakId,
+                                                 restPutUtbetalingBegrunnelse = restPutUtbetalingBegrunnelse,
+                                                 utbetalingBegrunnelseId = utbetalingBegrunnelseId)
 
-        return ResponseEntity.ok(Ressurs.success(nyUtbetalingBegrunnelser.map {
-            it.toRestUtbetalingBegrunnelse()
-        }))
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @DeleteMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/{utbetalingBegrunnelseId}"])
     fun slettUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                    @PathVariable
-                                   utbetalingBegrunnelseId: Long): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
-        val nyUtbetalingBegrunnelser = vedtakService.slettUtbetalingBegrunnelse(fagsakId = fagsakId,
-                                                                                utbetalingBegrunnelseId = utbetalingBegrunnelseId)
+                                   utbetalingBegrunnelseId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+        vedtakService.slettUtbetalingBegrunnelse(fagsakId = fagsakId,
+                                                 utbetalingBegrunnelseId = utbetalingBegrunnelseId)
 
-        return ResponseEntity.ok(Ressurs.success(nyUtbetalingBegrunnelser.map {
-            it.toRestUtbetalingBegrunnelse()
-        }))
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class RestVedtak(
         val aktiv: Boolean,
@@ -19,7 +20,8 @@ data class RestUtbetalingBegrunnelse(
         val fom: LocalDate,
         val tom: LocalDate,
         val resultat: BehandlingResultatType?,
-        var behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse?
+        var behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse?,
+        val opprettetTidspunkt: LocalDateTime
 )
 
 data class RestPutUtbetalingBegrunnelse(
@@ -38,8 +40,8 @@ fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
         vedtaksdato = this.vedtaksdato,
         id = this.id,
         utbetalingBegrunnelser = this.utbetalingBegrunnelser.map {
-                it.toRestUtbetalingBegrunnelse()
-        }
+            it.toRestUtbetalingBegrunnelse()
+        }.sortedBy { it.opprettetTidspunkt }
 )
 
 fun UtbetalingBegrunnelse.toRestUtbetalingBegrunnelse() =
@@ -48,6 +50,7 @@ fun UtbetalingBegrunnelse.toRestUtbetalingBegrunnelse() =
                 fom = this.fom,
                 tom = this.tom,
                 resultat = this.resultat,
-                behandlingresultatOgVilkårBegrunnelse = this.behandlingresultatOgVilkårBegrunnelse
+                behandlingresultatOgVilkårBegrunnelse = this.behandlingresultatOgVilkårBegrunnelse,
+                opprettetTidspunkt = this.opprettetTidspunkt
         )
 
