@@ -62,10 +62,10 @@ class MalerService(
 
     fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
         val enhetskode = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
-        val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt?.toString()?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
+        val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
 
         val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
-                soknadDato = søknadsDato,
+                soknadDato = søknadsDato.toLocalDate().tilDagMånedÅr().toString(),
                 fritekst = manueltBrevRequest.fritekst,
                 enhet = norg2RestClient.hentEnhet(enhetskode).navn,
                 saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
@@ -166,7 +166,7 @@ class MalerService(
     }
 
     private fun etterbetalingsbeløpFraSimulering() = 0 //TODO Må legges inn senere når simulering er implementert.
-                                                       // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
+    // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
 
     private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
         val behandling = vedtak.behandling
