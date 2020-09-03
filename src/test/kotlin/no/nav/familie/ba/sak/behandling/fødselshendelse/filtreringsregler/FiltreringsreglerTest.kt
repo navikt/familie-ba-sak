@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -34,9 +35,7 @@ internal class FiltreringsreglerTest {
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.MOR_HAR_GYLDIG_FOEDSELSNUMMER.spesifikasjon.identifikator)
+        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_HAR_GYLDIG_FOEDSELSNUMMER)
     }
 
     @Test
@@ -49,9 +48,7 @@ internal class FiltreringsreglerTest {
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.BARNET_HAR_GYLDIG_FOEDSELSNUMMER.spesifikasjon.identifikator)
+        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARNET_HAR_GYLDIG_FOEDSELSNUMMER)
     }
 
     @Test
@@ -64,9 +61,12 @@ internal class FiltreringsreglerTest {
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.BARNET_ER_UNDER_6_MND.spesifikasjon.identifikator)
+        val resultaterMedNei = evaluering.children.filter { it.resultat == Resultat.NEI }
+        assertThat(2).isEqualTo(resultaterMedNei.size)
+        assertThat(resultaterMedNei.map {it.identifikator}.containsAll(listOf(
+                Filtreringsregler.BARNET_ER_UNDER_6_MND.spesifikasjon.identifikator,
+                Filtreringsregler.BARN_FØDT_FØR_ETTERBETALING_INNTRER.spesifikasjon.identifikator)
+        ))
     }
 
     @Test
@@ -79,9 +79,7 @@ internal class FiltreringsreglerTest {
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.MOR_ER_OVER_18_AAR.spesifikasjon.identifikator)
+        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_ER_OVER_18_AAR)
     }
 
     @Test
@@ -94,9 +92,7 @@ internal class FiltreringsreglerTest {
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.identifikator)
+        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
     }
 
     @Test
@@ -109,9 +105,7 @@ internal class FiltreringsreglerTest {
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = false, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.MOR_LEVER.spesifikasjon.identifikator)
+        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_LEVER)
     }
 
     @Test
@@ -124,9 +118,7 @@ internal class FiltreringsreglerTest {
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = false, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.BARNET_LEVER.spesifikasjon.identifikator)
+        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARNET_LEVER)
     }
 
     @Test
@@ -139,8 +131,25 @@ internal class FiltreringsreglerTest {
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = true))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.MOR_HAR_IKKE_VERGE.spesifikasjon.identifikator)
+        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_HAR_IKKE_VERGE)
+    }
+
+    @Test
+    fun `Regelevaluering skal resultere i NEI når perioden fra barnets fødselsdato til behandlingsdato medfører etterbetaling`() {
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
+        val barnet = tilfeldigPerson(LocalDate.now().minusMonths(3)).copy(personIdent = gyldigFnr)
+        val restenAvBarna: List<PersonInfo> = listOf()
+
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
+                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+
+        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARN_FØDT_FØR_ETTERBETALING_INNTRER)
+    }
+
+    private fun assertEnesteRegelMedResultatNei(evalueringer: List<Evaluering>, filtreringsRegel: Filtreringsregler) {
+        assertThat(1).isEqualTo(evalueringer.filter { it.resultat == Resultat.NEI }.size)
+        assertThat(filtreringsRegel.spesifikasjon.identifikator)
+                .isEqualTo(evalueringer.filter { it.resultat == Resultat.NEI }[0].identifikator)
     }
 }

@@ -44,7 +44,12 @@ enum class Filtreringsregler(val spesifikasjon: Spesifikasjon<Fakta>) {
             "Mor har ikke verge",
             "MOR_HAR_IKKE_VERGE",
             implementasjon = { morHarIkkeVerge(this) })
-    );
+    ),
+    BARN_FØDT_FØR_ETTERBETALING_INNTRER(Spesifikasjon(
+            "Barnet er født før etterbetaling inntrer",
+            "BARN_FØDT_FØR_ETTERBETALING_INNTRER",
+            implementasjon = { barnetsFødselsdatoInnebærerIkkeEtterbetaling(this)}
+    ));
 
     override fun toString(): String {
         return this.spesifikasjon.beskrivelse

@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 
+import no.nav.familie.ba.sak.common.erFraInneværendeEllerForrigeMåned
+import no.nav.familie.ba.sak.common.erFraInneværendeMåned
 import no.nav.nare.core.evaluations.Evaluering
 import java.time.LocalDate
 
@@ -60,6 +62,17 @@ internal fun morHarIkkeVerge(fakta: Fakta): Evaluering {
     return when (!fakta.morHarVerge) {
         true -> Evaluering.ja("Mor har ikke verge")
         false -> Evaluering.nei("Mor har verge")
+    }
+}
+
+internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(fakta: Fakta): Evaluering {
+    val dagIMånedenForDagensDato = LocalDate.now().dayOfMonth
+    return when {
+        dagIMånedenForDagensDato < 20 && !fakta.barn.fødselsdato.erFraInneværendeEllerForrigeMåned() ->
+            Evaluering.nei("Barnets fødseldato vil med dagens dato innebære etterbetaling ved vedtak")
+        dagIMånedenForDagensDato >= 20 && !fakta.barn.fødselsdato.erFraInneværendeMåned() ->
+            Evaluering.nei("Barnets fødseldato vil med dagens dato innebære etterbetaling ved vedtak")
+        else -> Evaluering.ja("Barnets fødseldato vil med dagens dato ikke innebære etterbetaling")
     }
 }
 
