@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.beregnUtbetalingsperioderUtenKlassifisering
@@ -88,8 +89,9 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                     UtbetalingsDetaljDVH(
                             person = PersonDVH(
                                     rolle = personForAndel.type.name,
-                                    statsborgerskap = emptyList(), // TODO lag liste med statsborgerskap
-                                    bostedsland = "NO", //TODO hvor finner vi bostedsland?
+                                    statsborgerskap = personForAndel.statsborgerskap?.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode }
+                                            ?: error("Fant ingen statsborgerskap på personen"),
+                                    bostedsland = "NOR", //TODO hvor finner vi bostedsland?
                                     primærland = "IKKE IMPLMENTERT",
                                     sekundærland = "IKKE IMPLEMENTERT",
                                     delingsprosentOmsorg = 0, // TODO ikke implementert
