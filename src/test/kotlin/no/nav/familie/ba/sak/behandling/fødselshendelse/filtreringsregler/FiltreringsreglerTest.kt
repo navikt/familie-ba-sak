@@ -143,4 +143,21 @@ internal class FiltreringsreglerTest {
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
                 Filtreringsregler.MOR_HAR_IKKE_VERGE.spesifikasjon.identifikator)
     }
+
+    @Test
+    fun `Filtreringsreglene skal følge en fagbestemt rekkefølge`() {
+        val fagbestemtFiltreringsregelrekkefølge = listOf(
+                Filtreringsregler.MOR_HAR_GYLDIG_FOEDSELSNUMMER,
+                Filtreringsregler.BARNET_HAR_GYLDIG_FOEDSELSNUMMER,
+                Filtreringsregler.BARNET_ER_UNDER_6_MND,
+                Filtreringsregler.BARNET_LEVER,
+                Filtreringsregler.MOR_LEVER,
+                Filtreringsregler.MOR_ER_OVER_18_AAR,
+                Filtreringsregler.MOR_HAR_IKKE_VERGE,
+                Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN
+        )
+        assertThat(Filtreringsregler.values().zip(fagbestemtFiltreringsregelrekkefølge)
+                           .all { (x, y) -> x == y }
+        ).isTrue()
+    }
 }

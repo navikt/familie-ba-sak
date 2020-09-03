@@ -27,15 +27,15 @@ class OpprettOppgaveTask(
     }.toMap()
 
     override fun doTask(task: Task) {
-        val opprettOppgaveDTO = objectMapper.readValue(task.payload, OpprettOppgaveTaskDTO::class.java)
+        val opprettOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettOppgaveTaskDTO::class.java)
         task.metadata["oppgaveId"] = oppgaveService.opprettOppgave(
-                opprettOppgaveDTO.behandlingId,
-                opprettOppgaveDTO.oppgavetype,
-                opprettOppgaveDTO.fristForFerdigstillelse,
-                beskrivelse = opprettOppgaveDTO.beskrivelse
+                opprettOppgaveTaskDTO.behandlingId,
+                opprettOppgaveTaskDTO.oppgavetype,
+                opprettOppgaveTaskDTO.fristForFerdigstillelse,
+                beskrivelse = opprettOppgaveTaskDTO.beskrivelse
         )
         taskRepository.saveAndFlush(task)
-        antallOppgaveTyper[opprettOppgaveDTO.oppgavetype]?.increment()
+        antallOppgaveTyper[opprettOppgaveTaskDTO.oppgavetype]?.increment()
     }
 
     companion object {
