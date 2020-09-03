@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.logg.LoggService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -38,7 +37,7 @@ class FerdigstillBehandling(
                               it.displayName)
     }.toMap()
 
-    private val antallDagerBehandling: DistributionSummary = Metrics.summary("behandling.tid")
+    private val behandlingstid: DistributionSummary = Metrics.summary("behandling.tid")
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {
@@ -66,7 +65,7 @@ class FerdigstillBehandling(
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
         val dagerSidenOpprettet = ChronoUnit.DAYS.between(behandling.opprettetTidspunkt, LocalDateTime.now())
-        antallDagerBehandling.record(dagerSidenOpprettet.toDouble())
+        behandlingstid.record(dagerSidenOpprettet.toDouble())
         return hentNesteStegForNormalFlyt(behandling)
     }
 
