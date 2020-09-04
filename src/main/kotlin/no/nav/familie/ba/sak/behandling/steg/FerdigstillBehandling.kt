@@ -64,7 +64,8 @@ class FerdigstillBehandling(
         loggService.opprettFerdigstillBehandling(behandling)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
 
-        val dagerSidenOpprettet = ChronoUnit.DAYS.between(behandling.opprettetTidspunkt, LocalDateTime.now())
+        //val dagerSidenOpprettet = ChronoUnit.DAYS.between(behandling.opprettetTidspunkt, LocalDateTime.now())
+        val dagerSidenOpprettet = ChronoUnit.DAYS.between(LocalDateTime.now().minusDays(2), LocalDateTime.now())
         behandlingstid.record(dagerSidenOpprettet.toDouble())
         return hentNesteStegForNormalFlyt(behandling)
     }
