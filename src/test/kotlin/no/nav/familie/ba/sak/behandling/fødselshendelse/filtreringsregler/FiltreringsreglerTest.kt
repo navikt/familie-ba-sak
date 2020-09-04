@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.util.FnrGenerator
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import org.assertj.core.api.Assertions.assertThat
@@ -10,8 +13,8 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class FiltreringsreglerTest {
-    val dnummer = PersonIdent("42345678910")
-    val gyldigFnr = PersonIdent("12345678910")
+    val dnummer = PersonIdent(FnrGenerator.generer(erDnummer = true))
+    val gyldigFnr = PersonIdent(FnrGenerator.generer())
 
     @Test
     fun `Regelevaluering skal resultere i Ja`() {
@@ -135,21 +138,54 @@ internal class FiltreringsreglerTest {
     }
 
     @Test
-    fun `Regelevaluering skal resultere i NEI når perioden fra barnets fødselsdato til behandlingsdato medfører etterbetaling`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet = tilfeldigPerson(LocalDate.now().minusMonths(3)).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<PersonInfo> = listOf()
+    fun `Regelevaluering i forhold til den 21 i hver måned og barnets fødselsdato med hensyn til etterbetaling`() {
+        if (LocalDate.now().dayOfMonth < 21) {
+            assertRegelBasertPåDagensDato(
+                    LocalDate.now().minusMonths(2).sisteDagIMåned(), Resultat.NEI)
+            assertRegelBasertPåDagensDato(
+                    LocalDate.now().minusMonths(1).withDayOfMonth(1), Resultat.JA)
+        } else {
+            assertRegelBasertPåDagensDato(
+                    LocalDate.now().sisteDagIForrigeMåned(), Resultat.NEI)
+            assertRegelBasertPåDagensDato(
+                    LocalDate.now().withDayOfMonth(1), Resultat.JA)
+        }
+    }
 
+    private fun assertRegelBasertPåDagensDato(fødselsdatoForBarn: LocalDate, forventetResultat: Resultat) {
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
+        val barnet = tilfeldigPerson(fødselsdatoForBarn).copy(personIdent = gyldigFnr)
+        val restenAvBarna: List<PersonInfo> = listOf()
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARN_FØDT_FØR_ETTERBETALING_INNTRER)
+        assertThat(forventetResultat).isEqualTo(evaluering.resultat)
+        if (forventetResultat == Resultat.NEI)
+            assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARN_FØDT_FØR_ETTERBETALING_INNTRER)
     }
 
     private fun assertEnesteRegelMedResultatNei(evalueringer: List<Evaluering>, filtreringsRegel: Filtreringsregler) {
         assertThat(1).isEqualTo(evalueringer.filter { it.resultat == Resultat.NEI }.size)
         assertThat(filtreringsRegel.spesifikasjon.identifikator)
                 .isEqualTo(evalueringer.filter { it.resultat == Resultat.NEI }[0].identifikator)
+    }
+
+    @Test
+    fun `Filtreringsreglene skal følge en fagbestemt rekkefølge`() {
+        val fagbestemtFiltreringsregelrekkefølge = listOf(
+                Filtreringsregler.MOR_HAR_GYLDIG_FOEDSELSNUMMER,
+                Filtreringsregler.BARNET_HAR_GYLDIG_FOEDSELSNUMMER,
+                Filtreringsregler.BARNET_ER_UNDER_6_MND,
+                Filtreringsregler.BARNET_LEVER,
+                Filtreringsregler.MOR_LEVER,
+                Filtreringsregler.MOR_ER_OVER_18_AAR,
+                Filtreringsregler.MOR_HAR_IKKE_VERGE,
+                Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
+                Filtreringsregler.BARN_FØDT_FØR_ETTERBETALING_INNTRER
+        )
+        assertThat(Filtreringsregler.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
+        assertThat(Filtreringsregler.values().zip(fagbestemtFiltreringsregelrekkefølge)
+                           .all { (x, y) -> x == y }
+        ).isTrue()
     }
 }
