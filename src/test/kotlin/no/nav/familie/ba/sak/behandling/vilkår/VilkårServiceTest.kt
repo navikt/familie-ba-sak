@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 @SpringBootTest
@@ -255,7 +256,10 @@ class VilkårServiceTest(
                                                                         Resultat.JA,
                                                                         LocalDate.of(2010, 6, 2),
                                                                         LocalDate.of(2011, 9, 1),
-                                                                        ""))
+                                                                        "",
+                                                                        "",
+                                                                        LocalDateTime.now(),
+                                                                        behandling.id))
 
         val behandlingResultatEtterEndring = behandlingResultatService.oppdater(behandlingResultat2)
         val personResultatEtterEndring = behandlingResultatEtterEndring.personResultater.find { it.personIdent == barnFnr }!!
