@@ -1,8 +1,14 @@
 name: Build-Deploy-Preprod-dispatch
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Image-ref
+        default: ${{ github.sha }}
+        required: false
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.event.inputs.version }}
 jobs:
   deploy-to-dev:
     name: Bygg app/image, push til github, deploy til dev-fss
