@@ -11,7 +11,6 @@ object DevLauncher {
                           "mock-infotrygd-feed",
                           "mock-infotrygd-barnetrygd",
                           "mock-sts",
-//                          "kafka-lokal",
                           "mock-pdl"
                 )
         app.run(*args)
