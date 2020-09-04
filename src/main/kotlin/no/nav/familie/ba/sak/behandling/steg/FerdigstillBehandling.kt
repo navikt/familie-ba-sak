@@ -38,6 +38,7 @@ class FerdigstillBehandling(
     }.toMap()
 
     private val behandlingstid: DistributionSummary = Metrics.summary("behandling.tid")
+    private val behandlingstidtest: DistributionSummary = Metrics.summary("behandling.tid.test")
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {
@@ -67,6 +68,8 @@ class FerdigstillBehandling(
         //val dagerSidenOpprettet = ChronoUnit.DAYS.between(behandling.opprettetTidspunkt, LocalDateTime.now())
         val dagerSidenOpprettet = ChronoUnit.DAYS.between(LocalDateTime.now().minusDays(2), LocalDateTime.now())
         behandlingstid.record(dagerSidenOpprettet.toDouble())
+        behandlingstidtest.record(5.0)
+        LOG.info("Recorded metrics")
         return hentNesteStegForNormalFlyt(behandling)
     }
 
