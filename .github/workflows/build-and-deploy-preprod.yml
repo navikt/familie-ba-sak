@@ -1,6 +1,7 @@
 name: Build-Deploy-Preprod
 on:
   pull_request:
+  workflow_dispatch:
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
