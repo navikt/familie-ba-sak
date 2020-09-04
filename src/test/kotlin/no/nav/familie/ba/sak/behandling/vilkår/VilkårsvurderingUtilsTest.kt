@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class VilkårsvurderingUtilsTest {
 
@@ -60,7 +61,10 @@ class VilkårsvurderingUtilsTest {
     fun `periode erstattes dersom en periode med overlappende tidsintervall legges til`() {
         val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat,
                                                     LocalDate.of(2010, 6, 2), LocalDate.of(2011, 9, 1),
-                                                    "")
+                                                    "",
+                                                    "",
+                                                    LocalDateTime.now(),
+                                                    behandling.id)
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      restVilkårResultat)
 
@@ -78,7 +82,10 @@ class VilkårsvurderingUtilsTest {
     fun `periode splittes dersom en periode med inneklemt tidsintervall legges til`() {
         val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat,
                                                     LocalDate.of(2010, 3, 5), LocalDate.of(2010, 5, 20),
-                                                    "")
+                                                    "",
+                                                    "",
+                                                    LocalDateTime.now(),
+                                                    behandling.id)
 
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      restVilkårResultat)
@@ -105,7 +112,10 @@ class VilkårsvurderingUtilsTest {
     fun `fom-dato flyttes korrekt`() {
         val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat,
                                                     LocalDate.of(2010, 4, 2), LocalDate.of(2010, 8, 1),
-                                                    "")
+                                                    "",
+                                                    "",
+                                                    LocalDateTime.now(),
+                                                    behandling.id)
 
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      restVilkårResultat)
@@ -126,7 +136,10 @@ class VilkårsvurderingUtilsTest {
     fun `tom-dato flyttes korrekt`() {
         val restVilkårResultat = RestVilkårResultat(2, vilkår, resultat,
                                                     LocalDate.of(2010, 6, 2), LocalDate.of(2010, 9, 1),
-                                                    "")
+                                                    "",
+                                                    "",
+                                                    LocalDateTime.now(),
+                                                    behandling.id)
 
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      restVilkårResultat)
@@ -236,8 +249,15 @@ class VilkårsvurderingUtilsTest {
                                             regelInput = null,
                                             behandlingId = behandlingResultat.behandling.id,
                                             regelOutput = null)
-        val restVilkårResultat = RestVilkårResultat(id = 1, vilkårType = vilkår, resultat = resultat,
-                                                    periodeFom = LocalDate.of(2020, 6, 1), periodeTom = null, begrunnelse = "")
+        val restVilkårResultat = RestVilkårResultat(id = 1,
+                                                    vilkårType = vilkår,
+                                                    resultat = resultat,
+                                                    periodeFom = LocalDate.of(2020, 6, 1),
+                                                    periodeTom = null,
+                                                    begrunnelse = "",
+                                                    endretAv = "",
+                                                    endretTidspunkt = LocalDateTime.now(),
+                                                    behandlingId = behandling.id)
 
         VilkårsvurderingUtils.tilpassVilkårForEndretVilkår(personResultat, vilkårResultat, restVilkårResultat)
 
