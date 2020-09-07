@@ -32,12 +32,6 @@ spring:
       sasl:
         mechanism: PLAIN
         jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${CREDENTIAL_USERNAME}" password="${CREDENTIAL_PASSWORD}";
-    consumer:
-      group-id: srvfamilie-ba-sak
-      auto-offset-reset: latest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      enable-auto-commit: false
     producer:
       group-id: srvfamilie-ba-sak
       acks: 1
@@ -54,6 +48,9 @@ funksjonsbrytere:
     uri: https://unleash.nais.adeo.no/api/
     cluster: ${NAIS_CLUSTER_NAME}
     applicationName: ${NAIS_APP_NAME}
+  vedtak:
+    producer:
+      enabled: true
 
 management:
   endpoint.health.show-details: always
