@@ -1,14 +1,12 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.Feil
@@ -40,8 +38,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
-        // TODO: journalbehandling til å ha en liste av journalpostenr
-        return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.FERDIGSTILT) {
+        return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.AVSLUTTET) {
             val behandling = Behandling(fagsak = fagsak,
                                         opprinnelse = nyBehandling.behandlingOpprinnelse,
                                         type = nyBehandling.behandlingType,
@@ -53,7 +50,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             behandling
         } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
             aktivBehandling.steg = initSteg(nyBehandling.behandlingType)
-            aktivBehandling.status = BehandlingStatus.OPPRETTET
+            aktivBehandling.status = initStatus()
             lagre(aktivBehandling)
         } else {
             throw Feil(message = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
@@ -107,7 +104,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {
-        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.FATTER_VEDTAK)
     }
 
     fun oppdaterStatusPåBehandling(behandlingId: Long, status: BehandlingStatus): Behandling {
@@ -126,8 +123,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
-    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsMåned: LocalDate): List<Behandling> {
-        val ferdigstilteBehandlinger = behandlingRepository.findByFagsakAndFerdigstiltOrIverksatt(fagsakId)
+    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long,
+                                                          utbetalingsMåned: LocalDate = LocalDate.now()): List<Behandling> {
+        val ferdigstilteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
 
         val tilkjenteYtelser = ferdigstilteBehandlinger
                 .sortedBy { it.opprettetTidspunkt }
@@ -144,6 +142,16 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
 
         return hentGjeldendeForFagsak(fagsakId)
+    }
+
+
+    // TODO verifiser at dette blir riktig? Må man disable dette flagget for eventuelle gamle behandlinger?
+    fun ferdigstillBehandling(behandling: Behandling, behandlingResultatType: BehandlingResultatType) {
+        behandling.gjeldendeForUtbetaling =
+                behandlingResultatType == BehandlingResultatType.INNVILGET || behandlingResultatType == BehandlingResultatType.DELVIS_INNVILGET
+        behandling.status = BehandlingStatus.AVSLUTTET
+
+        lagre(behandling)
     }
 
     private fun hentBehandlingSomSkalOpphøres(tilkjentYtelse: TilkjentYtelse): Behandling {

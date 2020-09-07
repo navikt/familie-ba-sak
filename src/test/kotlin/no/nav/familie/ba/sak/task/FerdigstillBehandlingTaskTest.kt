@@ -71,7 +71,7 @@ class FerdigstillBehandlingTaskTest {
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = StegType.FERDIGSTILLE_BEHANDLING)
 
         return FerdigstillBehandlingTask.opprettTask(personIdent = fnr, behandlingsId = behandling.id)
@@ -86,10 +86,10 @@ class FerdigstillBehandlingTaskTest {
         ferdigstillBehandlingTask.onCompletion(testTask)
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
-        Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling.status)
+        Assertions.assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
-        Assertions.assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
+        Assertions.assertEquals(FagsakStatus.LØPENDE, fagsakService.hentFagsakStatus(ferdigstiltFagsak))
     }
 
     @Test
@@ -101,9 +101,9 @@ class FerdigstillBehandlingTaskTest {
         ferdigstillBehandlingTask.onCompletion(testTask)
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
-        Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling.status)
+        Assertions.assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
-        Assertions.assertEquals(FagsakStatus.STANSET, ferdigstiltFagsak.status)
+        Assertions.assertEquals(FagsakStatus.STANSET, fagsakService.hentFagsakStatus(ferdigstiltFagsak))
     }
 }

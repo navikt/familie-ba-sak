@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -47,11 +46,6 @@ class StatusFraOppdrag(
 
                         error("Mottok status '$it' fra oppdrag")
                     } else {
-                        behandlingService.oppdaterStatusPåBehandling(
-                                statusFraOppdragDTO.behandlingsId,
-                                BehandlingStatus.IVERKSATT
-                        )
-
                         if (behandling.type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
                             && behandling.type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
                             && behandling.type !== BehandlingType.TEKNISK_OPPHØR) {

@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
@@ -18,10 +18,7 @@ import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.nare.core.evaluations.Resultat
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -62,6 +59,9 @@ class ØkonomiIntegrasjonTest {
     lateinit var beregningService: BeregningService
 
     @Autowired
+    lateinit var stegService: StegService
+
+    @Autowired
     private lateinit var vedtakService: VedtakService
 
     @Test
@@ -86,7 +86,7 @@ class ØkonomiIntegrasjonTest {
 
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val behandlingResultat = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
 
@@ -105,16 +105,15 @@ class ØkonomiIntegrasjonTest {
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
         vedtak!!.vedtaksdato = LocalDate.now()
-        vedtakService.lagreEllerOppdater(vedtak!!)
+        vedtakService.lagreEllerOppdater(vedtak)
 
         val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
-        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak!!.id, "ansvarligSaksbehandler")
-
-        val oppdatertBehandling = behandlingService.hent(behandling.id)
-        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_IVERKSETTING, oppdatertBehandling.status)
+        assertDoesNotThrow {
+            økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak.id, "ansvarligSaksbehandler")
+        }
     }
 
     @Test
@@ -149,11 +148,8 @@ class ØkonomiIntegrasjonTest {
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak.id, "ansvarligSaksbehandler")
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
         behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
-
-        fagsak.status = FagsakStatus.LØPENDE
-        fagsakService.lagre(fagsak)
 
         val søkerOgBehandlingListe = behandlingService.hentGjeldendeBehandlingerForLøpendeFagsaker()
 

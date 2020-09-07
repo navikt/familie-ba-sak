@@ -11,10 +11,10 @@ data class RestFagsak(
         val status: FagsakStatus,
         val behandlinger: List<RestBehandling>)
 
-fun Fagsak.toRestFagsak(restBehandlinger: List<RestBehandling>) = RestFagsak(
+fun Fagsak.toRestFagsak(restBehandlinger: List<RestBehandling>, status: FagsakStatus) = RestFagsak(
         opprettetTidspunkt = this.opprettetTidspunkt,
         id = this.id,
         søkerFødselsnummer = this.hentAktivIdent().ident,
-        status = this.status,
+        status = status,
         behandlinger = restBehandlinger
 )

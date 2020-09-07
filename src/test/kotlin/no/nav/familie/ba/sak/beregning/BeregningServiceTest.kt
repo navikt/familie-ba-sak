@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.beregning
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
@@ -41,7 +42,11 @@ class BeregningServiceTest {
 
         every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
-        every { fagsakService.hentRestFagsak(any()) } answers { Ressurs.success(defaultFagsak.toRestFagsak(emptyList())) }
+        every { fagsakService.hentRestFagsak(any()) } answers {
+            Ressurs.success(defaultFagsak.toRestFagsak(emptyList(), fagsakService.hentFagsakStatus(
+                    defaultFagsak)))
+        }
+        every { fagsakService.hentFagsakStatus(any()) } answers { FagsakStatus.UNDER_BEHANDLING }
     }
 
     @Test

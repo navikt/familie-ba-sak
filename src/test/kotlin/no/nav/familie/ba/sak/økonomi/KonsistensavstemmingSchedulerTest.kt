@@ -6,7 +6,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -80,7 +79,6 @@ class KonsistensavstemmingSchedulerTest {
         val dagensDato = LocalDate.now()
         val nyBatch = Batch(kjøreDato = dagensDato)
         batchService.lagreNyStatus(nyBatch, KjøreStatus.LEDIG)
-        fagsakService.hentLøpendeFagsaker().forEach { fagsakService.oppdaterStatus(it, FagsakStatus.STANSET) }
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 

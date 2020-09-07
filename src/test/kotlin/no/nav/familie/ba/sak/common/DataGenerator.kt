@@ -53,8 +53,7 @@ fun nestePersonId(): Long {
     return gjeldendePersonId
 }
 
-val defaultFagsak = Fagsak(1,
-                           FagsakStatus.OPPRETTET).also {
+val defaultFagsak = Fagsak(1).also {
     it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr()), opprettetTidspunkt = LocalDateTime.now()))
 }
 

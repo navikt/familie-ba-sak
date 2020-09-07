@@ -42,6 +42,6 @@ class MockFagsakConfig (
         stegService.håndterPersongrunnlag(førsteBehandling,
                 RegistrerPersongrunnlagDTO(ident = "12345678910", barnasIdenter = listOf("31245678910")))
 
-        behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.FERDIGSTILT)
+        behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
     }
 }
