@@ -7,9 +7,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
@@ -217,18 +215,17 @@ fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
 
-fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>): SøknadDTO {
-    return SøknadDTO(
+fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>): SøknadDTOGammel {
+    return SøknadDTOGammel(
             underkategori = BehandlingUnderkategori.ORDINÆR,
-            søkerMedOpplysninger = SøkerMedOpplysninger(
+            søkerMedOpplysninger = SøkerMedOpplysningerGammel(
                     ident = søkerIdent
             ),
             barnaMedOpplysninger = barnasIdenter.map {
-                BarnMedOpplysninger(
+                BarnMedOpplysningerGammel(
                         ident = it
                 )
-            },
-            endringAvOpplysningerBegrunnelse = ""
+            }
     )
 }
 
