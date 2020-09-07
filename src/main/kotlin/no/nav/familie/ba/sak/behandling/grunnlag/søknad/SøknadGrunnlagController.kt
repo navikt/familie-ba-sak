@@ -22,7 +22,7 @@ class SøknadGrunnlagController(
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
-    @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag/v2"],
+    @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag/v3"],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registrereSøknadOgHentPersongrunnlagV2(@PathVariable behandlingId: Long,
                                                @RequestBody
@@ -40,7 +40,7 @@ class SøknadGrunnlagController(
                 )
     }
 
-    @GetMapping(path = ["/{behandlingId}/søknad"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping(path = ["/{behandlingId}/søknad/v3"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentSøknadGammel(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<SøknadDTOGammel>> {
         return Result.runCatching { søknadGrunnlagService.hentAktiv(behandlingId) }
                 .fold(
@@ -57,7 +57,7 @@ class SøknadGrunnlagController(
                 )
     }
 
-    @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag/v3"],
+    @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag"],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registrereSøknadOgHentPersongrunnlagV3(@PathVariable behandlingId: Long,
                                                @RequestBody
@@ -75,7 +75,7 @@ class SøknadGrunnlagController(
                 )
     }
 
-    @GetMapping(path = ["/{behandlingId}/søknad/v3"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping(path = ["/{behandlingId}/søknad"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentSøknadV3(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<SøknadDTO>> {
         return Result.runCatching { søknadGrunnlagService.hentAktiv(behandlingId) }
                 .fold(

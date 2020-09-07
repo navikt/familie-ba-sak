@@ -68,6 +68,16 @@ internal class TidTest {
     }
 
     @Test
+    fun `dato i inneværende eller forrige måned`() {
+        assertTrue(LocalDate.now().erFraInneværendeMåned())
+        assertTrue(LocalDate.now().erFraInneværendeEllerForrigeMåned())
+        assertFalse(LocalDate.now().minusMonths(1).erFraInneværendeMåned())
+        assertTrue(LocalDate.now().minusMonths(1).erFraInneværendeEllerForrigeMåned())
+        assertFalse(LocalDate.now().minusYears(1).erFraInneværendeMåned())
+        assertFalse(LocalDate.now().minusYears(1).erFraInneværendeEllerForrigeMåned())
+    }
+
+    @Test
     fun `skal bestemme om periode er etterfølgende periode`() {
         val personIdent = randomFnr()
         val behandling = lagBehandling()
