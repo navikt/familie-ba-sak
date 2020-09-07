@@ -19,7 +19,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
     }
@@ -31,7 +31,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
@@ -46,7 +46,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
@@ -61,7 +61,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
@@ -76,7 +76,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
@@ -91,7 +91,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(4)))
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
@@ -106,7 +106,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = false, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = false, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
@@ -121,7 +121,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = false, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = false, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
@@ -136,7 +136,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = true))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = true))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)

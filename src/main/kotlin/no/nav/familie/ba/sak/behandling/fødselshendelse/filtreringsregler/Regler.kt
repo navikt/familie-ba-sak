@@ -11,8 +11,7 @@ internal fun morHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
 }
 
 internal fun barnetHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
-
-    return when(!fakta.barn.any{ !erDnummer(it.personIdent.ident) }){
+    return when(!fakta.barn.any{ erDnummer(it.personIdent.ident) }){
         true -> Evaluering.ja("Alle barn har gyldig fødselsnummer.")
         false -> Evaluering.nei("Minst et barn har ikke gyldig fødselsnummer.")
     }
@@ -33,15 +32,9 @@ internal fun morErOver18år(fakta: Fakta): Evaluering {
 }
 
 internal fun merEnn5mndSidenForrigeBarn(fakta: Fakta): Evaluering {
-    val noenUnderFemMåneder  = fakta.barn.any {
-        val barnetsFødselsdato = it.fødselsdato
-        val listenAvAndreBarnUnder5måneder = fakta.restenAvBarna.filter {
-            it.fødselsdato.isAfter(barnetsFødselsdato.minusMonths(5))
-        }
-        listenAvAndreBarnUnder5måneder.isEmpty()
-    }
-
-    return when (!noenUnderFemMåneder) {
+    return when (!fakta.barn.any{
+        fakta.restenAvBarna.any{it.fødselsdato.isAfter(it.fødselsdato.minusMonths(5))}
+    }) {
         true -> Evaluering.ja("Det har gått mer enn fem måneder siden forrige barn ble født.")
         false -> Evaluering.nei("Det har gått mindre enn fem måneder siden forrige barn ble født.")
     }
