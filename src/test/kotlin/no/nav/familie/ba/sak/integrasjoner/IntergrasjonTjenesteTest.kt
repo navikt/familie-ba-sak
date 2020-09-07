@@ -63,7 +63,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Opprett oppgave skal returnere oppgave id`() {
         MDC.put("callId", "opprettOppgave")
-        stubFor(post("/api/oppgave/").willReturn(
+        stubFor(post("/api/oppgave/v2").willReturn(
                 okJson(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))))
 
         val request = lagTestOppgave()
@@ -80,7 +80,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `Opprett oppgave skal kaste feil hvis response er ugyldig`() {
-        stubFor(post("/api/oppgave/").willReturn(aResponse()
+        stubFor(post("/api/oppgave/v2").willReturn(aResponse()
                                                          .withStatus(500)
                                                          .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
 

@@ -25,7 +25,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.log.NavHttpHeaders
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -163,8 +163,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         return if (it is RestClientResponseException) it.responseBodyAsString else ""
     }
 
-    fun opprettOppgave(opprettOppgave: OpprettOppgave): String {
-        val uri = URI.create("$integrasjonUri/oppgave/")
+    fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): String {
+        val uri = URI.create("$integrasjonUri/oppgave/v2")
 
         return Result.runCatching {
             postForEntity<Ressurs<OppgaveResponse>>(uri, opprettOppgave, HttpHeaders().medContentTypeJsonUTF8())

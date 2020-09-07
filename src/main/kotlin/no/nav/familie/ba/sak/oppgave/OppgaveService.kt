@@ -42,8 +42,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         } else {
             val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
             val aktorId = personopplysningerService.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
-            val opprettOppgave = OpprettOppgave(
-                    ident = OppgaveIdent(ident = aktorId, type = IdentType.Aktør),
+            val opprettOppgave = OpprettOppgaveRequest(
+                    ident = OppgaveIdentV2(ident = aktorId, gruppe = IdentGruppe.AKTOERID),
                     saksId = fagsakId.toString(),
                     tema = Tema.BAR,
                     oppgavetype = oppgavetype,

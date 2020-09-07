@@ -59,14 +59,14 @@ class OppgaveServiceTest {
                 }
         )
         every { personopplysningerService.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
-        val slot = slot<OpprettOppgave>()
+        val slot = slot<OpprettOppgaveRequest>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdent(ident = AKTØR_ID_FAGSAK, type = IdentType.Aktør))
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = AKTØR_ID_FAGSAK, gruppe = IdentGruppe.AKTOERID))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.ORDINÆR_BARNETRYGD.kode)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -84,7 +84,7 @@ class OppgaveServiceTest {
                                                                                any<Behandling>())
         } returns null
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns emptyList()
-        val slot = slot<OpprettOppgave>()
+        val slot = slot<OpprettOppgaveRequest>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
         every { personopplysningerService.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
 
@@ -92,7 +92,7 @@ class OppgaveServiceTest {
 
         assertThat(slot.captured.enhetsnummer).isNull()
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdent(ident = AKTØR_ID_FAGSAK, type = IdentType.Aktør))
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = AKTØR_ID_FAGSAK, gruppe = IdentGruppe.AKTOERID))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.ORDINÆR_BARNETRYGD.kode)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())

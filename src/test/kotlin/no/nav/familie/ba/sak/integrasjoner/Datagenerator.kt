@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.oppgave.Tema
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -34,15 +35,15 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
     )
 }
 
-fun lagTestOppgave(): OpprettOppgave {
-    return OpprettOppgave(ident = OppgaveIdent(ident = "test", type = IdentType.Aktør),
-                          saksId = "123",
-                          tema = Tema.BAR,
-                          oppgavetype = Oppgavetype.BehandleSak,
-                          fristFerdigstillelse = LocalDate.now(),
-                          beskrivelse = "test",
-                          enhetsnummer = "1234",
-                          behandlingstema = "behandlingstema")
+fun lagTestOppgave(): OpprettOppgaveRequest {
+    return OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = "test", gruppe = IdentGruppe.AKTOERID),
+                                 saksId = "123",
+                                 tema = Tema.BAR,
+                                 oppgavetype = Oppgavetype.BehandleSak,
+                                 fristFerdigstillelse = LocalDate.now(),
+                                 beskrivelse = "test",
+                                 enhetsnummer = "1234",
+                                 behandlingstema = "behandlingstema")
 }
 
 fun lagTestOppgaveDTO(oppgaveId: Long,
@@ -51,6 +52,7 @@ fun lagTestOppgaveDTO(oppgaveId: Long,
                       tildeltEnhetsnr: String? = "4820"): Oppgave {
     return Oppgave(id = oppgaveId,
                    aktoerId = "1234",
+                   identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
                    fnr = ClientMocks.søkerFnr[0],
                    journalpostId = "1234",
                    tildeltEnhetsnr = tildeltEnhetsnr,
