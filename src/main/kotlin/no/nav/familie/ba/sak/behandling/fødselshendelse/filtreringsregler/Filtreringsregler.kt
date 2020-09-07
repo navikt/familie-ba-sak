@@ -45,6 +45,11 @@ enum class Filtreringsregler(val spesifikasjon: Spesifikasjon<Fakta>) {
             "Det har gått mer enn 5 måneder siden forrige barn ble født",
             "MER_ENN_5_MND_SIDEN_FORRIGE_BARN",
             implementasjon = { merEnn5mndSidenForrigeBarn(this) })
+    ),
+    BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING(Spesifikasjon(
+            "Barnets fødselsdato går ikke langt nok tilbake til at etterbetaling vil trigges",
+            "BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING",
+            implementasjon = { barnetsFødselsdatoInnebærerIkkeEtterbetaling(this)})
     );
 
     override fun toString(): String {
