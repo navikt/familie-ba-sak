@@ -10,7 +10,7 @@ class SøknadGrunnlagMigrering(private val søknadGrunnlagRepository: SøknadGru
 
     @Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE)
     private fun migrer() {
-        LOG.info("Migrerer søknadGrunnlagData")
+        LOG.info("Migrerer søknadGrunnlag til nytt format")
         var migrerteSøknader = 0
         val søknadGrunnlagListe = søknadGrunnlagRepository.findAll()
         søknadGrunnlagListe.map { søknadGrunnlag ->
@@ -31,7 +31,7 @@ class SøknadGrunnlagMigrering(private val søknadGrunnlagRepository: SøknadGru
                 }
             }
         }
-        LOG.info("Fant ${søknadGrunnlagListe.size} søknadGrunnlag, og migrerte $migrerteSøknader søknader")
+        LOG.info("Fant ${søknadGrunnlagListe.size} søknadGrunnlag, og migrerte $migrerteSøknader søknader til nytt format")
     }
 
     companion object {
