@@ -15,14 +15,20 @@ class SøknadGrunnlagMigrering(private val søknadGrunnlagRepository: SøknadGru
         val søknadGrunnlagListe = søknadGrunnlagRepository.findAll()
         søknadGrunnlagListe.map { søknadGrunnlag ->
 
-            val søknadDTOGammel = Result.runCatching { søknadGrunnlag.hentSøknadDtoGammel() }.fold(
+            val søknadDTO = Result.runCatching { søknadGrunnlag.hentSøknadDto() }.fold(
                     onSuccess = { it },
                     onFailure = { null }
             )
-            if (søknadDTOGammel != null) {
-                søknadGrunnlag.søknad = søknadDTOGammel.toSøknadDTO().writeValueAsString()
-                søknadGrunnlagRepository.save(søknadGrunnlag)
-                migrerteSøknader++
+            if(søknadDTO == null){
+                val søknadDTOGammel = Result.runCatching { søknadGrunnlag.hentSøknadDtoGammel() }.fold(
+                        onSuccess = { it },
+                        onFailure = { null }
+                )
+                if (søknadDTOGammel != null) {
+                    søknadGrunnlag.søknad = søknadDTOGammel.toSøknadDTO().writeValueAsString()
+                    søknadGrunnlagRepository.save(søknadGrunnlag)
+                    migrerteSøknader++
+                }
             }
         }
         LOG.info("Fant ${søknadGrunnlagListe.size} søknadGrunnlag, og migrerte $migrerteSøknader søknader")
