@@ -68,7 +68,7 @@ internal class FiltreringsreglerTest {
         assertThat(2).isEqualTo(resultaterMedNei.size)
         assertThat(resultaterMedNei.map {it.identifikator}.containsAll(listOf(
                 Filtreringsregler.BARNET_ER_UNDER_6_MND.spesifikasjon.identifikator,
-                Filtreringsregler.BARN_FØDT_FØR_ETTERBETALING_INNTRER.spesifikasjon.identifikator)
+                Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING.spesifikasjon.identifikator)
         ))
     }
 
@@ -161,7 +161,7 @@ internal class FiltreringsreglerTest {
 
         assertThat(forventetResultat).isEqualTo(evaluering.resultat)
         if (forventetResultat == Resultat.NEI)
-            assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARN_FØDT_FØR_ETTERBETALING_INNTRER)
+            assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING)
     }
 
     private fun assertEnesteRegelMedResultatNei(evalueringer: List<Evaluering>, filtreringsRegel: Filtreringsregler) {
@@ -181,7 +181,7 @@ internal class FiltreringsreglerTest {
                 Filtreringsregler.MOR_ER_OVER_18_AAR,
                 Filtreringsregler.MOR_HAR_IKKE_VERGE,
                 Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
-                Filtreringsregler.BARN_FØDT_FØR_ETTERBETALING_INNTRER
+                Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING
         )
         assertThat(Filtreringsregler.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
         assertThat(Filtreringsregler.values().zip(fagbestemtFiltreringsregelrekkefølge)
