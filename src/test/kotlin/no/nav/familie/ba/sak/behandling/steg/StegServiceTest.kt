@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknadGammel
+import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -86,9 +86,10 @@ class StegServiceTest(
                                          BehandlingOpprinnelse.MANUELL), behandling.steg)
 
         stegService.håndterSøknad(behandling = behandling,
-                                  restRegistrerSøknadGammel = RestRegistrerSøknadGammel(
+                                  restRegistrerSøknad = RestRegistrerSøknad(
                                           søknad = lagSøknadDTO(søkerIdent = søkerFnr,
-                                                                barnasIdenter = listOf(barnFnr)), bekreftEndringerViaFrontend = false))
+                                                                barnasIdenter = listOf(barnFnr)),
+                                          bekreftEndringerViaFrontend = true))
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)

@@ -22,6 +22,7 @@ class SøknadGrunnlagTest(
     fun `Skal lagre ned og hente søknadsgrunnlag`() {
         val behandlingId = 1L
         val søkerIdent = randomFnr()
+        val annenPartIdent = randomFnr()
         val barnIdent = randomFnr()
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
         søknadGrunnlagService.lagreOgDeaktiverGammel(SøknadGrunnlag(
@@ -33,7 +34,7 @@ class SøknadGrunnlagTest(
         Assertions.assertNotNull(søknadGrunnlag)
         Assertions.assertEquals(behandlingId, søknadGrunnlag?.behandlingId)
         Assertions.assertEquals(true, søknadGrunnlag?.aktiv)
-        Assertions.assertEquals(søkerIdent, søknadGrunnlag?.hentSøknadDtoGammel()?.søkerMedOpplysninger?.ident)
+        Assertions.assertEquals(søkerIdent, søknadGrunnlag?.hentSøknadDto()?.søkerMedOpplysninger?.ident)
     }
 
     @Test

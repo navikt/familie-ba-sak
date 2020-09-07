@@ -55,9 +55,6 @@ fun SøknadDTO.toSøknadDTOGammel() = SøknadDTOGammel(
 
 fun SøknadDTO.writeValueAsString(): String = objectMapper.writeValueAsString(this)
 
-fun SøknadDTOGammel.writeValueAsString(): String = objectMapper.writeValueAsString(this)
-
-
 data class SøkerMedOpplysningerGammel(
         val ident: String
 )
