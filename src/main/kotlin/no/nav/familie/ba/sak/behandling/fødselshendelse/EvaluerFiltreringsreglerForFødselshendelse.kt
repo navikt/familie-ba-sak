@@ -34,32 +34,32 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
         }
     }
 
-    fun evaluerFiltreringsregler(behandling: Behandling, barnetsIdent: String): Evaluering {
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, barnetsIdent))
+    fun evaluerFiltreringsregler(behandling: Behandling, barnsIdenter: Set<String>): Evaluering {
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, barnsIdenter))
         oppdaterMetrikker(evaluering)
         return evaluering
     }
 
-    private fun lagFaktaObjekt(behandling: Behandling, barnetsIdent: String): Fakta {
+    private fun lagFaktaObjekt(behandling: Behandling, barnsIdenter: Set<String>): Fakta {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         val mor = personopplysningGrunnlag.søker[0]
-        val barnet = personopplysningGrunnlag.barna.filter { it.personIdent.ident == barnetsIdent }.firstOrNull()
+        val barn = personopplysningGrunnlag.barna.filter { barnsIdenter.contains(it.personIdent.ident) }
                 ?: throw java.lang.IllegalStateException("Barnets ident er ikke tilstede i personopplysningsgrunnlaget.")
 
         val restenAvBarna =
                 personopplysningerService.hentPersoninfoFor(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
-                    it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && it.personIdent.id != barnet.personIdent.ident
+                    it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && !barn.map { m -> m.personIdent.ident }.toList().contains(it.personIdent.id)
                 }.map {
                     personopplysningerService.hentPersoninfoFor(it.personIdent.id)
                 }
 
         val morLever = !personopplysningerService.hentDødsfall(Ident(mor.personIdent.ident)).erDød
-        val barnetLever = !personopplysningerService.hentDødsfall(Ident(barnet.personIdent.ident)).erDød
+        val barnLever = !barn.any { personopplysningerService.hentDødsfall(Ident(it.personIdent.ident)).erDød }
         val morHarVerge = personopplysningerService.hentVergeData(Ident(mor.personIdent.ident)).harVerge
 
-        return Fakta(mor, barnet, restenAvBarna, morLever, barnetLever, morHarVerge)
+        return Fakta(mor, barn, restenAvBarna, morLever, barnLever, morHarVerge)
     }
 
     private fun oppdaterMetrikker(evaluering: Evaluering) {
