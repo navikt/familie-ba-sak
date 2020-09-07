@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.logg.LoggService
@@ -473,7 +472,8 @@ class BehandlingIntegrationTest {
 
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerFnr,
                                                                            listOf(barn1Fnr, barn2Fnr, barn3Fnr),
-                                                                           behandling)
+                                                                           behandling,
+                                                                           Målform.NB)
 
         val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
         val vegadresse = søker.bostedsadresse as GrVegadresse

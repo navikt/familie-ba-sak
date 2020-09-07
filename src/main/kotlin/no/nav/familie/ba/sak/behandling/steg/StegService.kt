@@ -115,7 +115,8 @@ class StegService(
                 RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
                                            barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
                                                    .map { barn -> barn.ident },
-                                           bekreftEndringerViaFrontend = registrerSøknad.bekreftEndringerViaFrontend))
+                                           bekreftEndringerViaFrontend = registrerSøknad.bekreftEndringerViaFrontend,
+                                           målform = søknadDTO.søkerMedOpplysninger.målform))
     }
 
     @Transactional
