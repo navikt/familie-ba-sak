@@ -39,6 +39,9 @@ data class Person(
         @Enumerated(EnumType.STRING) @Column(name = "sivilstand", nullable = false)
         val sivilstand: SIVILSTAND,
 
+        @Enumerated(EnumType.STRING) @Column(name = "maalform", nullable = false)
+        val målform: Målform = Målform.NB,
+
         @Embedded
         @AttributeOverrides(AttributeOverride(name = "ident",
                                               column = Column(name = "person_ident", updatable = false)))
@@ -106,5 +109,7 @@ enum class Medlemskap {
     NORDEN, EØS, TREDJELANDSBORGER, STATSLØS, UKJENT
 }
 
-
+enum class Målform {
+    NB, NN
+}
 

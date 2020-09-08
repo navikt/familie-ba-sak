@@ -49,7 +49,8 @@ class PersongrunnlagService(
 
     fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
                                                      barnasFødselsnummer: List<String>,
-                                                     behandling: Behandling) {
+                                                     behandling: Behandling,
+                                                     målform: Målform) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoFor(fødselsnummer)
@@ -63,7 +64,8 @@ class PersongrunnlagService(
                            navn = personinfo.navn ?: "",
                            bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
+                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
+                           målform = målform
         ).also {
             it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
             it.opphold = oppholdService.hentOpphold(it)

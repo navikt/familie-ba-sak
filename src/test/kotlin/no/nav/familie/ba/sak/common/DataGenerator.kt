@@ -226,7 +226,8 @@ fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>): SøknadDTO 
                 BarnMedOpplysninger(
                         ident = it
                 )
-            }
+            },
+            endringAvOpplysningerBegrunnelse = ""
     )
 }
 

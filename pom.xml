@@ -24,7 +24,8 @@
         <spring.cloud.version>2.2.4.RELEASE</spring.cloud.version>
         <spring.vault.version>2.2.2.RELEASE</spring.vault.version>
         <felles-kontrakter.version>2.0_20200723115650_db71799</felles-kontrakter.version>
-        <felles.version>1.20200624154125_0d8ff39</felles.version>
+        <felles.version>1.20200828135055_74d787e</felles.version>
+        <felles.prosessering.version>1.20200624154125_0d8ff39</felles.prosessering.version>
         <mockk.version>1.9.3</mockk.version>
         <token-validation-spring.version>1.2.0</token-validation-spring.version>
 
@@ -164,7 +165,7 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>prosessering</artifactId>
-            <version>${felles.version}</version>
+            <version>${felles.prosessering.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
@@ -174,6 +175,11 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>
+            <version>${felles.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>util</artifactId>
             <version>${felles.version}</version>
         </dependency>
         <dependency>

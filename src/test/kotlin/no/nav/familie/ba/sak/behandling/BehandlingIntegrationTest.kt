@@ -475,7 +475,8 @@ class BehandlingIntegrationTest {
 
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerFnr,
                                                                            listOf(barn1Fnr, barn2Fnr, barn3Fnr),
-                                                                           behandling)
+                                                                           behandling,
+                                                                           Målform.NB)
 
         val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
         val vegadresse = søker.bostedsadresse as GrVegadresse
