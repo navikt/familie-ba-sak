@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
@@ -81,7 +83,7 @@ class FødselshendelseIntegrasjonTest(
 ) {
 
     val now = LocalDate.now()
-    
+
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     val featureToggleServiceMock = mockk<FeatureToggleService>()
@@ -100,11 +102,13 @@ class FødselshendelseIntegrasjonTest(
                                                         behandlingRepository)
 
     @Test
-    fun `Fødselshendelse med flere barn skal bli håndtert riktige`() {
+    fun `Fødselshendelse med flere barn som oppfyl vilkår skal håndteres riktig`() {
+        val oppfyltBarnFnr = listOf(barnefnr[0], barnefnr[1])
+
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
-                morsfnr, morsfnr, barnefnr
+                morsfnr[0], morsfnr[0], oppfyltBarnFnr
         ))
-        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr))
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
         val behandlingResultater = behandlingResultatRepository.finnBehandlingResultater(behandling!!.id)
 
@@ -112,48 +116,71 @@ class FødselshendelseIntegrasjonTest(
 
         val behandlingResultat = behandlingResultater.get(0)
 
+        Assert.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
         Assert.assertEquals(true, behandlingResultat.aktiv)
         Assert.assertEquals(3, behandlingResultat.personResultater.size)
 
-        Assert.assertTrue(behandlingResultat.personResultater.all{
-            it.vilkårResultater.all{
+        Assert.assertTrue(behandlingResultat.personResultater.all {
+            it.vilkårResultater.all {
                 it.resultat == Resultat.JA
             }
         })
 
-        Assert.assertTrue(behandlingResultat.personResultater.map{it.personIdent}.containsAll(
-                barnefnr.plus(morsfnr)
+        Assert.assertTrue(behandlingResultat.personResultater.map { it.personIdent }.containsAll(
+                oppfyltBarnFnr.plus(morsfnr[0])
         ))
-
-        /*
-        behandlingResultater.forEach {
-            it.personResultater.forEach { result -> barnefnr.plus(morsfnr).contains(result.personIdent) }
-            it.personResultater.forEach { result -> result.vilkårResultater.forEach { vilkårResultat -> Assert.assertTrue(vilkårResultat.resultat.name == "JA") }}
-        }
-        */
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
         val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, now)
 
         Assert.assertEquals(2, andelTilkjentYtelser.size)
-        Assert.assertTrue(andelTilkjentYtelser.all{
+        Assert.assertTrue(andelTilkjentYtelser.all {
             it.beløp == sats.beløp
         })
 
-        val reffom= now.plusMonths(1)
-        val reftom= now.plusYears(18).minusMonths(2)
-        val fom= of(reffom.year, reffom.month, 1)
-        val tom= of(reftom.year, reftom.month, reffom.lengthOfMonth())
+        val reffom = now.plusMonths(1)
+        val reftom = now.plusYears(18).minusMonths(2)
+        val fom = of(reffom.year, reffom.month, 1)
+        val tom = of(reftom.year, reftom.month, reffom.lengthOfMonth())
 
-        Assert.assertTrue(andelTilkjentYtelser.all{
+        Assert.assertTrue(andelTilkjentYtelser.all {
             it.stønadFom == fom
             it.stønadTom == tom
         })
+    }
 
-        Assert.assertTrue(andelTilkjentYtelser.all{
-            it.beløp == sats.beløp
-        })
-   }
+    @Test
+    fun `Fødselshendelse med flere barn som ikke oppfyl vilkår skal håndteres riktig`() {
+        val ikkeOppfyltBarnFnr = listOf(barnefnr[0], barnefnr[2])
+
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
+                morsfnr[1], morsfnr[1], ikkeOppfyltBarnFnr
+        ))
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[1]))
+        val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
+        val behandlingResultater = behandlingResultatRepository.finnBehandlingResultater(behandling!!.id)
+
+        Assert.assertEquals(1, behandlingResultater.size)
+
+        val behandlingResultat = behandlingResultater.get(0)
+
+        Assert.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
+        Assert.assertEquals(true, behandlingResultat.aktiv)
+        Assert.assertEquals(3, behandlingResultat.personResultater.size)
+        Assert.assertTrue(behandlingResultat.personResultater.map { it.personIdent }.containsAll(
+                ikkeOppfyltBarnFnr.plus(morsfnr[1])
+        ))
+
+        val ikkeOppfyltBarnVilkårResultater = behandlingResultat.personResultater.find{
+            it.personIdent == ikkeOppfyltBarnFnr[1] }!!.vilkårResultater
+
+        Assert.assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter{it.resultat == Resultat.NEI}.size)
+        Assert.assertEquals(Vilkår.BOR_MED_SØKER, ikkeOppfyltBarnVilkårResultater.find { it.resultat== Resultat.NEI }!!.vilkårType)
+
+        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
+
+        Assert.assertEquals(0, andelTilkjentYtelser.size)
+    }
 
     @BeforeEach
     fun initMocks() {
@@ -164,8 +191,9 @@ class FødselshendelseIntegrasjonTest(
 
 @Configuration
 class MockConfiguration {
+
     val now = LocalDate.now()
-    
+
     @Bean
     @Profile("mock-pdl-flere-barn")
     @Primary
@@ -181,10 +209,21 @@ class MockConfiguration {
         }
 
         every {
-            personopplysningerServiceMock.hentPersoninfoFor(morsfnr)
+            personopplysningerServiceMock.hentPersoninfoFor(morsfnr[0])
         } returns PersonInfo(
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
+                kjønn = Kjønn.KVINNE,
+                sivilstand = SIVILSTAND.UGIFT,
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+                bostedsadresse = søkerBostedsadresse
+        )
+
+        every {
+            personopplysningerServiceMock.hentPersoninfoFor(morsfnr[1])
+        } returns PersonInfo(
+                fødselsdato = now.minusYears(20),
+                navn = "Mor Søker To",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
@@ -213,6 +252,17 @@ class MockConfiguration {
                 bostedsadresse = søkerBostedsadresse
         )
 
+        every {
+            personopplysningerServiceMock.hentPersoninfoFor(barnefnr[2])
+        } returns PersonInfo(
+                fødselsdato = now.minusMonths(1),
+                navn = "Gutt Barn To",
+                kjønn = Kjønn.MANN,
+                sivilstand = SIVILSTAND.UGIFT,
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+                bostedsadresse = ikkeOppfyltBarnBostedsadresse
+        )
+
         val hentAktørIdIdentSlot = slot<Ident>()
         every {
             personopplysningerServiceMock.hentAktivAktørId(capture(hentAktørIdIdentSlot))
@@ -236,7 +286,7 @@ class MockConfiguration {
             personopplysningerServiceMock.hentDødsfall(any())
         } returns DødsfallData(false, null)
 
-         every {
+        every {
             personopplysningerServiceMock.hentVergeData(any())
         } returns VergeData(false)
 
@@ -244,14 +294,21 @@ class MockConfiguration {
     }
 
     companion object {
-        val morsfnr = "12345678910"
-        val barnefnr = listOf("12345678911", "12345678912")
+        val morsfnr = listOf("12445678910", "12445678911")
+        val barnefnr = listOf("12345678911", "12345678912", "12345678913")
 
         val søkerBostedsadresse = Bostedsadresse(
                 vegadresse = Vegadresse(matrikkelId = 1111, husnummer = null, husbokstav = null,
                                         bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
                                         tilleggsnavn = null, postnummer = "2222")
         )
+
+        val ikkeOppfyltBarnBostedsadresse = Bostedsadresse(
+                vegadresse = Vegadresse(matrikkelId = 3333, husnummer = null, husbokstav = null,
+                                        bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
+                                        tilleggsnavn = null, postnummer = "4444")
+        )
+
     }
 
 }
