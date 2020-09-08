@@ -16,7 +16,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.gjeldendeForUtbetaling = true")
     fun findByFagsakAndGjeldendeForUtbetaling(fagsakId: Long): List<Behandling>
 
-    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status in ('AVSLUTTET')")
+    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET'")
     fun findByFagsakAndAvsluttet(fagsakId: Long): List<Behandling>
 }
-
