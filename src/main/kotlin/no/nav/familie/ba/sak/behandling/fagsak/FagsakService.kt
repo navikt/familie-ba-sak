@@ -95,6 +95,9 @@ class FagsakService(
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
+                     ?: throw Feil(message = "Finner ikke fagsak med id $fagsakId",
+                                   frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
+
         val restBehandlinger: List<RestBehandling> = lagRestBehandlinger(fagsak)
         return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
     }
@@ -115,7 +118,8 @@ class FagsakService(
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
-                val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
+                val andelerTilkjentYtelse =
+                        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
                 val restVedtakPerson = lagRestVedtakPerson(andelerTilkjentYtelse, personopplysningGrunnlag)
                 vedtak.toRestVedtak(restVedtakPerson)
             }
@@ -258,6 +262,7 @@ class FagsakService(
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(FagsakService::class.java)
     }
 }

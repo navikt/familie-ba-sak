@@ -49,13 +49,8 @@ class FagsakController(
     fun hentFagsak(@PathVariable @FagsaktilgangConstraint fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id $fagsakId")
 
-        return Result.runCatching { fagsakService.hentRestFagsak(fagsakId) }
-                .fold(
-                        onSuccess = { ResponseEntity.ok().body(it) },
-                        onFailure = {
-                            badRequest("Henting av fagsak med fagsakId $fagsakId feilet", it)
-                        }
-                )
+        val fagsak = fagsakService.hentRestFagsak(fagsakId)
+        return ResponseEntity.ok().body(fagsak)
     }
 
     @GetMapping("fagsaker/avstemming")
