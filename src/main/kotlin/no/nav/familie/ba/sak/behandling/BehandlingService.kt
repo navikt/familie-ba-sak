@@ -131,8 +131,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 .map { Pair(it, beregningService.hentTilkjentYtelseForBehandlingOptional(it.id)) }
 
         tilkjenteYtelser.forEach {
-            val behandling = it.first
-            val tilkjentYtelse = it.second
+            val (behandling, tilkjentYtelse) = it
 
             if (tilkjentYtelse == null) {
                 behandlingRepository.saveAndFlush(behandling.apply { gjeldendeForUtbetaling = false })
