@@ -159,7 +159,7 @@ class StegServiceTest(
         val behandlingEtterFerdigstiltBehandling = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.steg)
         Assertions.assertEquals(BehandlingStatus.AVSLUTTET, behandlingEtterFerdigstiltBehandling.status)
-        Assertions.assertEquals(FagsakStatus.LØPENDE, fagsakService.hentFagsakStatus(behandlingEtterFerdigstiltBehandling.fagsak))
+        Assertions.assertEquals(FagsakStatus.LØPENDE, behandlingEtterFerdigstiltBehandling.fagsak.status)
     }
 
     @Test

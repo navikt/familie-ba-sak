@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.*
@@ -87,17 +86,24 @@ class FagsakService(
         return fagsakRepository.save(fagsak)
     }
 
+    fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
+        fagsak.status = nyStatus
+
+        lagre(fagsak)
+    }
+
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
         val restBehandlinger: List<RestBehandling> = lagRestBehandlinger(fagsak)
-        return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger, hentFagsakStatus(fagsak)))
+        return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
     }
 
     fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestFagsak?> {
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
         if (fagsak != null) {
             val restBehandlinger: List<RestBehandling> = lagRestBehandlinger(fagsak)
-            return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger, hentFagsakStatus(fagsak)))
+            return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
         }
         return Ressurs.success(data = null)
     }
@@ -155,17 +161,7 @@ class FagsakService(
     }
 
     fun hentLøpendeFagsaker(): List<Fagsak> {
-        return behandlingRepository.findByGjeldendeForUtbetaling().map { it.fagsak }
-    }
-
-    fun hentFagsakStatus(fagsak: Fagsak): FagsakStatus {
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id)
-        return when {
-            behandlinger.isEmpty() -> FagsakStatus.OPPRETTET
-            behandlinger.any { it.status == BehandlingStatus.UTREDES } -> FagsakStatus.UNDER_BEHANDLING
-            behandlinger.any { it.gjeldendeForUtbetaling } -> FagsakStatus.LØPENDE
-            else -> FagsakStatus.STANSET
-        }
+        return fagsakRepository.finnLøpendeFagsaker()
     }
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {

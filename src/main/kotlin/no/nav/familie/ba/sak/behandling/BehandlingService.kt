@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.Feil
@@ -144,16 +143,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return hentGjeldendeForFagsak(fagsakId)
     }
 
-
-    // TODO verifiser at dette blir riktig? Må man disable dette flagget for eventuelle gamle behandlinger?
-    fun ferdigstillBehandling(behandling: Behandling, behandlingResultatType: BehandlingResultatType) {
-        behandling.gjeldendeForUtbetaling =
-                behandlingResultatType == BehandlingResultatType.INNVILGET || behandlingResultatType == BehandlingResultatType.DELVIS_INNVILGET
-        behandling.status = BehandlingStatus.AVSLUTTET
-
-        lagre(behandling)
-    }
-
     private fun hentBehandlingSomSkalOpphøres(tilkjentYtelse: TilkjentYtelse): Behandling {
         val utbetalingsOppdrag = objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
         val perioderMedOpphør = utbetalingsOppdrag.utbetalingsperiode.filter { it.opphør != null }
@@ -170,6 +159,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     companion object {
+
         val LOG: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
     }
 }

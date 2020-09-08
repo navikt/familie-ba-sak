@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
@@ -44,6 +45,9 @@ class FerdigstillBehandlingTaskTest {
     lateinit var behandlingService: BehandlingService
 
     @Autowired
+    lateinit var stegService: StegService
+
+    @Autowired
     lateinit var behandlingResultatService: BehandlingResultatService
 
     @Autowired
@@ -57,14 +61,15 @@ class FerdigstillBehandlingTaskTest {
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandling(fagsak, opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
 
-        val behandlingResultat = lagBehandlingResultat(fnr, behandling, resultat)
-
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
-        Assertions.assertNotNull(behandling.fagsak.id)
-
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(fnrBarn))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        val behandlingResultat = lagBehandlingResultat(fnr, behandling, resultat)
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
+        val behandlingSomSkalKjøreVilkårsvurdering = behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VILKÅRSVURDERING)
+        stegService.håndterVilkårsvurdering(behandlingSomSkalKjøreVilkårsvurdering)
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
@@ -78,7 +83,7 @@ class FerdigstillBehandlingTaskTest {
     }
 
     @Test
-    fun `Skal ferdigstille behandling og sette fagsak til løpende`() {
+    fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
         val testTask = lagTestTask(Resultat.JA)
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
@@ -89,7 +94,7 @@ class FerdigstillBehandlingTaskTest {
         Assertions.assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
-        Assertions.assertEquals(FagsakStatus.LØPENDE, fagsakService.hentFagsakStatus(ferdigstiltFagsak))
+        Assertions.assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
     }
 
     @Test
@@ -104,6 +109,6 @@ class FerdigstillBehandlingTaskTest {
         Assertions.assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
-        Assertions.assertEquals(FagsakStatus.STANSET, fagsakService.hentFagsakStatus(ferdigstiltFagsak))
+        Assertions.assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
     }
 }

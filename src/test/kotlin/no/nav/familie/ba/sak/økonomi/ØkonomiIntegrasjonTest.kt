@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -150,6 +151,9 @@ class ØkonomiIntegrasjonTest {
         økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak.id, "ansvarligSaksbehandler")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
         behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
+
+        fagsak.status = FagsakStatus.LØPENDE
+        fagsakService.lagre(fagsak)
 
         val søkerOgBehandlingListe = behandlingService.hentGjeldendeBehandlingerForLøpendeFagsaker()
 

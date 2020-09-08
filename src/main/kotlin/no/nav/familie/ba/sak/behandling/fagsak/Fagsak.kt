@@ -13,6 +13,10 @@ data class Fagsak(
         @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
         val id: Long = 0,
 
+        @Enumerated(EnumType.STRING)
+        @Column(name = "status", nullable = false)
+        var status: FagsakStatus = FagsakStatus.OPPRETTET,
+
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "fagsak",
                    cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE],
@@ -35,5 +39,5 @@ data class Fagsak(
 }
 
 enum class FagsakStatus {
-    OPPRETTET, UNDER_BEHANDLING, LØPENDE, STANSET
+    OPPRETTET, LØPENDE, AVSLUTTET
 }

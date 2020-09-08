@@ -43,10 +43,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers {
-            Ressurs.success(defaultFagsak.toRestFagsak(emptyList(), fagsakService.hentFagsakStatus(
-                    defaultFagsak)))
+            Ressurs.success(defaultFagsak.toRestFagsak(emptyList()))
         }
-        every { fagsakService.hentFagsakStatus(any()) } answers { FagsakStatus.UNDER_BEHANDLING }
     }
 
     @Test
