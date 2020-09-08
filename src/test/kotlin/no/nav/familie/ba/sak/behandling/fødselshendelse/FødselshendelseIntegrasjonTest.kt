@@ -5,23 +5,27 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.MockConfiguration.Companion.barnefnr
 import no.nav.familie.ba.sak.behandling.fødselshendelse.MockConfiguration.Companion.morsfnr
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.beregning.SatsService
+import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
-import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.*
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.junit.Assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -65,9 +69,17 @@ class FødselshendelseIntegrasjonTest(
         private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
-        private val personopplysningerService: PersonopplysningerService
+        private val personopplysningerService: PersonopplysningerService,
+
+        @Autowired
+        private val fagsakRepository: FagsakRepository,
+
+        @Autowired
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) {
 
+    val now = LocalDate.now()
+    
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     val featureToggleServiceMock = mockk<FeatureToggleService>()
@@ -90,6 +102,27 @@ class FødselshendelseIntegrasjonTest(
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
                 morsfnr, morsfnr, barnefnr
         ))
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr))
+        val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
+        val behandlingResultater = behandlingResultatRepository.finnBehandlingResultater(behandling!!.id)
+
+        Assert.assertEquals(1, behandlingResultater.size)
+        Assert.assertEquals(true, behandlingResultater.get(0).aktiv)
+
+        Assert.assertEquals(3, behandlingResultater.get(0).personResultater.size)
+        behandlingResultater.forEach {
+            it.personResultater.forEach { result -> barnefnr.plus(morsfnr).contains(result.personIdent) }
+            it.personResultater.forEach { result -> result.vilkårResultater.forEach { vilkårResultat -> Assert.assertTrue(vilkårResultat.resultat.name == "JA") }}
+        }
+
+        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
+
+        val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, now)
+
+
+        andelTilkjentYtelser.get(0).beløp
+        andelTilkjentYtelser.get(0).stønadFom
+        andelTilkjentYtelser.get(0).stønadTom
     }
 
     @BeforeEach
@@ -100,7 +133,9 @@ class FødselshendelseIntegrasjonTest(
 }
 
 @Configuration
-class MockConfiguration{
+class MockConfiguration {
+    val now = LocalDate.now()
+    
     @Bean
     @Profile("mock-pdl-flere-barn")
     @Primary
@@ -118,7 +153,7 @@ class MockConfiguration{
         every {
             personopplysningerServiceMock.hentPersoninfoFor(morsfnr)
         } returns PersonInfo(
-                fødselsdato = LocalDate.now().minusYears(20),
+                fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -129,7 +164,7 @@ class MockConfiguration{
         every {
             personopplysningerServiceMock.hentPersoninfoFor(barnefnr[0])
         } returns PersonInfo(
-                fødselsdato = LocalDate.now().minusMonths(5),
+                fødselsdato = now.minusMonths(5),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -140,7 +175,7 @@ class MockConfiguration{
         every {
             personopplysningerServiceMock.hentPersoninfoFor(barnefnr[1])
         } returns PersonInfo(
-                fødselsdato = LocalDate.now().minusMonths(5),
+                fødselsdato = now.minusMonths(5),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -149,20 +184,33 @@ class MockConfiguration{
         )
 
         val hentAktørIdIdentSlot = slot<Ident>()
-        every{
+        every {
             personopplysningerServiceMock.hentAktivAktørId(capture(hentAktørIdIdentSlot))
         } answers {
             AktørId(id = "0${hentAktørIdIdentSlot.captured.ident}")
         }
 
-        every{
+        every {
             personopplysningerServiceMock.hentStatsborgerskap(any())
-        } returns listOf(Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(20), gyldigTilOgMed = null))
-        return personopplysningerServiceMock
+        } returns listOf(Statsborgerskap(land = "NOR", gyldigFraOgMed = now.minusYears(20), gyldigTilOgMed = null))
 
-        every{
+        every {
             personopplysningerServiceMock.hentOpphold(any())
-        }returns listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
+        } returns listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
+
+        every {
+            personopplysningerServiceMock.hentBostedsadresseperioder(any())
+        } returns listOf()
+
+        every {
+            personopplysningerServiceMock.hentDødsfall(any())
+        } returns DødsfallData(false, null)
+
+         every {
+            personopplysningerServiceMock.hentVergeData(any())
+        } returns VergeData(false)
+
+        return personopplysningerServiceMock
     }
 
     companion object {
