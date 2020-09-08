@@ -19,10 +19,8 @@ import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
-import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
+import no.nav.familie.kontrakter.felles.personopplysning.*
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -150,7 +148,21 @@ class MockConfiguration{
                 bostedsadresse = søkerBostedsadresse
         )
 
+        val hentAktørIdIdentSlot = slot<Ident>()
+        every{
+            personopplysningerServiceMock.hentAktivAktørId(capture(hentAktørIdIdentSlot))
+        } answers {
+            AktørId(id = "0${hentAktørIdIdentSlot.captured.ident}")
+        }
+
+        every{
+            personopplysningerServiceMock.hentStatsborgerskap(any())
+        } returns listOf(Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(20), gyldigTilOgMed = null))
         return personopplysningerServiceMock
+
+        every{
+            personopplysningerServiceMock.hentOpphold(any())
+        }returns listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
     }
 
     companion object {
