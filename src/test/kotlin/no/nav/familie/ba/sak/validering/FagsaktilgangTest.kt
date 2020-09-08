@@ -67,14 +67,15 @@ internal class FagsaktilgangTest {
     private val personopplysningsgrunnlag =
             PersonopplysningGrunnlag(1,
                                      1,
-                                     mutableSetOf(Person(1,
-                                                         PersonType.SØKER,
-                                                         LocalDate.of(1984, 12, 16),
-                                                         "Mock Mockson",
-                                                         Kjønn.MANN,
-                                                         SIVILSTAND.GIFT,
-                                                         PersonIdent(randomFnr()),
-                                                         PersonopplysningGrunnlag(1, 1))),
+                                     mutableSetOf(Person(
+                                                         type = PersonType.SØKER,
+                                                         fødselsdato = LocalDate.of(1984, 12, 16),
+                                                         navn = "Mock Mockson",
+                                                         kjønn = Kjønn.MANN,
+                                                         sivilstand = SIVILSTAND.GIFT,
+                                                         personIdent = PersonIdent(randomFnr()),
+                                                         målform = Målform.NB,
+                                                         personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1))),
                                      true)
 
     private val behandlinger = listOf(Behandling(id = 1,

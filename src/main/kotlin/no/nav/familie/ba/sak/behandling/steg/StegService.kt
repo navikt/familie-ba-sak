@@ -114,7 +114,8 @@ class StegService(
                 RegistrerPersongrunnlagDTO(ident = søknadDTO.søkerMedOpplysninger.ident,
                                            barnasIdenter = søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden }
                                                    .map { barn -> barn.ident },
-                                           bekreftEndringerViaFrontend = registrerSøknad.bekreftEndringerViaFrontend))
+                                           bekreftEndringerViaFrontend = registrerSøknad.bekreftEndringerViaFrontend,
+                                           målform = søknadDTO.søkerMedOpplysninger.målform))
     }
 
     @Transactional
@@ -226,7 +227,7 @@ class StegService(
             }
 
             val behandlerRolle =
-                    SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minBy { it.nivå })
+                    SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minByOrNull { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {

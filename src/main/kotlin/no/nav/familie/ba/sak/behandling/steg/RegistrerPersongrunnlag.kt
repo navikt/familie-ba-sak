@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import org.springframework.stereotype.Service
@@ -28,11 +29,13 @@ class RegistrerPersongrunnlag(
             persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident,
                                                                                data.barnasIdenter.union(forrigePersongrunnlagBarna)
                                                                                        .toList(),
-                                                                               behandling)
+                                                                               behandling,
+                                                                               data.målform)
         } else {
             persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(data.ident,
                                                                                data.barnasIdenter,
-                                                                               behandling)
+                                                                               behandling,
+                                                                               data.målform)
         }
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.MANUELL) {
@@ -51,4 +54,5 @@ class RegistrerPersongrunnlag(
 data class RegistrerPersongrunnlagDTO(
         val ident: String,
         val bekreftEndringerViaFrontend: Boolean = false,
-        val barnasIdenter: List<String>)
+        val barnasIdenter: List<String>,
+        val målform: Målform = Målform.NB)

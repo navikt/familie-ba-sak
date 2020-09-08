@@ -32,6 +32,18 @@ fun LocalDate.sisteDagIMåned(): LocalDate {
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
 fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
 
+fun LocalDate.erFraInneværendeMåned(): Boolean {
+    val førsteDatoInneværendeMåned = LocalDate.now().withDayOfMonth(1)
+    val førsteDatoNesteMåned = førsteDatoInneværendeMåned.plusMonths(1)
+    return this.isSameOrAfter(førsteDatoInneværendeMåned) && isBefore(førsteDatoNesteMåned)
+}
+
+fun LocalDate.erFraInneværendeEllerForrigeMåned(): Boolean {
+    val førsteDatoForrigeMåned = LocalDate.now().withDayOfMonth(1).minusMonths(1)
+    val førsteDatoNesteMåned = førsteDatoForrigeMåned.plusMonths(2)
+    return this.isSameOrAfter(førsteDatoForrigeMåned) && isBefore(førsteDatoNesteMåned)
+}
+
 fun LocalDate.isSameOrBefore(toCompare: LocalDate): Boolean {
     return this.isBefore(toCompare) || this == toCompare
 }
