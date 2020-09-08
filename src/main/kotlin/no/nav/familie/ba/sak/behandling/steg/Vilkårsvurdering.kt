@@ -49,10 +49,7 @@ class Vilkårsvurdering(
                 behandling,
                 personopplysningGrunnlag)
 
-        if (behandling.opprinnelse != BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE ||
-                behandlingResultat.hentSamletResultat() == BehandlingResultatType.INNVILGET) {
-            beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        }
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, behandling)
 

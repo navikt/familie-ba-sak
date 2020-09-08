@@ -179,7 +179,19 @@ class FødselshendelseIntegrasjonTest(
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
-        Assert.assertEquals(0, andelTilkjentYtelser.size)
+        Assert.assertEquals(1, andelTilkjentYtelser.size)
+        val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, now)
+
+        Assert.assertEquals(sats.beløp, andelTilkjentYtelser[0].beløp)
+
+        val reffom = now.plusMonths(1)
+        val reftom = now.plusYears(18).minusMonths(2)
+        val fom = of(reffom.year, reffom.month, 1)
+        val tom = of(reftom.year, reftom.month, reffom.lengthOfMonth())
+
+        Assert.assertEquals(fom, andelTilkjentYtelser[0].stønadFom)
+        Assert.assertEquals(tom, andelTilkjentYtelser[0].stønadTom)
+        Assert.assertEquals(ikkeOppfyltBarnFnr[0], andelTilkjentYtelser[0].personIdent)
     }
 
     @BeforeEach

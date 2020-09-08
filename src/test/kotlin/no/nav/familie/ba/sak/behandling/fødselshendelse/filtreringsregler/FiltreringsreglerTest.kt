@@ -157,7 +157,7 @@ internal class FiltreringsreglerTest {
         val barnet = tilfeldigPerson(fødselsdatoForBarn).copy(personIdent = gyldigFnr)
         val restenAvBarna: List<PersonInfo> = listOf()
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(forventetResultat).isEqualTo(evaluering.resultat)
         if (forventetResultat == Resultat.NEI)

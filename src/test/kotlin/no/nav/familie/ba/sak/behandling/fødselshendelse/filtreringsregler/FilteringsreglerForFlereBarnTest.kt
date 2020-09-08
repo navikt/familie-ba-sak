@@ -102,9 +102,9 @@ class FilteringsreglerForFlereBarnTest {
                     personer.addAll(listOf(
                             genererPerson(type = PersonType.SØKER, personopplysningGrunnlag = this, ident = gyldigFnr.ident),
                             genererPerson(type = PersonType.BARN, personopplysningGrunnlag = this, ident = barnFnr0.ident,
-                                          fødselsDato = LocalDate.now().minusMonths(5)),
+                                          fødselsDato = LocalDate.now().minusMonths(1)),
                             genererPerson(type = PersonType.BARN, personopplysningGrunnlag = this, ident = barnFnr1.ident,
-                                          fødselsDato = LocalDate.now().minusMonths(5))
+                                          fødselsDato = LocalDate.now().minusMonths(1))
                     ))
                 }
         every { personopplysningerServiceMock.hentDødsfall(Ident(gyldigFnr.ident)) } returns DødsfallData(erDød = false,
@@ -138,9 +138,9 @@ class FilteringsreglerForFlereBarnTest {
                     personer.addAll(listOf(
                             genererPerson(type = PersonType.SØKER, personopplysningGrunnlag = this, ident = gyldigFnr.ident),
                             genererPerson(type = PersonType.BARN, personopplysningGrunnlag = this, ident = barnFnr0.ident,
-                                          fødselsDato = LocalDate.now().minusMonths(5)),
+                                          fødselsDato = LocalDate.now().minusMonths(1)),
                             genererPerson(type = PersonType.BARN, personopplysningGrunnlag = this, ident = barnFnr1.ident,
-                                          fødselsDato = LocalDate.now().minusMonths(5))
+                                          fødselsDato = LocalDate.now().minusMonths(1))
                     ))
                 }
         every { personopplysningerServiceMock.hentDødsfall(Ident(gyldigFnr.ident)) } returns DødsfallData(erDød = false,
