@@ -67,7 +67,6 @@ class FerdigstillBehandling(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    // finn tom, er den etter dagens dato = LØPENDe
     private fun oppdaterFagsakStatus(fagsak: Fagsak) {
         val gjeldendeBehandlinger =
                 behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
