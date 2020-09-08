@@ -294,7 +294,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val behandlinger = behandlingService.hentBehandlinger(behandling.fagsak.id)
 
 
-        return when (val forrigeBehandling = behandlinger.filter { it.id != behandling.id }.maxBy { it.opprettetTidspunkt }) {
+        return when (val forrigeBehandling = behandlinger.filter { it.id != behandling.id }.maxByOrNull { it.opprettetTidspunkt }) {
             null -> null
             else -> hentAktivForBehandling(behandlingId = forrigeBehandling.id)
         }

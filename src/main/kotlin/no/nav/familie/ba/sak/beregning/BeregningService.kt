@@ -77,23 +77,23 @@ class BeregningService(
         val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
         var opphørsdato: LocalDate? = null
         if (erRentOpphør) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.map { it.opphør!!.opphørDatoFom }.min()!!
+            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.map { it.opphør!!.opphørDatoFom }.minOrNull()!!
         }
 
         if (behandling.type == BehandlingType.REVURDERING) {
             val opphørPåRevurdering = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
             if (opphørPåRevurdering.isNotEmpty()) {
-                opphørsdato = opphørPåRevurdering.maxBy { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
+                opphørsdato = opphørPåRevurdering.maxByOrNull { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
             }
         }
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         return tilkjentYtelse.apply {
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-            this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxBy { it.vedtakdatoTom }!!.vedtakdatoTom
+            this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxByOrNull { it.vedtakdatoTom }!!.vedtakdatoTom
             this.stønadFom = if (erRentOpphør) null else utbetalingsoppdrag.utbetalingsperiode
                     .filter { !it.erEndringPåEksisterendePeriode }
-                    .minBy { it.vedtakdatoFom }!!.vedtakdatoFom
+                    .minByOrNull { it.vedtakdatoFom }!!.vedtakdatoFom
             this.endretDato = LocalDate.now()
             this.opphørFom = opphørsdato
         }

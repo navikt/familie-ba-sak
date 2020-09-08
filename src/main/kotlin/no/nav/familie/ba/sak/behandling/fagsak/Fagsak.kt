@@ -34,7 +34,7 @@ data class Fagsak(
     }
 
     fun hentAktivIdent(): PersonIdent {
-        return søkerIdenter.maxBy { it.opprettetTidspunkt }?.personIdent ?: error("Fant ingen ident på fagsak $id")
+        return søkerIdenter.maxByOrNull { it.opprettetTidspunkt }?.personIdent ?: error("Fant ingen ident på fagsak $id")
     }
 }
 
