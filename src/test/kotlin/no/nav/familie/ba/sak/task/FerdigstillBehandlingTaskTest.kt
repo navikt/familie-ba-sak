@@ -8,10 +8,12 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
+import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.nare.core.evaluations.Resultat
@@ -28,7 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-pdl", "mock-infotrygd-feed")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-pdl", "mock-iverksett", "mock-infotrygd-feed")
 @Tag("integration")
 class FerdigstillBehandlingTaskTest {
 
@@ -51,7 +53,12 @@ class FerdigstillBehandlingTaskTest {
     lateinit var behandlingResultatService: BehandlingResultatService
 
     @Autowired
+    lateinit var økonomiService: ØkonomiService
+
+    @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+
+    private var vedtak: Vedtak? = null
 
     private fun lagTestTask(resultat: Resultat): Task {
         val fnr = randomFnr()
@@ -71,7 +78,7 @@ class FerdigstillBehandlingTaskTest {
         val behandlingSomSkalKjøreVilkårsvurdering = behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VILKÅRSVURDERING)
         stegService.håndterVilkårsvurdering(behandlingSomSkalKjøreVilkårsvurdering)
 
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
@@ -85,6 +92,8 @@ class FerdigstillBehandlingTaskTest {
     @Test
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
         val testTask = lagTestTask(Resultat.JA)
+        iverksettMotOppdrag(vedtakId = vedtak!!.id)
+
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
         ferdigstillBehandlingTask.doTask(testTask)
@@ -100,6 +109,8 @@ class FerdigstillBehandlingTaskTest {
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
         val testTask = lagTestTask(Resultat.NEI)
+        //iverksettMotOppdrag(vedtakId = vedtak!!.id)
+
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
         ferdigstillBehandlingTask.doTask(testTask)
@@ -110,5 +121,9 @@ class FerdigstillBehandlingTaskTest {
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         Assertions.assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
+    }
+
+    fun iverksettMotOppdrag(vedtakId: Long) {
+        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId, "ansvarligSaksbehandler")
     }
 }

@@ -128,15 +128,24 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val tilkjenteYtelser = ferdigstilteBehandlinger
                 .sortedBy { it.opprettetTidspunkt }
-                .map { beregningService.hentTilkjentYtelseForBehandling(it.id) }
+                .map { Pair(it, beregningService.hentTilkjentYtelseForBehandlingOptional(it.id)) }
 
         tilkjenteYtelser.forEach {
-            if (it.stønadTom!! >= utbetalingsMåned && it.stønadFom != null) {
-                behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForUtbetaling = true })
-            }
-            if (it.opphørFom != null && it.opphørFom!! <= utbetalingsMåned) {
-                val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(it)
-                behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForUtbetaling = false })
+            val behandling = it.first
+            val tilkjentYtelse = it.second
+
+            if (tilkjentYtelse == null) {
+                behandlingRepository.saveAndFlush(behandling.apply { gjeldendeForUtbetaling = false })
+            } else {
+                if (tilkjentYtelse.stønadTom != null && tilkjentYtelse.stønadTom!! >= utbetalingsMåned
+                    && tilkjentYtelse.stønadFom != null) {
+                    behandlingRepository.saveAndFlush(behandling.apply { gjeldendeForUtbetaling = true })
+                }
+
+                if (tilkjentYtelse.opphørFom != null && tilkjentYtelse.opphørFom!! <= utbetalingsMåned) {
+                    val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(tilkjentYtelse)
+                    behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForUtbetaling = false })
+                }
             }
         }
 

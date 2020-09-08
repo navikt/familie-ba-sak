@@ -58,11 +58,7 @@ class FerdigstillBehandling(
         loggService.opprettFerdigstillBehandling(behandling)
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
 
-        if (behandlingResultatType == BehandlingResultatType.INNVILGET && fagsak.status != FagsakStatus.LØPENDE) {
-            fagsakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
-        } else {
-            fagsakService.oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
-        }
+        oppdaterFagsakStatus(fagsak = fagsak)
 
         val dagerSidenOpprettet = ChronoUnit.DAYS.between(behandling.opprettetTidspunkt, LocalDateTime.now())
         behandlingstid.record(dagerSidenOpprettet.toDouble())
@@ -71,10 +67,11 @@ class FerdigstillBehandling(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
+    // finn tom, er den etter dagens dato = LØPENDe
     private fun oppdaterFagsakStatus(fagsak: Fagsak) {
         val gjeldendeBehandlinger =
                 behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
-        if (gjeldendeBehandlinger.isEmpty()) {
+        if (gjeldendeBehandlinger.isNotEmpty()) {
             fagsakService.oppdaterStatus(fagsak, FagsakStatus.LØPENDE)
         } else {
             fagsakService.oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
