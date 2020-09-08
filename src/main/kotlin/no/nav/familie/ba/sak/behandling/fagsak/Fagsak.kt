@@ -39,5 +39,7 @@ data class Fagsak(
 }
 
 enum class FagsakStatus {
-    OPPRETTET, LØPENDE, AVSLUTTET
+    OPPRETTET, 
+    LØPENDE, // Har minst én behandling gjeldende for fremtidig utbetaling
+    AVSLUTTET
 }
