@@ -27,7 +27,7 @@ class KonsistensavstemmingScheduler(val batchService: BatchService,
 
         fagsakService.hentLøpendeFagsaker().forEach {
             val gjeldendeBehandling = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(it.id, dagensDato)
-            if (gjeldendeBehandling.isEmpty()) fagsakService.oppdaterStatus(it, FagsakStatus.STANSET)
+            if (gjeldendeBehandling.isEmpty()) fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET)
         }
 
         LOG.info("Kjører konsistensavstemming for $dagensDato")

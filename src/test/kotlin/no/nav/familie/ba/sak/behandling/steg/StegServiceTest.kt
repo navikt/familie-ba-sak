@@ -158,7 +158,7 @@ class StegServiceTest(
 
         val behandlingEtterFerdigstiltBehandling = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.steg)
-        Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, behandlingEtterFerdigstiltBehandling.status)
+        Assertions.assertEquals(BehandlingStatus.AVSLUTTET, behandlingEtterFerdigstiltBehandling.status)
         Assertions.assertEquals(FagsakStatus.LØPENDE, behandlingEtterFerdigstiltBehandling.fagsak.status)
     }
 
@@ -186,7 +186,7 @@ class StegServiceTest(
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = false)
 
         behandling.steg = StegType.BEHANDLING_AVSLUTTET
-        behandling.status = BehandlingStatus.FERDIGSTILT
+        behandling.status = BehandlingStatus.AVSLUTTET
         assertThrows<IllegalStateException> {
             stegService.håndterSendTilBeslutter(behandling, "1234")
         }
@@ -202,20 +202,20 @@ class StegServiceTest(
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = false)
 
         behandling.steg = StegType.BESLUTTE_VEDTAK
-        behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
         assertThrows<IllegalStateException> {
             stegService.håndterSendTilBeslutter(behandling, "1234")
         }
     }
 
     @Test
-    fun `Skal feile når man prøver å kalle beslutnin-steget med feil status på behandling`() {
+    fun `Skal feile når man prøver å kalle beslutning-steget med feil status på behandling`() {
         val søkerFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling.steg = StegType.BESLUTTE_VEDTAK
-        behandling.status = BehandlingStatus.SENDT_TIL_IVERKSETTING
+        behandling.status = BehandlingStatus.IVERKSETTER_VEDTAK
         assertThrows<IllegalStateException> {
             stegService.håndterBeslutningForVedtak(behandling,
                                                    RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT, begrunnelse = null))
@@ -237,7 +237,7 @@ class StegServiceTest(
 
         totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling = behandling)
         behandling.steg = StegType.BESLUTTE_VEDTAK
-        behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
         stegService.håndterBeslutningForVedtak(behandling,
                                                RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil"))
 

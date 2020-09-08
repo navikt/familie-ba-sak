@@ -80,7 +80,7 @@ class KonsistensavstemmingSchedulerTest {
         val dagensDato = LocalDate.now()
         val nyBatch = Batch(kjøreDato = dagensDato)
         batchService.lagreNyStatus(nyBatch, KjøreStatus.LEDIG)
-        fagsakService.hentLøpendeFagsaker().forEach { fagsakService.oppdaterStatus(it, FagsakStatus.STANSET) }
+        fagsakService.hentLøpendeFagsaker().forEach { fagsakService.oppdaterStatus(it, FagsakStatus.AVSLUTTET) }
 
         konsistensavstemmingScheduler.utførKonsistensavstemming()
 

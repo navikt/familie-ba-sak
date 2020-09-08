@@ -82,7 +82,7 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
                 opphørFom
         )
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(opphør, utbetalingsoppdragOpphør)
-        behandlingService.oppdaterStatusPåBehandling(opphør.id, BehandlingStatus.IVERKSATT)
+        behandlingService.oppdaterStatusPåBehandling(opphør.id, BehandlingStatus.IVERKSETTER_VEDTAK)
 
         val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
 
@@ -114,7 +114,7 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
                 opphørFom
         )
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(opphør, utbetalingsoppdragOpphør)
-        behandlingService.oppdaterStatusPåBehandling(opphør.id, BehandlingStatus.IVERKSATT)
+        behandlingService.oppdaterStatusPåBehandling(opphør.id, BehandlingStatus.AVSLUTTET)
 
         val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
 
@@ -146,7 +146,7 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
                 revurderingFom
         )
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(revurdering, utbetalingsoppdragRevurdering)
-        behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.IVERKSATT)
+        behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.AVSLUTTET)
 
         val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
 
@@ -179,7 +179,7 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
                 revurderingFom
         )
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(revurdering, utbetalingsoppdragRevurdering)
-        behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.IVERKSATT)
+        behandlingService.oppdaterStatusPåBehandling(revurdering.id, BehandlingStatus.AVSLUTTET)
 
         val gjeldendeBehandlinger = behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, vedtakDato)
 
@@ -203,7 +203,11 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
         Assertions.assertTrue(gjeldendeBehandlinger.isEmpty())
     }
 
-    private fun lagFerdigstiltFGB(fagsak: Fagsak, personIdent: String, vedtakDato: LocalDate, stønadFom: LocalDate, stønadTom: LocalDate): Behandling {
+    private fun lagFerdigstiltFGB(fagsak: Fagsak,
+                                  personIdent: String,
+                                  vedtakDato: LocalDate,
+                                  stønadFom: LocalDate,
+                                  stønadTom: LocalDate): Behandling {
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
         opprettTilkjentYtelseForBehandling(behandling)
         val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGBMedEttBarn(
@@ -215,7 +219,7 @@ class GjeldendeBehandlingForFagsakIntegrationTest {
                 stønadTom
         )
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
         return behandling
     }
 
