@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.*
 import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.nare.core.evaluations.Resultat
 import org.junit.Assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -40,6 +41,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
+import java.time.LocalDate.of
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -107,23 +109,51 @@ class FødselshendelseIntegrasjonTest(
         val behandlingResultater = behandlingResultatRepository.finnBehandlingResultater(behandling!!.id)
 
         Assert.assertEquals(1, behandlingResultater.size)
-        Assert.assertEquals(true, behandlingResultater.get(0).aktiv)
 
-        Assert.assertEquals(3, behandlingResultater.get(0).personResultater.size)
+        val behandlingResultat = behandlingResultater.get(0)
+
+        Assert.assertEquals(true, behandlingResultat.aktiv)
+        Assert.assertEquals(3, behandlingResultat.personResultater.size)
+
+        Assert.assertTrue(behandlingResultat.personResultater.all{
+            it.vilkårResultater.all{
+                it.resultat == Resultat.JA
+            }
+        })
+
+        Assert.assertTrue(behandlingResultat.personResultater.map{it.personIdent}.containsAll(
+                barnefnr.plus(morsfnr)
+        ))
+
+        /*
         behandlingResultater.forEach {
             it.personResultater.forEach { result -> barnefnr.plus(morsfnr).contains(result.personIdent) }
             it.personResultater.forEach { result -> result.vilkårResultater.forEach { vilkårResultat -> Assert.assertTrue(vilkårResultat.resultat.name == "JA") }}
         }
+        */
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
-
         val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, now)
 
+        Assert.assertEquals(2, andelTilkjentYtelser.size)
+        Assert.assertTrue(andelTilkjentYtelser.all{
+            it.beløp == sats.beløp
+        })
 
-        andelTilkjentYtelser.get(0).beløp
-        andelTilkjentYtelser.get(0).stønadFom
-        andelTilkjentYtelser.get(0).stønadTom
-    }
+        val reffom= now.plusMonths(1)
+        val reftom= now.plusYears(18).minusMonths(2)
+        val fom= of(reffom.year, reffom.month, 1)
+        val tom= of(reftom.year, reftom.month, reffom.lengthOfMonth())
+
+        Assert.assertTrue(andelTilkjentYtelser.all{
+            it.stønadFom == fom
+            it.stønadTom == tom
+        })
+
+        Assert.assertTrue(andelTilkjentYtelser.all{
+            it.beløp == sats.beløp
+        })
+   }
 
     @BeforeEach
     fun initMocks() {
@@ -164,7 +194,7 @@ class MockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoFor(barnefnr[0])
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(5),
+                fødselsdato = now.minusMonths(1),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -175,7 +205,7 @@ class MockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoFor(barnefnr[1])
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(5),
+                fødselsdato = now.minusMonths(1),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
