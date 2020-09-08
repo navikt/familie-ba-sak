@@ -12,10 +12,23 @@ import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.junit.BeforeClass
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 
 
-class FødselshendelseMedFlereBarnTest{
+@SpringBootTest
+@ActiveProfiles("dev", "mock-pdl")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class FødselshendelseMedFlereBarnTest(
+        @Autowired
+        private val fødselshendelseService: FødselshendelseService
+){
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
@@ -32,7 +45,8 @@ class FødselshendelseMedFlereBarnTest{
     val barn1Fnr = "12345678911"
     val barn2Fnr = "12345678912"
 
-    val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
+
+    /*val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
                                                         featureToggleServiceMock,
                                                         stegServiceMock,
@@ -42,7 +56,12 @@ class FødselshendelseMedFlereBarnTest{
                                                         personopplysningerServiceMock,
                                                         behandlingResultatRepositoryMock,
                                                         persongrunnlagServiceMock,
-                                                        behandlingRepositoryMock)
+                                                        behandlingRepositoryMock)*/
+
+    @BeforeClass
+    fun initMockk() {
+
+    }
 
     @Test
     fun `Fødselshendelse med flere barn skal bli handlet riktig`(){
