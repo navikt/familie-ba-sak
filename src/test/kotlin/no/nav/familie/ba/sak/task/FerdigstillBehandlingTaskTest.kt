@@ -6,11 +6,14 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
+import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.nare.core.evaluations.Resultat
@@ -27,7 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-pdl", "mock-infotrygd-feed")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-pdl", "mock-iverksett", "mock-infotrygd-feed")
 @Tag("integration")
 class FerdigstillBehandlingTaskTest {
 
@@ -44,10 +47,18 @@ class FerdigstillBehandlingTaskTest {
     lateinit var behandlingService: BehandlingService
 
     @Autowired
+    lateinit var stegService: StegService
+
+    @Autowired
     lateinit var behandlingResultatService: BehandlingResultatService
 
     @Autowired
+    lateinit var økonomiService: ØkonomiService
+
+    @Autowired
     lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+
+    private var vedtak: Vedtak? = null
 
     private fun lagTestTask(resultat: Resultat): Task {
         val fnr = randomFnr()
@@ -57,36 +68,39 @@ class FerdigstillBehandlingTaskTest {
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandling(fagsak, opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
 
-        val behandlingResultat = lagBehandlingResultat(fnr, behandling, resultat)
-
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
-        Assertions.assertNotNull(behandling.fagsak.id)
-
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(fnrBarn))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+        val behandlingResultat = lagBehandlingResultat(fnr, behandling, resultat)
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
+        val behandlingSomSkalKjøreVilkårsvurdering = behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VILKÅRSVURDERING)
+        stegService.håndterVilkårsvurdering(behandlingSomSkalKjøreVilkårsvurdering)
+
+        vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSATT)
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = StegType.FERDIGSTILLE_BEHANDLING)
 
         return FerdigstillBehandlingTask.opprettTask(personIdent = fnr, behandlingsId = behandling.id)
     }
 
     @Test
-    fun `Skal ferdigstille behandling og sette fagsak til løpende`() {
+    fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
         val testTask = lagTestTask(Resultat.JA)
+        iverksettMotOppdrag(vedtakId = vedtak!!.id)
+
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
         ferdigstillBehandlingTask.doTask(testTask)
         ferdigstillBehandlingTask.onCompletion(testTask)
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
-        Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling.status)
+        Assertions.assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         Assertions.assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
@@ -95,15 +109,21 @@ class FerdigstillBehandlingTaskTest {
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
         val testTask = lagTestTask(Resultat.NEI)
+        //iverksettMotOppdrag(vedtakId = vedtak!!.id)
+
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
         ferdigstillBehandlingTask.doTask(testTask)
         ferdigstillBehandlingTask.onCompletion(testTask)
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
-        Assertions.assertEquals(BehandlingStatus.FERDIGSTILT, ferdigstiltBehandling.status)
+        Assertions.assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
-        Assertions.assertEquals(FagsakStatus.STANSET, ferdigstiltFagsak.status)
+        Assertions.assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
+    }
+
+    fun iverksettMotOppdrag(vedtakId: Long) {
+        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId, "ansvarligSaksbehandler")
     }
 }

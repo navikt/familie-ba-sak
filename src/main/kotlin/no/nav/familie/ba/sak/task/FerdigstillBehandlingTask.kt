@@ -29,7 +29,6 @@ class FerdigstillBehandlingTask(
         const val TASK_STEP_TYPE = "ferdigstillBehandling"
         val LOG = LoggerFactory.getLogger(FerdigstillBehandlingTask::class.java)
 
-
         fun opprettTask(personIdent: String, behandlingsId: Long): Task {
             return Task.nyTask(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(FerdigstillBehandlingDTO(
