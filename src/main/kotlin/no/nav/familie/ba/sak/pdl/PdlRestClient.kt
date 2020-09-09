@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -186,6 +187,25 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
                    frontendFeilmelding = "Fant ikke opphold for person $ident: ${response.errorMessages()}",
                    httpStatus = HttpStatus.NOT_FOUND)
+    }
+
+    fun hentUtenlandskBostedsadresse(personIdent: String): PdlUtenlandskAdressseResponse.UtenlandskAdresse? {
+        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
+                                                query = hentGraphqlQuery("bostedsadresse-utenlandsk"))
+        val response = try {
+            postForEntity<PdlUtenlandskAdressseResponse>(pdlUri, pdlPersonRequest, httpHeaders("BAR"))
+        } catch (e: Exception) {
+            throw Feil(message = "Feil ved oppslag på utenlandsk bostedsadresse. Gav feil: ${NestedExceptionUtils.getMostSpecificCause(e).message}",
+                       frontendFeilmelding = "Feil oppsto ved oppslag på utenlandsk bostedsadresse $personIdent",
+                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                       throwable = e)
+        }
+
+        if (!response.harFeil()) return response.data?.person?.bostedsadresse?.first()?.utenlandskAdresse
+        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
+                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
+                   httpStatus = HttpStatus.NOT_FOUND)
+
     }
 
     fun hentBostedsadresseperioder(ident : String) : List<Bostedsadresseperiode>{

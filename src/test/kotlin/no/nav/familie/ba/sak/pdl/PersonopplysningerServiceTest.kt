@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import org.apache.commons.lang3.StringUtils
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -55,6 +56,18 @@ class PersonopplysningerServiceTest {
         assert(bostedsadresseperioder.first().periode?.fom != null)
     }
 
+    @Test
+    fun `hentLandkodeUtenlandskAdresse() skal returnere landkode `(){
+        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_MOR_MED_XXX_STATSBORGERSKAP)
+        assertThat(landkode).isEqualTo("DK")
+    }
+
+    @Test
+    fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen landkode `(){
+        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_BARN)
+        assertThat(landkode).isEqualTo("ZZ")
+    }
+
     companion object{
         val ID_MOR_MED_XXX_STATSBORGERSKAP= "22345678901"
         val ID_BARN= "32345678901"
@@ -100,6 +113,12 @@ class PersonopplysningerServiceTest {
 
             lagMockForPdl("hentBostedsadresseperioder.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
                           readfile("PdlIntegrasjon/bostedsadresseperioderResponse.json"))
+
+            lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
+                          readfile("PdlIntegrasjon/utenlandskAdresseResponse.json"))
+
+            lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
+                          readfile("PdlIntegrasjon/personinfoResponseForBarn.json"))
         }
 
     }
