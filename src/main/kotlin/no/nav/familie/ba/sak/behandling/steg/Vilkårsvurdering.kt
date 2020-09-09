@@ -54,7 +54,7 @@ class Vilkårsvurdering(
         behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, behandling)
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.GODKJENT)
+            behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         }
 
         return hentNesteStegForNormalFlyt(behandling)
