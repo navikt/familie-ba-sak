@@ -59,7 +59,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
         val barnLever = !barn.any { personopplysningerService.hentDødsfall(Ident(it.personIdent.ident)).erDød }
         val morHarVerge = personopplysningerService.hentVergeData(Ident(mor.personIdent.ident)).harVerge
 
-        return Fakta(mor, barn, restenAvBarna, morLever, barnLever, morHarVerge)
+        return Fakta(mor, barnaFraHendelse, restenAvBarna, morHarVerge)
     }
 
     private fun oppdaterMetrikker(evaluering: Evaluering) {
