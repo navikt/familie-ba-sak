@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -20,7 +17,6 @@ import org.springframework.stereotype.Service
 @Service
 class ØkonomiService(
         private val økonomiKlient: ØkonomiKlient,
-        private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
@@ -76,17 +72,14 @@ class ØkonomiService(
                 }
 
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
-        iverksettOppdrag(oppdatertBehandling.id, utbetalingsoppdrag)
+        iverksettOppdrag(utbetalingsoppdrag)
     }
 
-    private fun iverksettOppdrag(behandlingsId: Long,
-                                 utbetalingsoppdrag: Utbetalingsoppdrag) {
+    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         Result.runCatching { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
                 .fold(
                         onSuccess = {
                             assertGenerelleSuksessKriterier(it.body)
-
-                            behandlingService.oppdaterStatusPåBehandling(behandlingsId, BehandlingStatus.SENDT_TIL_IVERKSETTING)
                         },
                         onFailure = {
                             throw Exception("Iverksetting mot oppdrag feilet", it)

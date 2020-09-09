@@ -57,8 +57,7 @@ class SendTilBeslutter(
                     FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
             taskRepository.save(ferdigstillBehandleUnderkjentVedtakTask)
         }
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id,
-                                                     status = BehandlingStatus.SENDT_TIL_BESLUTTER)
+        behandlingService.sendBehandlingTilBeslutter(behandling)
 
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)?:
                                  throw Feil("Fant ikke behandlingsresultat på behandling")

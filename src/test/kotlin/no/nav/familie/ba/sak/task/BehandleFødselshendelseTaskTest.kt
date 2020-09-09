@@ -9,7 +9,10 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -61,7 +64,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910"))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
-        behandling.status = BehandlingStatus.FERDIGSTILT
+        behandling.status = BehandlingStatus.AVSLUTTET
         behandlingRepository.save(behandling)
 
         every {
@@ -82,7 +85,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
 
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910"))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
-        behandling.status = BehandlingStatus.FERDIGSTILT
+        behandling.status = BehandlingStatus.AVSLUTTET
         behandlingRepository.save(behandling)
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(

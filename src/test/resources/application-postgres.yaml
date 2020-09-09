@@ -66,6 +66,9 @@ funksjonsbrytere:
     uri: http://dummy/api/
     cluster: localhost
     applicationName: familie-ba-sak
+  vedtak:
+    producer:
+      enabled: false
 
 spring:
   datasource:
