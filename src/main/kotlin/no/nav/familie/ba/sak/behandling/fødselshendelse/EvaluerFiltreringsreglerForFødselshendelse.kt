@@ -34,7 +34,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
         }
     }
 
-    fun evaluerFiltreringsregler(behandling: Behandling, barnsIdenter: Set<String>): Evaluering {
+    fun evaluerFiltreringsregler(behandling: Behandling, barnasIdenter: Set<String>): Evaluering {
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, barnsIdenter))
         oppdaterMetrikker(evaluering)
         return evaluering
