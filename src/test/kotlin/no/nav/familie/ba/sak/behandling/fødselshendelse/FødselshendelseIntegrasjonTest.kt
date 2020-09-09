@@ -102,7 +102,7 @@ class FødselshendelseIntegrasjonTest(
                                                         behandlingRepository)
 
     @Test
-    fun `Fødselshendelse med flere barn som oppfyl vilkår skal håndteres riktig`() {
+    fun `Fødselshendelse med flere barn med oppfylt vilkårsvurdering skal håndteres riktig`() {
         val oppfyltBarnFnr = listOf(barnefnr[0], barnefnr[1])
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
