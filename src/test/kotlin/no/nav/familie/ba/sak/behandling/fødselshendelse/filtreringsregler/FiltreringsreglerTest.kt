@@ -88,11 +88,13 @@ internal class FiltreringsreglerTest {
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige barn ble født`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(4)))
+        val barnet1 = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
+        val barnet2 = tilfeldigPerson(LocalDate.now().plusMonths(4)).copy(personIdent = gyldigFnr)
+        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(4)),
+                                                     PersonInfo(LocalDate.now().minusMonths(8)))
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet1, barnet2), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
