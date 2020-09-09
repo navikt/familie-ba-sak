@@ -43,18 +43,21 @@ internal class StønadsstatistikkServiceTest {
                 barn1.fødselsdato.plusYears(3).sisteDagIMåned().toString(),
                 YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
-                person = barn1)
+                person = barn1,
+                periodeIdOffset = 1)
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                 barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
                 YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
-                person = barn2)
+                person = barn2,
+                periodeIdOffset = 2)
 
         val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                 barn2.fødselsdato.plusYears(2).sisteDagIMåned().toString(),
                 YtelseType.UTVIDET_BARNETRYGD,
                 behandling = behandling,
-                person = personopplysningGrunnlag.søker.first())
+                person = personopplysningGrunnlag.søker.first(),
+                periodeIdOffset = 3)
 
         every { behandlingService.hent(any()) } returns behandling
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns

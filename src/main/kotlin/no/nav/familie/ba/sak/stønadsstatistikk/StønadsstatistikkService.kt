@@ -122,20 +122,11 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                             ),
                             klassekode = andel.type.klassifisering,
                             utbetaltPrMnd = andel.beløp,
-                            delytelseId = hentDelytelseId(andel, segment)
+                            delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
                     )
                 }
         )
 
-    }
-
-    private fun hentDelytelseId(andel: AndelTilkjentYtelse, segment: LocalDateSegment<Int>): String {
-        val utbetalingsOppdrag = objectMapper.readValue(andel.tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
-
-        val listeMedUtbetalingsperioder = utbetalingsOppdrag.utbetalingsperiode
-
-        val utbetalingsperiode = listeMedUtbetalingsperioder.filter { it.vedtakdatoFom == segment.fom }.first()
-        return utbetalingsOppdrag.saksnummer + utbetalingsperiode.periodeId
     }
 
     private fun hentLandkode(person: Person): String {
