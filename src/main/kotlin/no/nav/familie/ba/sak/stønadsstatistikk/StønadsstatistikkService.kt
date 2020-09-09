@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.eksterne.kontrakter.*
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
@@ -80,6 +82,16 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
 
     }
 
+    private fun hentDelytelseId(behandlingId: Long): String {
+
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+        val utbetalingsOppdrag = objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
+
+
+        return utbetalingsOppdrag.saksnummer + utbetalingsOppdrag.utbetalingsperiode.first().periodeId
+
+    }
+
     private fun mapTilUtbetalingsperiode(segment: LocalDateSegment<Int>,
                                          andelerForSegment: List<AndelTilkjentYtelse>,
                                          behandling: Behandling,
@@ -109,11 +121,21 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                                     personIdent = personForAndel.personIdent.ident
                             ),
                             klassekode = andel.type.klassifisering,
-                            utbetaltPrMnd = andel.beløp
+                            utbetaltPrMnd = andel.beløp,
+                            delytelseId = hentDelytelseId(andel, segment)
                     )
                 }
         )
 
+    }
+
+    private fun hentDelytelseId(andel: AndelTilkjentYtelse, segment: LocalDateSegment<Int>): String {
+        val utbetalingsOppdrag = objectMapper.readValue(andel.tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
+
+        val listeMedUtbetalingsperioder = utbetalingsOppdrag.utbetalingsperiode
+
+        val utbetalingsperiode = listeMedUtbetalingsperioder.filter { it.vedtakdatoFom == segment.fom }.first()
+        return utbetalingsOppdrag.saksnummer + utbetalingsperiode.periodeId
     }
 
     private fun hentLandkode(person: Person): String {
