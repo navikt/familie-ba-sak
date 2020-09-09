@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.eksterne.kontrakter.*
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -23,6 +24,8 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                                private val beregningService: BeregningService,
                                private val vedtakService: VedtakService,
                                private val personopplysningerService: PersonopplysningerService) {
+    val LOG = LoggerFactory.getLogger(this::class.java)
+    val secureLogger = LoggerFactory.getLogger("secureLogger")
 
 
     fun hentVedtak(behandlingId: Long): VedtakDVH {
@@ -114,7 +117,14 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
     }
 
     private fun hentLandkode(person: Person): String {
-        return if (person.bostedsadresse != null) "NO" else personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
-                person.personIdent.ident)
+        return if (person.bostedsadresse != null) "NO" else {
+            val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
+                    person.personIdent.ident)
+            if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {
+                LOG.error("Sender landkode ukjent til DVH. Bør undersøke om hvorfor. Ident i securelogger")
+                secureLogger.error("Ukjent land sendt til DVH for person ${person.personIdent.ident}")
+            }
+            landKode
+        }
     }
 }
