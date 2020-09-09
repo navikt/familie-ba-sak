@@ -21,7 +21,7 @@ internal fun barnetHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
 
 internal fun barnetErUnder6mnd(fakta: Fakta): Evaluering {
     return when (!fakta.barn.any { (!LocalDate.now().minusMonths(6).isBefore(it.fødselsdato)) }) {
-        true -> Evaluering.ja("Alle barn er under 6 måneder.")
+        true -> Evaluering.ja("Alle barna er under 6 måneder.")
         false -> Evaluering.nei("Minst et barn er over 6 måneder.")
     }
 }
