@@ -13,14 +13,14 @@ internal fun morHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
 }
 
 internal fun barnetHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
-    return when (!fakta.barn.any { erDnummer(it.personIdent.ident) }) {
+    return when (fakta.barnaFraHendelse.none { erDnummer(it.personIdent.ident) }) {
         true -> Evaluering.ja("Alle barn har gyldig fødselsnummer.")
         false -> Evaluering.nei("Minst et barn har ikke gyldig fødselsnummer.")
     }
 }
 
 internal fun barnetErUnder6mnd(fakta: Fakta): Evaluering {
-    return when (!fakta.barn.any { (!LocalDate.now().minusMonths(6).isBefore(it.fødselsdato)) }) {
+    return when (fakta.barnaFraHendelse.none { (!LocalDate.now().minusMonths(6).isBefore(it.fødselsdato)) }) {
         true -> Evaluering.ja("Alle barna er under 6 måneder.")
         false -> Evaluering.nei("Minst et barn er over 6 måneder.")
     }
@@ -34,8 +34,8 @@ internal fun morErOver18år(fakta: Fakta): Evaluering {
 }
 
 internal fun merEnn5mndSidenForrigeBarn(fakta: Fakta): Evaluering {
-    return when (!fakta.barn.any {
-        fakta.restenAvBarna.any { it.fødselsdato.isAfter(it.fødselsdato.minusMonths(5)) }
+    return when (fakta.barnaFraHendelse.none {barnFraHendelse ->
+        fakta.restenAvBarna.any { barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.minusMonths(5)) }
     }) {
         true -> Evaluering.ja("Det har gått mer enn fem måneder siden forrige barn ble født.")
         false -> Evaluering.nei("Det har gått mindre enn fem måneder siden forrige barn ble født.")
@@ -66,9 +66,9 @@ internal fun morHarIkkeVerge(fakta: Fakta): Evaluering {
 internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(fakta: Fakta): Evaluering {
     val dagIMånedenForDagensDato = LocalDate.now().dayOfMonth
     return when {
-        dagIMånedenForDagensDato < 21 && !fakta.barn.any { it.fødselsdato.erFraInneværendeEllerForrigeMåned() } ->
+        dagIMånedenForDagensDato < 21 && !fakta.barnaFraHendelse.any { it.fødselsdato.erFraInneværendeEllerForrigeMåned() } ->
             Evaluering.nei("Saken medfører etterbetaling.")
-        dagIMånedenForDagensDato >= 21 && !fakta.barn.any { it.fødselsdato.erFraInneværendeMåned() } ->
+        dagIMånedenForDagensDato >= 21 && !fakta.barnaFraHendelse.any { it.fødselsdato.erFraInneværendeMåned() } ->
             Evaluering.nei("Saken medfører etterbetaling.")
         else -> Evaluering.ja("Saken medfører ikke etterbetaling.")
     }
