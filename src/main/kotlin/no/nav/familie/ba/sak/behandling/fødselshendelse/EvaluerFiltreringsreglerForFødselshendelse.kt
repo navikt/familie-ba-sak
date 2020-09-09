@@ -45,7 +45,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         val mor = personopplysningGrunnlag.søker[0]
-        val barn = personopplysningGrunnlag.barna.filter { barnsIdenter.contains(it.personIdent.ident) }
+        val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
                 ?: throw java.lang.IllegalStateException("Barnets ident er ikke tilstede i personopplysningsgrunnlaget.")
 
         val restenAvBarna =
