@@ -170,9 +170,24 @@ class FødselshendelseServiceTest {
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
     }
 
+    @Test
+    fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
+        initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
+                  filtreringResultat = Evaluering.ja(""),
+                  toggleVerdi = false,
+                  flerlinlinger = true)
+
+        fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseFlerlingerBehandling)
+
+        verify(exactly = 1) { IverksettMotOppdragTask.opprettTask(any(), any(), any()) }
+        verify { OpprettOppgaveTask.opprettTask(any(), any(), any()) wasNot called }
+    }
+
     private fun initMockk(vilkårsvurderingsResultat: BehandlingResultatType,
                           filtreringResultat: Evaluering,
-                          toggleVerdi: Boolean) {
+                          toggleVerdi: Boolean,
+                          flerlinlinger: Boolean = false) {
+
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling = behandling)
         val opprettOppgaveTask = Task.nyTask(OpprettOppgaveTask.TASK_STEP_TYPE, "")
@@ -190,6 +205,13 @@ class FødselshendelseServiceTest {
                                   kjønn = Kjønn.KVINNE,
                                   personopplysningGrunnlag = personopplysningGrunnlag,
                                   sivilstand = SIVILSTAND.UGIFT))
+        if (flerlinlinger) barna.plus(Person(type = PersonType.BARN,
+                                             personIdent = PersonIdent("01101800034"),
+                                             fødselsdato = LocalDate.of(2018, 1, 12),
+                                             kjønn = Kjønn.KVINNE,
+                                             personopplysningGrunnlag = personopplysningGrunnlag,
+                                             sivilstand = SIVILSTAND.UGIFT))
+
         personopplysningGrunnlag.personer.addAll(barna)
         personopplysningGrunnlag.personer.add(søker)
 
@@ -218,5 +240,6 @@ class FødselshendelseServiceTest {
 
     companion object {
         val fødselshendelseBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
+        val fødselshendelseFlerlingerBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
     }
 }
