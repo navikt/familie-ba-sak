@@ -49,7 +49,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
 
         val restenAvBarna =
                 personopplysningerService.hentPersoninfoFor(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
-                    it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && !barnaFraHendelse.map { m -> m.personIdent.ident }.toList().contains(it.personIdent.id)
+                    it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && barnaFraHendelse.none{barn-> barn.personIdent.ident == it.personIdent.id}
                 }.map {
                     personopplysningerService.hentPersoninfoFor(it.personIdent.id)
                 }

@@ -171,11 +171,13 @@ class FødselshendelseIntegrasjonTest(
                 ikkeOppfyltBarnFnr.plus(morsfnr[1])
         ))
 
-        val ikkeOppfyltBarnVilkårResultater = behandlingResultat.personResultater.find{
-            it.personIdent == ikkeOppfyltBarnFnr[1] }!!.vilkårResultater
+        val ikkeOppfyltBarnVilkårResultater = behandlingResultat.personResultater.find {
+            it.personIdent == ikkeOppfyltBarnFnr[1]
+        }!!.vilkårResultater
 
-        Assert.assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter{it.resultat == Resultat.NEI}.size)
-        Assert.assertEquals(Vilkår.BOR_MED_SØKER, ikkeOppfyltBarnVilkårResultater.find { it.resultat== Resultat.NEI }!!.vilkårType)
+        Assert.assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter { it.resultat == Resultat.NEI }.size)
+        Assert.assertEquals(Vilkår.BOR_MED_SØKER,
+                            ikkeOppfyltBarnVilkårResultater.find { it.resultat == Resultat.NEI }!!.vilkårType)
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
@@ -306,6 +308,7 @@ class MockConfiguration {
     }
 
     companion object {
+
         val morsfnr = listOf("12445678910", "12445678911")
         val barnefnr = listOf("12345678911", "12345678912", "12345678913")
 

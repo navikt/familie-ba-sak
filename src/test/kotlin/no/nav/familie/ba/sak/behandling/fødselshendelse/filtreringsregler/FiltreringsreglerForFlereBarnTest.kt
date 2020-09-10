@@ -17,17 +17,17 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
+import no.nav.familie.util.FnrGenerator
 import no.nav.nare.core.evaluations.Resultat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class FilteringsreglerForFlereBarnTest {
-    val dnummer0 = PersonIdent("42345678910")
-    val dnummer1 = PersonIdent("52345678910")
-    val barnFnr0 = PersonIdent("22345678910")
-    val barnFnr1 = PersonIdent("21345678910")
-    val gyldigFnr = PersonIdent("12345678910")
+class FiltreringsreglerForFlereBarnTest {
+    val dnummer0 = PersonIdent(FnrGenerator.generer(erDnummer = true))
+    val barnFnr0 = PersonIdent(FnrGenerator.generer())
+    val barnFnr1 = PersonIdent(FnrGenerator.generer())
+    val gyldigFnr = PersonIdent(FnrGenerator.generer())
 
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()

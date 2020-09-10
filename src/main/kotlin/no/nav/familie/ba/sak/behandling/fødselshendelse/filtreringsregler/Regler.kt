@@ -20,7 +20,7 @@ internal fun barnetHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
 }
 
 internal fun barnetErUnder6mnd(fakta: Fakta): Evaluering {
-    return when (fakta.barnaFraHendelse.none { (!LocalDate.now().minusMonths(6).isBefore(it.fødselsdato)) }) {
+    return when (fakta.barnaFraHendelse.none { it.fødselsdato.isBefore(LocalDate.now().minusMonths(6)) }) {
         true -> Evaluering.ja("Alle barna er under 6 måneder.")
         false -> Evaluering.nei("Minst et barn er over 6 måneder.")
     }
@@ -34,7 +34,7 @@ internal fun morErOver18år(fakta: Fakta): Evaluering {
 }
 
 internal fun merEnn5mndSidenForrigeBarn(fakta: Fakta): Evaluering {
-    return when (fakta.barnaFraHendelse.none {barnFraHendelse ->
+    return when (fakta.barnaFraHendelse.none { barnFraHendelse ->
         fakta.restenAvBarna.any { barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.minusMonths(5)) }
     }) {
         true -> Evaluering.ja("Det har gått mer enn fem måneder siden forrige barn ble født.")
