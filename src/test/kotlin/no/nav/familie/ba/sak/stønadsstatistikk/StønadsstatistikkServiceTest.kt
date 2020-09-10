@@ -75,4 +75,13 @@ internal class StønadsstatistikkServiceTest {
         assertEquals(3, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
         assertEquals(2 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD), vedtak.utbetalingsperioder[0].utbetaltPerMnd)
     }
+
+    @Test
+    fun `hver utbetalingsDetalj innenfor en utbetalingsperiode skal ha unik delytelseId`() {
+        val vedtak = stønadsstatistikkService.hentVedtak(1L)
+
+        vedtak.utbetalingsperioder.forEach {
+            assertEquals(it.utbetalingsDetaljer.size, it.utbetalingsDetaljer.distinctBy { it.delytelseId }.size)
+        }
+    }
 }
