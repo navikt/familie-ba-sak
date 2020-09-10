@@ -86,11 +86,25 @@ internal class FiltreringsreglerTest {
     }
 
     @Test
+    fun `Regelevaluering skal resultere i JA når det har gått mer enn 5 måneder siden forrige barn ble født`() {
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
+        val barnet1 = tilfeldigPerson(LocalDate.now().plusMonths(0)).copy(personIdent = gyldigFnr)
+        val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(personIdent = gyldigFnr)
+        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(8).minusDays(1)),
+                                                     PersonInfo(LocalDate.now().minusMonths(8)))
+
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
+                .evaluer(Fakta(mor, listOf(barnet1, barnet2), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+
+        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+    }
+
+    @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige barn ble født`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barnet1 = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val barnet2 = tilfeldigPerson(LocalDate.now().plusMonths(4)).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(4)),
+        val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(personIdent = gyldigFnr)
+        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(5).minusDays(1)),
                                                      PersonInfo(LocalDate.now().minusMonths(8)))
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()

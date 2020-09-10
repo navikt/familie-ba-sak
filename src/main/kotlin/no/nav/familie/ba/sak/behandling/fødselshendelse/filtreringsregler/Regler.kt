@@ -34,8 +34,8 @@ internal fun morErOver18år(fakta: Fakta): Evaluering {
 }
 
 internal fun merEnn5mndSidenForrigeBarn(fakta: Fakta): Evaluering {
-    return when (fakta.barnaFraHendelse.none { barnFraHendelse ->
-        fakta.restenAvBarna.any { barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.minusMonths(5)) }
+    return when (fakta.barnaFraHendelse.all { barnFraHendelse ->
+        fakta.restenAvBarna.all { barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) }
     }) {
         true -> Evaluering.ja("Det har gått mer enn fem måneder siden forrige barn ble født.")
         false -> Evaluering.nei("Det har gått mindre enn fem måneder siden forrige barn ble født.")
