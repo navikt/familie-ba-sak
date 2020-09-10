@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.stønadsstatistikk
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -65,7 +64,6 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                     }
                     mapTilUtbetalingsperiode(segment,
                                              andelerForSegment,
-                                             tilkjentYtelse.behandling,
                                              persongrunnlag)
                 }
     }
@@ -82,7 +80,6 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
 
     private fun mapTilUtbetalingsperiode(segment: LocalDateSegment<Int>,
                                          andelerForSegment: List<AndelTilkjentYtelse>,
-                                         behandling: Behandling,
                                          personopplysningGrunnlag: PersonopplysningGrunnlag): UtbetalingsperiodeDVH {
         return UtbetalingsperiodeDVH(
                 hjemmel = "Ikke implementert",

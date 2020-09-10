@@ -196,7 +196,7 @@ class VilkårService(
                 if (child.children.isNotEmpty())
                     child.children.forEach {
                         if (it.begrunnelse.isNotBlank()) {
-                            when (it.resultat) {
+                             when (it.resultat) {
                                 Resultat.NEI ->
                                     begrunnelse = "$begrunnelse\n\t- nei: ${it.begrunnelse}"
                                 Resultat.KANSKJE ->
