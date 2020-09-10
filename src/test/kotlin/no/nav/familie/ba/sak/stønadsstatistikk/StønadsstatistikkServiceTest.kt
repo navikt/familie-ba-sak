@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.barnFnr
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.økonomi.sats
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,9 +25,10 @@ internal class StønadsstatistikkServiceTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val beregningService: BeregningService = mockk()
     private val vedtakService: VedtakService = mockk()
+    private val personopplysningerService: PersonopplysningerService = mockk()
 
     private val stønadsstatistikkService =
-            StønadsstatistikkService(behandlingService, persongrunnlagService, beregningService, vedtakService)
+            StønadsstatistikkService(behandlingService, persongrunnlagService, beregningService, vedtakService, personopplysningerService)
 
     @BeforeAll
     fun init() {
@@ -59,12 +61,13 @@ internal class StønadsstatistikkServiceTest {
                 tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2, andelTilkjentYtelseSøker))
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
+        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
     }
 
     @Test
     fun hentVedtak() {
         val vedtak = stønadsstatistikkService.hentVedtak(1L)
-        System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
 
         assertEquals(3, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
         assertEquals(2 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD), vedtak.utbetalingsperioder[0].utbetaltPerMnd)

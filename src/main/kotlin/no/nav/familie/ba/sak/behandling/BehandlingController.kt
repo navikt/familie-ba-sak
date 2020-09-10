@@ -73,9 +73,7 @@ class BehandlingController(private val fagsakService: FagsakService,
 
             val ident = nyBehandling.morsIdent
                         ?: (nyBehandling.søkersIdent ?: error("Fant ingen gyldig ident på mor/søker"))
-            val skalBehandlesHosInfotrygd =
-                    fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(ident,
-                                                                                    nyBehandling.barnasIdenter)
+            fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(ident, nyBehandling.barnasIdenter)
             fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling))
             taskRepository.save(task)

@@ -140,7 +140,7 @@ object ØkonomiUtils {
     fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<String, List<AndelTilkjentYtelse>>)
             : Map<String, Int> =
             andelerFraForrigeBehandling.map { (personIdent, forrigeKjede) ->
-                personIdent to (forrigeKjede.maxBy { andel -> andel.periodeOffset!! }?.periodeOffset?.toInt()
+                personIdent to (forrigeKjede.maxByOrNull { andel -> andel.periodeOffset!! }?.periodeOffset?.toInt()
                                 ?: throw IllegalStateException("Andel i kjede skal ha offset"))
             }.toMap()
 

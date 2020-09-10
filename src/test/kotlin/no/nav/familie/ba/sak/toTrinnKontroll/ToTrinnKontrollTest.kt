@@ -43,11 +43,11 @@ class ToTrinnKontrollTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
-        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hent(behandling.id).status)
+        Assertions.assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
 
         totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling = behandling)
         totrinnskontrollService.besluttTotrinnskontroll(behandling, beslutning = Beslutning.GODKJENT, beslutter = "Beslutter")
-        Assertions.assertEquals(BehandlingStatus.GODKJENT, behandlingService.hent(behandling.id).status)
+        Assertions.assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingService.hent(behandling.id).status)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
         Assertions.assertTrue(totrinnskontroll.godkjent)
@@ -62,11 +62,11 @@ class ToTrinnKontrollTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
-        Assertions.assertEquals(BehandlingStatus.SENDT_TIL_BESLUTTER, behandlingService.hent(behandling.id).status)
+        Assertions.assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
 
         totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling = behandling)
         totrinnskontrollService.besluttTotrinnskontroll(behandling, beslutter = "Beslutter", beslutning = Beslutning.UNDERKJENT)
-        Assertions.assertEquals(BehandlingStatus.UNDERKJENT_AV_BESLUTTER, behandlingService.hent(behandling.id).status)
+        Assertions.assertEquals(BehandlingStatus.UTREDES, behandlingService.hent(behandling.id).status)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
         Assertions.assertFalse(totrinnskontroll.godkjent)

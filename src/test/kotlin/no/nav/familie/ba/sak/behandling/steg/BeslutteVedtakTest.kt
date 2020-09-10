@@ -46,7 +46,7 @@ class BeslutteVedtakTest {
     fun `Skal ferdigstille Godkjenne vedtak-oppgave ved Godkjent vedtak`() {
 
         val behandling = lagBehandling()
-        behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.steg = StegType.BESLUTTE_VEDTAK
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
@@ -63,7 +63,7 @@ class BeslutteVedtakTest {
     @Test
     fun `Skal ferdigstille Godkjenne vedtak-oppgave og opprette Behandle Underkjent Vedtak-oppgave ved Underkjent vedtak`() {
         val behandling = lagBehandling()
-        behandling.status = BehandlingStatus.SENDT_TIL_BESLUTTER
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.steg = StegType.BESLUTTE_VEDTAK
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
 

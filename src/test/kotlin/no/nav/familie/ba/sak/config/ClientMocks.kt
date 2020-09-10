@@ -94,6 +94,10 @@ class ClientMocks {
         } returns VergeData(false)
 
         every {
+            mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
+        } returns "NO"
+
+        every {
             mockPersonopplysningerService.hentPersoninfoFor(eq(barnFnr[0]))
         } returns personInfo.getValue(barnFnr[0])
 
@@ -271,6 +275,10 @@ class ClientMocks {
                             tom = LocalDate.of(2002, 1, 5)
                     )))
         }
+
+        every {
+            mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
+        } returns "NO"
 
         val ukjentId = "43125678910"
         every {
