@@ -216,7 +216,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
-        val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
+        val uri = URI.create("$integrasjonUri/oppgave/v2/$oppgaveId")
 
         return Result.runCatching {
             getForEntity<Ressurs<Oppgave>>(uri)
