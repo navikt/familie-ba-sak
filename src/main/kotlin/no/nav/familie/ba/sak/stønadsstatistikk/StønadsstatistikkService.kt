@@ -82,16 +82,6 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
 
     }
 
-    private fun hentDelytelseId(behandlingId: Long): String {
-
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
-        val utbetalingsOppdrag = objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
-
-
-        return utbetalingsOppdrag.saksnummer + utbetalingsOppdrag.utbetalingsperiode.first().periodeId
-
-    }
-
     private fun mapTilUtbetalingsperiode(segment: LocalDateSegment<Int>,
                                          andelerForSegment: List<AndelTilkjentYtelse>,
                                          behandling: Behandling,
