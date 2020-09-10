@@ -243,13 +243,13 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `finnOppgaveMedId returnerer OK`() {
         val oppgaveId = 1234L
-        stubFor(get("/api/oppgave/$oppgaveId").willReturn(okJson(objectMapper.writeValueAsString(success(lagTestOppgaveDTO(
+        stubFor(get("/api/oppgave/v4/$oppgaveId").willReturn(okJson(objectMapper.writeValueAsString(success(lagTestOppgaveDTO(
                 oppgaveId))))))
 
         val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
         assertThat(oppgave.id).isEqualTo(oppgaveId)
 
-        verify(getRequestedFor(urlEqualTo("/api/oppgave/$oppgaveId")))
+        verify(getRequestedFor(urlEqualTo("/api/oppgave/v4/$oppgaveId")))
     }
 
     @Test
