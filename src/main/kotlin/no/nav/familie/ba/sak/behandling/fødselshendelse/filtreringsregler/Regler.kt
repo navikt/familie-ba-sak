@@ -13,11 +13,9 @@ internal fun morErOver18år(fakta: Fakta): Evaluering {
 }
 
 internal fun merEnn5mndSidenForrigeBarn(fakta: Fakta): Evaluering {
-    val barnetsFødselsdato = fakta.barn.fødselsdato
-    val listenAvAndreBarnUnder5måneder = fakta.restenAvBarna.filter {
-        it.fødselsdato.isAfter(barnetsFødselsdato.minusMonths(5))
-    }
-    return when (listenAvAndreBarnUnder5måneder.isEmpty()) {
+    return when (fakta.barnaFraHendelse.all { barnFraHendelse ->
+        fakta.restenAvBarna.all { barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) }
+    }) {
         true -> Evaluering.ja("Det har gått mer enn fem måneder siden forrige barn ble født.")
         false -> Evaluering.nei("Det har gått mindre enn fem måneder siden forrige barn ble født.")
     }
@@ -47,9 +45,9 @@ internal fun morHarIkkeVerge(fakta: Fakta): Evaluering {
 internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(fakta: Fakta): Evaluering {
     val dagIMånedenForDagensDato = LocalDate.now().dayOfMonth
     return when {
-        dagIMånedenForDagensDato < 21 && !fakta.barn.fødselsdato.erFraInneværendeEllerForrigeMåned() ->
+        dagIMånedenForDagensDato < 21 && !fakta.barnaFraHendelse.any { it.fødselsdato.erFraInneværendeEllerForrigeMåned() } ->
             Evaluering.nei("Saken medfører etterbetaling.")
-        dagIMånedenForDagensDato >= 21 && !fakta.barn.fødselsdato.erFraInneværendeMåned() ->
+        dagIMånedenForDagensDato >= 21 && !fakta.barnaFraHendelse.any { it.fødselsdato.erFraInneværendeMåned() } ->
             Evaluering.nei("Saken medfører etterbetaling.")
         else -> Evaluering.ja("Saken medfører ikke etterbetaling.")
     }

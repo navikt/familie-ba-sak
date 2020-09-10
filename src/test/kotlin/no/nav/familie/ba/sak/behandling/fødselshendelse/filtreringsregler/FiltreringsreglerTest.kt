@@ -22,7 +22,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
     }
@@ -34,20 +34,36 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_ER_OVER_18_AAR)
     }
 
     @Test
-    fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige barn ble født`() {
+    fun `Regelevaluering skal resultere i JA når det har gått mer enn 5 måneder siden forrige barn ble født`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(4)))
+        val barnet1 = tilfeldigPerson(LocalDate.now().plusMonths(0)).copy(personIdent = gyldigFnr)
+        val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(personIdent = gyldigFnr)
+        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(8).minusDays(1)),
+                                                     PersonInfo(LocalDate.now().minusMonths(8)))
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet1, barnet2), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+
+        assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+    }
+
+    @Test
+    fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige barn ble født`() {
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
+        val barnet1 = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
+        val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(personIdent = gyldigFnr)
+        val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(5).minusDays(1)),
+                                                     PersonInfo(LocalDate.now().minusMonths(8)))
+
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
+                .evaluer(Fakta(mor, listOf(barnet1, barnet2), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
@@ -60,7 +76,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = false, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = false, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_LEVER)
@@ -73,7 +89,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = false, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = false, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARNET_LEVER)
@@ -86,7 +102,7 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = true))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = true))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_HAR_IKKE_VERGE)
@@ -112,7 +128,7 @@ internal class FiltreringsreglerTest {
         val barnet = tilfeldigPerson(fødselsdatoForBarn).copy(personIdent = gyldigFnr)
         val restenAvBarna: List<PersonInfo> = listOf()
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barnet, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(forventetResultat).isEqualTo(evaluering.resultat)
         if (forventetResultat == Resultat.NEI)
