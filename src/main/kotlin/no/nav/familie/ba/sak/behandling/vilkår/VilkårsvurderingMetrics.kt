@@ -26,7 +26,7 @@ class VilkårsvurderingMetrics {
                 }
             }
         }
-
+        
         LovligOppholdAvslagÅrsaker.values().map { årsak ->
             PersonType.values().filter { it !== PersonType.ANNENPART }.forEach { personType ->
                 lovligOppholdAvslagÅrsaker[personType.name + årsak.name] = Metrics.counter("familie.ba.behandling.lovligopphold",
@@ -35,6 +35,15 @@ class VilkårsvurderingMetrics {
                                                                                            "personType",
                                                                                            personType.name)
             }
+        }
+
+        LovligoppholdEØSborger.values().forEach {
+            lovligOppholdAvslagÅrsaker.plus(Pair("Mor har ikke hatt bostedsadresse i mer enn 5 år ${it.detaljertÅrsak}",
+                                                 Metrics.counter("familie.ba.behandling.lovligopphold",
+                                                                 "aarsak",
+                                                                 "Mor har ikke hatt bostedsadresse i mer enn 5 år",
+                                                                 "detaljertAarsak",
+                                                                 it.detaljertÅrsak)))
         }
     }
 
@@ -84,6 +93,10 @@ class VilkårsvurderingMetrics {
         fun økTellerForLovligOpphold(årsak: LovligOppholdAvslagÅrsaker, personType: PersonType) {
             lovligOppholdAvslagÅrsaker[personType.name + årsak.name]?.increment()
         }
+
+        fun økTellerForLovligOppholdEØSBorger(lovligoppholdEØSborger: LovligoppholdEØSborger) {
+            lovligOppholdAvslagÅrsaker["Mor har ikke hatt bostedsadresse i mer enn 5 år ${lovligoppholdEØSborger.detaljertÅrsak}"]?.increment()
+        }
     }
 }
 
@@ -92,4 +105,12 @@ enum class LovligOppholdAvslagÅrsaker {
     EØS,
     STATSLØS,
     BOSTEDSADRESSE
+}
+
+enum class LovligoppholdEØSborger(var detaljertÅrsak: String) {
+    IKKE_REGISTRERT_FAR_PÅ_BARNET("Ikke registrert far på barnet"),
+    MOR_OG_FAR_IKKE_SAMME_BOSTEDSADRESSE("Mor og far ikke samme bostedsadresse"),
+    FAR_HAR_IKKE_ET_LØPENDE_ARBEIDSFORHOLD_I_NORGE("Far har ikke et løpende arbeidsforhold i Norge"),
+    MOR_HAR_IKKE_HATT_ARBEIDSFORHOLD_I_DE_5_SISTE_ÅRENE("Mor har ikke hatt arbeidsforhold i de 5 siste årene")
+
 }
