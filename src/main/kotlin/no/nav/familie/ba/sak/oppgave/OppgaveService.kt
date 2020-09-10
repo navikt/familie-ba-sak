@@ -95,7 +95,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
     }
 
-    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): OppgaverOgAntall {
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
         return integrasjonClient.hentOppgaver(finnOppgaveRequest)
     }
 

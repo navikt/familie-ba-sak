@@ -8,7 +8,9 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstema
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -28,20 +30,13 @@ class OppgaveController(val oppgaveService: OppgaveService,
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequest)
-            : ResponseEntity<Ressurs<OppgaverOgAntall>> {
-
-        if (!finnOppgaveRequest.behandlingstema.isNullOrEmpty() && OppgaveService.Behandlingstema.values()
-                        .all { it.kode != finnOppgaveRequest.behandlingstema }) {
-            return badRequest("Ugyldig behandlingstema", null)
-        }
-
-        return try {
-            val oppgaver: OppgaverOgAntall = oppgaveService.hentOppgaver(finnOppgaveRequest)
-            ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
-        } catch (e: Throwable) {
-            illegalState("Henting av oppgaver feilet", e)
-        }
+            : ResponseEntity<Ressurs<FinnOppgaveResponseDto>> = try {
+        val oppgaver: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(finnOppgaveRequest)
+        ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
+    } catch (e: Throwable) {
+        illegalState("Henting av oppgaver feilet", e)
     }
+
 
     @PostMapping(path = ["/{oppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long,
@@ -90,24 +85,3 @@ class OppgaveController(val oppgaveService: OppgaveService,
         )
     }
 }
-
-class FinnOppgaveRequest(val behandlingstema: String? = null,
-                         val oppgavetype: String? = null,
-                         val enhet: String? = null,
-                         val saksbehandler: String? = null,
-                         val journalpostId: String? = null,
-                         val tilordnetRessurs: String? = null,
-                         val tildeltRessurs: Boolean? = null,
-                         val opprettetFomTidspunkt: String? = null,
-                         val opprettetTomTidspunkt: String? = null,
-                         val fristFomDato: String? = null,
-                         val fristTomDato: String? = null,
-                         val aktivFomDato: String? = null,
-                         val aktivTomDato: String? = null,
-                         val limit: Long? = null,
-                         val offset: Long? = null) {
-
-    val tema = "BAR"
-}
-
-class OppgaverOgAntall(val antallTreffTotalt: Long, val oppgaver: List<Oppgave>)

@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Tema
 import org.junit.jupiter.api.Assertions
@@ -73,17 +75,10 @@ class OppgaveControllerTest {
     fun `hentOppgaver via OppgaveController skal fungere`() {
         every {
             oppgaveService.hentOppgaver(any())
-        } returns OppgaverOgAntall(1, listOf(Oppgave(tema = Tema.BAR)))
-        val response = oppgaveController.hentOppgaver(FinnOppgaveRequest())
-        val oppgaverOgAntall = response.body?.data as OppgaverOgAntall
+        } returns FinnOppgaveResponseDto(1, listOf(Oppgave(tema = Tema.BAR)))
+        val response = oppgaveController.hentOppgaver(FinnOppgaveRequest(tema = Tema.BAR))
+        val oppgaverOgAntall = response.body?.data as FinnOppgaveResponseDto
         Assertions.assertEquals(1, oppgaverOgAntall.antallTreffTotalt)
         Assertions.assertEquals(Tema.BAR, oppgaverOgAntall.oppgaver.first().tema)
-    }
-
-    @Test
-    fun `hentOppgaver skal feile ved ukjent behandlingstema`() {
-        val oppgaver = oppgaveController.hentOppgaver(FinnOppgaveRequest(behandlingstema = "ab1000"))
-        Assertions.assertEquals(Ressurs.Status.FEILET, oppgaver.body?.status)
-        Assertions.assertEquals("Ugyldig behandlingstema", oppgaver.body?.melding)
     }
 }
