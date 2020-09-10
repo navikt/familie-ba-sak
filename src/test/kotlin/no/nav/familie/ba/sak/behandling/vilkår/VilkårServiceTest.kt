@@ -5,7 +5,9 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.behandling.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.Vilkårsvurdering
@@ -75,6 +77,19 @@ class VilkårServiceTest(
                                                                                    bekreftEndringerViaFrontend = true,
                                                                                    forrigeBehandling = forrigeBehandlingSomErIverksatt)
         Assertions.assertEquals(2, behandlingResultat.personResultater.size)
+
+
+        behandlingResultat.personResultater.map { personResultat ->
+            personResultat.tilRestPersonResultat().vilkårResultater.map {
+                vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = it.id,
+                                          restPersonResultat =
+                                          RestPersonResultat(personIdent = personResultat.personIdent,
+                                                             vilkårResultater = listOf(it.copy(
+                                                                     resultat = Resultat.JA,
+                                                                     periodeFom = LocalDate.of(2019, 5, 8)
+                                                             ))))
+            }
+        }
 
         val behandlingSteg: Vilkårsvurdering = stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         Assertions.assertNotNull(behandlingSteg)
@@ -196,7 +211,7 @@ class VilkårServiceTest(
 
         behandlingResultat2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
-                Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
+                Assertions.assertEquals(Resultat.KANSKJE, vilkårResultat.resultat)
                 if (personResultat.personIdent == barnFnr2) {
                     Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {

@@ -139,8 +139,52 @@ class VilkårService(
     private fun genererInitieltBehandlingResultat(behandling: Behandling): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(behandling = behandling)
 
-        lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+            lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
+        } else {
+            lagManuellVilkårsvurdering(behandlingResultat = behandlingResultat)
+        }
+
         return behandlingResultat
+    }
+
+    private fun lagManuellVilkårsvurdering(behandlingResultat: BehandlingResultat) {
+        val personopplysningGrunnlag =
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingResultat.behandling.id)
+                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${behandlingResultat.behandling.id}")
+
+        behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
+            val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
+                                                personIdent = person.personIdent.ident)
+
+            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+
+            val vilkårResultater = vilkårForPerson.map { vilkår ->
+                val fom =
+                        if (vilkår == Vilkår.UNDER_18_ÅR)
+                            person.fødselsdato
+                        else null
+
+                val tom: LocalDate? =
+                        if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
+
+
+                VilkårResultat(personResultat = personResultat,
+                               resultat = if (vilkår == Vilkår.UNDER_18_ÅR) Resultat.JA else Resultat.KANSKJE,
+                               vilkårType = vilkår,
+                               periodeFom = fom,
+                               periodeTom = tom,
+                               begrunnelse = if (vilkår == Vilkår.UNDER_18_ÅR) "Vurdert og satt automatisk" else "",
+                               behandlingId = personResultat.behandlingResultat.behandling.id,
+                               regelInput = null,
+                               regelOutput = null
+                )
+            }.toSortedSet(PersonResultat.comparator)
+
+            personResultat.setVilkårResultater(vilkårResultater)
+
+            personResultat
+        }.toSet()
     }
 
     private fun lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat: BehandlingResultat) {
