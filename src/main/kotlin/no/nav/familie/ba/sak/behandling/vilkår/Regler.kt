@@ -150,12 +150,12 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
                             }
                         }
                         contains(Medlemskap.TREDJELANDSBORGER) -> {
-                            økTellerForLovligOpphold(LovligOppholdUtfall.EØS_ANNENPART_TREDJELANDSBORGER)
-                            Evaluering.nei(LovligOppholdUtfall.EØS_ANNENPART_TREDJELANDSBORGER.begrunnelseForOppgave)
+                            økTellerForLovligOpphold(LovligOppholdUtfall.EØS_MEDFORELDER_TREDJELANDSBORGER)
+                            Evaluering.nei(LovligOppholdUtfall.EØS_MEDFORELDER_TREDJELANDSBORGER.begrunnelseForOppgave)
                         }
                         contains(Medlemskap.UKJENT) -> {
-                            økTellerForLovligOpphold(LovligOppholdUtfall.EØS_ANNENPART_STATSLØS)
-                            Evaluering.nei(LovligOppholdUtfall.EØS_ANNENPART_STATSLØS.begrunnelseForOppgave)
+                            økTellerForLovligOpphold(LovligOppholdUtfall.EØS_MEDFORELDER_STATSLØS)
+                            Evaluering.nei(LovligOppholdUtfall.EØS_MEDFORELDER_STATSLØS.begrunnelseForOppgave)
                         }
                         else -> {
                             Evaluering.nei("Statsborgerskap for annen forelder kan ikke avgjøres.")
@@ -276,43 +276,43 @@ private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEnti
 
 enum class LovligOppholdUtfall(val begrunnelseForOppgave: String, val begrunnelseForMetrikker: String) {
     TREDJELANDSBORGER(
-            "Mor har ikke lovlig opphold - tredjelandsborger",
-            "Mor: Tredjelandsborger."
+            "Mor har ikke lovlig opphold - tredjelandsborger.",
+            "Mor tredjelandsborger"
     ),
-    EØS_ANNENPART_TREDJELANDSBORGER(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
-            "Mor: EØS-borger, ikke i arbeid pr. nå. MF: Tredjelandsborger."
-    ),
-    EØS_ANNENPART_STATSLØS(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
-            "Mor: EØS-borger, ikke i arbeid pr. nå. MF: Statsløs."
-    ),
-    EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
-            "Mor: EØS-borger, ikke arbeidet lenge nok. MF: EØS-borger, ikke i arbeid pr. nå."
-    ),
-    EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
-            "Mor: EØS-borger, ikke bosatt lenge nok. MF: EØS-borger, ikke i arbeid pr. nå."
-    ),
-    EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Barnets mor og medforelder har ikke felles bostedsadresse. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
-            "Mor: EØS-borger, ikke arbeidet lenge nok, bor ikke med MF."
-    ),
-    EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Barnets mor og medforelder har ikke felles bostedsadresse. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
-            "Mor: EØS-borger, ikke bosatt lenge nok, bor ikke med MF."
-    ),
-    EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
-            "Mor: EØS-borger, ikke arbeidet lenge nok. MF ikke registrert."
+    STATSLØS(
+            "Mor har ikke lovlig opphold - er statsløs eller mangler statsborgerskap.",
+            "Mor statsløs eller mangler statsborgerskap"
     ),
     EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
             "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
-            "Mor: EØS-borger, ikke bosatt lenge nok. MF ikke registrert."
+            "Mor EØS. Ikke arb. MF ikke reg. Mor ikke bosatt 5 år"
     ),
-    STATSLØS(
-            "Mor har ikke lovlig opphold - er statsløs eller mangler statsborgerskap",
-            "Mor: Statsløs eller mangler statsborgerskap."
-    )
+    EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
+            "Mor EØS. Ikke arb. MF ikke reg. Mor ikke arbeid 5 år"
+    ),
+    EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Barnets mor og medforelder har ikke felles bostedsadresse. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
+            "Mor EØS. Ikke arb. Bor ikke med MF. Mor ikke bosatt 5 år"
+    ),
+    EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Barnets mor og medforelder har ikke felles bostedsadresse. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
+            "Mor EØS. Ikke arb. Bor ikke med MF. Mor ikke arbeid 5 år"
+    ),
+    EØS_MEDFORELDER_TREDJELANDSBORGER(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
+            "Mor EØS. Ikke arb. MF tredjelandsborger"
+    ),
+    EØS_MEDFORELDER_STATSLØS(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
+            "Mor EØS. Ikke arb. MF statsløs"
+    ),
+    EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
+            "Mor EØS. Ikke arb. MF EØS ikke arbeid. Mor ikke bosatt 5 år"
+    ),
+    EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
+            "Mor EØS. Ikke arb. MF EØS ikke arbeid. Mor ikke arbeid 5 år"
+    ),
 }
