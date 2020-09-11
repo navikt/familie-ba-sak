@@ -84,16 +84,6 @@ class StegService(
                       restRegistrerSøknad: RestRegistrerSøknad): Behandling =
             fullførSøknadsHåndtering(behandling = behandling, registrerSøknad = restRegistrerSøknad)
 
-    @Transactional
-    fun håndterSøknad(behandling: Behandling,
-                      restRegistrerSøknadGammel: RestRegistrerSøknadGammel): Behandling {
-
-        val registrerSøknad = RestRegistrerSøknad(søknad = restRegistrerSøknadGammel.søknad.toSøknadDTO(),
-                                bekreftEndringerViaFrontend = restRegistrerSøknadGammel.bekreftEndringerViaFrontend)
-
-        return fullførSøknadsHåndtering(behandling = behandling, registrerSøknad = registrerSøknad)
-    }
-
     private fun fullførSøknadsHåndtering(behandling: Behandling, registrerSøknad: RestRegistrerSøknad): Behandling {
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
         val søknadDTO = registrerSøknad.søknad
