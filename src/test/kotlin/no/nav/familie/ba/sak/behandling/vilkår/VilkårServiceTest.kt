@@ -186,11 +186,21 @@ class VilkårServiceTest(
         val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
                                                                                    bekreftEndringerViaFrontend = true,
                                                                                    forrigeBehandling = forrigeBehandlingSomErIverksatt)
+        Assertions.assertEquals(2, behandlingResultat.personResultater.size)
 
-        val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
-        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
 
-        behandlingResultatService.oppdater(behandlingResultat)
+        behandlingResultat.personResultater.map { personResultat ->
+            personResultat.tilRestPersonResultat().vilkårResultater.map {
+                vilkårService.endreVilkår(behandlingId = behandling.id, vilkårId = it.id,
+                                          restPersonResultat =
+                                          RestPersonResultat(personIdent = personResultat.personIdent,
+                                                             vilkårResultater = listOf(it.copy(
+                                                                     resultat = Resultat.JA,
+                                                                     periodeFom = LocalDate.of(2019, 5, 8)
+                                                             ))))
+            }
+        }
+
         behandling.steg = StegType.BEHANDLING_AVSLUTTET
         behandlingService.lagre(behandling)
 
@@ -211,10 +221,10 @@ class VilkårServiceTest(
 
         behandlingResultat2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
-                Assertions.assertEquals(Resultat.KANSKJE, vilkårResultat.resultat)
                 if (personResultat.personIdent == barnFnr2) {
                     Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
+                    Assertions.assertEquals(Resultat.JA, vilkårResultat.resultat)
                     Assertions.assertEquals(behandling.id, vilkårResultat.behandlingId)
                 }
             }

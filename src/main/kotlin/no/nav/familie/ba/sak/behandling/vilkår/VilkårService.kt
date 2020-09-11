@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
@@ -26,7 +25,6 @@ import java.util.*
 
 @Service
 class VilkårService(
-        private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics
@@ -140,20 +138,24 @@ class VilkårService(
         val behandlingResultat = BehandlingResultat(behandling = behandling)
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
+            behandlingResultat.apply {
+                personResultater = lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
+            }
         } else {
-            lagManuellVilkårsvurdering(behandlingResultat = behandlingResultat)
+            behandlingResultat.apply {
+                personResultater = lagManuellVilkårsvurdering(behandlingResultat = behandlingResultat)
+            }
         }
 
         return behandlingResultat
     }
 
-    private fun lagManuellVilkårsvurdering(behandlingResultat: BehandlingResultat) {
+    private fun lagManuellVilkårsvurdering(behandlingResultat: BehandlingResultat): Set<PersonResultat> {
         val personopplysningGrunnlag =
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingResultat.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${behandlingResultat.behandling.id}")
 
-        behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
@@ -187,12 +189,12 @@ class VilkårService(
         }.toSet()
     }
 
-    private fun lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat: BehandlingResultat) {
+    private fun lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat: BehandlingResultat): Set<PersonResultat> {
         val personopplysningGrunnlag =
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingResultat.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${behandlingResultat.behandling.id}")
 
-        behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
