@@ -26,8 +26,6 @@ class FerdigstillBehandling(
         private val fagsakService: FagsakService,
         private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
-        private val infotrygdFeedClient: InfotrygdFeedClient,
-        private val vedtakService: VedtakService,
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
 
@@ -51,10 +49,6 @@ class FerdigstillBehandling(
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 
-        infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(
-                hentFnrStoenadsmottaker(fagsak),
-                hentVedtaksdato(behandling.id)))
-
         loggService.opprettFerdigstillBehandling(behandling)
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
 
@@ -76,12 +70,6 @@ class FerdigstillBehandling(
             fagsakService.oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
         }
     }
-
-    private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.hentAktivIdent().ident
-
-    private fun hentVedtaksdato(behandlingsId: Long) =
-            vedtakService.hentAktivForBehandling(behandlingsId)?.vedtaksdato
-            ?: throw Exception("Aktivt vedtak eller vedtaksdato eksisterer ikke for $behandlingsId")
 
     override fun stegType(): StegType {
         return StegType.FERDIGSTILLE_BEHANDLING
