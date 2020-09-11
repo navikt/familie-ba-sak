@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgers
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresse.Companion.erSammeAdresse
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOpphold
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOppholdEØSBorger
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -84,14 +83,14 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
         Medlemskap.TREDJELANDSBORGER -> {
             val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
             if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.TREDJELANDSBORGER, fakta.personForVurdering.type)
+                økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.TREDJELANDSBORGER_FALLER_UT, fakta.personForVurdering.type)
                 Evaluering.nei("${fakta.personForVurdering.type} har ikke lovlig opphold")
             } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
         }
         Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
             val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
             if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS, fakta.personForVurdering.type)
+                økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS_FALLER_UT, fakta.personForVurdering.type)
                 Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
             } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
         }
@@ -149,7 +148,7 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
                             } else {
                                 sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta,
                                                                                   "Far er ikke registrert med arbeidsforhold i Norge.",
-                                                                                  LovligoppholdEØSborger.FAR_HAR_IKKE_ET_LØPENDE_ARBEIDSFORHOLD_I_NORGE)
+                                                                                  LovligOppholdAvslagÅrsaker.EØS_FAR_HAR_IKKE_ET_LØPENDE_ARBEIDSFORHOLD_I_NORGE)
                             }
                         }
                         contains(Medlemskap.TREDJELANDSBORGER) -> Evaluering.nei("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Annen forelder er tredjelandsborger.")
@@ -162,19 +161,19 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
             } else {
                 sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta,
                                                                   "Barnets mor og medforelder har ikke felles bostedsadresse. ",
-                                                                  LovligoppholdEØSborger.MOR_OG_FAR_IKKE_SAMME_BOSTEDSADRESSE)
+                                                                  LovligOppholdAvslagÅrsaker.EØS_MOR_OG_FAR_IKKE_SAMME_BOSTEDSADRESSE)
             }
         } else {
             sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta,
                                                               "Det er ikke registrert far på barnet.",
-                                                              LovligoppholdEØSborger.IKKE_REGISTRERT_FAR_PÅ_BARNET)
+                                                              LovligOppholdAvslagÅrsaker.EØS_IKKE_REGISTRERT_FAR_PÅ_BARNET)
         }
     }
 }
 
 private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta,
                                                               ekstraBegrunnelse: String,
-                                                              ekstrabegynnelseMetrikkel: LovligoppholdEØSborger): Evaluering {
+                                                              ekstrabegynnelseMetrikkel: LovligOppholdAvslagÅrsaker): Evaluering {
     return if (morHarBoddINorgeSiste5År(fakta)) {
         if (morHarJobbetINorgeSiste5År(fakta)) {
             Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
@@ -184,7 +183,7 @@ private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta,
             Evaluering.nei("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. ${ekstraBegrunnelse} Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.")
         }
     } else {
-        økTellerForLovligOppholdEØSBorger(ekstrabegynnelseMetrikkel)
+        økTellerForLovligOpphold(ekstrabegynnelseMetrikkel, PersonType.SØKER)
         Evaluering.nei("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. ${ekstraBegrunnelse} Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.")
     }
 }
