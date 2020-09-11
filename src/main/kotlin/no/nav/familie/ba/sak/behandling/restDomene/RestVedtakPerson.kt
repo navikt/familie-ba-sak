@@ -9,6 +9,7 @@ data class RestVedtakPerson(
         val personIdent: String?,
         val beløp: Int,
         val stønadFom: LocalDate,
+        val stønadTom: LocalDate,
         val ytelsePerioder: List<RestYtelsePeriode>
 )
 
@@ -29,7 +30,8 @@ fun lagRestVedtakPerson(andelerTilkjentYtelse: List<AndelTilkjentYtelse>, person
                 RestVedtakPerson(
                         personIdent = personopplysningGrunnlag?.personer?.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
                         beløp = andeler.map { it.beløp }.sum(),
-                        stønadFom = andeler.map { it.stønadFom }.min() ?: LocalDate.MIN,
+                        stønadFom = andeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN,
+                        stønadTom = andeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX,
                         ytelsePerioder = andeler.map { it1 ->
                             RestYtelsePeriode(it1.beløp,
                                               it1.stønadFom,

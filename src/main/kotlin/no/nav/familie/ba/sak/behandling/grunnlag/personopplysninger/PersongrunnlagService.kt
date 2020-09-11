@@ -49,10 +49,11 @@ class PersongrunnlagService(
 
     fun lagreSøkerOgBarnIPersonopplysningsgrunnlaget(fødselsnummer: String,
                                                      barnasFødselsnummer: List<String>,
-                                                     behandling: Behandling) {
+                                                     behandling: Behandling,
+                                                     målform: Målform) {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        val personinfo = personopplysningerService.hentPersoninfoFor(fødselsnummer)
+        val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
         val aktørId = personopplysningerService.hentAktivAktørId(Ident(fødselsnummer))
 
         val søker = Person(personIdent = behandling.fagsak.hentAktivIdent(),
@@ -63,7 +64,8 @@ class PersongrunnlagService(
                            navn = personinfo.navn ?: "",
                            bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
+                           sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
+                           målform = målform
         ).also {
             it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
             it.opphold = oppholdService.hentOpphold(it)
@@ -84,7 +86,7 @@ class PersongrunnlagService(
     private fun hentBarn(barnasFødselsnummer: List<String>,
                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
         return barnasFødselsnummer.map { nyttBarn ->
-            val personinfo = personopplysningerService.hentPersoninfoFor(nyttBarn)
+            val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(nyttBarn)
             Person(personIdent = PersonIdent(nyttBarn),
                                          type = PersonType.BARN,
                                          personopplysningGrunnlag = personopplysningGrunnlag,
@@ -104,11 +106,11 @@ class PersongrunnlagService(
 
     private fun leggTilFarEllerMedmor(barnetsFødselsnummer: String,
                                       personopplysningGrunnlag: PersonopplysningGrunnlag) {
-        val barnPersoninfo = personopplysningerService.hentPersoninfoFor(barnetsFødselsnummer)
+        val barnPersoninfo = personopplysningerService.hentPersoninfoMedRelasjoner(barnetsFødselsnummer)
         val farEllerMedmor = barnPersoninfo.familierelasjoner.filter { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }.firstOrNull()
         if (farEllerMedmor != null) {
             val annenPartFødselsnummer = farEllerMedmor.personIdent.id
-            val personinfo = personopplysningerService.hentPersoninfoFor(annenPartFødselsnummer)
+            val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(annenPartFødselsnummer)
             val person = Person(personIdent = PersonIdent(annenPartFødselsnummer),
                     type = PersonType.ANNENPART,
                     personopplysningGrunnlag = personopplysningGrunnlag,

@@ -77,7 +77,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
         val evalueringAvFiltrering =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter[0])
+                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter.toSet())
         var resultatAvVilkårsvurdering: BehandlingResultatType? = null
 
         if (evalueringAvFiltrering.resultat == Resultat.JA) {
@@ -150,13 +150,13 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
     internal fun hentBegrunnelseFraFiltreringsregler(evaluering: Evaluering): String? {
 
-        Filtreringsregler.values().forEach {filteringRegel->
+        Filtreringsregler.values().forEach { filteringRegel ->
 
             val regelEvaluering = evaluering.children.find {
                 it.identifikator == filteringRegel.spesifikasjon.identifikator
             }
 
-            if(regelEvaluering?.resultat == Resultat.NEI){
+            if (regelEvaluering?.resultat == Resultat.NEI) {
                 return regelEvaluering.begrunnelse
             }
         }

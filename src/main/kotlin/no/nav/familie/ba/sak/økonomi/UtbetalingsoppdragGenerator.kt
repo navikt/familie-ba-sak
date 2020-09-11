@@ -54,7 +54,7 @@ class UtbetalingsoppdragGenerator(
                 else ENDR
 
         val sisteBeståenAndelIHverKjede = sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
-        val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxBy { it.periodeOffset!! }?.periodeOffset?.toInt()
+        val sisteOffsetPåFagsak = forrigeKjeder.values.flatten().maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
 
         val andelerTilOpphør =
                 andelerTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder, sisteBeståenAndelIHverKjede)

@@ -60,7 +60,7 @@ class ArbeidsfordelingService(private val behandlingService: BehandlingService,
 
     private fun identMedAdressebeskyttelse(ident: String) = IdentMedAdressebeskyttelse(
             ident = ident,
-            adressebeskyttelsegradering = personopplysningerService.hentPersoninfoFor(ident).adressebeskyttelseGradering)
+            adressebeskyttelsegradering = personopplysningerService.hentPersoninfoMedRelasjoner(ident).adressebeskyttelseGradering)
 
     data class IdentMedAdressebeskyttelse(
             val ident: String,

@@ -50,7 +50,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
 
         behandlingService.oppdaterStatusPåBehandling(
                 behandlingId = behandling.id,
-                status = if (beslutning.erGodkjent()) BehandlingStatus.GODKJENT else BehandlingStatus.UNDERKJENT_AV_BESLUTTER)
+                status = if (beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES)
 
         lagreEllerOppdater(totrinnskontroll)
     }

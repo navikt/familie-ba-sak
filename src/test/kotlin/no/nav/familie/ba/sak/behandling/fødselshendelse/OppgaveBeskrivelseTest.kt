@@ -249,7 +249,7 @@ class OppgaveBeskrivelseTest {
 
         val søkersIdent = "12345678910"
         val barnetsIdent = "22345678910"
-        val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, søkerIdenter = emptySet())
+        val fagsak = Fagsak(søkerIdenter = emptySet())
         val behandling = Behandling(fagsak = fagsak,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                     opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE,

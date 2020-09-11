@@ -67,35 +67,6 @@ class VilkårVurderingTest(
     }
 
     @Test
-    fun `Henting og evaluering av fødselshendelse med flere barn kaster exception`() {
-
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(fagsak, opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
-
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-
-        personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
-                                                     personIdent = PersonIdent(barnFnr),
-                                                     type = PersonType.BARN,
-                                                     personopplysningGrunnlag = personopplysningGrunnlag,
-                                                     fødselsdato = LocalDate.now(),
-                                                     navn = "",
-                                                     kjønn = Kjønn.MANN,
-                                                     sivilstand = SIVILSTAND.UGIFT
-        ))
-
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-
-        assertThrows<IllegalStateException> {
-            vilkårService.initierVilkårvurderingForBehandling(behandling, false)
-        }
-    }
-
-    @Test
     fun `Henting og evaluering av fødselshendelse med oppfylte vilkår gir behandlingsresultat innvilget`() {
 
         val fnr = randomFnr()

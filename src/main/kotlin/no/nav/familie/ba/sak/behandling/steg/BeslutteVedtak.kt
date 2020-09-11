@@ -26,11 +26,10 @@ class BeslutteVedtak(
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: RestBeslutningPåVedtak): StegType {
-        if (behandling.status == BehandlingStatus.SENDT_TIL_IVERKSETTING) {
+        if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
             error("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
-        } else if (behandling.status == BehandlingStatus.IVERKSATT ||
-                   behandling.status == BehandlingStatus.FERDIGSTILT) {
-            error("Behandlingen er allerede iverksatt/ferdigstilt")
+        } else if (behandling.status == BehandlingStatus.AVSLUTTET) {
+            error("Behandlingen er allerede avsluttet")
         }
 
         totrinnskontrollService.besluttTotrinnskontroll(behandling = behandling,
