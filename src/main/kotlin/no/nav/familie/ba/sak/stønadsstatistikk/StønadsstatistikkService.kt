@@ -106,7 +106,8 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                                     personIdent = personForAndel.personIdent.ident
                             ),
                             klassekode = andel.type.klassifisering,
-                            utbetaltPrMnd = andel.beløp
+                            utbetaltPrMnd = andel.beløp,
+                            delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
                     )
                 }
         )
