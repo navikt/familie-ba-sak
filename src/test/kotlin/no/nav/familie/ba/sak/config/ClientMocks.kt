@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
+import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -98,15 +99,31 @@ class ClientMocks {
         } returns "NO"
 
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(eq(barnFnr[0]))
+            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[0]), PersonInfoQuery.ENKEL)
         } returns personInfo.getValue(barnFnr[0])
 
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(eq(barnFnr[1]))
+            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[1]), PersonInfoQuery.ENKEL)
         } returns personInfo.getValue(barnFnr[1])
 
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(eq(søkerFnr[0]))
+            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[0]), PersonInfoQuery.ENKEL)
+        } returns personInfo.getValue(søkerFnr[0])
+
+        every {
+            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[1]), PersonInfoQuery.ENKEL)
+        } returns personInfo.getValue(søkerFnr[1])
+
+        every {
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(barnFnr[0]))
+        } returns personInfo.getValue(barnFnr[0])
+
+        every {
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(barnFnr[1]))
+        } returns personInfo.getValue(barnFnr[1])
+
+        every {
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr[0]))
         } returns personInfo.getValue(søkerFnr[0]).copy(
                 familierelasjoner = setOf(
                         Familierelasjon(personIdent = Personident(id = barnFnr[0]),
@@ -120,7 +137,7 @@ class ClientMocks {
                         Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
                                         relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(eq(søkerFnr[1]))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr[1]))
         } returns personInfo.getValue(søkerFnr[1]).copy(
                 familierelasjoner = setOf(
                         Familierelasjon(personIdent = Personident(id = barnFnr[0]),
@@ -217,15 +234,15 @@ class ClientMocks {
         val barnId = "31245678910"
 
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(farId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(farId)
         } returns PersonInfo(fødselsdato = LocalDate.of(1969, 5, 1), kjønn = Kjønn.MANN, navn = "Far Mocksen")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(morId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(morId)
         } returns PersonInfo(fødselsdato = LocalDate.of(1979, 5, 1), kjønn = Kjønn.KVINNE, navn = "Mor Mocksen")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(barnId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(barnId)
         } returns PersonInfo(fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
                              familierelasjoner = setOf(
                                      Familierelasjon(Personident(farId),
@@ -282,12 +299,12 @@ class ClientMocks {
 
         val ukjentId = "43125678910"
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(ukjentId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(ukjentId)
         } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "ikke funnet")
 
         val feilId = "41235678910"
         every {
-            mockPersonopplysningerService.hentPersoninfoFor(feilId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(feilId)
         } throws IntegrasjonException("feil id")
 
         return mockPersonopplysningerService
@@ -341,11 +358,11 @@ class ClientMocks {
 
 fun mockHentPersoninfoForMedIdenter(mockPersonopplysningerService: PersonopplysningerService, søkerFnr: String, barnFnr: String) {
     every {
-        mockPersonopplysningerService.hentPersoninfoFor(eq(barnFnr))
+        mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(barnFnr))
     } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "Barn Barnesen")
 
     every {
-        mockPersonopplysningerService.hentPersoninfoFor(eq(søkerFnr))
+        mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr))
     } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
     every {
