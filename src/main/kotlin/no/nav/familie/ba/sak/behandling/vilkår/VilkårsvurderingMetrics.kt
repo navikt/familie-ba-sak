@@ -15,7 +15,7 @@ class VilkårsvurderingMetrics {
     val vilkårsvurderingUtfall = mutableMapOf<String, Counter>()
 
     init {
-        Vilkår.values().map {
+        Vilkår.values().forEach {
             Resultat.values().forEach { resultat ->
                 BehandlingOpprinnelse.values().forEach { behandlingOpprinnelse ->
                     PersonType.values().forEach { personType ->
@@ -27,14 +27,10 @@ class VilkårsvurderingMetrics {
             }
         }
 
-        LovligOppholdAvslagÅrsaker.values().map { årsak ->
-            PersonType.values().filter { it !== PersonType.ANNENPART }.forEach { personType ->
-                lovligOppholdAvslagÅrsaker[personType.name + årsak.name] = Metrics.counter("familie.ba.behandling.lovligopphold",
-                                                                                           "aarsak",
-                                                                                           årsak.name,
-                                                                                           "personType",
-                                                                                           personType.name)
-            }
+        LovligOppholdUtfall.values().forEach { utfall ->
+            lovligOppholdUtfall[utfall.name] = Metrics.counter("familie.ba.behandling.lovligopphold",
+                    "aarsak",
+                    utfall.begrunnelseForMetrikker)
         }
     }
 
@@ -79,17 +75,10 @@ class VilkårsvurderingMetrics {
     }
 
     companion object {
-        val lovligOppholdAvslagÅrsaker = mutableMapOf<String, Counter>()
+        val lovligOppholdUtfall = mutableMapOf<String, Counter>()
 
-        fun økTellerForLovligOpphold(årsak: LovligOppholdAvslagÅrsaker, personType: PersonType) {
-            lovligOppholdAvslagÅrsaker[personType.name + årsak.name]?.increment()
+        fun økTellerForLovligOpphold(utfall: LovligOppholdUtfall) {
+            lovligOppholdUtfall[utfall.name]?.increment()
         }
     }
-}
-
-enum class LovligOppholdAvslagÅrsaker {
-    TREDJELANDSBORGER,
-    EØS,
-    STATSLØS,
-    BOSTEDSADRESSE
 }
