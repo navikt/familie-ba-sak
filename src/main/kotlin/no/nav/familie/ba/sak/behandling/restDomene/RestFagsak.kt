@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.restDomene
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import java.time.LocalDateTime
 
 data class RestFagsak(
@@ -18,6 +19,8 @@ fun Fagsak.toRestFagsak(restBehandlinger: List<RestBehandling>) = RestFagsak(
         id = this.id,
         søkerFødselsnummer = this.hentAktivIdent().ident,
         status = this.status,
-        underBehandling = restBehandlinger.any { it.status == BehandlingStatus.UTREDES },
+        underBehandling = restBehandlinger.any {
+            it.status == BehandlingStatus.UTREDES || (it.steg >= StegType.BESLUTTE_VEDTAK && it.steg != StegType.BEHANDLING_AVSLUTTET)
+        },
         behandlinger = restBehandlinger
 )
