@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
@@ -26,7 +25,6 @@ import java.util.*
 
 @Service
 class VilkårService(
-        private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics
@@ -139,16 +137,64 @@ class VilkårService(
     private fun genererInitieltBehandlingResultat(behandling: Behandling): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(behandling = behandling)
 
-        lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+            behandlingResultat.apply {
+                personResultater = lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
+            }
+        } else {
+            behandlingResultat.apply {
+                personResultater = lagManuellVilkårsvurdering(behandlingResultat = behandlingResultat)
+            }
+        }
+
         return behandlingResultat
     }
 
-    private fun lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat: BehandlingResultat) {
+    private fun lagManuellVilkårsvurdering(behandlingResultat: BehandlingResultat): Set<PersonResultat> {
         val personopplysningGrunnlag =
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingResultat.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${behandlingResultat.behandling.id}")
 
-        behandlingResultat.personResultater = personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.personer.map { person ->
+            val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
+                                                personIdent = person.personIdent.ident)
+
+            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+
+            val vilkårResultater = vilkårForPerson.map { vilkår ->
+                val fom =
+                        if (vilkår == Vilkår.UNDER_18_ÅR)
+                            person.fødselsdato
+                        else null
+
+                val tom: LocalDate? =
+                        if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
+
+
+                VilkårResultat(personResultat = personResultat,
+                               resultat = if (vilkår == Vilkår.UNDER_18_ÅR) Resultat.JA else Resultat.KANSKJE,
+                               vilkårType = vilkår,
+                               periodeFom = fom,
+                               periodeTom = tom,
+                               begrunnelse = if (vilkår == Vilkår.UNDER_18_ÅR) "Vurdert og satt automatisk" else "",
+                               behandlingId = personResultat.behandlingResultat.behandling.id,
+                               regelInput = null,
+                               regelOutput = null
+                )
+            }.toSortedSet(PersonResultat.comparator)
+
+            personResultat.setVilkårResultater(vilkårResultater)
+
+            personResultat
+        }.toSet()
+    }
+
+    private fun lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat: BehandlingResultat): Set<PersonResultat> {
+        val personopplysningGrunnlag =
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingResultat.behandling.id)
+                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${behandlingResultat.behandling.id}")
+
+        return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
