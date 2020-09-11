@@ -122,29 +122,20 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
-    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long,
-                                                          utbetalingsMåned: LocalDate = LocalDate.now()): List<Behandling> {
+    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsMåned: LocalDate): List<Behandling> {
         val ferdigstilteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
 
         val tilkjenteYtelser = ferdigstilteBehandlinger
                 .sortedBy { it.opprettetTidspunkt }
-                .map { Pair(it, beregningService.hentTilkjentYtelseForBehandlingOptional(it.id)) }
+                .map { beregningService.hentTilkjentYtelseForBehandling(it.id) }
 
         tilkjenteYtelser.forEach {
-            val (behandling, tilkjentYtelse) = it
-
-            if (tilkjentYtelse == null) {
-                behandlingRepository.saveAndFlush(behandling.apply { gjeldendeForUtbetaling = false })
-            } else {
-                if (tilkjentYtelse.stønadTom != null && tilkjentYtelse.stønadTom!! >= utbetalingsMåned
-                    && tilkjentYtelse.stønadFom != null) {
-                    behandlingRepository.saveAndFlush(behandling.apply { gjeldendeForUtbetaling = true })
-                }
-
-                if (tilkjentYtelse.opphørFom != null && tilkjentYtelse.opphørFom!! <= utbetalingsMåned) {
-                    val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(tilkjentYtelse)
-                    behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForUtbetaling = false })
-                }
+            if (it.stønadTom!! >= utbetalingsMåned && it.stønadFom != null) {
+                behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForUtbetaling = true })
+            }
+            if (it.opphørFom != null && it.opphørFom!! <= utbetalingsMåned) {
+                val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(it)
+                behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForUtbetaling = false })
             }
         }
 
