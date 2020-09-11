@@ -29,7 +29,7 @@ class PersonopplysningerServiceTest {
 
     @Test
     fun `hentPersoninfoFor() skal return riktig personinfo`(){
-        val personInfo= personopplysningerService.hentPersoninfoFor(ID_MOR_MED_XXX_STATSBORGERSKAP)
+        val personInfo= personopplysningerService.hentPersoninfoMedRelasjoner(ID_MOR_MED_XXX_STATSBORGERSKAP)
 
         assert(LocalDate.of(1955, 9, 13).equals(personInfo.fødselsdato))
     }

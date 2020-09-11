@@ -419,7 +419,7 @@ class BehandlingIntegrationTest {
         val barn1Kommunenummer = "3233"
         val barn2BostedKommune = "Oslo"
 
-        every { personopplysningerService.hentPersoninfoFor(søkerFnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Mor",
@@ -436,7 +436,7 @@ class BehandlingIntegrationTest {
                 sivilstand = null
         )
 
-        every { personopplysningerService.hentPersoninfoFor(barn1Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Gutt",
@@ -447,7 +447,7 @@ class BehandlingIntegrationTest {
                 sivilstand = null
         )
 
-        every { personopplysningerService.hentPersoninfoFor(barn2Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn2Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2012, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Jente",
@@ -457,7 +457,7 @@ class BehandlingIntegrationTest {
                 sivilstand = null
         )
 
-        every { personopplysningerService.hentPersoninfoFor(barn3Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn3Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2013, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Jente2",

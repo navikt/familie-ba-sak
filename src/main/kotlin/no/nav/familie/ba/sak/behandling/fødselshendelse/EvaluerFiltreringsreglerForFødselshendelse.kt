@@ -49,10 +49,10 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
                 ?: throw java.lang.IllegalStateException("Barnets ident er ikke tilstede i personopplysningsgrunnlaget.")
 
         val restenAvBarna =
-                personopplysningerService.hentPersoninfoFor(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
+                personopplysningerService.hentPersoninfoMedRelasjoner(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
                     it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && it.personIdent.id != barnet.personIdent.ident
                 }.map {
-                    personopplysningerService.hentPersoninfoFor(it.personIdent.id)
+                    personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
                 }
 
         val morLever = !personopplysningerService.hentDødsfall(Ident(mor.personIdent.ident)).erDød

@@ -83,11 +83,11 @@ class FagsakServiceTest(
         val barn3Fnr = randomFnr()
 
         every {
-            personopplysningerService.hentPersoninfoFor(eq(barn1Fnr))
+            personopplysningerService.hentPersoninfoMedRelasjoner(eq(barn1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "barn1")
 
         every {
-            personopplysningerService.hentPersoninfoFor(eq(barn2Fnr))
+            personopplysningerService.hentPersoninfoMedRelasjoner(eq(barn2Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(2019, 5, 1),
                              kjønn = Kjønn.MANN,
                              navn = "barn2"
@@ -103,19 +103,19 @@ class FagsakServiceTest(
                                                                          LocalDate.of(1990, 1, 10))))
 
         every {
-            personopplysningerService.hentPersoninfoFor(eq(barn3Fnr))
+            personopplysningerService.hentPersoninfoMedRelasjoner(eq(barn3Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(2017, 3, 1), kjønn = Kjønn.KVINNE, navn = "barn3")
 
         every {
-            personopplysningerService.hentPersoninfoFor(eq(søker1Fnr))
+            personopplysningerService.hentPersoninfoMedRelasjoner(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            personopplysningerService.hentPersoninfoFor(eq(søker2Fnr))
+            personopplysningerService.hentPersoninfoMedRelasjoner(eq(søker2Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
 
         every {
-            personopplysningerService.hentPersoninfoFor(eq(søker3Fnr))
+            personopplysningerService.hentPersoninfoMedRelasjoner(eq(søker3Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3")
 
         val fagsak0 = fagsakService.hentEllerOpprettFagsak(FagsakRequest(
