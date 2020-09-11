@@ -43,18 +43,21 @@ internal class StønadsstatistikkServiceTest {
                 barn1.fødselsdato.plusYears(3).sisteDagIMåned().toString(),
                 YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
-                person = barn1)
+                person = barn1,
+                periodeIdOffset = 1)
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                 barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
                 YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
-                person = barn2)
+                person = barn2,
+                periodeIdOffset = 2)
 
         val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                 barn2.fødselsdato.plusYears(2).sisteDagIMåned().toString(),
                 YtelseType.UTVIDET_BARNETRYGD,
                 behandling = behandling,
-                person = personopplysningGrunnlag.søker.first())
+                person = personopplysningGrunnlag.søker.first(),
+                periodeIdOffset = 3)
 
         every { behandlingService.hent(any()) } returns behandling
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
@@ -71,5 +74,14 @@ internal class StønadsstatistikkServiceTest {
 
         assertEquals(3, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
         assertEquals(2 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD), vedtak.utbetalingsperioder[0].utbetaltPerMnd)
+    }
+
+    @Test
+    fun `hver utbetalingsDetalj innenfor en utbetalingsperiode skal ha unik delytelseId`() {
+        val vedtak = stønadsstatistikkService.hentVedtak(1L)
+
+        vedtak.utbetalingsperioder.forEach {
+            assertEquals(it.utbetalingsDetaljer.size, it.utbetalingsDetaljer.distinctBy { it.delytelseId }.size)
+        }
     }
 }
