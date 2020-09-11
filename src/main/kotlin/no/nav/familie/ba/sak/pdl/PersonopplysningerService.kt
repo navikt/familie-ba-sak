@@ -28,7 +28,9 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
         return personinfo.copy(familierelasjoner = familierelasjoner)
     }
 
-    fun hentPersoninfo(personIdent: String): PersonInfo = pdlRestClient.hentPerson(personIdent, "BAR", PersonInfoQuery.ENKEL)
+    fun hentPersoninfo(personIdent: String): PersonInfo {
+        return pdlRestClient.hentPerson(personIdent, "BAR", PersonInfoQuery.ENKEL)
+    }
 
     fun hentAktivAktørId(ident: Ident): AktørId {
         val aktørId = hentAktørId(ident.ident, "BAR")
@@ -48,8 +50,7 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
     }
 
     fun hentIdenter(ident: Ident): List<IdentInformasjon> {
-        val identer = hentIdenter(ident.ident, "BAR", true)
-        return identer
+        return hentIdenter(ident.ident, "BAR", true)
     }
 
     fun hentIdenter(personIdent: String, tema: String, historikk: Boolean): List<IdentInformasjon> {
@@ -102,8 +103,14 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
                 ))
     }
 
+    fun hentLandkodeUtenlandskBostedsadresse(ident: String): String {
+        val landkode = pdlRestClient.hentUtenlandskBostedsadresse(ident)?.landkode
+        return if (landkode.isNullOrEmpty()) UKJENT_LANDKODE else landkode
+    }
+
     companion object {
         const val PERSON = "PERSON"
+        const val UKJENT_LANDKODE = "ZZ"
         val LOG = LoggerFactory.getLogger(PersonopplysningerService::class.java)
     }
 }

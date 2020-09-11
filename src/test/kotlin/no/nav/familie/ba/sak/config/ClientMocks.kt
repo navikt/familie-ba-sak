@@ -94,6 +94,10 @@ class ClientMocks {
         } returns VergeData(false)
 
         every {
+            mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
+        } returns "NO"
+
+        every {
             mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[0]))
         } returns personInfo.getValue(barnFnr[0])
 
@@ -288,6 +292,10 @@ class ClientMocks {
                     )))
         }
 
+        every {
+            mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
+        } returns "NO"
+
         val ukjentId = "43125678910"
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(ukjentId)
@@ -332,12 +340,12 @@ class ClientMocks {
                                           sivilstand = SIVILSTAND.GIFT,
                                           kjønn = Kjønn.MANN,
                                           navn = "Far Faresen"),
-                barnFnr[0] to PersonInfo(fødselsdato = LocalDate.now().minusYears(1),
+                barnFnr[0] to PersonInfo(fødselsdato = LocalDate.now().minusYears(2),
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UOPPGITT,
                                          kjønn = Kjønn.MANN,
                                          navn = "Gutten Barnesen"),
-                barnFnr[1] to PersonInfo(fødselsdato = LocalDate.now(),
+                barnFnr[1] to PersonInfo(fødselsdato = LocalDate.now().minusMonths(5),
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UGIFT,
                                          kjønn = Kjønn.KVINNE,

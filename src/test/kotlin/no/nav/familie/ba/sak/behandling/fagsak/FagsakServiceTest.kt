@@ -135,7 +135,7 @@ class FagsakServiceTest(
         stegService.håndterPersongrunnlag(førsteBehandling,
                                           RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr)))
 
-        behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.FERDIGSTILT)
+        behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
 
         val andreBehandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,

@@ -71,7 +71,7 @@ class FagsakService(
                 lagre(it)
             }
             antallFagsakerOpprettet.increment()
-        } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent.equals(personIdent) }) {
+        } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent == personIdent }) {
             fagsak.also {
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
                 lagre(it)
@@ -86,8 +86,18 @@ class FagsakService(
         return fagsakRepository.save(fagsak)
     }
 
+    fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
+        fagsak.status = nyStatus
+
+        lagre(fagsak)
+    }
+
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
+                     ?: throw Feil(message = "Finner ikke fagsak med id $fagsakId",
+                                   frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
+
         val restBehandlinger: List<RestBehandling> = lagRestBehandlinger(fagsak)
         return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
     }
@@ -108,7 +118,8 @@ class FagsakService(
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
-                val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
+                val andelerTilkjentYtelse =
+                        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
                 val restVedtakPerson = lagRestVedtakPerson(andelerTilkjentYtelse, personopplysningGrunnlag)
                 vedtak.toRestVedtak(restVedtakPerson)
             }
@@ -137,18 +148,11 @@ class FagsakService(
                     beregningOversikt = if (tilkjentYtelse == null || personopplysningGrunnlag == null) emptyList() else
                         TilkjentYtelseUtils.hentBeregningOversikt(
                                 tilkjentYtelseForBehandling = tilkjentYtelse,
-                                personopplysningGrunnlag = personopplysningGrunnlag)
+                                personopplysningGrunnlag = personopplysningGrunnlag),
+                    gjeldendeForUtbetaling = behandling.gjeldendeForUtbetaling
             )
         }
     }
-
-    fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status} til $nyStatus")
-        fagsak.status = nyStatus
-
-        lagre(fagsak)
-    }
-
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
         val personIdent = PersonIdent(fødselsnummer)
@@ -258,6 +262,7 @@ class FagsakService(
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(FagsakService::class.java)
     }
 }
