@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
+import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -98,19 +99,19 @@ class ClientMocks {
         } returns "NO"
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[0]))
+            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[0]), PersonInfoQuery.ENKEL)
         } returns personInfo.getValue(barnFnr[0])
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[1]))
+            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[1]), PersonInfoQuery.ENKEL)
         } returns personInfo.getValue(barnFnr[1])
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[0]))
+            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[0]), PersonInfoQuery.ENKEL)
         } returns personInfo.getValue(søkerFnr[0])
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[1]))
+            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[1]), PersonInfoQuery.ENKEL)
         } returns personInfo.getValue(søkerFnr[1])
 
         every {
