@@ -22,7 +22,6 @@ class SøknadGrunnlagTest(
     fun `Skal lagre ned og hente søknadsgrunnlag`() {
         val behandlingId = 1L
         val søkerIdent = randomFnr()
-        val annenPartIdent = randomFnr()
         val barnIdent = randomFnr()
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
         søknadGrunnlagService.lagreOgDeaktiverGammel(SøknadGrunnlag(
@@ -41,12 +40,10 @@ class SøknadGrunnlagTest(
     fun `Skal sjekke at det kun kan være et aktivt grunnlag for en behandling`() {
         val behandlingId = 2L
         val søkerIdent = randomFnr()
-        val annenPartIdent = randomFnr()
         val barnIdent = randomFnr()
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
 
         val søkerIdent2 = randomFnr()
-        val annenPartIdent2 = randomFnr()
         val barnIdent2 = randomFnr()
         val søknadDTO2 = lagSøknadDTO(søkerIdent = søkerIdent2, barnasIdenter = listOf(barnIdent2))
 
