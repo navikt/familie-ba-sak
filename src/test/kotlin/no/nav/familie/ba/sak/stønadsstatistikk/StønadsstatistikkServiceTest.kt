@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.barnFnr
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
+import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.økonomi.sats
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,9 +25,10 @@ internal class StønadsstatistikkServiceTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val beregningService: BeregningService = mockk()
     private val vedtakService: VedtakService = mockk()
+    private val personopplysningerService: PersonopplysningerService = mockk()
 
     private val stønadsstatistikkService =
-            StønadsstatistikkService(behandlingService, persongrunnlagService, beregningService, vedtakService)
+            StønadsstatistikkService(behandlingService, persongrunnlagService, beregningService, vedtakService, personopplysningerService)
 
     @BeforeAll
     fun init() {
@@ -41,32 +43,45 @@ internal class StønadsstatistikkServiceTest {
                 barn1.fødselsdato.plusYears(3).sisteDagIMåned().toString(),
                 YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
-                person = barn1)
+                person = barn1,
+                periodeIdOffset = 1)
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                 barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
                 YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
-                person = barn2)
+                person = barn2,
+                periodeIdOffset = 2)
 
         val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                 barn2.fødselsdato.plusYears(2).sisteDagIMåned().toString(),
                 YtelseType.UTVIDET_BARNETRYGD,
                 behandling = behandling,
-                person = personopplysningGrunnlag.søker.first())
+                person = personopplysningGrunnlag.søker.first(),
+                periodeIdOffset = 3)
 
         every { behandlingService.hent(any()) } returns behandling
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
                 tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2, andelTilkjentYtelseSøker))
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
+        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
     }
 
     @Test
     fun hentVedtak() {
         val vedtak = stønadsstatistikkService.hentVedtak(1L)
-        System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
 
         assertEquals(3, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
         assertEquals(2 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD), vedtak.utbetalingsperioder[0].utbetaltPerMnd)
+    }
+
+    @Test
+    fun `hver utbetalingsDetalj innenfor en utbetalingsperiode skal ha unik delytelseId`() {
+        val vedtak = stønadsstatistikkService.hentVedtak(1L)
+
+        vedtak.utbetalingsperioder.forEach {
+            assertEquals(it.utbetalingsDetaljer.size, it.utbetalingsDetaljer.distinctBy { it.delytelseId }.size)
+        }
     }
 }

@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.logg.LoggService
@@ -38,7 +37,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Resultat
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -420,7 +422,7 @@ class BehandlingIntegrationTest {
         val barn1Kommunenummer = "3233"
         val barn2BostedKommune = "Oslo"
 
-        every { personopplysningerService.hentPersoninfoFor(søkerFnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(søkerFnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(1990, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Mor",
@@ -437,7 +439,7 @@ class BehandlingIntegrationTest {
                 sivilstand = null
         )
 
-        every { personopplysningerService.hentPersoninfoFor(barn1Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn1Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2009, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Gutt",
@@ -448,7 +450,7 @@ class BehandlingIntegrationTest {
                 sivilstand = null
         )
 
-        every { personopplysningerService.hentPersoninfoFor(barn2Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn2Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2012, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Jente",
@@ -458,7 +460,7 @@ class BehandlingIntegrationTest {
                 sivilstand = null
         )
 
-        every { personopplysningerService.hentPersoninfoFor(barn3Fnr) } returns PersonInfo(
+        every { personopplysningerService.hentPersoninfoMedRelasjoner(barn3Fnr) } returns PersonInfo(
                 fødselsdato = LocalDate.of(2013, 1, 1),
                 adressebeskyttelseGradering = null,
                 navn = "Jente2",
@@ -473,7 +475,8 @@ class BehandlingIntegrationTest {
 
         persongrunnlagService.lagreSøkerOgBarnIPersonopplysningsgrunnlaget(søkerFnr,
                                                                            listOf(barn1Fnr, barn2Fnr, barn3Fnr),
-                                                                           behandling)
+                                                                           behandling,
+                                                                           Målform.NB)
 
         val søker = personRepository.findByPersonIdent(PersonIdent(søkerFnr)).first()
         val vegadresse = søker.bostedsadresse as GrVegadresse

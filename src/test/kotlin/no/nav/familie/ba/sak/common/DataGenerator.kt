@@ -53,8 +53,7 @@ fun nestePersonId(): Long {
     return gjeldendePersonId
 }
 
-val defaultFagsak = Fagsak(1,
-                           FagsakStatus.OPPRETTET).also {
+val defaultFagsak = Fagsak(1).also {
     it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr()), opprettetTidspunkt = LocalDateTime.now()))
 }
 
@@ -227,7 +226,8 @@ fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>): SøknadDTO 
                 BarnMedOpplysninger(
                         ident = it
                 )
-            }
+            },
+            endringAvOpplysningerBegrunnelse = ""
     )
 }
 
@@ -332,8 +332,8 @@ fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resulta
             setOf(VilkårResultat(personResultat = personResultat,
                                  vilkårType = Vilkår.BOSATT_I_RIKET,
                                  resultat = resultat,
-                                 periodeFom = LocalDate.now(),
-                                 periodeTom = LocalDate.now(),
+                                 periodeFom = LocalDate.now().minusMonths(1),
+                                 periodeTom = LocalDate.now().plusYears(2),
                                  begrunnelse = "",
                                  behandlingId = behandling.id,
                                  regelInput = null,

@@ -34,10 +34,12 @@ data class Fagsak(
     }
 
     fun hentAktivIdent(): PersonIdent {
-        return søkerIdenter.maxBy { it.opprettetTidspunkt }?.personIdent ?: error("Fant ingen ident på fagsak $id")
+        return søkerIdenter.maxByOrNull { it.opprettetTidspunkt }?.personIdent ?: error("Fant ingen ident på fagsak $id")
     }
 }
 
 enum class FagsakStatus {
-    OPPRETTET, LØPENDE, STANSET
+    OPPRETTET, 
+    LØPENDE, // Har minst én behandling gjeldende for fremtidig utbetaling
+    AVSLUTTET
 }

@@ -29,7 +29,7 @@ abstract class BaseEntitet : Serializable {
 
     @Version
     @Column(name = "versjon", nullable = false)
-    private val versjon: Long = 0
+    open var versjon: Long = 0
 
     @PreUpdate
     protected fun onUpdate() {

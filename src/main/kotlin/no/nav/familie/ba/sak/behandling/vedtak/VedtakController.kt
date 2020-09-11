@@ -121,8 +121,8 @@ class VedtakController(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        if (behandling.status != BehandlingStatus.IVERKSATT && behandling.status != BehandlingStatus.FERDIGSTILT) {
-            return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er iverksatt/ferdigstilt")
+        if (behandling.status != BehandlingStatus.AVSLUTTET) {
+            return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er avsluttet")
         }
 
         val task = OpphørVedtakTask.opprettOpphørVedtakTask(behandling,

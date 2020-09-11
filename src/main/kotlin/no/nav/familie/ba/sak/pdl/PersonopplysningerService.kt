@@ -16,7 +16,7 @@ import org.springframework.web.context.annotation.ApplicationScope
 @ApplicationScope
 class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
 
-    fun hentPersoninfoFor(personIdent: String): PersonInfo {
+    fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfo(personIdent, PersonInfoQuery.MED_RELASJONER)
         val familierelasjoner = personinfo.familierelasjoner.map {
             val relasjonsinfo = hentPersoninfo(it.personIdent.id, PersonInfoQuery.ENKEL)
@@ -29,8 +29,7 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
     }
 
     fun hentPersoninfo(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
-        val person = pdlRestClient.hentPerson(personIdent, "BAR", personInfoQuery)
-        return person
+        return pdlRestClient.hentPerson(personIdent, "BAR", personInfoQuery)
     }
 
     fun hentAktivAktørId(ident: Ident): AktørId {
@@ -51,8 +50,7 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
     }
 
     fun hentIdenter(ident: Ident): List<IdentInformasjon> {
-        val identer = hentIdenter(ident.ident, "BAR", true)
-        return identer
+        return hentIdenter(ident.ident, "BAR", true)
     }
 
     fun hentIdenter(personIdent: String, tema: String, historikk: Boolean): List<IdentInformasjon> {
@@ -105,8 +103,14 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
                 ))
     }
 
+    fun hentLandkodeUtenlandskBostedsadresse(ident: String): String {
+        val landkode = pdlRestClient.hentUtenlandskBostedsadresse(ident)?.landkode
+        return if (landkode.isNullOrEmpty()) UKJENT_LANDKODE else landkode
+    }
+
     companion object {
         const val PERSON = "PERSON"
+        const val UKJENT_LANDKODE = "ZZ"
         val LOG = LoggerFactory.getLogger(PersonopplysningerService::class.java)
     }
 }
