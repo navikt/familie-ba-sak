@@ -23,7 +23,7 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>2.2.4.RELEASE</spring.cloud.version>
         <spring.vault.version>2.2.2.RELEASE</spring.vault.version>
-        <felles-kontrakter.version>2.0_20200909120521_6da9031</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20200911074202_a92df6a</felles-kontrakter.version>
         <felles.version>1.20200828135055_74d787e</felles.version>
         <felles.prosessering.version>1.20200624154125_0d8ff39</felles.prosessering.version>
         <mockk.version>1.9.3</mockk.version>
