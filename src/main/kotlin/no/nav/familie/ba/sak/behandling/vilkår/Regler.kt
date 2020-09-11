@@ -280,19 +280,19 @@ enum class LovligOppholdUtfall(val begrunnelseForOppgave: String, val begrunnels
             "Mor: Tredjelandsborger."
     ),
     EØS_ANNENPART_TREDJELANDSBORGER(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Annen forelder er tredjelandsborger.",
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
             "Mor: EØS-borger, ikke i arbeid pr. nå. MF: Tredjelandsborger."
     ),
     EØS_ANNENPART_STATSLØS(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Annen forelder er statsløs.",
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
             "Mor: EØS-borger, ikke i arbeid pr. nå. MF: Statsløs."
     ),
     EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Far er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
             "Mor: EØS-borger, ikke arbeidet lenge nok. MF: EØS-borger, ikke i arbeid pr. nå."
     ),
     EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Far er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
             "Mor: EØS-borger, ikke bosatt lenge nok. MF: EØS-borger, ikke i arbeid pr. nå."
     ),
     EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
@@ -304,11 +304,11 @@ enum class LovligOppholdUtfall(val begrunnelseForOppgave: String, val begrunnels
             "Mor: EØS-borger, ikke bosatt lenge nok, bor ikke med MF."
     ),
     EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert far på barnet. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
             "Mor: EØS-borger, ikke arbeidet lenge nok. MF ikke registrert."
     ),
     EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
-            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert far på barnet. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
             "Mor: EØS-borger, ikke bosatt lenge nok. MF ikke registrert."
     ),
     STATSLØS(
