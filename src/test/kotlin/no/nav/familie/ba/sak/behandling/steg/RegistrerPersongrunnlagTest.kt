@@ -59,7 +59,7 @@ class RegistrerPersongrunnlagTest(
         val barn2Id = randomFnr()
 
         every {
-            personopplysningerService.hentPersoninfoFor(any())
+            personopplysningerService.hentPersoninfoMedRelasjoner(any())
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
@@ -86,7 +86,7 @@ class RegistrerPersongrunnlagTest(
         val barn2Id = randomFnr()
 
         every {
-            personopplysningerService.hentPersoninfoFor(any())
+            personopplysningerService.hentPersoninfoMedRelasjoner(any())
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)

@@ -77,7 +77,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
         val evalueringAvFiltrering =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter[0])
+                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter.toSet())
         var resultatAvVilkårsvurdering: BehandlingResultatType? = null
 
         if (evalueringAvFiltrering.resultat == Resultat.JA) {
