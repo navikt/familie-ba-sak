@@ -23,10 +23,10 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     beskrivelse = "Bor med søker: har samme adresse",
                     identifikator = "BOR_MED_SØKER:SAMME_ADRESSE",
                     implementasjon = { barnBorMedSøker(this) })
-                    og Spesifikasjon(beskrivelse = "§2-2 - Bor med søker: har eksakt en søker",
+                    og Spesifikasjon(beskrivelse = "Bor med søker: har eksakt en søker",
                                      identifikator = "BOR_MED_SØKER:EN_SØKER",
                                      implementasjon = { harEnSøker(this) })
-                    og Spesifikasjon(beskrivelse = "§2-2 - Bor med søker: søker må være mor",
+                    og Spesifikasjon(beskrivelse = "Bor med søker: søker må være mor",
                                      identifikator = "BOR_MED_SØKER:SØKER_ER_MOR",
                                      implementasjon = { søkerErMor(this) }),
             begrunnelser = mapOf(
