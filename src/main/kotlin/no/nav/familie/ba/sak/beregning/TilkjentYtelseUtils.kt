@@ -61,6 +61,7 @@ object TilkjentYtelseUtils {
                                         minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
                                 val oppfyltTomKommerFra18ÅrsVilkår =
                                         oppfyltTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
+
                                 val beløpsperioder = SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
                                         stønadFraOgMed = settRiktigStønadFom(oppfyltFom),
@@ -139,8 +140,9 @@ object TilkjentYtelseUtils {
                 antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
                 sakstype = behandling.kategori,
                 beregningDetaljer = andelerForSegment.map { andel ->
-                    val personForAndel = personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
-                                         ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+                    val personForAndel =
+                            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                            ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                     RestBeregningDetalj(
                             person = RestPerson(
                                     type = personForAndel.type,

@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
 import java.time.LocalDate
+import java.time.Period
 import java.util.*
 import javax.persistence.*
 
@@ -99,6 +100,8 @@ data class Person(
     override fun hashCode(): Int {
         return Objects.hash(personIdent, fødselsdato)
     }
+
+    fun hentAlder() : Int = Period.between(this.fødselsdato, LocalDate.now()).years
 }
 
 enum class Kjønn {
