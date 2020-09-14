@@ -86,6 +86,9 @@ class VilkårTilTilkjentYtelseTest {
             barn1Andel2Beløp: Int?,
             barn1Andel2Periode: String?,
             barn1Andel2Type: String?,
+            barn1Andel3Beløp: Int?,
+            barn1Andel3Periode: String?,
+            barn1Andel3Type: String?,
             barn2Andel1Beløp: Int?,
             barn2Andel1Periode: String?,
             barn2Andel1Type: String?,
@@ -107,6 +110,7 @@ class VilkårTilTilkjentYtelseTest {
         val forventetTilkjentYtelse = TestTilkjentYtelseBuilder(behandlingResultat.behandling)
                 .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
                 .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp, barn1Andel2Periode, barn1Andel2Type)
+                .medAndelTilkjentYtelse(barn1, barn1Andel3Beløp, barn1Andel3Periode, barn1Andel3Type)
                 .medAndelTilkjentYtelse(barn2, barn2Andel1Beløp, barn2Andel1Periode, barn2Andel1Type)
                 .medAndelTilkjentYtelse(barn2, barn2Andel2Beløp, barn2Andel2Periode, barn2Andel2Type)
                 .bygg()
