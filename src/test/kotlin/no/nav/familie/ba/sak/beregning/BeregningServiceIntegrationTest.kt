@@ -161,7 +161,7 @@ class BeregningServiceIntegrationTest {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
-        val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
+        val dato_2020_11_01 = LocalDate.of(2020, 11, 1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -177,25 +177,27 @@ class BeregningServiceIntegrationTest {
                                                                                   søkerFnr,
                                                                                   barn1Fnr,
                                                                                   barn2Fnr,
-                                                                                  dato_2020_01_01,
-                                                                                  dato_2020_01_01.plusYears(17))
+                                                                                  dato_2020_11_01,
+                                                                                  dato_2020_11_01.plusYears(17))
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-        val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personIdent == barn1Id }
-        val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.find { it.personIdent == barn2Id }
+        val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == barn1Id }
+        val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == barn2Id }
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertTrue(tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty())
-        Assertions.assertNotNull(andelBarn1)
-        Assertions.assertNotNull(andelBarn2)
+        Assertions.assertEquals(2, andelBarn1.size)
+        Assertions.assertEquals(2, andelBarn2.size)
         tilkjentYtelse.andelerTilkjentYtelse.forEach {
             Assertions.assertEquals(tilkjentYtelse, it.tilkjentYtelse)
         }
-        Assertions.assertEquals(1054, andelBarn1!!.beløp)
-        Assertions.assertEquals(1054, andelBarn2!!.beløp)
+        Assertions.assertEquals(1, andelBarn1.filter { it.beløp == 1054 }.size)
+        Assertions.assertEquals(1, andelBarn1.filter { it.beløp == 1354 }.size)
+        Assertions.assertEquals(1, andelBarn2.filter { it.beløp == 1054 }.size)
+        Assertions.assertEquals(1, andelBarn2.filter { it.beløp == 1354 }.size)
     }
 
     private fun opprettTilkjentYtelse(behandling: Behandling) {
