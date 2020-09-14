@@ -84,10 +84,10 @@ class VilkårVurderingTest(
 
         behandlingResultat.personResultater.forEach {
             it.vilkårResultater.forEach {
-                Assertions.assertNotNull(it.regelInput)
+                assertNotNull(it.regelInput)
                 val fakta = ObjectMapper().readValue(it.regelInput, Map::class.java)
                 assertTrue(fakta.containsKey("personForVurdering"))
-                Assertions.assertNotNull(it.regelOutput)
+                assertNotNull(it.regelOutput)
                 val evaluering = ObjectMapper().readValue(it.regelOutput, Map::class.java)
                 assertEquals(evaluering["resultat"], "JA")
             }
@@ -391,7 +391,7 @@ class VilkårVurderingTest(
                 }
 
         assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
-        assertEquals("Mor er EØS-borger og har et løpende arbeidsforhold i Norge.",
+        assertEquals("Mor er EØS-borger, men har et løpende arbeidsforhold i Norge.",
                      Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
     }
 
@@ -440,7 +440,7 @@ class VilkårVurderingTest(
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
         assertEquals(Resultat.NEI, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
-        assertEquals("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Annen forelder er tredjelandsborger.",
+        assertEquals("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
                      Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
     }
 
@@ -464,7 +464,7 @@ class VilkårVurderingTest(
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
         assertEquals(Resultat.NEI, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
-        assertEquals("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Annen forelder er statsløs.",
+        assertEquals("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
                      Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
     }
 
@@ -490,7 +490,7 @@ class VilkårVurderingTest(
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
         assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
-        assertEquals("Annen forelder er fra EØS og har et løpende arbeidsforhold i Norge.",
+        assertEquals("Annen forelder er fra EØS, men har et løpende arbeidsforhold i Norge.",
                      Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
     }
 
