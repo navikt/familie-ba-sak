@@ -2,13 +2,10 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
@@ -16,7 +13,6 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
-import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.familie.util.FnrGenerator
 import no.nav.nare.core.evaluations.Resultat
 import org.assertj.core.api.Assertions
@@ -24,7 +20,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class FiltreringsreglerForFlereBarnTest {
-    val dnummer0 = PersonIdent(FnrGenerator.generer(erDnummer = true))
     val barnFnr0 = PersonIdent(FnrGenerator.generer())
     val barnFnr1 = PersonIdent(FnrGenerator.generer())
     val gyldigFnr = PersonIdent(FnrGenerator.generer())
@@ -33,43 +28,6 @@ class FiltreringsreglerForFlereBarnTest {
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val evaluerFiltreringsreglerForFødselshendelse = EvaluerFiltreringsreglerForFødselshendelse(
             personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock)
-
-    @Test
-    fun `Regelevaluering skal resultere i NEI når minst ett barn har D-nummer`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barn = listOf(
-                tilfeldigPerson(LocalDate.now()).copy(personIdent = barnFnr0),
-                tilfeldigPerson(LocalDate.now()).copy(personIdent = dnummer0)
-        )
-        val restenAvBarna: List<PersonInfo> = listOf()
-
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barn, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
-
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.BARNET_HAR_GYLDIG_FOEDSELSNUMMER.spesifikasjon.identifikator)
-    }
-
-    @Test
-    fun `Regelevaluering skal resultere i NEI når minst ett barn er over 6 måneder`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barn = listOf(
-                tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(personIdent = barnFnr0),
-                tilfeldigPerson(LocalDate.now().minusYears(1)).copy(personIdent = barnFnr1)
-        )
-
-        val restenAvBarna: List<PersonInfo> = listOf()
-
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barn, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
-
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.BARNET_ER_UNDER_6_MND.spesifikasjon.identifikator)
-    }
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige minst ett barn ble født`() {
