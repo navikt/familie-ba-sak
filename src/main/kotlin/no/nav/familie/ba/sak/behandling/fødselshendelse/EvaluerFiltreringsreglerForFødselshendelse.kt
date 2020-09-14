@@ -48,10 +48,10 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
         val restenAvBarna =
-                personopplysningerService.hentPersoninfoFor(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
+                personopplysningerService.hentPersoninfoMedRelasjoner(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
                     it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && barnaFraHendelse.none{barn-> barn.personIdent.ident == it.personIdent.id}
                 }.map {
-                    personopplysningerService.hentPersoninfoFor(it.personIdent.id)
+                    personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
                 }
 
         val morLever = !personopplysningerService.hentDødsfall(Ident(mor.personIdent.ident)).erDød

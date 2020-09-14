@@ -81,7 +81,7 @@ class OppgaveController(val oppgaveService: OppgaveService,
                     oppgave = oppgave,
                     journalpost = if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!).data
                                                                                ?: error("Feil ved henting av journalpost, data finnes ikke på ressurs"),
-                    person = personIdent?.ident?.let { personopplysningerService.hentPersoninfoFor(it).toRestPersonInfo(it) },
+                    person = personIdent?.ident?.let { personopplysningerService.hentPersoninfoMedRelasjoner(it).toRestPersonInfo(it) },
                     fagsak = fagsak
             ))
         }.fold(

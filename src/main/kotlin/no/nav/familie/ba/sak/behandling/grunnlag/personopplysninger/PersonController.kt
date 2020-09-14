@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.behandling.restDomene.toRestPersonInfo
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -29,12 +29,32 @@ class PersonController(private val personopplysningerService: Personopplysninger
     @PersontilgangConstraint
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         return Result.runCatching {
-            personopplysningerService.hentPersoninfoFor(personIdent)
+            personopplysningerService.hentPersoninfoMedRelasjoner(personIdent)
         }
                 .fold(
                         onFailure = {
                             throw Feil(message = "Hent person feilet: ${it.message}",
                                        frontendFeilmelding = "Henting av person med ident '$personIdent' feilet.")
+                        },
+                        onSuccess = {
+                            ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent)))
+                        }
+                )
+    }
+
+    @GetMapping(path = ["/enkel"])
+    @PersontilgangConstraint
+    fun hentPersonEnkel(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
+        return Result.runCatching {
+            personopplysningerService.hentPersoninfo(personIdent, PersonInfoQuery.ENKEL)
+        }
+                .fold(
+                        onFailure = {
+                            when (it) {
+                                is Feil -> throw it
+                                else -> throw Feil(message = "Hent person feilet: ${it.message}",
+                                                   frontendFeilmelding = "Henting av person med ident '$personIdent' feilet.")
+                            }
                         },
                         onSuccess = {
                             ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent)))

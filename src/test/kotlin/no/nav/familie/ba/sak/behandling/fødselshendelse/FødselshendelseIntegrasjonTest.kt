@@ -223,7 +223,7 @@ class MockConfiguration {
         }
 
         every {
-            personopplysningerServiceMock.hentPersoninfoFor(morsfnr[0])
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(morsfnr[0])
         } returns PersonInfo(
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
@@ -234,7 +234,7 @@ class MockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfoFor(morsfnr[1])
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(morsfnr[1])
         } returns PersonInfo(
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker To",
@@ -245,7 +245,7 @@ class MockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfoFor(barnefnr[0])
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[0])
         } returns PersonInfo(
                 fødselsdato = now.minusMonths(1),
                 navn = "Gutt Barn",
@@ -256,7 +256,7 @@ class MockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfoFor(barnefnr[1])
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[1])
         } returns PersonInfo(
                 fødselsdato = now.minusMonths(1),
                 navn = "Jente Barn",
@@ -267,7 +267,7 @@ class MockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfoFor(barnefnr[2])
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[2])
         } returns PersonInfo(
                 fødselsdato = now.minusMonths(1),
                 navn = "Gutt Barn To",
