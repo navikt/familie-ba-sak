@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
@@ -13,8 +14,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.*
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
@@ -62,6 +62,12 @@ object TilkjentYtelseUtils {
                                 val oppfyltTomKommerFra18ÅrsVilkår =
                                         oppfyltTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
 
+                                val barnsPeriodeForTillegg = hentPeriodeForTillegg(person.hentSeksårsdag(), oppfyltFom, oppfyltTom)
+
+                                if (barnsPeriodeForTillegg !== null ) {
+
+                                }
+
                                 val beløpsperioder = SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
                                         stønadFraOgMed = settRiktigStønadFom(oppfyltFom),
@@ -86,6 +92,14 @@ object TilkjentYtelseUtils {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         return tilkjentYtelse
+    }
+
+    fun hentPeriodeForTillegg(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? {
+        return if (seksårsdag.isSameOrAfter(oppfyltFom) && seksårsdag.isSameOrBefore(oppfyltTom)) {
+            Periode(oppfyltFom, seksårsdag)
+        } else if (seksårsdag.isSameOrAfter(oppfyltTom)) {
+            Periode(oppfyltFom, oppfyltTom)
+        } else null
     }
 
     fun beregnNåværendeBeløp(beregningOversikt: List<RestBeregningOversikt>, vedtak: Vedtak): Int {

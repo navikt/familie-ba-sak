@@ -101,7 +101,9 @@ data class Person(
         return Objects.hash(personIdent, fødselsdato)
     }
 
-    fun hentAlder() : Int = Period.between(this.fødselsdato, LocalDate.now()).years
+    fun hentAlder() : Int = Period.between(fødselsdato, LocalDate.now()).years
+
+    fun hentSeksårsdag() : LocalDate = fødselsdato.plusYears(6)
 }
 
 enum class Kjønn {
