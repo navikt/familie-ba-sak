@@ -44,6 +44,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import java.time.LocalDate.of
+import java.time.YearMonth
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -131,22 +132,23 @@ class FødselshendelseIntegrasjonTest(
         ))
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
-        val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, now)
+        val satsOrdinær = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.now(), YearMonth.now()).first()
+        val satsTillegg = SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.now(), YearMonth.now()).first()
 
-        Assert.assertEquals(2, andelTilkjentYtelser.size)
-        Assert.assertTrue(andelTilkjentYtelser.all {
-            it.beløp == sats.beløp
-        })
+        Assert.assertEquals(4, andelTilkjentYtelser.size)
+        Assert.assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsOrdinær.beløp }.size)
+        Assert.assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
 
         val reffom = now.plusMonths(1)
         val reftom = now.plusYears(18).minusMonths(2)
         val fom = of(reffom.year, reffom.month, 1)
         val tom = of(reftom.year, reftom.month, reffom.lengthOfMonth())
 
-        Assert.assertTrue(andelTilkjentYtelser.all {
-            it.stønadFom == fom
-            it.stønadTom == tom
-        })
+        val (barn1, barn2) = andelTilkjentYtelser.partition { it.personIdent == barnefnr[0] }
+        Assert.assertEquals(fom, barn1.minByOrNull { it.stønadFom }!!.stønadFom)
+        Assert.assertEquals(tom, barn1.maxByOrNull { it.stønadTom }!!.stønadTom)
+        Assert.assertEquals(fom, barn2.minByOrNull { it.stønadFom }!!.stønadFom)
+        Assert.assertEquals(tom, barn2.maxByOrNull { it.stønadTom }!!.stønadTom)
     }
 
     @Test
@@ -181,18 +183,20 @@ class FødselshendelseIntegrasjonTest(
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
-        Assert.assertEquals(1, andelTilkjentYtelser.size)
-        val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, now)
+        Assert.assertEquals(2, andelTilkjentYtelser.size)
+        val satsOrdinær = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.now(), YearMonth.now()).first()
+        val satsTillegg = SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.now(), YearMonth.now()).first()
 
-        Assert.assertEquals(sats.beløp, andelTilkjentYtelser[0].beløp)
+        Assert.assertEquals(1, andelTilkjentYtelser.filter { it.beløp == satsOrdinær.beløp }.size)
+        Assert.assertEquals(1, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
 
         val reffom = now.plusMonths(1)
         val reftom = now.plusYears(18).minusMonths(2)
         val fom = of(reffom.year, reffom.month, 1)
         val tom = of(reftom.year, reftom.month, reffom.lengthOfMonth())
 
-        Assert.assertEquals(fom, andelTilkjentYtelser[0].stønadFom)
-        Assert.assertEquals(tom, andelTilkjentYtelser[0].stønadTom)
+        Assert.assertEquals(fom, andelTilkjentYtelser.minByOrNull { it.stønadFom }!!.stønadFom)
+        Assert.assertEquals(tom, andelTilkjentYtelser.maxByOrNull { it.stønadTom }!!.stønadTom)
         Assert.assertEquals(ikkeOppfyltBarnFnr[0], andelTilkjentYtelser[0].personIdent)
     }
 

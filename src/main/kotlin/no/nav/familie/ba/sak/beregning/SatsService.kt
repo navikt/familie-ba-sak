@@ -16,11 +16,6 @@ object SatsService {
             Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31))
     )
 
-    fun hentGyldigSatsFor(type: SatsType, dato: LocalDate): Sats {
-        return finnAlleSatserFor(type)
-                .first { sats -> sats.gyldigFom <= dato && sats.gyldigTom >= dato }
-    }
-
     fun hentGyldigSatsFor(satstype: SatsType,
                           stønadFraOgMed: YearMonth,
                           stønadTilOgMed: YearMonth,
@@ -42,4 +37,7 @@ object SatsService {
     )
 
     fun LocalDate.toYearMonth() = YearMonth.from(this)
+
+    fun hentDatoForSatsendring(satstype: SatsType,
+                               oppdatertBeløp: Int): LocalDate? = satser.find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom
 }

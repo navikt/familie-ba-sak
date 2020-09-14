@@ -43,7 +43,7 @@ class VilkårTilTilkjentYtelseTest {
             barn1Andel2Type: String?) {
 
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021,9,1))
 
         val behandlingResultat = TestBehandlingResultatBuilder(sakType)
                 .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)

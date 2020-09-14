@@ -13,7 +13,7 @@ internal class TilkjentYtelseUtilsTest {
         val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
         val seksårsdag = LocalDate.of(2023, 1, 1)
 
-        assertEquals(periode, TilkjentYtelseUtils.hentPeriodeForTillegg(seksårsdag, periode.fom, periode.tom))
+        assertEquals(periode, TilkjentYtelseUtils.hentPeriodeUnder6år(seksårsdag, periode.fom, periode.tom))
     }
 
     @Test
@@ -22,7 +22,7 @@ internal class TilkjentYtelseUtilsTest {
         val seksårsdag = LocalDate.of(2021, 1, 1)
 
         assertEquals(Periode(periode.fom, seksårsdag),
-                     TilkjentYtelseUtils.hentPeriodeForTillegg(seksårsdag, periode.fom, periode.tom))
+                     TilkjentYtelseUtils.hentPeriodeUnder6år(seksårsdag, periode.fom, periode.tom))
     }
 
     @Test
@@ -30,6 +30,6 @@ internal class TilkjentYtelseUtilsTest {
         val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
         val seksårsdag = LocalDate.of(2018, 1, 1)
 
-        assertEquals(null, TilkjentYtelseUtils.hentPeriodeForTillegg(seksårsdag, periode.fom, periode.tom))
+        assertEquals(null, TilkjentYtelseUtils.hentPeriodeUnder6år(seksårsdag, periode.fom, periode.tom))
     }
 }

@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
@@ -62,18 +61,23 @@ object TilkjentYtelseUtils {
                                 val oppfyltTomKommerFra18ÅrsVilkår =
                                         oppfyltTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
 
-                                val barnsPeriodeForTillegg = hentPeriodeForTillegg(person.hentSeksårsdag(), oppfyltFom, oppfyltTom)
+                                val periodeUnder6År = hentPeriodeUnder6år(person.hentSeksårsdag(), oppfyltFom, oppfyltTom)
+                                val beløpsperioderMedTillegg = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
+                                        satstype = SatsType.TILLEGG_ORBA,
+                                        stønadFraOgMed = settRiktigStønadFom(periodeUnder6År.fom),
+                                        stønadTilOgMed = settRiktigStønadTom(false,
+                                                                             periodeUnder6År.tom)
+                                ) else emptyList()
 
-                                if (barnsPeriodeForTillegg !== null ) {
-
-                                }
-
-                                val beløpsperioder = SatsService.hentGyldigSatsFor(
+                                val periodeOver6år = hentPeriodeOver6år(person.hentSeksårsdag(), oppfyltFom, oppfyltTom)
+                                val beløpsperioderUtenTillegg = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
-                                        stønadFraOgMed = settRiktigStønadFom(oppfyltFom),
+                                        stønadFraOgMed = settRiktigStønadFom(periodeOver6år.fom),
                                         stønadTilOgMed = settRiktigStønadTom(oppfyltTomKommerFra18ÅrsVilkår,
-                                                                             oppfyltTom)
-                                )
+                                                                             periodeOver6år.tom)
+                                ) else emptyList()
+
+                                val beløpsperioder = listOf(beløpsperioderMedTillegg, beløpsperioderUtenTillegg).flatten()
 
                                 beløpsperioder.map { beløpsperiode ->
                                     AndelTilkjentYtelse(
@@ -94,13 +98,29 @@ object TilkjentYtelseUtils {
         return tilkjentYtelse
     }
 
-    fun hentPeriodeForTillegg(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? {
-        return if (seksårsdag.isSameOrAfter(oppfyltFom) && seksårsdag.isSameOrBefore(oppfyltTom)) {
-            Periode(oppfyltFom, seksårsdag)
-        } else if (seksårsdag.isSameOrAfter(oppfyltTom)) {
-            Periode(oppfyltFom, oppfyltTom)
-        } else null
-    }
+    fun hentPeriodeUnder6år(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? =
+            when {
+                seksårsdag.isAfter(oppfyltTom) -> {
+                    Periode(oppfyltFom, oppfyltTom)
+                }
+                seksårsdag.isSameOrBetween(oppfyltFom, oppfyltTom) -> {
+                    Periode(oppfyltFom, seksårsdag)
+                }
+                else -> null
+            }
+
+    fun hentPeriodeOver6år(seksårsdag: LocalDate,
+                           oppfyltFom: LocalDate,
+                           oppfyltTom: LocalDate): Periode? =
+            when {
+                seksårsdag.isSameOrBefore(oppfyltTom) -> {
+                    Periode(oppfyltFom, oppfyltTom)
+                }
+                seksårsdag.isSameOrBetween(oppfyltFom, oppfyltTom) -> {
+                    Periode(seksårsdag.plusDays(1), oppfyltTom)
+                }
+                else -> null
+            }
 
     fun beregnNåværendeBeløp(beregningOversikt: List<RestBeregningOversikt>, vedtak: Vedtak): Int {
         return beregningOversikt.find {
