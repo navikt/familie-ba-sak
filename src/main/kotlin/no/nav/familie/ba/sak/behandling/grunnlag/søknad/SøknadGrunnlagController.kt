@@ -22,41 +22,6 @@ class SøknadGrunnlagController(
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
-    @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag/v3"],
-                 produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun registrereSøknadOgHentPersongrunnlagV2(@PathVariable behandlingId: Long,
-                                               @RequestBody
-                                               restRegistrerSøknadGammel: RestRegistrerSøknadGammel): ResponseEntity<Ressurs<RestFagsak>> {
-        val behandling = behandlingService.hent(behandlingId = behandlingId)
-
-        return Result.runCatching {
-            stegService.håndterSøknad(behandling = behandling, restRegistrerSøknadGammel = restRegistrerSøknadGammel)
-        }
-                .fold(
-                        onSuccess = { ResponseEntity.ok(fagsakService.hentRestFagsak(behandling.fagsak.id)) },
-                        onFailure = {
-                            throw it
-                        }
-                )
-    }
-
-    @GetMapping(path = ["/{behandlingId}/søknad/v3"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentSøknadGammel(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<SøknadDTOGammel>> {
-        return Result.runCatching { søknadGrunnlagService.hentAktiv(behandlingId) }
-                .fold(
-                        onSuccess = {
-                            when (it) {
-                                null -> throw Feil(message = "Fant ikke søknadsgrunnlag på behandling",
-                                                   frontendFeilmelding = "Klarte ikke å hente søknadsgrunnlag på behandling")
-                                else -> ResponseEntity.ok(Ressurs.success(it.hentSøknadDto().toSøknadDTOGammel()))
-                            }
-                        },
-                        onFailure = {
-                            return illegalState((it.cause?.message ?: it.message).toString(), it)
-                        }
-                )
-    }
-
     @PostMapping(path = ["/{behandlingId}/registrere-søknad-og-hent-persongrunnlag"],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registrereSøknadOgHentPersongrunnlagV3(@PathVariable behandlingId: Long,
