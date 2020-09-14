@@ -4,7 +4,10 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
@@ -32,9 +35,6 @@ class VilkårTilTilkjentYtelseTest {
             søkerVilkår2: String?,
             barn1Periode1: String?,
             barn1Vilkår1: String?,
-            barn1Periode2: String?,
-            barn1Vilkår2: String?,
-            resultater: String?,
             barn1Andel1Beløp: Int?,
             barn1Andel1Periode: String?,
             barn1Andel1Type: String?,
@@ -49,7 +49,6 @@ class VilkårTilTilkjentYtelseTest {
                 .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
                 .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2)
                 .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
-                .medPersonVilkårPeriode(barn1, barn1Vilkår2, barn1Periode2)
                 .bygg()
 
         val forventetTilkjentYtelse = TestTilkjentYtelseBuilder(behandlingResultat.behandling)
@@ -79,13 +78,8 @@ class VilkårTilTilkjentYtelseTest {
             søkerVilkår2: String?,
             barn1Periode1: String?,
             barn1Vilkår1: String?,
-            barn1Periode2: String?,
-            barn1Vilkår2: String?,
             barn2Periode1: String?,
             barn2Vilkår1: String?,
-            barn2Periode2: String?,
-            barn2Vilkår2: String?,
-            resultater: String?,
             barn1Andel1Beløp: Int?,
             barn1Andel1Periode: String?,
             barn1Andel1Type: String?,
@@ -100,16 +94,14 @@ class VilkårTilTilkjentYtelseTest {
             barn2Andel2Type: String?) {
 
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
-        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2020, 2,1))
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2022,4,1))
 
         val behandlingResultat = TestBehandlingResultatBuilder("NASJONAL")
                 .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
                 .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2)
                 .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
-                .medPersonVilkårPeriode(barn1, barn1Vilkår2, barn1Periode2)
                 .medPersonVilkårPeriode(barn2, barn2Vilkår1, barn2Periode1)
-                .medPersonVilkårPeriode(barn2, barn2Vilkår2, barn2Periode2)
                 .bygg()
 
         val forventetTilkjentYtelse = TestTilkjentYtelseBuilder(behandlingResultat.behandling)

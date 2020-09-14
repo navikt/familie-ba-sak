@@ -113,7 +113,7 @@ object TilkjentYtelseUtils {
                            oppfyltFom: LocalDate,
                            oppfyltTom: LocalDate): Periode? =
             when {
-                seksårsdag.isSameOrBefore(oppfyltTom) -> {
+                seksårsdag.isSameOrBefore(oppfyltFom) -> {
                     Periode(oppfyltFom, oppfyltTom)
                 }
                 seksårsdag.isSameOrBetween(oppfyltFom, oppfyltTom) -> {
