@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.søknad
 
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTOGammel
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDateTime
@@ -30,10 +29,6 @@ data class SøknadGrunnlag(
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true
 ) {
-
-    fun hentSøknadDtoGammel(): SøknadDTOGammel {
-        return objectMapper.readValue(this.søknad, SøknadDTOGammel::class.java)
-    }
 
     fun hentSøknadDto(): SøknadDTO {
         return objectMapper.readValue(this.søknad, SøknadDTO::class.java)
