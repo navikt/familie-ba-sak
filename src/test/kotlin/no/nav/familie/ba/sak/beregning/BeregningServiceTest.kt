@@ -56,7 +56,7 @@ class BeregningServiceTest {
                 BehandlingResultat(behandling = behandling)
 
         val periodeFom = LocalDate.of(2020, 1, 1)
-        val periodeTom = LocalDate.of(2020, 11, 1)
+        val periodeTom = LocalDate.of(2020, 7, 1)
         val personResultatBarn = lagPersonResultat(behandlingResultat = behandlingResultat,
                                                    fnr = barn1Fnr,
                                                    resultat = Resultat.JA,
@@ -78,7 +78,8 @@ class BeregningServiceTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id,
                                                                        søkerPersonIdent = søkerFnr,
-                                                                       barnasIdenter = listOf(barn1Fnr))
+                                                                       barnasIdenter = listOf(barn1Fnr),
+                                                                       barnFødselsdato = LocalDate.of(2002, 7, 1))
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { behandlingResultat }
@@ -106,7 +107,7 @@ class BeregningServiceTest {
                 BehandlingResultat(behandling = behandling)
 
         val periodeFom = LocalDate.of(2018, 1, 1)
-        val periodeTom = LocalDate.of(2020, 11, 1)
+        val periodeTom = LocalDate.of(2020, 7, 1)
         val personResultatBarn = lagPersonResultat(behandlingResultat = behandlingResultat,
                                                    fnr = barn1Fnr,
                                                    resultat = Resultat.JA,
@@ -153,7 +154,7 @@ class BeregningServiceTest {
 
         Assertions.assertEquals(1054, andelerTilkjentYtelse.last().beløp)
         Assertions.assertEquals(satsPeriode2Start, andelerTilkjentYtelse.last().stønadFom)
-        Assertions.assertEquals(periodeTom.minusMonths(1).sisteDagIMåned(), andelerTilkjentYtelse.last().stønadTom)
+        Assertions.assertEquals(periodeTom.sisteDagIMåned(), andelerTilkjentYtelse.last().stønadTom)
     }
 
     @Test
@@ -202,6 +203,7 @@ class BeregningServiceTest {
     @Test
     fun `For flere barn med forskjellige perioderesultat skal perioderesultat mappes til andel ytelser`() {
         val behandling = lagBehandling()
+        val barnFødselsdato = LocalDate.of(2019, 1, 1)
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
         val søkerFnr = randomFnr()
@@ -271,7 +273,8 @@ class BeregningServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
                 behandlingId = behandling.id,
                 søkerPersonIdent = søkerFnr,
-                barnasIdenter = listOf(barn1Fnr, barn2Fnr)
+                barnasIdenter = listOf(barn1Fnr, barn2Fnr),
+                barnFødselsdato = barnFødselsdato
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -288,29 +291,33 @@ class BeregningServiceTest {
         Assertions.assertEquals(5, slot.captured.andelerTilkjentYtelse.size)
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
 
+
+        val (andelerBarn1, andelerBarn2) = andelerTilkjentYtelse.partition { it.personIdent == barn1Fnr }
+
         // Barn 1 - første periode (før satsendring)
-        Assertions.assertEquals(periode1Fom.plusMonths(1).withDayOfMonth(1), andelerTilkjentYtelse[0].stønadFom)
-        Assertions.assertEquals(tilleggFom!!.minusDays(1), andelerTilkjentYtelse[0].stønadTom)
-        Assertions.assertEquals(1054, andelerTilkjentYtelse[0].beløp)
+        Assertions.assertEquals(periode1Fom.førsteDagINesteMåned(), andelerBarn1[0].stønadFom)
+        Assertions.assertEquals(tilleggFom!!.minusDays(1), andelerBarn1[0].stønadTom)
+        Assertions.assertEquals(1054, andelerBarn1[0].beløp)
 
         // Barn 1 - første periode (etter satsendring)
-        Assertions.assertEquals(tilleggFom, andelerTilkjentYtelse[1].stønadFom)
-        Assertions.assertEquals(periode1Tom.sisteDagIMåned(), andelerTilkjentYtelse[1].stønadTom)
-        Assertions.assertEquals(1354, andelerTilkjentYtelse[1].beløp)
+        Assertions.assertEquals(tilleggFom, andelerBarn1[1].stønadFom)
+        Assertions.assertEquals(periode1Tom.sisteDagIMåned(), andelerBarn1[1].stønadTom)
+        Assertions.assertEquals(1354, andelerBarn1[1].beløp)
+
+        // Barn 1 - andre periode (før fylte 6 år)
+        Assertions.assertEquals(periode3Fom.førsteDagINesteMåned(), andelerBarn1[2].stønadFom)
+        Assertions.assertEquals(barnFødselsdato.plusYears(6).sisteDagIMåned(), andelerBarn1[2].stønadTom)
+        Assertions.assertEquals(1354, andelerBarn1[2].beløp)
+
+        // Barn 1 - andre periode (etter fylte 6 år)
+        Assertions.assertEquals(barnFødselsdato.plusYears(6).førsteDagINesteMåned(), andelerBarn1[3].stønadFom)
+        Assertions.assertEquals(periode3Tom.sisteDagIMåned(), andelerBarn1[3].stønadTom)
+        Assertions.assertEquals(1054, andelerBarn1[3].beløp)
 
         // Barn 2 - eneste periode (etter satsendring)
-        Assertions.assertEquals(periode3Fom.plusMonths(1).withDayOfMonth(1), andelerTilkjentYtelse[2].stønadFom)
-        Assertions.assertEquals(periode3Midt.sisteDagIMåned(), andelerTilkjentYtelse[2].stønadTom)
-        Assertions.assertEquals(1354, andelerTilkjentYtelse[2].beløp)
+        Assertions.assertEquals(periode3Fom.førsteDagINesteMåned(), andelerBarn2[0].stønadFom)
+        Assertions.assertEquals(periode3Midt.sisteDagIMåned(), andelerBarn2[0].stønadTom)
+        Assertions.assertEquals(1354, andelerBarn2[0].beløp)
 
-        // Barn 1 -
-        Assertions.assertEquals(periode3Fom.plusMonths(1).withDayOfMonth(1), andelerTilkjentYtelse[3].stønadFom)
-        Assertions.assertEquals(periode3Tom.sisteDagIMåned(), andelerTilkjentYtelse[3].stønadTom)
-        Assertions.assertEquals(1054, andelerTilkjentYtelse[3].beløp)
-
-        // Barn 1 -
-        Assertions.assertEquals(periode3Fom.plusMonths(1).withDayOfMonth(1), andelerTilkjentYtelse[3].stønadFom)
-        Assertions.assertEquals(periode3Tom.sisteDagIMåned(), andelerTilkjentYtelse[3].stønadTom)
-        Assertions.assertEquals(1054, andelerTilkjentYtelse[3].beløp)
     }
 }
