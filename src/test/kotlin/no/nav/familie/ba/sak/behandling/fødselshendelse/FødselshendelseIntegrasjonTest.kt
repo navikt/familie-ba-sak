@@ -8,7 +8,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.MockConfiguration.Companion.barnefnr
 import no.nav.familie.ba.sak.behandling.fødselshendelse.MockConfiguration.Companion.morsfnr
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
@@ -18,6 +19,8 @@ import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
@@ -185,11 +188,9 @@ class FødselshendelseIntegrasjonTest(
         val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, now)
 
         Assert.assertEquals(sats.beløp, andelTilkjentYtelser[0].beløp)
-
-        val reffom = now.plusMonths(1)
-        val reftom = now.plusYears(18).minusMonths(2)
-        val fom = of(reffom.year, reffom.month, 1)
-        val tom = of(reftom.year, reftom.month, reffom.lengthOfMonth())
+        
+        val fom = now.førsteDagIInneværendeMåned()
+        val tom = now.plusYears(18).minusMonths(2).sisteDagIMåned()
 
         Assert.assertEquals(fom, andelTilkjentYtelser[0].stønadFom)
         Assert.assertEquals(tom, andelTilkjentYtelser[0].stønadTom)
