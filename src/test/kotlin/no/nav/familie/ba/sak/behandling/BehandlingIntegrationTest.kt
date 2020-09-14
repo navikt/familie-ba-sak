@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.SatsService
+import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
@@ -320,18 +322,34 @@ class BehandlingIntegrationTest {
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it.personBeregninger }
-                .associateBy({ it.personIdent }, { it.ytelsePerioder[0] })
+                .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
+        val satsEndringDato = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)
         Assertions.assertEquals(2, restVedtakBarnMap.size)
-        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)
-        Assertions.assertEquals(dato_2020_01_01, restVedtakBarnMap[barn1Fnr]!!.stønadFom)
-        Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!!.stønadTom)
-        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!!.ytelseType)
 
-        Assertions.assertEquals(1054, restVedtakBarnMap[barn2Fnr]!!.beløp)
-        Assertions.assertEquals(dato_2020_10_01, restVedtakBarnMap[barn2Fnr]!!.stønadFom)
-        Assertions.assertTrue(dato_2020_10_01 < restVedtakBarnMap[barn2Fnr]!!.stønadTom)
-        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!!.ytelseType)
+        // Barn 1
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![0].beløp)
+        Assertions.assertEquals(dato_2020_01_01, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
+        Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
+        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![0].ytelseType)
+        Assertions.assertEquals(1354, restVedtakBarnMap[barn1Fnr]!![1].beløp)
+        Assertions.assertEquals(satsEndringDato, restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
+        Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
+        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![1].ytelseType)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![2].beløp)
+        Assertions.assertEquals(dato_2020_01_01.plusYears(5).førsteDagINesteMåned(), restVedtakBarnMap[barn1Fnr]!![2].stønadFom)
+        Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!![2].stønadTom)
+        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![2].ytelseType)
+
+        // Barn 2
+        Assertions.assertEquals(1354, restVedtakBarnMap[barn2Fnr]!![0].beløp)
+        Assertions.assertEquals(dato_2020_10_01, restVedtakBarnMap[barn2Fnr]!![0].stønadFom)
+        Assertions.assertTrue(dato_2020_10_01 < restVedtakBarnMap[barn2Fnr]!![0].stønadTom)
+        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![0].ytelseType)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn2Fnr]!![1].beløp)
+        Assertions.assertEquals(dato_2020_01_01.plusYears(5).førsteDagINesteMåned(), restVedtakBarnMap[barn2Fnr]!![1].stønadFom)
+        Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn2Fnr]!![1].stønadTom)
+        Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![1].ytelseType)
     }
 
     @Test
@@ -386,18 +404,23 @@ class BehandlingIntegrationTest {
                 .data!!.behandlinger
                 .flatMap { it.vedtakForBehandling }
                 .flatMap { it.personBeregninger }
-                .associateBy({ it.personIdent }, { it.ytelsePerioder[0] })
+                .associateBy({ it.personIdent }, { it.ytelsePerioder.sortedBy { it.stønadFom } })
 
         Assertions.assertEquals(2, restVedtakBarnMap.size)
-        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!!.beløp)
-        Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn1Fnr]!!.stønadFom)
-        Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn1Fnr]!!.stønadTom)
 
-        Assertions.assertEquals(1054, restVedtakBarnMap[barn3Fnr]!!.beløp)
-        Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn3Fnr]!!.stønadFom)
-        Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn3Fnr]!!.stønadTom)
+        Assertions.assertEquals(1354, restVedtakBarnMap[barn1Fnr]!![0].beløp)
+        Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
+        Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![1].beløp)
+        Assertions.assertEquals(dato_2021_01_01.plusYears(4).førsteDagINesteMåned(), restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
+        Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
 
-        Assertions.assertNull(restVedtakBarnMap[barn2Fnr])
+        Assertions.assertEquals(1354, restVedtakBarnMap[barn3Fnr]!![0].beløp)
+        Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn3Fnr]!![0].stønadFom)
+        Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn3Fnr]!![0].stønadTom)
+        Assertions.assertEquals(1054, restVedtakBarnMap[barn3Fnr]!![1].beløp)
+        Assertions.assertEquals(dato_2021_01_01.plusYears(4).førsteDagINesteMåned(), restVedtakBarnMap[barn3Fnr]!![1].stønadFom)
+        Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn3Fnr]!![1].stønadTom)
     }
 
     @Test
@@ -445,8 +468,11 @@ class BehandlingIntegrationTest {
                 navn = "Gutt",
                 kjønn = Kjønn.MANN,
                 familierelasjoner = emptySet(),
-                bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId, barn1Bruksenhetsnummer, barn1Tilleggsnavn,
-                                                                                    barn1Postnummer, barn1Kommunenummer)),
+                bostedsadresse = Bostedsadresse(matrikkeladresse = Matrikkeladresse(matrikkelId,
+                                                                                    barn1Bruksenhetsnummer,
+                                                                                    barn1Tilleggsnavn,
+                                                                                    barn1Postnummer,
+                                                                                    barn1Kommunenummer)),
                 sivilstand = null
         )
 
