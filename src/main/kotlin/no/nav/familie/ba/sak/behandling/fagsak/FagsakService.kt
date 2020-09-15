@@ -171,7 +171,7 @@ class FagsakService(
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
         val personer = personRepository.findByPersonIdent(PersonIdent(personIdent))
         val personInfo = runCatching {
-            personopplysningerService.hentPersoninfoFor(personIdent)
+            personopplysningerService.hentPersoninfoMedRelasjoner(personIdent)
         }.fold(
                 onSuccess = { it },
                 onFailure = {
@@ -195,7 +195,7 @@ class FagsakService(
                     //get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
                     val søkerInfo = if (behandling.fagsak.hentAktivIdent().ident == personIdent) personInfo else
                         runCatching {
-                            personopplysningerService.hentPersoninfoFor(behandling.fagsak.hentAktivIdent().ident)
+                            personopplysningerService.hentPersoninfoMedRelasjoner(behandling.fagsak.hentAktivIdent().ident)
                         }.fold(
                                 onSuccess = { it },
                                 onFailure = {
@@ -236,7 +236,7 @@ class FagsakService(
             }.forEach {
                 if (assosierteFagsakDeltager.find({ d -> d.ident == it.personIdent.id }) == null) {
                     val forelderInfo = runCatching {
-                        personopplysningerService.hentPersoninfoFor(it.personIdent.id)
+                        personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
                     }.fold(
                             onSuccess = { it },
                             onFailure = {

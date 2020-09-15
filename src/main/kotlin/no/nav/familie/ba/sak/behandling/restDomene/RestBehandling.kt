@@ -48,7 +48,8 @@ data class RestVilkårResultat(
         val begrunnelse: String,
         val endretAv: String,
         val endretTidspunkt: LocalDateTime,
-        val behandlingId: Long
+        val behandlingId: Long,
+        val erVurdert: Boolean? = null
 )
 
 fun PersonResultat.tilRestPersonResultat() =
@@ -63,6 +64,7 @@ fun PersonResultat.tilRestPersonResultat() =
                                        begrunnelse = resultat.begrunnelse,
                                        endretAv = resultat.endretAv,
                                        endretTidspunkt = resultat.endretTidspunkt,
-                                       behandlingId = resultat.behandlingId
+                                       behandlingId = resultat.behandlingId,
+                                       erVurdert = resultat.resultat != Resultat.KANSKJE || resultat.versjon > 0
                                )
                            })

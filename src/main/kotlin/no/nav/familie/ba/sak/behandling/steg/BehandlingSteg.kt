@@ -99,6 +99,10 @@ enum class StegType(val rekkefølge: Int,
         return this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
     }
 
+    fun erSaksbehandlerSteg(): Boolean {
+        return this.tillattFor.any { it == BehandlerRolle.SAKSBEHANDLER || it == BehandlerRolle.BESLUTTER }
+    }
+
     fun hentNesteSteg(utførendeStegType: StegType,
                       behandlingType: BehandlingType? = null,
                       behandlingOpprinnelse: BehandlingOpprinnelse? = null): StegType {

@@ -16,7 +16,7 @@ import org.springframework.web.context.annotation.ApplicationScope
 @ApplicationScope
 class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
 
-    fun hentPersoninfoFor(personIdent: String): PersonInfo {
+    fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfo(personIdent, PersonInfoQuery.MED_RELASJONER)
         val familierelasjoner = personinfo.familierelasjoner.map {
             val relasjonsinfo = hentPersoninfo(it.personIdent.id, PersonInfoQuery.ENKEL)

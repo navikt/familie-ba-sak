@@ -8,11 +8,11 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -84,16 +84,6 @@ class StegService(
     fun håndterSøknad(behandling: Behandling,
                       restRegistrerSøknad: RestRegistrerSøknad): Behandling =
             fullførSøknadsHåndtering(behandling = behandling, registrerSøknad = restRegistrerSøknad)
-
-    @Transactional
-    fun håndterSøknad(behandling: Behandling,
-                      restRegistrerSøknadGammel: RestRegistrerSøknadGammel): Behandling {
-
-        val registrerSøknad = RestRegistrerSøknad(søknad = restRegistrerSøknadGammel.søknad.toSøknadDTO(),
-                                bekreftEndringerViaFrontend = restRegistrerSøknadGammel.bekreftEndringerViaFrontend)
-
-        return fullførSøknadsHåndtering(behandling = behandling, registrerSøknad = registrerSøknad)
-    }
 
     private fun fullførSøknadsHåndtering(behandling: Behandling, registrerSøknad: RestRegistrerSøknad): Behandling {
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
@@ -213,27 +203,30 @@ class StegService(
                             behandlingSteg: BehandlingSteg<*>,
                             utførendeSteg: () -> StegType): Behandling {
         try {
-            if (behandling.steg == sisteSteg) {
-                error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
-            }
-
-            if (behandlingSteg.stegType().kommerEtter(behandling.steg)) {
-                error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${behandlingSteg.stegType()
-                        .displayName()}'," +
-                      " men behandlingen er på steg '${behandling.steg.displayName()}'")
-            }
-
-            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
-                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
-            }
-
             val behandlerRolle =
                     SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minByOrNull { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
-                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${behandlingSteg.stegType()
-                        .displayName()} pga manglende rolle.")
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${
+                    behandlingSteg.stegType()
+                            .displayName()
+                } pga manglende rolle.")
+            }
+
+            if (behandling.steg == sisteSteg) {
+                error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
+            }
+
+            if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType().kommerEtter(behandling.steg)) {
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
+                    behandlingSteg.stegType()
+                            .displayName()
+                }', men behandlingen er på steg '${behandling.steg.displayName()}'")
+            }
+
+            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
+                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
 
             behandlingSteg.preValiderSteg(behandling, this)
@@ -278,6 +271,7 @@ class StegService(
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }

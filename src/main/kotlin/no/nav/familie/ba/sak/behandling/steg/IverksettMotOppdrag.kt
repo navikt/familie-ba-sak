@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedClient
+import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
@@ -9,7 +13,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class IverksettMotOppdrag(private val økonomiService: ØkonomiService,
-                          private val totrinnskontrollService: TotrinnskontrollService) : BehandlingSteg<IverksettingTaskDTO> {
+                          private val totrinnskontrollService: TotrinnskontrollService,
+                          private val infotrygdFeedClient: InfotrygdFeedClient,
+                          private val vedtakService: VedtakService
+                          ) : BehandlingSteg<IverksettingTaskDTO> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
@@ -34,6 +41,10 @@ class IverksettMotOppdrag(private val økonomiService: ØkonomiService,
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: IverksettingTaskDTO): StegType {
+        infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(
+                hentFnrStoenadsmottaker(behandling.fagsak),
+                hentVedtaksdato(behandling.id)))
+
         økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(data.vedtaksId,
                                                                data.saksbehandlerId)
 
@@ -43,4 +54,11 @@ class IverksettMotOppdrag(private val økonomiService: ØkonomiService,
     override fun stegType(): StegType {
         return StegType.IVERKSETT_MOT_OPPDRAG
     }
+
+    private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.hentAktivIdent().ident
+
+    private fun hentVedtaksdato(behandlingsId: Long) =
+            vedtakService.hentAktivForBehandling(behandlingsId)?.vedtaksdato
+            ?: throw Exception("Aktivt vedtak eller vedtaksdato eksisterer ikke for $behandlingsId")
+
 }

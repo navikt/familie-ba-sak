@@ -52,6 +52,10 @@ fun LocalDate.isSameOrAfter(toCompare: LocalDate): Boolean {
     return this.isAfter(toCompare) || this == toCompare
 }
 
+fun LocalDate.isSameOrBetween(fom: LocalDate, tom: LocalDate): Boolean {
+    return this.isSameOrAfter(fom) && this.isSameOrBefore(tom)
+}
+
 private fun LocalDate.toDate(): Date = Date.from(this.atStartOfDay(ZoneId.systemDefault()).toInstant())
 
 private fun LocalDate.isBetween(toCompare: Periode): Boolean {
