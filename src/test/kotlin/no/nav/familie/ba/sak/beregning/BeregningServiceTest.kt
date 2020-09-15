@@ -154,7 +154,7 @@ class BeregningServiceTest {
 
         Assertions.assertEquals(1054, andelerTilkjentYtelse.last().beløp)
         Assertions.assertEquals(satsPeriode2Start, andelerTilkjentYtelse.last().stønadFom)
-        Assertions.assertEquals(periodeTom.sisteDagIMåned(), andelerTilkjentYtelse.last().stønadTom)
+        Assertions.assertEquals(periodeTom.sisteDagIForrigeMåned(), andelerTilkjentYtelse.last().stønadTom)
     }
 
     @Test
@@ -301,12 +301,12 @@ class BeregningServiceTest {
 
         // Barn 1 - første periode (etter satsendring)
         Assertions.assertEquals(tilleggFom, andelerBarn1[1].stønadFom)
-        Assertions.assertEquals(periode1Tom.sisteDagIMåned(), andelerBarn1[1].stønadTom)
+        Assertions.assertEquals(periode1Tom.sisteDagIForrigeMåned(), andelerBarn1[1].stønadTom)
         Assertions.assertEquals(1354, andelerBarn1[1].beløp)
 
         // Barn 1 - andre periode (før fylte 6 år)
         Assertions.assertEquals(periode3Fom.førsteDagINesteMåned(), andelerBarn1[2].stønadFom)
-        Assertions.assertEquals(barnFødselsdato.plusYears(6).sisteDagIMåned(), andelerBarn1[2].stønadTom)
+        Assertions.assertEquals(barnFødselsdato.plusYears(6).sisteDagIForrigeMåned(), andelerBarn1[2].stønadTom)
         Assertions.assertEquals(1354, andelerBarn1[2].beløp)
 
         // Barn 1 - andre periode (etter fylte 6 år)
@@ -316,7 +316,7 @@ class BeregningServiceTest {
 
         // Barn 2 - eneste periode (etter satsendring)
         Assertions.assertEquals(periode3Fom.førsteDagINesteMåned(), andelerBarn2[0].stønadFom)
-        Assertions.assertEquals(periode3Midt.sisteDagIMåned(), andelerBarn2[0].stønadTom)
+        Assertions.assertEquals(periode3Midt.sisteDagIForrigeMåned(), andelerBarn2[0].stønadTom)
         Assertions.assertEquals(1354, andelerBarn2[0].beløp)
 
     }

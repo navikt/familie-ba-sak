@@ -9,11 +9,14 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.beregning.SatsService.hentPeriodeOver6år
+import no.nav.familie.ba.sak.beregning.SatsService.hentPeriodeUnder6år
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
@@ -97,30 +100,6 @@ object TilkjentYtelseUtils {
 
         return tilkjentYtelse
     }
-
-    fun hentPeriodeUnder6år(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? =
-            when {
-                seksårsdag.isAfter(oppfyltTom) -> {
-                    Periode(oppfyltFom, oppfyltTom)
-                }
-                seksårsdag.isSameOrBetween(oppfyltFom, oppfyltTom) -> {
-                    Periode(oppfyltFom, seksårsdag)
-                }
-                else -> null
-            }
-
-    fun hentPeriodeOver6år(seksårsdag: LocalDate,
-                           oppfyltFom: LocalDate,
-                           oppfyltTom: LocalDate): Periode? =
-            when {
-                seksårsdag.isSameOrBefore(oppfyltFom) -> {
-                    Periode(oppfyltFom, oppfyltTom)
-                }
-                seksårsdag.isSameOrBetween(oppfyltFom, oppfyltTom) -> {
-                    Periode(seksårsdag.plusDays(1), oppfyltTom)
-                }
-                else -> null
-            }
 
     fun beregnNåværendeBeløp(beregningOversikt: List<RestBeregningOversikt>, vedtak: Vedtak): Int {
         return beregningOversikt.find {
