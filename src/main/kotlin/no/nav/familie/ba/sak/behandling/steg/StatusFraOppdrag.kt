@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
@@ -22,9 +21,9 @@ data class StatusFraOppdragMedTask(
 
 @Service
 class StatusFraOppdrag(
-        private val behandlingService: BehandlingService,
         private val økonomiService: ØkonomiService,
-        private val taskRepository: TaskRepository) : BehandlingSteg<StatusFraOppdragMedTask> {
+        private val taskRepository: TaskRepository,
+        private val featureToggleService: FeatureToggleService) : BehandlingSteg<StatusFraOppdragMedTask> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: StatusFraOppdragMedTask): StegType {
@@ -46,9 +45,12 @@ class StatusFraOppdrag(
 
                         error("Mottok status '$it' fra oppdrag")
                     } else {
-                        if (behandling.type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
-                            && behandling.type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
-                            && behandling.type !== BehandlingType.TEKNISK_OPPHØR) {
+                        val featureToggleSendVedtaksbrev =
+                                featureToggleService.isEnabled(toggleId = "familie-ba-sak.send-vedtaksbrev",
+                                                               defaultValue = true)
+
+                        LOG.info("Feature toggle for å sende vedtaksbrev er ${if (featureToggleSendVedtaksbrev) "på." else "av."}")
+                        if (behandling.sendVedtaksbrev() && featureToggleSendVedtaksbrev) {
                             opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
                                                              task)
                         } else {
@@ -78,6 +80,7 @@ class StatusFraOppdrag(
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
