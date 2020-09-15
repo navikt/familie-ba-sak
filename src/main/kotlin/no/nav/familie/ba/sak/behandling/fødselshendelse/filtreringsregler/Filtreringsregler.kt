@@ -6,21 +6,6 @@ import no.nav.nare.core.specifications.Spesifikasjon
 // i forbindelse med opprettelse av oppgave.
 enum class Filtreringsregler(val spesifikasjon: Spesifikasjon<Fakta>) {
 
-    MOR_HAR_GYLDIG_FOEDSELSNUMMER(Spesifikasjon(
-            "Mor har gyldig fødselsnummer",
-            "MOR_HAR_GYLDIG_FOEDSELSNUMMER",
-            implementasjon = { morHarGyldigFødselsnummer(this) })
-    ),
-    BARNET_HAR_GYLDIG_FOEDSELSNUMMER(Spesifikasjon(
-            "Barnet har gyldig fødselsnummer",
-            "BARNET_HAR_GYLDIG_FOEDSELSNUMMER",
-            implementasjon = { barnetHarGyldigFødselsnummer(this) })
-    ),
-    BARNET_ER_UNDER_6_MND(Spesifikasjon(
-            "Barnet er under 6 måneder",
-            "BARNET_ER_UNDER_6_MND",
-            implementasjon = { barnetErUnder6mnd(this) })
-    ),
     BARNET_LEVER(Spesifikasjon(
             "Barnet lever",
             "BARNET_LEVER",
