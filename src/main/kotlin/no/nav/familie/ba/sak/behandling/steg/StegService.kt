@@ -218,12 +218,11 @@ class StegService(
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (behandlingSteg.stegType().kommerEtter(behandling.steg)) {
+            if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType().kommerEtter(behandling.steg)) {
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
                     behandlingSteg.stegType()
                             .displayName()
-                }'," +
-                      " men behandlingen er på steg '${behandling.steg.displayName()}'")
+                }', men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
