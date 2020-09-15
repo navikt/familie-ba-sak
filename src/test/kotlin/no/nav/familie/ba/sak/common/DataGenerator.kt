@@ -54,7 +54,8 @@ fun nestePersonId(): Long {
 }
 
 val defaultFagsak = Fagsak(1).also {
-    it.søkerIdenter = setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr()), opprettetTidspunkt = LocalDateTime.now()))
+    it.søkerIdenter =
+            setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr()), opprettetTidspunkt = LocalDateTime.now()))
 }
 
 fun lagBehandling(fagsak: Fagsak = defaultFagsak,
@@ -62,13 +63,15 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                   behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                   opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL
 ) = Behandling(id = nesteBehandlingId(),
-        fagsak = fagsak,
-        type = behandlingType,
-        kategori = behandlingKategori,
-        underkategori = BehandlingUnderkategori.ORDINÆR,
-        opprinnelse = opprinnelse)
+               fagsak = fagsak,
+               type = behandlingType,
+               kategori = behandlingKategori,
+               underkategori = BehandlingUnderkategori.ORDINÆR,
+               opprinnelse = opprinnelse)
 
-fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.BARN, kjønn: Kjønn = Kjønn.MANN) = Person(
+fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
+                    personType: PersonType = PersonType.BARN,
+                    kjønn: Kjønn = Kjønn.MANN) = Person(
         id = nestePersonId(),
         aktørId = randomAktørId(),
         personIdent = PersonIdent(randomFnr()),
@@ -80,7 +83,9 @@ fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(), personType: Perso
         sivilstand = SIVILSTAND.UGIFT
 )
 
-fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(), personType: PersonType = PersonType.SØKER, kjønn: Kjønn = Kjønn.MANN) = Person(
+fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(),
+                   personType: PersonType = PersonType.SØKER,
+                   kjønn: Kjønn = Kjønn.MANN) = Person(
         id = nestePersonId(),
         aktørId = randomAktørId(),
         personIdent = PersonIdent(randomFnr()),
@@ -96,10 +101,10 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
               forrigeVedtak: Vedtak? = null,
               opphørsdato: LocalDate? = null) =
         Vedtak(id = nesteVedtakId(),
-                behandling = behandling,
-                vedtaksdato = LocalDate.now(),
-                forrigeVedtakId = forrigeVedtak?.id,
-                opphørsdato = opphørsdato
+               behandling = behandling,
+               vedtaksdato = LocalDate.now(),
+               forrigeVedtakId = forrigeVedtak?.id,
+               opphørsdato = opphørsdato
         )
 
 fun lagAndelTilkjentYtelse(fom: String,
@@ -166,7 +171,8 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
 
 fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                     søkerPersonIdent: String,
-                                    barnasIdenter: List<String>): PersonopplysningGrunnlag {
+                                    barnasIdenter: List<String>,
+                                    barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1)): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
     val bostedsadresse = GrMatrikkeladresse(matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
                                             postnummer = "0202", kommunenummer = "2231")
@@ -188,7 +194,7 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
                                                      personIdent = PersonIdent(it),
                                                      type = PersonType.BARN,
                                                      personopplysningGrunnlag = personopplysningGrunnlag,
-                                                     fødselsdato = LocalDate.of(2019, 1, 1),
+                                                     fødselsdato = barnFødselsdato,
                                                      navn = "",
                                                      kjønn = Kjønn.MANN,
                                                      bostedsadresse = bostedsadresse,
