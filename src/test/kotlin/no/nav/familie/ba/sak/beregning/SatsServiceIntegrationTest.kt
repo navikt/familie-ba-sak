@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
+import java.time.YearMonth
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -21,37 +22,41 @@ class SatsServiceIntegrationTest {
 
     @Test
     fun `Skal hente ut riktig sats for ordinær barnetrygd i 2020`() {
-
-        val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, LocalDate.of(2020, 1, 1))
+        val dato = LocalDate.of(2020, 1, 1)
+        val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.from(dato), YearMonth.from(dato)).first()
 
         Assertions.assertEquals(1054, sats.beløp)
     }
 
     @Test
     fun `Skal hente ut riktig sats for tillegg til barnetrygd i september 2020`() {
-        val sats = SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, LocalDate.of(2020, 9, 1))
+        val dato = LocalDate.of(2020, 9, 1)
+        val sats = SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.from(dato), YearMonth.from(dato)).first()
 
         Assertions.assertEquals(1354, sats.beløp)
     }
 
     @Test
-    fun `Skal ikke finne noen sats for tillegg til barnetrygd før september 2020`() {
+    fun `Skal hente ut sats for ordinær barnetrygd ved tillegg før september 2020`() {
+        val dato = LocalDate.of(2020, 1, 1)
+        val sats = SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.from(dato), YearMonth.from(dato)).first()
+        val satsOrdinær = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.from(dato), YearMonth.from(dato)).first()
 
-        Assertions.assertThrows(NoSuchElementException::class.java) {
-            SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, LocalDate.of(2020, 1, 1))
-        }
+        Assertions.assertEquals(satsOrdinær.beløp, sats.beløp)
     }
 
     @Test
     fun `Skal hente ut riktig sats for småbarnstillegg`() {
-        val sats = SatsService.hentGyldigSatsFor(SatsType.SMA, LocalDate.of(2020, 1, 1))
+        val dato = LocalDate.of(2020, 1, 1)
+        val sats = SatsService.hentGyldigSatsFor(SatsType.SMA, YearMonth.from(dato), YearMonth.from(dato)).first()
 
         Assertions.assertEquals(660, sats.beløp)
     }
 
     @Test
     fun `Skal hente ut riktig sats for ordinær barnetrygd i 2018`() {
-        val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, LocalDate.of(2018, 1, 1))
+        val dato = LocalDate.of(2018, 1, 1)
+        val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.from(dato), YearMonth.from(dato)).first()
 
         Assertions.assertEquals(970, sats.beløp)
     }
