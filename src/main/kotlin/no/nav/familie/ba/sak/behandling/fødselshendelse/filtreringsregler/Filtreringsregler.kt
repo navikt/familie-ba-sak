@@ -32,7 +32,7 @@ enum class Filtreringsregler(val spesifikasjon: Spesifikasjon<Fakta>) {
             implementasjon = { merEnn5mndSidenForrigeBarn(this) })
     ),
     BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING(Spesifikasjon(
-            "Barnets fødselsdato går ikke langt nok tilbake til at etterbetaling vil trigges",
+            "Saken medfører etterbetaling",
             "BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING",
             implementasjon = { barnetsFødselsdatoInnebærerIkkeEtterbetaling(this)})
     );
