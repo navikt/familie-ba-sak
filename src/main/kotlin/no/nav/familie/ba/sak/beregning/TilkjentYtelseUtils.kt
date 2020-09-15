@@ -65,7 +65,7 @@ object TilkjentYtelseUtils {
                                 val beløpsperioderMedTillegg = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.TILLEGG_ORBA,
                                         stønadFraOgMed = settRiktigStønadFom(periodeUnder6År.fom),
-                                        stønadTilOgMed = settRiktigStønadTom(false,
+                                        stønadTilOgMed = settRiktigStønadTom(true,
                                                                              periodeUnder6År.tom)
                                 ) else emptyList()
 
@@ -136,8 +136,8 @@ object TilkjentYtelseUtils {
     private fun settRiktigStønadFom(fraOgMed: LocalDate): YearMonth =
             YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
 
-    private fun settRiktigStønadTom(erBarnetrygdTil18ÅrsDag: Boolean, tilOgMed: LocalDate): YearMonth {
-        return if (erBarnetrygdTil18ÅrsDag)
+    private fun settRiktigStønadTom(skalAvsluttesMånedenFør: Boolean, tilOgMed: LocalDate): YearMonth {
+        return if (skalAvsluttesMånedenFør)
             YearMonth.from(tilOgMed.minusMonths(1).sisteDagIMåned())
         else
             YearMonth.from(tilOgMed.sisteDagIMåned())
