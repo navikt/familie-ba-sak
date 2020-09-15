@@ -5,27 +5,6 @@ import no.nav.familie.ba.sak.common.erFraInneværendeMåned
 import no.nav.nare.core.evaluations.Evaluering
 import java.time.LocalDate
 
-internal fun morHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
-    return when (!erDnummer(fakta.mor.personIdent.ident)) {
-        true -> Evaluering.ja("Mor har gyldig fødselsnummer.")
-        false -> Evaluering.nei("Mor har ikke gyldig fødselsnummer.")
-    }
-}
-
-internal fun barnetHarGyldigFødselsnummer(fakta: Fakta): Evaluering {
-    return when (fakta.barnaFraHendelse.none { erDnummer(it.personIdent.ident) }) {
-        true -> Evaluering.ja("Alle barn har gyldig fødselsnummer.")
-        false -> Evaluering.nei("Minst et barn har ikke gyldig fødselsnummer.")
-    }
-}
-
-internal fun barnetErUnder6mnd(fakta: Fakta): Evaluering {
-    return when (fakta.barnaFraHendelse.none { it.fødselsdato.isBefore(LocalDate.now().minusMonths(6)) }) {
-        true -> Evaluering.ja("Alle barna er under 6 måneder.")
-        false -> Evaluering.nei("Minst et barn er over 6 måneder.")
-    }
-}
-
 internal fun morErOver18år(fakta: Fakta): Evaluering {
     return when (LocalDate.now().isAfter(fakta.mor.fødselsdato.plusYears(18))) {
         true -> Evaluering.ja("Mor er over 18 år.")
@@ -72,8 +51,4 @@ internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(fakta: Fakta): Evalu
             Evaluering.nei("Saken medfører etterbetaling.")
         else -> Evaluering.ja("Saken medfører ikke etterbetaling.")
     }
-}
-
-private fun erDnummer(personIdent: String): Boolean {
-    return personIdent.substring(0, 1).toInt() > 3
 }

@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class FiltreringsreglerTest {
-    val dnummer = PersonIdent(FnrGenerator.generer(erDnummer = true))
     val gyldigFnr = PersonIdent(FnrGenerator.generer())
 
     @Test
@@ -26,50 +25,6 @@ internal class FiltreringsreglerTest {
                 .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
-    }
-
-    @Test
-    fun `Regelevaluering skal resultere i NEI når mor har D-nummer`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = dnummer)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<PersonInfo> = listOf()
-
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
-
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MOR_HAR_GYLDIG_FOEDSELSNUMMER)
-    }
-
-    @Test
-    fun `Regelevaluering skal resultere i NEI når barnet har D-nummer`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = dnummer)
-        val restenAvBarna: List<PersonInfo> = listOf()
-
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
-
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.BARNET_HAR_GYLDIG_FOEDSELSNUMMER)
-    }
-
-    @Test
-    fun `Regelevaluering skal resultere i NEI når barnet er over 6 måneder`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet = tilfeldigPerson(LocalDate.now().minusYears(1)).copy(personIdent = gyldigFnr)
-        val restenAvBarna: List<PersonInfo> = listOf()
-
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
-
-        assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        val resultaterMedNei = evaluering.children.filter { it.resultat == Resultat.NEI }
-        assertThat(2).isEqualTo(resultaterMedNei.size)
-        assertThat(resultaterMedNei.map {it.identifikator}.containsAll(listOf(
-                Filtreringsregler.BARNET_ER_UNDER_6_MND.spesifikasjon.identifikator,
-                Filtreringsregler.BARNETS_FØDSELSDATO_TRIGGER_IKKE_ETTERBETALING.spesifikasjon.identifikator)
-        ))
     }
 
     @Test
@@ -189,9 +144,6 @@ internal class FiltreringsreglerTest {
     @Test
     fun `Filtreringsreglene skal følge en fagbestemt rekkefølge`() {
         val fagbestemtFiltreringsregelrekkefølge = listOf(
-                Filtreringsregler.MOR_HAR_GYLDIG_FOEDSELSNUMMER,
-                Filtreringsregler.BARNET_HAR_GYLDIG_FOEDSELSNUMMER,
-                Filtreringsregler.BARNET_ER_UNDER_6_MND,
                 Filtreringsregler.BARNET_LEVER,
                 Filtreringsregler.MOR_LEVER,
                 Filtreringsregler.MOR_ER_OVER_18_AAR,

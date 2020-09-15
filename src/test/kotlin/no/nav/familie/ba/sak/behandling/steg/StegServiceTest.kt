@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.steg
 
+import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
@@ -20,6 +21,8 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderBehandlingResultatTilInnvilget
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedClient
+import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -34,6 +37,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 
 
 @SpringBootTest
@@ -65,7 +69,10 @@ class StegServiceTest(
         private val databaseCleanupService: DatabaseCleanupService,
 
         @Autowired
-        private val totrinnskontrollService: TotrinnskontrollService
+        private val totrinnskontrollService: TotrinnskontrollService,
+
+        @Autowired
+        private val infotrygdFeedClient: InfotrygdFeedClient
 ) {
 
     @BeforeAll
@@ -123,6 +130,10 @@ class StegServiceTest(
                 saksbehandlerId = "System",
                 personIdent = søkerFnr
         ))
+
+        verify(exactly = 1) {
+            infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(søkerFnr, LocalDate.now()))
+        }
 
         val behandlingEtterIverksetteVedtak = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI, behandlingEtterIverksetteVedtak.steg)
