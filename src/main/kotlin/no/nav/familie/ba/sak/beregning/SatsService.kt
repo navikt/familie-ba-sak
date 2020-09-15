@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import java.time.LocalDate
+import java.time.Period
 import java.time.YearMonth
 
 object SatsService {
@@ -63,6 +64,9 @@ object SatsService {
                     Periode(maxOf(oppfyltFom, seksårsdag.plusDays(1)), oppfyltTom)
                 }
             }
+
+    fun splittPeriodePå6Årsdag(seksårsdag: LocalDate, fom: LocalDate, tom: LocalDate): Pair<Periode?, Periode?> =
+            Pair(hentPeriodeUnder6år(seksårsdag, fom, tom), hentPeriodeOver6år(seksårsdag, fom, tom))
 
     fun hentDatoForSatsendring(satstype: SatsType,
                                oppdatertBeløp: Int): LocalDate? = satser.find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom

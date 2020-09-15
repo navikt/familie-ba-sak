@@ -310,7 +310,7 @@ class BeregningServiceTest {
         Assertions.assertEquals(1354, andelerBarn1[2].beløp)
 
         // Barn 1 - andre periode (etter fylte 6 år)
-        Assertions.assertEquals(barnFødselsdato.plusYears(6).førsteDagINesteMåned(), andelerBarn1[3].stønadFom)
+        Assertions.assertEquals(barnFødselsdato.plusYears(6).førsteDagIInneværendeMåned(), andelerBarn1[3].stønadFom)
         Assertions.assertEquals(periode3Tom.sisteDagIMåned(), andelerBarn1[3].stønadTom)
         Assertions.assertEquals(1054, andelerBarn1[3].beløp)
 

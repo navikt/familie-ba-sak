@@ -9,8 +9,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.beregning.SatsService.hentPeriodeOver6år
-import no.nav.familie.ba.sak.beregning.SatsService.hentPeriodeUnder6år
+import no.nav.familie.ba.sak.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -64,23 +63,27 @@ object TilkjentYtelseUtils {
                                 val oppfyltTomKommerFra18ÅrsVilkår =
                                         oppfyltTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
 
-                                val periodeUnder6År = hentPeriodeUnder6år(person.hentSeksårsdag(), oppfyltFom, oppfyltTom)
-                                val beløpsperioderMedTillegg = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
+
+                                val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(person.hentSeksårsdag(),
+                                                                                               oppfyltFom,
+                                                                                               oppfyltTom)
+
+                                val beløpsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.TILLEGG_ORBA,
-                                        stønadFraOgMed = settRiktigStønadFom(periodeUnder6År.fom),
-                                        stønadTilOgMed = settRiktigStønadTom(true,
-                                                                             periodeUnder6År.tom)
+                                        stønadFraOgMed = settRiktigStønadFom(fraOgMed = periodeUnder6År.fom),
+                                        stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = true,
+                                                                             tilOgMed = periodeUnder6År.tom)
                                 ) else emptyList()
 
-                                val periodeOver6år = hentPeriodeOver6år(person.hentSeksårsdag(), oppfyltFom, oppfyltTom)
-                                val beløpsperioderUtenTillegg = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
+                                val beløpsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
-                                        stønadFraOgMed = settRiktigStønadFom(periodeOver6år.fom),
-                                        stønadTilOgMed = settRiktigStønadTom(oppfyltTomKommerFra18ÅrsVilkår,
-                                                                             periodeOver6år.tom)
+                                        stønadFraOgMed = settRiktigStønadFom(skalStarteMånedenFør = periodeUnder6År != null,
+                                                                             fraOgMed = periodeOver6år.fom),
+                                        stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
+                                                                             tilOgMed = periodeOver6år.tom)
                                 ) else emptyList()
 
-                                val beløpsperioder = listOf(beløpsperioderMedTillegg, beløpsperioderUtenTillegg).flatten()
+                                val beløpsperioder = listOf(beløpsperioderFørFylte6År, beløpsperioderEtterFylte6År).flatten()
 
                                 beløpsperioder.map { beløpsperiode ->
                                     AndelTilkjentYtelse(
@@ -112,15 +115,18 @@ object TilkjentYtelseUtils {
     }
 
 
-    private fun settRiktigStønadFom(fraOgMed: LocalDate): YearMonth =
-            YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
+    private fun settRiktigStønadFom(skalStarteMånedenFør: Boolean = false, fraOgMed: LocalDate): YearMonth =
+            if (skalStarteMånedenFør)
+                YearMonth.from(fraOgMed.withDayOfMonth(1))
+            else
+                YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
 
-    private fun settRiktigStønadTom(skalAvsluttesMånedenFør: Boolean, tilOgMed: LocalDate): YearMonth {
-        return if (skalAvsluttesMånedenFør)
-            YearMonth.from(tilOgMed.minusMonths(1).sisteDagIMåned())
-        else
-            YearMonth.from(tilOgMed.sisteDagIMåned())
-    }
+    private fun settRiktigStønadTom(skalAvsluttesMånedenFør: Boolean, tilOgMed: LocalDate): YearMonth =
+            if (skalAvsluttesMånedenFør)
+                YearMonth.from(tilOgMed.minusMonths(1).sisteDagIMåned())
+            else
+                YearMonth.from(tilOgMed.sisteDagIMåned())
+
 
     fun hentBeregningOversikt(tilkjentYtelseForBehandling: TilkjentYtelse, personopplysningGrunnlag: PersonopplysningGrunnlag)
             : List<RestBeregningOversikt> {

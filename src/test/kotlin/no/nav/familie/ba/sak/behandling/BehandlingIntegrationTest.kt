@@ -337,7 +337,7 @@ class BehandlingIntegrationTest {
         Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
         Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![1].ytelseType)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![2].beløp)
-        Assertions.assertEquals(dato_2020_01_01.plusYears(5).førsteDagINesteMåned(), restVedtakBarnMap[barn1Fnr]!![2].stønadFom)
+        Assertions.assertEquals(dato_2020_01_01.plusYears(5).førsteDagIInneværendeMåned(), restVedtakBarnMap[barn1Fnr]!![2].stønadFom)
         Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!![2].stønadTom)
         Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![2].ytelseType)
 
@@ -347,7 +347,7 @@ class BehandlingIntegrationTest {
         Assertions.assertTrue(dato_2020_10_01 < restVedtakBarnMap[barn2Fnr]!![0].stønadTom)
         Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![0].ytelseType)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn2Fnr]!![1].beløp)
-        Assertions.assertEquals(dato_2020_01_01.plusYears(5).førsteDagINesteMåned(), restVedtakBarnMap[barn2Fnr]!![1].stønadFom)
+        Assertions.assertEquals(dato_2020_01_01.plusYears(5).førsteDagIInneværendeMåned(), restVedtakBarnMap[barn2Fnr]!![1].stønadFom)
         Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn2Fnr]!![1].stønadTom)
         Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![1].ytelseType)
     }
@@ -412,14 +412,14 @@ class BehandlingIntegrationTest {
         Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![1].beløp)
-        Assertions.assertEquals(dato_2021_01_01.plusYears(4).førsteDagINesteMåned(), restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
+        Assertions.assertEquals(dato_2021_01_01.plusYears(4).førsteDagIInneværendeMåned(), restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
 
         Assertions.assertEquals(1354, restVedtakBarnMap[barn3Fnr]!![0].beløp)
         Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn3Fnr]!![0].stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn3Fnr]!![0].stønadTom)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn3Fnr]!![1].beløp)
-        Assertions.assertEquals(dato_2021_01_01.plusYears(4).førsteDagINesteMåned(), restVedtakBarnMap[barn3Fnr]!![1].stønadFom)
+        Assertions.assertEquals(dato_2021_01_01.plusYears(4).førsteDagIInneværendeMåned(), restVedtakBarnMap[barn3Fnr]!![1].stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn3Fnr]!![1].stønadTom)
     }
 
