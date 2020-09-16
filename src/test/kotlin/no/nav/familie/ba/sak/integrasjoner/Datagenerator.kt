@@ -36,7 +36,7 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
 fun lagTestOppgave(): OpprettOppgave {
     return OpprettOppgave(ident = OppgaveIdent(ident = "test", type = IdentType.Aktør),
                           saksId = "123",
-                          tema = Tema.BAR,
+                          tema = no.nav.familie.kontrakter.felles.oppgave.Tema.BAR,
                           oppgavetype = Oppgavetype.BehandleSak,
                           fristFerdigstillelse = LocalDate.now(),
                           beskrivelse = "test",
