@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.familie.ba.sak.common.BearerTokenWithSTSFallbackClientInterceptor2
 import no.nav.familie.http.interceptor.*
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -28,7 +29,7 @@ import java.time.Duration
         BearerTokenClientInterceptor::class,
         MdcValuesPropagatingClientInterceptor::class,
         StsBearerTokenClientInterceptor::class,
-        BearerTokenWithSTSFallbackClientInterceptor::class)
+        BearerTokenWithSTSFallbackClientInterceptor2::class)
 class RestTemplateConfig(
         private val environment: Environment
 ) {
@@ -64,7 +65,7 @@ class RestTemplateConfig(
             }
 
     @Bean("jwt-sts")
-    fun restTemplateJwtBearerFallbackSts(bearerTokenWithSTSFallbackClientInterceptor: BearerTokenWithSTSFallbackClientInterceptor,
+    fun restTemplateJwtBearerFallbackSts(bearerTokenWithSTSFallbackClientInterceptor: BearerTokenWithSTSFallbackClientInterceptor2,
                                          consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
 
         return if (trengerProxy()) {
