@@ -73,14 +73,14 @@ class RestTemplateConfig(
                     .interceptors(consumerIdClientInterceptor,
                                   bearerTokenWithSTSFallbackClientInterceptor,
                                   MdcValuesPropagatingClientInterceptor())
-                    .requestFactory(this::requestFactory)
+                    .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
                     .build()
         } else {
             RestTemplateBuilder()
                     .interceptors(consumerIdClientInterceptor,
                                   bearerTokenWithSTSFallbackClientInterceptor,
                                   MdcValuesPropagatingClientInterceptor())
-                    .requestFactory(this::requestFactory)
+                    .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
                     .build()
         }
     }
