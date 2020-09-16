@@ -266,7 +266,7 @@ class StegService(
                                              "steg",
                                              it.stegType().name,
                                              "beskrivelse",
-                                             it.stegType().rekkefølge.toString() + it.stegType().displayName())
+                                             it.stegType().rekkefølge.toString() + " " + it.stegType().displayName())
         }.toMap()
     }
 
