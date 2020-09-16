@@ -26,10 +26,10 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
             Resultat.values().forEach { resultat ->
                 filtreringsreglerMetrics[it.spesifikasjon.identifikator + resultat.name] =
                         Metrics.counter("familie.ba.sak.filtreringsregler.utfall",
-                                        "resultat",
-                                        resultat.name,
                                         "beskrivelse",
-                                        it.spesifikasjon.beskrivelse)
+                                        it.spesifikasjon.beskrivelse,
+                                        "resultat",
+                                        resultat.name)
             }
         }
     }
