@@ -90,10 +90,15 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
             else -> {
                 val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
 
+                val søker = persongrunnlagService.hentSøker(behandling)
+                val barna = persongrunnlagService.hentBarna(behandling)
 
-                behandlingResultat.personResultater.first().vilkårResultater.forEach{it.} .vilkårResultater.filter { it.it.resultat == Resultat.NEI}
+                val personResultatMor = behandlingResultat.personResultater.filter{ it.personIdent == søker.personIdent.ident }.first()
+                val personResultatBarna = behandlingResultat.personResultater.filter{ s -> barna.any{ barn -> barn.personIdent.ident == s.personIdent} }
 
+                personResultatMor.
                 Vilkår.BOSATT_I_RIKET.
+
 
 
                 Vilkår.values().filter{behandlingResultat.}.firstOrNull()behandlingResultat.personResultater.forEach()
