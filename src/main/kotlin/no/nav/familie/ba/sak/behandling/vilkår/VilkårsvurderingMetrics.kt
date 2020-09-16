@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component
 @Component
 class VilkårsvurderingMetrics {
 
-    val vilkårsvurderingUtfall = mutableMapOf<String, Counter>()
+    lateinit var vilkårsvurderingUtfall: Map<String, Counter>
+    lateinit var vilkårsvurderingFørstUtfall: Map<String, Counter>
 
     val personTypeToDisplayedType = mapOf(
             PersonType.SØKER to "Mor",
@@ -26,7 +27,16 @@ class VilkårsvurderingMetrics {
                 BehandlingOpprinnelse.values().forEach { behandlingOpprinnelse ->
                     PersonType.values().forEach { personType ->
                         if (it.parterDetteGjelderFor.contains(personType)) {
-                            genererMetrikkMap(it.spesifikasjon, personType, resultat, behandlingOpprinnelse)
+                            vilkårsvurderingUtfall = genererMetrikkMap(it.spesifikasjon,
+                                                                       personType,
+                                                                       resultat,
+                                                                       behandlingOpprinnelse,
+                                                                       "familie.ba.behandling.vilkaarsvurdering")
+                            vilkårsvurderingFørstUtfall = genererMetrikkMap(it.spesifikasjon,
+                                                                       personType,
+                                                                       resultat,
+                                                                       behandlingOpprinnelse,
+                                                                       "familie.ba.behandling.vilkaarsvurdering.foerstutfall")
                         }
                     }
                 }
@@ -49,9 +59,11 @@ class VilkårsvurderingMetrics {
     private fun genererMetrikkMap(spesifikasjon: Spesifikasjon<Fakta>,
                                   personType: PersonType,
                                   resultat: Resultat,
-                                  behandlingOpprinnelse: BehandlingOpprinnelse) {
+                                  behandlingOpprinnelse: BehandlingOpprinnelse,
+                                  navn: String): MutableMap<String, Counter> {
+        val counterMap = mutableMapOf<String, Counter>()
         if (spesifikasjon.children.isEmpty()) {
-            val counter = Metrics.counter("familie.ba.behandling.vilkaarsvurdering",
+            val counter = Metrics.counter(navn,
                                           "vilkaar",
                                           spesifikasjon.identifikator,
                                           "personType",
@@ -63,11 +75,18 @@ class VilkårsvurderingMetrics {
                                           "beskrivelse",
                                           spesifikasjon.beskrivelse)
 
-            vilkårsvurderingUtfall[vilkårNøkkel(spesifikasjon.identifikator, personType, resultat, behandlingOpprinnelse)] =
+            counterMap[vilkårNøkkel(spesifikasjon.identifikator, personType, resultat, behandlingOpprinnelse)] =
                     counter
         } else {
-            spesifikasjon.children.forEach { genererMetrikkMap(it, personType, resultat, behandlingOpprinnelse) }
+            spesifikasjon.children.forEach {
+                counterMap.putAll(genererMetrikkMap(it,
+                                                    personType,
+                                                    resultat,
+                                                    behandlingOpprinnelse, navn))
+            }
         }
+
+        return counterMap
     }
 
     fun vilkårNøkkel(vilkår: String,
@@ -86,8 +105,7 @@ class VilkårsvurderingMetrics {
         }
     }
 
-    companion object {
-
+    companion object{
         val lovligOppholdAvslagÅrsaker = mutableMapOf<String, Counter>()
 
         fun økTellerForLovligOpphold(årsak: LovligOppholdAvslagÅrsaker, personType: PersonType) {
@@ -109,6 +127,7 @@ enum class LovligOppholdAvslagÅrsaker(val lovligOppholdStatsborger: LovligOppho
                                                        "Far har ikke et løpende arbeidsforhold i Norge"),
     EØS_MOR_HAR_IKKE_HATT_ARBEIDSFORHOLD_I_DE_5_SISTE_ÅRENE(LovligOppholdStatsborger.EØS,
                                                             "Mor har ikke hatt arbeidsforhold i de 5 siste årene"),
-    TREDJELANDSBORGER_FALLER_UT(LovligOppholdStatsborger.TREDJELANDSBORGER, "Årsak til at søker faller ut på lovlig opphold vilkår – tredjelandsborger"),
+    TREDJELANDSBORGER_FALLER_UT(LovligOppholdStatsborger.TREDJELANDSBORGER,
+                                "Årsak til at søker faller ut på lovlig opphold vilkår – tredjelandsborger"),
     STATSLØS_FALLER_UT(LovligOppholdStatsborger.STATSLØS, "Årsak til at søker faller ut på lovlig opphold vilkår – statsløs"),
 }

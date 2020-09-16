@@ -20,6 +20,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
                                                  private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
+    val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
 
     init {
         Filtreringsregler.values().map {
@@ -30,6 +31,11 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
                                         it.spesifikasjon.beskrivelse,
                                         "resultat",
                                         resultat.name)
+
+                filtreringsreglerFørsteUtfallMetrics[it.spesifikasjon.identifikator] =
+                        Metrics.counter("familie.ba.sak.filtreringsregler.førsteutfall",
+                                        "beskrivelse",
+                                        it.spesifikasjon.beskrivelse)
             }
         }
     }
@@ -49,7 +55,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
 
         val restenAvBarna =
                 personopplysningerService.hentPersoninfoMedRelasjoner(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
-                    it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && barnaFraHendelse.none{barn-> barn.personIdent.ident == it.personIdent.id}
+                    it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }
                 }.map {
                     personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
                 }
@@ -61,17 +67,29 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
         return Fakta(mor, barnaFraHendelse, restenAvBarna, morLever, barnLever, morHarVerge)
     }
 
+    private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean{
+        if(evaluering.resultat == Resultat.NEI && førsteutfall){
+            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]?.increment()
+            return false
+        }
+        return førsteutfall
+    }
+
     private fun oppdaterMetrikker(evaluering: Evaluering) {
+        var førsteutfall = true
         if (evaluering.children.isEmpty()) {
             filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]?.increment()
+            førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
         } else {
             evaluering.children.forEach {
                 filtreringsreglerMetrics[it.identifikator + it.resultat.name]?.increment()
+                førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
             }
         }
     }
 
     companion object {
+
         val LOG: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }

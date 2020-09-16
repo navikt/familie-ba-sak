@@ -175,6 +175,10 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         taskRepository.save(nyTask)
     }
 
+    private fun økTellereForFørsteUtfallAvVilkår(){
+
+    }
+
     private fun fødselshendelseSkalRullesTilbake(): Boolean =
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
 }
