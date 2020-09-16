@@ -8,7 +8,8 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -202,27 +203,30 @@ class StegService(
                             behandlingSteg: BehandlingSteg<*>,
                             utførendeSteg: () -> StegType): Behandling {
         try {
-            if (behandling.steg == sisteSteg) {
-                error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
-            }
-
-            if (behandlingSteg.stegType().kommerEtter(behandling.steg)) {
-                error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${behandlingSteg.stegType()
-                        .displayName()}'," +
-                      " men behandlingen er på steg '${behandling.steg.displayName()}'")
-            }
-
-            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
-                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
-            }
-
             val behandlerRolle =
                     SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minByOrNull { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
-                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${behandlingSteg.stegType()
-                        .displayName()} pga manglende rolle.")
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${
+                    behandlingSteg.stegType()
+                            .displayName()
+                } pga manglende rolle.")
+            }
+
+            if (behandling.steg == sisteSteg) {
+                error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
+            }
+
+            if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType().kommerEtter(behandling.steg)) {
+                error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
+                    behandlingSteg.stegType()
+                            .displayName()
+                }', men behandlingen er på steg '${behandling.steg.displayName()}'")
+            }
+
+            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
+                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
 
             behandlingSteg.preValiderSteg(behandling, this)
@@ -267,6 +271,7 @@ class StegService(
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
