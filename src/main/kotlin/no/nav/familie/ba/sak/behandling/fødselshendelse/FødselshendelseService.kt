@@ -43,7 +43,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val vilkårsvurderingMetrics: VilkårsvurderingMetrics) {
 
     val finnesLøpendeSakIInfotrygd: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
-    val finnesIkkeLøpendeSakIInfotrygd: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
+    val finnesIkkeLøpendeSakIInfotrygd: Counter =
+            Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
     val stansetIAutomatiskFiltreringCounter = Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
     val stansetIAutomatiskVilkårsvurderingCounter =
             Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
@@ -78,12 +79,13 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
         val evalueringAvFiltrering =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter.toSet())
+                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
+                                                                                    nyBehandling.barnasIdenter.toSet())
         var resultatAvVilkårsvurdering: BehandlingResultatType? = null
 
         if (evalueringAvFiltrering.resultat == Resultat.JA) {
             resultatAvVilkårsvurdering = stegService.evaluerVilkårForFødselshendelse(behandling, nyBehandling.søkersIdent)
-        }
+        } 
 
         when (resultatAvVilkårsvurdering) {
             null -> stansetIAutomatiskFiltreringCounter.increment()
@@ -110,18 +112,18 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
     }
 
-    private fun erVilkårUtfall(behandlingResultat: BehandlingResultat, personType: PersonType, vilkår: Vilkår): Boolean{
-        val personer = if( personType == PersonType.SØKER){
+    private fun erVilkårUtfall(behandlingResultat: BehandlingResultat, personType: PersonType, vilkår: Vilkår): Boolean {
+        val personer = if (personType == PersonType.SØKER) {
             listOf(persongrunnlagService.hentSøker(behandlingResultat.behandling))
-        } else{
+        } else {
             persongrunnlagService.hentBarna(behandlingResultat.behandling)
         }
 
-        return behandlingResultat?.personResultater?.find{
-            personer.map{it?.personIdent}.contains(it.personIdent) && it.vilkårResultater.find{
-                vilkårResusltat -> vilkårResusltat.vilkårType == Vilkår.BOSATT_I_RIKET && vilkårResusltat.resultat == Resultat.NEI
+        return behandlingResultat?.personResultater?.find {
+            personer.map { it?.personIdent }.contains(it.personIdent) && it.vilkårResultater.find { vilkårResusltat ->
+                vilkårResusltat.vilkårType == Vilkår.BOSATT_I_RIKET && vilkårResusltat.resultat == Resultat.NEI
             } != null
-        }!= null
+        } != null
     }
 
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
@@ -141,7 +143,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
 
         persongrunnlagService.hentBarna(behandling).forEach { barn ->
-            val vilkårsresultat = behandlingResultat?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
+            val vilkårsresultat =
+                    behandlingResultat?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.NEI) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er over 18 år."
@@ -190,10 +193,10 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         taskRepository.save(nyTask)
     }
 
-    private fun økTellereForStansetIAutomatiskVilkårsvurdering(behandling: Behandling){
+    private fun økTellereForStansetIAutomatiskVilkårsvurdering(behandling: Behandling) {
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)!!
 
-        val vilkårList= listOf(
+        val orderedVilkårList = listOf(
                 //Mor bosatt i riket
                 Pair(PersonType.SØKER, Vilkår.BOSATT_I_RIKET),
                 //Mor har lovlig opphold
@@ -210,18 +213,12 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                 Pair(PersonType.BARN, Vilkår.LOVLIG_OPPHOLD),
         )
 
-        vilkårList.forEach{
-            if(erVilkårUtfall(behandlingResultat, it.first, it.second)){
-                økTellereForFørsteUtfallAvVilkår(behandlingResultat, it.first, it.second)
-                return forEach@ Unit
-            }
+        orderedVilkårList.find { erVilkårUtfall(behandlingResultat, it.first, it.second) }?.let {
+            vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(it.second, it.first)
         }
 
         stansetIAutomatiskVilkårsvurderingCounter.increment()
     }
-
-    private fun økTellereForFørsteUtfallAvVilkår(behandlingResultat: BehandlingResultat, personType: PersonType, vilkår: Vilkår)
-            : Boolean= erVilkårUtfall(behandlingResultat, personType, vilkår)
 
     private fun fødselshendelseSkalRullesTilbake(): Boolean =
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
