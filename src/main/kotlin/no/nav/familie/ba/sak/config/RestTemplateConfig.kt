@@ -143,4 +143,6 @@ class RestTemplateConfig(
             listOf("e2e", "dev", "postgres").contains(it.trim(' '))
         }
     }
+
+
 }
