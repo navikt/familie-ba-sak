@@ -20,10 +20,13 @@ import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.junit.Assert
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class OppgaveBeskrivelseTest {
+
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
@@ -35,6 +38,7 @@ class OppgaveBeskrivelseTest {
     val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
     val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     val behandlingRepositoryMock = mockk<BehandlingRepository>()
+    val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
                                                         featureToggleServiceMock,
@@ -45,7 +49,14 @@ class OppgaveBeskrivelseTest {
                                                         personopplysningerServiceMock,
                                                         behandlingResultatRepositoryMock,
                                                         persongrunnlagServiceMock,
-                                                        behandlingRepositoryMock)
+                                                        behandlingRepositoryMock,
+                                                        vilkårsvurderingMetricsMock)
+
+    @BeforeEach
+    fun initMocks(){
+        every {vilkårsvurderingMetricsMock.
+        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} returns Unit
+    }
 
     @Test
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere begrunnelse av første regel som feilet`() {
@@ -78,47 +89,62 @@ class OppgaveBeskrivelseTest {
     }
 
     @Test
-    fun `hentBegrunnelseFraVilkårsvurdering() skal returnere riktig beskrivelse basert på vilkårsrekkefølgen`(){
-        every{behandlingRepositoryMock.finnBehandling(any())} returns behandling
-        every{persongrunnlagServiceMock.hentSøker(any())} returns søker
-        every{persongrunnlagServiceMock.hentBarna(any())} returns listOf(barn)
-        every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
+    fun `hentBegrunnelseFraVilkårsvurdering() skal returnere riktig beskrivelse basert på vilkårsrekkefølgen`() {
+        every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling
+        every { persongrunnlagServiceMock.hentSøker(any()) } returns søker
+        every { persongrunnlagServiceMock.hentBarna(any()) } returns listOf(barn)
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = false, lovligOpphold = false),
-                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false, borMedSøker = true, giftPartnerskap = true, bosattIRiket = true)
+                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false,
+                                                        borMedSøker = true,
+                                                        giftPartnerskap = true,
+                                                        bosattIRiket = true)
         )
         val beskrivelse0 = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
         Assert.assertEquals("Mor er ikke bosatt i riket.", beskrivelse0)
 
-        every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = true, lovligOpphold = false),
-                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false, borMedSøker = true, giftPartnerskap = true, bosattIRiket = true)
+                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false,
+                                                        borMedSøker = true,
+                                                        giftPartnerskap = true,
+                                                        bosattIRiket = true)
         )
         val beskrivelse1 = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
         Assert.assertEquals("Begrunnelse fra vilkårsvurdering", beskrivelse1)
 
-        every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = true, lovligOpphold = true),
-                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false, borMedSøker = true, giftPartnerskap = false, bosattIRiket = true)
+                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false,
+                                                        borMedSøker = true,
+                                                        giftPartnerskap = false,
+                                                        bosattIRiket = true)
         )
         val beskrivelse2 = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
         Assert.assertTrue(beskrivelse2!!.contains("er over 18 år."))
 
-        every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = true, lovligOpphold = true),
-                barnasVilkår = TestFaktaForBarnasVilkår(under18År = true, borMedSøker = false, giftPartnerskap = false, bosattIRiket = true)
+                barnasVilkår = TestFaktaForBarnasVilkår(under18År = true,
+                                                        borMedSøker = false,
+                                                        giftPartnerskap = false,
+                                                        bosattIRiket = true)
         )
         val beskrivelse3 = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
         Assert.assertTrue(beskrivelse3!!.contains("er ikke bosatt med mor."))
     }
 
     @Test
-    fun `hentBegrunnelseFraVilkårsvurdering() skal returnere null dersom ingen regler i vilkårsvurderingen feiler`(){
-        every{behandlingRepositoryMock.finnBehandling(any())} returns behandling
-        every{persongrunnlagServiceMock.hentSøker(any())} returns søker
-        every{persongrunnlagServiceMock.hentBarna(any())} returns listOf(barn)
-        every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
+    fun `hentBegrunnelseFraVilkårsvurdering() skal returnere null dersom ingen regler i vilkårsvurderingen feiler`() {
+        every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling
+        every { persongrunnlagServiceMock.hentSøker(any()) } returns søker
+        every { persongrunnlagServiceMock.hentBarna(any()) } returns listOf(barn)
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = true, lovligOpphold = true),
-                barnasVilkår = TestFaktaForBarnasVilkår(under18År = true, borMedSøker = true, giftPartnerskap = true, bosattIRiket = true)
+                barnasVilkår = TestFaktaForBarnasVilkår(under18År = true,
+                                                        borMedSøker = true,
+                                                        giftPartnerskap = true,
+                                                        bosattIRiket = true)
         )
         val beskrivelse = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
         Assert.assertNull(beskrivelse)

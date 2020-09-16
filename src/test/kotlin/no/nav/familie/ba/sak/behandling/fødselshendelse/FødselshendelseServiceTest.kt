@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class FødselshendelseServiceTest {
+
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
@@ -42,6 +44,7 @@ class FødselshendelseServiceTest {
     val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
     val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     val behandlingRepositoryMock = mockk<BehandlingRepository>()
+    val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
 
     val søkerFnr = "12345678910"
     val barn1Fnr = "12345678911"
@@ -57,7 +60,9 @@ class FødselshendelseServiceTest {
                                                         personopplysningerServiceMock,
                                                         behandlingResultatRepositoryMock,
                                                         persongrunnlagServiceMock,
-                                                        behandlingRepositoryMock)
+                                                        behandlingRepositoryMock,
+                                                        vilkårsvurderingMetricsMock
+    )
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer false`() {
@@ -236,10 +241,15 @@ class FødselshendelseServiceTest {
 
         mockkObject(OpprettOppgaveTask.Companion)
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
+
+        every {vilkårsvurderingMetricsMock.
+        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} returns Unit
     }
 
     companion object {
+
         val fødselshendelseBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
-        val fødselshendelseFlerlingerBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
+        val fødselshendelseFlerlingerBehandling =
+                NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
     }
 }

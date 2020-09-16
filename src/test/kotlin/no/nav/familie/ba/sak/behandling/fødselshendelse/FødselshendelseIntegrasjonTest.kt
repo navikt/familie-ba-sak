@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
@@ -79,7 +80,7 @@ class FødselshendelseIntegrasjonTest(
         private val fagsakRepository: FagsakRepository,
 
         @Autowired
-        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
     val now = LocalDate.now()
@@ -87,6 +88,7 @@ class FødselshendelseIntegrasjonTest(
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     val featureToggleServiceMock = mockk<FeatureToggleService>()
+    val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
 
 
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
@@ -99,7 +101,8 @@ class FødselshendelseIntegrasjonTest(
                                                         personopplysningerService,
                                                         behandlingResultatRepository,
                                                         persongrunnlagService,
-                                                        behandlingRepository)
+                                                        behandlingRepository,
+                                                        vilkårsvurderingMetricsMock)
 
     @Test
     fun `Fødselshendelse med flere barn med oppfylt vilkårsvurdering skal håndteres riktig`() {
@@ -200,6 +203,8 @@ class FødselshendelseIntegrasjonTest(
     fun initMocks() {
         every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } returns Unit
         every { featureToggleServiceMock.isEnabled(any()) } returns false
+        every {vilkårsvurderingMetricsMock.
+        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} returns Unit
     }
 }
 
