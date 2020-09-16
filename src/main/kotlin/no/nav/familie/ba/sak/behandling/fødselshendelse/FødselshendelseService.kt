@@ -121,7 +121,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         return behandlingResultat?.personResultater?.find {
             personer.map { it?.personIdent }.contains(it.personIdent) && it.vilkårResultater.find { vilkårResusltat ->
-                vilkårResusltat.vilkårType == Vilkår.BOSATT_I_RIKET && vilkårResusltat.resultat == Resultat.NEI
+                vilkårResusltat.vilkårType == vilkår && vilkårResusltat.resultat == Resultat.NEI
             } != null
         } != null
     }
