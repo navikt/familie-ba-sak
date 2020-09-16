@@ -67,12 +67,22 @@ class RestTemplateConfig(
     fun restTemplateJwtBearerFallbackSts(bearerTokenWithSTSFallbackClientInterceptor: BearerTokenWithSTSFallbackClientInterceptor,
                                          consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
 
-        return RestTemplateBuilder()
-                .interceptors(consumerIdClientInterceptor,
-                              bearerTokenWithSTSFallbackClientInterceptor,
-                              MdcValuesPropagatingClientInterceptor())
-                .requestFactory(this::requestFactory)
-                .build()
+        return if (trengerProxy()) {
+            RestTemplateBuilder()
+                    .additionalCustomizers(NaisProxyCustomizer())
+                    .interceptors(consumerIdClientInterceptor,
+                                  bearerTokenWithSTSFallbackClientInterceptor,
+                                  MdcValuesPropagatingClientInterceptor())
+                    .requestFactory(this::requestFactory)
+                    .build()
+        } else {
+            RestTemplateBuilder()
+                    .interceptors(consumerIdClientInterceptor,
+                                  bearerTokenWithSTSFallbackClientInterceptor,
+                                  MdcValuesPropagatingClientInterceptor())
+                    .requestFactory(this::requestFactory)
+                    .build()
+        }
     }
 
     @Bean("jwtBearer")
