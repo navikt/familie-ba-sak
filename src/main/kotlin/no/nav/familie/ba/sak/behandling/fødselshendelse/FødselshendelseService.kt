@@ -87,7 +87,19 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         when (resultatAvVilkårsvurdering) {
             null -> stansetIAutomatiskFiltreringCounter.increment()
             BehandlingResultatType.INNVILGET -> passertFiltreringOgVilkårsvurderingCounter.increment()
-            else -> stansetIAutomatiskVilkårsvurderingCounter.increment()
+            else -> {
+                val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
+
+
+                behandlingResultat.personResultater.first().vilkårResultater.forEach{it.} .vilkårResultater.filter { it.it.resultat == Resultat.NEI}
+
+                Vilkår.BOSATT_I_RIKET.
+
+
+                Vilkår.values().filter{behandlingResultat.}.firstOrNull()behandlingResultat.personResultater.forEach()
+
+                stansetIAutomatiskVilkårsvurderingCounter.increment()
+            }
         }
 
         if (fødselshendelseSkalRullesTilbake()) {
