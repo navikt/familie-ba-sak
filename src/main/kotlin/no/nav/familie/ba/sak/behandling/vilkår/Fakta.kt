@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.Period
 
 data class Fakta(val personForVurdering: Person, val behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL) {
-    val alder = Period.between(personForVurdering.fødselsdato, LocalDate.now()).years
+    val alder = personForVurdering.hentAlder()
     fun toJson(): String =
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
 }

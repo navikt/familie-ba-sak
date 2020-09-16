@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.beregning.SatsService.splittPeriodePå6Årsdag
+import no.nav.familie.ba.sak.beregning.SatsService.BeløpPeriode
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -61,12 +63,30 @@ object TilkjentYtelseUtils {
                                         minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
                                 val oppfyltTomKommerFra18ÅrsVilkår =
                                         oppfyltTom == periodeResultatBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.periodeTom
-                                val beløpsperioder = SatsService.hentGyldigSatsFor(
+
+
+                                val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(person.hentSeksårsdag(),
+                                                                                               oppfyltFom,
+                                                                                               oppfyltTom)
+
+                                val beløpsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
+                                        satstype = SatsType.TILLEGG_ORBA,
+                                        stønadFraOgMed = settRiktigStønadFom(fraOgMed = periodeUnder6År.fom),
+                                        stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = true,
+                                                                             tilOgMed = periodeUnder6År.tom)
+                                ) else emptyList()
+
+                                val beløpsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
-                                        stønadFraOgMed = settRiktigStønadFom(oppfyltFom),
-                                        stønadTilOgMed = settRiktigStønadTom(oppfyltTomKommerFra18ÅrsVilkår,
-                                                                             oppfyltTom)
-                                )
+                                        stønadFraOgMed = settRiktigStønadFom(skalStarteMånedenFør = periodeUnder6År != null,
+                                                                             fraOgMed = periodeOver6år.fom),
+                                        stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
+                                                                             tilOgMed = periodeOver6år.tom)
+                                ) else emptyList()
+
+                                val beløpsperioder =
+                                        listOf(beløpsperioderFørFylte6År, beløpsperioderEtterFylte6År).flatten()
+                                                .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
 
                                 beløpsperioder.map { beløpsperiode ->
                                     AndelTilkjentYtelse(
@@ -98,15 +118,18 @@ object TilkjentYtelseUtils {
     }
 
 
-    private fun settRiktigStønadFom(fraOgMed: LocalDate): YearMonth =
-            YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
+    private fun settRiktigStønadFom(skalStarteMånedenFør: Boolean = false, fraOgMed: LocalDate): YearMonth =
+            if (skalStarteMånedenFør)
+                YearMonth.from(fraOgMed.withDayOfMonth(1))
+            else
+                YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
 
-    private fun settRiktigStønadTom(erBarnetrygdTil18ÅrsDag: Boolean, tilOgMed: LocalDate): YearMonth {
-        return if (erBarnetrygdTil18ÅrsDag)
-            YearMonth.from(tilOgMed.minusMonths(1).sisteDagIMåned())
-        else
-            YearMonth.from(tilOgMed.sisteDagIMåned())
-    }
+    private fun settRiktigStønadTom(skalAvsluttesMånedenFør: Boolean, tilOgMed: LocalDate): YearMonth =
+            if (skalAvsluttesMånedenFør)
+                YearMonth.from(tilOgMed.minusMonths(1).sisteDagIMåned())
+            else
+                YearMonth.from(tilOgMed.sisteDagIMåned())
+
 
     fun hentBeregningOversikt(tilkjentYtelseForBehandling: TilkjentYtelse, personopplysningGrunnlag: PersonopplysningGrunnlag)
             : List<RestBeregningOversikt> {
@@ -139,8 +162,9 @@ object TilkjentYtelseUtils {
                 antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
                 sakstype = behandling.kategori,
                 beregningDetaljer = andelerForSegment.map { andel ->
-                    val personForAndel = personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
-                                         ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+                    val personForAndel =
+                            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                            ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                     RestBeregningDetalj(
                             person = RestPerson(
                                     type = personForAndel.type,
@@ -171,4 +195,16 @@ private fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): Lo
     }
 
     return minOf(periodeTomBarn ?: LocalDate.MAX, periodeTomSoker ?: LocalDate.MAX)
+}
+
+private fun slåSammenEtterfølgendePerioderMedSammeBeløp(sammenlagt: MutableList<BeløpPeriode>,
+                                                        neste: BeløpPeriode): MutableList<BeløpPeriode> {
+    if (sammenlagt.isNotEmpty() && sammenlagt.last().beløp == neste.beløp) {
+        val forrigeOgNeste = BeløpPeriode(neste.beløp, sammenlagt.last().fraOgMed, neste.tilOgMed)
+        sammenlagt.removeLast()
+        sammenlagt.add(forrigeOgNeste)
+    } else {
+        sammenlagt.add(neste)
+    }
+    return sammenlagt
 }

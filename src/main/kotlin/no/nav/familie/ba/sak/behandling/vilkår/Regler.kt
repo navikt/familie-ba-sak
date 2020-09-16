@@ -75,26 +75,26 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
     val nåværendeMedlemskap = finnNåværendeMedlemskap(fakta.personForVurdering.statsborgerskap)
 
     return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
-        Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
-        //TODO: Implementeres av TEA-1532
-        Medlemskap.EØS -> {
-            sjekkLovligOppholdForEØSBorger(fakta)
-        }
-        Medlemskap.TREDJELANDSBORGER -> {
-            val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-            if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.TREDJELANDSBORGER_FALLER_UT, fakta.personForVurdering.type)
-                Evaluering.nei("${fakta.personForVurdering.type} har ikke lovlig opphold")
-            } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
-        }
-        Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
-            val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
-            if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                økTellerForLovligOpphold(LovligOppholdAvslagÅrsaker.STATSLØS_FALLER_UT, fakta.personForVurdering.type)
-                Evaluering.nei("${fakta.personForVurdering.type} er statsløs eller mangler statsborgerskap, og har ikke lovlig opphold")
-            } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
-        }
-        else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
+            Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
+            //TODO: Implementeres av TEA-1532
+            Medlemskap.EØS -> {
+                sjekkLovligOppholdForEØSBorger(fakta)
+            }
+            Medlemskap.TREDJELANDSBORGER -> {
+                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
+                    økTellerForLovligOpphold(LovligOppholdUtfall.TREDJELANDSBORGER)
+                    Evaluering.nei(LovligOppholdUtfall.TREDJELANDSBORGER.begrunnelseForOppgave)
+                } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
+            }
+            Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
+                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
+                    økTellerForLovligOpphold(LovligOppholdUtfall.STATSLØS)
+                    Evaluering.nei(LovligOppholdUtfall.STATSLØS.begrunnelseForOppgave)
+                } else Evaluering.ja("Er statsløs eller mangler statsborgerskap med lovlig opphold")
+            }
+            else -> Evaluering.kanskje("Kan ikke avgjøre om personen har lovlig opphold.")
     }
 }
 
@@ -135,7 +135,7 @@ fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().
 
 private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
     return if (personHarLøpendeArbeidsforhold(fakta.personForVurdering)) {
-        Evaluering.ja("Mor er EØS-borger og har et løpende arbeidsforhold i Norge.")
+        Evaluering.ja("Mor er EØS-borger, men har et løpende arbeidsforhold i Norge.")
     } else {
         if (annenForelderRegistrert(fakta)) {
             if (annenForelderBorMedMor(fakta)) {
@@ -144,15 +144,21 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
                         contains(Medlemskap.NORDEN) -> Evaluering.ja("Annen forelder er norsk eller nordisk statsborger.")
                         contains(Medlemskap.EØS) -> {
                             if (personHarLøpendeArbeidsforhold(hentAnnenForelder(fakta).first())) {
-                                Evaluering.ja("Annen forelder er fra EØS og har et løpende arbeidsforhold i Norge.")
+                                Evaluering.ja("Annen forelder er fra EØS, men har et løpende arbeidsforhold i Norge.")
                             } else {
                                 sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta,
-                                                                                  "Far er ikke registrert med arbeidsforhold i Norge.",
-                                                                                  LovligOppholdAvslagÅrsaker.EØS_FAR_HAR_IKKE_ET_LØPENDE_ARBEIDSFORHOLD_I_NORGE)
+                                        LovligOppholdUtfall.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                                        LovligOppholdUtfall.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
                             }
                         }
-                        contains(Medlemskap.TREDJELANDSBORGER) -> Evaluering.nei("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Annen forelder er tredjelandsborger.")
-                        contains(Medlemskap.UKJENT) -> Evaluering.nei("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Annen forelder er statsløs.")
+                        contains(Medlemskap.TREDJELANDSBORGER) -> {
+                            økTellerForLovligOpphold(LovligOppholdUtfall.EØS_MEDFORELDER_TREDJELANDSBORGER)
+                            Evaluering.nei(LovligOppholdUtfall.EØS_MEDFORELDER_TREDJELANDSBORGER.begrunnelseForOppgave)
+                        }
+                        contains(Medlemskap.UKJENT) -> {
+                            økTellerForLovligOpphold(LovligOppholdUtfall.EØS_MEDFORELDER_STATSLØS)
+                            Evaluering.nei(LovligOppholdUtfall.EØS_MEDFORELDER_STATSLØS.begrunnelseForOppgave)
+                        }
                         else -> {
                             Evaluering.nei("Statsborgerskap for annen forelder kan ikke avgjøres.")
                         }
@@ -160,31 +166,32 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
                 }
             } else {
                 sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta,
-                                                                  "Barnets mor og medforelder har ikke felles bostedsadresse. ",
-                                                                  LovligOppholdAvslagÅrsaker.EØS_MOR_OG_FAR_IKKE_SAMME_BOSTEDSADRESSE)
+                        LovligOppholdUtfall.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                        LovligOppholdUtfall.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
             }
         } else {
             sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta,
-                                                              "Det er ikke registrert far på barnet.",
-                                                              LovligOppholdAvslagÅrsaker.EØS_IKKE_REGISTRERT_FAR_PÅ_BARNET)
+                    LovligOppholdUtfall.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                    LovligOppholdUtfall.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+            )
         }
     }
 }
 
 private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta,
-                                                              ekstraBegrunnelse: String,
-                                                              ekstrabegynnelseMetrikkel: LovligOppholdAvslagÅrsaker): Evaluering {
+                                                              arbeidsforholdAvslag: LovligOppholdUtfall,
+                                                              bosettelseAvslag: LovligOppholdUtfall)
+        : Evaluering {
     return if (morHarBoddINorgeSiste5År(fakta)) {
         if (morHarJobbetINorgeSiste5År(fakta)) {
-            Evaluering.ja("Mor har bodd i Norge i mer enn 5 år og jobbet i Norge siste 5 år.")
+            Evaluering.ja("Mor har bodd og jobbet i Norge siste 5 år.")
         } else {
-            // TODO: Kombinasjonen ikk bosatt i norge siste 5år og ikke jobbet siste fem år en ikke muligkombinasjon
-            // Anne og Birgitte skall diskutere hvordan denne metrikkelen skal telles.
-            Evaluering.nei("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. ${ekstraBegrunnelse} Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.")
+            økTellerForLovligOpphold(arbeidsforholdAvslag)
+            Evaluering.nei(arbeidsforholdAvslag.begrunnelseForOppgave)
         }
     } else {
-        økTellerForLovligOpphold(ekstrabegynnelseMetrikkel, PersonType.SØKER)
-        Evaluering.nei("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. ${ekstraBegrunnelse} Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.")
+        økTellerForLovligOpphold(bosettelseAvslag)
+        Evaluering.nei(bosettelseAvslag.begrunnelseForOppgave)
     }
 }
 
@@ -267,4 +274,47 @@ private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEnti
             maksimumAvstand
         }
     }
+}
+
+enum class LovligOppholdUtfall(val begrunnelseForOppgave: String, val begrunnelseForMetrikker: String) {
+    TREDJELANDSBORGER(
+            "Mor har ikke lovlig opphold - tredjelandsborger.",
+            "Mor tredjelandsborger"
+    ),
+    STATSLØS(
+            "Mor har ikke lovlig opphold - er statsløs eller mangler statsborgerskap.",
+            "Mor statsløs eller mangler statsborgerskap"
+    ),
+    EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
+            "Mor EØS. Ikke arb. MF ikke reg. Mor ikke bosatt 5 år"
+    ),
+    EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
+            "Mor EØS. Ikke arb. MF ikke reg. Mor ikke arbeid 5 år"
+    ),
+    EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Barnets mor og medforelder har ikke felles bostedsadresse. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
+            "Mor EØS. Ikke arb. Bor ikke med MF. Mor ikke bosatt 5 år"
+    ),
+    EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Barnets mor og medforelder har ikke felles bostedsadresse. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
+            "Mor EØS. Ikke arb. Bor ikke med MF. Mor ikke arbeid 5 år"
+    ),
+    EØS_MEDFORELDER_TREDJELANDSBORGER(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
+            "Mor EØS. Ikke arb. MF tredjelandsborger"
+    ),
+    EØS_MEDFORELDER_STATSLØS(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
+            "Mor EØS. Ikke arb. MF statsløs"
+    ),
+    EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
+            "Mor EØS. Ikke arb. MF EØS ikke arbeid. Mor ikke bosatt 5 år"
+    ),
+    EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
+            "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
+            "Mor EØS. Ikke arb. MF EØS ikke arbeid. Mor ikke arbeid 5 år"
+    ),
 }

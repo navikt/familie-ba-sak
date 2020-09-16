@@ -221,8 +221,8 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         }
 
         if (!response.harFeil()){
-            if(response.data == null || response.data.person== null || response.data.person.bostedsadresse== null){
-                throw Feil(message = "Ugyldig response (null) fra PDL ved henting av bostedsadresseperioder.",
+            if(response.data.person == null){
+                throw Feil(message = "Ugyldig response (person=null) fra PDL ved henting av bostedsadresseperioder.",
                            frontendFeilmelding = "Feilet ved henting av bostedsadresseperioder for person $ident",
                            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
             }

@@ -18,11 +18,11 @@ class VilkårsvurderingMetrics {
     val personTypeToDisplayedType = mapOf(
             PersonType.SØKER to "Mor",
             PersonType.BARN to "Barn",
-            PersonType.ANNENPART to "Annen Part"
+            PersonType.ANNENPART to "Medforelder"
     )
 
     init {
-        Vilkår.values().map {
+        Vilkår.values().forEach {
             Resultat.values().forEach { resultat ->
                 BehandlingOpprinnelse.values().forEach { behandlingOpprinnelse ->
                     PersonType.values().forEach { personType ->
@@ -43,16 +43,10 @@ class VilkårsvurderingMetrics {
             }
         }
 
-        LovligOppholdAvslagÅrsaker.values().map { årsak ->
-            PersonType.values().filter { it !== PersonType.ANNENPART }.forEach { personType ->
-                lovligOppholdAvslagÅrsaker[personType.name + årsak.name] = Metrics.counter("familie.ba.behandling.lovligopphold",
-                                                                                           "aarsak",
-                                                                                           årsak.besrivelse,
-                                                                                           "personType",
-                                                                                           personType.name,
-                                                                                           "statsborger",
-                                                                                           årsak.lovligOppholdStatsborger.beskrivelse)
-            }
+        LovligOppholdUtfall.values().forEach { utfall ->
+            lovligOppholdUtfall[utfall.name] = Metrics.counter("familie.ba.behandling.lovligopphold",
+                    "aarsak",
+                    utfall.begrunnelseForMetrikker)
         }
     }
 
@@ -112,29 +106,10 @@ class VilkårsvurderingMetrics {
     }
 
     companion object {
+        val lovligOppholdUtfall = mutableMapOf<String, Counter>()
 
-        val lovligOppholdAvslagÅrsaker = mutableMapOf<String, Counter>()
-
-        fun økTellerForLovligOpphold(årsak: LovligOppholdAvslagÅrsaker, personType: PersonType) {
-            lovligOppholdAvslagÅrsaker[personType.name + årsak.name]?.increment()
+        fun økTellerForLovligOpphold(utfall: LovligOppholdUtfall) {
+            lovligOppholdUtfall[utfall.name]?.increment()
         }
     }
-}
-
-enum class LovligOppholdStatsborger(val beskrivelse: String) {
-    TREDJELANDSBORGER("Tredjelandsborger"),
-    EØS("EØS"),
-    STATSLØS("Stateløs"),
-}
-
-enum class LovligOppholdAvslagÅrsaker(val lovligOppholdStatsborger: LovligOppholdStatsborger, val besrivelse: String) {
-    EØS_IKKE_REGISTRERT_FAR_PÅ_BARNET(LovligOppholdStatsborger.EØS, "Ikke registrert far på barnet"),
-    EØS_MOR_OG_FAR_IKKE_SAMME_BOSTEDSADRESSE(LovligOppholdStatsborger.EØS, "Mor og far ikke samme bostedsadresse"),
-    EØS_FAR_HAR_IKKE_ET_LØPENDE_ARBEIDSFORHOLD_I_NORGE(LovligOppholdStatsborger.EØS,
-                                                       "Far har ikke et løpende arbeidsforhold i Norge"),
-    EØS_MOR_HAR_IKKE_HATT_ARBEIDSFORHOLD_I_DE_5_SISTE_ÅRENE(LovligOppholdStatsborger.EØS,
-                                                            "Mor har ikke hatt arbeidsforhold i de 5 siste årene"),
-    TREDJELANDSBORGER_FALLER_UT(LovligOppholdStatsborger.TREDJELANDSBORGER,
-                                "Årsak til at søker faller ut på lovlig opphold vilkår – tredjelandsborger"),
-    STATSLØS_FALLER_UT(LovligOppholdStatsborger.STATSLØS, "Årsak til at søker faller ut på lovlig opphold vilkår – statsløs"),
 }

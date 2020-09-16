@@ -57,7 +57,7 @@ class BehandlingController(private val fagsakService: FagsakService,
                 onSuccess = {
                     val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
                     antallManuelleBehandlingerOpprettet[nyBehandling.behandlingType]?.increment()
-                    return restFagsak
+                    restFagsak
                 },
                 onFailure = {
                     throw it
