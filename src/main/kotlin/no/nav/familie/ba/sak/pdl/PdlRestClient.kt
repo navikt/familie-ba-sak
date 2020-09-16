@@ -22,7 +22,7 @@ import java.time.LocalDate
 
 @Service
 class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
-                    @Qualifier("sts") val restTemplate: RestOperations,
+                    @Qualifier("jwt-sts") val restTemplate: RestOperations,
                     private val stsRestClient: StsRestClient)
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
