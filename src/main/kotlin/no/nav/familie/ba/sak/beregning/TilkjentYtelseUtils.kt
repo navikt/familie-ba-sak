@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.beregning.SatsService.splittPeriodePå6Årsdag
+import no.nav.familie.ba.sak.beregning.SatsService.BeløpPeriode
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -83,7 +84,9 @@ object TilkjentYtelseUtils {
                                                                              tilOgMed = periodeOver6år.tom)
                                 ) else emptyList()
 
-                                val beløpsperioder = listOf(beløpsperioderFørFylte6År, beløpsperioderEtterFylte6År).flatten()
+                                val beløpsperioder =
+                                        listOf(beløpsperioderFørFylte6År, beløpsperioderEtterFylte6År).flatten()
+                                                .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
 
                                 beløpsperioder.map { beløpsperiode ->
                                     AndelTilkjentYtelse(
@@ -192,4 +195,16 @@ private fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): Lo
     }
 
     return minOf(periodeTomBarn ?: LocalDate.MAX, periodeTomSoker ?: LocalDate.MAX)
+}
+
+private fun slåSammenEtterfølgendePerioderMedSammeBeløp(sammenlagt: MutableList<BeløpPeriode>,
+                                                        neste: BeløpPeriode): MutableList<BeløpPeriode> {
+    if (sammenlagt.isNotEmpty() && sammenlagt.last().beløp == neste.beløp) {
+        val forrigeOgNeste = BeløpPeriode(neste.beløp, sammenlagt.last().fraOgMed, neste.tilOgMed)
+        sammenlagt.removeLast()
+        sammenlagt.add(forrigeOgNeste)
+    } else {
+        sammenlagt.add(neste)
+    }
+    return sammenlagt
 }
