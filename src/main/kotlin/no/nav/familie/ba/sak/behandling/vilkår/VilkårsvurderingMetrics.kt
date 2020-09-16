@@ -33,10 +33,10 @@ class VilkårsvurderingMetrics {
                                                                        behandlingOpprinnelse,
                                                                        "familie.ba.behandling.vilkaarsvurdering")
                             vilkårsvurderingFørstUtfall = genererMetrikkMap(it.spesifikasjon,
-                                                                       personType,
-                                                                       resultat,
-                                                                       behandlingOpprinnelse,
-                                                                       "familie.ba.behandling.vilkaarsvurdering.foerstutfall")
+                                                                            personType,
+                                                                            resultat,
+                                                                            behandlingOpprinnelse,
+                                                                            "familie.ba.behandling.vilkaarsvurdering.foerstutfall")
                         }
                     }
                 }
@@ -94,6 +94,12 @@ class VilkårsvurderingMetrics {
                      resultat: Resultat,
                      behandlingOpprinnelse: BehandlingOpprinnelse) = "${vilkår}-${personType.name}_${resultat.name}_${behandlingOpprinnelse.name}"
 
+    fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkår: Vilkår, personType: PersonType) {
+        vilkårsvurderingFørstUtfall[vilkårNøkkel(vilkår.spesifikasjon.identifikator,
+                                                 personType, Resultat.NEI,
+                                                 BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)]?.increment()
+    }
+
     fun økTellereForEvaluering(evaluering: Evaluering, personType: PersonType, behandlingOpprinnelse: BehandlingOpprinnelse) {
         if (evaluering.children.isEmpty()) {
             vilkårsvurderingUtfall[vilkårNøkkel(evaluering.identifikator,
@@ -105,7 +111,8 @@ class VilkårsvurderingMetrics {
         }
     }
 
-    companion object{
+    companion object {
+
         val lovligOppholdAvslagÅrsaker = mutableMapOf<String, Counter>()
 
         fun økTellerForLovligOpphold(årsak: LovligOppholdAvslagÅrsaker, personType: PersonType) {
