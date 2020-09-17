@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.behandling.restDomene.toRestPersonInfo
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.domene.DataForManuellJournalføring
+import no.nav.familie.ba.sak.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -27,9 +27,9 @@ class OppgaveController(val oppgaveService: OppgaveService,
     @PostMapping(path = ["/hent-oppgaver"],
                  consumes = [MediaType.APPLICATION_JSON_VALUE],
                  produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequest)
+    fun hentOppgaver(@RequestBody restFinnOppgaveRequest: RestFinnOppgaveRequest)
             : ResponseEntity<Ressurs<FinnOppgaveResponseDto>> = try {
-        val oppgaver: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(finnOppgaveRequest)
+        val oppgaver: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(restFinnOppgaveRequest.tilFinnOppgaveRequest())
         ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
     } catch (e: Throwable) {
         illegalState("Henting av oppgaver feilet", e)
