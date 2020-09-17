@@ -71,43 +71,30 @@ class RestTemplateConfig(
     fun restTemplateJwtBearerFallbackSts(bearerTokenClientInterceptor: BearerTokenWithSTSFallbackClientInterceptor,
                                          consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
 
-        return if (trengerProxy()) {
-            RestTemplateBuilder()
-                    .additionalCustomizers(NaisProxyCustomizer())
-                    .interceptors(consumerIdClientInterceptor,
-                                  bearerTokenClientInterceptor,
-                                  MdcValuesPropagatingClientInterceptor())
-                    .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
-                    .build()
-        } else {
-            RestTemplateBuilder()
-                    .interceptors(consumerIdClientInterceptor,
-                                  bearerTokenClientInterceptor,
-                                  MdcValuesPropagatingClientInterceptor())
-                    .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
-                    .build()
-        }
+        return RestTemplateBuilder()
+                .interceptors(consumerIdClientInterceptor,
+                              bearerTokenClientInterceptor,
+                              MdcValuesPropagatingClientInterceptor())
+                .requestFactory(this::requestFactory)
+                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .also {
+                    if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
+                }
+                .build()
     }
 
     @Bean("jwtBearer")
     fun restTemplateJwtBearer(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
                               bearerTokenClientInterceptor: BearerTokenClientInterceptor): RestOperations {
-        return if (trengerProxy()) {
-            RestTemplateBuilder()
-                    .additionalCustomizers(NaisProxyCustomizer())
-                    .interceptors(consumerIdClientInterceptor,
-                                  bearerTokenClientInterceptor,
-                                  MdcValuesPropagatingClientInterceptor())
-                    .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
-                    .build()
-        } else {
-            RestTemplateBuilder()
-                    .interceptors(consumerIdClientInterceptor,
-                                  bearerTokenClientInterceptor,
-                                  MdcValuesPropagatingClientInterceptor())
-                    .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
-                    .build()
-        }
+        return RestTemplateBuilder()
+                .interceptors(consumerIdClientInterceptor,
+                              bearerTokenClientInterceptor,
+                              MdcValuesPropagatingClientInterceptor())
+                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .also {
+                    if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
+                }
+                .build()
     }
 
     @Bean
