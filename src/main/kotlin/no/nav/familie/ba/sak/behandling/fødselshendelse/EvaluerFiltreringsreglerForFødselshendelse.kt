@@ -35,7 +35,9 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
                 filtreringsreglerFørsteUtfallMetrics[it.spesifikasjon.identifikator] =
                         Metrics.counter("familie.ba.sak.filtreringsregler.foerstutfall",
                                         "beskrivelse",
-                                        it.spesifikasjon.beskrivelse)
+                                        it.spesifikasjon.beskrivelse,
+                                        "resultat",
+                                        resultat.name)
 
             }
         }
