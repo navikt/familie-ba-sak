@@ -42,10 +42,8 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
     }
 
     fun evaluerFiltreringsregler(behandling: Behandling, barnasIdenter: Set<String>): Evaluering {
-        LOG.info("Evaluating Filtering Rules...")
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, barnasIdenter))
         oppdaterMetrikker(evaluering)
-        LOG.info("Finished Evaluating Filtering Rules")
         return evaluering
     }
 
@@ -71,7 +69,6 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
     }
 
     private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean{
-        LOG.info("increase first fail counter ${evaluering.identifikator} ${førsteutfall}")
         if(evaluering.resultat == Resultat.NEI && førsteutfall){
             LOG.info("increase first fail counter ${evaluering.identifikator} ${filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]}")
             filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]!!.increment()
@@ -81,7 +78,6 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
     }
 
     private fun oppdaterMetrikker(evaluering: Evaluering) {
-        LOG.info("handle metrics")
         var førsteutfall = true
         if (evaluering.children.isEmpty()) {
             LOG.info("increase counter ${evaluering.identifikator + evaluering.resultat.name}")
