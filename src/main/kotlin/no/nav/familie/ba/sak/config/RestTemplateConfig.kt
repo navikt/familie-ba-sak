@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.familie.ba.sak.common.BearerTokenWithSTSFallbackClientInterceptor2
-import no.nav.familie.http.interceptor.*
+import no.nav.familie.ba.sak.common.BearerTokenWithSTSFallbackClientInterceptor
+import no.nav.familie.http.interceptor.BearerTokenClientInterceptor
+import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
+import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
+import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +32,7 @@ import java.time.Duration
         BearerTokenClientInterceptor::class,
         MdcValuesPropagatingClientInterceptor::class,
         StsBearerTokenClientInterceptor::class,
-        BearerTokenWithSTSFallbackClientInterceptor2::class)
+        BearerTokenWithSTSFallbackClientInterceptor::class)
 class RestTemplateConfig(
         private val environment: Environment
 ) {
@@ -65,21 +68,21 @@ class RestTemplateConfig(
             }
 
     @Bean("jwt-sts")
-    fun restTemplateJwtBearerFallbackSts(bearerTokenWithSTSFallbackClientInterceptor: BearerTokenWithSTSFallbackClientInterceptor2,
+    fun restTemplateJwtBearerFallbackSts(bearerTokenClientInterceptor: BearerTokenWithSTSFallbackClientInterceptor,
                                          consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
 
         return if (trengerProxy()) {
             RestTemplateBuilder()
                     .additionalCustomizers(NaisProxyCustomizer())
                     .interceptors(consumerIdClientInterceptor,
-                                  bearerTokenWithSTSFallbackClientInterceptor,
+                                  bearerTokenClientInterceptor,
                                   MdcValuesPropagatingClientInterceptor())
                     .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
                     .build()
         } else {
             RestTemplateBuilder()
                     .interceptors(consumerIdClientInterceptor,
-                                  bearerTokenWithSTSFallbackClientInterceptor,
+                                  bearerTokenClientInterceptor,
                                   MdcValuesPropagatingClientInterceptor())
                     .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
                     .build()

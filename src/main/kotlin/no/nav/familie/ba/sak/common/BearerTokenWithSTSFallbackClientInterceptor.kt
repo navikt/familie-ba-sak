@@ -17,15 +17,14 @@ import org.springframework.stereotype.Component
 import java.net.URI
 
 @Component
-class BearerTokenWithSTSFallbackClientInterceptor2(private val oAuth2AccessTokenService: OAuth2AccessTokenService,
-                                                   private val clientConfigurationProperties: ClientConfigurationProperties,
-                                                   private val stsRestClient: StsRestClient) :
+class BearerTokenWithSTSFallbackClientInterceptor(private val oAuth2AccessTokenService: OAuth2AccessTokenService,
+                                                  private val clientConfigurationProperties: ClientConfigurationProperties,
+                                                  private val stsRestClient: StsRestClient) :
         ClientHttpRequestInterceptor {
 
     override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
         if (preferredUsername() == null) {
-            val systembrukerToken = stsRestClient.systemOIDCToken
-            request.headers.setBearerAuth(systembrukerToken)
+            request.headers.setBearerAuth(stsRestClient.systemOIDCToken)
         } else {
             val clientProperties = clientPropertiesFor(request.uri)
             val response: OAuth2AccessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)

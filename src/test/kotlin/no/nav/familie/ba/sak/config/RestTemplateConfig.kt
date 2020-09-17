@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.familie.ba.sak.common.BearerTokenWithSTSFallbackClientInterceptor2
+import no.nav.familie.ba.sak.common.BearerTokenWithSTSFallbackClientInterceptor
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
@@ -29,7 +29,7 @@ import java.time.Duration
         ConsumerIdClientInterceptor::class,
         MdcValuesPropagatingClientInterceptor::class,
         StsBearerTokenClientInterceptor::class,
-        BearerTokenWithSTSFallbackClientInterceptor2::class)
+        BearerTokenWithSTSFallbackClientInterceptor::class)
 @Profile("integrasjonstest")
 class RestTemplateConfig {
 
@@ -63,12 +63,12 @@ class RestTemplateConfig {
             }
 
     @Bean("jwt-sts")
-    fun restTemplateJwtBearerFallbackSts(bearerTokenWithSTSFallbackClientInterceptor: BearerTokenWithSTSFallbackClientInterceptor2,
+    fun restTemplateJwtBearerFallbackSts(bearerTokenClientInterceptor: BearerTokenWithSTSFallbackClientInterceptor,
                                          consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
 
         return RestTemplateBuilder()
                 .interceptors(consumerIdClientInterceptor,
-                              bearerTokenWithSTSFallbackClientInterceptor,
+                              bearerTokenClientInterceptor,
                               MdcValuesPropagatingClientInterceptor())
                 .requestFactory(this::requestFactory)
                 .build()
