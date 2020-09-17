@@ -32,7 +32,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
                                         "resultat",
                                         resultat.name)
 
-                filtreringsreglerFørsteUtfallMetrics[it.spesifikasjon.identifikator] =
+                filtreringsreglerFørsteUtfallMetrics[it.spesifikasjon.identifikator + resultat.name] =
                         Metrics.counter("familie.ba.sak.filtreringsregler.foerstutfall",
                                         "beskrivelse",
                                         it.spesifikasjon.beskrivelse,
@@ -72,7 +72,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
 
     private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean{
         if(evaluering.resultat == Resultat.NEI && førsteutfall){
-            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]?.increment()
+            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator + evaluering.resultat.name]?.increment()
             return false
         }
         return førsteutfall
