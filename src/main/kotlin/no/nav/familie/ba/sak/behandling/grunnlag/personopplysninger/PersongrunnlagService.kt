@@ -1,9 +1,14 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
+import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
+import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
+import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -68,18 +73,25 @@ class PersongrunnlagService(
                            målform = målform
         ).also {
             it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
-            it.opphold = oppholdService.hentOpphold(it)
-            it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(fødselsnummer), it)
             it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
         }
+
+        val søkerErEØSBorger = erEØSBorger(søker.statsborgerskap)
 
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        leggTilFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
+        if (søkerErEØSBorger) {
+            søker.also {
+                it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(fødselsnummer), it)
+                it.opphold = oppholdService.hentOpphold(it)
+            }
 
-        secureLogger.info("Setter persongrunnlag med søker: ${fødselsnummer} og barn: ${barnasFødselsnummer}")
-        secureLogger.info("Barna på persongrunnlaget som lagres: ${personopplysningGrunnlag.barna.map { it.personIdent.ident }}")
+            if (!personHarLøpendeArbeidsforhold(søker)) {
+                leggTilFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
+            }
+        }
+
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
@@ -88,48 +100,61 @@ class PersongrunnlagService(
         return barnasFødselsnummer.map { nyttBarn ->
             val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(nyttBarn)
             Person(personIdent = PersonIdent(nyttBarn),
-                                         type = PersonType.BARN,
-                                         personopplysningGrunnlag = personopplysningGrunnlag,
-                                         fødselsdato = personinfo.fødselsdato,
-                                         aktørId = personopplysningerService.hentAktivAktørId(Ident(nyttBarn)),
-                                         navn = personinfo.navn ?: "",
-                                         kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                                         bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
-                                         sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
-            ).also {
-                it.statsborgerskap =  statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(nyttBarn), it)
-                it.opphold = oppholdService.hentOpphold(it)
-                it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
-            }
+                   type = PersonType.BARN,
+                   personopplysningGrunnlag = personopplysningGrunnlag,
+                   fødselsdato = personinfo.fødselsdato,
+                   aktørId = personopplysningerService.hentAktivAktørId(Ident(nyttBarn)),
+                   navn = personinfo.navn ?: "",
+                   kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+                   bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
+                   sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
+            )
         }
     }
 
     private fun leggTilFarEllerMedmor(barnetsFødselsnummer: String,
                                       personopplysningGrunnlag: PersonopplysningGrunnlag) {
         val barnPersoninfo = personopplysningerService.hentPersoninfoMedRelasjoner(barnetsFødselsnummer)
-        val farEllerMedmor = barnPersoninfo.familierelasjoner.filter { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }.firstOrNull()
+        val farEllerMedmor =
+                barnPersoninfo.familierelasjoner.firstOrNull { it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR }
         if (farEllerMedmor != null) {
             val annenPartFødselsnummer = farEllerMedmor.personIdent.id
             val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(annenPartFødselsnummer)
             val person = Person(personIdent = PersonIdent(annenPartFødselsnummer),
-                    type = PersonType.ANNENPART,
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    fødselsdato = personinfo.fødselsdato,
-                    aktørId = personopplysningerService.hentAktivAktørId(Ident(annenPartFødselsnummer)),
-                    navn = personinfo.navn ?: "",
-                    kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                    bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
-                    sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
+                                type = PersonType.ANNENPART,
+                                personopplysningGrunnlag = personopplysningGrunnlag,
+                                fødselsdato = personinfo.fødselsdato,
+                                aktørId = personopplysningerService.hentAktivAktørId(Ident(annenPartFødselsnummer)),
+                                navn = personinfo.navn ?: "",
+                                kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+                                bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
+                                sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT
             ).also {
-                it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(annenPartFødselsnummer), it)
-                it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(annenPartFødselsnummer), it)
+                it.statsborgerskap =
+                        statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(annenPartFødselsnummer),
+                                                                                           it)
+            }
+
+            val farEllerMedmorErEØSBorger = erEØSBorger(person.statsborgerskap)
+
+            if (farEllerMedmorErEØSBorger) {
+                person.also {
+                    it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(annenPartFødselsnummer), it)
+                }
             }
 
             personopplysningGrunnlag.personer.add(person)
         }
     }
 
+    private fun erEØSBorger(søkersStatsborgerskap: List<GrStatsborgerskap>?): Boolean {
+        val nåværendeMedlemskap = finnNåværendeMedlemskap(søkersStatsborgerskap)
+
+        return finnSterkesteMedlemskap(nåværendeMedlemskap) == Medlemskap.EØS
+    }
+
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
     }

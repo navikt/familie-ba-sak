@@ -64,23 +64,23 @@ data class Person(
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
-        var statsborgerskap: List<GrStatsborgerskap>? = null,
+        var statsborgerskap: List<GrStatsborgerskap> = emptyList(),
 
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
-        var opphold: List<GrOpphold>? = null,
+        var opphold: List<GrOpphold> = emptyList(),
 
         @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
-        var arbeidsforhold: List<GrArbeidsforhold>? = null,
+        var arbeidsforhold: List<GrArbeidsforhold> = emptyList(),
 
         @OneToMany(cascade = [CascadeType.ALL], fetch=FetchType.EAGER)
         //Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
         @Fetch(value = FetchMode.SUBSELECT)
         @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
-        var bostedsadresseperiode: List<GrBostedsadresseperiode>? = null
+        var bostedsadresseperiode: List<GrBostedsadresseperiode> = emptyList(),
 ) : BaseEntitet() {
 
     override fun toString(): String {
