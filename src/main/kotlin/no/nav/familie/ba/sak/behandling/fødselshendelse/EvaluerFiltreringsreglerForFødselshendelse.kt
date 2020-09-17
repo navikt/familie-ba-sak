@@ -32,20 +32,20 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
                                         "resultat",
                                         resultat.name)
 
-                filtreringsreglerFørsteUtfallMetrics[it.spesifikasjon.identifikator + resultat.name] =
-                        Metrics.counter("familie.ba.sak.filtreringsregler.foerstutfall",
+                filtreringsreglerFørsteUtfallMetrics[it.spesifikasjon.identifikator] =
+                        Metrics.counter("familie.ba.sak.filtreringsregler.foersteutfall",
                                         "beskrivelse",
-                                        it.spesifikasjon.beskrivelse,
-                                        "resultat",
-                                        resultat.name)
+                                        it.spesifikasjon.beskrivelse)
 
             }
         }
     }
 
     fun evaluerFiltreringsregler(behandling: Behandling, barnasIdenter: Set<String>): Evaluering {
+        LOG.info("Evaluating Filtering Rules...")
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, barnasIdenter))
         oppdaterMetrikker(evaluering)
+        LOG.info("Finished Evaluating Filtering Rules")
         return evaluering
     }
 
@@ -71,16 +71,20 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
     }
 
     private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean{
+        LOG.info("increase first fail counter ${evaluering.identifikator} ${førsteutfall}")
         if(evaluering.resultat == Resultat.NEI && førsteutfall){
-            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator + evaluering.resultat.name]!!.increment()
+            LOG.info("increase first fail counter ${evaluering.identifikator} ${filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]}")
+            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]!!.increment()
             return false
         }
         return førsteutfall
     }
 
     private fun oppdaterMetrikker(evaluering: Evaluering) {
+        LOG.info("handle metrics")
         var førsteutfall = true
         if (evaluering.children.isEmpty()) {
+            LOG.info("increase counter ${evaluering.identifikator + evaluering.resultat.name}")
             filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]!!.increment()
             førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
         } else {
