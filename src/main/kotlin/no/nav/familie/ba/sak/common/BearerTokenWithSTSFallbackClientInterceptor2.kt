@@ -29,7 +29,6 @@ class BearerTokenWithSTSFallbackClientInterceptor2(private val oAuth2AccessToken
         } else {
             val clientProperties = clientPropertiesFor(request.uri)
             val response: OAuth2AccessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)
-            secureLogger.info("SB token: ${response.accessToken}")
             request.headers.setBearerAuth(response.accessToken)
         }
 
