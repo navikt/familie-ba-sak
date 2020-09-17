@@ -118,9 +118,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         } else {
             persongrunnlagService.hentBarna(behandlingResultat.behandling)
         }
-
-        return behandlingResultat?.personResultater?.find {
-            personer.map { it?.personIdent }.contains(it.personIdent) && it.vilkårResultater.find { vilkårResusltat ->
+        return behandlingResultat?.personResultater?.find {personResultat ->
+            personer.map { it?.personIdent?.ident }.contains(personResultat.personIdent) && personResultat.vilkårResultater.find { vilkårResusltat ->
                 vilkårResusltat.vilkårType == vilkår && vilkårResusltat.resultat == Resultat.NEI
             } != null
         } != null
