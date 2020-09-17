@@ -7,13 +7,11 @@ import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenRespons
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.stereotype.Component
-
 import java.net.URI
 
 @Component
@@ -28,7 +26,6 @@ class BearerTokenWithSTSFallbackClientInterceptor(private val oAuth2AccessTokenS
         } else {
             val clientProperties = clientPropertiesFor(request.uri)
             val response: OAuth2AccessTokenResponse = oAuth2AccessTokenService.getAccessToken(clientProperties)
-            secureLogger.info("SB token: ${response.accessToken}")
             request.headers.setBearerAuth(response.accessToken)
         }
 
@@ -57,9 +54,5 @@ class BearerTokenWithSTSFallbackClientInterceptor(private val oAuth2AccessTokenS
             // Ingen request context. Skjer ved kall som har opphav i kjørende applikasjon. Ping etc.
             null
         }
-    }
-
-    companion object {
-        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
