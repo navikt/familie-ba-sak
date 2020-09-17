@@ -36,6 +36,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
                         Metrics.counter("familie.ba.sak.filtreringsregler.foerstutfall",
                                         "beskrivelse",
                                         it.spesifikasjon.beskrivelse)
+
             }
         }
     }

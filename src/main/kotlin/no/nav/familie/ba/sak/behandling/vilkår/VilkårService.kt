@@ -194,6 +194,9 @@ class VilkårService(
                 personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingResultat.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${behandlingResultat.behandling.id}")
 
+        val fødselsdatoEldsteBarn = personopplysningGrunnlag.personer
+                .filter { it.type == PersonType.BARN }
+                .maxByOrNull { it.fødselsdato }?.fødselsdato ?: error("Fant ikke barn i personopplysninger")
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
@@ -202,7 +205,9 @@ class VilkårService(
             val fakta = Fakta(personForVurdering = person, behandlingOpprinnelse = behandlingResultat.behandling.opprinnelse)
             val evalueringerForVilkår = spesifikasjonererForPerson.map { it.evaluer(fakta) }
 
-            personResultat.setVilkårResultater(vilkårResultater(personResultat, person, fakta, evalueringerForVilkår))
+            personResultat.setVilkårResultater(
+                    vilkårResultater(personResultat, person, fakta, evalueringerForVilkår, fødselsdatoEldsteBarn)
+            )
 
             personResultat
         }.toSet()
@@ -213,13 +218,14 @@ class VilkårService(
     private fun vilkårResultater(personResultat: PersonResultat,
                                  person: Person,
                                  fakta: Fakta,
-                                 evalueringer: List<Evaluering>): SortedSet<VilkårResultat> {
+                                 evalueringer: List<Evaluering>,
+                                 fødselsdatoEldsteBarn: LocalDate): SortedSet<VilkårResultat> {
 
         return evalueringer.map { child ->
             val fom =
                     if (person.type === PersonType.BARN)
                         person.fødselsdato
-                    else LocalDate.now()
+                    else fødselsdatoEldsteBarn
 
             val vilkår =
                     if (child.identifikator == "" && child.children.isNotEmpty())
@@ -242,7 +248,7 @@ class VilkårService(
                 if (child.children.isNotEmpty())
                     child.children.forEach {
                         if (it.begrunnelse.isNotBlank()) {
-                            when (it.resultat) {
+                             when (it.resultat) {
                                 Resultat.NEI ->
                                     begrunnelse = "$begrunnelse\n\t- nei: ${it.begrunnelse}"
                                 Resultat.KANSKJE ->

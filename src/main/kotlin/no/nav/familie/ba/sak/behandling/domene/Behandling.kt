@@ -49,6 +49,12 @@ data class Behandling(
         var steg: StegType = initSteg()
 ) : BaseEntitet() {
 
+    fun sendVedtaksbrev(): Boolean {
+        return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
+               && type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+               && type !== BehandlingType.TEKNISK_OPPHØR
+    }
+
     override fun toString(): String {
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }

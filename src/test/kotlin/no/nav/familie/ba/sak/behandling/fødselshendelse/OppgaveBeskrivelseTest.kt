@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
-import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -20,10 +19,13 @@ import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.junit.Assert
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class OppgaveBeskrivelseTest {
+
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
@@ -35,6 +37,7 @@ class OppgaveBeskrivelseTest {
     val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
     val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     val behandlingRepositoryMock = mockk<BehandlingRepository>()
+    val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
                                                         featureToggleServiceMock,
@@ -45,89 +48,108 @@ class OppgaveBeskrivelseTest {
                                                         personopplysningerServiceMock,
                                                         behandlingResultatRepositoryMock,
                                                         persongrunnlagServiceMock,
-                                                        behandlingRepositoryMock)
+                                                        behandlingRepositoryMock,
+                                                        vilkårsvurderingMetricsMock)
+
+    @BeforeEach
+    fun initMocks(){
+        every {vilkårsvurderingMetricsMock.
+        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} returns Unit
+    }
 
     @Test
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere begrunnelse av første regel som feilet`() {
-        val testEvaluering0 = testSpesifikasjoner.evaluer(TestFaktaForFiltreringsregler(morHarGyldigFodselsnummer = false,
-                                                                                        barnetHarGyldigFodselsnummer = false,
-                                                                                        barnetErUnder6Mnd = true))
-        val beskrivelse0 = fødselshendelseService.hentBegrunnelseFraFiltreringsregler(testEvaluering0)
-        Assert.assertEquals("mor har ikke gyldig fødselsnummer", beskrivelse0)
+        var evaluering = testSpesifikasjoner.evaluer(
+                TestFaktaForFiltreringsregler(barnetLever = false, morLever = false, morErOver18År = true))
+        Assert.assertEquals("Det er registrert dødsdato på barnet.",
+                            fødselshendelseService.hentBegrunnelseFraFiltreringsregler(evaluering))
 
-        val testEvaluering1 = testSpesifikasjoner.evaluer(TestFaktaForFiltreringsregler(morHarGyldigFodselsnummer = true,
-                                                                                        barnetHarGyldigFodselsnummer = false,
-                                                                                        barnetErUnder6Mnd = false))
-        val beskrivelse1 = fødselshendelseService.hentBegrunnelseFraFiltreringsregler(testEvaluering1)
-        Assert.assertEquals("barnet har ikke gyldig fødselsnummer", beskrivelse1)
+        evaluering = testSpesifikasjoner.evaluer(
+                TestFaktaForFiltreringsregler(barnetLever = true, morLever = false, morErOver18År = false))
+        Assert.assertEquals("Det er registrert dødsdato på mor.",
+                            fødselshendelseService.hentBegrunnelseFraFiltreringsregler(evaluering))
 
-        val testEvaluering2 = testSpesifikasjoner.evaluer(TestFaktaForFiltreringsregler(morHarGyldigFodselsnummer = true,
-                                                                                        barnetHarGyldigFodselsnummer = true,
-                                                                                        barnetErUnder6Mnd = false))
-        val beskrivelse2 = fødselshendelseService.hentBegrunnelseFraFiltreringsregler(testEvaluering2)
-        Assert.assertEquals("barnet er over 6 måneder", beskrivelse2)
+        evaluering = testSpesifikasjoner.evaluer(
+                TestFaktaForFiltreringsregler(barnetLever = true, morLever = true, morErOver18År = false))
+        Assert.assertEquals("Mor er under 18 år.",
+                            fødselshendelseService.hentBegrunnelseFraFiltreringsregler(evaluering))
     }
 
     @Test
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere null dersom ingen regler feiler`() {
-        val testEvaluering = testSpesifikasjoner.evaluer(TestFaktaForFiltreringsregler(morHarGyldigFodselsnummer = true,
-                                                                                       barnetHarGyldigFodselsnummer = true,
-                                                                                       barnetErUnder6Mnd = true))
+        val testEvaluering = testSpesifikasjoner.evaluer(TestFaktaForFiltreringsregler(barnetLever = true,
+                                                                                       morLever = true,
+                                                                                       morErOver18År = true))
         val beskrivelse = fødselshendelseService.hentBegrunnelseFraFiltreringsregler(testEvaluering)
         Assert.assertNull(beskrivelse)
     }
 
     @Test
-    fun `hentBegrunnelseFraVilkårsvurdering() skal returnere riktig beskrivelse basert på vilkårsrekkefølgen`(){
-        every{behandlingRepositoryMock.finnBehandling(any())} returns behandling
-        every{persongrunnlagServiceMock.hentSøker(any())} returns søker
-        every{persongrunnlagServiceMock.hentBarna(any())} returns listOf(barn)
-        every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
+    fun `hentBegrunnelseFraVilkårsvurdering() skal returnere riktig beskrivelse basert på vilkårsrekkefølgen`() {
+        every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling
+        every { persongrunnlagServiceMock.hentSøker(any()) } returns søker
+        every { persongrunnlagServiceMock.hentBarna(any()) } returns listOf(barn)
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = false, lovligOpphold = false),
-                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false, borMedSøker = true, giftPartnerskap = true, bosattIRiket = true)
+                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false,
+                                                        borMedSøker = true,
+                                                        giftPartnerskap = true,
+                                                        bosattIRiket = true)
         )
         val beskrivelse0 = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
         Assert.assertEquals("Mor er ikke bosatt i riket.", beskrivelse0)
 
-        every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = true, lovligOpphold = false),
-                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false, borMedSøker = true, giftPartnerskap = true, bosattIRiket = true)
+                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false,
+                                                        borMedSøker = true,
+                                                        giftPartnerskap = true,
+                                                        bosattIRiket = true)
         )
         val beskrivelse1 = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
         Assert.assertEquals("Begrunnelse fra vilkårsvurdering", beskrivelse1)
 
-        every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = true, lovligOpphold = true),
-                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false, borMedSøker = true, giftPartnerskap = false, bosattIRiket = true)
+                barnasVilkår = TestFaktaForBarnasVilkår(under18År = false,
+                                                        borMedSøker = true,
+                                                        giftPartnerskap = false,
+                                                        bosattIRiket = true)
         )
         val beskrivelse2 = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
         Assert.assertTrue(beskrivelse2!!.contains("er over 18 år."))
 
-        every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = true, lovligOpphold = true),
-                barnasVilkår = TestFaktaForBarnasVilkår(under18År = true, borMedSøker = false, giftPartnerskap = false, bosattIRiket = true)
+                barnasVilkår = TestFaktaForBarnasVilkår(under18År = true,
+                                                        borMedSøker = false,
+                                                        giftPartnerskap = false,
+                                                        bosattIRiket = true)
         )
         val beskrivelse3 = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
         Assert.assertTrue(beskrivelse3!!.contains("er ikke bosatt med mor."))
     }
 
     @Test
-    fun `hentBegrunnelseFraVilkårsvurdering() skal returnere null dersom ingen regler i vilkårsvurderingen feiler`(){
-        every{behandlingRepositoryMock.finnBehandling(any())} returns behandling
-        every{persongrunnlagServiceMock.hentSøker(any())} returns søker
-        every{persongrunnlagServiceMock.hentBarna(any())} returns listOf(barn)
-        every{behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any())} returns genererBehandlingResultat(
+    fun `hentBegrunnelseFraVilkårsvurdering() skal returnere null dersom ingen regler i vilkårsvurderingen feiler`() {
+        every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling
+        every { persongrunnlagServiceMock.hentSøker(any()) } returns søker
+        every { persongrunnlagServiceMock.hentBarna(any()) } returns listOf(barn)
+        every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns genererBehandlingResultat(
                 søkersVilkår = TestFaktaForSøkersVilkår(bosattIRiket = true, lovligOpphold = true),
-                barnasVilkår = TestFaktaForBarnasVilkår(under18År = true, borMedSøker = true, giftPartnerskap = true, bosattIRiket = true)
+                barnasVilkår = TestFaktaForBarnasVilkår(under18År = true,
+                                                        borMedSøker = true,
+                                                        giftPartnerskap = true,
+                                                        bosattIRiket = true)
         )
         val beskrivelse = fødselshendelseService.hentBegrunnelseFraVilkårsvurdering(behandling.id)
         Assert.assertNull(beskrivelse)
     }
 
     class TestFaktaForFiltreringsregler(
-            val morHarGyldigFodselsnummer: Boolean,
-            val barnetHarGyldigFodselsnummer: Boolean,
-            val barnetErUnder6Mnd: Boolean
+            val barnetLever: Boolean,
+            val morLever: Boolean,
+            val morErOver18År: Boolean
     )
 
     class TestFaktaForSøkersVilkår(
@@ -145,36 +167,36 @@ class OppgaveBeskrivelseTest {
 
     companion object {
 
-        private fun morHarGyldigFodselsnummer(input: TestFaktaForFiltreringsregler): Evaluering {
-            return if (input.morHarGyldigFodselsnummer)
-                Evaluering.ja("mor har gyldig fødselsnummer")
-            else Evaluering.nei("mor har ikke gyldig fødselsnummer")
+        private fun barnetLever(input: TestFaktaForFiltreringsregler): Evaluering {
+            return if (input.barnetLever)
+                Evaluering.ja("Det er ikke registrert dødsdato på barnet.")
+            else Evaluering.nei("Det er registrert dødsdato på barnet.")
         }
 
-        private fun barnetHarGyldigFodselsnummer(input: TestFaktaForFiltreringsregler): Evaluering {
-            return if (input.barnetHarGyldigFodselsnummer)
-                Evaluering.ja("barnet har gyldig fødselsnummer")
-            else Evaluering.nei("barnet har ikke gyldig fødselsnummer")
+        private fun morLever(input: TestFaktaForFiltreringsregler): Evaluering {
+            return if (input.morLever)
+                Evaluering.ja("Det er ikke registrert dødsdato på mor.")
+            else Evaluering.nei("Det er registrert dødsdato på mor.")
         }
 
-        private fun barnetErUnder6Mnd(input: TestFaktaForFiltreringsregler): Evaluering {
-            return if (input.barnetErUnder6Mnd)
-                Evaluering.ja("barnet er under 6 måneder")
-            else Evaluering.nei("barnet er over 6 måneder")
+        private fun morErOver18år(input: TestFaktaForFiltreringsregler): Evaluering {
+            return if (input.morErOver18År)
+                Evaluering.ja("Mor er over 18 år.")
+            else Evaluering.nei("Mor er under 18 år.")
         }
 
         val testSpesifikasjoner = Spesifikasjon<TestFaktaForFiltreringsregler>(
                 "Test Regel 0",
-                "MOR_HAR_GYLDIG_FOEDSELSNUMMER",
-                implementasjon = { morHarGyldigFodselsnummer(this) }
+                "BARNET_LEVER",
+                implementasjon = { barnetLever(this) }
         ) og Spesifikasjon<TestFaktaForFiltreringsregler>(
                 "Test Regel 1",
-                "BARNET_HAR_GYLDIG_FOEDSELSNUMMER",
-                implementasjon = { barnetHarGyldigFodselsnummer(this) }
+                "MOR_LEVER",
+                implementasjon = { morLever(this) }
         ) og Spesifikasjon<TestFaktaForFiltreringsregler>(
                 "Test Regel 2",
-                "BARNET_ER_UNDER_6_MND",
-                implementasjon = { barnetErUnder6Mnd(this) }
+                "MOR_ER_OVER_18_AAR",
+                implementasjon = { morErOver18år(this) }
         )
 
         private fun genererBehandlingResultat(søkersVilkår: TestFaktaForSøkersVilkår,
