@@ -74,7 +74,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
         LOG.info("increase first fail counter ${evaluering.identifikator} ${førsteutfall}")
         if(evaluering.resultat == Resultat.NEI && førsteutfall){
             LOG.info("increase first fail counter ${evaluering.identifikator} ${filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]}")
-            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]?.increment()
+            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]!!.increment()
             return false
         }
         return førsteutfall
@@ -85,12 +85,12 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
         var førsteutfall = true
         if (evaluering.children.isEmpty()) {
             LOG.info("increase counter ${evaluering.identifikator + evaluering.resultat.name}")
-            filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]?.increment()
+            filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]!!.increment()
             førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
         } else {
             evaluering.children.forEach {
-                filtreringsreglerMetrics[it.identifikator + it.resultat.name]?.increment()
-                førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
+                filtreringsreglerMetrics[it.identifikator + it.resultat.name]!!.increment()
+                førsteutfall= økTellereForFørsteUtfall(it, førsteutfall)
             }
         }
     }
