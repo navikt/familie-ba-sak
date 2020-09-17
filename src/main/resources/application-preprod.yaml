@@ -19,7 +19,7 @@ no.nav.security.jwt:
         resource-url: ${PDL_URL}
         token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${BA_SAK_SCOPE}
+        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
