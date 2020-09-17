@@ -72,7 +72,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
 
     private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean{
         if(evaluering.resultat == Resultat.NEI && førsteutfall){
-            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator + evaluering.resultat.name]?.increment()
+            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator + evaluering.resultat.name]!!.increment()
             return false
         }
         return førsteutfall
@@ -81,12 +81,12 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
     private fun oppdaterMetrikker(evaluering: Evaluering) {
         var førsteutfall = true
         if (evaluering.children.isEmpty()) {
-            filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]?.increment()
+            filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]!!.increment()
             førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
         } else {
             evaluering.children.forEach {
-                filtreringsreglerMetrics[it.identifikator + it.resultat.name]?.increment()
-                førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
+                filtreringsreglerMetrics[it.identifikator + it.resultat.name]!!.increment()
+                førsteutfall= økTellereForFørsteUtfall(it, førsteutfall)
             }
         }
     }
