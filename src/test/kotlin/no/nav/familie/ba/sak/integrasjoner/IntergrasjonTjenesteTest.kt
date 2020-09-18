@@ -11,8 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.domene.*
-import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
-import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
@@ -22,8 +20,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.FilType
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
+import no.nav.familie.kontrakter.felles.oppgave.*
 import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -49,9 +46,6 @@ class IntergrasjonTjenesteTest {
     @Qualifier("integrasjonClient")
     lateinit var integrasjonClient: IntegrasjonClient
 
-    @Autowired
-    lateinit var personopplysningerService: PersonopplysningerService
-
     @AfterEach
     fun cleanUp() {
         MDC.clear()
@@ -63,7 +57,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Opprett oppgave skal returnere oppgave id`() {
         MDC.put("callId", "opprettOppgave")
-        stubFor(post("/api/oppgave/").willReturn(
+        stubFor(post("/api/oppgave/v2").willReturn(
                 okJson(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))))
 
         val request = lagTestOppgave()
@@ -80,7 +74,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `Opprett oppgave skal kaste feil hvis response er ugyldig`() {
-        stubFor(post("/api/oppgave/").willReturn(aResponse()
+        stubFor(post("/api/oppgave/v2").willReturn(aResponse()
                                                          .withStatus(500)
                                                          .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
 
@@ -96,10 +90,10 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `hentOppgaver skal returnere en liste av oppgaver og antallet oppgaver`() {
         val oppgave = Oppgave()
-        stubFor(post("/api/oppgave/v2").willReturn(okJson(objectMapper.writeValueAsString(
-                success(OppgaverOgAntall(1, listOf(oppgave)))))))
+        stubFor(post("/api/oppgave/v4").willReturn(okJson(objectMapper.writeValueAsString(
+                success(FinnOppgaveResponseDto(1, listOf(oppgave)))))))
 
-        val oppgaverOgAntall = integrasjonClient.hentOppgaver(FinnOppgaveRequest())
+        val oppgaverOgAntall = integrasjonClient.hentOppgaver(FinnOppgaveRequest(tema = Tema.BAR))
         assertThat(oppgaverOgAntall.oppgaver).hasSize(1)
     }
 

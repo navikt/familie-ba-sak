@@ -10,8 +10,6 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.domene.ArbeidsforholdRequest
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.journalføring.domene.*
-import no.nav.familie.ba.sak.oppgave.FinnOppgaveRequest
-import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -23,9 +21,7 @@ import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgave
+import no.nav.familie.kontrakter.felles.oppgave.*
 import no.nav.familie.log.NavHttpHeaders
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -163,8 +159,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         return if (it is RestClientResponseException) it.responseBodyAsString else ""
     }
 
-    fun opprettOppgave(opprettOppgave: OpprettOppgave): String {
-        val uri = URI.create("$integrasjonUri/oppgave/")
+    fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): String {
+        val uri = URI.create("$integrasjonUri/oppgave/v2")
 
         return Result.runCatching {
             postForEntity<Ressurs<OppgaveResponse>>(uri, opprettOppgave, HttpHeaders().medContentTypeJsonUTF8())
@@ -256,13 +252,13 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): OppgaverOgAntall {
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
         return finnOppgaveRequest.run {
-            val uri = URI.create("$integrasjonUri/oppgave/v2")
+            val uri = URI.create("$integrasjonUri/oppgave/v4")
 
             try {
                 val ressurs =
-                        postForEntity<Ressurs<OppgaverOgAntall>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
+                        postForEntity<Ressurs<FinnOppgaveResponseDto>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
                 assertGenerelleSuksessKriterier(ressurs)
                 ressurs.data ?: throw IntegrasjonException("Ressurs mangler.", null, uri, null)
             } catch (e: Exception) {

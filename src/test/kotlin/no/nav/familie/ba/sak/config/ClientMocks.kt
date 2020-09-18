@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
-import no.nav.familie.ba.sak.oppgave.OppgaverOgAntall
 import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
@@ -25,6 +24,7 @@ import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.*
 import org.springframework.context.annotation.Bean
@@ -177,7 +177,8 @@ class ClientMocks {
                 lagTestOppgaveDTO(1L)
 
         every { mockIntegrasjonClient.hentOppgaver(any()) } returns
-                OppgaverOgAntall(2, listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "Z999999")))
+                FinnOppgaveResponseDto(2,
+                                       listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "Z999999")))
 
         every { mockIntegrasjonClient.opprettOppgave(any()) } returns
                 "12345678"
@@ -330,6 +331,7 @@ class ClientMocks {
     }
 
     companion object {
+
         val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
         val FOM_1990 = LocalDate.of(1990, Month.JANUARY, 1)
         val FOM_2000 = LocalDate.of(2000, Month.JANUARY, 1)
