@@ -170,7 +170,7 @@ class FødselshendelseServiceTest {
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
-        verify(exactly = 0) { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) }
+        verify(exactly = 0) { stegServiceMock.evaluerVilkårForFødselshendelse(any()) }
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(any(), any(), any()) }
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
     }
@@ -221,7 +221,7 @@ class FødselshendelseServiceTest {
         personopplysningGrunnlag.personer.add(søker)
 
         every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
-        every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
+        every { stegServiceMock.evaluerVilkårForFødselshendelse(any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every { evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(), any()) } returns filtreringResultat
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak

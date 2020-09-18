@@ -42,8 +42,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         } else {
             val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
             val aktorId = personopplysningerService.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
-            val opprettOppgave = OpprettOppgave(
-                    ident = OppgaveIdent(ident = aktorId, type = IdentType.Aktør),
+            val opprettOppgave = OpprettOppgaveRequest(
+                    ident = OppgaveIdentV2(ident = aktorId, gruppe = IdentGruppe.AKTOERID),
                     saksId = fagsakId.toString(),
                     tema = Tema.BAR,
                     oppgavetype = oppgavetype,
@@ -95,7 +95,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
     }
 
-    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): OppgaverOgAntall {
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
         return integrasjonClient.hentOppgaver(finnOppgaveRequest)
     }
 
@@ -107,6 +107,6 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     }
 
     companion object {
-        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

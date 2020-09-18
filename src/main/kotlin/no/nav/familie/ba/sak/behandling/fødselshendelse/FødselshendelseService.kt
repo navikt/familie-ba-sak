@@ -84,8 +84,9 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         var resultatAvVilkårsvurdering: BehandlingResultatType? = null
 
         if (evalueringAvFiltrering.resultat == Resultat.JA) {
-            resultatAvVilkårsvurdering = stegService.evaluerVilkårForFødselshendelse(behandling, nyBehandling.søkersIdent)
-        } 
+            resultatAvVilkårsvurdering =
+                    stegService.evaluerVilkårForFødselshendelse(behandling)
+        }
 
         when (resultatAvVilkårsvurdering) {
             null -> stansetIAutomatiskFiltreringCounter.increment()
