@@ -70,7 +70,6 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
 
     private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean{
         if(evaluering.resultat == Resultat.NEI && førsteutfall){
-            LOG.info("increase first fail counter ${evaluering.identifikator} ${filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]}")
             filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]!!.increment()
             return false
         }
@@ -80,7 +79,6 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
     private fun oppdaterMetrikker(evaluering: Evaluering) {
         var førsteutfall = true
         if (evaluering.children.isEmpty()) {
-            LOG.info("increase counter ${evaluering.identifikator + evaluering.resultat.name}")
             filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]!!.increment()
             førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
         } else {
