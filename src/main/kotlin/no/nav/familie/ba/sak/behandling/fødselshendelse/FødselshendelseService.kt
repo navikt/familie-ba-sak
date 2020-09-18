@@ -42,7 +42,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val behandlingRepository: BehandlingRepository) {
 
     val finnesLøpendeSakIInfotrygd: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
-    val finnesIkkeLøpendeSakIInfotrygd: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
+    val finnesIkkeLøpendeSakIInfotrygd: Counter =
+            Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
     val stansetIAutomatiskFiltreringCounter = Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
     val stansetIAutomatiskVilkårsvurderingCounter =
             Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
@@ -77,11 +78,13 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
         val evalueringAvFiltrering =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter.toSet())
+                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
+                                                                                    nyBehandling.barnasIdenter.toSet())
         var resultatAvVilkårsvurdering: BehandlingResultatType? = null
 
         if (evalueringAvFiltrering.resultat == Resultat.JA) {
-            resultatAvVilkårsvurdering = stegService.evaluerVilkårForFødselshendelse(behandling, nyBehandling.søkersIdent)
+            resultatAvVilkårsvurdering =
+                    stegService.evaluerVilkårForFødselshendelse(behandling)
         }
 
         when (resultatAvVilkårsvurdering) {
@@ -126,7 +129,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
 
         persongrunnlagService.hentBarna(behandling).forEach { barn ->
-            val vilkårsresultat = behandlingResultat?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
+            val vilkårsresultat =
+                    behandlingResultat?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.NEI) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato}) er over 18 år."

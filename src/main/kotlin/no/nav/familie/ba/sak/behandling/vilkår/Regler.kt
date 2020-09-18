@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresse.Companion.erSammeAdresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresse.Companion.erSammeAdresse
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics.Companion.økTellerForLovligOpphold
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
@@ -48,12 +48,11 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
     val barn = fakta.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
 
-    return if (søker.isEmpty())
-        Evaluering.nei(("Ingen søker"))
-    else if (erSammeAdresse(søker.first().bostedsadresse, barn.bostedsadresse))
-        Evaluering.ja("Barnet bor med mor")
-    else
-        Evaluering.nei("Barnet bor ikke med mor")
+    return when {
+        søker.isEmpty() -> Evaluering.nei("Ingen søker")
+        erSammeAdresse(søker.first().bostedsadresse, barn.bostedsadresse) -> Evaluering.ja("Barnet bor med mor")
+        else -> Evaluering.nei("Barnet bor ikke med mor")
+    }
 }
 
 internal fun bosattINorge(fakta: Fakta): Evaluering =
@@ -76,19 +75,18 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
 
     return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
             Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
-            //TODO: Implementeres av TEA-1532
             Medlemskap.EØS -> {
                 sjekkLovligOppholdForEØSBorger(fakta)
             }
             Medlemskap.TREDJELANDSBORGER -> {
-                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
+                val nåværendeOpphold = fakta.personForVurdering.opphold.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     økTellerForLovligOpphold(LovligOppholdUtfall.TREDJELANDSBORGER)
                     Evaluering.nei(LovligOppholdUtfall.TREDJELANDSBORGER.begrunnelseForOppgave)
                 } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
             }
             Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
-                val nåværendeOpphold = fakta.personForVurdering.opphold?.singleOrNull { it.gjeldendeNå() }
+                val nåværendeOpphold = fakta.personForVurdering.opphold.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     økTellerForLovligOpphold(LovligOppholdUtfall.STATSLØS)
                     Evaluering.nei(LovligOppholdUtfall.STATSLØS.begrunnelseForOppgave)
@@ -195,9 +193,9 @@ private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta,
     }
 }
 
-fun personHarLøpendeArbeidsforhold(personForVurdering: Person): Boolean = personForVurdering.arbeidsforhold?.any {
+fun personHarLøpendeArbeidsforhold(personForVurdering: Person): Boolean = personForVurdering.arbeidsforhold.any {
     it.periode?.tom == null || it.periode.tom >= LocalDate.now()
-} ?: false
+}
 
 fun annenForelderRegistrert(fakta: Fakta): Boolean {
     val annenForelder = hentAnnenForelder(fakta).firstOrNull()
@@ -220,13 +218,9 @@ private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopp
 }
 
 fun morHarBoddINorgeSiste5År(fakta: Fakta): Boolean {
-    if (fakta.personForVurdering.bostedsadresseperiode == null) {
-        return false
-    }
-
-    val perioder = fakta.personForVurdering.bostedsadresseperiode!!.map {
+    val perioder = fakta.personForVurdering.bostedsadresseperiode.mapNotNull {
         it.periode
-    }.filterNotNull()
+    }
 
     if (perioder.any { it.fom == null }) {
         return false
@@ -236,13 +230,9 @@ fun morHarBoddINorgeSiste5År(fakta: Fakta): Boolean {
 }
 
 fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
-    if (fakta.personForVurdering.arbeidsforhold == null) {
-        return false
-    }
-
-    val perioder = fakta.personForVurdering.arbeidsforhold!!.map {
+    val perioder = fakta.personForVurdering.arbeidsforhold.mapNotNull {
         it.periode
-    }.filterNotNull()
+    }
 
     if (perioder.any { it.fom == null }) {
         return false
