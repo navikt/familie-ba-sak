@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
@@ -8,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgers
 import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
-import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -71,24 +71,30 @@ class PersongrunnlagService(
                            kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
                            sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
                            målform = målform
-        ).also {
-            it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
-            it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
-        }
-
-        val søkerErEØSBorger = erEØSBorger(søker.statsborgerskap)
+        )
 
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        if (søkerErEØSBorger) {
+        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             søker.also {
-                it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(fødselsnummer), it)
-                it.opphold = oppholdService.hentOpphold(it)
+                it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
+                it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)
             }
 
-            if (!personHarLøpendeArbeidsforhold(søker)) {
-                leggTilFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
+            val søkersMedlemskap = finnNåværendeSterkesteMedlemskap(søker.statsborgerskap)
+            if (søkersMedlemskap == Medlemskap.EØS) {
+                søker.also {
+                    it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(fødselsnummer), it)
+                }
+
+                if (!personHarLøpendeArbeidsforhold(søker)) {
+                    leggTilFarEllerMedmor(barnasFødselsnummer.first(), personopplysningGrunnlag)
+                }
+            } else if (søkersMedlemskap != Medlemskap.NORDEN) {
+                søker.also {
+                    it.opphold = oppholdService.hentOpphold(it)
+                }
             }
         }
 
@@ -99,15 +105,16 @@ class PersongrunnlagService(
                          personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> {
         return barnasFødselsnummer.map { nyttBarn ->
             val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(nyttBarn)
-            Person(personIdent = PersonIdent(nyttBarn),
-                   type = PersonType.BARN,
-                   personopplysningGrunnlag = personopplysningGrunnlag,
-                   fødselsdato = personinfo.fødselsdato,
-                   aktørId = personopplysningerService.hentAktivAktørId(Ident(nyttBarn)),
-                   navn = personinfo.navn ?: "",
-                   kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-                   bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
-                   sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
+            Person(
+                    personIdent = PersonIdent(nyttBarn),
+                    type = PersonType.BARN,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fødselsdato = personinfo.fødselsdato,
+                    aktørId = personopplysningerService.hentAktivAktørId(Ident(nyttBarn)),
+                    navn = personinfo.navn ?: "",
+                    kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
+                    bostedsadresse = GrBostedsadresse.fraBostedsadresse(personinfo.bostedsadresse),
+                    sivilstand = personinfo.sivilstand ?: SIVILSTAND.UOPPGITT,
             )
         }
     }
@@ -135,9 +142,9 @@ class PersongrunnlagService(
                                                                                            it)
             }
 
-            val farEllerMedmorErEØSBorger = erEØSBorger(person.statsborgerskap)
+            val farEllerMedmorsStatsborgerskap = finnNåværendeSterkesteMedlemskap(person.statsborgerskap)
 
-            if (farEllerMedmorErEØSBorger) {
+            if (farEllerMedmorsStatsborgerskap == Medlemskap.EØS) {
                 person.also {
                     it.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(Ident(annenPartFødselsnummer), it)
                 }
@@ -147,10 +154,10 @@ class PersongrunnlagService(
         }
     }
 
-    private fun erEØSBorger(søkersStatsborgerskap: List<GrStatsborgerskap>?): Boolean {
-        val nåværendeMedlemskap = finnNåværendeMedlemskap(søkersStatsborgerskap)
+    private fun finnNåværendeSterkesteMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): Medlemskap? {
+        val nåværendeMedlemskap = finnNåværendeMedlemskap(statsborgerskap)
 
-        return finnSterkesteMedlemskap(nåværendeMedlemskap) == Medlemskap.EØS
+        return finnSterkesteMedlemskap(nåværendeMedlemskap)
     }
 
     companion object {
