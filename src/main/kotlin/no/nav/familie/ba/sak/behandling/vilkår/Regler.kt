@@ -49,7 +49,7 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
     val søker = barn.personopplysningGrunnlag.søker
 
     return when {
-        søker.isEmpty() -> Evaluering.nei(("Ingen søker"))
+        søker.isEmpty() -> Evaluering.nei("Ingen søker")
         erSammeAdresse(søker.first().bostedsadresse, barn.bostedsadresse) -> Evaluering.ja("Barnet bor med mor")
         else -> Evaluering.nei("Barnet bor ikke med mor")
     }
