@@ -9,6 +9,7 @@ import no.nav.familie.http.interceptor.StsBearerTokenClientInterceptor
 import no.nav.familie.http.sts.StsRestClient
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
@@ -85,7 +86,7 @@ class RestTemplateConfig(
 
     @Bean("jwtBearer")
     fun restTemplateJwtBearer(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-                              bearerTokenClientInterceptor: BearerTokenClientInterceptor): RestOperations {
+                              @Qualifier("BearerTokenClientInterceptor") bearerTokenClientInterceptor: BearerTokenClientInterceptor): RestOperations {
         return RestTemplateBuilder()
                 .interceptors(consumerIdClientInterceptor,
                               bearerTokenClientInterceptor,
