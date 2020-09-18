@@ -84,7 +84,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         if (evalueringAvFiltrering.resultat == Resultat.JA) {
             resultatAvVilkårsvurdering =
-                    stegService.evaluerVilkårForFødselshendelse(behandling, nyBehandling.søkersIdent ?: nyBehandling.morsIdent)
+                    stegService.evaluerVilkårForFødselshendelse(behandling)
         }
 
         when (resultatAvVilkårsvurdering) {
