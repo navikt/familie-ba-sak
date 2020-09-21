@@ -67,7 +67,6 @@ class BehandlingController(private val fagsakService: FagsakService,
     }
 
     @PutMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Unprotected
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
         return Result.runCatching {
