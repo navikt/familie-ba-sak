@@ -35,13 +35,15 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         }
     }
 
-    fun evaluerFiltreringsregler(fakta: Fakta): Evaluering {
+    fun evaluerFiltreringsregler(behandling: Behandling, barnasIdenter: Set<String>): Pair<Fakta, Evaluering> {
+        val fakta = lagFaktaObjekt(behandling, barnasIdenter.toSet())
+
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(fakta)
         oppdaterMetrikker(evaluering)
-        return evaluering
+        return Pair(fakta, evaluering)
     }
 
-    fun lagFaktaObjekt(behandling: Behandling, barnasIdenter: Set<String>): Fakta {
+    private fun lagFaktaObjekt(behandling: Behandling, barnasIdenter: Set<String>): Fakta {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 

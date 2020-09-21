@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class FiltreringsreglerForFlereBarnTest {
+
     val barnFnr0 = PersonIdent(FnrGenerator.generer())
     val barnFnr1 = PersonIdent(FnrGenerator.generer())
     val gyldigFnr = PersonIdent(FnrGenerator.generer())
@@ -76,10 +77,9 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { personopplysningerServiceMock.hentVergeData(Ident(gyldigFnr.ident)) } returns VergeData(harVerge = false)
 
-        val fakta = evaluerFiltreringsreglerForFødselshendelse.lagFaktaObjekt(behandling,
-                                                                              setOf(barnFnr0.ident,
-                                                                                    barnFnr1.ident))
-        val evaluering = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(fakta)
+        val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
+                                                                                             setOf(barnFnr0.ident,
+                                                                                                   barnFnr1.ident))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
@@ -88,7 +88,7 @@ class FiltreringsreglerForFlereBarnTest {
     }
 
     @Test
-    fun `Regelevaluering skal resultere i JA når alle filtreringsregler er oppfylt`(){
+    fun `Regelevaluering skal resultere i JA når alle filtreringsregler er oppfylt`() {
         val behandling = lagBehandling()
         val personInfo = generePersonInfoMedBarn(setOf(barnFnr0.ident, barnFnr1.ident))
 
@@ -113,10 +113,9 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { personopplysningerServiceMock.hentVergeData(Ident(gyldigFnr.ident)) } returns VergeData(harVerge = false)
 
-        val fakta = evaluerFiltreringsreglerForFødselshendelse.lagFaktaObjekt(behandling,
-                                                                              setOf(barnFnr0.ident,
-                                                                                    barnFnr1.ident))
-        val evaluering = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(fakta)
+        val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
+                                                                                             setOf(barnFnr0.ident,
+                                                                                                   barnFnr1.ident))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
     }
@@ -154,7 +153,7 @@ class FiltreringsreglerForFlereBarnTest {
                 familierelasjoner = barn?.map {
                     Familierelasjon(personIdent = Personident(it),
                                     relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                    navn = "navn ${it}")
+                                    navn = "navn $it")
                 }?.toSet() ?: emptySet()
         )
     }

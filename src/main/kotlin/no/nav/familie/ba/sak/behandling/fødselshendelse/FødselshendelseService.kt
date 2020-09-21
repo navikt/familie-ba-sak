@@ -79,10 +79,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     fun opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling: NyBehandlingHendelse) {
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
-        val faktaForFiltreringsregler =
-                evaluerFiltreringsreglerForFødselshendelse.lagFaktaObjekt(behandling, nyBehandling.barnasIdenter.toSet())
-        val evalueringAvFiltrering =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(faktaForFiltreringsregler)
+        val (faktaForFiltreringsregler, evalueringAvFiltrering) =
+                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter.toSet())
 
         gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = faktaForFiltreringsregler,
                                                      evalueringAvFiltrering = evalueringAvFiltrering,

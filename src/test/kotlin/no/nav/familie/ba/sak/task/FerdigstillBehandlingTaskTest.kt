@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
@@ -66,7 +65,7 @@ class FerdigstillBehandlingTaskTest {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(fagsak, opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE))
+                lagBehandling(fagsak))
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(fnrBarn))
@@ -75,7 +74,8 @@ class FerdigstillBehandlingTaskTest {
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, resultat)
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
-        val behandlingSomSkalKjøreVilkårsvurdering = behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VILKÅRSVURDERING)
+        val behandlingSomSkalKjøreVilkårsvurdering =
+                behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VILKÅRSVURDERING)
         stegService.håndterVilkårsvurdering(behandlingSomSkalKjøreVilkårsvurdering)
 
         vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(

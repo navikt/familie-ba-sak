@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -222,7 +223,15 @@ class FødselshendelseServiceTest {
         every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
-        every { evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any()) } returns filtreringResultat
+        every {
+            evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(),
+                                                                                    any())
+        } returns Pair(Fakta(mor = søker,
+                             morHarVerge = false,
+                             morLever = true,
+                             barnetLever = true,
+                             barnaFraHendelse = barna,
+                             restenAvBarna = emptyList()), filtreringResultat)
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
         every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } just Runs
         every { taskRepositoryMock.save(any()) } returns opprettOppgaveTask

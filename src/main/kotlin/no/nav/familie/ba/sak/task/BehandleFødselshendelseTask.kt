@@ -24,16 +24,25 @@ class BehandleFødselshendelseTask(
 
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
+        LOG.info("Kjører BehandleFødselshendelseTask")
+
         try {
-            LOG.info("Kjører BehandleFødselshendelseTask")
             fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(behandleFødselshendelseTaskDTO.nyBehandling)
         } catch (e: KontrollertRollbackException) {
-            fødselshendelsePreLanseringRepository.save(e.fødselshendelsePreLansering.copy(id = 0))
+            when (e.fødselshendelsePreLansering) {
+                null -> LOG.error("Rollback har blitt trigget, men data fra fødselshendelse mangler")
+                else -> fødselshendelsePreLanseringRepository.save(e.fødselshendelsePreLansering.copy(id = 0))
+            }
 
             LOG.info("Rollback utført. Data ikke persistert.")
-        } catch (e: Feil) {
+        } catch (e: Throwable) {
             LOG.info("FødselshendelseTask kjørte med Feil=${e.message}")
-            secureLogger.info("FødselshendelseTask kjørte med Feil=${e.frontendFeilmelding}", e)
+
+            if (e is Feil) {
+                secureLogger.info("FødselshendelseTask kjørte med Feil=${e.frontendFeilmelding}", e)
+            } else {
+                secureLogger.info("FødselshendelseTask feilet!", e)
+            }
         }
     }
 
@@ -55,4 +64,4 @@ class BehandleFødselshendelseTask(
     }
 }
 
-data class KontrollertRollbackException(val fødselshendelsePreLansering: FødselshendelsePreLansering) : RuntimeException()
+data class KontrollertRollbackException(val fødselshendelsePreLansering: FødselshendelsePreLansering?) : RuntimeException()

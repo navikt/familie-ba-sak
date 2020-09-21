@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.gdpr
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.vilkår.FaktaTilVilkårsvurdering
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class GDPRService(
-        private val fødelshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
+        private val fødelshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository,
+        private val behandlingService: BehandlingService
 ) {
 
     fun lagreResultatAvFiltreringsregler(faktaForFiltreringsregler: Fakta,
@@ -20,6 +22,7 @@ class GDPRService(
                                          nyBehandling: NyBehandlingHendelse,
                                          behandlingId: Long) {
         val fødselshendelsePreLansering = FødselshendelsePreLansering(
+                personIdent = nyBehandling.morsIdent!!,
                 behandlingId = behandlingId,
                 nyBehandlingHendelse = nyBehandling.toJson(),
                 filtreringsreglerInput = faktaForFiltreringsregler.toJson(),
@@ -32,13 +35,17 @@ class GDPRService(
                                                                         faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
                                                                         evaluering: Evaluering) {
         val fødselshendelsePreLansering = fødelshendelsePreLanseringRepository.finnFødselshendelsePreLansering(behandlingId)
+                                          ?: FødselshendelsePreLansering(
+                                                  behandlingId = behandlingId,
+                                                  personIdent = behandlingService.hent(behandlingId).fagsak.hentAktivIdent().ident
+                                          )
 
         fødselshendelsePreLansering.leggTilVurderingForPerson(faktaTilVilkårsvurdering, evaluering)
 
         fødelshendelsePreLanseringRepository.saveAndFlush(fødselshendelsePreLansering)
     }
 
-    fun hentFødselshendelsePreLansering(behandlingId: Long): FødselshendelsePreLansering {
+    fun hentFødselshendelsePreLansering(behandlingId: Long): FødselshendelsePreLansering? {
         return fødelshendelsePreLanseringRepository.finnFødselshendelsePreLansering(behandlingId)
     }
 }
