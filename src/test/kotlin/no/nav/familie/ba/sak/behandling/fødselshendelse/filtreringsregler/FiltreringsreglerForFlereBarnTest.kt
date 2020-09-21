@@ -45,7 +45,7 @@ class FiltreringsreglerForFlereBarnTest {
                 .evaluer(Fakta(mor, barn, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
+        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(2)
         Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
                 Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.identifikator)
     }
@@ -81,7 +81,7 @@ class FiltreringsreglerForFlereBarnTest {
                                                                                                    barnFnr1.ident))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
+        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(2)
         Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
                 Filtreringsregler.BARNET_LEVER.spesifikasjon.identifikator)
     }
@@ -116,7 +116,7 @@ class FiltreringsreglerForFlereBarnTest {
                                                                                              setOf(barnFnr0.ident,
                                                                                                    barnFnr1.ident))
 
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
     }
 
     private fun genererPerson(type: PersonType,
