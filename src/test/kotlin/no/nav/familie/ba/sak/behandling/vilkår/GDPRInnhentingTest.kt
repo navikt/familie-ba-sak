@@ -70,7 +70,7 @@ class GDPRInnhentingTest(
     @Test
     fun `Autovedtak for nordisk søker`() {
         stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
-                søkersIdent = GDPRMockConfiguration.morsfnr[0],
+                morsIdent = GDPRMockConfiguration.morsfnr[0],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[0])
         ))
 
@@ -92,7 +92,7 @@ class GDPRInnhentingTest(
     @Test
     fun `Autovedtak for eøs søker og nordisk medforelder`() {
         stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
-                søkersIdent = GDPRMockConfiguration.morsfnr[1],
+                morsIdent = GDPRMockConfiguration.morsfnr[1],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[1])
         ))
 
@@ -112,7 +112,7 @@ class GDPRInnhentingTest(
     @Test
     fun `Autovedtak for eøs søker og medforelder`() {
         stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
-                søkersIdent = GDPRMockConfiguration.morsfnr[2],
+                morsIdent = GDPRMockConfiguration.morsfnr[2],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[2])
         ))
 
@@ -133,7 +133,7 @@ class GDPRInnhentingTest(
     @Test
     fun `Autovedtak for tredjelandsborger`() {
         stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
-                søkersIdent = GDPRMockConfiguration.morsfnr[3],
+                morsIdent = GDPRMockConfiguration.morsfnr[3],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[3])
         ))
 
