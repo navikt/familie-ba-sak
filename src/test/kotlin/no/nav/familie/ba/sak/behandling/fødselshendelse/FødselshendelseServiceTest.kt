@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
+import no.nav.familie.ba.sak.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -239,6 +240,9 @@ class FødselshendelseServiceTest {
         every { persongrunnlagServiceMock.hentSøker(any()) } returns søker
         every { persongrunnlagServiceMock.hentBarna(any()) } returns barna
         every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling
+
+        every { gdprServiceMock.lagreResultatAvFiltreringsregler(any(), any(), any(), any()) } just runs
+        every { gdprServiceMock.hentFødselshendelsePreLansering(any()) } returns FødselshendelsePreLansering(personIdent = søker.personIdent.ident, behandlingId = behandling.id)
 
         mockkObject(IverksettMotOppdragTask.Companion)
         every {

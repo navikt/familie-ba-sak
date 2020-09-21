@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.gdpr.domene.FødelshendelsePreLanseringRepository
@@ -264,7 +265,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[0], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -275,7 +276,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[0])
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -314,7 +315,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[1], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -325,7 +326,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[1])
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -364,7 +365,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[2], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -375,7 +376,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[2])
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -414,7 +415,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[3], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -425,7 +426,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[3])
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -453,7 +454,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[4], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -464,7 +465,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[4])
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -488,7 +489,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[4], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -499,7 +500,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[4])
         } returns PersonInfo(
-                fødselsdato = now.minusDays(15),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
