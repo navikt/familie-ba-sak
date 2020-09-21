@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
-                  val spesifikasjon: Spesifikasjon<Fakta>,
+                  val spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
                   val begrunnelser: Map<BehandlingResultatType, List<BehandlingresultatOgVilkårBegrunnelse>> = emptyMap(),
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
@@ -19,7 +19,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     BOR_MED_SØKER(
             parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
-            spesifikasjon = Spesifikasjon<Fakta>(
+            spesifikasjon = Spesifikasjon<FaktaTilVilkårsvurdering>(
                     beskrivelse = "Bor med søker: har samme adresse",
                     identifikator = "BOR_MED_SØKER:SAMME_ADRESSE",
                     implementasjon = { barnBorMedSøker(this) })
@@ -83,6 +83,13 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     }
 
     companion object {
+
+        fun hentSamletSpesifikasjonForPerson(personType: PersonType): Spesifikasjon<FaktaTilVilkårsvurdering> {
+            return hentVilkårFor(personType)
+                    .toSet()
+                    .map { vilkår -> vilkår.spesifikasjon }
+                    .reduce { samledeVilkårsregler, vilkårsregler -> samledeVilkårsregler og vilkårsregler }
+        }
 
         fun hentVilkårFor(personType: PersonType): Set<Vilkår> {
             return values().filter {

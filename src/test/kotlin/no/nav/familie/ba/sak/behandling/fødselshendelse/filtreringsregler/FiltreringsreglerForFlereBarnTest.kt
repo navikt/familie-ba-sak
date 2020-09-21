@@ -76,9 +76,10 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { personopplysningerServiceMock.hentVergeData(Ident(gyldigFnr.ident)) } returns VergeData(harVerge = false)
 
-        val evaluering = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                             setOf(barnFnr0.ident,
-                                                                                                   barnFnr1.ident))
+        val fakta = evaluerFiltreringsreglerForFødselshendelse.lagFaktaObjekt(behandling,
+                                                                              setOf(barnFnr0.ident,
+                                                                                    barnFnr1.ident))
+        val evaluering = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(fakta)
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
@@ -112,9 +113,10 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { personopplysningerServiceMock.hentVergeData(Ident(gyldigFnr.ident)) } returns VergeData(harVerge = false)
 
-        val evaluering = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                             setOf(barnFnr0.ident,
-                                                                                                   barnFnr1.ident))
+        val fakta = evaluerFiltreringsreglerForFødselshendelse.lagFaktaObjekt(behandling,
+                                                                              setOf(barnFnr0.ident,
+                                                                                    barnFnr1.ident))
+        val evaluering = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(fakta)
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
     }

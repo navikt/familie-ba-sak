@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.behandling.fødselshendelse.FødselshendelseService
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.gdpr.domene.FødelshendelsePreLanseringRepository
+import no.nav.familie.ba.sak.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -15,7 +17,10 @@ import java.util.*
 @TaskStepBeskrivelse(taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
                      beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
                      maxAntallFeil = 3)
-class BehandleFødselshendelseTask(private val fødselshendelseService: FødselshendelseService) : AsyncTaskStep {
+class BehandleFødselshendelseTask(
+        private val fødselshendelseService: FødselshendelseService,
+        private val fødselshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository) :
+        AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO = objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
@@ -23,6 +28,8 @@ class BehandleFødselshendelseTask(private val fødselshendelseService: Fødsels
             LOG.info("Kjører BehandleFødselshendelseTask")
             fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(behandleFødselshendelseTaskDTO.nyBehandling)
         } catch (e: KontrollertRollbackException) {
+            fødselshendelsePreLanseringRepository.save(e.fødselshendelsePreLansering.copy(id = 0))
+
             LOG.info("Rollback utført. Data ikke persistert.")
         } catch (e: Feil) {
             LOG.info("FødselshendelseTask kjørte med Feil=${e.message}")
@@ -31,6 +38,7 @@ class BehandleFødselshendelseTask(private val fødselshendelseService: Fødsels
     }
 
     companion object {
+
         const val TASK_STEP_TYPE = "behandleFødselshendelseTask"
         val LOG = LoggerFactory.getLogger(this::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -47,4 +55,4 @@ class BehandleFødselshendelseTask(private val fødselshendelseService: Fødsels
     }
 }
 
-class KontrollertRollbackException : RuntimeException()
+data class KontrollertRollbackException(val fødselshendelsePreLansering: FødselshendelsePreLansering) : RuntimeException()

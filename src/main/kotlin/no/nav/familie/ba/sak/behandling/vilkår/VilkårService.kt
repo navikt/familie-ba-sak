@@ -14,9 +14,9 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPers
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPut
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
-import no.nav.nare.core.specifications.Spesifikasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -27,10 +27,12 @@ import java.util.*
 class VilkårService(
         private val behandlingResultatService: BehandlingResultatService,
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val vilkårsvurderingMetrics: VilkårsvurderingMetrics
+        private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
+        private val gdprService: GDPRService
 ) {
 
-    fun hentVilkårsvurdering(behandlingId: Long): BehandlingResultat? = behandlingResultatService.hentAktivForBehandling(behandlingId = behandlingId)
+    fun hentVilkårsvurdering(behandlingId: Long): BehandlingResultat? = behandlingResultatService.hentAktivForBehandling(
+            behandlingId = behandlingId)
 
     @Transactional
     fun endreVilkår(behandlingId: Long,
@@ -195,33 +197,42 @@ class VilkårService(
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${behandlingResultat.behandling.id}")
 
         val fødselsdatoEldsteBarn = personopplysningGrunnlag.personer
-                .filter { it.type == PersonType.BARN }
-                .maxByOrNull { it.fødselsdato }?.fødselsdato ?: error("Fant ikke barn i personopplysninger")
+                                            .filter { it.type == PersonType.BARN }
+                                            .maxByOrNull { it.fødselsdato }?.fødselsdato
+                                    ?: error("Fant ikke barn i personopplysninger")
+
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
-            val spesifikasjonererForPerson = spesifikasjonerForPerson(person)
-            val fakta = Fakta(personForVurdering = person, behandlingOpprinnelse = behandlingResultat.behandling.opprinnelse)
-            val evalueringerForVilkår = spesifikasjonererForPerson.map { it.evaluer(fakta) }
+            val samletSpesifikasjonForPerson = Vilkår.hentSamletSpesifikasjonForPerson(person.type)
+            val faktaTilVilkårsvurdering = FaktaTilVilkårsvurdering(personForVurdering = person,
+                                                                    behandlingOpprinnelse = behandlingResultat.behandling.opprinnelse)
+            val evalueringForVilkårsvurdering = samletSpesifikasjonForPerson.evaluer(faktaTilVilkårsvurdering)
+
+            gdprService.oppdaterFødselshendelsePreLanseringMedVilkårsvurderingForPerson(behandlingId = behandlingResultat.behandling.id,
+                                                                                        faktaTilVilkårsvurdering = faktaTilVilkårsvurdering,
+                                                                                        evaluering = evalueringForVilkårsvurdering)
 
             personResultat.setVilkårResultater(
-                    vilkårResultater(personResultat, person, fakta, evalueringerForVilkår, fødselsdatoEldsteBarn)
+                    vilkårResultater(personResultat,
+                                     person,
+                                     faktaTilVilkårsvurdering,
+                                     evalueringForVilkårsvurdering,
+                                     fødselsdatoEldsteBarn)
             )
 
             personResultat
         }.toSet()
     }
 
-    private fun spesifikasjonerForPerson(person: Person): List<Spesifikasjon<Fakta>> = Vilkår.hentVilkårFor(person.type).map { vilkår -> vilkår.spesifikasjon}
-
     private fun vilkårResultater(personResultat: PersonResultat,
                                  person: Person,
-                                 fakta: Fakta,
-                                 evalueringer: List<Evaluering>,
+                                 faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
+                                 evalueringForVilkårsvurdering: Evaluering,
                                  fødselsdatoEldsteBarn: LocalDate): SortedSet<VilkårResultat> {
 
-        return evalueringer.map { child ->
+        return evalueringForVilkårsvurdering.children.map { child ->
             val fom =
                     if (person.type === PersonType.BARN)
                         person.fødselsdato
@@ -248,7 +259,7 @@ class VilkårService(
                 if (child.children.isNotEmpty())
                     child.children.forEach {
                         if (it.begrunnelse.isNotBlank()) {
-                             when (it.resultat) {
+                            when (it.resultat) {
                                 Resultat.NEI ->
                                     begrunnelse = "$begrunnelse\n\t- nei: ${it.begrunnelse}"
                                 Resultat.KANSKJE ->
@@ -267,7 +278,7 @@ class VilkårService(
                            periodeTom = tom,
                            begrunnelse = begrunnelse,
                            behandlingId = personResultat.behandlingResultat.behandling.id,
-                           regelInput = fakta.toJson(),
+                           regelInput = faktaTilVilkårsvurdering.toJson(),
                            regelOutput = child.toJson()
             )
         }.toSortedSet(PersonResultat.comparator)
@@ -279,6 +290,7 @@ class VilkårService(
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
