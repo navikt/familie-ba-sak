@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
@@ -209,7 +207,7 @@ class FødselshendelseIntegrasjonTest(
         every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } returns Unit
         every { featureToggleServiceMock.isEnabled(any()) } returns false
         every {vilkårsvurderingMetricsMock.
-        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} returns Unit
+        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} just(runs)
     }
 }
 
