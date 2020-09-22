@@ -142,6 +142,7 @@ class ClientMocks {
                                         fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
                         Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
                                         relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr[1]))
         } returns personInfo.getValue(søkerFnr[1]).copy(
@@ -156,6 +157,22 @@ class ClientMocks {
                                         fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
                         Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
                                         relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
+
+        every {
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(integrasjonerFnr))
+        } returns personInfo.getValue(integrasjonerFnr).copy(
+                familierelasjoner = setOf(
+                        Familierelasjon(personIdent = Personident(id = barnFnr[0]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[0]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                        Familierelasjon(personIdent = Personident(id = barnFnr[1]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[1]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                        Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+
         return mockPersonopplysningerService
     }
 
@@ -366,6 +383,7 @@ class ClientMocks {
 
         val søkerFnr = arrayOf("12345678910", "11223344556")
         val barnFnr = arrayOf("01101800033", "01101900033")
+        val integrasjonerFnr = "10000111111"
         val bostedsadresse = Bostedsadresse(
                 matrikkeladresse = Matrikkeladresse(matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
                                                     postnummer = "0202", kommunenummer = "2231")
@@ -391,7 +409,12 @@ class ClientMocks {
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UGIFT,
                                          kjønn = Kjønn.KVINNE,
-                                         navn = "Jenta Barnesen")
+                                         navn = "Jenta Barnesen"),
+                integrasjonerFnr to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
+                                               bostedsadresse = bostedsadresse,
+                                               sivilstand = SIVILSTAND.GIFT,
+                                               kjønn = Kjønn.KVINNE,
+                                               navn = "Mor Moresen")
         )
     }
 
