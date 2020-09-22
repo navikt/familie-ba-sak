@@ -3,10 +3,9 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 import no.nav.familie.ba.sak.common.erFraInneværendeEllerForrigeMåned
 import no.nav.familie.ba.sak.common.erFraInneværendeMåned
 import no.nav.nare.core.evaluations.Evaluering
-import java.time.LocalDate
 
 internal fun morErOver18år(fakta: Fakta): Evaluering {
-    return when (LocalDate.now().isAfter(fakta.mor.fødselsdato.plusYears(18))) {
+    return when (fakta.dagensDato.isAfter(fakta.mor.fødselsdato.plusYears(18))) {
         true -> Evaluering.ja("Mor er over 18 år.")
         false -> Evaluering.nei("Mor er under 18 år.")
     }
@@ -43,7 +42,7 @@ internal fun morHarIkkeVerge(fakta: Fakta): Evaluering {
 }
 
 internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(fakta: Fakta): Evaluering {
-    val dagIMånedenForDagensDato = LocalDate.now().dayOfMonth
+    val dagIMånedenForDagensDato = fakta.dagensDato.dayOfMonth
     return when {
         dagIMånedenForDagensDato < 21 && !fakta.barnaFraHendelse.any { it.fødselsdato.erFraInneværendeEllerForrigeMåned() } ->
             Evaluering.nei("Saken medfører etterbetaling.")

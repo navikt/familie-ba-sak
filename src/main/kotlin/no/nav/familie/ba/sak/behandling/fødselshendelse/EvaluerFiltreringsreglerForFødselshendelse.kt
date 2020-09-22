@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysningerService: PersonopplysningerService,
-                                                 private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
+                                                 private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+                                                 private val localDateService: LocalDateService) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
 
@@ -49,7 +51,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
 
         val restenAvBarna =
                 personopplysningerService.hentPersoninfoMedRelasjoner(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
-                    it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && barnaFraHendelse.none{barn-> barn.personIdent.ident == it.personIdent.id}
+                    it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }
                 }.map {
                     personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
                 }
@@ -58,7 +60,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
         val barnLever = !barnaFraHendelse.any { personopplysningerService.hentDødsfall(Ident(it.personIdent.ident)).erDød }
         val morHarVerge = personopplysningerService.hentVergeData(Ident(mor.personIdent.ident)).harVerge
 
-        return Fakta(mor, barnaFraHendelse, restenAvBarna, morLever, barnLever, morHarVerge)
+        return Fakta(mor, barnaFraHendelse, restenAvBarna, morLever, barnLever, morHarVerge, localDateService.now())
     }
 
     private fun oppdaterMetrikker(evaluering: Evaluering) {
@@ -72,6 +74,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
     }
 
     companion object {
+
         val LOG: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }

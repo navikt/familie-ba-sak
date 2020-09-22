@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.fødselshendelse.EvaluerFiltreringsreglerForFødselshendelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -20,14 +21,16 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class FiltreringsreglerForFlereBarnTest {
+
     val barnFnr0 = PersonIdent(FnrGenerator.generer())
     val barnFnr1 = PersonIdent(FnrGenerator.generer())
     val gyldigFnr = PersonIdent(FnrGenerator.generer())
 
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
+    val localDateServiceMock = mockk<LocalDateService>()
     val evaluerFiltreringsreglerForFødselshendelse = EvaluerFiltreringsreglerForFødselshendelse(
-            personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock)
+            personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock, localDateServiceMock)
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige minst ett barn ble født`() {
@@ -42,10 +45,11 @@ class FiltreringsreglerForFlereBarnTest {
         )
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barn, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, barn, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false,
+                               dagensDato = LocalDate.now().withDayOfMonth(15)))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(2)
+        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
         Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
                 Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.identifikator)
     }
@@ -76,18 +80,20 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { personopplysningerServiceMock.hentVergeData(Ident(gyldigFnr.ident)) } returns VergeData(harVerge = false)
 
+        every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
+
         val evaluering = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
                                                                                              setOf(barnFnr0.ident,
                                                                                                    barnFnr1.ident))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(2)
+        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
         Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
                 Filtreringsregler.BARNET_LEVER.spesifikasjon.identifikator)
     }
 
     @Test
-    fun `Regelevaluering skal resultere i JA når alle filtreringsregler er oppfylt`(){
+    fun `Regelevaluering skal resultere i JA når alle filtreringsregler er oppfylt`() {
         val behandling = lagBehandling()
         val personInfo = generePersonInfoMedBarn(setOf(barnFnr0.ident, barnFnr1.ident))
 
@@ -111,6 +117,8 @@ class FiltreringsreglerForFlereBarnTest {
         every { personopplysningerServiceMock.hentPersoninfoMedRelasjoner(gyldigFnr.ident) } returns personInfo
 
         every { personopplysningerServiceMock.hentVergeData(Ident(gyldigFnr.ident)) } returns VergeData(harVerge = false)
+
+        every { localDateServiceMock.now() } returns LocalDate.now()
 
         val evaluering = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
                                                                                              setOf(barnFnr0.ident,
