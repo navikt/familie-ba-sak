@@ -196,7 +196,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     private fun økTellereForStansetIAutomatiskVilkårsvurdering(behandling: Behandling) {
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)!!
 
-        Vilkår.hentRekkefølge().find { erVilkårForPersonNei(behandlingResultat, it.first, it.second) }?.let {
+        Vilkår.hentFødselshendelseVilkårsreglerRekkefølge().find { erVilkårForPersonNei(behandlingResultat, it.first, it.second) }?.let {
             vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(it.second, it.first)
         }
 

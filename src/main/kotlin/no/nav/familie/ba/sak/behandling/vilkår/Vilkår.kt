@@ -90,11 +90,11 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             }.toSet()
         }
 
-        fun hentRekkefølge(): List<Pair<PersonType, Vilkår>> {
-            return vilkårRekkefølge
+        fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Pair<PersonType, Vilkår>> {
+            return fødselshendelseVilkårsreglerRekkefølge
         }
 
-        private val vilkårRekkefølge = listOf(
+        private val fødselshendelseVilkårsreglerRekkefølge = listOf(
                 //Mor bosatt i riket
                 Pair(PersonType.SØKER, Vilkår.BOSATT_I_RIKET),
                 //Mor har lovlig opphold

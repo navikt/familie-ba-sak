@@ -243,7 +243,7 @@ class FødselshendelseServiceTest {
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
 
         every {vilkårsvurderingMetricsMock.
-        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} returns Unit
+        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} just runs
     }
 
     companion object {

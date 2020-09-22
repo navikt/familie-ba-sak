@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
@@ -54,7 +56,7 @@ class OppgaveBeskrivelseTest {
     @BeforeEach
     fun initMocks(){
         every {vilkårsvurderingMetricsMock.
-        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} returns Unit
+        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} just runs
     }
 
     @Test
