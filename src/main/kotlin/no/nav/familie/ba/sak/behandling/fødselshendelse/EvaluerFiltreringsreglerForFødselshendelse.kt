@@ -48,7 +48,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         val mor = personopplysningGrunnlag.søker.firstOrNull()
-                  ?: error("Fant flere personer i grunnlaget med type=søker.")
+                  ?: error("Fant ingen personer i grunnlaget med type=søker.")
 
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
