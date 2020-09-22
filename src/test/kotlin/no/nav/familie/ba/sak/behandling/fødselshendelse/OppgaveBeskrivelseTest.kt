@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -28,36 +29,33 @@ import java.time.LocalDate
 
 class OppgaveBeskrivelseTest {
 
-    val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
-    val personopplysningerServiceMock = mockk<PersonopplysningerService>()
-    val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
-    val featureToggleServiceMock = mockk<FeatureToggleService>()
-    val stegServiceMock = mockk<StegService>()
-    val vedtakServiceMock = mockk<VedtakService>()
-    val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
-    val taskRepositoryMock = mockk<TaskRepository>()
-    val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
-    val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
-    val behandlingRepositoryMock = mockk<BehandlingRepository>()
-    val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
-    val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
-                                                        infotrygdBarnetrygdClientMock,
-                                                        featureToggleServiceMock,
-                                                        stegServiceMock,
-                                                        vedtakServiceMock,
-                                                        evaluerFiltreringsreglerForFødselshendelseMock,
-                                                        taskRepositoryMock,
-                                                        personopplysningerServiceMock,
-                                                        behandlingResultatRepositoryMock,
-                                                        persongrunnlagServiceMock,
-                                                        behandlingRepositoryMock,
-                                                        vilkårsvurderingMetricsMock)
+    private val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
+    private val personopplysningerServiceMock = mockk<PersonopplysningerService>()
+    private val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
+    private val featureToggleServiceMock = mockk<FeatureToggleService>()
+    private val stegServiceMock = mockk<StegService>()
+    private val vedtakServiceMock = mockk<VedtakService>()
+    private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
+    private val taskRepositoryMock = mockk<TaskRepository>()
+    private val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
+    private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
+    private val behandlingRepositoryMock = mockk<BehandlingRepository>()
+    private val gdprServiceMock = mockk<GDPRService>()
+    private val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
 
-    @BeforeEach
-    fun initMocks(){
-        every {vilkårsvurderingMetricsMock.
-        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} just runs
-    }
+    private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
+                                                                infotrygdBarnetrygdClientMock,
+                                                                featureToggleServiceMock,
+                                                                stegServiceMock,
+                                                                vedtakServiceMock,
+                                                                evaluerFiltreringsreglerForFødselshendelseMock,
+                                                                taskRepositoryMock,
+                                                                personopplysningerServiceMock,
+                                                                behandlingResultatRepositoryMock,
+                                                                persongrunnlagServiceMock,
+                                                                behandlingRepositoryMock,
+                                                                vilkårsvurderingMetricsMock,
+                                                                gdprServiceMock)
 
     @Test
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere begrunnelse av første regel som feilet`() {

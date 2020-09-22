@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -40,7 +41,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val behandlingResultatRepository: BehandlingResultatRepository,
                              private val persongrunnlagService: PersongrunnlagService,
                              private val behandlingRepository: BehandlingRepository,
-                             private val vilkårsvurderingMetrics: VilkårsvurderingMetrics) {
+                             private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
+                             private val gdprService: GDPRService) {
 
     val finnesLøpendeSakIInfotrygd: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
     val finnesIkkeLøpendeSakIInfotrygd: Counter =
@@ -78,15 +80,19 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     fun opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling: NyBehandlingHendelse) {
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
-        val evalueringAvFiltrering =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                    nyBehandling.barnasIdenter.toSet())
-        var resultatAvVilkårsvurdering: BehandlingResultatType? = null
+        val (faktaForFiltreringsregler, evalueringAvFiltrering) =
+                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter.toSet())
 
-        if (evalueringAvFiltrering.resultat == Resultat.JA) {
-            resultatAvVilkårsvurdering =
+        gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = faktaForFiltreringsregler,
+                                                     evalueringAvFiltrering = evalueringAvFiltrering,
+                                                     nyBehandling = nyBehandling,
+                                                     behandlingId = behandling.id)
+
+        val resultatAvVilkårsvurdering: BehandlingResultatType? =
+                if (evalueringAvFiltrering.resultat == Resultat.JA)
                     stegService.evaluerVilkårForFødselshendelse(behandling)
-        }
+                else
+                    null
 
         when (resultatAvVilkårsvurdering) {
             null -> stansetIAutomatiskFiltreringCounter.increment()
@@ -95,7 +101,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
 
         if (fødselshendelseSkalRullesTilbake()) {
-            throw KontrollertRollbackException()
+            throw KontrollertRollbackException(gdprService.hentFødselshendelsePreLansering(behandlingId = behandling.id))
         } else {
             if (evalueringAvFiltrering.resultat !== Resultat.JA || resultatAvVilkårsvurdering !== BehandlingResultatType.INNVILGET) {
                 val beskrivelse = when (resultatAvVilkårsvurdering) {

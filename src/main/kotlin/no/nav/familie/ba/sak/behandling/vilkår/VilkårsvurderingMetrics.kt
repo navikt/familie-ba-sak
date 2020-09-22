@@ -52,12 +52,12 @@ class VilkårsvurderingMetrics {
         }
     }
 
-    private fun LeggTilEntryTilMetrikkMap(counterMap: Map<String, Counter>,
-                                          spesifikasjon: Spesifikasjon<Fakta>,
-                                          personType: PersonType,
-                                          resultat: Resultat,
-                                          behandlingOpprinnelse: BehandlingOpprinnelse,
-                                          navn: String): Map<String, Counter> {
+    private fun genererMetrikkMap(counterMap: Map<String, Counter>,
+                                  spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
+                                  personType: PersonType,
+                                  resultat: Resultat,
+                                  behandlingOpprinnelse: BehandlingOpprinnelse,
+                                  navn: String): Map<String, Counter> {
         if (spesifikasjon.children.isEmpty()) {
             val counter = Metrics.counter(navn,
                                           "vilkaar",
