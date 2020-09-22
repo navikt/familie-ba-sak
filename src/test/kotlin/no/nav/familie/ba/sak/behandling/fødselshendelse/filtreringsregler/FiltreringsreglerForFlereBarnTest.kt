@@ -82,8 +82,8 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
-        val evaluering = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                             setOf(barnFnr0.ident,
+        val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
+                                                                                          setOf(barnFnr0.ident,
                                                                                                    barnFnr1.ident))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
@@ -120,7 +120,7 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now()
 
-        val evaluering = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
+        val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
                                                                                              setOf(barnFnr0.ident,
                                                                                                    barnFnr1.ident))
 
@@ -160,7 +160,7 @@ class FiltreringsreglerForFlereBarnTest {
                 familierelasjoner = barn?.map {
                     Familierelasjon(personIdent = Personident(it),
                                     relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                    navn = "navn ${it}")
+                                    navn = "navn $it")
                 }?.toSet() ?: emptySet()
         )
     }

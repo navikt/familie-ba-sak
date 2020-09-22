@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -12,6 +13,8 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.gdpr.GDPRService
+import no.nav.familie.ba.sak.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -31,33 +34,36 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class FødselshendelseServiceTest {
-    val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
-    val personopplysningerServiceMock = mockk<PersonopplysningerService>()
-    val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
-    val featureToggleServiceMock = mockk<FeatureToggleService>()
-    val stegServiceMock = mockk<StegService>()
-    val vedtakServiceMock = mockk<VedtakService>()
-    val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
-    val taskRepositoryMock = mockk<TaskRepository>()
-    val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
-    val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
-    val behandlingRepositoryMock = mockk<BehandlingRepository>()
 
-    val søkerFnr = "12345678910"
-    val barn1Fnr = "12345678911"
-    val barn2Fnr = "12345678912"
+    private val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
+    private val personopplysningerServiceMock = mockk<PersonopplysningerService>()
+    private val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
+    private val featureToggleServiceMock = mockk<FeatureToggleService>()
+    private val stegServiceMock = mockk<StegService>()
+    private val vedtakServiceMock = mockk<VedtakService>()
+    private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
+    private val taskRepositoryMock = mockk<TaskRepository>()
+    private val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
+    private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
+    private val behandlingRepositoryMock = mockk<BehandlingRepository>()
+    private val gdprServiceMock = mockk<GDPRService>()
 
-    val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
-                                                        infotrygdBarnetrygdClientMock,
-                                                        featureToggleServiceMock,
-                                                        stegServiceMock,
-                                                        vedtakServiceMock,
-                                                        evaluerFiltreringsreglerForFødselshendelseMock,
-                                                        taskRepositoryMock,
-                                                        personopplysningerServiceMock,
-                                                        behandlingResultatRepositoryMock,
-                                                        persongrunnlagServiceMock,
-                                                        behandlingRepositoryMock)
+    private val søkerFnr = "12345678910"
+    private val barn1Fnr = "12345678911"
+    private val barn2Fnr = "12345678912"
+
+    private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
+                                                                infotrygdBarnetrygdClientMock,
+                                                                featureToggleServiceMock,
+                                                                stegServiceMock,
+                                                                vedtakServiceMock,
+                                                                evaluerFiltreringsreglerForFødselshendelseMock,
+                                                                taskRepositoryMock,
+                                                                personopplysningerServiceMock,
+                                                                behandlingResultatRepositoryMock,
+                                                                persongrunnlagServiceMock,
+                                                                behandlingRepositoryMock,
+                                                                gdprServiceMock)
 
     @Test
     fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer false`() {
@@ -218,7 +224,15 @@ class FødselshendelseServiceTest {
         every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
-        every { evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(), any()) } returns filtreringResultat
+        every {
+            evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(),
+                                                                                    any())
+        } returns Pair(Fakta(mor = søker,
+                             morHarVerge = false,
+                             morLever = true,
+                             barnetLever = true,
+                             barnaFraHendelse = barna,
+                             restenAvBarna = emptyList()), filtreringResultat)
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
         every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } just Runs
         every { taskRepositoryMock.save(any()) } returns opprettOppgaveTask
@@ -226,6 +240,9 @@ class FødselshendelseServiceTest {
         every { persongrunnlagServiceMock.hentSøker(any()) } returns søker
         every { persongrunnlagServiceMock.hentBarna(any()) } returns barna
         every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling
+
+        every { gdprServiceMock.lagreResultatAvFiltreringsregler(any(), any(), any(), any()) } just runs
+        every { gdprServiceMock.hentFødselshendelsePreLansering(any()) } returns FødselshendelsePreLansering(personIdent = søker.personIdent.ident, behandlingId = behandling.id)
 
         mockkObject(IverksettMotOppdragTask.Companion)
         every {
@@ -239,7 +256,9 @@ class FødselshendelseServiceTest {
     }
 
     companion object {
+
         val fødselshendelseBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033"))
-        val fødselshendelseFlerlingerBehandling = NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
+        val fødselshendelseFlerlingerBehandling =
+                NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
     }
 }

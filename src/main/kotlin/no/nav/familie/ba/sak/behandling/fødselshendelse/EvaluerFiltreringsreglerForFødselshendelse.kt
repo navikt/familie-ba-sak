@@ -17,9 +17,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysningerService: PersonopplysningerService,
-                                                 private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-                                                 private val localDateService: LocalDateService) {
+class EvaluerFiltreringsreglerForFødselshendelse(
+        private val personopplysningerService: PersonopplysningerService,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val localDateService: LocalDateService) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
 
@@ -36,17 +37,21 @@ class EvaluerFiltreringsreglerForFødselshendelse(private val personopplysninger
         }
     }
 
-    fun evaluerFiltreringsregler(behandling: Behandling, barnasIdenter: Set<String>): Evaluering {
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(lagFaktaObjekt(behandling, barnasIdenter))
+    fun evaluerFiltreringsregler(behandling: Behandling, barnasIdenter: Set<String>): Pair<Fakta, Evaluering> {
+        val fakta = lagFaktaObjekt(behandling, barnasIdenter.toSet())
+
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(fakta)
         oppdaterMetrikker(evaluering)
-        return evaluering
+        return Pair(fakta, evaluering)
     }
 
     private fun lagFaktaObjekt(behandling: Behandling, barnasIdenter: Set<String>): Fakta {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
-        val mor = personopplysningGrunnlag.søker[0]
+        val mor = personopplysningGrunnlag.søker.firstOrNull()
+                  ?: error("Fant ingen personer i grunnlaget med type=søker.")
+
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
         val restenAvBarna =
