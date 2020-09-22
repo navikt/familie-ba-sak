@@ -40,7 +40,7 @@ class VilkårsvurderingMetrics {
         }
     }
 
-    private fun genererMetrikkMap(spesifikasjon: Spesifikasjon<Fakta>,
+    private fun genererMetrikkMap(spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
                                   personType: PersonType,
                                   resultat: Resultat,
                                   behandlingOpprinnelse: BehandlingOpprinnelse) {

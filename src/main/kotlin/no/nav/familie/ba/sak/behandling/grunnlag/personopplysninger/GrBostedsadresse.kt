@@ -19,16 +19,22 @@ abstract class GrBostedsadresse(
 
     companion object {
         fun fraBostedsadresse(bostedsadresse: Bostedsadresse?): GrBostedsadresse? {
-            if(bostedsadresse == null){
-                return null
-            }else if (bostedsadresse.vegadresse != null) {
-                return GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
-            } else if (bostedsadresse.matrikkeladresse != null) {
-                return GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
-            } else if (bostedsadresse.ukjentBosted != null) {
-                return GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
-            } else {
-                return null
+            return when {
+                bostedsadresse == null -> {
+                    null
+                }
+                bostedsadresse.vegadresse != null -> {
+                    GrVegadresse.fraVegadresse(bostedsadresse.vegadresse!!)
+                }
+                bostedsadresse.matrikkeladresse != null -> {
+                    GrMatrikkeladresse.fraMatrikkeladresse(bostedsadresse.matrikkeladresse!!)
+                }
+                bostedsadresse.ukjentBosted != null -> {
+                    GrUkjentBosted.fraUkjentBosted(bostedsadresse.ukjentBosted!!)
+                }
+                else -> {
+                    null
+                }
             }
         }
 
