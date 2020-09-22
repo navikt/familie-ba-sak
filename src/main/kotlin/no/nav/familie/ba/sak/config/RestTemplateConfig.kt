@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import no.nav.familie.http.interceptor.BearerTokenWithSTSFallbackClientInterceptor
 import no.nav.familie.http.interceptor.BearerTokenClientInterceptor
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
@@ -30,7 +31,8 @@ import java.time.Duration
         ConsumerIdClientInterceptor::class,
         BearerTokenClientInterceptor::class,
         MdcValuesPropagatingClientInterceptor::class,
-        StsBearerTokenClientInterceptor::class)
+        StsBearerTokenClientInterceptor::class,
+        BearerTokenWithSTSFallbackClientInterceptor::class)
 class RestTemplateConfig(
         private val environment: Environment
 ) {
@@ -65,25 +67,34 @@ class RestTemplateConfig(
                 setConnectTimeout(20 * 1000)
             }
 
+    @Bean("jwt-sts")
+    fun restTemplateJwtBearerFallbackSts(bearerTokenClientInterceptor: BearerTokenWithSTSFallbackClientInterceptor,
+                                         consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
+
+        return RestTemplateBuilder()
+                .interceptors(consumerIdClientInterceptor,
+                              bearerTokenClientInterceptor,
+                              MdcValuesPropagatingClientInterceptor())
+                .requestFactory(this::requestFactory)
+                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .also {
+                    if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
+                }
+                .build()
+    }
+
     @Bean("jwtBearer")
     fun restTemplateJwtBearer(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
                               bearerTokenClientInterceptor: BearerTokenClientInterceptor): RestOperations {
-        return if (trengerProxy()) {
-            RestTemplateBuilder()
-                    .additionalCustomizers(NaisProxyCustomizer())
-                    .interceptors(consumerIdClientInterceptor,
-                                  bearerTokenClientInterceptor,
-                                  MdcValuesPropagatingClientInterceptor())
-                    .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
-                    .build()
-        } else {
-            RestTemplateBuilder()
-                    .interceptors(consumerIdClientInterceptor,
-                                  bearerTokenClientInterceptor,
-                                  MdcValuesPropagatingClientInterceptor())
-                    .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
-                    .build()
-        }
+        return RestTemplateBuilder()
+                .interceptors(consumerIdClientInterceptor,
+                              bearerTokenClientInterceptor,
+                              MdcValuesPropagatingClientInterceptor())
+                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .also {
+                    if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
+                }
+                .build()
     }
 
     @Bean
@@ -123,4 +134,6 @@ class RestTemplateConfig(
             listOf("e2e", "dev", "postgres").contains(it.trim(' '))
         }
     }
+
+
 }
