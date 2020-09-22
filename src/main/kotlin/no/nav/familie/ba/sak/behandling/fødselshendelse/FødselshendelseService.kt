@@ -196,24 +196,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     private fun økTellereForStansetIAutomatiskVilkårsvurdering(behandling: Behandling) {
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)!!
 
-        val orderedVilkårList = listOf(
-                //Mor bosatt i riket
-                Pair(PersonType.SØKER, Vilkår.BOSATT_I_RIKET),
-                //Mor har lovlig opphold
-                Pair(PersonType.SØKER, Vilkår.LOVLIG_OPPHOLD),
-                //Barnet er under 18 år
-                Pair(PersonType.BARN, Vilkår.UNDER_18_ÅR),
-                //Barnet bor med søker
-                Pair(PersonType.BARN, Vilkår.BOR_MED_SØKER),
-                //Barnet er ugift og har ikke inngått partnerskap
-                Pair(PersonType.BARN, Vilkår.GIFT_PARTNERSKAP),
-                //Barnet er bosatt i riket
-                Pair(PersonType.BARN, Vilkår.BOSATT_I_RIKET),
-                //Barnet har lovlig opphold
-                Pair(PersonType.BARN, Vilkår.LOVLIG_OPPHOLD),
-        )
-
-        orderedVilkårList.find { erVilkårForPersonNei(behandlingResultat, it.first, it.second) }?.let {
+        Vilkår.hentRekkefølge().find { erVilkårForPersonNei(behandlingResultat, it.first, it.second) }?.let {
             vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(it.second, it.first)
         }
 
