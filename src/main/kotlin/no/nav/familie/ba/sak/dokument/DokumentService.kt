@@ -50,7 +50,7 @@ class DokumentService(
                         ?: error("Finner ikke søker på vedtaket")
 
             val behandlingResultatType =
-                    behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+                    behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling = vedtak.behandling)
 
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                            ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",

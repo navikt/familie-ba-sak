@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -41,7 +42,7 @@ data class BehandlingResultat(
         return "BehandlingResultat(id=$id, behandling=${behandling.id})"
     }
 
-    fun hentSamletResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultatType {
+    fun hentSamletResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?, behandlingOpprinnelse: BehandlingOpprinnelse): BehandlingResultatType {
         if (personopplysningGrunnlag == null || personResultater.isEmpty() ||
             personResultater.any { it.hentSamletResultat() == BehandlingResultatType.IKKE_VURDERT }) {
             return BehandlingResultatType.IKKE_VURDERT

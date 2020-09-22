@@ -81,7 +81,7 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
-        assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat(personopplysningGrunnlag))
+        assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat(personopplysningGrunnlag, behandling.opprinnelse))
 
         behandlingResultat.personResultater.forEach {
             it.vilkårResultater.forEach {
@@ -120,7 +120,7 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
 
-        assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat(personopplysningGrunnlag))
+        assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat(personopplysningGrunnlag, behandling.opprinnelse))
     }
 
     @Test

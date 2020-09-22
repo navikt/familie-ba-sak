@@ -60,8 +60,14 @@ class LoggService(
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Endring på vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat gikk fra ${forrigeBehandlingResultat.hentSamletResultat(personopplysningGrunnlag).displayName.toLowerCase()} " +
-                            "til ${nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag).displayName.toLowerCase()}"
+                    tekst = "Resultat gikk fra ${
+                        forrigeBehandlingResultat.hentSamletResultat(personopplysningGrunnlag,
+                                                                     behandling.opprinnelse).displayName.toLowerCase()
+                    } " +
+                            "til ${
+                                nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag,
+                                                                          behandling.opprinnelse).displayName.toLowerCase()
+                            }"
             ))
         } else {
             lagre(Logg(
@@ -69,7 +75,10 @@ class LoggService(
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Opprettet vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat ble ${nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag).displayName.toLowerCase()}"
+                    tekst = "Resultat ble ${
+                        nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag,
+                                                                  behandling.opprinnelse).displayName.toLowerCase()
+                    }"
             ))
         }
     }
@@ -111,7 +120,7 @@ class LoggService(
                 tittel = if (beslutning.erGodkjent()) "Godkjent vedtak" else "Underkjent vedtak",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = if (beslutning.erGodkjent()) "Vedtak godkjent"
-                        else "Vedtak underkjent" + if (begrunnelse != null) " med begrunnelse: $begrunnelse" else ""
+                else "Vedtak underkjent" + if (begrunnelse != null) " med begrunnelse: $begrunnelse" else ""
         ))
     }
 

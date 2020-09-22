@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -14,12 +15,12 @@ class BehandlingResultatService(
         private val loggService: LoggService
 ) {
 
-    fun hentBehandlingResultatTypeFraBehandling(behandlingId: Long): BehandlingResultatType {
-        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
+    fun hentBehandlingResultatTypeFraBehandling(behandling: Behandling): BehandlingResultatType {
+        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
                                  ?: return BehandlingResultatType.IKKE_VURDERT
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId)
-        return behandlingResultat.hentSamletResultat(personopplysningGrunnlag)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
+        return behandlingResultat.hentSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
     }
 
     fun hentAktivForBehandling(behandlingId: Long): BehandlingResultat? {
