@@ -106,7 +106,7 @@ class FødselshendelseIntegrasjonTest(
                                                         behandlingResultatRepository,
                                                         persongrunnlagService,
                                                         behandlingRepository,
-                                                        vilkårsvurderingMetricsMock)
+                                                        vilkårsvurderingMetricsMock,
                                                         gdprService)
 
     @Test

@@ -52,7 +52,7 @@ class VilkårsvurderingMetrics {
         }
     }
 
-    private fun genererMetrikkMap(counterMap: Map<String, Counter>,
+    private fun LeggTilEntryTilMetrikkMap(counterMap: Map<String, Counter>,
                                   spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
                                   personType: PersonType,
                                   resultat: Resultat,
