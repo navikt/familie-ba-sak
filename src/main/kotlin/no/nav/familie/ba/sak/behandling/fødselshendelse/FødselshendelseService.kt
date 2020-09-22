@@ -113,17 +113,17 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         }
     }
 
-    private fun erVilkårUtfall(behandlingResultat: BehandlingResultat, personType: PersonType, vilkår: Vilkår): Boolean {
+    private fun erVilkårForPersonNei(behandlingResultat: BehandlingResultat, personType: PersonType, vilkår: Vilkår): Boolean {
         val personer = if (personType == PersonType.SØKER) {
             listOf(persongrunnlagService.hentSøker(behandlingResultat.behandling))
         } else {
             persongrunnlagService.hentBarna(behandlingResultat.behandling)
         }
-        return behandlingResultat?.personResultater?.find {personResultat ->
-            personer.map { it?.personIdent?.ident }.contains(personResultat.personIdent) && personResultat.vilkårResultater.find { vilkårResusltat ->
+        return behandlingResultat?.personResultater?.any {personResultat ->
+            personer.map { it?.personIdent?.ident }.contains(personResultat.personIdent) && personResultat.vilkårResultater.any { vilkårResusltat ->
                 vilkårResusltat.vilkårType == vilkår && vilkårResusltat.resultat == Resultat.NEI
-            } != null
-        } != null
+            }
+        }
     }
 
     internal fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String? {
@@ -213,7 +213,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                 Pair(PersonType.BARN, Vilkår.LOVLIG_OPPHOLD),
         )
 
-        orderedVilkårList.find { erVilkårUtfall(behandlingResultat, it.first, it.second) }?.let {
+        orderedVilkårList.find { erVilkårForPersonNei(behandlingResultat, it.first, it.second) }?.let {
             vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(it.second, it.first)
         }
 

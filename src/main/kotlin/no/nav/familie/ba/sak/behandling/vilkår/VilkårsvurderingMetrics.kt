@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 class VilkårsvurderingMetrics {
 
     var vilkårsvurderingUtfall = mapOf<String, Counter>()
-    var vilkårsvurderingFørstUtfall = mapOf<String, Counter>()
+    var vilkårsvurderingFørsteUtfall = mapOf<String, Counter>()
 
     val personTypeToDisplayedType = mapOf(
             PersonType.SØKER to "Mor",
@@ -33,12 +33,12 @@ class VilkårsvurderingMetrics {
                                                                                resultat,
                                                                                behandlingOpprinnelse,
                                                                                "familie.ba.behandling.vilkaarsvurdering")
-                            vilkårsvurderingFørstUtfall = LeggTilEntryTilMetrikkMap(vilkårsvurderingFørstUtfall,
-                                                                                    it.spesifikasjon,
-                                                                                    personType,
-                                                                                    resultat,
-                                                                                    behandlingOpprinnelse,
-                                                                                    "familie.ba.behandling.vilkaarsvurdering.foerstutfall")
+                            vilkårsvurderingFørsteUtfall = LeggTilEntryTilMetrikkMap(vilkårsvurderingFørsteUtfall,
+                                                                                     it.spesifikasjon,
+                                                                                     personType,
+                                                                                     resultat,
+                                                                                     behandlingOpprinnelse,
+                                                                                     "familie.ba.behandling.vilkaarsvurdering.foerstutfall")
                         }
                     }
                 }
@@ -92,9 +92,9 @@ class VilkårsvurderingMetrics {
                      behandlingOpprinnelse: BehandlingOpprinnelse) = "${vilkår}-${personType.name}_${resultat.name}_${behandlingOpprinnelse.name}"
 
     fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkår: Vilkår, personType: PersonType) {
-        vilkårsvurderingFørstUtfall[vilkårNøkkel(vilkår.spesifikasjon.identifikator,
-                                                 personType, Resultat.NEI,
-                                                 BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)]!!.increment()
+        vilkårsvurderingFørsteUtfall[vilkårNøkkel(vilkår.spesifikasjon.identifikator,
+                                                  personType, Resultat.NEI,
+                                                  BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)]!!.increment()
     }
 
     fun økTellereForEvaluering(evaluering: Evaluering, personType: PersonType, behandlingOpprinnelse: BehandlingOpprinnelse) {
