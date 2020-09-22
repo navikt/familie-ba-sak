@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -13,18 +14,21 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -56,7 +60,16 @@ class GDPRInnhentingTest(
         private val integrasjonClient: IntegrasjonClient,
 
         @Autowired
-        private val stegService: StegService
+        private val stegService: StegService,
+
+        @Autowired
+        private val featureToggleService: FeatureToggleService,
+
+        @Autowired
+        private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+
+        @Autowired
+        private val fødelshendelsePreLanseringRepository: FødelshendelsePreLanseringRepository
 ) {
 
     @BeforeAll
@@ -167,7 +180,56 @@ class GDPRInnhentingTest(
             integrasjonClient.hentArbeidsforhold(GDPRMockConfiguration.morsfnr[4], any())
         }
     }
+
+    /**
+     * Automatisk fødselshendelse, lagre ned innhenting og resultat
+     */
+    @Test
+    fun `Lagring av fødselshendelse til midlertidig tabell`() {
+        every {
+            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
+        } returns true
+
+        behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(
+                        morsIdent = GDPRMockConfiguration.morsfnr[5],
+                        barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[4])
+                ))))
+
+        val fødselshendelsePreLansering =
+                fødelshendelsePreLanseringRepository.finnFødselshendelsePreLansering(GDPRMockConfiguration.morsfnr[5])
+                        .firstOrNull()
+        Assertions.assertNotNull(fødselshendelsePreLansering)
+
+        val faktaForFiltreringsregler = mapTilFaktaTilFiltrering(fødselshendelsePreLansering!!.filtreringsreglerInput)
+        Assertions.assertEquals(GDPRMockConfiguration.morsfnr[5], faktaForFiltreringsregler.mor.personIdent.ident)
+
+        val vurderinger = fødselshendelsePreLansering.hentVilkårsvurderingerForFødselshendelse().vurderinger
+        Assertions.assertNotNull(vurderinger.find {
+            mapTilFaktaTilVilkårsvurdering(it.faktaTilVilkårsvurdering).personForVurdering.personIdent.ident == GDPRMockConfiguration.morsfnr[5]
+        })
+
+        Assertions.assertNotNull(vurderinger.find {
+            mapTilFaktaTilVilkårsvurdering(it.faktaTilVilkårsvurdering).personForVurdering.personIdent.ident == GDPRMockConfiguration.barnefnr[4]
+        })
+
+        Assertions.assertNull(fagsakService.hent(PersonIdent(GDPRMockConfiguration.morsfnr[5])))
+    }
+
+    fun mapTilFaktaTilFiltrering(faktaTilFiltrering: String): SubsetFaktaTilFiltreringForTest = objectMapper.readValue(
+            faktaTilFiltrering)
+
+    fun mapTilFaktaTilVilkårsvurdering(faktaTilVilkårsvurdering: String): SubsetFaktaTilVilkårsvurderingForTest = objectMapper.readValue(
+            faktaTilVilkårsvurdering)
 }
+
+data class SubsetFaktaTilFiltreringForTest(val mor: SubsetAvPersonForTest)
+
+data class SubsetFaktaTilVilkårsvurderingForTest(val personForVurdering: SubsetAvPersonForTest)
+
+data class SubsetAvPersonForTest(
+        val personIdent: PersonIdent,
+)
 
 @Configuration
 class GDPRMockConfiguration {
@@ -203,7 +265,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[0], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(1),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -214,7 +276,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[0])
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(1),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -253,7 +315,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[1], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(1),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -264,7 +326,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[1])
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(1),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -303,7 +365,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[2], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(1),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -314,7 +376,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[2])
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(1),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -353,7 +415,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[3], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(1),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -364,7 +426,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[3])
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(1),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -392,7 +454,7 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfo(barnefnr[4], PersonInfoQuery.ENKEL)
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(1),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -403,7 +465,42 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[4])
         } returns PersonInfo(
-                fødselsdato = now.minusMonths(1),
+                fødselsdato = now.førsteDagIInneværendeMåned(),
+                navn = "Jente Barn",
+                kjønn = Kjønn.KVINNE,
+                sivilstand = SIVILSTAND.UGIFT,
+                familierelasjoner = setOf(),
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+                bostedsadresse = søkerBostedsadresse
+        )
+
+        // Automatisk, lagrecase
+        every {
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(morsfnr[5])
+        } returns PersonInfo(
+                fødselsdato = now.minusYears(20),
+                navn = "Mor Søker Fem",
+                kjønn = Kjønn.KVINNE,
+                sivilstand = SIVILSTAND.UGIFT,
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+                bostedsadresse = søkerBostedsadresse
+        )
+
+        every {
+            personopplysningerServiceMock.hentPersoninfo(barnefnr[4], PersonInfoQuery.ENKEL)
+        } returns PersonInfo(
+                fødselsdato = now.førsteDagIInneværendeMåned(),
+                navn = "Jente Barn",
+                kjønn = Kjønn.KVINNE,
+                sivilstand = SIVILSTAND.UGIFT,
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+                bostedsadresse = søkerBostedsadresse
+        )
+
+        every {
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[4])
+        } returns PersonInfo(
+                fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -434,6 +531,14 @@ class GDPRMockConfiguration {
         every {
             personopplysningerServiceMock.hentStatsborgerskap(Ident(morsfnr[3]))
         } returns listOf(Statsborgerskap(land = "USA", gyldigFraOgMed = now.minusYears(20), gyldigTilOgMed = null))
+
+        every {
+            personopplysningerServiceMock.hentStatsborgerskap(Ident(morsfnr[4]))
+        } returns listOf(Statsborgerskap(land = "NOR", gyldigFraOgMed = now.minusYears(20), gyldigTilOgMed = null))
+
+        every {
+            personopplysningerServiceMock.hentStatsborgerskap(Ident(morsfnr[5]))
+        } returns listOf(Statsborgerskap(land = "NOR", gyldigFraOgMed = now.minusYears(20), gyldigTilOgMed = null))
 
         every {
             personopplysningerServiceMock.hentStatsborgerskap(Ident(farsfnr[0]))
@@ -468,7 +573,7 @@ class GDPRMockConfiguration {
 
     companion object {
 
-        val morsfnr = listOf("12445678910", "12445678911", "12445678917", "12445678918", "12345678921")
+        val morsfnr = listOf("12445678910", "12445678911", "12445678917", "12445678918", "12345678921", "12345678923")
         val farsfnr = listOf("12345678912", "12345678913", "12345678919")
         val barnefnr = listOf("12345678914", "12345678915", "12345678916", "12345678920", "12345678922")
 

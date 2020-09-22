@@ -12,7 +12,7 @@ class GiftEllerPartnerskapVilkårTest {
 
     @Test
     fun `Gift-vilkår gir resultat JA for fødselshendelse når sivilstand er uoppgitt`() {
-        val fakta = Fakta(personForVurdering = barn, behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+        val fakta = FaktaTilVilkårsvurdering(personForVurdering = barn, behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
@@ -20,7 +20,7 @@ class GiftEllerPartnerskapVilkårTest {
 
     @Test
     fun `Gift-vilkår gir resultat KANSKJE for manuell behandling når sivilstand er uoppgitt`() {
-        val fakta = Fakta(personForVurdering = barn, behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
+        val fakta = FaktaTilVilkårsvurdering(personForVurdering = barn, behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.KANSKJE)

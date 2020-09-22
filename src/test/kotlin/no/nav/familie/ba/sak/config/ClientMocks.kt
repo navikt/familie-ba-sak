@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadr
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -386,7 +387,7 @@ class ClientMocks {
                                          sivilstand = SIVILSTAND.UOPPGITT,
                                          kjønn = Kjønn.MANN,
                                          navn = "Gutten Barnesen"),
-                barnFnr[1] to PersonInfo(fødselsdato = LocalDate.now().minusMonths(5),
+                barnFnr[1] to PersonInfo(fødselsdato = LocalDate.now().førsteDagIInneværendeMåned(),
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UGIFT,
                                          kjønn = Kjønn.KVINNE,

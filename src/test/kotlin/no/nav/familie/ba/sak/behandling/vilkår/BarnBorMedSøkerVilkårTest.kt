@@ -49,13 +49,13 @@ class BarnBorMedSøkerVilkårTest {
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
     }
 
-    private fun opprettFaktaObject(bostedsadresseSøker: GrBostedsadresse, bostedsadresseBarn: GrBostedsadresse): Fakta {
+    private fun opprettFaktaObject(bostedsadresseSøker: GrBostedsadresse, bostedsadresseBarn: GrBostedsadresse): FaktaTilVilkårsvurdering {
         val barnMedAdresse = barn.copy(bostedsadresse = bostedsadresseBarn)
         barnMedAdresse.personopplysningGrunnlag.personer.clear()
         barnMedAdresse.personopplysningGrunnlag.personer.add(søker.copy(bostedsadresse = bostedsadresseSøker))
 
-        return Fakta(personForVurdering = barnMedAdresse,
-                          behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+        return FaktaTilVilkårsvurdering(personForVurdering = barnMedAdresse,
+                                        behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
     }
 
     companion object {
