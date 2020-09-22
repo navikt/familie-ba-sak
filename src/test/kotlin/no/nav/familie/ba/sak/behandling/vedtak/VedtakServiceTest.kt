@@ -132,21 +132,17 @@ class VedtakServiceTest(
 
     @Test
     @Tag("integration")
-    fun `Opprett innvilget behandling med vedtak`() {
+    fun `Opprett behandling med vedtak`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
-
-        val behandlingResultatType =
-                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = behandling.id)
-        Assertions.assertNotNull(behandling.fagsak.id)
-        Assertions.assertEquals(behandlingResultatType, BehandlingResultatType.INNVILGET)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
@@ -168,37 +164,6 @@ class VedtakServiceTest(
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(totrinnskontroll)
         Assertions.assertEquals("ansvarligSaksbehandler", totrinnskontroll!!.saksbehandler)
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Opprett opphørt behandling med vedtak`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.NEI)
-
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
-
-        val behandlingResultatType =
-                behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = behandling.id)
-        Assertions.assertNotNull(behandling.fagsak.id)
-        Assertions.assertEquals(behandlingResultatType, BehandlingResultatType.AVSLÅTT)
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag
-        )
-
-        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
-        Assertions.assertNotNull(hentetVedtak)
     }
 
     @Test

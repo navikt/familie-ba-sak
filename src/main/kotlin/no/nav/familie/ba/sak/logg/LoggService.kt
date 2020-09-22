@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.logg
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
@@ -15,6 +16,7 @@ import java.time.LocalDateTime
 @Service
 class LoggService(
         private val loggRepository: LoggRepository,
+        private val persongrunnlagService: PersongrunnlagService,
         private val rolleConfig: RolleConfig
 ) {
 
@@ -51,14 +53,15 @@ class LoggService(
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
                                     forrigeBehandlingResultat: BehandlingResultat?,
                                     nyttBehandlingResultat: BehandlingResultat): Logg {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         return if (forrigeBehandlingResultat != null) {
             lagre(Logg(
                     behandlingId = behandling.id,
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Endring på vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat gikk fra ${forrigeBehandlingResultat.hentSamletResultat().displayName.toLowerCase()} " +
-                            "til ${nyttBehandlingResultat.hentSamletResultat().displayName.toLowerCase()}"
+                    tekst = "Resultat gikk fra ${forrigeBehandlingResultat.hentSamletResultat(personopplysningGrunnlag).displayName.toLowerCase()} " +
+                            "til ${nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag).displayName.toLowerCase()}"
             ))
         } else {
             lagre(Logg(
@@ -66,7 +69,7 @@ class LoggService(
                     type = LoggType.VILKÅRSVURDERING,
                     tittel = "Opprettet vilkårsvurdering",
                     rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat ble ${nyttBehandlingResultat.hentSamletResultat().displayName.toLowerCase()}"
+                    tekst = "Resultat ble ${nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag).displayName.toLowerCase()}"
             ))
         }
     }

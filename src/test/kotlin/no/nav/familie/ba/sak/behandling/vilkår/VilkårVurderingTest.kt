@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
@@ -15,8 +14,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.nare.core.evaluations.Resultat
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -80,7 +81,7 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
-        assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
+        assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat(personopplysningGrunnlag))
 
         behandlingResultat.personResultater.forEach {
             it.vilkårResultater.forEach {
@@ -119,7 +120,7 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
 
-        assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
+        assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat(personopplysningGrunnlag))
     }
 
     @Test

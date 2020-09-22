@@ -114,12 +114,13 @@ class FødselshendelseIntegrasjonTest(
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
         val behandlingResultater = behandlingResultatRepository.finnBehandlingResultater(behandling!!.id)
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
         Assert.assertEquals(1, behandlingResultater.size)
 
-        val behandlingResultat = behandlingResultater.get(0)
+        val behandlingResultat = behandlingResultater[0]
 
-        Assert.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
+        Assert.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat(persongrunnlag))
         Assert.assertEquals(true, behandlingResultat.aktiv)
         Assert.assertEquals(3, behandlingResultat.personResultater.size)
 
@@ -163,12 +164,13 @@ class FødselshendelseIntegrasjonTest(
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[1]))
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
         val behandlingResultater = behandlingResultatRepository.finnBehandlingResultater(behandling!!.id)
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
         Assert.assertEquals(1, behandlingResultater.size)
 
-        val behandlingResultat = behandlingResultater.get(0)
+        val behandlingResultat = behandlingResultater[0]
 
-        Assert.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
+        Assert.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat(persongrunnlag))
         Assert.assertEquals(true, behandlingResultat.aktiv)
         Assert.assertEquals(3, behandlingResultat.personResultater.size)
         Assert.assertTrue(behandlingResultat.personResultater.map { it.personIdent }.containsAll(

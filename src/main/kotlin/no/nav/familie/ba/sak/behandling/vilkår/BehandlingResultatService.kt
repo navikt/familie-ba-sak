@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service
 @Service
 class BehandlingResultatService(
         private val behandlingResultatRepository: BehandlingResultatRepository,
+        private val persongrunnlagService: PersongrunnlagService,
         private val loggService: LoggService
 ) {
 
@@ -16,7 +18,8 @@ class BehandlingResultatService(
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandlingId)
                                  ?: return BehandlingResultatType.IKKE_VURDERT
 
-        return behandlingResultat.hentSamletResultat()
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId)
+        return behandlingResultat.hentSamletResultat(personopplysningGrunnlag)
     }
 
     fun hentAktivForBehandling(behandlingId: Long): BehandlingResultat? {

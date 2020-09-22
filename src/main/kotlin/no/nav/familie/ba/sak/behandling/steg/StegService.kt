@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
@@ -73,10 +74,10 @@ class StegService(
                                                                 bekreftEndringerViaFrontend = true))
     }
 
-    fun evaluerVilkårForFødselshendelse(behandling: Behandling): BehandlingResultatType? {
+    fun evaluerVilkårForFødselshendelse(behandling: Behandling, personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultatType? {
         håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
-        return behandlingResultat?.hentSamletResultat()
+        return behandlingResultat?.hentSamletResultat(personopplysningGrunnlag)
                 .also { secureLogger.info("Behandling med søkerident ${behandling.fagsak.hentAktivIdent().ident} fullført med resultat: $it") }
     }
 

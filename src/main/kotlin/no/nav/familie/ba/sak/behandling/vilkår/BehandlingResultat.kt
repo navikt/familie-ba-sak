@@ -2,9 +2,14 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.beregning.domene.personResultaterTilPeriodeResultater
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.maksimum
+import no.nav.familie.ba.sak.common.minimum
 import javax.persistence.*
 
 @Entity(name = "BehandlingResultat")
@@ -36,14 +41,14 @@ data class BehandlingResultat(
         return "BehandlingResultat(id=$id, behandling=${behandling.id})"
     }
 
-    fun hentSamletResultat(): BehandlingResultatType {
-        if (personResultater.isEmpty() ||
+    fun hentSamletResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultatType {
+        if (personopplysningGrunnlag == null || personResultater.isEmpty() ||
             personResultater.any { it.hentSamletResultat() == BehandlingResultatType.IKKE_VURDERT }) {
             return BehandlingResultatType.IKKE_VURDERT
         }
 
         return when {
-            personResultater.all { it.hentSamletResultat() == BehandlingResultatType.INNVILGET } ->
+            hentOppfyltePerioderPerBarn(personopplysningGrunnlag).isNotEmpty() ->
                 BehandlingResultatType.INNVILGET
             else ->
                 if (behandling.type == BehandlingType.REVURDERING) BehandlingResultatType.OPPHØRT
@@ -51,7 +56,49 @@ data class BehandlingResultat(
         }
     }
 
+    fun hentOppfyltePerioderPerBarn(personopplysningGrunnlag: PersonopplysningGrunnlag): List<Pair<Periode, OppfyltPeriode>> {
+        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = hentInnvilgedePerioder(personopplysningGrunnlag)
+
+        return innvilgedePeriodeResultatBarna
+                .flatMap { periodeResultatBarn ->
+                    innvilgetPeriodeResultatSøker
+                            .filter { it.overlapper(periodeResultatBarn) }
+                            .map { overlappendePerioderesultatSøker ->
+                                val oppfyltFom =
+                                        maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
+                                val oppfyltTom =
+                                        minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
+
+                                Pair(Periode(oppfyltFom, oppfyltTom),
+                                     OppfyltPeriode(barn = periodeResultatBarn, søker = overlappendePerioderesultatSøker))
+                            }
+                }
+    }
+
     fun periodeResultater(brukMåned: Boolean): Set<PeriodeResultat> = this.personResultaterTilPeriodeResultater(brukMåned)
+
+    fun hentInnvilgedePerioder(personopplysningGrunnlag: PersonopplysningGrunnlag): Pair<List<PeriodeResultat>, List<PeriodeResultat>> {
+        val periodeResultater = periodeResultater(false)
+
+        val identBarnMap = personopplysningGrunnlag.barna
+                .associateBy { it.personIdent.ident }
+
+        val søkerMap = personopplysningGrunnlag.søker
+                .associateBy { it.personIdent.ident }
+
+        val innvilgetPeriodeResultatSøker = periodeResultater.filter {
+            søkerMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
+                    PersonType.SØKER
+            )
+        }
+        val innvilgedePeriodeResultatBarna = periodeResultater.filter {
+            identBarnMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
+                    PersonType.BARN
+            )
+        }
+
+        return Pair(innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna)
+    }
 
     fun kopier(): BehandlingResultat {
         val nyttBehandlingResultat = BehandlingResultat(
@@ -72,3 +119,8 @@ enum class BehandlingResultatType(val brevMal: String, val displayName: String) 
     HENLAGT(brevMal = "ukjent", displayName = "Henlagt"),
     IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert")
 }
+
+data class OppfyltPeriode(
+        val barn: PeriodeResultat,
+        val søker: PeriodeResultat
+)

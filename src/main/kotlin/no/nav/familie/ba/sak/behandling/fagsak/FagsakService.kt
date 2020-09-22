@@ -138,8 +138,13 @@ class FagsakService(
                     steg = behandling.steg,
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
-                    samletResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)?.hentSamletResultat()
-                                     ?: BehandlingResultatType.IKKE_VURDERT,
+                    samletResultat =
+                    if (personopplysningGrunnlag == null)
+                        BehandlingResultatType.IKKE_VURDERT
+                    else
+                        behandlingResultatService.hentAktivForBehandling(
+                                behandling.id)?.hentSamletResultat(personopplysningGrunnlag)
+                        ?: BehandlingResultatType.IKKE_VURDERT,
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
                     underkategori = behandling.underkategori,
