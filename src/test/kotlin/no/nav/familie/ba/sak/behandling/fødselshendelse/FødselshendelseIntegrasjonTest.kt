@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -82,7 +83,10 @@ class FødselshendelseIntegrasjonTest(
         private val fagsakRepository: FagsakRepository,
 
         @Autowired
-        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+
+        @Autowired
+        private val gdprService: GDPRService
 ) {
 
     val now = LocalDate.now()
@@ -90,7 +94,6 @@ class FødselshendelseIntegrasjonTest(
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     val featureToggleServiceMock = mockk<FeatureToggleService>()
-
 
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
@@ -102,7 +105,8 @@ class FødselshendelseIntegrasjonTest(
                                                         personopplysningerService,
                                                         behandlingResultatRepository,
                                                         persongrunnlagService,
-                                                        behandlingRepository)
+                                                        behandlingRepository,
+                                                        gdprService)
 
     @Test
     fun `Fødselshendelse med flere barn med oppfylt vilkårsvurdering skal håndteres riktig`() {
@@ -124,8 +128,8 @@ class FødselshendelseIntegrasjonTest(
         Assert.assertEquals(true, behandlingResultat.aktiv)
         Assert.assertEquals(3, behandlingResultat.personResultater.size)
 
-        Assert.assertTrue(behandlingResultat.personResultater.all {
-            it.vilkårResultater.all {
+        Assert.assertTrue(behandlingResultat.personResultater.all { personResultat ->
+            personResultat.vilkårResultater.all {
                 it.resultat == Resultat.JA
             }
         })
@@ -255,7 +259,6 @@ class MockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[0])
         } returns PersonInfo(
-                //fødselsdato = now.minusMonths(1),
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
@@ -267,7 +270,6 @@ class MockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[1])
         } returns PersonInfo(
-                //fødselsdato = now.minusMonths(1),
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
@@ -279,7 +281,6 @@ class MockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[2])
         } returns PersonInfo(
-                //fødselsdato = now.minusMonths(1),
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn To",
                 kjønn = Kjønn.MANN,

@@ -42,14 +42,18 @@ data class BehandlingResultat(
         return "BehandlingResultat(id=$id, behandling=${behandling.id})"
     }
 
-    fun hentSamletResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?, behandlingOpprinnelse: BehandlingOpprinnelse): BehandlingResultatType {
+    fun hentSamletResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?,
+                           behandlingOpprinnelse: BehandlingOpprinnelse): BehandlingResultatType {
         if (personopplysningGrunnlag == null || personResultater.isEmpty() ||
             personResultater.any { it.hentSamletResultat() == BehandlingResultatType.IKKE_VURDERT }) {
             return BehandlingResultatType.IKKE_VURDERT
         }
 
+        val minimumStørrelseForInnvilgelse =
+                if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) personopplysningGrunnlag.barna.size else 1
+
         return when {
-            hentOppfyltePerioderPerBarn(personopplysningGrunnlag).isNotEmpty() ->
+            hentOppfyltePerioderPerBarn(personopplysningGrunnlag).size >= minimumStørrelseForInnvilgelse ->
                 BehandlingResultatType.INNVILGET
             else ->
                 if (behandling.type == BehandlingType.REVURDERING) BehandlingResultatType.OPPHØRT

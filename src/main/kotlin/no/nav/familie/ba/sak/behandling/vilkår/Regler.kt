@@ -17,14 +17,14 @@ import no.nav.nare.core.evaluations.Evaluering
 import java.time.Duration
 import java.time.LocalDate
 
-internal fun barnUnder18År(fakta: Fakta): Evaluering =
-        if (fakta.alder < 18)
+internal fun barnUnder18År(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering =
+        if (faktaTilVilkårsvurdering.alder < 18)
             Evaluering.ja("Barn er under 18 år")
         else
             Evaluering.nei("Barn er ikke under 18 år")
 
-internal fun harEnSøker(fakta: Fakta): Evaluering {
-    val barn = fakta.personForVurdering
+internal fun harEnSøker(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
+    val barn = faktaTilVilkårsvurdering.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
 
     return if (søker.size == 1)
@@ -33,8 +33,8 @@ internal fun harEnSøker(fakta: Fakta): Evaluering {
         Evaluering.nei("Søknad har mer enn en eller ingen søker")
 }
 
-internal fun søkerErMor(fakta: Fakta): Evaluering {
-    val barn = fakta.personForVurdering
+internal fun søkerErMor(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
+    val barn = faktaTilVilkårsvurdering.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
 
     return when {
@@ -44,8 +44,8 @@ internal fun søkerErMor(fakta: Fakta): Evaluering {
     }
 }
 
-internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
-    val barn = fakta.personForVurdering
+internal fun barnBorMedSøker(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
+    val barn = faktaTilVilkårsvurdering.personForVurdering
     val søker = barn.personopplysningGrunnlag.søker
 
     return when {
@@ -55,38 +55,38 @@ internal fun barnBorMedSøker(fakta: Fakta): Evaluering {
     }
 }
 
-internal fun bosattINorge(fakta: Fakta): Evaluering =
+internal fun bosattINorge(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering =
         /**
          * En person med registrert bostedsadresse er bosatt i Norge.
          * En person som mangler registrert bostedsadresse er utflyttet.
          * See: https://navikt.github.io/pdl/#_utflytting
          */
-        fakta.personForVurdering.bostedsadresse
+        faktaTilVilkårsvurdering.personForVurdering.bostedsadresse
                 ?.let { Evaluering.ja("Mor er bosatt i riket") }
         ?: Evaluering.nei("Mor er ikke bosatt i riket")
 
-internal fun lovligOpphold(fakta: Fakta): Evaluering {
-    if (fakta.behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE &&
-        fakta.personForVurdering.type == PersonType.BARN) {
+internal fun lovligOpphold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
+    if (faktaTilVilkårsvurdering.behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE &&
+        faktaTilVilkårsvurdering.personForVurdering.type == PersonType.BARN) {
         return Evaluering.ja("Ikke separat oppholdsvurdering for barnet ved automatisk vedtak.")
     }
 
-    val nåværendeMedlemskap = finnNåværendeMedlemskap(fakta.personForVurdering.statsborgerskap)
+    val nåværendeMedlemskap = finnNåværendeMedlemskap(faktaTilVilkårsvurdering.personForVurdering.statsborgerskap)
 
     return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
             Medlemskap.NORDEN -> Evaluering.ja("Er nordisk statsborger.")
             Medlemskap.EØS -> {
-                sjekkLovligOppholdForEØSBorger(fakta)
+                sjekkLovligOppholdForEØSBorger(faktaTilVilkårsvurdering)
             }
             Medlemskap.TREDJELANDSBORGER -> {
-                val nåværendeOpphold = fakta.personForVurdering.opphold.singleOrNull { it.gjeldendeNå() }
+                val nåværendeOpphold = faktaTilVilkårsvurdering.personForVurdering.opphold.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     økTellerForLovligOpphold(LovligOppholdUtfall.TREDJELANDSBORGER)
                     Evaluering.nei(LovligOppholdUtfall.TREDJELANDSBORGER.begrunnelseForOppgave)
                 } else Evaluering.ja("Er tredjelandsborger med lovlig opphold")
             }
             Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
-                val nåværendeOpphold = fakta.personForVurdering.opphold.singleOrNull { it.gjeldendeNå() }
+                val nåværendeOpphold = faktaTilVilkårsvurdering.personForVurdering.opphold.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     økTellerForLovligOpphold(LovligOppholdUtfall.STATSLØS)
                     Evaluering.nei(LovligOppholdUtfall.STATSLØS.begrunnelseForOppgave)
@@ -96,10 +96,10 @@ internal fun lovligOpphold(fakta: Fakta): Evaluering {
     }
 }
 
-internal fun giftEllerPartnerskap(fakta: Fakta): Evaluering =
-        when (fakta.personForVurdering.sivilstand) {
+internal fun giftEllerPartnerskap(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering =
+        when (faktaTilVilkårsvurdering.personForVurdering.sivilstand) {
             SIVILSTAND.UOPPGITT ->
-                if (fakta.behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+                if (faktaTilVilkårsvurdering.behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
                     Evaluering.ja("Person mangler informasjon om sivilstand.")
                 else
                     Evaluering.kanskje("Person mangler informasjon om sivilstand.")
@@ -131,22 +131,22 @@ fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
 
 fun Evaluering.toJson(): String = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
 
-private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
-    return if (personHarLøpendeArbeidsforhold(fakta.personForVurdering)) {
+private fun sjekkLovligOppholdForEØSBorger(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
+    return if (personHarLøpendeArbeidsforhold(faktaTilVilkårsvurdering.personForVurdering)) {
         Evaluering.ja("Mor er EØS-borger, men har et løpende arbeidsforhold i Norge.")
     } else {
-        if (annenForelderRegistrert(fakta)) {
-            if (annenForelderBorMedMor(fakta)) {
-                with(statsborgerskapAnnenForelder(fakta)) {
+        if (annenForelderRegistrert(faktaTilVilkårsvurdering)) {
+            if (annenForelderBorMedMor(faktaTilVilkårsvurdering)) {
+                with(statsborgerskapAnnenForelder(faktaTilVilkårsvurdering)) {
                     when {
                         contains(Medlemskap.NORDEN) -> Evaluering.ja("Annen forelder er norsk eller nordisk statsborger.")
                         contains(Medlemskap.EØS) -> {
-                            if (personHarLøpendeArbeidsforhold(hentAnnenForelder(fakta).first())) {
+                            if (personHarLøpendeArbeidsforhold(hentAnnenForelder(faktaTilVilkårsvurdering).first())) {
                                 Evaluering.ja("Annen forelder er fra EØS, men har et løpende arbeidsforhold i Norge.")
                             } else {
-                                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta,
-                                        LovligOppholdUtfall.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                                        LovligOppholdUtfall.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
+                                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(faktaTilVilkårsvurdering,
+                                                                                  LovligOppholdUtfall.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                                                                                  LovligOppholdUtfall.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
                             }
                         }
                         contains(Medlemskap.TREDJELANDSBORGER) -> {
@@ -163,25 +163,25 @@ private fun sjekkLovligOppholdForEØSBorger(fakta: Fakta): Evaluering {
                     }
                 }
             } else {
-                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta,
-                        LovligOppholdUtfall.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                        LovligOppholdUtfall.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
+                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(faktaTilVilkårsvurdering,
+                                                                  LovligOppholdUtfall.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                                                                  LovligOppholdUtfall.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
             }
         } else {
-            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta,
-                    LovligOppholdUtfall.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                    LovligOppholdUtfall.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(faktaTilVilkårsvurdering,
+                                                              LovligOppholdUtfall.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                                                              LovligOppholdUtfall.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
             )
         }
     }
 }
 
-private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(fakta: Fakta,
+private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering,
                                                               arbeidsforholdAvslag: LovligOppholdUtfall,
                                                               bosettelseAvslag: LovligOppholdUtfall)
         : Evaluering {
-    return if (morHarBoddINorgeSiste5År(fakta)) {
-        if (morHarJobbetINorgeSiste5År(fakta)) {
+    return if (morHarBoddINorgeSiste5År(faktaTilVilkårsvurdering)) {
+        if (morHarJobbetINorgeSiste5År(faktaTilVilkårsvurdering)) {
             Evaluering.ja("Mor har bodd og jobbet i Norge siste 5 år.")
         } else {
             økTellerForLovligOpphold(arbeidsforholdAvslag)
@@ -197,28 +197,28 @@ fun personHarLøpendeArbeidsforhold(personForVurdering: Person): Boolean = perso
     it.periode?.tom == null || it.periode.tom >= LocalDate.now()
 }
 
-fun annenForelderRegistrert(fakta: Fakta): Boolean {
-    val annenForelder = hentAnnenForelder(fakta).firstOrNull()
+fun annenForelderRegistrert(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Boolean {
+    val annenForelder = hentAnnenForelder(faktaTilVilkårsvurdering).firstOrNull()
     return annenForelder != null
 }
 
-fun annenForelderBorMedMor(fakta: Fakta): Boolean {
-    val annenForelder = hentAnnenForelder(fakta).first()
-    return erSammeAdresse(fakta.personForVurdering.bostedsadresse, annenForelder.bostedsadresse)
+fun annenForelderBorMedMor(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Boolean {
+    val annenForelder = hentAnnenForelder(faktaTilVilkårsvurdering).first()
+    return erSammeAdresse(faktaTilVilkårsvurdering.personForVurdering.bostedsadresse, annenForelder.bostedsadresse)
 }
 
-fun statsborgerskapAnnenForelder(fakta: Fakta): List<Medlemskap> {
+fun statsborgerskapAnnenForelder(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): List<Medlemskap> {
     val annenForelder =
-            hentAnnenForelder(fakta).first()
+            hentAnnenForelder(faktaTilVilkårsvurdering).first()
     return finnNåværendeMedlemskap(annenForelder.statsborgerskap)
 }
 
-private fun hentAnnenForelder(fakta: Fakta) = fakta.personForVurdering.personopplysningGrunnlag.personer.filter {
+private fun hentAnnenForelder(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering) = faktaTilVilkårsvurdering.personForVurdering.personopplysningGrunnlag.personer.filter {
     it.type == PersonType.ANNENPART
 }
 
-fun morHarBoddINorgeSiste5År(fakta: Fakta): Boolean {
-    val perioder = fakta.personForVurdering.bostedsadresseperiode.mapNotNull {
+fun morHarBoddINorgeSiste5År(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Boolean {
+    val perioder = faktaTilVilkårsvurdering.personForVurdering.bostedsadresseperiode.mapNotNull {
         it.periode
     }
 
@@ -229,8 +229,8 @@ fun morHarBoddINorgeSiste5År(fakta: Fakta): Boolean {
     return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 0
 }
 
-fun morHarJobbetINorgeSiste5År(fakta: Fakta): Boolean {
-    val perioder = fakta.personForVurdering.arbeidsforhold.mapNotNull {
+fun morHarJobbetINorgeSiste5År(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Boolean {
+    val perioder = faktaTilVilkårsvurdering.personForVurdering.arbeidsforhold.mapNotNull {
         it.periode
     }
 

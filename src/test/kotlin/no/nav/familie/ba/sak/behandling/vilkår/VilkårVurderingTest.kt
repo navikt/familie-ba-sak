@@ -197,9 +197,9 @@ class VilkårVurderingTest(
         val barn3 = genererPerson(PersonType.BARN, personopplysningGrunnlag, null, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(barn3)
 
-        assertEquals(Resultat.JA, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn1)).resultat)
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn2)).resultat)
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn3)).resultat)
+        assertEquals(Resultat.JA, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn1)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn2)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn3)).resultat)
     }
 
     @Test
@@ -211,7 +211,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, null)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
     @Test
@@ -227,7 +227,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
     @Test
@@ -239,7 +239,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
     @Test
@@ -253,7 +253,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
     @Test
@@ -265,7 +265,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
 
@@ -275,7 +275,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.JA, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.JA, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
     @Test
@@ -284,7 +284,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.NEI, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.GIFT_PARTNERSKAP.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
     @Test
@@ -294,7 +294,7 @@ class VilkårVurderingTest(
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(søker)
 
-        assertEquals(Resultat.JA, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(søker)).resultat)
+        assertEquals(Resultat.JA, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(søker)).resultat)
     }
 
     @Test
@@ -303,7 +303,7 @@ class VilkårVurderingTest(
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(søker)
 
-        assertEquals(Resultat.NEI, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(søker)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(søker)).resultat)
     }
 
     @Test
@@ -313,7 +313,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.JA, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.JA, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
     @Test
@@ -322,7 +322,7 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.NEI, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(Fakta(barn)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.BOSATT_I_RIKET.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
     }
 
     @Test
@@ -338,7 +338,7 @@ class VilkårVurderingTest(
                             )
                 }
 
-        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
     }
 
     @Test
@@ -359,7 +359,7 @@ class VilkårVurderingTest(
                             )
                 }
 
-        val medlemskap = finnNåværendeMedlemskap(Fakta(person).personForVurdering.statsborgerskap)
+        val medlemskap = finnNåværendeMedlemskap(FaktaTilVilkårsvurdering(person).personForVurdering.statsborgerskap)
 
         assertEquals(2, medlemskap.size)
         assertEquals(Medlemskap.NORDEN, medlemskap[0])
@@ -391,9 +391,9 @@ class VilkårVurderingTest(
                     it.arbeidsforhold = løpendeArbeidsforhold(it)
                 }
 
-        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
         assertEquals("Mor er EØS-borger, men har et løpende arbeidsforhold i Norge.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
     }
 
     @Test
@@ -415,9 +415,9 @@ class VilkårVurderingTest(
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.NORDEN)
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
         assertEquals("Annen forelder er norsk eller nordisk statsborger.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
     }
 
     @Test
@@ -440,9 +440,9 @@ class VilkårVurderingTest(
 
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.NEI, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
         assertEquals("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
     }
 
     @Test
@@ -464,9 +464,9 @@ class VilkårVurderingTest(
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.UKJENT)
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.NEI, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals(Resultat.NEI, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
         assertEquals("Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
     }
 
 
@@ -490,9 +490,9 @@ class VilkårVurderingTest(
                 .also { it.arbeidsforhold = løpendeArbeidsforhold(it) }
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
-        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).resultat)
+        assertEquals(Resultat.JA, Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).resultat)
         assertEquals("Annen forelder er fra EØS, men har et løpende arbeidsforhold i Norge.",
-                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(Fakta(person)).begrunnelse)
+                     Vilkår.LOVLIG_OPPHOLD.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(person)).begrunnelse)
     }
 
     private fun opprettAnnenForelder(personopplysningGrunnlag: PersonopplysningGrunnlag,

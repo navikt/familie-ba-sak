@@ -42,13 +42,13 @@ class ReglerTest {
 
     @Test
     fun `skal returnere usant dersom arbeidsforhold er null eller listen av arbeidsforhold er tom`() {
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(null)))).isFalse
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(emptyList())))).isFalse
+        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(null)))).isFalse
+        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(emptyList())))).isFalse
     }
 
     @Test
     fun `90 dagers arbeidsfravær i starten av 5-års-perioden skal godkjennes`() {
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom = LocalDate.now().minusYears(5).plusDays(90), tom = null)
                 )
@@ -57,7 +57,7 @@ class ReglerTest {
 
     @Test
     fun `91 dagers arbeidsfravær i starten av 5-års-perioden skal avslås`() {
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom = LocalDate.now().minusYears(5).plusDays(91), tom = null)
                 )
@@ -66,7 +66,7 @@ class ReglerTest {
 
     @Test
     fun `90 dagers arbeidsfravær i slutten av 5-års-perioden skal godkjennes`() {
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(90))
                 )
@@ -75,7 +75,7 @@ class ReglerTest {
 
     @Test
     fun `91 dagers arbeidsfravær i slutten av 5-års-perioden skal avslås`() {
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(91))
                 )
@@ -84,7 +84,7 @@ class ReglerTest {
 
     @Test
     fun `et mellomrom på 90 dager (eller mindre) mellom to arbeidsperioder skal godkjennes`() {
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
                         DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(93))
@@ -94,7 +94,7 @@ class ReglerTest {
 
     @Test
     fun `et mellomrom på 91 dager (eller mer) mellom to arbeidsperioder skal avslås`() {
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom = LocalDate.now().minusDays(2), tom = LocalDate.now()),
                         DatoIntervallEntitet(fom = LocalDate.now().minusYears(5), tom = LocalDate.now().minusDays(94))
@@ -104,7 +104,7 @@ class ReglerTest {
 
     @Test
     fun `arbeidsforhold som startet fra før 5 år siden skal tas med i beregningen`() {
-        assertThat(morHarJobbetINorgeSiste5År(Fakta(lagSøkerMedArbeidsforhold(
+        assertThat(morHarJobbetINorgeSiste5År(FaktaTilVilkårsvurdering(lagSøkerMedArbeidsforhold(
                 listOf(
                         DatoIntervallEntitet(fom = LocalDate.now().minusYears(8))
                 )
