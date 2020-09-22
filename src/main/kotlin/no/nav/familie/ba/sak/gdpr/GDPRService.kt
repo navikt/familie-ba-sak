@@ -22,7 +22,7 @@ class GDPRService(
                                          nyBehandling: NyBehandlingHendelse,
                                          behandlingId: Long) {
         val fødselshendelsePreLansering = FødselshendelsePreLansering(
-                personIdent = nyBehandling.morsIdent!!,
+                personIdent = nyBehandling.morsIdent ?: error("Kunne ikke finne mors ident på behandling fra fødselshendelse"),
                 behandlingId = behandlingId,
                 nyBehandlingHendelse = nyBehandling.toJson(),
                 filtreringsreglerInput = faktaForFiltreringsregler.toJson(),
