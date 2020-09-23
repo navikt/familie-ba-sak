@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VE
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient.Companion.hentVedlegg
 import no.nav.familie.ba.sak.integrasjoner.domene.*
-import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -57,7 +56,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Opprett oppgave skal returnere oppgave id`() {
         MDC.put("callId", "opprettOppgave")
-        stubFor(post("/api/oppgave/v2").willReturn(
+        stubFor(post("/api/oppgave/opprett").willReturn(
                 okJson(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))))
 
         val request = lagTestOppgave()
@@ -74,7 +73,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `Opprett oppgave skal kaste feil hvis response er ugyldig`() {
-        stubFor(post("/api/oppgave/v2").willReturn(aResponse()
+        stubFor(post("/api/oppgave/opprett").willReturn(aResponse()
                                                          .withStatus(500)
                                                          .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
 

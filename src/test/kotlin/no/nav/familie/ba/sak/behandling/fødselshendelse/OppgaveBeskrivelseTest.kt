@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
@@ -20,6 +22,8 @@ import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.junit.Assert
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -37,19 +41,21 @@ class OppgaveBeskrivelseTest {
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
+    private val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
 
     private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
-                                                        infotrygdBarnetrygdClientMock,
-                                                        featureToggleServiceMock,
-                                                        stegServiceMock,
-                                                        vedtakServiceMock,
-                                                        evaluerFiltreringsreglerForFødselshendelseMock,
-                                                        taskRepositoryMock,
-                                                        personopplysningerServiceMock,
-                                                        behandlingResultatRepositoryMock,
-                                                        persongrunnlagServiceMock,
-                                                        behandlingRepositoryMock,
-                                                        gdprServiceMock)
+                                                                infotrygdBarnetrygdClientMock,
+                                                                featureToggleServiceMock,
+                                                                stegServiceMock,
+                                                                vedtakServiceMock,
+                                                                evaluerFiltreringsreglerForFødselshendelseMock,
+                                                                taskRepositoryMock,
+                                                                personopplysningerServiceMock,
+                                                                behandlingResultatRepositoryMock,
+                                                                persongrunnlagServiceMock,
+                                                                behandlingRepositoryMock,
+                                                                vilkårsvurderingMetricsMock,
+                                                                gdprServiceMock)
 
     @Test
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere begrunnelse av første regel som feilet`() {

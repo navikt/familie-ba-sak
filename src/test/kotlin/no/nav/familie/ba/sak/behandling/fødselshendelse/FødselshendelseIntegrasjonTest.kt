@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
@@ -15,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
@@ -94,6 +93,7 @@ class FødselshendelseIntegrasjonTest(
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     val featureToggleServiceMock = mockk<FeatureToggleService>()
+    val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
 
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
@@ -106,6 +106,7 @@ class FødselshendelseIntegrasjonTest(
                                                         behandlingResultatRepository,
                                                         persongrunnlagService,
                                                         behandlingRepository,
+                                                        vilkårsvurderingMetricsMock,
                                                         gdprService)
 
     @Test
@@ -210,8 +211,10 @@ class FødselshendelseIntegrasjonTest(
 
     @BeforeEach
     fun initMocks() {
-        every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } returns Unit
+        every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } just runs
         every { featureToggleServiceMock.isEnabled(any()) } returns false
+        every {vilkårsvurderingMetricsMock.
+        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} just runs
     }
 }
 

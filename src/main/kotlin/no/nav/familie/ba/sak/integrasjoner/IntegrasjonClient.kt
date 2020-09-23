@@ -9,7 +9,10 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.domene.ArbeidsforholdRequest
 import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
-import no.nav.familie.ba.sak.journalføring.domene.*
+import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggRequest
+import no.nav.familie.ba.sak.journalføring.domene.LogiskVedleggResponse
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -160,7 +163,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): String {
-        val uri = URI.create("$integrasjonUri/oppgave/v2")
+        val uri = URI.create("$integrasjonUri/oppgave/opprett")
 
         return Result.runCatching {
             postForEntity<Ressurs<OppgaveResponse>>(uri, opprettOppgave, HttpHeaders().medContentTypeJsonUTF8())
