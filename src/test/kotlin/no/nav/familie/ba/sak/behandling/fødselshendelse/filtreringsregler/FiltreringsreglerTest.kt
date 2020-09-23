@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class FiltreringsreglerTest {
+
     val gyldigFnr = PersonIdent(FnrGenerator.generer())
 
     @Test
@@ -49,7 +50,12 @@ internal class FiltreringsreglerTest {
                                                      PersonInfo(LocalDate.now().minusMonths(8)))
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet1, barnet2), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor,
+                               listOf(barnet1, barnet2),
+                               restenAvBarna,
+                               morLever = true,
+                               barnetLever = true,
+                               morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
     }
@@ -63,7 +69,12 @@ internal class FiltreringsreglerTest {
                                                      PersonInfo(LocalDate.now().minusMonths(8)))
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet1, barnet2), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor,
+                               listOf(barnet1, barnet2),
+                               restenAvBarna,
+                               morLever = true,
+                               barnetLever = true,
+                               morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
@@ -110,25 +121,28 @@ internal class FiltreringsreglerTest {
 
     @Test
     fun `Regelevaluering i forhold til den 21 i hver måned og barnets fødselsdato med hensyn til etterbetaling`() {
-        if (LocalDate.now().dayOfMonth < 21) {
-            assertRegelBasertPåDagensDato(
-                    LocalDate.now().minusMonths(2).sisteDagIMåned(), Resultat.NEI)
-            assertRegelBasertPåDagensDato(
-                    LocalDate.now().minusMonths(1).withDayOfMonth(1), Resultat.JA)
-        } else {
-            assertRegelBasertPåDagensDato(
-                    LocalDate.now().sisteDagIForrigeMåned(), Resultat.NEI)
-            assertRegelBasertPåDagensDato(
-                    LocalDate.now().withDayOfMonth(1), Resultat.JA)
-        }
+        val now = LocalDate.now()
+        assertRegelBasertPåDato(dagensDato = now.withDayOfMonth(20),
+                                fødselsdatoForBarn = now.minusMonths(2).sisteDagIMåned(),
+                                forventetResultat = Resultat.NEI)
+        assertRegelBasertPåDato(dagensDato = now.withDayOfMonth(20),
+                                fødselsdatoForBarn = now.minusMonths(1).withDayOfMonth(1),
+                                forventetResultat = Resultat.JA)
+        assertRegelBasertPåDato(dagensDato = now.withDayOfMonth(21),
+                                fødselsdatoForBarn = now.sisteDagIForrigeMåned(),
+                                forventetResultat = Resultat.NEI)
+        assertRegelBasertPåDato(dagensDato = now.withDayOfMonth(21),
+                                fødselsdatoForBarn = now.withDayOfMonth(1),
+                                forventetResultat = Resultat.JA)
     }
 
-    private fun assertRegelBasertPåDagensDato(fødselsdatoForBarn: LocalDate, forventetResultat: Resultat) {
+    private fun assertRegelBasertPåDato(dagensDato: LocalDate, fødselsdatoForBarn: LocalDate, forventetResultat: Resultat) {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
         val barnet = tilfeldigPerson(fødselsdatoForBarn).copy(personIdent = gyldigFnr)
         val restenAvBarna: List<PersonInfo> = listOf()
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false))
+                .evaluer(Fakta(mor, listOf(barnet), restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false,
+                               dagensDato))
 
         assertThat(forventetResultat).isEqualTo(evaluering.resultat)
         if (forventetResultat == Resultat.NEI)

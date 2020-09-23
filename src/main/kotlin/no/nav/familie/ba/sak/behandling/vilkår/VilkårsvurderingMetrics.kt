@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component
 @Component
 class VilkårsvurderingMetrics {
 
-    val vilkårsvurderingUtfall = mutableMapOf<String, Counter>()
+    var vilkårsvurderingUtfall = mapOf<String, Counter>()
+    var vilkårsvurderingFørsteUtfall = mapOf<String, Counter>()
 
     val personTypeToDisplayedType = mapOf(
             PersonType.SØKER to "Mor",
@@ -26,7 +27,18 @@ class VilkårsvurderingMetrics {
                 BehandlingOpprinnelse.values().forEach { behandlingOpprinnelse ->
                     PersonType.values().forEach { personType ->
                         if (it.parterDetteGjelderFor.contains(personType)) {
-                            genererMetrikkMap(it.spesifikasjon, personType, resultat, behandlingOpprinnelse)
+                            vilkårsvurderingUtfall = LeggTilEntryTilMetrikkMap(vilkårsvurderingUtfall,
+                                                                               it.spesifikasjon,
+                                                                               personType,
+                                                                               resultat,
+                                                                               behandlingOpprinnelse,
+                                                                               "familie.ba.behandling.vilkaarsvurdering")
+                            vilkårsvurderingFørsteUtfall = LeggTilEntryTilMetrikkMap(vilkårsvurderingFørsteUtfall,
+                                                                                     it.spesifikasjon,
+                                                                                     personType,
+                                                                                     resultat,
+                                                                                     behandlingOpprinnelse,
+                                                                                     "familie.ba.behandling.vilkaarsvurdering.foerstutfall")
                         }
                     }
                 }
@@ -35,17 +47,19 @@ class VilkårsvurderingMetrics {
 
         LovligOppholdUtfall.values().forEach { utfall ->
             lovligOppholdUtfall[utfall.name] = Metrics.counter("familie.ba.behandling.lovligopphold",
-                    "aarsak",
-                    utfall.begrunnelseForMetrikker)
+                                                               "aarsak",
+                                                               utfall.begrunnelseForMetrikker)
         }
     }
 
-    private fun genererMetrikkMap(spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
+    private fun LeggTilEntryTilMetrikkMap(counterMap: Map<String, Counter>,
+                                  spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
                                   personType: PersonType,
                                   resultat: Resultat,
-                                  behandlingOpprinnelse: BehandlingOpprinnelse) {
+                                  behandlingOpprinnelse: BehandlingOpprinnelse,
+                                  navn: String): Map<String, Counter> {
         if (spesifikasjon.children.isEmpty()) {
-            val counter = Metrics.counter("familie.ba.behandling.vilkaarsvurdering",
+            val counter = Metrics.counter(navn,
                                           "vilkaar",
                                           spesifikasjon.identifikator,
                                           "personType",
@@ -57,10 +71,18 @@ class VilkårsvurderingMetrics {
                                           "beskrivelse",
                                           spesifikasjon.beskrivelse)
 
-            vilkårsvurderingUtfall[vilkårNøkkel(spesifikasjon.identifikator, personType, resultat, behandlingOpprinnelse)] =
-                    counter
+            return counterMap.plus(Pair(vilkårNøkkel(spesifikasjon.identifikator, personType, resultat, behandlingOpprinnelse),
+                                        counter))
         } else {
-            spesifikasjon.children.forEach { genererMetrikkMap(it, personType, resultat, behandlingOpprinnelse) }
+            var nyMap = counterMap
+            spesifikasjon.children.forEach {
+                nyMap = LeggTilEntryTilMetrikkMap(nyMap,
+                                                  it,
+                                                  personType,
+                                                  resultat,
+                                                  behandlingOpprinnelse, navn)
+            }
+            return nyMap
         }
     }
 
@@ -69,18 +91,25 @@ class VilkårsvurderingMetrics {
                      resultat: Resultat,
                      behandlingOpprinnelse: BehandlingOpprinnelse) = "${vilkår}-${personType.name}_${resultat.name}_${behandlingOpprinnelse.name}"
 
+    fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkår: Vilkår, personType: PersonType) {
+        vilkårsvurderingFørsteUtfall[vilkårNøkkel(vilkår.spesifikasjon.identifikator,
+                                                  personType, Resultat.NEI,
+                                                  BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)]!!.increment()
+    }
+
     fun økTellereForEvaluering(evaluering: Evaluering, personType: PersonType, behandlingOpprinnelse: BehandlingOpprinnelse) {
         if (evaluering.children.isEmpty()) {
             vilkårsvurderingUtfall[vilkårNøkkel(evaluering.identifikator,
                                                 personType,
                                                 evaluering.resultat,
-                                                behandlingOpprinnelse)]?.increment()
+                                                behandlingOpprinnelse)]!!.increment()
         } else {
             evaluering.children.forEach { økTellereForEvaluering(it, personType, behandlingOpprinnelse) }
         }
     }
 
     companion object {
+
         val lovligOppholdUtfall = mutableMapOf<String, Counter>()
 
         fun økTellerForLovligOpphold(utfall: LovligOppholdUtfall) {
