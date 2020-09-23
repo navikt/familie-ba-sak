@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.randomFnr
@@ -106,7 +107,7 @@ class LoggServiceTest(
 
         val behandling = lagBehandling()
         val behandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.JA)
-        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, null, behandlingResultat)
+        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, behandlingResultat,BehandlingResultatType.INNVILGET, null)
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg.tittel)
@@ -114,7 +115,7 @@ class LoggServiceTest(
 
         val nyttBehandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.NEI)
         val nyVilkårsvurderingLogg =
-                loggService.opprettVilkårsvurderingLogg(behandling, behandlingResultat, nyttBehandlingResultat)
+                loggService.opprettVilkårsvurderingLogg(behandling, nyttBehandlingResultat, BehandlingResultatType.AVSLÅTT, behandlingResultat)
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg.tittel)

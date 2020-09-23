@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.logg.LoggService
@@ -62,7 +61,7 @@ class SendTilBeslutter(
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)?:
                                  throw Feil("Fant ikke behandlingsresultat på behandling")
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat.kopier(), loggHendelse = false)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat.kopier())
 
         return hentNesteStegForNormalFlyt(behandling)
     }

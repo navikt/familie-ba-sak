@@ -31,8 +31,8 @@ data class BehandlingResultat(
         var aktiv: Boolean = true,
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "forrige_samlede_resultat")
-        var forrigeSamledeResultat: BehandlingResultatType? = null,
+        @Column(name = "samlet_resultat")
+        var samletResultat: BehandlingResultatType = BehandlingResultatType.IKKE_VURDERT,
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "behandlingResultat",
@@ -46,13 +46,12 @@ data class BehandlingResultat(
         return "BehandlingResultat(id=$id, behandling=${behandling.id})"
     }
 
-    fun oppdaterForrigeSamledeResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?,
-                                       behandlingOpprinnelse: BehandlingOpprinnelse) {
-        forrigeSamledeResultat = hentSamletResultat(personopplysningGrunnlag, behandlingOpprinnelse)
+    fun oppdaterSamletResultat(nyttBehandlingsresultat: BehandlingResultatType) {
+        samletResultat = nyttBehandlingsresultat
     }
 
-    fun hentSamletResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?,
-                           behandlingOpprinnelse: BehandlingOpprinnelse): BehandlingResultatType {
+    fun beregnSamletResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?,
+                             behandlingOpprinnelse: BehandlingOpprinnelse): BehandlingResultatType {
         if (personopplysningGrunnlag == null || personResultater.isEmpty() ||
             personResultater.any { it.hentSamletResultat() == BehandlingResultatType.IKKE_VURDERT }) {
             return BehandlingResultatType.IKKE_VURDERT

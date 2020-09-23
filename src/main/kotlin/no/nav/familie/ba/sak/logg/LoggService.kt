@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.journalføring.domene.DokumentType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -51,22 +52,19 @@ class LoggService(
     }
 
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
-                                    forrigeBehandlingResultat: BehandlingResultat?,
-                                    nyttBehandlingResultat: BehandlingResultat): Logg {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+                                    aktivBehandlingResultat: BehandlingResultat,
+                                    nyttBehandlingResultatType: BehandlingResultatType,
+                                    forrigeBehandlingResultat: BehandlingResultat?): Logg {
         val forrigeBehandlingResultatType =
-                if (nyttBehandlingResultat.forrigeSamledeResultat != null) nyttBehandlingResultat.forrigeSamledeResultat else forrigeBehandlingResultat?.hentSamletResultat(
-                        personopplysningGrunnlag,
-                        behandling.opprinnelse)
-        val nyBehandlingResultatType = nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+                if (aktivBehandlingResultat.samletResultat != BehandlingResultatType.IKKE_VURDERT) aktivBehandlingResultat.samletResultat else forrigeBehandlingResultat?.samletResultat
 
         val tekst = if (forrigeBehandlingResultatType != null) {
-            if (forrigeBehandlingResultatType != nyBehandlingResultatType) {
-                "Resultat gikk fra ${forrigeBehandlingResultatType.displayName.toLowerCase()} til ${nyBehandlingResultatType.displayName.toLowerCase()}"
+            if (forrigeBehandlingResultatType != nyttBehandlingResultatType) {
+                "Resultat gikk fra ${forrigeBehandlingResultatType.displayName.toLowerCase()} til ${nyttBehandlingResultatType.displayName.toLowerCase()}"
             } else {
-                "Resultat fortsatt ${nyBehandlingResultatType.displayName.toLowerCase()}"
+                "Resultat fortsatt ${nyttBehandlingResultatType.displayName.toLowerCase()}"
             }
-        } else "Resultat ble ${nyBehandlingResultatType.displayName.toLowerCase()}"
+        } else "Resultat ble ${nyttBehandlingResultatType.displayName.toLowerCase()}"
 
         return lagre(Logg(
                 behandlingId = behandling.id,

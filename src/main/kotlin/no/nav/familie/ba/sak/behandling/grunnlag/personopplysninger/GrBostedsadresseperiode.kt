@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import javax.persistence.*

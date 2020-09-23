@@ -398,7 +398,7 @@ class BehandlingIntegrationTest {
                                                                                    barn3Fnr,
                                                                                    dato_2021_01_01.minusMonths(1),
                                                                                    stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat2, loggHendelse = true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat2)
 
         val restVedtakBarnMap = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
                 .data!!.behandlinger

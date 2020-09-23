@@ -50,9 +50,10 @@ class Vilkårsvurdering(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, behandling)
+        val nyttSamletBehandlingResultat = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, nyttSamletBehandlingResultat, behandling)
 
-        behandlingResultat.oppdaterForrigeSamledeResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        behandlingResultat.oppdaterSamletResultat(nyttSamletBehandlingResultat)
         behandlingResultatService.oppdater(behandlingResultat)
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {

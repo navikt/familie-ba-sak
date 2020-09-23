@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse.Companion.snittAndeler
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import java.lang.IllegalStateException
 import java.time.LocalDate
 
 object ØkonomiUtils {

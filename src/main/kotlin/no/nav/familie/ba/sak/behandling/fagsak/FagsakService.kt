@@ -143,7 +143,7 @@ class FagsakService(
                         BehandlingResultatType.IKKE_VURDERT
                     else
                         behandlingResultatService.hentAktivForBehandling(
-                                behandling.id)?.hentSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+                                behandling.id)?.samletResultat
                         ?: BehandlingResultatType.IKKE_VURDERT,
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,

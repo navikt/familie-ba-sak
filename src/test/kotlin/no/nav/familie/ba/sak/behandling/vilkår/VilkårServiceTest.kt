@@ -160,7 +160,7 @@ class VilkårServiceTest(
 
         val kopiertBehandlingResultat = behandlingResultat.kopier()
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = kopiertBehandlingResultat, loggHendelse = false)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = kopiertBehandlingResultat)
         val behandlingsResultater = behandlingResultatService
                 .hentBehandlingResultatForBehandling(behandlingId = behandling.id)
 
