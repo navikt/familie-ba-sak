@@ -21,7 +21,7 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <spring.cloud.version>2.2.4.RELEASE</spring.cloud.version>
+        <spring.cloud.version>2.2.5.RELEASE</spring.cloud.version>
         <spring.vault.version>2.2.2.RELEASE</spring.vault.version>
         <felles.version>1.20200921151640_5bbb06a</felles.version>
         <felles-kontrakter.version>2.0_20200922155747_77124e4</felles-kontrakter.version>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-contract-wiremock</artifactId>
-            <version>${spring.cloud.version}</version>
+            <version>2.2.4.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>

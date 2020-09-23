@@ -199,7 +199,7 @@ class VilkårService(
                                             .maxByOrNull { it.fødselsdato }?.fødselsdato
                                     ?: error("Fant ikke barn i personopplysninger")
 
-        return personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
