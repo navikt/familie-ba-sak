@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 data class RestFinnOppgaveRequest(
         val behandlingstema: Behandlingstema? = null,
-        val oppgavetype: Oppgavetype? = null,
+        val oppgavetype: String? = null,
         val enhet: String? = null,
         val saksbehandler: String? = null,
         val journalpostId: String? = null,
@@ -27,7 +27,7 @@ data class RestFinnOppgaveRequest(
     fun tilFinnOppgaveRequest(): FinnOppgaveRequest = FinnOppgaveRequest(
             tema = Tema.BAR,
             behandlingstema = this.behandlingstema,
-            oppgavetype = this.oppgavetype,
+            oppgavetype = if (this.oppgavetype != null) Oppgavetype.values().find { it.value == this.oppgavetype } else null,
             enhet = this.enhet,
             saksbehandler = this.saksbehandler,
             journalpostId = this.journalpostId,

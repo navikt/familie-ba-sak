@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -18,9 +19,11 @@ import org.springframework.stereotype.Service
 @Service
 class EvaluerFiltreringsreglerForFødselshendelse(
         private val personopplysningerService: PersonopplysningerService,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val localDateService: LocalDateService) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
+    val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
 
     init {
         Filtreringsregler.values().map {
@@ -31,6 +34,12 @@ class EvaluerFiltreringsreglerForFødselshendelse(
                                         it.spesifikasjon.beskrivelse,
                                         "resultat",
                                         resultat.name)
+
+                filtreringsreglerFørsteUtfallMetrics[it.spesifikasjon.identifikator] =
+                        Metrics.counter("familie.ba.sak.filtreringsregler.foersteutfall",
+                                        "beskrivelse",
+                                        it.spesifikasjon.beskrivelse)
+
             }
         }
     }
@@ -63,15 +72,26 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         val barnLever = !barnaFraHendelse.any { personopplysningerService.hentDødsfall(Ident(it.personIdent.ident)).erDød }
         val morHarVerge = personopplysningerService.hentVergeData(Ident(mor.personIdent.ident)).harVerge
 
-        return Fakta(mor, barnaFraHendelse, restenAvBarna, morLever, barnLever, morHarVerge)
+        return Fakta(mor, barnaFraHendelse, restenAvBarna, morLever, barnLever, morHarVerge, localDateService.now())
+    }
+
+    private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean{
+        if(evaluering.resultat == Resultat.NEI && førsteutfall){
+            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]!!.increment()
+            return false
+        }
+        return førsteutfall
     }
 
     private fun oppdaterMetrikker(evaluering: Evaluering) {
+        var førsteutfall = true
         if (evaluering.children.isEmpty()) {
-            filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]?.increment()
+            filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]!!.increment()
+            førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
         } else {
             evaluering.children.forEach {
-                filtreringsreglerMetrics[it.identifikator + it.resultat.name]?.increment()
+                filtreringsreglerMetrics[it.identifikator + it.resultat.name]!!.increment()
+                førsteutfall= økTellereForFørsteUtfall(it, førsteutfall)
             }
         }
     }

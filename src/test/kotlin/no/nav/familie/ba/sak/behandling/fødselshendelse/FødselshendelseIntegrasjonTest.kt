@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
@@ -15,11 +13,12 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
+import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -94,6 +93,7 @@ class FødselshendelseIntegrasjonTest(
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     val featureToggleServiceMock = mockk<FeatureToggleService>()
+    val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
 
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
@@ -106,6 +106,7 @@ class FødselshendelseIntegrasjonTest(
                                                         behandlingResultatRepository,
                                                         persongrunnlagService,
                                                         behandlingRepository,
+                                                        vilkårsvurderingMetricsMock,
                                                         gdprService)
 
     @Test
@@ -113,7 +114,7 @@ class FødselshendelseIntegrasjonTest(
         val oppfyltBarnFnr = listOf(barnefnr[0], barnefnr[1])
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
-                morsfnr[0], morsfnr[0], oppfyltBarnFnr
+                morsfnr[0], oppfyltBarnFnr
         ))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
@@ -146,8 +147,8 @@ class FødselshendelseIntegrasjonTest(
         Assert.assertEquals(2, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
 
         val reffom = now
-        val reftom = now.plusYears(18).minusMonths(1)
-        val fom = of(reffom.year, reffom.month, 1).plusMonths(1)
+        val reftom = now.plusYears(18).minusMonths(2)
+        val fom = of(reffom.year, reffom.month, 1)
         val tom = of(reftom.year, reftom.month, reftom.lengthOfMonth())
 
         val (barn1, barn2) = andelTilkjentYtelser.partition { it.personIdent == barnefnr[0] }
@@ -162,7 +163,7 @@ class FødselshendelseIntegrasjonTest(
         val ikkeOppfyltBarnFnr = listOf(barnefnr[0], barnefnr[2])
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
-                morsfnr[1], morsfnr[1], ikkeOppfyltBarnFnr
+                morsfnr[1], ikkeOppfyltBarnFnr
         ))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[1]))
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
@@ -197,8 +198,8 @@ class FødselshendelseIntegrasjonTest(
         Assert.assertEquals(1, andelTilkjentYtelser.filter { it.beløp == satsTillegg.beløp }.size)
 
         val reffom = now
-        val reftom = now.plusYears(18).minusMonths(1)
-        val fom = of(reffom.year, reffom.month, 1).plusMonths(1)
+        val reftom = now.plusYears(18).minusMonths(2)
+        val fom = of(reffom.year, reffom.month, 1)
         val tom = of(reftom.year, reftom.month, reftom.lengthOfMonth())
 
         Assert.assertEquals(fom, andelTilkjentYtelser.minByOrNull { it.stønadFom }!!.stønadFom)
@@ -208,15 +209,26 @@ class FødselshendelseIntegrasjonTest(
 
     @BeforeEach
     fun initMocks() {
-        every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } returns Unit
+        every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } just runs
         every { featureToggleServiceMock.isEnabled(any()) } returns false
+        every {vilkårsvurderingMetricsMock.
+        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} just runs
     }
 }
 
 @Configuration
 class MockConfiguration {
 
-    val now = LocalDate.now()
+    val now = LocalDate.now().withDayOfMonth(15)
+
+    @Bean
+    @Profile("mock-pdl-flere-barn")
+    @Primary
+    fun mockLocalDateService(): LocalDateService {
+        val localDateServiceMock = mockk<LocalDateService>()
+        every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
+        return localDateServiceMock
+    }
 
     @Bean
     @Profile("mock-pdl-flere-barn")
@@ -257,7 +269,7 @@ class MockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[0])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
+                fødselsdato = now.minusMonths(1),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -268,7 +280,7 @@ class MockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[1])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
+                fødselsdato = now.minusMonths(1),
                 navn = "Jente Barn",
                 kjønn = Kjønn.KVINNE,
                 sivilstand = SIVILSTAND.UGIFT,
@@ -279,7 +291,7 @@ class MockConfiguration {
         every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[2])
         } returns PersonInfo(
-                fødselsdato = now.førsteDagIInneværendeMåned(),
+                fødselsdato = now.minusMonths(1),
                 navn = "Gutt Barn To",
                 kjønn = Kjønn.MANN,
                 sivilstand = SIVILSTAND.UGIFT,
