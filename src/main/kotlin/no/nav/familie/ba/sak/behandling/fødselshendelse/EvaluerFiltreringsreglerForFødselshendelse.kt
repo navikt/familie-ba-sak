@@ -21,6 +21,7 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
+    val filtreringsreglerFørsteUtfallMetrics = mutableMapOf<String, Counter>()
 
     init {
         Filtreringsregler.values().map {
@@ -31,6 +32,12 @@ class EvaluerFiltreringsreglerForFødselshendelse(
                                         it.spesifikasjon.beskrivelse,
                                         "resultat",
                                         resultat.name)
+
+                filtreringsreglerFørsteUtfallMetrics[it.spesifikasjon.identifikator] =
+                        Metrics.counter("familie.ba.sak.filtreringsregler.foersteutfall",
+                                        "beskrivelse",
+                                        it.spesifikasjon.beskrivelse)
+
             }
         }
     }
@@ -66,12 +73,23 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         return Fakta(mor, barnaFraHendelse, restenAvBarna, morLever, barnLever, morHarVerge)
     }
 
+    private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean{
+        if(evaluering.resultat == Resultat.NEI && førsteutfall){
+            filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]!!.increment()
+            return false
+        }
+        return førsteutfall
+    }
+
     private fun oppdaterMetrikker(evaluering: Evaluering) {
+        var førsteutfall = true
         if (evaluering.children.isEmpty()) {
-            filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]?.increment()
+            filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]!!.increment()
+            førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
         } else {
             evaluering.children.forEach {
-                filtreringsreglerMetrics[it.identifikator + it.resultat.name]?.increment()
+                filtreringsreglerMetrics[it.identifikator + it.resultat.name]!!.increment()
+                førsteutfall= økTellereForFørsteUtfall(it, førsteutfall)
             }
         }
     }

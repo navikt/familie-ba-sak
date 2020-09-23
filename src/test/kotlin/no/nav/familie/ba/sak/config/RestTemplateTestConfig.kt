@@ -31,7 +31,7 @@ import java.time.Duration
         StsBearerTokenClientInterceptor::class,
         BearerTokenWithSTSFallbackClientInterceptor::class)
 @Profile("integrasjonstest")
-class RestTemplateConfig {
+class RestTemplateTestConfig {
 
     @Bean
     @Autowired
