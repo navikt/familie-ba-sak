@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import java.time.LocalDate
@@ -11,7 +12,7 @@ data class Fakta(val mor: Person,
                  val morLever: Boolean,
                  val barnetLever: Boolean,
                  val morHarVerge: Boolean,
-                 val dagensDato: LocalDate = LocalDate.now()) {
+                 @JsonIgnore val dagensDato: LocalDate = LocalDate.now()) {
     fun toJson(): String =
             objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
 }
