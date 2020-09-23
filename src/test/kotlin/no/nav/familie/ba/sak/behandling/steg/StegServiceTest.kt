@@ -194,7 +194,7 @@ class StegServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val behandlingResultat = BehandlingResultat(behandling = behandling, aktiv = true)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = false)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
 
         behandling.steg = StegType.BEHANDLING_AVSLUTTET
         behandling.status = BehandlingStatus.AVSLUTTET
@@ -210,7 +210,7 @@ class StegServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val behandlingResultat = BehandlingResultat(behandling = behandling, aktiv = true)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = false)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
 
         behandling.steg = StegType.BESLUTTE_VEDTAK
         behandling.status = BehandlingStatus.FATTER_VEDTAK

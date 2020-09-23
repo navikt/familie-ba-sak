@@ -14,8 +14,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import no.nav.nare.core.evaluations.Resultat
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -27,6 +29,9 @@ import java.time.LocalDate
 class VilkårVurderingTest(
         @Autowired
         private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val behandlingResultatService: BehandlingResultatService,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -79,15 +84,19 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
-        assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
+        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
+        val endretBehandlingResultat = behandlingResultatService.oppdater(behandlingResultat)
 
-        behandlingResultat.personResultater.forEach {
-            it.vilkårResultater.forEach {
-                assertNotNull(it.regelInput)
-                val fakta = ObjectMapper().readValue(it.regelInput, Map::class.java)
+        assertEquals(BehandlingResultatType.INNVILGET, endretBehandlingResultat.samletResultat)
+
+        endretBehandlingResultat.personResultater.forEach {
+            it.vilkårResultater.forEach { vilkårResultat ->
+                assertNotNull(vilkårResultat.regelInput)
+                val fakta = ObjectMapper().readValue(vilkårResultat.regelInput, Map::class.java)
                 assertTrue(fakta.containsKey("personForVurdering"))
-                assertNotNull(it.regelOutput)
-                val evaluering = ObjectMapper().readValue(it.regelOutput, Map::class.java)
+                assertNotNull(vilkårResultat.regelOutput)
+                val evaluering = ObjectMapper().readValue(vilkårResultat.regelOutput, Map::class.java)
                 assertEquals(evaluering["resultat"], "JA")
             }
         }
@@ -117,8 +126,11 @@ class VilkårVurderingTest(
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
+        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
+        val endretBehandlingResultat = behandlingResultatService.oppdater(behandlingResultat)
 
-        assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
+        assertEquals(BehandlingResultatType.AVSLÅTT, endretBehandlingResultat.samletResultat)
     }
 
     @Test
@@ -331,8 +343,10 @@ class VilkårVurderingTest(
                     it.statsborgerskap =
                             listOf(
                                     GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null,
-                                                                                           fom = LocalDate.now().minusYears(1))
-                                                      , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it)
+                                                                                           fom = LocalDate.now().minusYears(1)),
+                                                      landkode = "DNK",
+                                                      medlemskap = Medlemskap.NORDEN,
+                                                      person = it)
                             )
                 }
 
@@ -346,14 +360,20 @@ class VilkårVurderingTest(
                 .also {
                     it.statsborgerskap =
                             listOf(
-                                    GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null)
-                                                      , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it),
+                                    GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null),
+                                                      landkode = "DNK",
+                                                      medlemskap = Medlemskap.NORDEN,
+                                                      person = it),
                                     GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null,
-                                                                                           fom = LocalDate.now().minusYears(1))
-                                                      , landkode = "DEU", medlemskap = Medlemskap.EØS, person = it),
+                                                                                           fom = LocalDate.now().minusYears(1)),
+                                                      landkode = "DEU",
+                                                      medlemskap = Medlemskap.EØS,
+                                                      person = it),
                                     GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = LocalDate.now().minusYears(2),
-                                                                                           fom = LocalDate.now().minusYears(2))
-                                                      , landkode = "POL", medlemskap = Medlemskap.EØS, person = it)
+                                                                                           fom = LocalDate.now().minusYears(2)),
+                                                      landkode = "POL",
+                                                      medlemskap = Medlemskap.EØS,
+                                                      person = it)
                             )
                 }
 

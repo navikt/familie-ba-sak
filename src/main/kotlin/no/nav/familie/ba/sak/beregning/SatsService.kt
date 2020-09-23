@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import java.time.LocalDate
-import java.time.Period
 import java.time.YearMonth
 
 object SatsService {

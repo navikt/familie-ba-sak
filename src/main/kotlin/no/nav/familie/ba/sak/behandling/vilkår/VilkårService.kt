@@ -103,8 +103,7 @@ class VilkårService(
             val behandlingResultat =
                     genererInitieltBehandlingResultatFraAnnenBehandling(behandling = behandling,
                                                                         annenBehandling = forrigeBehandling)
-            return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat,
-                                                                      loggHendelse = false)
+            return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
         } else {
             if (aktivBehandlingResultat != null) {
                 val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
@@ -117,8 +116,7 @@ class VilkårService(
                                frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
                     )
                 }
-                return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = initieltSomErOppdatert,
-                                                                          loggHendelse = false)
+                return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = initieltSomErOppdatert)
             } else {
                 behandlingResultatService.lagreInitielt(initieltBehandlingResultat)
             }

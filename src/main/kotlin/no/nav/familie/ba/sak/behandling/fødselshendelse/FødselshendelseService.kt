@@ -25,6 +25,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -80,6 +81,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     fun opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling: NyBehandlingHendelse) {
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val (faktaForFiltreringsregler, evalueringAvFiltrering) =
                 evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter.toSet())
 
@@ -90,7 +92,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         val resultatAvVilkårsvurdering: BehandlingResultatType? =
                 if (evalueringAvFiltrering.resultat == Resultat.JA)
-                    stegService.evaluerVilkårForFødselshendelse(behandling)
+                    stegService.evaluerVilkårForFødselshendelse(behandling, personopplysningGrunnlag)
                 else
                     null
 
@@ -211,4 +213,11 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
     private fun fødselshendelseSkalRullesTilbake(): Boolean =
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
+
+
+    companion object {
+
+        val LOG = LoggerFactory.getLogger(this::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    }
 }

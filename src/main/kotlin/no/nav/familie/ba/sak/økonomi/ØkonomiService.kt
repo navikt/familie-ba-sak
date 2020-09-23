@@ -38,7 +38,7 @@ class ØkonomiService(
                     // TODO: Midlertidig fiks før støtte for delvis innvilget
                     midlertidigUtledBehandlingResultatType(
                             hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(
-                                    behandlingId = oppdatertBehandling.id))
+                                    behandling = oppdatertBehandling))
                     //behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = oppdatertBehandling.id)
                 }
 

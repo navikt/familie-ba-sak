@@ -150,7 +150,7 @@ class BehandlingresultatOgVilkårBegrunnelseTest(@Autowired
 
         behandlingResultat.personResultater = setOf(søkerPersonResultat, barn1PersonResultat, barn2PersonResultat)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat, false)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat)
 
         vedtakService.lagreOgDeaktiverGammel(lagVedtak(behandling))
 

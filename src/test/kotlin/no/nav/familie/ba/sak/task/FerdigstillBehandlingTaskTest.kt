@@ -74,7 +74,7 @@ class FerdigstillBehandlingTaskTest {
 
         val behandlingResultat = lagBehandlingResultat(fnr, behandling, resultat)
 
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
         val behandlingSomSkalKjøreVilkårsvurdering =
                 behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VILKÅRSVURDERING)
         stegService.håndterVilkårsvurdering(behandlingSomSkalKjøreVilkårsvurdering)
