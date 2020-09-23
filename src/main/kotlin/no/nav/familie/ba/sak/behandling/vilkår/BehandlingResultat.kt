@@ -30,6 +30,10 @@ data class BehandlingResultat(
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
 
+        @Enumerated(EnumType.STRING)
+        @Column(name = "forrige_samlede_resultat")
+        var forrigeSamledeResultat: BehandlingResultatType? = null,
+
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "behandlingResultat",
                    cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
@@ -40,6 +44,11 @@ data class BehandlingResultat(
 
     override fun toString(): String {
         return "BehandlingResultat(id=$id, behandling=${behandling.id})"
+    }
+
+    fun oppdaterForrigeSamledeResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?,
+                                       behandlingOpprinnelse: BehandlingOpprinnelse) {
+        forrigeSamledeResultat = hentSamletResultat(personopplysningGrunnlag, behandlingOpprinnelse)
     }
 
     fun hentSamletResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?,

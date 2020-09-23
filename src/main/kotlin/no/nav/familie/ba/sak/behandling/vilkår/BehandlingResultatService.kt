@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -47,7 +46,6 @@ class BehandlingResultatService(
 
         loggService.opprettVilkårsvurderingLogg(behandling,
                 forrigeBehandlingResultatSomIkkeErAutogenerert, behandlingResultat)
-
     }
 
     fun lagreNyOgDeaktiverGammel(behandlingResultat: BehandlingResultat,

@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Feil
@@ -52,6 +51,9 @@ class Vilkårsvurdering(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, behandling)
+
+        behandlingResultat.oppdaterForrigeSamledeResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        behandlingResultatService.oppdater(behandlingResultat)
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)

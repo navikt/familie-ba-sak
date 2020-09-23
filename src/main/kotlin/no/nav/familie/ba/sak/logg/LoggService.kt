@@ -54,33 +54,27 @@ class LoggService(
                                     forrigeBehandlingResultat: BehandlingResultat?,
                                     nyttBehandlingResultat: BehandlingResultat): Logg {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-        return if (forrigeBehandlingResultat != null) {
-            lagre(Logg(
-                    behandlingId = behandling.id,
-                    type = LoggType.VILKÅRSVURDERING,
-                    tittel = "Endring på vilkårsvurdering",
-                    rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat gikk fra ${
-                        forrigeBehandlingResultat.hentSamletResultat(personopplysningGrunnlag,
-                                                                     behandling.opprinnelse).displayName.toLowerCase()
-                    } " +
-                            "til ${
-                                nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag,
-                                                                          behandling.opprinnelse).displayName.toLowerCase()
-                            }"
-            ))
-        } else {
-            lagre(Logg(
-                    behandlingId = behandling.id,
-                    type = LoggType.VILKÅRSVURDERING,
-                    tittel = "Opprettet vilkårsvurdering",
-                    rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat ble ${
-                        nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag,
-                                                                  behandling.opprinnelse).displayName.toLowerCase()
-                    }"
-            ))
-        }
+        val forrigeBehandlingResultatType =
+                forrigeBehandlingResultat?.hentSamletResultat(personopplysningGrunnlag,
+                                                              behandling.opprinnelse)
+                ?: nyttBehandlingResultat.forrigeSamledeResultat
+        val nyBehandlingResultatType = nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+
+        val tekst = if (forrigeBehandlingResultatType != null) {
+            if (forrigeBehandlingResultatType != nyBehandlingResultatType) {
+                "Resultat gikk fra ${forrigeBehandlingResultatType.displayName.toLowerCase()} til ${nyBehandlingResultatType.displayName.toLowerCase()}"
+            } else {
+                "Resultat fortsatt ${nyBehandlingResultatType.displayName.toLowerCase()}"
+            }
+        } else "Resultat ble ${nyBehandlingResultatType.displayName.toLowerCase()}"
+
+        return lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.VILKÅRSVURDERING,
+                tittel = if (forrigeBehandlingResultatType != null) "Vilkårsvurdering endret" else "Vilkårsvurdering gjennomført",
+                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = tekst
+        ))
     }
 
     fun opprettFødselshendelseLogg(behandling: Behandling) {
