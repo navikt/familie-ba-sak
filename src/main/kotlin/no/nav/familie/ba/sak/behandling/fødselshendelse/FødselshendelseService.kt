@@ -3,14 +3,14 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -42,6 +42,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val behandlingResultatRepository: BehandlingResultatRepository,
                              private val persongrunnlagService: PersongrunnlagService,
                              private val behandlingRepository: BehandlingRepository,
+                             private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
                              private val gdprService: GDPRService) {
 
     val finnesLøpendeSakIInfotrygd: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
@@ -98,7 +99,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         when (resultatAvVilkårsvurdering) {
             null -> stansetIAutomatiskFiltreringCounter.increment()
             BehandlingResultatType.INNVILGET -> passertFiltreringOgVilkårsvurderingCounter.increment()
-            else -> stansetIAutomatiskVilkårsvurderingCounter.increment()
+            else -> økTellereForStansetIAutomatiskVilkårsvurdering(behandling)
         }
 
         if (fødselshendelseSkalRullesTilbake()) {
@@ -116,6 +117,19 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
                 vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
                 IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
+            }
+        }
+    }
+
+    private fun erVilkårForPersonNei(behandlingResultat: BehandlingResultat, personType: PersonType, vilkår: Vilkår): Boolean {
+        val personer = if (personType == PersonType.SØKER) {
+            listOf(persongrunnlagService.hentSøker(behandlingResultat.behandling))
+        } else {
+            persongrunnlagService.hentBarna(behandlingResultat.behandling)
+        }
+        return behandlingResultat?.personResultater?.any {personResultat ->
+            personer.map { it?.personIdent?.ident }.contains(personResultat.personIdent) && personResultat.vilkårResultater.any { vilkårResusltat ->
+                vilkårResusltat.vilkårType == vilkår && vilkårResusltat.resultat == Resultat.NEI
             }
         }
     }
@@ -185,6 +199,16 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                 beskrivelse = beskrivelse
         )
         taskRepository.save(nyTask)
+    }
+
+    private fun økTellereForStansetIAutomatiskVilkårsvurdering(behandling: Behandling) {
+        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)!!
+
+        Vilkår.hentFødselshendelseVilkårsreglerRekkefølge().find { erVilkårForPersonNei(behandlingResultat, it.first, it.second) }?.let {
+            vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(it.second, it.first)
+        }
+
+        stansetIAutomatiskVilkårsvurderingCounter.increment()
     }
 
     private fun fødselshendelseSkalRullesTilbake(): Boolean =
