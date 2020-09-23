@@ -114,7 +114,7 @@ class FødselshendelseIntegrasjonTest(
         val oppfyltBarnFnr = listOf(barnefnr[0], barnefnr[1])
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
-                morsfnr[0], morsfnr[0], oppfyltBarnFnr
+                morsfnr[0], oppfyltBarnFnr
         ))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
@@ -163,7 +163,7 @@ class FødselshendelseIntegrasjonTest(
         val ikkeOppfyltBarnFnr = listOf(barnefnr[0], barnefnr[2])
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(NyBehandlingHendelse(
-                morsfnr[1], morsfnr[1], ikkeOppfyltBarnFnr
+                morsfnr[1], ikkeOppfyltBarnFnr
         ))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[1]))
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)

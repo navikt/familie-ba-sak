@@ -84,13 +84,13 @@ class LoggServiceTest(
 
     @Test
     fun `Skal lage logginnslag ved stegflyt for automatisk behandling`() {
-        val søkersIdent = randomFnr()
+        val morsIdent = randomFnr()
         val barnetsIdent = randomFnr()
 
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkersIdent, barnetsIdent)
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, morsIdent, barnetsIdent)
 
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
-                søkersIdent = søkersIdent,
+                morsIdent = morsIdent,
                 barnasIdenter = listOf(barnetsIdent)
         ))
 

@@ -69,11 +69,7 @@ class BehandlingController(private val fagsakService: FagsakService,
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
         return Result.runCatching {
-
-
-            val ident = nyBehandling.morsIdent
-                        ?: (nyBehandling.søkersIdent ?: error("Fant ingen gyldig ident på mor/søker"))
-            fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(ident, nyBehandling.barnasIdenter)
+            fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(nyBehandling.morsIdent, nyBehandling.barnasIdenter)
             fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling))
             taskRepository.save(task)
@@ -109,7 +105,6 @@ data class NyBehandling(
         val barnasIdenter: List<String> = emptyList())
 
 class NyBehandlingHendelse(
-        val søkersIdent: String? = null,
-        val morsIdent: String? = null,
+        val morsIdent: String,
         val barnasIdenter: List<String>
 )
