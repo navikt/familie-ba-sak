@@ -146,6 +146,12 @@
             <version>3.3.3</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-model</artifactId>
+            <version>3.6.3</version>
+        </dependency>
+
 
         <!-- NAV-interne avhengigheter -->
         <dependency>
