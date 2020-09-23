@@ -116,7 +116,8 @@ data class BehandlingResultat(
     fun kopier(): BehandlingResultat {
         val nyttBehandlingResultat = BehandlingResultat(
                 behandling = behandling,
-                aktiv = aktiv
+                aktiv = aktiv,
+                samletResultat = samletResultat
         )
 
         nyttBehandlingResultat.personResultater = personResultater.map { it.kopierMedParent(nyttBehandlingResultat) }.toSet()
