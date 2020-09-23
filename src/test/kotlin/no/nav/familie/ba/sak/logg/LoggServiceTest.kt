@@ -109,7 +109,7 @@ class LoggServiceTest(
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling, null, behandlingResultat)
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
-        Assertions.assertEquals("Opprettet vilkårsvurdering", vilkårsvurderingLogg.tittel)
+        Assertions.assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg.tittel)
 
 
         val nyttBehandlingResultat = lagBehandlingResultat(søkerFnr, behandling, Resultat.NEI)
@@ -117,7 +117,7 @@ class LoggServiceTest(
                 loggService.opprettVilkårsvurderingLogg(behandling, behandlingResultat, nyttBehandlingResultat)
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)
-        Assertions.assertEquals("Endring på vilkårsvurdering", nyVilkårsvurderingLogg.tittel)
+        Assertions.assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg.tittel)
 
         val logger = loggService.hentLoggForBehandling(behandlingId = behandling.id)
         Assertions.assertEquals(2, logger.size)

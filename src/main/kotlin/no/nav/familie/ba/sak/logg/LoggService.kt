@@ -55,9 +55,9 @@ class LoggService(
                                     nyttBehandlingResultat: BehandlingResultat): Logg {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val forrigeBehandlingResultatType =
-                forrigeBehandlingResultat?.hentSamletResultat(personopplysningGrunnlag,
-                                                              behandling.opprinnelse)
-                ?: nyttBehandlingResultat.forrigeSamledeResultat
+                if (nyttBehandlingResultat.forrigeSamledeResultat != null) nyttBehandlingResultat.forrigeSamledeResultat else forrigeBehandlingResultat?.hentSamletResultat(
+                        personopplysningGrunnlag,
+                        behandling.opprinnelse)
         val nyBehandlingResultatType = nyttBehandlingResultat.hentSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
 
         val tekst = if (forrigeBehandlingResultatType != null) {
