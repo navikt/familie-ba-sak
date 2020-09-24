@@ -21,7 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev", "mock-pdl", "mock-dokgen")
+@ActiveProfiles("dev", "mock-pdl", "mock-dokgen", "mock-infotrygd-feed")
 @Tag("integration")
 class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
                                       @Autowired private val featureToggleService: FeatureToggleService,

@@ -363,18 +363,6 @@ class ClientMocks {
         return mockInfotrygdBarnetrygdClient
     }
 
-    @Bean
-    @Primary
-    fun mockInfotrygdFeedClient(): InfotrygdFeedClient {
-        val mockInfotrygdFeedClient = mockk<InfotrygdFeedClient>()
-
-        every {
-            mockInfotrygdFeedClient.sendFødselhendelsesFeedTilInfotrygd(any())
-        } just runs
-
-        return mockInfotrygdFeedClient
-    }
-
     companion object {
 
         val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)

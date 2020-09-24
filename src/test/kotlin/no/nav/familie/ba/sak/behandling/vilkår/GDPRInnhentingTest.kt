@@ -43,7 +43,7 @@ import java.time.LocalDate
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev", "mock-pdl-gdpr")
+@ActiveProfiles("dev", "mock-pdl-gdpr", "mock-infotrygd-feed")
 @Tag("integration")
 @TestInstance(Lifecycle.PER_CLASS)
 class GDPRInnhentingTest(
