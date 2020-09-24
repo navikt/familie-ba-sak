@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 
 object SikkerhetContext {
-    val SYSTEM_FORKORTELSE = "VL"
-    val SYSTEM_NAVN = "System"
+    const val SYSTEM_FORKORTELSE = "VL"
+    const val SYSTEM_NAVN = "System"
 
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }

@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.BARN
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.SØKER
 import no.nav.nare.core.specifications.Spesifikasjon
 import java.time.LocalDate
 
@@ -11,14 +13,14 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
     UNDER_18_ÅR(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+            parterDetteGjelderFor = listOf<PersonType>(BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Er under 18 år",
                     identifikator = "UNDER_18_ÅR",
                     implementasjon = { barnUnder18År(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     BOR_MED_SØKER(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+            parterDetteGjelderFor = listOf<PersonType>(BARN),
             spesifikasjon = Spesifikasjon<FaktaTilVilkårsvurdering>(
                     beskrivelse = "Bor med søker: har samme adresse",
                     identifikator = "BOR_MED_SØKER:SAMME_ADRESSE",
@@ -40,14 +42,14 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     GIFT_PARTNERSKAP(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+            parterDetteGjelderFor = listOf<PersonType>(BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Gift/partnerskap",
                     identifikator = "GIFT_PARTNERSKAP",
                     implementasjon = { giftEllerPartnerskap(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     BOSATT_I_RIKET(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
+            parterDetteGjelderFor = listOf<PersonType>(SØKER, BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Bosatt i riket",
                     identifikator = "BOSATT_I_RIKET",
@@ -61,7 +63,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     LOVLIG_OPPHOLD(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
+            parterDetteGjelderFor = listOf<PersonType>(SØKER, BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Lovlig opphold",
                     identifikator = "LOVLIG_OPPHOLD",
@@ -103,19 +105,19 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
 
         private val fødselshendelseVilkårsreglerRekkefølge = listOf(
                 //Mor bosatt i riket
-                Pair(PersonType.SØKER, Vilkår.BOSATT_I_RIKET),
+                Pair(SØKER, BOSATT_I_RIKET),
                 //Mor har lovlig opphold
-                Pair(PersonType.SØKER, Vilkår.LOVLIG_OPPHOLD),
+                Pair(SØKER, LOVLIG_OPPHOLD),
                 //Barnet er under 18 år
-                Pair(PersonType.BARN, Vilkår.UNDER_18_ÅR),
+                Pair(BARN, UNDER_18_ÅR),
                 //Barnet bor med søker
-                Pair(PersonType.BARN, Vilkår.BOR_MED_SØKER),
+                Pair(BARN, BOR_MED_SØKER),
                 //Barnet er ugift og har ikke inngått partnerskap
-                Pair(PersonType.BARN, Vilkår.GIFT_PARTNERSKAP),
+                Pair(BARN, GIFT_PARTNERSKAP),
                 //Barnet er bosatt i riket
-                Pair(PersonType.BARN, Vilkår.BOSATT_I_RIKET),
+                Pair(BARN, BOSATT_I_RIKET),
                 //Barnet har lovlig opphold
-                Pair(PersonType.BARN, Vilkår.LOVLIG_OPPHOLD),
+                Pair(BARN, LOVLIG_OPPHOLD),
         )
     }
 }
