@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -22,13 +23,12 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
     fun loggBehandlingStatus(behandlingId: Long, forrigeBehandlingId: Long?): BehandlingDVH {
         val behandling = behandlingService.hent(behandlingId)
-        val journalpost = journalføringRepository.findByBehandlingId(behandlingId)
-
 
 
         var datoMottatt: LocalDateTime = LocalDateTime.now() // TODO: Endre til LocalDateTime i kontrakten
         when (behandling.opprinnelse) {
             BehandlingOpprinnelse.MANUELL -> {
+            val journalpost = journalføringRepository.findByBehandlingId(behandlingId)
                 datoMottatt = journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
                                       .filter { it.journalposttype == Journalposttype.I }
                                       .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
@@ -36,7 +36,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                       .minOrNull() ?: throw error("")
             }
             BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE -> {
-                datoMottatt = behandling.opprettetTidspunkt  // TODO: trenger avklaring
+                datoMottatt = behandling.opprettetTidspunkt
             }
         }
 
@@ -46,8 +46,9 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val aktivtVedtak = vedtakService.hentAktivForBehandling(behandlingId)
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId)
 
-        val behandlingDVH = BehandlingDVH(funksjonellTid = ZonedDateTime.now(),
-                                          tekniskTid = ZonedDateTime.now(), //now()
+        val now = ZonedDateTime.now()
+        val behandlingDVH = BehandlingDVH(funksjonellTid = now,
+                                          tekniskTid = now, //now()
                                           mottattDato = datoMottatt.atZone(TIMEZONE), // TODO hva er dato Mottat for manuell, automatisk fra hendelse, automatisk fra journalpost
                                           registrertDato = datoMottatt.atZone(TIMEZONE), //Hva er forskjell på registrert og mottatt
                                           behandlingId = behandling.id.toString(),
@@ -62,15 +63,15 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                               */
 
                                           ansvarligEnhetKode = ansvarligEnhetKode!!,
-                                          behandlendeEnhetKode = behandlendeEnhetsKode, //TODO Hva gjør vi hvis behandlendeEnhetsKode ikke finnes? //der hvor saksbehandler hører hjemme
+                                          behandlendeEnhetKode = behandlendeEnhetsKode, //der hvor saksbehandler hører hjemme //TODO Hva gjør vi hvis behandlendeEnhetsKode ikke finnes?
                                           ansvarligEnhetType = "NORG",
                                           behandlendeEnhetType = "NORG",
                                           totrinnsbehandling = behandling.opprinnelse == BehandlingOpprinnelse.MANUELL,
                                           avsender = "familie-ba-sak",
-                                          versjon = 2, // TODO kan vurdere å bumpe den manuelt sammen med en test som feiler hvis vi glemmer det. Kan også undersøke om det går an å plukke ut noe fra manifestet
+                                          versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
                 // Ikke påkrevde felt
                                           vedtaksDato = aktivtVedtak?.vedtaksdato,
-                                          relatertBehandlingId = forrigeBehandlingId.toString(), // Kan en behandling være avsluttet, men ikke i status TEKNISK_OPPHØR eller AVSLUTTET, kan man bruke siste deaktiverte? kan man bruke forrigeVedtakId og så finne behandling
+                                          relatertBehandlingId = forrigeBehandlingId?.toString(), // Kan en behandling være avsluttet, men ikke i status TEKNISK_OPPHØR eller AVSLUTTET, kan man bruke siste deaktiverte? kan man bruke forrigeVedtakId og så finne behandling
                                           vedtakId = aktivtVedtak?.id?.toString(),
                                           resultat = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.resultat?.name,
                                           resultatBegrunnelse = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.behandlingresultatOgVilkårBegrunnelse?.name,
@@ -78,7 +79,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 //                                          behandlingStatusBeskrivelse = null, //har ingen beskrivelse
                                           resultatBegrunnelseBeskrivelse = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.behandlingresultatOgVilkårBegrunnelse?.tittel,
 //                                          utenlandstilsnittBeskrivelse = "relatertButenlandstilsnittBeskrivelseehandlingId",
-                                          beslutter = totrinnskontroll?.beslutter,
+                                          beslutter = totrinnskontroll?.beslutter,  // TODO skal den være annerledes ved automatisk behandling eller kan vi sette null/tom string
                                           saksbehandler = totrinnskontroll?.saksbehandler,
                                           behandlingOpprettetAv = behandling.opprettetAv,
                                           behandlingOpprettetType = "saksbehandlerId",
@@ -89,6 +90,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
     companion object {
 
-        private val TIMEZONE = ZoneId.of("Europe/Paris")
+        val TIMEZONE = ZoneId.of("Europe/Paris")
     }
 }
