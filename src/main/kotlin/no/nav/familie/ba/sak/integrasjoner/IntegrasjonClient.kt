@@ -92,7 +92,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
         return try {
             val response =
-                    postForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, PersonIdent(ident))
+                    postForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, no.nav.familie.kontrakter.felles.PersonIdent(ident))
             response.data ?: throw IntegrasjonException("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt",
                                                         null,
                                                         uri)
