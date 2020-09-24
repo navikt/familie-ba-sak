@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -52,12 +51,6 @@ fun LocalDate.isSameOrAfter(toCompare: LocalDate): Boolean {
     return this.isAfter(toCompare) || this == toCompare
 }
 
-fun LocalDate.isSameOrBetween(fom: LocalDate, tom: LocalDate): Boolean {
-    return this.isSameOrAfter(fom) && this.isSameOrBefore(tom)
-}
-
-private fun LocalDate.toDate(): Date = Date.from(this.atStartOfDay(ZoneId.systemDefault()).toInstant())
-
 private fun LocalDate.isBetween(toCompare: Periode): Boolean {
     return this.isAfter(toCompare.fom) && this.isBefore(toCompare.tom)
 }
@@ -78,9 +71,7 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
     return this.fom.isBetween(other) && this.tom.isSameOrAfter(other.tom)
 }
 
-data class Periode(val fom: LocalDate, val tom: LocalDate) {
-    val hash get() = "${fom}_${tom}"
-}
+data class Periode(val fom: LocalDate, val tom: LocalDate)
 
 fun VilkårResultat.toPeriode(): Periode {
     return Periode(fom = this.periodeFom ?: throw Feil("Perioden har ikke fom-dato"),
@@ -127,7 +118,7 @@ fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): Lis
             TreeMap()
     for (periode in input) {
         if (periode.fom != null
-                && (!map.containsKey(periode.fom) || periode.tom == null || periode.tom.isAfter(map[periode.fom]))) {
+            && (!map.containsKey(periode.fom) || periode.tom == null || periode.tom.isAfter(map[periode.fom]))) {
             map[periode.fom] = periode.tom
         }
     }

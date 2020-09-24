@@ -96,8 +96,7 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                     UtbetalingsDetaljDVH(
                             person = PersonDVH(
                                     rolle = personForAndel.type.name,
-                                    statsborgerskap = personForAndel.statsborgerskap?.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode }
-                                                      ?: error("Fant ingen statsborgerskap på personen"),
+                                    statsborgerskap = personForAndel.statsborgerskap.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode },
                                     bostedsland = hentLandkode(personForAndel),
                                     primærland = "IKKE IMPLMENTERT",
                                     sekundærland = "IKKE IMPLEMENTERT",

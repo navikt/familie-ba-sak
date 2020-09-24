@@ -210,7 +210,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `hentBehandlendeEnhet returnerer OK`() {
-        stubFor(get("/api/arbeidsfordeling/enhet/BAR")
+        stubFor(post("/api/arbeidsfordeling/enhet/BAR")
                         .withHeader("Accept", containing("json"))
                         .willReturn(okJson(objectMapper.writeValueAsString(success(listOf(
                                 Arbeidsfordelingsenhet("2", "foo")))))))

@@ -9,8 +9,6 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.Tema
@@ -64,7 +62,10 @@ class OppgaveControllerTest {
     fun `Tildeling av oppgave skal returnere feil ved feil fra integrasjonsklienten`() {
         val OPPGAVE_ID = "1234"
         val SAKSBEHANDLER_ID = "Z999998"
-        every { oppgaveService.fordelOppgave(any(), any()) } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
+        every {
+            oppgaveService.fordelOppgave(any(),
+                                         any())
+        } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
 
         val respons = oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
 

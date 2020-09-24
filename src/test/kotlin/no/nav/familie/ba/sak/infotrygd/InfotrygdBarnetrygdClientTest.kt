@@ -1,11 +1,10 @@
 package no.nav.familie.ba.sak.infotrygd
 
-import com.github.tomakehurst.wiremock.client.WireMock.*
-import no.nav.commons.foedselsnummer.FoedselsNr
+import com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests
 import no.nav.familie.ba.sak.config.ApplicationConfig
-import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
@@ -36,7 +35,7 @@ class InfotrygdBarnetrygdClientTest {
     fun setUp() {
         resetAllRequests()
         client = InfotrygdBarnetrygdClient(
-                URI.create("http://localhost:${environment.get("wiremock.server.port")}/api"),
+                URI.create("http://localhost:${environment["wiremock.server.port"]}/api"),
                 restOperations,
                 environment
         )

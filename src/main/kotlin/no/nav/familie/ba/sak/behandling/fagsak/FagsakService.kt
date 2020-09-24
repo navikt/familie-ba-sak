@@ -239,7 +239,7 @@ class FagsakService(
                 it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MOR
                 || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR
             }.forEach {
-                if (assosierteFagsakDeltager.find({ d -> d.ident == it.personIdent.id }) == null) {
+                if (assosierteFagsakDeltager.find { d -> d.ident == it.personIdent.id } == null) {
                     val forelderInfo = runCatching {
                         personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
                     }.fold(
