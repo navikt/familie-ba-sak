@@ -10,10 +10,12 @@ import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
+@Service
 class SaksstatistikkService(private val behandlingService: BehandlingService,
                             private val journalføringRepository: JournalføringRepository,
                             private val journalføringService: JournalføringService,
