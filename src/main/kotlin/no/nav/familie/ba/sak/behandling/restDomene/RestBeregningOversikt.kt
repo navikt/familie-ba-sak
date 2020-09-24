@@ -11,11 +11,12 @@ data class RestBeregningOversikt(
         val beregningDetaljer: List<RestBeregningDetalj>,
         val ytelseTyper: List<YtelseType>,
         val antallBarn: Int,
-        val utbetaltPerMnd: Int)
+        val utbetaltPerMnd: Int,
+        val endring: Boolean,
+)
 
 data class RestBeregningDetalj(
         val person: RestPerson,
         val ytelseType: YtelseType,
         val utbetaltPerMnd: Int,
-        val endring: Boolean,
 )

@@ -154,6 +154,7 @@ object TilkjentYtelseUtils {
                                             andelerForSegment: List<AndelTilkjentYtelse>,
                                             behandling: Behandling,
                                             personopplysningGrunnlag: PersonopplysningGrunnlag): RestBeregningOversikt {
+        val endret = false //TODO: Enten sammenligne med forrige beregningoversikt (fra forrige tilkjent ytelse) eller bruk andel og sett et endretflagg der
         return RestBeregningOversikt(
                 periodeFom = segment.fom,
                 periodeTom = segment.tom,
@@ -161,6 +162,7 @@ object TilkjentYtelseUtils {
                 utbetaltPerMnd = segment.value,
                 antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
                 sakstype = behandling.kategori,
+                endring = endret,
                 beregningDetaljer = andelerForSegment.map { andel ->
                     val personForAndel =
                             personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
