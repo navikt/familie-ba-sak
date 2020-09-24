@@ -31,7 +31,7 @@ object Utils {
         model = if (File("pom.xml").exists()) reader.read(FileReader("pom.xml")) else reader.read(
                 InputStreamReader(
                         this::class.java.getResourceAsStream(
-                                "META-INF/maven/no.nav.familie.ba.sak/pom.xml"
+                                "META-INF/maven/no.nav.familie.ba.sak/familie-ba-sak/pom.xml"
                         )
                 )
         )
