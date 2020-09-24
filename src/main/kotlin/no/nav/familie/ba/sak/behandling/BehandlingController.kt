@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService,
-                           private val fødselshendelseService: FødselshendelseService,
                            private val taskRepository: TaskRepository) {
 
     private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("manuell")
@@ -70,9 +69,9 @@ class BehandlingController(private val fagsakService: FagsakService,
         return try {
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling))
             taskRepository.save(task)
-            ok("OK")
+            ok("Task opprettet for behandling av fødselshendelse.")
         } catch (ex: Throwable) {
-            illegalState("Opprettelse av behandling fra hendelse feilet: ${ex.message}", ex)
+            illegalState("Task kunne ikke opprettes for behandling av fødselshendelse: ${ex.message}", ex)
         }
     }
 

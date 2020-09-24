@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.*
+import no.nav.familie.ba.sak.behandling.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
@@ -8,6 +9,8 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -346,6 +349,30 @@ class ClientMocks {
         } returns false
 
         return mockFeatureToggleService
+    }
+
+    @Bean
+    @Primary
+    fun mockInfotrygdBarnetrygdClient(): InfotrygdBarnetrygdClient {
+        val mockInfotrygdBarnetrygdClient = mockk<InfotrygdBarnetrygdClient>()
+
+        every {
+            mockInfotrygdBarnetrygdClient.harIkkeLøpendeSakIInfotrygd(any(), any())
+        } returns true
+
+        return mockInfotrygdBarnetrygdClient
+    }
+
+    @Bean
+    @Primary
+    fun mockInfotrygdFeedClient(): InfotrygdFeedClient {
+        val mockInfotrygdFeedClient = mockk<InfotrygdFeedClient>()
+
+        every {
+            mockInfotrygdFeedClient.sendFødselhendelsesFeedTilInfotrygd(any())
+        } just runs
+
+        return mockInfotrygdFeedClient
     }
 
     companion object {
