@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.nare.core.evaluations.Resultat
@@ -69,7 +70,7 @@ class PersonResultat(
     }
 
     fun hentSamletResultat(): BehandlingResultatType {
-        if(vilkårResultater.any{ it.resultat == Resultat.KANSKJE}) {
+        if (vilkårResultater.any { it.resultat == Resultat.KANSKJE }) {
             return BehandlingResultatType.IKKE_VURDERT
         }
 
@@ -81,6 +82,12 @@ class PersonResultat(
                 BehandlingResultatType.AVSLÅTT
             }
         }
+    }
+
+    fun allePåkrevdeVilkårErOppfylt(personType: PersonType): Boolean {
+        val alleVilkår = Vilkår.hentVilkårFor(personType)
+        return vilkårResultater.map { it.vilkårType }.containsAll(alleVilkår)
+               && vilkårResultater.all { it.resultat == Resultat.JA }
     }
 
     fun kopierMedParent(behandlingResultat: BehandlingResultat): PersonResultat {
@@ -95,6 +102,7 @@ class PersonResultat(
     }
 
     companion object {
+
         val comparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.vilkårType })
     }
 }

@@ -40,7 +40,7 @@ class FerdigstillBehandling(
                                       data: String): StegType {
         LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
 
-        val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
+        val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling)
 
         if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK) {
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")

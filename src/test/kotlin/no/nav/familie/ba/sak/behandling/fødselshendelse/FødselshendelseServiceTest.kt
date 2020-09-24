@@ -45,7 +45,7 @@ class FødselshendelseServiceTest {
     private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
     private val taskRepositoryMock = mockk<TaskRepository>()
     private val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
-    private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
+    private val persongrunnlagServiceMock = mockk<PersongrunnlagService>(relaxed = true)
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
     private val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
@@ -174,7 +174,7 @@ class FødselshendelseServiceTest {
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
-        verify(exactly = 0) { stegServiceMock.evaluerVilkårForFødselshendelse(any()) }
+        verify(exactly = 0) { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) }
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(any(), any(), any()) }
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
     }
@@ -225,7 +225,7 @@ class FødselshendelseServiceTest {
         personopplysningGrunnlag.personer.add(søker)
 
         every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
-        every { stegServiceMock.evaluerVilkårForFødselshendelse(any()) } returns vilkårsvurderingsResultat
+        every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every {
             evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(),
@@ -245,7 +245,8 @@ class FødselshendelseServiceTest {
         every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling
 
         every { gdprServiceMock.lagreResultatAvFiltreringsregler(any(), any(), any(), any()) } just runs
-        every { gdprServiceMock.hentFødselshendelsePreLansering(any()) } returns FødselshendelsePreLansering(personIdent = søker.personIdent.ident, behandlingId = behandling.id)
+        every { gdprServiceMock.hentFødselshendelsePreLansering(any()) } returns FødselshendelsePreLansering(personIdent = søker.personIdent.ident,
+                                                                                                             behandlingId = behandling.id)
 
         mockkObject(IverksettMotOppdragTask.Companion)
         every {

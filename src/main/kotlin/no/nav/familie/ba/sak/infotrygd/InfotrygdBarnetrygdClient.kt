@@ -4,13 +4,12 @@ import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.http.client.AbstractRestClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.core.env.Environment
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
-import java.lang.Exception
 import java.net.URI
 
 @Component

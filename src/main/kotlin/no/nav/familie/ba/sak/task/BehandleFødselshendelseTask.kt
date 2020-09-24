@@ -33,7 +33,6 @@ class BehandleFødselshendelseTask(
                 null -> LOG.error("Rollback har blitt trigget, men data fra fødselshendelse mangler")
                 else -> fødselshendelsePreLanseringRepository.save(e.fødselshendelsePreLansering.copy(id = 0))
             }
-
             LOG.info("Rollback utført. Data ikke persistert.")
         } catch (e: Throwable) {
             LOG.info("FødselshendelseTask kjørte med Feil=${e.message}")
@@ -43,6 +42,7 @@ class BehandleFødselshendelseTask(
             } else {
                 secureLogger.info("FødselshendelseTask feilet!", e)
             }
+            throw e
         }
     }
 

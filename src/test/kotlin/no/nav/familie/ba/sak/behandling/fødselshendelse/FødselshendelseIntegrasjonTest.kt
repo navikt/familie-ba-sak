@@ -124,7 +124,7 @@ class FødselshendelseIntegrasjonTest(
 
         val behandlingResultat = behandlingResultater[0]
 
-        Assert.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
+        Assert.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.samletResultat)
         Assert.assertEquals(true, behandlingResultat.aktiv)
         Assert.assertEquals(3, behandlingResultat.personResultater.size)
 
@@ -171,9 +171,9 @@ class FødselshendelseIntegrasjonTest(
 
         Assert.assertEquals(1, behandlingResultater.size)
 
-        val behandlingResultat = behandlingResultater.get(0)
+        val behandlingResultat = behandlingResultater[0]
 
-        Assert.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
+        Assert.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.samletResultat)
         Assert.assertEquals(true, behandlingResultat.aktiv)
         Assert.assertEquals(3, behandlingResultat.personResultater.size)
         Assert.assertTrue(behandlingResultat.personResultater.map { it.personIdent }.containsAll(
