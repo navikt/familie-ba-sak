@@ -16,5 +16,6 @@ data class RestBeregningOversikt(
 data class RestBeregningDetalj(
         val person: RestPerson,
         val ytelseType: YtelseType,
-        val utbetaltPerMnd: Int
+        val utbetaltPerMnd: Int,
+        val endring: Boolean,
 )

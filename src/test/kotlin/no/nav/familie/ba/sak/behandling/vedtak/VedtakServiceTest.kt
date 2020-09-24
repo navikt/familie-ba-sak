@@ -239,7 +239,7 @@ class VedtakServiceTest(
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
                                                                                 opprinnelse = BehandlingOpprinnelse.MANUELL))
 
-        val forrigeVedtak = vedtakService.hentForrigeVedtak(revurderingOpphørBehandling)
+        val forrigeVedtak = vedtakService.hentForrigeVedtakPåFagsak(revurderingOpphørBehandling)
         Assertions.assertNotNull(forrigeVedtak)
         Assertions.assertEquals(revurderingInnvilgetBehandling.id, forrigeVedtak?.behandling?.id)
     }

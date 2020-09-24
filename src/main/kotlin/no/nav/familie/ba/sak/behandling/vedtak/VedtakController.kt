@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
@@ -35,6 +37,15 @@ class VedtakController(
         private val stegService: StegService,
         private val taskRepository: TaskRepository
 ) {
+
+    @GetMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/forrige-vedtak"])
+    fun hentUtbetalingBegrunnelserFraForrigeVedtak(@PathVariable
+                                                   fagsakId: Long): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
+        // TODO: Frontend vet hvilke perioder som er uendret gjennom RestBeregningOversikt og vil vise de man ønskser med lesevisning.
+        val restUtbetalingsbegrunnelser =
+                vedtakService.hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId).map { it.toRestUtbetalingBegrunnelse() }
+        return ResponseEntity.ok(Ressurs.success(data = restUtbetalingsbegrunnelser))
+    }
 
     @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse"])
     fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,

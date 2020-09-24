@@ -138,6 +138,15 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         lagreOgDeaktiverGammel(vedtak)
     }
 
+    fun hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId: Long): List<UtbetalingBegrunnelse> {
+        val forrigeVedtak = hentForrigeVedtakPåFagsak(fagsakId)
+        if (forrigeVedtak != null) {
+            return forrigeVedtak.utbetalingBegrunnelser.toList()
+        } else {
+            throw Feil("Finner ikke forrige vedtak ved uthenting av utbetalingbegrunnelser fra forrige vedtak")
+        }
+    }
+
     @Transactional
     fun leggTilUtbetalingBegrunnelse(periode: Periode,
                                      fagsakId: Long): List<RestUtbetalingBegrunnelse> {
@@ -180,7 +189,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             lagreEllerOppdater(vedtak)
         }
     }
-
 
     @Transactional
     fun endreUtbetalingBegrunnelse(restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse,
@@ -303,7 +311,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         }
     }
 
-    fun hentForrigeVedtakPåFagsak(fagsakId: Long): Vedtak? {
+    private fun hentForrigeVedtakPåFagsak(fagsakId: Long): Vedtak? {
         val aktivtVedtak = hentVedtakForAktivBehandling(fagsakId) ?: error("Finner ingen aktivt vedtak på fagsak $fagsakId")
         return if (aktivtVedtak.forrigeVedtakId != null) hent(aktivtVedtak.forrigeVedtakId) else null
     }
