@@ -54,7 +54,7 @@ class PdlGraphqlTest {
     @Test
     fun testDeserializationOfResponseWithErrors() {
         val resp = mapper.readValue(File(getFile("pdl/pdlPersonIkkeFunnetResponse.json")), PdlHentPersonResponse::class.java)
-        assertThat(resp.harFeil()).isTrue()
+        assertThat(resp.harFeil()).isTrue
         assertThat(resp.errorMessages()).contains("Fant ikke person", "Ikke tilgang")
     }
 

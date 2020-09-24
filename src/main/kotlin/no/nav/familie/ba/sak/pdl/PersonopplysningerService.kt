@@ -68,7 +68,7 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
     }
 
     fun hentVergeData(ident: Ident): VergeData {
-        return harVerge(ident.ident, "BAR").let { VergeData(harVerge = it.harVerge) }
+        return VergeData(harVerge = harVerge(ident.ident, "BAR").harVerge)
     }
 
     fun hentDødsfall(personIdent: String, tema: String): DødsfallResponse {

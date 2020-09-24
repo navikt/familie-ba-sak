@@ -1,15 +1,18 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
+import no.nav.familie.ba.sak.beregning.domene.YtelseType.SMÅBARNSTILLEGG
+import no.nav.familie.ba.sak.common.dato
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ØkonomiUtilsTest {

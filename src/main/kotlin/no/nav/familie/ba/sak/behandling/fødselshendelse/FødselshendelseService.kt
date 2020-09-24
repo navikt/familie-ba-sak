@@ -127,7 +127,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         } else {
             persongrunnlagService.hentBarna(behandlingResultat.behandling)
         }
-        return behandlingResultat?.personResultater?.any {personResultat ->
+        return behandlingResultat.personResultater.any { personResultat ->
             personer.map { it?.personIdent?.ident }.contains(personResultat.personIdent) && personResultat.vilkårResultater.any { vilkårResusltat ->
                 vilkårResusltat.vilkårType == vilkår && vilkårResusltat.resultat == Resultat.NEI
             }
@@ -218,6 +218,5 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     companion object {
 
         val LOG = LoggerFactory.getLogger(this::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

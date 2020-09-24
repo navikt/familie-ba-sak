@@ -163,7 +163,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-    fun hentOpphold(ident: String, tema: String): List<Opphold>{
+    fun hentOpphold(ident: String, tema: String): List<Opphold> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
                                                 query = hentGraphqlQuery("opphold"))
         val response = try {
@@ -175,8 +175,8 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                        throwable = e)
         }
 
-        if (!response.harFeil()){
-            if(response.data == null || response.data.person== null || response.data.person.opphold== null){
+        if (!response.harFeil()) {
+            if (response.data?.person?.opphold == null) {
                 throw Feil(message = "Ugyldig response (null) fra PDL ved henting av opphold.",
                            frontendFeilmelding = "Feilet ved henting av opphold for person $ident",
                            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
@@ -195,7 +195,9 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         val response = try {
             postForEntity<PdlUtenlandskAdressseResponse>(pdlUri, pdlPersonRequest, httpHeaders("BAR"))
         } catch (e: Exception) {
-            throw Feil(message = "Feil ved oppslag på utenlandsk bostedsadresse. Gav feil: ${NestedExceptionUtils.getMostSpecificCause(e).message}",
+            throw Feil(message = "Feil ved oppslag på utenlandsk bostedsadresse. Gav feil: ${
+                NestedExceptionUtils.getMostSpecificCause(e).message
+            }",
                        frontendFeilmelding = "Feil oppsto ved oppslag på utenlandsk bostedsadresse $personIdent",
                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                        throwable = e)
@@ -208,7 +210,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
     }
 
-    fun hentBostedsadresseperioder(ident : String) : List<Bostedsadresseperiode>{
+    fun hentBostedsadresseperioder(ident: String): List<Bostedsadresseperiode> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
                                                 query = hentGraphqlQuery("hentBostedsadresseperioder"))
         val response = try {
@@ -220,13 +222,13 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                        throwable = e)
         }
 
-        if (!response.harFeil()){
-            if(response.data.person == null){
+        if (!response.harFeil()) {
+            if (response.data.person == null) {
                 throw Feil(message = "Ugyldig response (person=null) fra PDL ved henting av bostedsadresseperioder.",
                            frontendFeilmelding = "Feilet ved henting av bostedsadresseperioder for person $ident",
                            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
             }
-            if(response.data.person.bostedsadresse.any{it.gyldigFraOgMed == null}){
+            if (response.data.person.bostedsadresse.any { it.gyldigFraOgMed == null }) {
                 LOG.warn("Uventet response (gyldigFraOgMed == null) fra PDL ved henting av bostedadresseperioder.")
             }
             return response.data.person.bostedsadresse
@@ -238,6 +240,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
     }
 
     companion object {
+
         private const val PATH_GRAPHQL = "graphql"
         val LOG = LoggerFactory.getLogger(PdlRestClient::class.java)
     }

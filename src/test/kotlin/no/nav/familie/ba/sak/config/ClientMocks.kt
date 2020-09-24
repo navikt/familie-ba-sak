@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
@@ -28,6 +27,7 @@ import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.*
+import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile

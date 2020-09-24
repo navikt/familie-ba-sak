@@ -95,7 +95,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         val fjernedeVedlegg = request.eksisterendeLogiskeVedlegg.partition { request.logiskeVedlegg.contains(it) }.second
         val nyeVedlegg = request.logiskeVedlegg.partition { request.eksisterendeLogiskeVedlegg.contains(it) }.second
 
-        val dokumentInfoId = request.dokumentInfoId.takeIf { !it.isEmpty() }
+        val dokumentInfoId = request.dokumentInfoId.takeIf { it.isNotEmpty() }
                              ?: hentJournalpost(journalpostId).data?.dokumenter?.first()?.dokumentInfoId
                              ?: error("Fant ikke dokumentInfoId på journalpost")
 
@@ -124,24 +124,6 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                 }
             }
         }
-    }
-
-    private fun mapTilOppdaterJournalpostRequest(restOppdaterJournalpost: RestOppdaterJournalpost,
-                                                 sak: Sak): OppdaterJournalpostRequest {
-        val dokument = DokumentInfo(dokumentInfoId = restOppdaterJournalpost.dokumentInfoId,
-                                    tittel = restOppdaterJournalpost.dokumentTittel,
-                                    brevkode = null,
-                                    dokumentstatus = Dokumentstatus.FERDIGSTILT,
-                                    dokumentvarianter = null,
-                                    logiskeVedlegg = null)
-
-        return OppdaterJournalpostRequest(avsenderMottaker = AvsenderMottaker(restOppdaterJournalpost.avsender.id,
-                                                                              navn = restOppdaterJournalpost.avsender.navn),
-                                          bruker = Bruker(restOppdaterJournalpost.bruker.id,
-                                                          navn = restOppdaterJournalpost.bruker.navn),
-                                          sak = sak,
-                                          tittel = restOppdaterJournalpost.dokumentTittel,
-                                          dokumenter = listOf(dokument))
     }
 
     private fun opprettOppgaveFor(behandling: Behandling, navIdent: String) {
