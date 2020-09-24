@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.task
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.gdpr.domene.FødelshendelsePreLanseringRepository
@@ -35,6 +37,7 @@ class BehandleFødselshendelseTask(
         // behandleHendelseIBaSak skal gjøre en "dry run", kun for metrikkers skyld, og skal hverken lage oppgave eller vedtak.
         // Koden under fjernes når vi går live.
         fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        antallAutomatiskeBehandlingerOpprettet.increment()
         behandleHendelseIBaSak(nyBehandling)
 
         // Dette er flyten, slik den skal se ut når vi går "live".
@@ -71,10 +74,15 @@ class BehandleFødselshendelseTask(
     }
 
     companion object {
-
         const val TASK_STEP_TYPE = "behandleFødselshendelseTask"
         val LOG = LoggerFactory.getLogger(this::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
+        val antallAutomatiskeBehandlingerOpprettet = Metrics.counter(
+                "behandling.opprettet.automatisk",
+                "type",
+                BehandlingType.FØRSTEGANGSBEHANDLING.name,
+                "beskrivelse",
+                BehandlingType.FØRSTEGANGSBEHANDLING.visningsnavn)
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task.nyTask(

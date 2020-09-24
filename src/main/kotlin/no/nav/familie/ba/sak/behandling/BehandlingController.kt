@@ -36,8 +36,6 @@ class BehandlingController(private val fagsakService: FagsakService,
 
     private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("manuell")
 
-    private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("automatisk")
-
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -72,7 +70,6 @@ class BehandlingController(private val fagsakService: FagsakService,
         return try {
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling))
             taskRepository.save(task)
-            antallAutomatiskeBehandlingerOpprettet[BehandlingType.FØRSTEGANGSBEHANDLING]?.increment()
             ok("OK")
         } catch (ex: Throwable) {
             illegalState("Opprettelse av behandling fra hendelse feilet: ${ex.message}", ex)
