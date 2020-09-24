@@ -351,18 +351,6 @@ class ClientMocks {
         return mockFeatureToggleService
     }
 
-    @Bean
-    @Primary
-    fun mockInfotrygdBarnetrygdClient(): InfotrygdBarnetrygdClient {
-        val mockInfotrygdBarnetrygdClient = mockk<InfotrygdBarnetrygdClient>()
-
-        every {
-            mockInfotrygdBarnetrygdClient.harIkkeLøpendeSakIInfotrygd(any(), any())
-        } returns true
-
-        return mockInfotrygdBarnetrygdClient
-    }
-
     companion object {
 
         val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
