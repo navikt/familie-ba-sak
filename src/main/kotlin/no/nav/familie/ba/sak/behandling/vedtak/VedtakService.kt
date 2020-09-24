@@ -111,7 +111,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     @Transactional
     fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
-        val forrigeVedtak = hentForrigeVedtak(behandling = behandling)
+        val forrigeVedtak = hentForrigeVedtakPåFagsak(sisteBehandlingPåFagsak = behandling)
 
         // TODO: Midlertidig fiks før støtte for delvis innvilget
         val behandlingResultatType = midlertidigUtledBehandlingResultatType(
@@ -235,7 +235,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
 
             val begrunnelseSomSkalPersisteres =
-                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse.hentBeskrivelse(gjelderSøker, barnasFødselsdatoer, vilkårsdato)
+                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse.hentBeskrivelse(gjelderSøker,
+                                                                                                       barnasFødselsdatoer,
+                                                                                                       vilkårsdato)
 
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
@@ -290,14 +292,20 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     }
 
-    fun hentForrigeVedtak(behandling: Behandling): Vedtak? {
-        val behandlinger = behandlingService.hentBehandlinger(behandling.fagsak.id)
+    fun hentForrigeVedtakPåFagsak(sisteBehandlingPåFagsak: Behandling): Vedtak? {
+        val behandlinger = behandlingService.hentBehandlinger(sisteBehandlingPåFagsak.fagsak.id)
 
 
-        return when (val forrigeBehandling = behandlinger.filter { it.id != behandling.id }.maxByOrNull { it.opprettetTidspunkt }) {
+        return when (val forrigeBehandling =
+                behandlinger.filter { it.id != sisteBehandlingPåFagsak.id }.maxByOrNull { it.opprettetTidspunkt }) {
             null -> null
             else -> hentAktivForBehandling(behandlingId = forrigeBehandling.id)
         }
+    }
+
+    fun hentForrigeVedtakPåFagsak(fagsakId: Long): Vedtak? {
+        val aktivtVedtak = hentVedtakForAktivBehandling(fagsakId) ?: error("Finner ingen aktivt vedtak på fagsak $fagsakId")
+        return if (aktivtVedtak.forrigeVedtakId != null) hent(aktivtVedtak.forrigeVedtakId) else null
     }
 
     fun hent(vedtakId: Long): Vedtak {
