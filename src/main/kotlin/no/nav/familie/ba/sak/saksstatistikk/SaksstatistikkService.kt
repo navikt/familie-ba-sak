@@ -27,17 +27,17 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val behandling = behandlingService.hent(behandlingId)
 
 
-        var datoMottatt: LocalDateTime = LocalDateTime.now() // TODO: Endre til LocalDateTime i kontrakten
+        var datoMottatt: LocalDateTime = LocalDateTime.now()
         when (behandling.opprinnelse) {
-            BehandlingOpprinnelse.MANUELL -> {
-            val journalpost = journalføringRepository.findByBehandlingId(behandlingId)
-                datoMottatt = journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
-                                      .filter { it.journalposttype == Journalposttype.I }
-                                      .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
-                                      .mapNotNull { it.datoMottatt }
-                                      .minOrNull() ?: throw error("")
-            }
-            BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE -> {
+//            BehandlingOpprinnelse.MANUELL -> {
+//            val journalpost = journalføringRepository.findByBehandlingId(behandlingId)
+//                datoMottatt = journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
+//                                      .filter { it.journalposttype == Journalposttype.I }
+//                                      .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
+//                                      .mapNotNull { it.datoMottatt }
+//                                      .minOrNull() ?: throw error("")
+//            }
+            else -> {
                 datoMottatt = behandling.opprettetTidspunkt
             }
         }
