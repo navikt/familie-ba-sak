@@ -45,8 +45,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
                              private val gdprService: GDPRService) {
 
-    val finnesLøpendeSakIInfotrygd: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
-    val finnesIkkeLøpendeSakIInfotrygd: Counter =
+    val harLøpendeSakIInfotrygdCounter: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
+    val harIkkeLøpendeSakIInfotrygdCounter: Counter =
             Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
     val stansetIAutomatiskFiltreringCounter = Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
     val stansetIAutomatiskVilkårsvurderingCounter =
@@ -64,13 +64,13 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                     .map { identinfo -> identinfo.ident }
         }
 
-        val finnesHosInfotrygd = !infotrygdBarnetrygdClient.finnesIkkeHosInfotrygd(morsIdenter, alleBarnasIdenter)
-        when (finnesHosInfotrygd) {
-            true -> finnesLøpendeSakIInfotrygd.increment()
-            false -> finnesIkkeLøpendeSakIInfotrygd.increment()
+        return if (infotrygdBarnetrygdClient.harIkkeLøpendeSakIInfotrygd(morsIdenter, alleBarnasIdenter)) {
+            harIkkeLøpendeSakIInfotrygdCounter.increment()
+            false
+        } else {
+            harLøpendeSakIInfotrygdCounter.increment()
+            true
         }
-
-        return finnesHosInfotrygd
     }
 
     fun sendTilInfotrygdFeed(barnIdenter: List<String>) {
