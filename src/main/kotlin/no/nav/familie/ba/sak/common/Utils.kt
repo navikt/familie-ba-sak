@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.common
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import org.apache.maven.model.Model
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader
+import org.springframework.core.io.ClassPathResource
 import java.io.File
 import java.io.FileReader
 import java.io.InputStreamReader
@@ -30,9 +31,9 @@ object Utils {
         val model: Model
         model = if (File("pom.xml").exists()) reader.read(FileReader("pom.xml")) else reader.read(
                 InputStreamReader(
-                        this::class.java.getResourceAsStream(
+                        ClassPathResource(
                                 "META-INF/maven/no.nav.familie.ba.sak/familie-ba-sak/pom.xml"
-                        )
+                        ).inputStream
                 )
         )
 
