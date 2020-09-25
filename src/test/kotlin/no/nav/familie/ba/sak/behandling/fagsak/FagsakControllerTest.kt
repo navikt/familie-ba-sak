@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import io.mockk.every
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -32,11 +31,7 @@ class FagsakControllerTest(
         private val fagsakController: FagsakController,
 
         @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient,
-
-        @Autowired
         private val mockPersonopplysningerService: PersonopplysningerService
-
 ) {
 
     @Test

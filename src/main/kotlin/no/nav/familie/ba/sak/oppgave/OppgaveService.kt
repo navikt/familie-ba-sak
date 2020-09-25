@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.oppgave
 
-import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -20,12 +20,11 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                      private val personopplysningerService: PersonopplysningerService,
                      private val behandlingRepository: BehandlingRepository,
                      private val oppgaveRepository: OppgaveRepository,
-                     private val arbeidsfordelingService: ArbeidsfordelingService) {
+                     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository) {
 
     fun opprettOppgave(behandlingId: Long,
                        oppgavetype: Oppgavetype,
                        fristForFerdigstillelse: LocalDate,
-                       enhetId: String? = null,
                        tilordnetNavIdent: String? = null,
                        beskrivelse: String? = null): String {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
@@ -40,7 +39,12 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
             eksisterendeOppgave.gsakId
         } else {
-            val enhetsnummer = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()
+            val arbeidsfordelingsenhet = arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
+
+            if (arbeidsfordelingsenhet == null) {
+                LOG.warn("Fant ikke behandlende enhet på behandling ${behandling.id} ved opprettelse av $oppgavetype-oppgave.")
+            }
+
             val aktorId = personopplysningerService.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
             val opprettOppgave = OpprettOppgaveRequest(
                     ident = OppgaveIdentV2(ident = aktorId, gruppe = IdentGruppe.AKTOERID),
@@ -49,7 +53,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = enhetId ?: enhetsnummer?.enhetId,
+                    enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
                     behandlingstema = Behandlingstema.ORDINÆR_BARNETRYGD.kode,
                     tilordnetRessurs = tilordnetNavIdent
             )
@@ -62,6 +66,10 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         }
     }
 
+    fun oppdaterOppgave(patchOppgave: Oppgave): OppgaveResponse {
+        return integrasjonClient.oppdaterOppgave(patchOppgave)
+    }
+
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String): String {
         return integrasjonClient.fordelOppgave(oppgaveId, saksbehandler)
     }
@@ -72,6 +80,10 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
     fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): DbOppgave? {
         return oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
+    }
+
+    fun hentOppgaverSomIkkeErFerdigstilt(behandling: Behandling): List<DbOppgave> {
+        return oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(behandling)
     }
 
     fun hentOppgave(oppgaveId: Long): Oppgave {
@@ -90,7 +102,11 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     }
 
     fun lagOppgaveTekst(fagsakId: Long, beskrivelse: String? = null): String {
-        return if (beskrivelse != null) { beskrivelse + "\n" } else { "" } +
+        return if (beskrivelse != null) {
+            beskrivelse + "\n"
+        } else {
+            ""
+        } +
                "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
                "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
     }
@@ -107,6 +123,7 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     }
 
     companion object {
+
         private val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

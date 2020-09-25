@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
@@ -24,6 +25,7 @@ class PersongrunnlagService(
         private val statsborgerskapService: StatsborgerskapService,
         private val oppholdService: OppholdService,
         private val arbeidsforholdService: ArbeidsforholdService,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
         private val personopplysningerService: PersonopplysningerService
 ) {
 
@@ -56,6 +58,10 @@ class PersongrunnlagService(
                                                      barnasFødselsnummer: List<String>,
                                                      behandling: Behandling,
                                                      målform: Målform) {
+        fastsettBehandlendeEnhetVedIntroduksjonAvNyePersoner(behandling = behandling,
+                                                             personerSomLeggesTil = listOf(listOf(fødselsnummer),
+                                                                                           barnasFødselsnummer).flatten())
+
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
@@ -95,6 +101,22 @@ class PersongrunnlagService(
         }
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+    }
+
+    private fun fastsettBehandlendeEnhetVedIntroduksjonAvNyePersoner(behandling: Behandling, personerSomLeggesTil: List<String>) {
+
+        when (val aktivPersongrunnlag = hentAktiv(behandling.id)) {
+            null -> arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, false)
+            else -> {
+                val nyePersonerErIntrodusert = personerSomLeggesTil.any { ident ->
+                    aktivPersongrunnlag.personer.none { it.personIdent.ident == ident }
+                }
+
+                if (nyePersonerErIntrodusert) {
+                    arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, false)
+                }
+            }
+        }
     }
 
     private fun hentBarn(barnasFødselsnummer: List<String>,

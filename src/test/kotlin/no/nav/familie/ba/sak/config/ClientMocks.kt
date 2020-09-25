@@ -207,10 +207,11 @@ class ClientMocks {
         every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")
 
-        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), any()) } returns "journalpostId"
+        every { mockIntegrasjonClient.journalførVedtaksbrev(any(), any(), any(), any()) } returns "journalpostId"
 
-        every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("9999",
-                                                                                                          "Ukjent"))
+        every {
+            mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any())
+        } returns "journalpostId"
 
         every { mockIntegrasjonClient.distribuerBrev(any()) } returns success("bestillingsId")
 
@@ -231,14 +232,6 @@ class ClientMocks {
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(any<List<String>>())
         } returns listOf(Tilgang(true, null))
-
-        every {
-            mockIntegrasjonClient.journalFørVedtaksbrev(eq(søkerFnr[0]), any(), any())
-        } returns "Testrespons"
-
-        every {
-            mockIntegrasjonClient.journalførManueltBrev(eq(søkerFnr[0]), any(), any(), any(), any())
-        } returns "Testrespons"
 
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
