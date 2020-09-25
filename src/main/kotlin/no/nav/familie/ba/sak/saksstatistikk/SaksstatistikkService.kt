@@ -27,16 +27,16 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val behandling = behandlingService.hent(behandlingId)
 
 
-        var datoMottatt: LocalDateTime = LocalDateTime.now()
+        var datoMottatt: LocalDateTime
         when (behandling.opprinnelse) {
-//            BehandlingOpprinnelse.MANUELL -> {
-//            val journalpost = journalføringRepository.findByBehandlingId(behandlingId)
-//                datoMottatt = journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
-//                                      .filter { it.journalposttype == Journalposttype.I }
-//                                      .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
-//                                      .mapNotNull { it.datoMottatt }
-//                                      .minOrNull() ?: throw error("")
-//            }
+            BehandlingOpprinnelse.MANUELL -> {
+            val journalpost = journalføringRepository.findByBehandlingId(behandlingId)
+                datoMottatt = journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
+                                      .filter { it.journalposttype == Journalposttype.I }
+                                      .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
+                                      .mapNotNull { it.datoMottatt }
+                                      .minOrNull() ?: behandling.opprettetTidspunkt  //Skal man kaste feil eller ikke
+            }
             else -> {
                 datoMottatt = behandling.opprettetTidspunkt
             }

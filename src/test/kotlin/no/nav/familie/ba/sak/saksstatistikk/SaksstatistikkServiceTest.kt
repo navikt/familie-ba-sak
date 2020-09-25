@@ -8,15 +8,20 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
+import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
@@ -39,28 +44,22 @@ internal class SaksstatistikkServiceTest {
                                                              totrinnskontrollService,
                                                              vedtakService)
 
-    private val behandling = lagBehandling(opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
 
-    private val vedtak = lagVedtak(behandling)
+
+
 
     @BeforeAll
     fun init() {
-
-        every { behandlingService.hent(any()) } returns behandling
-        // every { journalføringRepository.findByBehandlingId(any()) }
-
         every { arbeidsfordelingService.bestemBehandlendeEnhet(any()) } returns "4820"
         every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("4821", "NAV"))
-
-        every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-//        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(behandling = behandling,
-//                                                                                                 saksbehandler = "saksbehandler",
-//                                                                                                 beslutter = "beslutter")
-
     }
 
     @Test
-    fun loggBehandlingStatus() {
+    fun `Skal mappe til behandlingDVH for Automatisk rute`() {
+        val behandling = lagBehandling(opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+        val vedtak = lagVedtak(behandling)
+        every { behandlingService.hent(any()) } returns behandling
+        every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
 
         val behandlingDvh = sakstatistikkService.loggBehandlingStatus(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
@@ -77,6 +76,39 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh.behandlingType).isEqualTo(behandling.type.name)
         assertThat(behandlingDvh.behandlingStatus).isEqualTo(behandling.status.name)
         assertThat(behandlingDvh.totrinnsbehandling).isFalse()
+        assertThat(behandlingDvh.saksbehandler).isEmpty()
+        assertThat(behandlingDvh.beslutter).isEmpty()
+        assertThat(behandlingDvh.avsender).isEqualTo("familie-ba-sak")
+        assertThat(behandlingDvh.versjon).isNotEmpty()
+
+    }
+
+    @Test
+    fun `Skal mappe til behandlingDVH for manuell rute`() {
+        val behandling = lagBehandling(opprinnelse = BehandlingOpprinnelse.MANUELL)
+        val vedtak = lagVedtak(behandling)
+        every { behandlingService.hent(any()) } returns behandling
+        every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
+        every { journalføringRepository.findByBehandlingId(any())} returns listOf(DbJournalpost(1, "foo", LocalDateTime.now(), behandling, "123"))
+        val mottattDato = LocalDateTime.of(2019,12,20,10,0,0)
+        val jp = lagTestJournalpost ("123", "123").copy(relevanteDatoer = listOf(RelevantDato(mottattDato, "DATO_REGISTRERT")))
+        every { journalføringService.hentJournalpost(any())} returns Ressurs.Companion.success(jp)
+
+        val behandlingDvh = sakstatistikkService.loggBehandlingStatus(2, 1)
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
+
+        assertThat(behandlingDvh.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
+        assertThat(behandlingDvh.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
+        assertThat(behandlingDvh.mottattDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh.registrertDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
+        assertThat(behandlingDvh.behandlingId).isEqualTo(behandling.id.toString())
+        assertThat(behandlingDvh.relatertBehandlingId).isEqualTo("1")
+        assertThat(behandlingDvh.sakId).isEqualTo(behandling.fagsak.id.toString())
+        assertThat(behandlingDvh.vedtakId).isEqualTo(vedtak.id.toString())
+        assertThat(behandlingDvh.behandlingType).isEqualTo(behandling.type.name)
+        assertThat(behandlingDvh.behandlingStatus).isEqualTo(behandling.status.name)
+        assertThat(behandlingDvh.totrinnsbehandling).isTrue()
         assertThat(behandlingDvh.saksbehandler).isEmpty()
         assertThat(behandlingDvh.beslutter).isEmpty()
         assertThat(behandlingDvh.avsender).isEqualTo("familie-ba-sak")
