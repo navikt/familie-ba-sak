@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
@@ -34,6 +35,9 @@ class OppgaveServiceTest {
     lateinit var personopplysningerService: PersonopplysningerService
 
     @MockK
+    lateinit var arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository
+
+    @MockK
     lateinit var arbeidsfordelingService: ArbeidsfordelingService
 
     @MockK
@@ -59,6 +63,11 @@ class OppgaveServiceTest {
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(behandlingId = 1,
                                                                                                                       behandlendeEnhetId = ENHETSNUMMER,
                                                                                                                       behandlendeEnhetNavn = "enhet")
+
+        every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
+                behandlingId = 1,
+                behandlendeEnhetId = ENHETSNUMMER,
+                behandlendeEnhetNavn = "enhet")
 
         val slot = slot<OpprettOppgaveRequest>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
