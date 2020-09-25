@@ -37,9 +37,10 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                       .mapNotNull { it.datoMottatt }
                                       .minOrNull() ?: behandling.opprettetTidspunkt  //Skal man kaste feil eller ikke
             }
-            else -> {
+            BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE -> {
                 datoMottatt = behandling.opprettetTidspunkt
             }
+            else -> error("Statistikkhåndtering for behandling med opprinnelse ${behandling.opprinnelse.name} ikke implementert.")
         }
 
         val behandlendeEnhetsKode = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
