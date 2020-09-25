@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.common.RessursUtils.ok
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -30,12 +31,9 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService,
-                           private val fødselshendelseService: FødselshendelseService,
                            private val taskRepository: TaskRepository) {
 
     private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("manuell")
-
-    private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("automatisk")
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -68,21 +66,13 @@ class BehandlingController(private val fagsakService: FagsakService,
     @PutMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
                                                   nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
-        return Result.runCatching {
-            fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(nyBehandling.morsIdent, nyBehandling.barnasIdenter)
-            fødselshendelseService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
+        return try {
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling))
             taskRepository.save(task)
+            ok("Task opprettet for behandling av fødselshendelse.")
+        } catch (ex: Throwable) {
+            illegalState("Task kunne ikke opprettes for behandling av fødselshendelse: ${ex.message}", ex)
         }
-                .fold(
-                        onFailure = {
-                            illegalState("Opprettelse av behandling fra hendelse feilet: ${it.message}", it)
-                        },
-                        onSuccess = {
-                            antallAutomatiskeBehandlingerOpprettet[BehandlingType.FØRSTEGANGSBEHANDLING]?.increment()
-                            return ResponseEntity.ok(Ressurs.Companion.success("Ok"))
-                        }
-                )
     }
 
     private fun initBehandlingMetrikker(type: String): Map<BehandlingType, Counter> {
