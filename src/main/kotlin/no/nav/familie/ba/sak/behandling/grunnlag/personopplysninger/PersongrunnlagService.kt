@@ -58,10 +58,6 @@ class PersongrunnlagService(
                                                      barnasFødselsnummer: List<String>,
                                                      behandling: Behandling,
                                                      målform: Målform) {
-        fastsettBehandlendeEnhetVedIntroduksjonAvNyePersoner(behandling = behandling,
-                                                             personerSomLeggesTil = listOf(listOf(fødselsnummer),
-                                                                                           barnasFødselsnummer).flatten())
-
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val personinfo = personopplysningerService.hentPersoninfoMedRelasjoner(fødselsnummer)
@@ -100,22 +96,12 @@ class PersongrunnlagService(
             }
         }
 
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-    }
-
-    private fun fastsettBehandlendeEnhetVedIntroduksjonAvNyePersoner(behandling: Behandling, personerSomLeggesTil: List<String>) {
-
-        when (val aktivPersongrunnlag = hentAktiv(behandling.id)) {
-            null -> arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, false)
-            else -> {
-                val nyePersonerErIntrodusert = personerSomLeggesTil.any { ident ->
-                    aktivPersongrunnlag.personer.none { it.personIdent.ident == ident }
-                }
-
-                if (nyePersonerErIntrodusert) {
-                    arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, false)
-                }
-            }
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
+            /**
+             * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
+             * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
+             */
+            arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, false)
         }
     }
 
