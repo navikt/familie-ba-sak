@@ -34,7 +34,8 @@ class PersonController(private val personopplysningerService: Personopplysninger
                 .fold(
                         onFailure = {
                             throw Feil(message = "Hent person feilet: ${it.message}",
-                                       frontendFeilmelding = "Henting av person med ident '$personIdent' feilet.")
+                                       frontendFeilmelding = "Henting av person med ident '$personIdent' feilet.",
+                                       throwable = it)
                         },
                         onSuccess = {
                             ResponseEntity.ok(Ressurs.success(it.toRestPersonInfo(personIdent)))
@@ -53,7 +54,8 @@ class PersonController(private val personopplysningerService: Personopplysninger
                             when (it) {
                                 is Feil -> throw it
                                 else -> throw Feil(message = "Hent person feilet: ${it.message}",
-                                                   frontendFeilmelding = "Henting av person med ident '$personIdent' feilet.")
+                                                   frontendFeilmelding = "Henting av person med ident '$personIdent' feilet.",
+                                                   throwable = it)
                             }
                         },
                         onSuccess = {
