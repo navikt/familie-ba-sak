@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandli
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.client.Norg2RestClient
+import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -20,49 +21,51 @@ class FastsettBehandlendeEnhetMigrering(
 
     @Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE)
     private fun migrer() {
-        logger.info("Migrerer enhet fra vedtak til arbeidsfordeling på behandling")
-        val behandlinger = behandlingRepository.findAll()
+        if (LeaderClient.isLeader() == true) {
+            logger.info("Migrerer enhet fra vedtak til arbeidsfordeling på behandling")
+            val behandlinger = behandlingRepository.findAll()
 
-        var vellykkedeMigreringer = 0
-        var mislykkedeMigreringer = 0
-        behandlinger.forEach { behandling ->
+            var vellykkedeMigreringer = 0
+            var mislykkedeMigreringer = 0
+            behandlinger.forEach { behandling ->
 
-            val arbeidsfordelingPåBehandling =
-                    arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+                val arbeidsfordelingPåBehandling =
+                        arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
-            if (arbeidsfordelingPåBehandling == null) {
-                kotlin.runCatching {
-                    val aktivVedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+                if (arbeidsfordelingPåBehandling == null) {
+                    kotlin.runCatching {
+                        val aktivVedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
 
-                    val enhetNummerFraVedtak = aktivVedtak?.ansvarligEnhet
-                    val arbeidsfordelingsenhet = arbeidsfordelingService.hentArbeidsfordelingsenhet(behandling)
+                        val enhetNummerFraVedtak = aktivVedtak?.ansvarligEnhet
+                        val arbeidsfordelingsenhet = arbeidsfordelingService.hentArbeidsfordelingsenhet(behandling)
 
-                    arbeidsfordelingPåBehandlingRepository.save(
-                            ArbeidsfordelingPåBehandling(
-                                    behandlingId = behandling.id,
-                                    behandlendeEnhetId = enhetNummerFraVedtak ?: arbeidsfordelingsenhet.enhetId,
-                                    behandlendeEnhetNavn = if (enhetNummerFraVedtak != null) norg2RestClient.hentEnhet(
-                                            enhetNummerFraVedtak).navn else arbeidsfordelingsenhet.enhetNavn
-                            )
+                        arbeidsfordelingPåBehandlingRepository.save(
+                                ArbeidsfordelingPåBehandling(
+                                        behandlingId = behandling.id,
+                                        behandlendeEnhetId = enhetNummerFraVedtak ?: arbeidsfordelingsenhet.enhetId,
+                                        behandlendeEnhetNavn = if (enhetNummerFraVedtak != null) norg2RestClient.hentEnhet(
+                                                enhetNummerFraVedtak).navn else arbeidsfordelingsenhet.enhetNavn
+                                )
+                        )
+                    }.fold(
+                            onSuccess = {
+                                logger.info("Vellykket migrering for behandling ${behandling.id}")
+                                vellykkedeMigreringer++
+                            },
+                            onFailure = {
+                                logger.warn("Mislykket migrering for behandling ${behandling.id}")
+                                secureLogger.warn("Mislykket migrering for behandling ${behandling.id}", it)
+                                mislykkedeMigreringer++
+                            }
                     )
-                }.fold(
-                        onSuccess = {
-                            logger.info("Vellykket migrering for behandling ${behandling.id}")
-                            vellykkedeMigreringer++
-                        },
-                        onFailure = {
-                            logger.warn("Mislykket migrering for behandling ${behandling.id}")
-                            secureLogger.warn("Mislykket migrering for behandling ${behandling.id}", it)
-                            mislykkedeMigreringer++
-                        }
-                )
+                }
             }
-        }
 
-        logger.info("Migrering av enhet fra vedtak til arbeidsfordeling på behandling ferdig.\n" +
-                    "Antall behandlinger=${behandlinger.size}\n" +
-                    "Vellykede migreringer=$vellykkedeMigreringer\n" +
-                    "Mislykkede migreringer=$mislykkedeMigreringer\n")
+            logger.info("Migrering av enhet fra vedtak til arbeidsfordeling på behandling ferdig.\n" +
+                        "Antall behandlinger=${behandlinger.size}\n" +
+                        "Vellykede migreringer=$vellykkedeMigreringer\n" +
+                        "Mislykkede migreringer=$mislykkedeMigreringer\n")
+        }
     }
 
     companion object {
