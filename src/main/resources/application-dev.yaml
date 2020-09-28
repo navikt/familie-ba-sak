@@ -74,7 +74,7 @@ funksjonsbrytere:
     uri: http://dummy/api/
     cluster: localhost
     applicationName: familie-ba-sak
-  vedtak:
+  kafka:
     producer:
       enabled: false
 

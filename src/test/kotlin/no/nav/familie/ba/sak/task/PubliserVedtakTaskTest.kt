@@ -8,6 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.vedtak.producer.KafkaProducer
+import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -43,7 +44,7 @@ class PubliserVedtakTaskTest {
 
     @Test
     fun `skal kjøre task`() {
-        every { kafkaProducerMock.sendMessage(any()) }.returns(100)
+        every { kafkaProducerMock.sendMessage(ofType(VedtakDVH::class)) }.returns(100)
 
         publiserVedtakTask.doTask(PubliserVedtakTask.opprettTask("ident", 42))
 
