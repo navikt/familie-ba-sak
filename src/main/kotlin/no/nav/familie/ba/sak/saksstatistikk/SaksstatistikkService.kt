@@ -42,7 +42,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             else -> error("Statistikkhåndtering for behandling med opprinnelse ${behandling.opprinnelse.name} ikke implementert.")
         }
 
-        val behandlendeEnhetsKode = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId // TODO: Få avklart at dette blir korrekt
+        val behandlendeEnhetsKode = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
         val ansvarligEnhetKode = arbeidsfordelingService.hentArbeidsfordelingsenhet(behandling).enhetId
 
         val aktivtVedtak = vedtakService.hentAktivForBehandling(behandlingId)
