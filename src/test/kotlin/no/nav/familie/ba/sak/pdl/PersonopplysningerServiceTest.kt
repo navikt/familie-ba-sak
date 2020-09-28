@@ -73,13 +73,13 @@ class PersonopplysningerServiceTest {
 
     @Test
     fun `hentadressebeskyttelse skal returnere gradering`(){
-        val gradering = personopplysningerService.hentAdressebeskyttelse(ID_BARN)
+        val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_BARN)
         assertThat(gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }
 
     @Test
     fun `hentadressebeskyttelse feiler`(){
-        assertThrows<Feil> { personopplysningerService.hentAdressebeskyttelse(ID_MOR) }
+        assertThrows<Feil> { personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_MOR) }
     }
 
     companion object{

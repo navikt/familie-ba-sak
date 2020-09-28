@@ -104,7 +104,7 @@ class PersonopplysningerService(
         return if (landkode.isNullOrEmpty()) UKJENT_LANDKODE else landkode
     }
 
-    fun hentAdressebeskyttelse(ident: String): ADRESSEBESKYTTELSEGRADERING =
+    fun hentAdressebeskyttelseSomSystembruker(ident: String): ADRESSEBESKYTTELSEGRADERING =
         stsOnlyPdlRestClient.hentAdressebeskyttelse(ident).first().gradering
 
     companion object {
