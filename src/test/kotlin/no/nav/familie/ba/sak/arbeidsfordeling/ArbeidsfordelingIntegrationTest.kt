@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.arbeidsfordeling
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -17,11 +18,13 @@ import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -61,6 +64,9 @@ class ArbeidsfordelingIntegrationTest(
 
         @Autowired
         private val integrasjonClient: IntegrasjonClient,
+
+        @Autowired
+        private val oppgaveService: OppgaveService,
 
         @Autowired
         private val databaseCleanupService: DatabaseCleanupService
@@ -204,6 +210,37 @@ class ArbeidsfordelingIntegrationTest(
         val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
                 arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(MANUELT_OVERSTYRT_ENHET, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
+    }
+
+    @Test
+    fun `Skal fastsette ny behandlende enhet og oppdatere eksisterende oppgave ved registrering av søknad`() {
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(ArbeidsfordelingMockConfiguration.søkerFnr))
+        val behandling = stegService.håndterNyBehandling(NyBehandling(
+                BehandlingKategori.NASJONAL,
+                BehandlingUnderkategori.ORDINÆR,
+                ArbeidsfordelingMockConfiguration.søkerFnr,
+                BehandlingType.FØRSTEGANGSBEHANDLING
+        ))
+
+        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
+
+        oppgaveService.opprettOppgave(behandling.id, Oppgavetype.BehandleSak, LocalDate.now())
+
+        stegService.håndterSøknad(behandling, RestRegistrerSøknad(
+                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.søkerFnr,
+                                      listOf(ArbeidsfordelingMockConfiguration.barnMedDiskresjonskode)),
+                bekreftEndringerViaFrontend = false
+        ))
+
+        verify(exactly = 1) {
+            oppgaveService.oppdaterOppgave(any())
+        }
+
+        val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
+                arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        assertEquals(FORTROLIG_ENHET,
+                     arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode.behandlendeEnhetId)
     }
 
     companion object {

@@ -25,6 +25,7 @@ import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.*
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
@@ -200,6 +201,9 @@ class ClientMocks {
 
         every { mockIntegrasjonClient.opprettOppgave(any()) } returns
                 "12345678"
+
+        every { mockIntegrasjonClient.oppdaterOppgave(any()) } returns
+                OppgaveResponse(12345678L)
 
         every { mockIntegrasjonClient.fordelOppgave(any(), any()) } returns
                 "12345678"
