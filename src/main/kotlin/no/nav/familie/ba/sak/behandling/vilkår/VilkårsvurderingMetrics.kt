@@ -7,13 +7,13 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class VilkårsvurderingMetrics {
 
-    var vilkårsvurderingUtfall = mapOf<String, Counter>()
-    var vilkårsvurderingFørsteUtfall = mapOf<String, Counter>()
+    val vilkårsvurderingUtfall = mutableMapOf<String, Counter>()
 
     val personTypeToDisplayedType = mapOf(
             PersonType.SØKER to "Mor",
@@ -21,24 +21,24 @@ class VilkårsvurderingMetrics {
             PersonType.ANNENPART to "Medforelder"
     )
 
+    enum class VilkårstellerType(val navn: String) {
+        UTFALL("familie.ba.behandling.vilkaarsvurdering"),
+        FØRSTEUTFALL("familie.ba.behandling.vilkaarsvurdering.foerstutfall")
+    }
+
     init {
-        Vilkår.values().forEach {
-            Resultat.values().forEach { resultat ->
-                BehandlingOpprinnelse.values().forEach { behandlingOpprinnelse ->
-                    PersonType.values().forEach { personType ->
-                        if (it.parterDetteGjelderFor.contains(personType)) {
-                            vilkårsvurderingUtfall = LeggTilEntryTilMetrikkMap(vilkårsvurderingUtfall,
-                                                                               it.spesifikasjon,
-                                                                               personType,
-                                                                               resultat,
-                                                                               behandlingOpprinnelse,
-                                                                               "familie.ba.behandling.vilkaarsvurdering")
-                            vilkårsvurderingFørsteUtfall = LeggTilEntryTilMetrikkMap(vilkårsvurderingFørsteUtfall,
-                                                                                     it.spesifikasjon,
-                                                                                     personType,
-                                                                                     resultat,
-                                                                                     behandlingOpprinnelse,
-                                                                                     "familie.ba.behandling.vilkaarsvurdering.foerstutfall")
+        VilkårstellerType.values().forEach { tellerType ->
+            Vilkår.values().forEach {
+                Resultat.values().forEach { resultat ->
+                    BehandlingOpprinnelse.values().forEach { behandlingOpprinnelse ->
+                        PersonType.values().forEach { personType ->
+                            if (it.parterDetteGjelderFor.contains(personType)) {
+                                leggTilEntryTilMetrikkMap(tellerType,
+                                                          it.spesifikasjon,
+                                                          personType,
+                                                          resultat,
+                                                          behandlingOpprinnelse)
+                            }
                         }
                     }
                 }
@@ -52,14 +52,13 @@ class VilkårsvurderingMetrics {
         }
     }
 
-    private fun LeggTilEntryTilMetrikkMap(counterMap: Map<String, Counter>,
-                                  spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
-                                  personType: PersonType,
-                                  resultat: Resultat,
-                                  behandlingOpprinnelse: BehandlingOpprinnelse,
-                                  navn: String): Map<String, Counter> {
+    private fun leggTilEntryTilMetrikkMap(tellerType: VilkårstellerType,
+                                          spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
+                                          personType: PersonType,
+                                          resultat: Resultat,
+                                          behandlingOpprinnelse: BehandlingOpprinnelse){
         if (spesifikasjon.children.isEmpty()) {
-            val counter = Metrics.counter(navn,
+            val counter = Metrics.counter(tellerType.navn,
                                           "vilkaar",
                                           spesifikasjon.identifikator,
                                           "personType",
@@ -70,36 +69,41 @@ class VilkårsvurderingMetrics {
                                           resultat.name,
                                           "beskrivelse",
                                           spesifikasjon.beskrivelse)
-
-            return counterMap.plus(Pair(vilkårNøkkel(spesifikasjon.identifikator, personType, resultat, behandlingOpprinnelse),
-                                        counter))
+            vilkårsvurderingUtfall[vilkårNøkkel(tellerType,
+                                                spesifikasjon.identifikator,
+                                                personType,
+                                                resultat,
+                                                behandlingOpprinnelse)] =
+                    counter
         } else {
-            var nyMap = counterMap
             spesifikasjon.children.forEach {
-                nyMap = LeggTilEntryTilMetrikkMap(nyMap,
-                                                  it,
-                                                  personType,
-                                                  resultat,
-                                                  behandlingOpprinnelse, navn)
+                leggTilEntryTilMetrikkMap(tellerType,
+                                          it,
+                                          personType,
+                                          resultat,
+                                          behandlingOpprinnelse)
             }
-            return nyMap
         }
     }
 
-    fun vilkårNøkkel(vilkår: String,
-                     personType: PersonType,
-                     resultat: Resultat,
-                     behandlingOpprinnelse: BehandlingOpprinnelse) = "${vilkår}-${personType.name}_${resultat.name}_${behandlingOpprinnelse.name}"
-
-    fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkår: Vilkår, personType: PersonType) {
-        vilkårsvurderingFørsteUtfall[vilkårNøkkel(vilkår.spesifikasjon.identifikator,
-                                                  personType, Resultat.NEI,
-                                                  BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)]!!.increment()
-    }
+    fun vilkårNøkkel(
+            tellerType: VilkårstellerType,
+            vilkår: String,
+            personType: PersonType,
+            resultat: Resultat,
+            behandlingOpprinnelse: BehandlingOpprinnelse) = "${tellerType}-${vilkår}-${personType.name}_${resultat.name}_${behandlingOpprinnelse.name}"
 
     fun økTellereForEvaluering(evaluering: Evaluering, personType: PersonType, behandlingOpprinnelse: BehandlingOpprinnelse) {
+        økTellereForEvaluering(VilkårstellerType.UTFALL, evaluering, personType, behandlingOpprinnelse)
+    }
+
+    fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(evaluering: Evaluering, personType: PersonType) {
+        økTellereForEvaluering(VilkårstellerType.FØRSTEUTFALL, evaluering, personType, BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+    }
+
+    fun økTellereForEvaluering(tellerType: VilkårstellerType, evaluering: Evaluering, personType: PersonType, behandlingOpprinnelse: BehandlingOpprinnelse) {
         if (evaluering.children.isEmpty()) {
-            vilkårsvurderingUtfall[vilkårNøkkel(evaluering.identifikator,
+            vilkårsvurderingUtfall[vilkårNøkkel(tellerType, evaluering.identifikator,
                                                 personType,
                                                 evaluering.resultat,
                                                 behandlingOpprinnelse)]!!.increment()
@@ -109,7 +113,6 @@ class VilkårsvurderingMetrics {
     }
 
     companion object {
-
         val lovligOppholdUtfall = mutableMapOf<String, Counter>()
 
         fun økTellerForLovligOpphold(utfall: LovligOppholdUtfall) {

@@ -25,6 +25,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
+import no.nav.nare.core.specifications.Spesifikasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -83,7 +84,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val (faktaForFiltreringsregler, evalueringAvFiltrering) =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter.toSet())
+                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
+                                                                                    nyBehandling.barnasIdenter.toSet())
 
         gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = faktaForFiltreringsregler,
                                                      evalueringAvFiltrering = evalueringAvFiltrering,
@@ -99,7 +101,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         when (resultatAvVilkårsvurdering) {
             null -> stansetIAutomatiskFiltreringCounter.increment()
             BehandlingResultatType.INNVILGET -> passertFiltreringOgVilkårsvurderingCounter.increment()
-            else -> økTellereForStansetIAutomatiskVilkårsvurdering(behandling)
+            else -> stansetIAutomatiskVilkårsvurderingCounter.increment()
+
         }
 
         if (fødselshendelseSkalRullesTilbake()) {
@@ -117,19 +120,6 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
                 vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
                 IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
-            }
-        }
-    }
-
-    private fun erVilkårForPersonNei(behandlingResultat: BehandlingResultat, personType: PersonType, vilkår: Vilkår): Boolean {
-        val personer = if (personType == PersonType.SØKER) {
-            listOf(persongrunnlagService.hentSøker(behandlingResultat.behandling))
-        } else {
-            persongrunnlagService.hentBarna(behandlingResultat.behandling)
-        }
-        return behandlingResultat?.personResultater?.any {personResultat ->
-            personer.map { it?.personIdent?.ident }.contains(personResultat.personIdent) && personResultat.vilkårResultater.any { vilkårResusltat ->
-                vilkårResusltat.vilkårType == vilkår && vilkårResusltat.resultat == Resultat.NEI
             }
         }
     }
@@ -199,16 +189,6 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                 beskrivelse = beskrivelse
         )
         taskRepository.save(nyTask)
-    }
-
-    private fun økTellereForStansetIAutomatiskVilkårsvurdering(behandling: Behandling) {
-        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)!!
-
-        Vilkår.hentFødselshendelseVilkårsreglerRekkefølge().find { erVilkårForPersonNei(behandlingResultat, it.first, it.second) }?.let {
-            vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(it.second, it.first)
-        }
-
-        stansetIAutomatiskVilkårsvurderingCounter.increment()
     }
 
     private fun fødselshendelseSkalRullesTilbake(): Boolean =

@@ -199,29 +199,46 @@ class VilkårService(
                                             .maxByOrNull { it.fødselsdato }?.fødselsdato
                                     ?: error("Fant ikke barn i personopplysninger")
 
-        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
-            val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
-                                                personIdent = person.personIdent.ident)
+        val personResultatOgEvaluering =
+                personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
+                    val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
+                                                        personIdent = person.personIdent.ident)
 
-            val samletSpesifikasjonForPerson = Vilkår.hentSamletSpesifikasjonForPerson(person.type)
-            val faktaTilVilkårsvurdering = FaktaTilVilkårsvurdering(personForVurdering = person,
-                                                                    behandlingOpprinnelse = behandlingResultat.behandling.opprinnelse)
-            val evalueringForVilkårsvurdering = samletSpesifikasjonForPerson.evaluer(faktaTilVilkårsvurdering)
+                    val samletSpesifikasjonForPerson = Vilkår.hentSamletSpesifikasjonForPerson(person.type)
+                    val faktaTilVilkårsvurdering = FaktaTilVilkårsvurdering(personForVurdering = person,
+                                                                            behandlingOpprinnelse = behandlingResultat.behandling.opprinnelse)
+                    val evalueringForVilkårsvurdering = samletSpesifikasjonForPerson.evaluer(faktaTilVilkårsvurdering)
 
-            gdprService.oppdaterFødselshendelsePreLanseringMedVilkårsvurderingForPerson(behandlingId = behandlingResultat.behandling.id,
-                                                                                        faktaTilVilkårsvurdering = faktaTilVilkårsvurdering,
-                                                                                        evaluering = evalueringForVilkårsvurdering)
+                    gdprService.oppdaterFødselshendelsePreLanseringMedVilkårsvurderingForPerson(behandlingId = behandlingResultat.behandling.id,
+                                                                                                faktaTilVilkårsvurdering = faktaTilVilkårsvurdering,
+                                                                                                evaluering = evalueringForVilkårsvurdering)
 
-            personResultat.setVilkårResultater(
-                    vilkårResultater(personResultat,
-                                     person,
-                                     faktaTilVilkårsvurdering,
-                                     evalueringForVilkårsvurdering,
-                                     fødselsdatoEldsteBarn)
-            )
+                    personResultat.setVilkårResultater(
+                            vilkårResultater(personResultat,
+                                             person,
+                                             faktaTilVilkårsvurdering,
+                                             evalueringForVilkårsvurdering,
+                                             fødselsdatoEldsteBarn)
+                    )
 
-            personResultat
-        }.toSet()
+                    Triple(personResultat, person.type, evalueringForVilkårsvurdering)
+                }
+
+        Vilkår.hentFødselshendelseVilkårsreglerRekkefølge().forEach {
+            val utfallTriple = personResultatOgEvaluering.find { triple ->
+                val personType = triple.second
+                val evaluering = triple.third
+                personType == it.first && evaluering.identifikator == it.second.spesifikasjon.identifikator &&
+                evaluering.resultat == Resultat.NEI
+            }
+            if(utfallTriple!= null){
+                vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(utfallTriple.third,
+                                                                                                 utfallTriple.second)
+                return@forEach
+            }
+        }
+
+        return personResultatOgEvaluering.map{ it.first}.toSet()
     }
 
     private fun vilkårResultater(personResultat: PersonResultat,
