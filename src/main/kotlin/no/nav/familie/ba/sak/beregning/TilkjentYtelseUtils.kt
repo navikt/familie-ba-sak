@@ -132,22 +132,38 @@ object TilkjentYtelseUtils {
                 YearMonth.from(tilOgMed.sisteDagIMåned())
 
 
-    fun hentBeregningOversikt(tilkjentYtelseForBehandling: TilkjentYtelse, personopplysningGrunnlag: PersonopplysningGrunnlag)
+    fun hentBeregningOversikt(tilkjentYtelseForBehandling: TilkjentYtelse,
+                              personopplysningGrunnlag: PersonopplysningGrunnlag,
+                              tilkjentYtelseForForrigeBehandling: TilkjentYtelse? = null)
             : List<RestBeregningOversikt> {
         if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
 
         val segmenter = utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling)
+        val segmenterFraForrigeTilkjentYtelse =
+                if (tilkjentYtelseForForrigeBehandling !== null) utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling) else emptyList()
 
         return segmenter.map { segment ->
             val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
                 segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
             }
-            mapTilRestBeregningOversikt(segment,
-                                        andelerForSegment,
-                                        tilkjentYtelseForBehandling.behandling,
-                                        personopplysningGrunnlag)
+            mapTilRestBeregningOversikt(segment = segment,
+                                        andelerForSegment = andelerForSegment,
+                                        behandling = tilkjentYtelseForBehandling.behandling,
+                                        personopplysningGrunnlag = personopplysningGrunnlag,
+                                        endringISegment =
+                                        when {
+                                            segmenterFraForrigeTilkjentYtelse.any { it == segment } ->
+                                                if (segment.erSatsendring()) BeregningEndring.UENDRET_SATS else BeregningEndring.UENDRET
+                                            else ->
+                                                if (segment.erSatsendring()) BeregningEndring.ENDRET_SATS else BeregningEndring.ENDRET
+                                        })
         }
     }
+
+    private fun LocalDateSegment<Int>.erSatsendring(): Boolean =
+            SatsService.hentAlleSatser()
+                    .filter { it.gyldigFom != LocalDate.MIN }
+                    .find { it.gyldigFom == this.fom && it.beløp == this.value } != null
 
     private fun utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling: TilkjentYtelse): List<LocalDateSegment<Int>> {
         val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)

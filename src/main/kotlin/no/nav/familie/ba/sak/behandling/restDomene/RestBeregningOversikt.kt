@@ -22,7 +22,8 @@ data class RestBeregningDetalj(
 )
 
 enum class BeregningEndring {
-    UENDRET,
     ENDRET,
-    SATS
+    ENDRET_SATS, // Skal trigges som vanlig endring, men med satt begrunnelse
+    UENDRET,
+    UENDRET_SATS, // Skal ikke anses som endring, men visning av begrunnelse må spesialhåndteres
 }
