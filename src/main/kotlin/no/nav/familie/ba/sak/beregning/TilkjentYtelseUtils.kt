@@ -136,55 +136,55 @@ object TilkjentYtelseUtils {
             : List<RestBeregningOversikt> {
         if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
 
-        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
+        val segmenter = utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling)
 
-        return utbetalingsPerioder.toSegments()
-                .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-                .map { segment ->
-                    val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
-                        segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
-                    }
-                    mapTilRestBeregningOversikt(segment,
-                                                andelerForSegment,
-                                                tilkjentYtelseForBehandling.behandling,
-                                                personopplysningGrunnlag)
-                }
+        return segmenter.map { segment ->
+            val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
+                segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
+            }
+            mapTilRestBeregningOversikt(segment,
+                                        andelerForSegment,
+                                        tilkjentYtelseForBehandling.behandling,
+                                        personopplysningGrunnlag)
+        }
+    }
+
+    private fun utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling: TilkjentYtelse): List<LocalDateSegment<Int>> {
+        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
+        return utbetalingsPerioder.toSegments().sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
     }
 
     private fun mapTilRestBeregningOversikt(segment: LocalDateSegment<Int>,
                                             andelerForSegment: List<AndelTilkjentYtelse>,
                                             behandling: Behandling,
-                                            personopplysningGrunnlag: PersonopplysningGrunnlag): RestBeregningOversikt {
-        //TODO: Enten sammenligne med forrige beregningoversikt (fra forrige tilkjent ytelse) eller bruk andel og sett et endretflagg der
+                                            personopplysningGrunnlag: PersonopplysningGrunnlag,
+                                            endringISegment: BeregningEndring = BeregningEndring.ENDRET): RestBeregningOversikt =
+            RestBeregningOversikt(
+                    periodeFom = segment.fom,
+                    periodeTom = segment.tom,
+                    ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
+                    utbetaltPerMnd = segment.value,
+                    antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
+                    sakstype = behandling.kategori,
+                    endring = endringISegment,
+                    beregningDetaljer = andelerForSegment.map { andel ->
+                        val personForAndel =
+                                personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                                ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+                        RestBeregningDetalj(
+                                person = RestPerson(
+                                        type = personForAndel.type,
+                                        kjønn = personForAndel.kjønn,
+                                        navn = personForAndel.navn,
+                                        fødselsdato = personForAndel.fødselsdato,
+                                        personIdent = personForAndel.personIdent.ident
+                                ),
+                                ytelseType = andel.type,
+                                utbetaltPerMnd = andel.beløp
+                        )
+                    }
+            )
 
-        val endringISegment = BeregningEndring.ENDRET //endring i vertikal
-
-        return RestBeregningOversikt(
-                periodeFom = segment.fom,
-                periodeTom = segment.tom,
-                ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
-                utbetaltPerMnd = segment.value,
-                antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
-                sakstype = behandling.kategori,
-                endring = endringISegment,
-                beregningDetaljer = andelerForSegment.map { andel ->
-                    val personForAndel =
-                            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
-                            ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
-                    RestBeregningDetalj(
-                            person = RestPerson(
-                                    type = personForAndel.type,
-                                    kjønn = personForAndel.kjønn,
-                                    navn = personForAndel.navn,
-                                    fødselsdato = personForAndel.fødselsdato,
-                                    personIdent = personForAndel.personIdent.ident
-                            ),
-                            ytelseType = andel.type,
-                            utbetaltPerMnd = andel.beløp
-                    )
-                }
-        )
-    }
 }
 
 private fun maksimum(periodeFomSoker: LocalDate?, periodeFomBarn: LocalDate?): LocalDate {
