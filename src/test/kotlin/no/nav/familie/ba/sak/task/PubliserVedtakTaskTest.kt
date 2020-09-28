@@ -7,7 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.stønadsstatistikk.StønadsstatistikkService
-import no.nav.familie.ba.sak.vedtak.producer.VedtakProducer
+import no.nav.familie.ba.sak.vedtak.producer.KafkaProducer
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -22,7 +22,7 @@ class PubliserVedtakTaskTest {
     private lateinit var taskRepositoryMock: TaskRepository
 
     @MockK(relaxed = true)
-    private lateinit var vedtakProducerMock: VedtakProducer
+    private lateinit var kafkaProducerMock: KafkaProducer
 
     @MockK(relaxed = true)
     private lateinit var stønadsstatistikkService: StønadsstatistikkService
@@ -43,7 +43,7 @@ class PubliserVedtakTaskTest {
 
     @Test
     fun `skal kjøre task`() {
-        every { vedtakProducerMock.sendMessage(any()) }.returns(100)
+        every { kafkaProducerMock.sendMessage(any()) }.returns(100)
 
         publiserVedtakTask.doTask(PubliserVedtakTask.opprettTask("ident", 42))
 

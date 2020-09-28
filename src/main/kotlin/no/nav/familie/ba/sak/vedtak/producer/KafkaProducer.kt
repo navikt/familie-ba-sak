@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
-interface VedtakProducer {
+interface KafkaProducer {
     fun sendMessage(vedtak: VedtakDVH): Long
 }
 
@@ -18,7 +18,7 @@ interface VedtakProducer {
         havingValue = "true",
         matchIfMissing = false)
 @Primary
-class VedtakKafkaProducer : VedtakProducer {
+class DefaultKafkaProducer : KafkaProducer {
 
     @Autowired
     lateinit var kafkaTemplate: KafkaTemplate<String, VedtakDVH>
@@ -30,13 +30,13 @@ class VedtakKafkaProducer : VedtakProducer {
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(VedtakKafkaProducer::class.java)
+        private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
         private const val TOPIC = "aapen-barnetrygd-vedtak-v1"
     }
 }
 
 @Service
-class VedtakMockProducer : VedtakProducer {
+class MockKafkaProducer : KafkaProducer {
 
 
     val logger = LoggerFactory.getLogger(this::class.java)
