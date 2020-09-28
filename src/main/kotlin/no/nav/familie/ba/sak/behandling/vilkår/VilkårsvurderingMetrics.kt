@@ -98,11 +98,20 @@ class VilkårsvurderingMetrics {
     }
 
     fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(evaluering: Evaluering, personType: PersonType) {
+        LOG.info("øk teller for førsteutfallvilkår")
         økTellereForEvaluering(VilkårstellerType.FØRSTEUTFALL, evaluering, personType, BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
     }
 
     fun økTellereForEvaluering(tellerType: VilkårstellerType, evaluering: Evaluering, personType: PersonType, behandlingOpprinnelse: BehandlingOpprinnelse) {
         if (evaluering.children.isEmpty()) {
+            LOG.info("øk teller ${vilkårNøkkel(tellerType, evaluering.identifikator,
+                                               personType,
+                                               evaluering.resultat,
+                                               behandlingOpprinnelse)} ${vilkårsvurderingUtfall[vilkårNøkkel(tellerType, evaluering.identifikator,
+                                                                                                             personType,
+                                                                                                             evaluering.resultat,
+                                                                                                             behandlingOpprinnelse)]}")
+
             vilkårsvurderingUtfall[vilkårNøkkel(tellerType, evaluering.identifikator,
                                                 personType,
                                                 evaluering.resultat,
@@ -118,5 +127,7 @@ class VilkårsvurderingMetrics {
         fun økTellerForLovligOpphold(utfall: LovligOppholdUtfall) {
             lovligOppholdUtfall[utfall.name]?.increment()
         }
+
+        val LOG = LoggerFactory.getLogger(VilkårsvurderingMetrics::class.java)
     }
 }
