@@ -52,8 +52,8 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val now = ZonedDateTime.now()
         val behandlingDVH = BehandlingDVH(funksjonellTid = now,
                                           tekniskTid = now, //now()
-                                          mottattDato = datoMottatt.atZone(TIMEZONE), // TODO hva er dato Mottat for manuell, automatisk fra hendelse, automatisk fra journalpost
-                                          registrertDato = datoMottatt.atZone(TIMEZONE), //Hva er forskjell på registrert og mottatt
+                                          mottattDato = datoMottatt.atZone(TIMEZONE), // TODO hva er dato Mottat for manuell, automatisk fra hendelse, automatisk fra journalpost. Vi trekker fra 2 dager på skanning
+                                          registrertDato = datoMottatt.atZone(TIMEZONE),
                                           behandlingId = behandling.id.toString(),
                                           sakId = behandling.fagsak.id.toString(),
                                           behandlingType = behandling.type.name,
@@ -80,7 +80,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                           resultatBegrunnelse = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.behandlingresultatOgVilkårBegrunnelse?.name,
                                           behandlingTypeBeskrivelse = behandling.type.visningsnavn,
 //                                          behandlingStatusBeskrivelse = null, //har ingen beskrivelse
-                                          resultatBegrunnelseBeskrivelse = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.behandlingresultatOgVilkårBegrunnelse?.tittel,
+                                          resultatBegrunnelseBeskrivelse = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.behandlingresultatOgVilkårBegrunnelse?.tittel, // Denne er feil
 //                                          utenlandstilsnittBeskrivelse = "relatertButenlandstilsnittBeskrivelseehandlingId",
                                           beslutter = totrinnskontroll?.beslutter,  // TODO skal den være annerledes ved automatisk behandling eller kan vi sette null/tom string
                                           saksbehandler = totrinnskontroll?.saksbehandler,
