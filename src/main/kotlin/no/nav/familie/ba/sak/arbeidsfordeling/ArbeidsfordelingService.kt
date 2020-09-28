@@ -62,11 +62,9 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
 
         val oppdatertArbeidsfordelingPåBehandling = when (aktivArbeidsfordelingPåBehandling) {
             null -> {
-                val arbeidsfordelingPåBehandling = ArbeidsfordelingPåBehandling(behandlingId = behandling.id,
-                                                                                behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
-                                                                                behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn)
-                arbeidsfordelingPåBehandlingRepository.save(arbeidsfordelingPåBehandling)
-                arbeidsfordelingPåBehandling
+                arbeidsfordelingPåBehandlingRepository.save(ArbeidsfordelingPåBehandling(behandlingId = behandling.id,
+                                                                                         behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
+                                                                                         behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn))
             }
             else -> {
                 if ((!aktivArbeidsfordelingPåBehandling.manueltOverstyrt || manuellOppdatering) &&
