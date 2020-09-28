@@ -21,8 +21,8 @@ class FastsettBehandlendeEnhetMigrering(
 
     @Scheduled(initialDelay = 1000, fixedDelay = Long.MAX_VALUE)
     private fun migrer() {
+        logger.info("Migrerer enhet fra vedtak til arbeidsfordeling på behandling")
         if (LeaderClient.isLeader() == true) {
-            logger.info("Migrerer enhet fra vedtak til arbeidsfordeling på behandling")
             val behandlinger = behandlingRepository.findAll()
 
             var vellykkedeMigreringer = 0
@@ -67,6 +67,8 @@ class FastsettBehandlendeEnhetMigrering(
                         "Antall behandlinger=${behandlinger.size}\n" +
                         "Vellykede migreringer=$vellykkedeMigreringer\n" +
                         "Mislykkede migreringer=$mislykkedeMigreringer\n")
+        } else {
+            logger.info("Leader election er ikke satt opp, skipper migrering.")
         }
     }
 
