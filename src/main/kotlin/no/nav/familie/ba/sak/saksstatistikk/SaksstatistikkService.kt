@@ -26,7 +26,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
     fun loggBehandlingStatus(behandlingId: Long, forrigeBehandlingId: Long?): BehandlingDVH {
         val behandling = behandlingService.hent(behandlingId)
 
-
         var datoMottatt: LocalDateTime
         when (behandling.opprinnelse) {
             BehandlingOpprinnelse.MANUELL -> {
@@ -35,7 +34,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                       .filter { it.journalposttype == Journalposttype.I }
                                       .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
                                       .mapNotNull { it.datoMottatt }
-                                      .minOrNull() ?: behandling.opprettetTidspunkt  //Skal man kaste feil eller ikke
+                                      .minOrNull() ?: behandling.opprettetTidspunkt
             }
             BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE -> {
                 datoMottatt = behandling.opprettetTidspunkt
@@ -43,8 +42,8 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             else -> error("Statistikkhåndtering for behandling med opprinnelse ${behandling.opprinnelse.name} ikke implementert.")
         }
 
-        val behandlendeEnhetsKode = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
-        val ansvarligEnhetKode = arbeidsfordelingService.hentBehandlendeEnhet(behandling.fagsak).firstOrNull()?.enhetId
+        val behandlendeEnhetsKode = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId // TODO: Få avklart at dette blir korrekt
+        val ansvarligEnhetKode = arbeidsfordelingService.hentArbeidsfordelingsenhet(behandling).enhetId
 
         val aktivtVedtak = vedtakService.hentAktivForBehandling(behandlingId)
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId)
@@ -52,21 +51,15 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val now = ZonedDateTime.now()
         val behandlingDVH = BehandlingDVH(funksjonellTid = now,
                                           tekniskTid = now, //now()
-                                          mottattDato = datoMottatt.atZone(TIMEZONE), // TODO hva er dato Mottat for manuell, automatisk fra hendelse, automatisk fra journalpost. Vi trekker fra 2 dager på skanning
+                                          mottattDato = datoMottatt.atZone(TIMEZONE),
                                           registrertDato = datoMottatt.atZone(TIMEZONE),
                                           behandlingId = behandling.id.toString(),
                                           sakId = behandling.fagsak.id.toString(),
                                           behandlingType = behandling.type.name,
                                           behandlingStatus = behandling.status.name,
-                                          utenlandstilsnitt = "NASJONAL", /* TODO Kode som beskriver behandlingens  utlandstilsnitt i henhold til NAV spesialisering.
-                                              I hoved sak vil denne koden beskrive om saksbehandlingsfrister er i henhold til utlandssaker
-                                              eller innlandssaker, men vil for mange kildesystem være angitt med en høyere oppløsning."
-
-                                              https://confluence.adeo.no/display/DVH/Fellesdimensjoner+-+Utenlandstilsnitt
-                                              */
-
-                                          ansvarligEnhetKode = ansvarligEnhetKode!!,
-                                          behandlendeEnhetKode = behandlendeEnhetsKode, //der hvor saksbehandler hører hjemme //TODO Hva gjør vi hvis behandlendeEnhetsKode ikke finnes?
+                                          utenlandstilsnitt = "NASJONAL",
+                                          ansvarligEnhetKode = ansvarligEnhetKode,
+                                          behandlendeEnhetKode = behandlendeEnhetsKode,
                                           ansvarligEnhetType = "NORG",
                                           behandlendeEnhetType = "NORG",
                                           totrinnsbehandling = behandling.opprinnelse == BehandlingOpprinnelse.MANUELL,
@@ -74,20 +67,20 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                           versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
                 // Ikke påkrevde felt
                                           vedtaksDato = aktivtVedtak?.vedtaksdato,
-                                          relatertBehandlingId = forrigeBehandlingId?.toString(), // Kan en behandling være avsluttet, men ikke i status TEKNISK_OPPHØR eller AVSLUTTET, kan man bruke siste deaktiverte? kan man bruke forrigeVedtakId og så finne behandling
+                                          relatertBehandlingId = forrigeBehandlingId?.toString(),
                                           vedtakId = aktivtVedtak?.id?.toString(),
                                           resultat = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.resultat?.name,
                                           resultatBegrunnelse = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.behandlingresultatOgVilkårBegrunnelse?.name,
                                           behandlingTypeBeskrivelse = behandling.type.visningsnavn,
-//                                          behandlingStatusBeskrivelse = null, //har ingen beskrivelse
-                                          resultatBegrunnelseBeskrivelse = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.behandlingresultatOgVilkårBegrunnelse?.tittel, // Denne er feil
-//                                          utenlandstilsnittBeskrivelse = "relatertButenlandstilsnittBeskrivelseehandlingId",
-                                          beslutter = totrinnskontroll?.beslutter,  // TODO skal den være annerledes ved automatisk behandling eller kan vi sette null/tom string
-                                          saksbehandler = totrinnskontroll?.saksbehandler,
+                                          resultatBegrunnelseBeskrivelse = aktivtVedtak?.utbetalingBegrunnelser?.mapNotNull { it.behandlingresultatOgVilkårBegrunnelse?.tittel }.orEmpty(),
                                           behandlingOpprettetAv = behandling.opprettetAv,
                                           behandlingOpprettetType = "saksbehandlerId",
                                           behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling"
         )
+        if (totrinnskontroll != null) {
+            behandlingDVH.copy(beslutter = totrinnskontroll.beslutter,
+                               saksbehandler = totrinnskontroll.saksbehandler)
+        }
         return behandlingDVH
     }
 

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.saksstatistikk
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -50,8 +51,8 @@ internal class SaksstatistikkServiceTest {
 
     @BeforeAll
     fun init() {
-        every { arbeidsfordelingService.bestemBehandlendeEnhet(any()) } returns "4820"
-        every { arbeidsfordelingService.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("4821", "NAV"))
+        every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(behandlendeEnhetId = "4820", behandlendeEnhetNavn = "Nav", behandlingId = 1)
+        every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
     }
 
     @Test
@@ -76,8 +77,8 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh.behandlingType).isEqualTo(behandling.type.name)
         assertThat(behandlingDvh.behandlingStatus).isEqualTo(behandling.status.name)
         assertThat(behandlingDvh.totrinnsbehandling).isFalse()
-        assertThat(behandlingDvh.saksbehandler).isEmpty()
-        assertThat(behandlingDvh.beslutter).isEmpty()
+        assertThat(behandlingDvh.saksbehandler).isNull()
+        assertThat(behandlingDvh.beslutter).isNull()
         assertThat(behandlingDvh.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh.versjon).isNotEmpty()
 
@@ -109,8 +110,8 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh.behandlingType).isEqualTo(behandling.type.name)
         assertThat(behandlingDvh.behandlingStatus).isEqualTo(behandling.status.name)
         assertThat(behandlingDvh.totrinnsbehandling).isTrue()
-        assertThat(behandlingDvh.saksbehandler).isEmpty()
-        assertThat(behandlingDvh.beslutter).isEmpty()
+        assertThat(behandlingDvh.saksbehandler).isNull()
+        assertThat(behandlingDvh.beslutter).isNull()
         assertThat(behandlingDvh.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh.versjon).isNotEmpty()
 
