@@ -177,6 +177,8 @@ class StegServiceTest(
     fun `Skal feile når man prøver å håndtere feil steg`() {
         val søkerFnr = randomFnr()
 
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "")
+
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING),
@@ -190,6 +192,9 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å endre en avsluttet behandling`() {
         val søkerFnr = randomFnr()
+
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "")
+
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val behandlingResultat = BehandlingResultat(behandling = behandling, aktiv = true)
@@ -206,6 +211,9 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å noe annet enn å beslutte behandling når den er på dette steget`() {
         val søkerFnr = randomFnr()
+
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "")
+
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val behandlingResultat = BehandlingResultat(behandling = behandling, aktiv = true)
@@ -222,6 +230,8 @@ class StegServiceTest(
     @Test
     fun `Skal feile når man prøver å kalle beslutning-steget med feil status på behandling`() {
         val søkerFnr = randomFnr()
+
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))

@@ -27,10 +27,14 @@ class MalerServiceTest {
     private val norg2RestClient: Norg2RestClient = mockk()
     private val beregningService: BeregningService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
+    private val arbeidsfordelingService: ArbeidsfordelingService = mockk(relaxed = true)
     private val søknadGrunnlagService: SøknadGrunnlagService = mockk()
 
-    private val malerService: MalerService = MalerService(mockk(), beregningService, persongrunnlagService, norg2RestClient, arbeidsfordelingService, søknadGrunnlagService)
+    private val malerService: MalerService = MalerService(mockk(),
+                                                          beregningService,
+                                                          persongrunnlagService,
+                                                          arbeidsfordelingService,
+                                                          søknadGrunnlagService)
 
     @Test
     fun `Skal returnere malnavn innvilget-tredjelandsborger for medlemskap TREDJELANDSBORGER og resultat INNVILGET`() {
@@ -69,8 +73,7 @@ class MalerServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList().subList(0, 1))
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
-        val vedtak = lagVedtak(behandling)//.copy(ansvarligEnhet = "enhet", vedtaksdato = fødselsdato.plusDays(7))
-            vedtak.ansvarligEnhet = "enhet"
+        val vedtak = lagVedtak(behandling)
             vedtak.vedtaksdato = fødselsdato.plusDays(7)
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                 fødselsdato.plusYears(18).toString(),
@@ -108,7 +111,6 @@ class MalerServiceTest {
         val barn1 = personopplysningGrunnlag.barna.first()
         val barn2 = personopplysningGrunnlag.barna.last()
         val vedtak = lagVedtak(behandling)
-            vedtak.ansvarligEnhet = "enhet"
             vedtak.vedtaksdato = barn2.fødselsdato.plusMonths(6)
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                 barn1.fødselsdato.plusYears(18).sisteDagIMåned().toString(),

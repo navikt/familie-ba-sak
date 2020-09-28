@@ -80,6 +80,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         behandlingRepository.save(nyBehandling)
         loggService.opprettBehandlingLogg(nyBehandling)
 
+        arbeidsfordelingService.settBehandlendeEnhet(nyBehandling,
+                                                     arbeidsfordelingService.hentArbeidsfordelingsenhet(gjeldendeBehandling))
+
         val nyttVedtak = Vedtak(
                 behandling = nyBehandling,
                 vedtaksdato = now(),
@@ -121,7 +124,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val vedtak = Vedtak(
                 behandling = behandling,
                 forrigeVedtakId = forrigeVedtak?.id,
-                ansvarligEnhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling),
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
                         .førsteDagINesteMåned() else null,
                 vedtaksdato = if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) now() else null
@@ -235,7 +237,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
 
             val begrunnelseSomSkalPersisteres =
-                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse.hentBeskrivelse(gjelderSøker, barnasFødselsdatoer, vilkårsdato)
+                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse.hentBeskrivelse(gjelderSøker,
+                                                                                                       barnasFødselsdatoer,
+                                                                                                       vilkårsdato)
 
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
@@ -294,7 +298,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val behandlinger = behandlingService.hentBehandlinger(behandling.fagsak.id)
 
 
-        return when (val forrigeBehandling = behandlinger.filter { it.id != behandling.id }.maxByOrNull { it.opprettetTidspunkt }) {
+        return when (val forrigeBehandling =
+                behandlinger.filter { it.id != behandling.id }.maxByOrNull { it.opprettetTidspunkt }) {
             null -> null
             else -> hentAktivForBehandling(behandlingId = forrigeBehandling.id)
         }
