@@ -12,7 +12,7 @@ data class RestBeregningOversikt(
         val ytelseTyper: List<YtelseType>,
         val antallBarn: Int,
         val utbetaltPerMnd: Int,
-        val endring: Boolean,
+        val endring: BeregningEndring,
 )
 
 data class RestBeregningDetalj(
@@ -20,3 +20,9 @@ data class RestBeregningDetalj(
         val ytelseType: YtelseType,
         val utbetaltPerMnd: Int,
 )
+
+enum class BeregningEndring {
+    UENDRET,
+    ENDRET,
+    SATS
+}

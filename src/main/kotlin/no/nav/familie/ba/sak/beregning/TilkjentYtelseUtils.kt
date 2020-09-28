@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.beregning
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndring
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
 import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
@@ -154,7 +155,10 @@ object TilkjentYtelseUtils {
                                             andelerForSegment: List<AndelTilkjentYtelse>,
                                             behandling: Behandling,
                                             personopplysningGrunnlag: PersonopplysningGrunnlag): RestBeregningOversikt {
-        val endret = false //TODO: Enten sammenligne med forrige beregningoversikt (fra forrige tilkjent ytelse) eller bruk andel og sett et endretflagg der
+        //TODO: Enten sammenligne med forrige beregningoversikt (fra forrige tilkjent ytelse) eller bruk andel og sett et endretflagg der
+
+        val endringISegment = BeregningEndring.ENDRET //endring i vertikal
+
         return RestBeregningOversikt(
                 periodeFom = segment.fom,
                 periodeTom = segment.tom,
@@ -162,7 +166,7 @@ object TilkjentYtelseUtils {
                 utbetaltPerMnd = segment.value,
                 antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
                 sakstype = behandling.kategori,
-                endring = endret,
+                endring = endringISegment,
                 beregningDetaljer = andelerForSegment.map { andel ->
                     val personForAndel =
                             personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
