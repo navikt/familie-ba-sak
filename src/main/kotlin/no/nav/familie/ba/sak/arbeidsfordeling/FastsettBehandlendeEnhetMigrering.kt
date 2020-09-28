@@ -58,6 +58,8 @@ class FastsettBehandlendeEnhetMigrering(
                                 mislykkedeMigreringer++
                             }
                     )
+                } else {
+                    vellykkedeMigreringer++
                 }
             }
 
