@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
@@ -17,7 +17,6 @@ import java.time.LocalDateTime
 @Service
 class LoggService(
         private val loggRepository: LoggRepository,
-        private val persongrunnlagService: PersongrunnlagService,
         private val rolleConfig: RolleConfig
 ) {
 
@@ -29,6 +28,18 @@ class LoggService(
                               it.visningsnavn)
     }.toMap()
 
+    fun opprettBehandlendeEnhetEndret(behandling: Behandling,
+                                      fraBehandlendeEnhetNavn: String,
+                                      tilBehandlendeEnhetNavn: String) {
+        lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLENDE_ENHET_ENDRET,
+                tittel = "Behandlende enhet endret",
+                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = "Fra $fraBehandlendeEnhetNavn til $tilBehandlendeEnhetNavn"
+        ))
+    }
+
     fun opprettMottattDokument(behandling: Behandling, datoMottatt: LocalDateTime, dokumentType: DokumentType) {
         lagre(Logg(
                 opprettetTidspunkt = datoMottatt,
@@ -39,6 +50,7 @@ class LoggService(
                 tekst = ""
         ))
     }
+
 
     fun opprettRegistrertSøknadLogg(behandling: Behandling, søknadFinnesFraFør: Boolean) {
         val tittel = if (!søknadFinnesFraFør) "Søknaden ble registrert" else "Søknaden ble endret"

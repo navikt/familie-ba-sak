@@ -5,9 +5,9 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.restDomene.RestFamilierelasjon
 import no.nav.familie.ba.sak.behandling.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity
 import java.time.LocalDate
 
 class PersontilgangTest {
+
     private lateinit var client: IntegrasjonClient
     private lateinit var persontilgang: Persontilgang
 

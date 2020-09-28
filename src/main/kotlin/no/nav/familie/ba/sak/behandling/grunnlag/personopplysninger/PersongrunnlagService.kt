@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
@@ -24,6 +25,7 @@ class PersongrunnlagService(
         private val statsborgerskapService: StatsborgerskapService,
         private val oppholdService: OppholdService,
         private val arbeidsforholdService: ArbeidsforholdService,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
         private val personopplysningerService: PersonopplysningerService
 ) {
 
@@ -94,7 +96,13 @@ class PersongrunnlagService(
             }
         }
 
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
+            /**
+             * For sikkerhetsskyld fastsetter vi alltid behandlende enhet når nytt personopplysningsgrunnlag opprettes.
+             * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
+             */
+            arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, false)
+        }
     }
 
     private fun hentBarn(barnasFødselsnummer: List<String>,

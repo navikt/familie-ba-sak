@@ -25,7 +25,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
-import no.nav.nare.core.specifications.Spesifikasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -46,8 +45,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
                              private val gdprService: GDPRService) {
 
-    val finnesLøpendeSakIInfotrygd: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
-    val finnesIkkeLøpendeSakIInfotrygd: Counter =
+    val harLøpendeSakIInfotrygdCounter: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
+    val harIkkeLøpendeSakIInfotrygdCounter: Counter =
             Metrics.counter("foedselshendelse.mor.eller.barn.finnes.ikke.loepende.i.infotrygd")
     val stansetIAutomatiskFiltreringCounter = Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
     val stansetIAutomatiskVilkårsvurderingCounter =
@@ -65,13 +64,13 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                     .map { identinfo -> identinfo.ident }
         }
 
-        val finnesHosInfotrygd = !infotrygdBarnetrygdClient.finnesIkkeHosInfotrygd(morsIdenter, alleBarnasIdenter)
-        when (finnesHosInfotrygd) {
-            true -> finnesLøpendeSakIInfotrygd.increment()
-            false -> finnesIkkeLøpendeSakIInfotrygd.increment()
+        return if (infotrygdBarnetrygdClient.harIkkeLøpendeSakIInfotrygd(morsIdenter, alleBarnasIdenter)) {
+            harIkkeLøpendeSakIInfotrygdCounter.increment()
+            false
+        } else {
+            harLøpendeSakIInfotrygdCounter.increment()
+            true
         }
-
-        return finnesHosInfotrygd
     }
 
     fun sendTilInfotrygdFeed(barnIdenter: List<String>) {
@@ -84,8 +83,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val (faktaForFiltreringsregler, evalueringAvFiltrering) =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                    nyBehandling.barnasIdenter.toSet())
+                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter.toSet())
 
         gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = faktaForFiltreringsregler,
                                                      evalueringAvFiltrering = evalueringAvFiltrering,
@@ -198,6 +196,5 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     companion object {
 
         val LOG = LoggerFactory.getLogger(this::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

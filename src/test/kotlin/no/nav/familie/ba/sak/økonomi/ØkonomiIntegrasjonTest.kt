@@ -36,7 +36,7 @@ import java.time.LocalDate
                     "FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling")
 @TestInstance(Lifecycle.PER_CLASS)
 @AutoConfigureWireMock(port = 28085)
 class ØkonomiIntegrasjonTest {

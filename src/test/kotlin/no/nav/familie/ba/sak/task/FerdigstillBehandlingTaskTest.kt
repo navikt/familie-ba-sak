@@ -30,7 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-pdl", "mock-iverksett", "mock-infotrygd-feed")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-pdl", "mock-iverksett", "mock-infotrygd-feed", "mock-arbeidsfordeling")
 @Tag("integration")
 class FerdigstillBehandlingTaskTest {
 

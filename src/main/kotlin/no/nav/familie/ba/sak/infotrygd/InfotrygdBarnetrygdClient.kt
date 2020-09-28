@@ -18,7 +18,7 @@ class InfotrygdBarnetrygdClient(@Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_U
                                 private val environment: Environment)
     : AbstractRestClient(restOperations, "infotrygd_barnetrygd") {
 
-    fun finnesIkkeHosInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String>): Boolean {
+    fun harIkkeLøpendeSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String>): Boolean {
         if (environment.activeProfiles.contains("e2e")) {
             return true
         }
