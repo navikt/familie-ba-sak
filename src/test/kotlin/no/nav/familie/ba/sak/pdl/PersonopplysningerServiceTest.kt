@@ -72,6 +72,12 @@ class PersonopplysningerServiceTest {
     }
 
     @Test
+    fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen bostedsadresse `(){
+        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_MOR_MED_TOM_BOSTEDSADRESSE)
+        assertThat(landkode).isEqualTo("ZZ")
+    }
+
+    @Test
     fun `hentadressebeskyttelse skal returnere gradering`(){
         val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_BARN)
         assertThat(gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
@@ -84,6 +90,7 @@ class PersonopplysningerServiceTest {
 
     companion object{
         val ID_MOR= "22345678901"
+        val ID_MOR_MED_TOM_BOSTEDSADRESSE= "22345678903"
         val ID_BARN= "32345678901"
 
         private fun gyldigRequest(queryFilnavn: String, requestFilnavn: String): String {
@@ -133,6 +140,9 @@ class PersonopplysningerServiceTest {
 
             lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
                           readfile("PdlIntegrasjon/personinfoResponseForBarn.json"))
+
+            lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForMorMedTomBostedsadresse.json",
+                          readfile("PdlIntegrasjon/tomBostedsadresseResponse.json"))
 
             lagMockForPdl("hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse.json",
                           readfile("pdlAdressebeskyttelseResponse.json"))
