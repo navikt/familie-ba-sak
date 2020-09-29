@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import org.apache.commons.lang3.StringUtils
@@ -9,6 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,35 +33,35 @@ class PersonopplysningerServiceTest {
 
     @Test
     fun `hentPersoninfoMedRelasjoner() skal return riktig personinfo`(){
-        val personInfo= personopplysningerService.hentPersoninfoMedRelasjoner(ID_MOR_MED_XXX_STATSBORGERSKAP)
+        val personInfo= personopplysningerService.hentPersoninfoMedRelasjoner(ID_MOR)
 
         assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
     }
 
     @Test
     fun `hentStatsborgerskap() skal return riktig statsborgerskap`(){
-        val statsborgerskap= personopplysningerService.hentStatsborgerskap(Ident(ID_MOR_MED_XXX_STATSBORGERSKAP))
+        val statsborgerskap= personopplysningerService.hentStatsborgerskap(Ident(ID_MOR))
         assert(statsborgerskap.size == 1)
         assert(statsborgerskap.first().land == "XXX")
     }
 
     @Test
     fun `hentOpphold() skal returnere riktig opphold`(){
-        val opphold = personopplysningerService.hentOpphold(ID_MOR_MED_XXX_STATSBORGERSKAP)
+        val opphold = personopplysningerService.hentOpphold(ID_MOR)
         assert(opphold.size == 1)
         assert(opphold.first().type == OPPHOLDSTILLATELSE.MIDLERTIDIG)
     }
 
     @Test
     fun `hentBostedsadresseperioder() skal returnere riktige perioder`(){
-        val bostedsadresseperioder = personopplysningerService.hentBostedsadresseperioder(ID_MOR_MED_XXX_STATSBORGERSKAP)
+        val bostedsadresseperioder = personopplysningerService.hentBostedsadresseperioder(ID_MOR)
         assert(bostedsadresseperioder.size == 1)
         assert(bostedsadresseperioder.first().periode?.fom != null)
     }
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere landkode `(){
-        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_MOR_MED_XXX_STATSBORGERSKAP)
+        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_MOR)
         assertThat(landkode).isEqualTo("DK")
     }
 
@@ -68,8 +71,19 @@ class PersonopplysningerServiceTest {
         assertThat(landkode).isEqualTo("ZZ")
     }
 
+    @Test
+    fun `hentadressebeskyttelse skal returnere gradering`(){
+        val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_BARN)
+        assertThat(gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
+    }
+
+    @Test
+    fun `hentadressebeskyttelse feiler`(){
+        assertThrows<Feil> { personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_MOR) }
+    }
+
     companion object{
-        val ID_MOR_MED_XXX_STATSBORGERSKAP= "22345678901"
+        val ID_MOR= "22345678901"
         val ID_BARN= "32345678901"
 
         private fun gyldigRequest(queryFilnavn: String, requestFilnavn: String): String {
@@ -119,6 +133,12 @@ class PersonopplysningerServiceTest {
 
             lagMockForPdl("bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
                           readfile("PdlIntegrasjon/personinfoResponseForBarn.json"))
+
+            lagMockForPdl("hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse.json",
+                          readfile("pdlAdressebeskyttelseResponse.json"))
+
+            lagMockForPdl("hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse2.json",
+                          readfile("pdlPersonIkkeFunnetResponse.json"))
         }
 
     }
