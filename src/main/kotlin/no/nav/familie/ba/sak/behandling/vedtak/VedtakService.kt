@@ -140,11 +140,23 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     fun hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId: Long): List<UtbetalingBegrunnelse> {
         val forrigeVedtak = hentForrigeVedtakPåFagsak(fagsakId)
-        if (forrigeVedtak != null) {
-            return forrigeVedtak.utbetalingBegrunnelser.toList()
-        } else {
-            throw Feil("Finner ikke forrige vedtak ved uthenting av utbetalingbegrunnelser fra forrige vedtak")
+        return forrigeVedtak?.utbetalingBegrunnelser?.toList() ?: emptyList()
+    }
+
+    fun leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId: Long, perioder: List<Periode>) {
+        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+        perioder.forEach {
+            leggTilUtbetalingBegrunnelse(fagsakId,
+                                         UtbetalingBegrunnelse(vedtak = vedtak,
+                                                               fom = it.fom,
+                                                               tom = it.tom,
+                                                               behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING))
         }
+    }
+
+    fun leggTilUtbetalingsbegrunnelseforuendrede(fagsakId: Long, perioder: List<Periode>) {
+        val utbetalingsbegrunnelser = hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId).filter { Periode(it.fom, it.tom) in perioder }
+        utbetalingsbegrunnelser.forEach { leggTilUtbetalingBegrunnelse(fagsakId = fagsakId, utbetalingBegrunnelse = it) }
     }
 
     @Transactional
@@ -161,6 +173,30 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         vedtak.leggTilUtbetalingBegrunnelse(begrunnelse)
 
         lagreEllerOppdater(vedtak)
+
+        return vedtak.utbetalingBegrunnelser.map {
+            it.toRestUtbetalingBegrunnelse()
+        }
+    }
+
+    @Transactional
+    fun leggTilUtbetalingBegrunnelse(fagsakId: Long,
+                                     utbetalingBegrunnelse: UtbetalingBegrunnelse): List<RestUtbetalingBegrunnelse> {
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        if (vedtak.utbetalingBegrunnelser.none { it.erLik(utbetalingBegrunnelse) }) {
+            val begrunnelse = UtbetalingBegrunnelse(vedtak = vedtak,
+                                                    fom = utbetalingBegrunnelse.fom,
+                                                    tom = utbetalingBegrunnelse.tom,
+                                                    resultat = utbetalingBegrunnelse.resultat,
+                                                    behandlingresultatOgVilkårBegrunnelse = utbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse,
+                                                    brevBegrunnelse = utbetalingBegrunnelse.brevBegrunnelse)
+
+            vedtak.leggTilUtbetalingBegrunnelse(begrunnelse)
+
+            lagreEllerOppdater(vedtak)
+        }
 
         return vedtak.utbetalingBegrunnelser.map {
             it.toRestUtbetalingBegrunnelse()

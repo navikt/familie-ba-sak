@@ -250,6 +250,11 @@ object VilkårsvurderingUtils {
             }
         }
 
+
+        val satsBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING
+        vilkårBegrunnelser[BehandlingResultatType.INNVILGET]?.add(RestVedtakBegrunnelse(id = satsBegrunnelse,
+                                                                                        navn = satsBegrunnelse.tittel))
+
         return vilkårBegrunnelser
     }
 }

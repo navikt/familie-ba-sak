@@ -38,14 +38,26 @@ class VedtakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @GetMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/forrige-vedtak"])
-    fun hentUtbetalingBegrunnelserFraForrigeVedtak(@PathVariable
-                                                   fagsakId: Long): ResponseEntity<Ressurs<List<RestUtbetalingBegrunnelse>>> {
-        // TODO: Frontend vet hvilke perioder som er uendret gjennom RestBeregningOversikt og vil vise de man ønskser med lesevisning.
-        val restUtbetalingsbegrunnelser =
-                vedtakService.hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId).map { it.toRestUtbetalingBegrunnelse() }
-        return ResponseEntity.ok(Ressurs.success(data = restUtbetalingsbegrunnelser))
+    @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/satsendringer"])
+    fun settSatsendringer(@PathVariable fagsakId: Long,
+                          @RequestBody
+                          perioder: List<Periode>): ResponseEntity<Ressurs<RestFagsak>> {
+
+        vedtakService.leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId, perioder)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
+
+    @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/uendrede"])
+    fun settUendrede(@PathVariable fagsakId: Long,
+                     @RequestBody
+                     perioder: List<Periode>): ResponseEntity<Ressurs<RestFagsak>> {
+
+        vedtakService.leggTilUtbetalingsbegrunnelseforuendrede(fagsakId, perioder)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
+    }
+
 
     @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse"])
     fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,

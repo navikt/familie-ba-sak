@@ -77,7 +77,7 @@ class VilkårController(
      */
     private fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
         behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingId, steg = StegType.VILKÅRSVURDERING)
-        vedtakService.slettUtbetalingBegrunnelser(behandlingId) // TODO: Obs! vil her kun slette de nye (de på endrede perioder)
+        vedtakService.slettUtbetalingBegrunnelser(behandlingId)
     }
 }
 

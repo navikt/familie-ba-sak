@@ -47,4 +47,9 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
             return "Du får barnetrygd fordi vi har kommet fram til at du har fått fast omsorg for barn født $barnasFødselsdatoer fra $vilkårsdato."
         }
     },
+    SATSENDRING("Satsendring") {
+        override fun hentBeskrivelse(gjelderSøker: Boolean, barnasFødselsdatoer: String, vilkårsdato: String): String {
+            return "Satsendring med virkning fra $vilkårsdato."
+        }
+    },
 }
