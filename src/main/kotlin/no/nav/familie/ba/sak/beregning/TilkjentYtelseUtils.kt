@@ -75,6 +75,7 @@ object TilkjentYtelseUtils {
 
                                 val beløpsperioder =
                                         listOf(beløpsperioderFørFylte6År, beløpsperioderEtterFylte6År).flatten()
+                                                .sortedBy { it.fraOgMed }
                                                 .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
 
                                 beløpsperioder.map { beløpsperiode ->

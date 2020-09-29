@@ -14,7 +14,9 @@ import org.springframework.web.context.annotation.ApplicationScope
 
 @Service
 @ApplicationScope
-class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
+class PersonopplysningerService(
+        val pdlRestClient: PdlRestClient,
+        val stsOnlyPdlRestClient: StsOnlyPdlRestClient) {
 
     fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfo(personIdent, PersonInfoQuery.MED_RELASJONER)
@@ -29,17 +31,17 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
     }
 
     fun hentPersoninfo(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
-        return pdlRestClient.hentPerson(personIdent, "BAR", personInfoQuery)
+        return pdlRestClient.hentPerson(personIdent, personInfoQuery)
     }
 
     fun hentAktivAktørId(ident: Ident): AktørId {
-        val aktørId = hentAktørId(ident.ident, "BAR")
+        val aktørId = hentAktørId(ident.ident)
         if (aktørId.isEmpty()) error("Finner ingen aktiv aktørId for ident")
         return AktørId(aktørId.first())
     }
 
-    fun hentAktørId(personIdent: String, tema: String): List<String> {
-        val hentIdenter = pdlRestClient.hentIdenter(personIdent, tema)
+    fun hentAktørId(personIdent: String): List<String> {
+        val hentIdenter = pdlRestClient.hentIdenter(personIdent)
         return hentIdenter.data.pdlIdenter!!.identer.filter { it.gruppe == "AKTORID" && !it.historisk }.map { it.ident }
     }
 
@@ -50,11 +52,11 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
     }
 
     fun hentIdenter(ident: Ident): List<IdentInformasjon> {
-        return hentIdenter(ident.ident, "BAR", true)
+        return hentIdenter(ident.ident, true)
     }
 
-    fun hentIdenter(personIdent: String, tema: String, historikk: Boolean): List<IdentInformasjon> {
-        val hentIdenter = pdlRestClient.hentIdenter(personIdent, tema)
+    fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {
+        val hentIdenter = pdlRestClient.hentIdenter(personIdent)
 
         return if (historikk) {
             hentIdenter.data.pdlIdenter!!.identer.map { it }
@@ -64,52 +66,49 @@ class PersonopplysningerService(val pdlRestClient: PdlRestClient) {
     }
 
     fun hentDødsfall(ident: Ident): DødsfallData {
-        return hentDødsfall(ident.ident, "BAR").let { DødsfallData(erDød = it.erDød, dødsdato = it.dødsdato) }
-    }
-
-    fun hentVergeData(ident: Ident): VergeData {
-        return VergeData(harVerge = harVerge(ident.ident, "BAR").harVerge)
-    }
-
-    fun hentDødsfall(personIdent: String, tema: String): DødsfallResponse {
-        val doedsfall = pdlRestClient.hentDødsfall(personIdent, tema)
+        val doedsfall = pdlRestClient.hentDødsfall(ident.ident)
         return DødsfallResponse(erDød = doedsfall.isNotEmpty(),
                                 dødsdato = doedsfall.filter { it.doedsdato != null }
                                         .map { it.doedsdato }
                                         .firstOrNull())
+                .let { DødsfallData(erDød = it.erDød, dødsdato = it.dødsdato) }
     }
 
-    fun harVerge(personIdent: String, tema: String): VergeResponse {
-        val harVerge = pdlRestClient.hentVergemaalEllerFremtidsfullmakt(personIdent, tema)
+    fun hentVergeData(ident: Ident): VergeData {
+        return VergeData(harVerge = harVerge(ident.ident).harVerge)
+    }
+
+    fun harVerge(personIdent: String): VergeResponse {
+        val harVerge = pdlRestClient.hentVergemaalEllerFremtidsfullmakt(personIdent)
                 .any { it.type != "stadfestetFremtidsfullmakt" }
 
         return VergeResponse(harVerge)
     }
 
-    fun hentStatsborgerskap(ident: Ident): List<Statsborgerskap> {
-        return hentStatsborgerskap(ident.ident, "BAR")
-    }
+    fun hentStatsborgerskap(ident: Ident): List<Statsborgerskap> =
+            pdlRestClient.hentStatsborgerskap(ident.ident)
 
-    fun hentStatsborgerskap(ident: String, tema: String): List<Statsborgerskap> =
-            pdlRestClient.hentStatsborgerskap(ident, tema)
+    fun hentOpphold(ident: String): List<Opphold> = pdlRestClient.hentOpphold(ident)
 
-    fun hentOpphold(ident: String): List<Opphold> = pdlRestClient.hentOpphold(ident, "BAR")
-
-    fun hentBostedsadresseperioder(ident : String) : List<GrBostedsadresseperiode> = pdlRestClient.hentBostedsadresseperioder(ident).map{
-        GrBostedsadresseperiode(
-                periode = DatoIntervallEntitet(
-                        fom= it.gyldigFraOgMed?.toLocalDate(),
-                        tom= it.gyldigTilOgMed?.toLocalDate()
-                ))
-    }
+    fun hentBostedsadresseperioder(ident: String): List<GrBostedsadresseperiode> =
+            pdlRestClient.hentBostedsadresseperioder(ident).map {
+                GrBostedsadresseperiode(
+                        periode = DatoIntervallEntitet(
+                                fom = it.gyldigFraOgMed?.toLocalDate(),
+                                tom = it.gyldigTilOgMed?.toLocalDate()
+                        ))
+            }
 
     fun hentLandkodeUtenlandskBostedsadresse(ident: String): String {
         val landkode = pdlRestClient.hentUtenlandskBostedsadresse(ident)?.landkode
         return if (landkode.isNullOrEmpty()) UKJENT_LANDKODE else landkode
     }
 
+    fun hentAdressebeskyttelseSomSystembruker(ident: String): ADRESSEBESKYTTELSEGRADERING =
+        stsOnlyPdlRestClient.hentAdressebeskyttelse(ident).first().gradering
+
     companion object {
-        const val PERSON = "PERSON"
+
         const val UKJENT_LANDKODE = "ZZ"
         val LOG = LoggerFactory.getLogger(PersonopplysningerService::class.java)
     }
