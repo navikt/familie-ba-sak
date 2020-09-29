@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -51,7 +50,6 @@ import java.time.LocalDate
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-pdl-arbeidsfordeling")
 @Tag("integration")
-@AutoConfigureWireMock(port = 28085)
 class ArbeidsfordelingIntegrationTest(
         @Autowired
         private val fagsakService: FagsakService,
