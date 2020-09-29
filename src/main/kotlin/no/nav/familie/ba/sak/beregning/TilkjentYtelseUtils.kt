@@ -140,7 +140,7 @@ object TilkjentYtelseUtils {
 
         val segmenter = utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling)
         val segmenterFraForrigeTilkjentYtelse =
-                if (tilkjentYtelseForForrigeBehandling !== null) utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling) else emptyList()
+                if (tilkjentYtelseForForrigeBehandling !== null) utledSegmenterFraTilkjentYtelse(tilkjentYtelseForForrigeBehandling) else emptyList()
 
         return segmenter.map { segment ->
             val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {

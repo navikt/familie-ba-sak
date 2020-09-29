@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndring
+import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -31,5 +32,69 @@ internal class TilkjentYtelseUtilsTest {
         val seksårsdag = LocalDate.of(2018, 1, 1)
 
         assertEquals(null, SatsService.hentPeriodeUnder6år(seksårsdag, periode.fom, periode.tom))
+    }
+
+    @Test
+    fun `Uendrede beregninger får endringskode UENDRET og UENDRET_SATS`() {
+        val person = tilfeldigPerson()
+        val personopplysningsgrunnlag = lagTestPersonopplysningGrunnlag(0, person)
+        val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse().also {
+            it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
+                                                                         fom = "2020-01-01",
+                                                                         tom = "2020-08-31",
+                                                                         beløp = 1054),
+                                                  lagAndelTilkjentYtelse(person = person,
+                                                                         fom = "2020-09-01",
+                                                                         tom = "2020-12-30",
+                                                                         beløp = 1354)))
+        }
+        val nyTilkjentYtelse = lagInitiellTilkjentYtelse().also {
+            it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
+                                                                         fom = "2020-01-01",
+                                                                         tom = "2020-08-31",
+                                                                         beløp = 1054),
+                                                  lagAndelTilkjentYtelse(person = person,
+                                                                         fom = "2020-09-01",
+                                                                         tom = "2020-12-30",
+                                                                         beløp = 1354)))
+        }
+
+        val oversikt = TilkjentYtelseUtils.hentBeregningOversikt(
+                tilkjentYtelseForBehandling = nyTilkjentYtelse,
+                personopplysningGrunnlag = personopplysningsgrunnlag,
+                tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse)
+                .sortedBy { it.periodeFom }
+        assertEquals(BeregningEndring.UENDRET, oversikt[0].endring)
+        assertEquals(BeregningEndring.UENDRET_SATS, oversikt[1].endring)
+    }
+
+    @Test
+    fun `Endrede beregninger får endringskode ENDRET og ENDRET_SATS`() {
+        val person = tilfeldigPerson()
+        val personopplysningsgrunnlag = lagTestPersonopplysningGrunnlag(0, person)
+        val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse().also {
+            it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
+                                                                         fom = "2020-01-01",
+                                                                         tom = "2020-12-30",
+                                                                         beløp = 1054)))
+        }
+        val nyTilkjentYtelse = lagInitiellTilkjentYtelse().also {
+            it.andelerTilkjentYtelse.addAll(setOf(lagAndelTilkjentYtelse(person = person,
+                                                                         fom = "2020-01-01",
+                                                                         tom = "2020-08-31",
+                                                                         beløp = 1054),
+                                                  lagAndelTilkjentYtelse(person = person,
+                                                                         fom = "2020-09-01",
+                                                                         tom = "2020-12-30",
+                                                                         beløp = 1354)))
+        }
+
+        val oversikt = TilkjentYtelseUtils.hentBeregningOversikt(
+                tilkjentYtelseForBehandling = nyTilkjentYtelse,
+                personopplysningGrunnlag = personopplysningsgrunnlag,
+                tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse)
+                .sortedBy { it.periodeFom }
+        assertEquals(BeregningEndring.ENDRET, oversikt[0].endring)
+        assertEquals(BeregningEndring.ENDRET_SATS, oversikt[1].endring)
     }
 }
