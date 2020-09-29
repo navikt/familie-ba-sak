@@ -19,8 +19,10 @@ object YtelseSatsMapper {
     private fun map(ytelseType: YtelseType): SatsType? {
         return when (ytelseType) {
             YtelseType.ORDINÆR_BARNETRYGD -> SatsType.ORBA
+            YtelseType.ORDINÆR_BARNETRYGD_UNDER_6_ÅR -> SatsType.TILLEGG_ORBA
             YtelseType.UTVIDET_BARNETRYGD -> SatsType.ORBA
             YtelseType.SMÅBARNSTILLEGG -> SatsType.SMA
+            YtelseType.FINNMARKSTILLEGG -> SatsType.FINN_SVAL
             YtelseType.EØS -> null
             YtelseType.MANUELL_VURDERING -> null
         }

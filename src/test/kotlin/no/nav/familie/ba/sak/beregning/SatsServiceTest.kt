@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.spyk
 import no.nav.familie.ba.sak.beregning.domene.Sats
 import no.nav.familie.ba.sak.beregning.domene.SatsType
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.dato
 import no.nav.familie.ba.sak.common.årMnd
 import org.junit.jupiter.api.Assertions
@@ -14,7 +15,7 @@ class SatsServiceTest {
 
     val satsService = spyk(SatsService)
 
-    val MAX_GYLDIG_FRA_OG_MED = årMnd("2020-05")
+    private val MAX_GYLDIG_FRA_OG_MED = årMnd("2020-05")
 
     @Test
     fun `Skal bruke sats for satstype som er løpende`() {
@@ -70,7 +71,7 @@ class SatsServiceTest {
 
         Assertions.assertEquals(1, beløpperioder.size)
         assertSatsperioder(TestKrPeriode(1054, "2020-04", "2023-06"), beløpperioder[0])
-     }
+    }
 
     @Test
     fun `Skal stoppe når sats utløper, også om det finnes ny sats etter cut-of`() {
@@ -170,9 +171,16 @@ class SatsServiceTest {
         Assertions.assertEquals(forventet.tom?.let { årMnd(it) }, faktisk.tilOgMed, "Forskjell i til-og-med")
     }
 
-    private fun stubSatsRepo(type: SatsType, vararg satser: TestKrPeriode): Unit {
+    private fun stubSatsRepo(type: SatsType, vararg satser: TestKrPeriode) {
         every { satsService["finnAlleSatserFor"](type) } returns
-                satser.asList().map { Sats(type, it.beløp, it.fom?.let { s -> dato(s) } ?: LocalDate.MIN, it.tom?.let { s -> dato(s)} ?: LocalDate.MAX ) }
+                satser.asList()
+                        .map {
+                            Sats(type,
+                                 it.beløp,
+                                 it.fom?.let { s -> dato(s) } ?: LocalDate.MIN,
+                                 it.tom?.let { s -> dato(s) } ?: LocalDate.MAX,
+                                 YtelseType.ORDINÆR_BARNETRYGD)
+                        }
     }
 
     private data class TestKrPeriode(

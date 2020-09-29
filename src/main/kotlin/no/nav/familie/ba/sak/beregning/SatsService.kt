@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.beregning.domene.Sats
 import no.nav.familie.ba.sak.beregning.domene.SatsType
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
@@ -11,13 +12,13 @@ import java.time.YearMonth
 object SatsService {
 
     private val satser = listOf(
-            Sats(SatsType.ORBA, 1054, LocalDate.of(2019, 3, 1), LocalDate.MAX),
-            Sats(SatsType.ORBA, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
-            Sats(SatsType.SMA, 660, LocalDate.MIN, LocalDate.MAX),
-            Sats(SatsType.TILLEGG_ORBA, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
-            Sats(SatsType.TILLEGG_ORBA, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2020, 8, 31)),
-            Sats(SatsType.TILLEGG_ORBA, 1354, LocalDate.of(2020, 9, 1), LocalDate.MAX),
-            Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31))
+            Sats(SatsType.ORBA, 1054, LocalDate.of(2019, 3, 1), LocalDate.MAX, YtelseType.ORDINÆR_BARNETRYGD),
+            Sats(SatsType.ORBA, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28), YtelseType.ORDINÆR_BARNETRYGD),
+            Sats(SatsType.SMA, 660, LocalDate.MIN, LocalDate.MAX, YtelseType.SMÅBARNSTILLEGG),
+            Sats(SatsType.TILLEGG_ORBA, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28), YtelseType.ORDINÆR_BARNETRYGD),
+            Sats(SatsType.TILLEGG_ORBA, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2020, 8, 31), YtelseType.ORDINÆR_BARNETRYGD),
+            Sats(SatsType.TILLEGG_ORBA, 1354, LocalDate.of(2020, 9, 1), LocalDate.MAX, YtelseType.ORDINÆR_BARNETRYGD_UNDER_6_ÅR),
+            Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31), YtelseType.FINNMARKSTILLEGG)
     )
 
     fun hentGyldigSatsFor(satstype: SatsType,
@@ -26,19 +27,26 @@ object SatsService {
                           maxSatsGyldigFraOgMed: YearMonth = YearMonth.now()): List<BeløpPeriode> {
 
         return finnAlleSatserFor(satstype)
-                .map { BeløpPeriode(it.beløp, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
+                .map { BeløpPeriode(it, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
                 .filter { it.fraOgMed <= maxSatsGyldigFraOgMed }
-                .map { BeløpPeriode(it.beløp, maxOf(it.fraOgMed, stønadFraOgMed), minOf(it.tilOgMed, stønadTilOgMed)) }
+                .map {
+                    BeløpPeriode(it.sats,
+                                 maxOf(it.fraOgMed, stønadFraOgMed),
+                                 minOf(it.tilOgMed, stønadTilOgMed))
+                }
                 .filter { it.fraOgMed <= it.tilOgMed }
     }
 
     private fun finnAlleSatserFor(type: SatsType): List<Sats> = satser.filter { it.type == type }
 
     data class BeløpPeriode(
-            val beløp: Int,
+            val sats: Sats,
             val fraOgMed: YearMonth,
-            val tilOgMed: YearMonth
-    )
+            val tilOgMed: YearMonth,
+    ) {
+        val beløp = sats.beløp
+        val ytelseType = sats.ytelseType
+    }
 
     private fun LocalDate.toYearMonth() = YearMonth.from(this)
 
@@ -53,8 +61,8 @@ object SatsService {
             }
 
     private fun hentPeriodeOver6år(seksårsdag: LocalDate,
-                           oppfyltFom: LocalDate,
-                           oppfyltTom: LocalDate): Periode? =
+                                   oppfyltFom: LocalDate,
+                                   oppfyltTom: LocalDate): Periode? =
             when {
                 oppfyltTom.isSameOrBefore(seksårsdag) -> {
                     null
