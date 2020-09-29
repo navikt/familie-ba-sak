@@ -24,7 +24,7 @@ class PdlTestConfig {
         val klient = mockk<PdlRestClient>(relaxed = true)
 
         every {
-            klient.hentPerson(any(), any(), any())
+            klient.hentPerson(any(), any())
         } returns PersonInfo(fødselsdato = LocalDate.of(1980, 5, 12),
                              navn = "Kari Normann",
                              kjønn = Kjønn.KVINNE,
