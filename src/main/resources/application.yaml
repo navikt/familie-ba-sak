@@ -42,6 +42,8 @@ spring:
 logging:
   config: "classpath:logback-spring.xml"
 
+retry.backoff.delay: 5000
+
 funksjonsbrytere:
   enabled: true
   unleash:
