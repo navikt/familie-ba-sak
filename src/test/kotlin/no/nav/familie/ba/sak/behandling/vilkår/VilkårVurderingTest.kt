@@ -24,7 +24,7 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl")
+@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårVurderingTest(
         @Autowired

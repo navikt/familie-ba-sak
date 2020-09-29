@@ -115,7 +115,7 @@ class DokumentService(
         val fnr = behandling.fagsak.hentAktivIdent().ident
         val fagsakId = "${behandling.fagsak.id}"
         val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)
-        val enhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
+        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
         val journalføringsId = integrasjonClient.journalførManueltBrev(fnr = fnr,
                                                                        fagsakId = fagsakId,

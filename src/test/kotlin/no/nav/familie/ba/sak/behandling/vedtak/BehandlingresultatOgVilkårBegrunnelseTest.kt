@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import io.mockk.MockKAnnotations
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -22,34 +22,36 @@ import java.time.LocalDate
 
 @SpringBootTest
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("mock-pdl", "postgres")
+@ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class BehandlingresultatOgVilkårBegrunnelseTest(@Autowired
-                            val behandlingRepository: BehandlingRepository,
+class BehandlingresultatOgVilkårBegrunnelseTest(
+        @Autowired
+        private val behandlingRepository: BehandlingRepository,
 
-                                                @Autowired
-                            val behandlingResultatService: BehandlingResultatService,
+        @Autowired
+        private val behandlingResultatService: BehandlingResultatService,
 
-                                                @Autowired
-                            val vedtakService: VedtakService,
+        @Autowired
+        private val vedtakService: VedtakService,
 
-                                                @Autowired
-                            val persongrunnlagService: PersongrunnlagService,
+        @Autowired
+        private val persongrunnlagService: PersongrunnlagService,
 
-                                                @Autowired
-                            val beregningService: BeregningService,
+        @Autowired
+        private val beregningService: BeregningService,
 
-                                                @Autowired
-                            val fagsakService: FagsakService,
+        @Autowired
+        private val fagsakService: FagsakService,
 
-                                                @Autowired
-                            val fagsakPersonRepository: FagsakPersonRepository,
+        @Autowired
+        private val fagsakPersonRepository: FagsakPersonRepository,
 
-                                                @Autowired
-                            val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        @Autowired
+        private val loggService: LoggService,
 
-                                                @Autowired
-                            val loggService: LoggService) {
+        @Autowired
+        private val arbeidsfordelingService: ArbeidsfordelingService
+) {
 
     lateinit var behandlingService: BehandlingService
 
@@ -62,7 +64,8 @@ class BehandlingresultatOgVilkårBegrunnelseTest(@Autowired
                 persongrunnlagService,
                 beregningService,
                 fagsakService,
-                loggService)
+                loggService,
+                arbeidsfordelingService)
     }
 
     @Test

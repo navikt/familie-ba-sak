@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -29,6 +31,7 @@ import java.time.Period
 
 @Service
 class FagsakService(
+        private val arbeidsfordelingService: ArbeidsfordelingService,
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakRepository: FagsakRepository,
         private val fagsakPersonRepository: FagsakPersonRepository,
@@ -117,6 +120,8 @@ class FagsakService(
         return behandlinger.map { behandling ->
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
+            val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
                 val andelerTilkjentYtelse =
                         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
@@ -130,6 +135,7 @@ class FagsakService(
 
             RestBehandling(
                     aktiv = behandling.aktiv,
+                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling.toRestArbeidsfordelingPåBehandling(),
                     behandlingId = behandling.id,
                     vedtakForBehandling = restVedtakForBehandling,
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
