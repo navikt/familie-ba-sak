@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.vedtak.producer.KafkaProducer
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -22,7 +23,8 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                             private val journalføringService: JournalføringService,
                             private val arbeidsfordelingService: ArbeidsfordelingService,
                             private val totrinnskontrollService: TotrinnskontrollService,
-                            private val vedtakService: VedtakService) {
+                            private val vedtakService: VedtakService,
+                            private val kafkaProducer: KafkaProducer) {
 
     fun loggBehandlingStatus(behandlingId: Long, forrigeBehandlingId: Long?): BehandlingDVH {
         val behandling = behandlingService.hent(behandlingId)
@@ -50,7 +52,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
         val now = ZonedDateTime.now()
         val behandlingDVH = BehandlingDVH(funksjonellTid = now,
-                                          tekniskTid = now, //now()
+                                          tekniskTid = now, // TODO burde denne vært satt til opprettetTidspunkt/endretTidspunkt?
                                           mottattDato = datoMottatt.atZone(TIMEZONE),
                                           registrertDato = datoMottatt.atZone(TIMEZONE),
                                           behandlingId = behandling.id.toString(),
@@ -85,6 +87,9 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             behandlingDVH.copy(beslutter = totrinnskontroll.beslutter,
                                saksbehandler = totrinnskontroll.saksbehandler)
         }
+
+        kafkaProducer.sendMessage(behandlingDVH)
+
         return behandlingDVH
     }
 

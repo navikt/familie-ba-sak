@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.vedtak.producer.KafkaProducer
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -39,15 +40,18 @@ internal class SaksstatistikkServiceTest {
     private val journalføringService: JournalføringService = mockk()
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
     private val totrinnskontrollService: TotrinnskontrollService = mockk(relaxed = true)
+    private val kafkaProducer: KafkaProducer = mockk(relaxed = true)
 
     private val vedtakService: VedtakService = mockk()
 
-    private val sakstatistikkService = SaksstatistikkService(behandlingService,
-                                                             journalføringRepository,
-                                                             journalføringService,
-                                                             arbeidsfordelingService,
-                                                             totrinnskontrollService,
-                                                             vedtakService)
+    private val sakstatistikkService = SaksstatistikkService(
+            behandlingService,
+            journalføringRepository,
+            journalføringService,
+            arbeidsfordelingService,
+            totrinnskontrollService,
+            vedtakService,
+            kafkaProducer)
 
 
     @BeforeAll
