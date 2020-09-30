@@ -50,7 +50,7 @@ funksjonsbrytere:
     uri: https://unleash.nais.adeo.no/api/
     cluster: ${NAIS_CLUSTER_NAME}
     applicationName: ${NAIS_APP_NAME}
-  vedtak:
+  kafka:
     producer:
       enabled: true
 
