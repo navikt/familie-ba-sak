@@ -81,7 +81,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         }
     }
 
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
         if (environment.activeProfiles.contains("e2e")) {
             return listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
@@ -102,7 +102,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     }
 
 
-    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delay = 5000))
+    @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
     fun hentArbeidsforhold(ident: String, ansettelsesperiodeFom: LocalDate): List<Arbeidsforhold> {
 
         val uri = UriComponentsBuilder.fromUri(integrasjonUri)
@@ -180,6 +180,28 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                                it,
                                                uri,
                                                opprettOppgave.ident?.ident)
+                }
+        )
+    }
+
+    fun oppdaterOppgave(patchOppgave: Oppgave): OppgaveResponse {
+        val uri = URI.create("$integrasjonUri/oppgave/oppdater")
+
+        return Result.runCatching {
+            postForEntity<Ressurs<OppgaveResponse>>(uri, patchOppgave, HttpHeaders().medContentTypeJsonUTF8())
+        }.fold(
+                onSuccess = {
+                    assertGenerelleSuksessKriterier(it)
+                    it.getDataOrThrow()
+                },
+                onFailure = {
+                    val message = if (it is RestClientResponseException) it.responseBodyAsString else ""
+                    throw IntegrasjonException("Kall mot integrasjon feilet ved oppdater oppgave. response=$message",
+                                               it,
+                                               uri,
+                                               patchOppgave.identer?.find { ident ->
+                                                   ident.gruppe == IdentGruppe.FOLKEREGISTERIDENT
+                                               }?.ident)
                 }
         )
     }
@@ -292,7 +314,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId")
         return exchange(
                 networkRequest = {
-                    putForEntity<Ressurs<OppdaterJournalpostResponse>>(uri, request)
+                    putForEntity(uri, request)
                 },
                 onFailure = {
                     IntegrasjonException("Kall mot integrasjon feilet ved oppdaterJournalpost", it, uri, request.bruker.id)
@@ -304,7 +326,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg")
         return exchange(
                 networkRequest = {
-                    postForEntity<Ressurs<LogiskVedleggResponse>>(uri, request)
+                    postForEntity(uri, request)
                 },
                 onFailure = {
                     IntegrasjonException("Kall mot integrasjon feilet ved leggTilLogiskVedlegg", it, uri, null)
@@ -316,7 +338,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg/$logiskVedleggId")
         return exchange(
                 networkRequest = {
-                    deleteForEntity<Ressurs<LogiskVedleggResponse>>(uri)
+                    deleteForEntity(uri)
                 },
                 onFailure = {
                     IntegrasjonException("Kall mot integrasjon feilet ved slettLogiskVedlegg", it, uri, null)
@@ -336,16 +358,13 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun journalFørVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak): String {
-        if (vedtak.ansvarligEnhet == "9999") {
-            logger.error("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, 9999")
-        }
+    fun journalførVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak, journalførendeEnhet: String): String {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
         val brev = listOf(Dokument(vedtak.stønadBrevPdF!!, FilType.PDFA, dokumentType = BrevType.VEDTAK.arkivType))
         val vedlegg = listOf(Dokument(vedleggPdf, FilType.PDFA,
                                       dokumentType = VEDLEGG_DOKUMENT_TYPE,
                                       tittel = VEDTAK_VEDLEGG_TITTEL))
-        return lagJournalpostForBrev(fnr, fagsakId, vedtak.ansvarligEnhet, brev, vedlegg)
+        return lagJournalpostForBrev(fnr, fagsakId, journalførendeEnhet, brev, vedlegg)
     }
 
     fun journalførManueltBrev(fnr: String,
@@ -366,6 +385,10 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                               vedlegg: List<Dokument> = emptyList()): String {
         val uri = URI.create("$integrasjonUri/arkiv/v3")
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
+
+        if (journalførendeEnhet == "9999") {
+            logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, 9999")
+        }
 
         return Result.runCatching {
             val arkiverDokumentRequest = ArkiverDokumentRequest(fnr = fnr,

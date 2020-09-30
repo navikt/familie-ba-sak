@@ -34,9 +34,9 @@ object RessursUtils {
     }
 
     private fun <T> frontendErrorResponse(feil: Feil): ResponseEntity<Ressurs<T>> {
-        secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): " +
+        secureLogger.info("En håndtert feil har oppstått(${feil.httpStatus}): " +
                            "${feil.frontendFeilmelding}, ${feil.stackTrace}", feil.throwable)
-        LOG.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
+        LOG.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
 
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(
                 frontendFeilmelding = feil.frontendFeilmelding,

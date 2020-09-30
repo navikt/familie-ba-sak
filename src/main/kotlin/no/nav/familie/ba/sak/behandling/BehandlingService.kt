@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -27,7 +28,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val persongrunnlagService: PersongrunnlagService,
                         private val beregningService: BeregningService,
                         private val fagsakService: FagsakService,
-                        private val loggService: LoggService) {
+                        private val loggService: LoggService,
+                        private val arbeidsfordelingService: ArbeidsfordelingService) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -99,7 +101,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
-        return behandlingRepository.save(behandling)
+        return behandlingRepository.save(behandling).also {
+            arbeidsfordelingService.fastsettBehandlendeEnhet(it, false)
+        }
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {

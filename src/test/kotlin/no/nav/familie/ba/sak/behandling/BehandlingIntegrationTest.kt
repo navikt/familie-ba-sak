@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.*
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -46,7 +47,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -57,55 +57,57 @@ import javax.transaction.Transactional
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling")
 @Tag("integration")
-@AutoConfigureWireMock(port = 28085)
-class BehandlingIntegrationTest {
+class BehandlingIntegrationTest(
+        @Autowired
+        private val behandlingRepository: BehandlingRepository,
 
-    @Autowired
-    lateinit var behandlingRepository: BehandlingRepository
+        @Autowired
+        private val personRepository: PersonRepository,
 
-    @Autowired
-    lateinit var personRepository: PersonRepository
+        @Autowired
+        private val vedtakRepository: VedtakRepository,
 
-    @Autowired
-    lateinit var vedtakRepository: VedtakRepository
+        @Autowired
+        private val vedtakService: VedtakService,
 
-    @Autowired
-    lateinit var vedtakService: VedtakService
+        @Autowired
+        private val persongrunnlagService: PersongrunnlagService,
 
-    @Autowired
-    lateinit var persongrunnlagService: PersongrunnlagService
+        @Autowired
+        private val beregningService: BeregningService,
 
-    @Autowired
-    lateinit var beregningService: BeregningService
+        @Autowired
+        private val behandlingResultatRepository: BehandlingResultatRepository,
 
-    @Autowired
-    lateinit var behandlingResultatRepository: BehandlingResultatRepository
+        @Autowired
+        private val behandlingResultatService: BehandlingResultatService,
 
-    @Autowired
-    lateinit var behandlingResultatService: BehandlingResultatService
+        @Autowired
+        private val fagsakPersonRepository: FagsakPersonRepository,
 
-    @Autowired
-    lateinit var fagsakPersonRepository: FagsakPersonRepository
+        @Autowired
+        private val totrinnskontrollService: TotrinnskontrollService,
 
-    @Autowired
-    lateinit var totrinnskontrollService: TotrinnskontrollService
+        @Autowired
+        private val fagsakService: FagsakService,
 
-    @Autowired
-    lateinit var fagsakService: FagsakService
+        @Autowired
+        private val integrasjonClient: IntegrasjonClient,
 
-    @Autowired
-    lateinit var integrasjonClient: IntegrasjonClient
+        @Autowired
+        private val personopplysningerService: PersonopplysningerService,
 
-    @Autowired
-    lateinit var personopplysningerService: PersonopplysningerService
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService,
 
-    @Autowired
-    lateinit var databaseCleanupService: DatabaseCleanupService
+        @Autowired
+        private val loggService: LoggService,
 
-    @Autowired
-    lateinit var loggService: LoggService
+        @Autowired
+        private val arbeidsfordelingService: ArbeidsfordelingService
+) {
 
     lateinit var behandlingService: BehandlingService
 
@@ -120,7 +122,8 @@ class BehandlingIntegrationTest {
                 persongrunnlagService,
                 beregningService,
                 fagsakService,
-                loggService)
+                loggService,
+                arbeidsfordelingService)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
                         .willReturn(aResponse()
@@ -337,7 +340,8 @@ class BehandlingIntegrationTest {
         Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
         Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![1].ytelseType)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![2].beløp)
-        Assertions.assertEquals(dato_2020_01_01.plusYears(5).førsteDagIInneværendeMåned(), restVedtakBarnMap[barn1Fnr]!![2].stønadFom)
+        Assertions.assertEquals(dato_2020_01_01.plusYears(5).førsteDagIInneværendeMåned(),
+                                restVedtakBarnMap[barn1Fnr]!![2].stønadFom)
         Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn1Fnr]!![2].stønadTom)
         Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn1Fnr]!![2].ytelseType)
 
@@ -347,7 +351,8 @@ class BehandlingIntegrationTest {
         Assertions.assertTrue(dato_2020_10_01 < restVedtakBarnMap[barn2Fnr]!![0].stønadTom)
         Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![0].ytelseType)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn2Fnr]!![1].beløp)
-        Assertions.assertEquals(dato_2020_01_01.plusYears(5).førsteDagIInneværendeMåned(), restVedtakBarnMap[barn2Fnr]!![1].stønadFom)
+        Assertions.assertEquals(dato_2020_01_01.plusYears(5).førsteDagIInneværendeMåned(),
+                                restVedtakBarnMap[barn2Fnr]!![1].stønadFom)
         Assertions.assertTrue(dato_2020_01_01 < restVedtakBarnMap[barn2Fnr]!![1].stønadTom)
         Assertions.assertEquals(YtelseType.ORDINÆR_BARNETRYGD, restVedtakBarnMap[barn2Fnr]!![1].ytelseType)
     }
@@ -412,14 +417,16 @@ class BehandlingIntegrationTest {
         Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn1Fnr]!![0].stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn1Fnr]!![0].stønadTom)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn1Fnr]!![1].beløp)
-        Assertions.assertEquals(dato_2021_01_01.plusYears(4).førsteDagIInneværendeMåned(), restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
+        Assertions.assertEquals(dato_2021_01_01.plusYears(4).førsteDagIInneværendeMåned(),
+                                restVedtakBarnMap[barn1Fnr]!![1].stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn1Fnr]!![1].stønadTom)
 
         Assertions.assertEquals(1354, restVedtakBarnMap[barn3Fnr]!![0].beløp)
         Assertions.assertEquals(dato_2021_01_01, restVedtakBarnMap[barn3Fnr]!![0].stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn3Fnr]!![0].stønadTom)
         Assertions.assertEquals(1054, restVedtakBarnMap[barn3Fnr]!![1].beløp)
-        Assertions.assertEquals(dato_2021_01_01.plusYears(4).førsteDagIInneværendeMåned(), restVedtakBarnMap[barn3Fnr]!![1].stønadFom)
+        Assertions.assertEquals(dato_2021_01_01.plusYears(4).førsteDagIInneværendeMåned(),
+                                restVedtakBarnMap[barn3Fnr]!![1].stønadFom)
         Assertions.assertTrue(dato_2021_01_01 < restVedtakBarnMap[barn3Fnr]!![1].stønadTom)
     }
 

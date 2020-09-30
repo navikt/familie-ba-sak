@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
-import no.nav.familie.ba.sak.client.Norg2RestClient
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
@@ -34,7 +33,6 @@ class MalerService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val norg2RestClient: Norg2RestClient,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
@@ -66,14 +64,14 @@ class MalerService(
     }
 
     fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
-        val enhetskode = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
+        val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn
         val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt
                           ?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
 
         val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
                 soknadDato = søknadsDato.toLocalDate().tilDagMånedÅr().toString(),
                 fritekst = manueltBrevRequest.fritekst,
-                enhet = norg2RestClient.hentEnhet(enhetskode).navn,
+                enhet = enhetNavn,
                 saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
         ))
         return MalMedData(
@@ -98,14 +96,12 @@ class MalerService(
                                                                           personopplysningGrunnlag = personopplysningGrunnlag)
                 .sortedBy { it.periodeFom }
 
-        val enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
-        else throw Feil(message = "Ansvarlig enhet er ikke satt ved generering av brev",
-                        frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev")
+        val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
 
         return if (vedtak.behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            autovedtakBrevFelter(vedtak, personopplysningGrunnlag, beregningOversikt, enhet)
+            autovedtakBrevFelter(vedtak, personopplysningGrunnlag, beregningOversikt, enhetNavn)
         } else {
-            manueltVedtakBrevFelter(vedtak, beregningOversikt, enhet)
+            manueltVedtakBrevFelter(vedtak, beregningOversikt, enhetNavn)
         }
     }
 

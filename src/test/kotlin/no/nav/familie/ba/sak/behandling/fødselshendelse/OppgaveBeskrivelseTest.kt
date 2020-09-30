@@ -1,15 +1,16 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse
 
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -22,8 +23,6 @@ import no.nav.nare.core.evaluations.Evaluering
 import no.nav.nare.core.evaluations.Resultat
 import no.nav.nare.core.specifications.Spesifikasjon
 import org.junit.Assert
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -272,11 +271,11 @@ class OppgaveBeskrivelseTest {
         val søkersIdent = "12345678910"
         val barnetsIdent = "22345678910"
         val fagsak = Fagsak(søkerIdenter = emptySet())
-        val behandling = Behandling(fagsak = fagsak,
-                                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                    opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE,
-                                    kategori = BehandlingKategori.EØS,
-                                    underkategori = BehandlingUnderkategori.ORDINÆR)
+        val behandling = lagBehandling(
+                fagsak = fagsak,
+                opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE,
+                behandlingKategori = BehandlingKategori.EØS
+        )
         val søker = Person(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 12), kjønn = Kjønn.KVINNE,
                            sivilstand = SIVILSTAND.GIFT, personIdent = PersonIdent(søkersIdent),
                            personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id))

@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.pdl
 import java.io.File
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.ba.sak.pdl.internal.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlNavn
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -49,6 +51,12 @@ class PdlGraphqlTest {
     fun testUkjentBostedAdresse() {
         val resp = mapper.readValue(File(getFile("pdl/pdlUkjentBostedAdresseOkResponse.json")), PdlHentPersonResponse::class.java)
         assertThat(resp.data.person!!.bostedsadresse.first()?.ukjentBosted?.bostedskommune).isEqualTo("Oslo")
+    }
+
+    @Test
+    fun testAdressebeskyttelse() {
+        val resp = mapper.readValue(File(getFile("pdl/pdlAdressebeskyttelseResponse.json")), PdlAdressebeskyttelseResponse::class.java)
+        assertThat(resp.data.person!!.adressebeskyttelse.first().gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }
 
     @Test
