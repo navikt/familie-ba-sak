@@ -123,14 +123,17 @@ object TilkjentYtelseUtils {
 
     fun hentBeregningOversikt(tilkjentYtelseForBehandling: TilkjentYtelse, personopplysningGrunnlag: PersonopplysningGrunnlag)
             : List<RestBeregningOversikt> {
-        if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
+        val registrertAndelTilkjentYtelse = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
+            personopplysningGrunnlag.barna.any{barn -> barn.personIdent.ident == it.personIdent}
+        }.toSet()
+        if (registrertAndelTilkjentYtelse.isEmpty()) return emptyList()
 
-        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
+        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(registrertAndelTilkjentYtelse)
 
         return utbetalingsPerioder.toSegments()
                 .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-                .map { segment ->
-                    val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
+                .map{ segment ->
+                    val andelerForSegment = registrertAndelTilkjentYtelse.filter {
                         segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
                     }
                     mapTilRestBeregningOversikt(segment,
