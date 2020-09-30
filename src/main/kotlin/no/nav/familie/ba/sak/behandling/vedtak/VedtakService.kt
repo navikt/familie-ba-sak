@@ -150,12 +150,17 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                          UtbetalingBegrunnelse(vedtak = vedtak,
                                                                fom = it.fom,
                                                                tom = it.tom,
-                                                               behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING))
+                                                               resultat = BehandlingResultatType.INNVILGET,
+                                                               behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING,
+                                                               brevBegrunnelse =
+                                                               BehandlingresultatOgVilkårBegrunnelse.SATSENDRING.hentBeskrivelse(
+                                                                       vilkårsdato = it.fom.toString())))
         }
     }
 
     fun leggTilUtbetalingsbegrunnelseforuendrede(fagsakId: Long, perioder: List<Periode>) {
-        val utbetalingsbegrunnelser = hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId).filter { Periode(it.fom, it.tom) in perioder }
+        val utbetalingsbegrunnelser =
+                hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId).filter { Periode(it.fom, it.tom) in perioder }
         utbetalingsbegrunnelser.forEach { leggTilUtbetalingBegrunnelse(fagsakId = fagsakId, utbetalingBegrunnelse = it) }
     }
 
