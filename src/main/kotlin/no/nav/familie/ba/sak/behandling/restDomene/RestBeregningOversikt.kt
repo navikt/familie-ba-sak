@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import java.time.LocalDate
 
 data class RestBeregningOversikt(
-        val periodeFom: LocalDate?,
-        val periodeTom: LocalDate?,
+        val periodeFom: LocalDate,
+        val periodeTom: LocalDate,
         val sakstype: BehandlingKategori,
         val beregningDetaljer: List<RestBeregningDetalj>,
         val ytelseTyper: List<YtelseType>,

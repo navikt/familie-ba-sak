@@ -50,7 +50,7 @@ class Vilkårsvurdering(
                 personopplysningGrunnlag)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-
+        vedtakService.leggTilInitielleUtbetalingsbegrunnelser(fagsakId = behandling.fagsak.id, behandling = behandling)
         behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, behandling)
 
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {

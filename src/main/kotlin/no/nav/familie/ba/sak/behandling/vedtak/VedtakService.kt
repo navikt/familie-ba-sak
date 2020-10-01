@@ -10,11 +10,13 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndring
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
@@ -143,7 +145,26 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         return forrigeVedtak?.utbetalingBegrunnelser?.toList() ?: emptyList()
     }
 
-    fun leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId: Long, perioder: List<Periode>) {
+    fun leggTilInitielleUtbetalingsbegrunnelser(fagsakId: Long, behandling: Behandling) {
+        slettUtbetalingBegrunnelser(behandling.id)
+        val forrigeBehandling = behandlingService.hentForrigeBehandling(fagsakId, behandling);
+        val forrigeTilkjentYtelse =
+                if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(forrigeBehandling.id) else null
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val personopplysningsGrunnlag =
+                persongrunnlagService.hentAktiv(behandling.id) ?: error("Finner ikke personopplhysningsgrunnlag på behandling")
+        val beregningsoversikt = TilkjentYtelseUtils.hentBeregningOversikt(
+                tilkjentYtelseForBehandling = tilkjentYtelse,
+                tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse,
+                personopplysningGrunnlag = personopplysningsGrunnlag)
+
+        val uendrede = beregningsoversikt.filter { it.endring == BeregningEndring.UENDRET || it.endring == BeregningEndring.UENDRET_SATS }.map { Periode(it.periodeFom, it.periodeTom) }
+        val satsendringer = beregningsoversikt.filter { it.endring == BeregningEndring.ENDRET_SATS }.map { Periode(it.periodeFom, it.periodeTom) }
+        leggTilUtbetalingsbegrunnelseforuendrede(fagsakId, uendrede)
+        leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId, satsendringer)
+    }
+
+    private fun leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId: Long, perioder: List<Periode>) {
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
         perioder.forEach {
             leggTilUtbetalingBegrunnelse(fagsakId,
@@ -158,7 +179,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         }
     }
 
-    fun leggTilUtbetalingsbegrunnelseforuendrede(fagsakId: Long, perioder: List<Periode>) {
+    private fun leggTilUtbetalingsbegrunnelseforuendrede(fagsakId: Long, perioder: List<Periode>) {
         val utbetalingsbegrunnelser =
                 hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId).filter { Periode(it.fom, it.tom) in perioder }
         utbetalingsbegrunnelser.forEach { leggTilUtbetalingBegrunnelse(fagsakId = fagsakId, utbetalingBegrunnelse = it) }

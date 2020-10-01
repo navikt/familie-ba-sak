@@ -38,27 +38,6 @@ class VedtakController(
         private val taskRepository: TaskRepository
 ) {
 
-    @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/satsendringer"])
-    fun settSatsendringer(@PathVariable fagsakId: Long,
-                          @RequestBody
-                          perioder: List<Periode>): ResponseEntity<Ressurs<RestFagsak>> {
-
-        vedtakService.leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId, perioder)
-
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
-    }
-
-    @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse/uendrede"])
-    fun settUendrede(@PathVariable fagsakId: Long,
-                     @RequestBody
-                     perioder: List<Periode>): ResponseEntity<Ressurs<RestFagsak>> {
-
-        vedtakService.leggTilUtbetalingsbegrunnelseforuendrede(fagsakId, perioder)
-
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
-    }
-
-
     @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse"])
     fun leggTilUtbetalingBegrunnelse(@PathVariable fagsakId: Long,
                                      @RequestBody
