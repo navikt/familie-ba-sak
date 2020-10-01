@@ -78,7 +78,7 @@ spring:
   flyway:
     enabled: true
   jpa:
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql=false

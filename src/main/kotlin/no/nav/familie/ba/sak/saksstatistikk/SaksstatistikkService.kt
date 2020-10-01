@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.vedtak.producer.KafkaProducer
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
@@ -23,10 +22,9 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                             private val journalføringService: JournalføringService,
                             private val arbeidsfordelingService: ArbeidsfordelingService,
                             private val totrinnskontrollService: TotrinnskontrollService,
-                            private val vedtakService: VedtakService,
-                            private val kafkaProducer: KafkaProducer) {
+                            private val vedtakService: VedtakService) {
 
-    fun loggBehandlingStatus(behandlingId: Long, forrigeBehandlingId: Long?): BehandlingDVH {
+    fun loggBehandlingStatus(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH {
         val behandling = behandlingService.hent(behandlingId)
 
         val datoMottatt = when (behandling.opprinnelse) {
@@ -87,8 +85,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             behandlingDVH.copy(beslutter = totrinnskontroll.beslutter,
                                saksbehandler = totrinnskontroll.saksbehandler)
         }
-
-        kafkaProducer.sendMessage(behandlingDVH)
 
         return behandlingDVH
     }

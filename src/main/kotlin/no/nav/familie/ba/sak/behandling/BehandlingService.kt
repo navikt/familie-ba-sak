@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkService
+import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -31,8 +31,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val beregningService: BeregningService,
                         private val fagsakService: FagsakService,
                         private val loggService: LoggService,
-                        private val saksstatistikkService: SaksstatistikkService,
-                        private val arbeidsfordelingService: ArbeidsfordelingService) {
+                        private val arbeidsfordelingService: ArbeidsfordelingService,
+                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -64,9 +64,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun loggBehandlinghendelse(behandling: Behandling) {
-        saksstatistikkService.loggBehandlingStatus(behandling.id,
-                                                   hentForrigeBehandlingSomErIverksatt(behandling.fagsak.id)
-                                                           .takeIf { erRevurderingEllerKlage(behandling) }?.id)
+        saksstatistikkEventPublisher.publish(behandling.id,
+                                             hentForrigeBehandlingSomErIverksatt(behandling.fagsak.id)
+                                                 .takeIf { erRevurderingEllerKlage(behandling) }?.id)
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
