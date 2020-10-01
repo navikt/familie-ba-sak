@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.vedtak.producer
 
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service
 interface KafkaProducer {
     fun sendMessage(vedtak: VedtakDVH): Long
     fun sendMessage(behandling: BehandlingDVH): Long
+    fun sendMessage(sak: SakDVH): Long
 }
 
 @Service
@@ -32,31 +34,50 @@ class DefaultKafkaProducer : KafkaProducer {
     }
 
     override fun sendMessage(behandling: BehandlingDVH): Long {
-        val response = kafkaTemplate.send(SAKSSTATISTIKK_TOPIC, behandling.behandlingId, behandling).get()
-        logger.info("$SAKSSTATISTIKK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
+        val response = kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, behandling.behandlingId, behandling).get()
+        logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
+        return response.recordMetadata.offset()
+    }
+
+    override fun sendMessage(sak: SakDVH): Long {
+        val response = kafkaTemplate.send(SAKSSTATISTIKK_SAK_TOPIC, sak.sakId, sak).get()
+        logger.info("$SAKSSTATISTIKK_SAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         return response.recordMetadata.offset()
     }
 
     companion object {
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
         private const val VEDTAK_TOPIC = "aapen-barnetrygd-vedtak-v1"
-        private const val SAKSSTATISTIKK_TOPIC = "aapen-barnetrygd-saksstatistkk-v1"
+        private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "aapen-barnetrygd-saksstatistkk-behandling-v1"
+        private const val SAKSSTATISTIKK_SAK_TOPIC = "aapen-barnetrygd-saksstatistkk-sak-v1"
     }
 }
 
 @Service
 class MockKafkaProducer : KafkaProducer {
 
-
     val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun sendMessage(vedtak: VedtakDVH): Long {
         logger.info("Skipper sending av vedtak for ${vedtak.behandlingsId} fordi kafka ikke er enablet")
+
+        sendteMeldinger["vedtak-${vedtak.behandlingsId}"] = vedtak
         return 0
     }
 
     override fun sendMessage(behandling: BehandlingDVH): Long {
         logger.info("Skipper sending av saksstatistikk behandling for ${behandling.behandlingId} fordi kafka ikke er enablet")
+        sendteMeldinger["behandling-${behandling.behandlingId}"] = behandling
         return 0
+    }
+
+    override fun sendMessage(sak: SakDVH): Long {
+        logger.info("Skipper sending av saksstatistikk sak for ${sak.sakId} fordi kafka ikke er enablet")
+        sendteMeldinger["sak-${sak.sakId}"] = sak
+        return 0
+    }
+
+    companion object {
+        var sendteMeldinger = mutableMapOf<String, Any>()
     }
 }

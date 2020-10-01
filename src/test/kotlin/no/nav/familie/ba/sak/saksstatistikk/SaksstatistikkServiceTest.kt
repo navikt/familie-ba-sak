@@ -40,7 +40,6 @@ internal class SaksstatistikkServiceTest {
     private val journalføringService: JournalføringService = mockk()
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
     private val totrinnskontrollService: TotrinnskontrollService = mockk(relaxed = true)
-    private val kafkaProducer: KafkaProducer = mockk(relaxed = true)
 
     private val vedtakService: VedtakService = mockk()
 
@@ -50,8 +49,7 @@ internal class SaksstatistikkServiceTest {
             journalføringService,
             arbeidsfordelingService,
             totrinnskontrollService,
-            vedtakService,
-            kafkaProducer)
+            vedtakService)
 
 
     @BeforeAll
