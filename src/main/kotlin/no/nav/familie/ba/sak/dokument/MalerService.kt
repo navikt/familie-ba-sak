@@ -97,6 +97,7 @@ class MalerService(
                 tilkjentYtelseForBehandling = tilkjentYtelse,
                 tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse,
                 personopplysningGrunnlag = personopplysningGrunnlag)
+                .filter { it.endring.trengerBegrunnelse }
                 .sortedBy { it.periodeFom }
 
         val enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
