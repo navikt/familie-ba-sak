@@ -58,7 +58,8 @@ class InfotrygdFeedClientTest {
 
         verify(anyRequestedFor(anyUrl())
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
-                       .withRequestBody(equalToJson(objectMapper.writeValueAsString(request))))
+                       .withRequestBody(equalToJson(
+                               objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = request.fnrBarn.first())))))
     }
 
     @Test
