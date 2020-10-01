@@ -12,7 +12,6 @@ import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 

@@ -12,11 +12,11 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
-import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -110,7 +110,6 @@ class FerdigstillBehandlingTaskTest {
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
         val testTask = lagTestTask(Resultat.NEI)
-        //iverksettMotOppdrag(vedtakId = vedtak!!.id)
 
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 

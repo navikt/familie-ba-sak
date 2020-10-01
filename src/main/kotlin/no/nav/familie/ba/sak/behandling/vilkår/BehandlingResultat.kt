@@ -96,11 +96,8 @@ data class BehandlingResultat(
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
 
-        val søkerMap = personopplysningGrunnlag.søker
-                .associateBy { it.personIdent.ident }
-
         val innvilgetPeriodeResultatSøker = periodeResultater.filter {
-            søkerMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
+            it.personIdent == personopplysningGrunnlag.søker.personIdent.ident && it.allePåkrevdeVilkårErOppfylt(
                     PersonType.SØKER
             )
         }

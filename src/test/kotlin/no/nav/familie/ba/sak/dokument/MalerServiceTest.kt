@@ -81,7 +81,7 @@ class MalerServiceTest {
                 behandling = behandling,
                 person = personopplysningGrunnlag.barna.first())
 
-        every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker.first()
+        every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns tilkjentYtelse.copy(
                 andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
@@ -123,7 +123,7 @@ class MalerServiceTest {
                 behandling = behandling,
                 person = barn2)
 
-        every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker.first()
+        every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
                 tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))

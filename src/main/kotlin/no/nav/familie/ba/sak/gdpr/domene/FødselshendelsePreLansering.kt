@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.vilkår.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.behandling.vilkår.toJson
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.nare.core.evaluations.Evaluering
 import java.util.*
 import javax.persistence.*
 
