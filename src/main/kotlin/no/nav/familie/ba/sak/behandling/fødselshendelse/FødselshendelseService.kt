@@ -3,15 +3,15 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -101,7 +101,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         when (resultatAvVilkårsvurdering) {
             null -> stansetIAutomatiskFiltreringCounter.increment()
             BehandlingResultatType.INNVILGET -> passertFiltreringOgVilkårsvurderingCounter.increment()
-            else -> økTellereForStansetIAutomatiskVilkårsvurdering(behandling)
+            else -> stansetIAutomatiskVilkårsvurderingCounter.increment()
         }
 
         if (fødselshendelseSkalRullesTilbake()) {
@@ -188,47 +188,6 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                 beskrivelse = beskrivelse
         )
         taskRepository.save(nyTask)
-    }
-
-    private fun økTellereForStansetIAutomatiskVilkårsvurdering(behandling: Behandling) {
-        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)!!
-
-        Vilkår.hentFødselshendelseVilkårsreglerRekkefølge()
-                .map { mapVilkårTilVilkårResultater(behandlingResultat, it) }
-                .firstOrNull { vilkårResultatGruppertPåPerson ->
-                    vilkårResultatGruppertPåPerson.any { it.second?.resultat == Resultat.NEI }
-                }
-                ?.let { vilkårResultatGruppertPåPerson ->
-                    val vilkårResultatSøker =
-                            vilkårResultatGruppertPåPerson.firstOrNull { it.first.type == PersonType.SØKER && it.second != null }
-                    val vilkårResultatBarn =
-                            vilkårResultatGruppertPåPerson.firstOrNull { it.first.type == PersonType.BARN && it.second != null }
-
-                    when {
-                        vilkårResultatSøker != null -> vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(
-                                vilkårResultatSøker.second!!)
-                        vilkårResultatBarn != null -> vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(
-                                vilkårResultatBarn.second!!)
-                        else -> error("Verken barn eller søker har vilkår med NEI selv om vi forventer minst et negativt resultat")
-                    }
-
-                }
-
-        stansetIAutomatiskVilkårsvurderingCounter.increment()
-    }
-
-    private fun mapVilkårTilVilkårResultater(behandlingResultat: BehandlingResultat,
-                                             vilkår: Vilkår): List<Pair<Person, VilkårResultat?>> {
-        val personer = persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.personer
-                       ?: error("Finner ikke persongrunnlag på behandling ${behandlingResultat.behandling.id}")
-
-        return personer.map { person ->
-            val personResultat = behandlingResultat.personResultater.firstOrNull { personResultat ->
-                personResultat.personIdent == person.personIdent.ident
-            }
-
-            Pair(person, personResultat?.vilkårResultater?.find { it.vilkårType == vilkår && it.resultat == Resultat.NEI })
-        }
     }
 
     private fun fødselshendelseSkalRullesTilbake(): Boolean =

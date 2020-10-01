@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.utfall.VilkårIkkeOppfyltÅrsak
@@ -68,28 +69,13 @@ class VilkårsvurderingMetrics(
         }
     }
 
-    fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkårResultat: VilkårResultat) {
-        val behandlingId = vilkårResultat.personResultat?.behandlingResultat?.behandling?.id!!
-        val personer = persongrunnlagService.hentAktiv(behandlingId)?.personer
-                       ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
-
-        val person = personer.firstOrNull { it.personIdent.ident == vilkårResultat.personResultat?.personIdent }
-                     ?: error("Finner ikke person")
-
-        logger.info("Første vilkår med feil=$vilkårResultat, på personType=${person.type}, på behandling $behandlingId")
-        secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.personIdent.ident}, på behandling $behandlingId")
-        vilkårResultat.evalueringÅrsaker.forEach { årsak ->
-            vilkårsvurderingFørsteUtfall[person.type]?.get(årsak)?.increment()
-        }
-    }
 
     fun tellMetrikker(behandlingResultat: BehandlingResultat) {
-
-        val personer = persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.personer
-                       ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)
+                             ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         behandlingResultat.personResultater.forEach { personResultat ->
-            val person = personer.firstOrNull { it.personIdent.ident == personResultat.personIdent }
+            val person = persongrunnlag.personer.firstOrNull { it.personIdent.ident == personResultat.personIdent }
                          ?: error("Finner ikke person")
 
             val negativeVilkår = personResultat.vilkårResultater.filter { vilkårResultat ->
@@ -106,6 +92,62 @@ class VilkårsvurderingMetrics(
                     vilkårsvurderingUtfall[person.type]?.get(årsak)?.increment()
                 }
             }
+        }
+
+        økTellereForStansetIAutomatiskVilkårsvurdering(behandlingResultat)
+    }
+
+    private fun økTellereForStansetIAutomatiskVilkårsvurdering(behandlingResultat: BehandlingResultat) {
+        Vilkår.hentFødselshendelseVilkårsreglerRekkefølge()
+                .map { mapVilkårTilVilkårResultater(behandlingResultat, it) }
+                .firstOrNull { vilkårResultatGruppertPåPerson ->
+                    vilkårResultatGruppertPåPerson.any { it.second?.resultat == Resultat.NEI }
+                }
+                ?.let { vilkårResultatGruppertPåPerson ->
+                    val vilkårResultatSøker =
+                            vilkårResultatGruppertPåPerson.firstOrNull { it.first.type == PersonType.SØKER && it.second != null }
+                    val vilkårResultatBarn =
+                            vilkårResultatGruppertPåPerson.firstOrNull { it.first.type == PersonType.BARN && it.second != null }
+
+                    when {
+                        vilkårResultatSøker != null -> {
+                            økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(
+                                    vilkårResultatSøker.second!!)
+                        }
+                        vilkårResultatBarn != null -> {
+                            økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(
+                                    vilkårResultatBarn.second!!)
+                        }
+                    }
+                }
+    }
+
+    private fun mapVilkårTilVilkårResultater(behandlingResultat: BehandlingResultat,
+                                             vilkår: Vilkår): List<Pair<Person, VilkårResultat?>> {
+        val personer = persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.personer
+                       ?: error("Finner ikke persongrunnlag på behandling ${behandlingResultat.behandling.id}")
+
+        return personer.map { person ->
+            val personResultat = behandlingResultat.personResultater.firstOrNull { personResultat ->
+                personResultat.personIdent == person.personIdent.ident
+            }
+
+            Pair(person, personResultat?.vilkårResultater?.find { it.vilkårType == vilkår && it.resultat == Resultat.NEI })
+        }
+    }
+
+    private fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkårResultat: VilkårResultat) {
+        val behandlingId = vilkårResultat.personResultat?.behandlingResultat?.behandling?.id!!
+        val personer = persongrunnlagService.hentAktiv(behandlingId)?.personer
+                       ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+
+        val person = personer.firstOrNull { it.personIdent.ident == vilkårResultat.personResultat?.personIdent }
+                     ?: error("Finner ikke person")
+
+        logger.info("Første vilkår med feil=$vilkårResultat, på personType=${person.type}, på behandling $behandlingId")
+        secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.personIdent.ident}, på behandling $behandlingId")
+        vilkårResultat.evalueringÅrsaker.forEach { årsak ->
+            vilkårsvurderingFørsteUtfall[person.type]?.get(årsak)?.increment()
         }
     }
 
