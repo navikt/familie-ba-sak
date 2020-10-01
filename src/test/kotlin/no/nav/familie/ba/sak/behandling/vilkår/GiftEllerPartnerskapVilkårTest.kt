@@ -18,14 +18,6 @@ class GiftEllerPartnerskapVilkårTest {
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
     }
 
-    @Test
-    fun `Gift-vilkår gir resultat KANSKJE for manuell behandling når sivilstand er uoppgitt`() {
-        val fakta = FaktaTilVilkårsvurdering(personForVurdering = barn, behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL)
-
-        val evaluering = vilkår.spesifikasjon.evaluer(fakta)
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.KANSKJE)
-    }
-
     companion object {
         val vilkår = Vilkår.GIFT_PARTNERSKAP
         val barn = tilfeldigPerson(personType = PersonType.BARN).copy(sivilstand = SIVILSTAND.UOPPGITT)

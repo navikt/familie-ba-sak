@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
-import no.nav.familie.ba.sak.behandling.vilkår.FaktaTilVilkårsvurdering
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
 
@@ -31,7 +30,8 @@ data class PersonopplysningGrunnlag(
         get() = personer.filter { it.type == PersonType.BARN }
 
     val søker: Person
-        get() = personer.singleOrNull { it.type == PersonType.SØKER } ?: error("Persongrunnlag mangler søker")
+        get() = personer.singleOrNull { it.type == PersonType.SØKER }
+                ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
 
     val annenForelder: Person?
         get() = personer.singleOrNull { it.type == PersonType.ANNENPART }

@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.nare
 
-import javax.persistence.AttributeConverter
-import javax.persistence.Converter
-
 
 interface EvalueringÅrsak {
 
@@ -17,7 +14,7 @@ interface EvalueringÅrsak {
 data class Evaluering(
         val resultat: Resultat,
         val evalueringÅrsaker: List<EvalueringÅrsak>,
-        val begrunnelse: String = "",
+        val begrunnelse: String,
         val beskrivelse: String = "",
         val identifikator: String = "",
         val operator: Operator = Operator.INGEN,
@@ -26,6 +23,7 @@ data class Evaluering(
     infix fun og(other: Evaluering) = Evaluering(
             resultat = resultat og other.resultat,
             evalueringÅrsaker = evalueringÅrsaker + other.evalueringÅrsaker,
+            begrunnelse = "($begrunnelse OG ${other.begrunnelse})",
             operator = Operator.OG,
             children = this.specOrChildren() + other.specOrChildren()
     )
@@ -33,6 +31,7 @@ data class Evaluering(
     infix fun eller(other: Evaluering) = Evaluering(
             resultat = resultat eller other.resultat,
             evalueringÅrsaker = evalueringÅrsaker + other.evalueringÅrsaker,
+            begrunnelse = "($begrunnelse ELLER ${other.begrunnelse})",
             operator = Operator.ELLER,
             children = this.specOrChildren() + other.specOrChildren()
     )
@@ -40,6 +39,7 @@ data class Evaluering(
     fun ikke() = Evaluering(
             resultat = resultat.ikke(),
             evalueringÅrsaker = evalueringÅrsaker,
+            begrunnelse = "(IKKE $begrunnelse)",
             operator = Operator.IKKE,
             children = listOf(this)
     )
@@ -49,11 +49,11 @@ data class Evaluering(
 
     companion object {
 
-        fun ja(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.JA, listOf(evalueringÅrsak))
+        fun ja(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.JA, listOf(evalueringÅrsak), evalueringÅrsak.hentBeskrivelse())
 
-        fun nei(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.NEI, listOf(evalueringÅrsak))
+        fun nei(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.NEI, listOf(evalueringÅrsak), evalueringÅrsak.hentBeskrivelse())
 
-        fun kanskje(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.KANSKJE, listOf(evalueringÅrsak))
+        fun kanskje(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.KANSKJE, listOf(evalueringÅrsak), evalueringÅrsak.hentBeskrivelse())
 
         fun evaluer(identifikator: String,
                     beskrivelse: String,
