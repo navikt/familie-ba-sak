@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkService
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -108,7 +109,12 @@ class BehandlingIntegrationTest(
         private val loggService: LoggService,
 
         @Autowired
-        private val arbeidsfordelingService: ArbeidsfordelingService
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+
+        @Autowired
+        private val saksstatistikkService: SaksstatistikkService
+
+
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -125,6 +131,7 @@ class BehandlingIntegrationTest(
                 beregningService,
                 fagsakService,
                 loggService,
+                saksstatistikkService,
                 arbeidsfordelingService)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
