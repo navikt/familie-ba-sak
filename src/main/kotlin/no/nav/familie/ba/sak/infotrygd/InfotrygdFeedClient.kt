@@ -24,10 +24,10 @@ class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") privat
     : AbstractRestClient(restOperations, "infotrygd_feed") {
 
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) =
-        sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"), infotrygdFødselhendelsesFeedDto)
+            sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"), infotrygdFødselhendelsesFeedDto)
 
     fun sendVedtakFeedTilInfotrygd(infotrygdVedtakFeedDto: InfotrygdVedtakFeedDto) =
-         sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/vedtaksmelding"), infotrygdVedtakFeedDto)
+            sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/vedtaksmelding"), infotrygdVedtakFeedDto)
 
     @Retryable(value = [IOException::class], maxAttempts = 3, backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
     private fun sendFeedTilInfotrygd(endpoint: URI, feed: Any) {
@@ -41,7 +41,7 @@ class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") privat
                 onSuccess = {
                 },
                 onFailure = {
-                    if(it is HttpClientErrorException) {
+                    if (it is HttpClientErrorException) {
                         logger.error("Http feil mot infotrygd feed: httpkode: ${it.statusCode}, feilmelding ${it.message}", it)
                     } else {
                         logger.error("Feil mot infotrygd feed; melding ${it.message}", it)
@@ -53,6 +53,7 @@ class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") privat
     }
 
     companion object {
+
         val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }
