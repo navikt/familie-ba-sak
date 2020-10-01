@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -193,31 +194,40 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)!!
 
         Vilkår.hentFødselshendelseVilkårsreglerRekkefølge()
-                .map { mapVilkårTilVilkårResultat(behandlingResultat, it.first, it.second) }
-                .firstOrNull { it?.resultat == Resultat.NEI }
-                ?.let {
-                    vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(it)
+                .map { mapVilkårTilVilkårResultater(behandlingResultat, it) }
+                .firstOrNull { vilkårResultatGruppertPåPerson ->
+                    vilkårResultatGruppertPåPerson.any { it.second?.resultat == Resultat.NEI }
+                }
+                ?.let { vilkårResultatGruppertPåPerson ->
+                    val vilkårResultatSøker =
+                            vilkårResultatGruppertPåPerson.firstOrNull { it.first.type == PersonType.SØKER && it.second != null }
+                    val vilkårResultatBarn =
+                            vilkårResultatGruppertPåPerson.firstOrNull { it.first.type == PersonType.BARN && it.second != null }
+
+                    when {
+                        vilkårResultatSøker != null -> vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(
+                                vilkårResultatSøker.second!!)
+                        vilkårResultatBarn != null -> vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(
+                                vilkårResultatBarn.second!!)
+                        else -> error("Verken barn eller søker har vilkår med NEI selv om vi forventer minst et negativt resultat")
+                    }
+
                 }
 
         stansetIAutomatiskVilkårsvurderingCounter.increment()
     }
 
-    private fun mapVilkårTilVilkårResultat(behandlingResultat: BehandlingResultat,
-                                           personType: PersonType,
-                                           vilkår: Vilkår): VilkårResultat? {
-        val personer = if (personType == PersonType.SØKER) {
-            listOf(persongrunnlagService.hentSøker(behandlingResultat.behandling))
-        } else {
-            persongrunnlagService.hentBarna(behandlingResultat.behandling)
-        }
+    private fun mapVilkårTilVilkårResultater(behandlingResultat: BehandlingResultat,
+                                             vilkår: Vilkår): List<Pair<Person, VilkårResultat?>> {
+        val personer = persongrunnlagService.hentAktiv(behandlingResultat.behandling.id)?.personer
+                       ?: error("Finner ikke persongrunnlag på behandling ${behandlingResultat.behandling.id}")
 
-        val personResultat = behandlingResultat.personResultater.firstOrNull { personResultat ->
-            personer.map { it?.personIdent?.ident }
-                    .contains(personResultat.personIdent)
-        }
+        return personer.map { person ->
+            val personResultat = behandlingResultat.personResultater.firstOrNull { personResultat ->
+                personResultat.personIdent == person.personIdent.ident
+            }
 
-        return personResultat?.vilkårResultater?.firstOrNull { vilkårResusltat ->
-            vilkårResusltat.vilkårType == vilkår && vilkårResusltat.resultat == Resultat.NEI
+            Pair(person, personResultat?.vilkårResultater?.find { it.vilkårType == vilkår && it.resultat == Resultat.NEI })
         }
     }
 

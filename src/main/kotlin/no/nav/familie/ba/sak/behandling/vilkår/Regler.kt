@@ -42,7 +42,7 @@ internal fun barnBorMedSøker(faktaTilVilkårsvurdering: FaktaTilVilkårsvurderi
 
     return when {
         erSammeAdresse(søker.bostedsadresse, barn.bostedsadresse) -> Evaluering.ja(BARNET_BOR_MED_MOR)
-        else -> Evaluering.nei(BARNET_BOR_IKKE_MED_SØKER)
+        else -> Evaluering.nei(BARNET_BOR_IKKE_MED_MOR)
     }
 }
 
@@ -53,8 +53,8 @@ internal fun bosattINorge(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering):
          * See: https://navikt.github.io/pdl/#_utflytting
          */
         faktaTilVilkårsvurdering.personForVurdering.bostedsadresse
-                ?.let { Evaluering.ja(MOR_BOR_I_RIKET) }
-        ?: Evaluering.nei(MOR_BOR_IKKE_I_RIKET)
+                ?.let { Evaluering.ja(BOR_I_RIKET) }
+        ?: Evaluering.nei(BOR_IKKE_I_RIKET)
 
 internal fun lovligOpphold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
     if (faktaTilVilkårsvurdering.behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE &&

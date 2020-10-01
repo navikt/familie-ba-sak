@@ -17,7 +17,7 @@ enum class VilkårOppfyltÅrsak(val beskrivelse: String, val vilkår: Vilkår) :
     BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP("Person er ikke gift eller har registrert partner", Vilkår.GIFT_PARTNERSKAP),
 
     // Bosatt i riket
-    MOR_BOR_I_RIKET("Mor er bosatt i riket", Vilkår.BOSATT_I_RIKET),
+    BOR_I_RIKET("Er bosatt i riket", Vilkår.BOSATT_I_RIKET),
 
     // Lovlig opphold
     AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD("Ikke separat oppholdsvurdering for barnet ved automatisk vedtak.",

@@ -11,14 +11,14 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
 
     // Bor med søker
     SØKER_ER_IKKE_MOR(beskrivelse = "Søker er ikke mor", vilkår = Vilkår.BOR_MED_SØKER),
-    BARNET_BOR_IKKE_MED_SØKER(beskrivelse = "Barnet bor ikke med mor", vilkår = Vilkår.BOR_MED_SØKER),
+    BARNET_BOR_IKKE_MED_MOR(beskrivelse = "Barnet bor ikke med mor", vilkår = Vilkår.BOR_MED_SØKER),
 
     // Gift eller partnerskap hos barn
     BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP(beskrivelse = "Person er gift eller har registrert partner",
                                        vilkår = Vilkår.GIFT_PARTNERSKAP),
 
     // Bosatt i riket
-    MOR_BOR_IKKE_I_RIKET(beskrivelse = "Mor er ikke bosatt i riket", vilkår = Vilkår.BOSATT_I_RIKET),
+    BOR_IKKE_I_RIKET(beskrivelse = "Er ikke bosatt i riket", vilkår = Vilkår.BOSATT_I_RIKET),
 
     // Lovlig opphold
     STATSBORGERSKAP_ANNEN_FORELDER_UKLART(beskrivelse = "Statsborgerskap for annen forelder kan ikke avgjøres.",

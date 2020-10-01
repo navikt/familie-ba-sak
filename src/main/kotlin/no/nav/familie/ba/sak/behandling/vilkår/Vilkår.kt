@@ -96,22 +96,13 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             }.toSet()
         }
 
-        fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Pair<PersonType, Vilkår>> {
+        fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Vilkår> {
             return listOf(
-                    //Mor bosatt i riket
-                    Pair(SØKER, BOSATT_I_RIKET),
-                    //Mor har lovlig opphold
-                    Pair(SØKER, LOVLIG_OPPHOLD),
-                    //Barnet er under 18 år
-                    Pair(BARN, UNDER_18_ÅR),
-                    //Barnet bor med søker
-                    Pair(BARN, BOR_MED_SØKER),
-                    //Barnet er ugift og har ikke inngått partnerskap
-                    Pair(BARN, GIFT_PARTNERSKAP),
-                    //Barnet er bosatt i riket
-                    Pair(BARN, BOSATT_I_RIKET),
-                    //Barnet har lovlig opphold
-                    Pair(BARN, LOVLIG_OPPHOLD),
+                    UNDER_18_ÅR,
+                    BOR_MED_SØKER,
+                    GIFT_PARTNERSKAP,
+                    BOSATT_I_RIKET,
+                    LOVLIG_OPPHOLD,
             )
         }
     }

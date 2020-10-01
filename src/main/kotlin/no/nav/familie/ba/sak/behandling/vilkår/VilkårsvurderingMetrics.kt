@@ -25,7 +25,17 @@ class VilkårsvurderingMetrics(
             PersonType.ANNENPART to "Medforelder"
     )
 
+    enum class VilkårTellerType(val navn: String) {
+        UTFALL("familie.ba.behandling.vilkaarsvurdering"),
+        FØRSTEUTFALL("familie.ba.behandling.vilkaarsvurdering.foerstutfall")
+    }
+
     init {
+        initVilkårMetrikker(VilkårTellerType.UTFALL, vilkårsvurderingUtfall)
+        initVilkårMetrikker(VilkårTellerType.FØRSTEUTFALL, vilkårsvurderingFørsteUtfall)
+    }
+
+    fun initVilkårMetrikker(vilkårTellerType: VilkårTellerType, utfallMap: MutableMap<PersonType, Map<String, Counter>>) {
         PersonType.values().forEach { personType ->
             val vilkårUtfallMap = mutableMapOf<String, Counter>()
             listOf(Pair(Resultat.NEI, VilkårIkkeOppfyltÅrsak.values()),
@@ -41,7 +51,7 @@ class VilkårsvurderingMetrics(
 
                                     if (vilkår.parterDetteGjelderFor.contains(personType)) {
                                         vilkårUtfallMap[årsak.toString()] =
-                                                Metrics.counter("familie.ba.behandling.vilkaarsvurdering",
+                                                Metrics.counter(vilkårTellerType.navn,
                                                                 "vilkaar",
                                                                 årsak.hentIdentifikator(),
                                                                 "resultat",
@@ -54,8 +64,7 @@ class VilkårsvurderingMetrics(
                                 }
                     }
 
-            vilkårsvurderingUtfall[personType] = vilkårUtfallMap
-            vilkårsvurderingFørsteUtfall[personType] = vilkårUtfallMap
+            utfallMap[personType] = vilkårUtfallMap
         }
     }
 
@@ -67,7 +76,8 @@ class VilkårsvurderingMetrics(
         val person = personer.firstOrNull { it.personIdent.ident == vilkårResultat.personResultat?.personIdent }
                      ?: error("Finner ikke person")
 
-        logger.info("Første vilkår med feil=$vilkårResultat, på behandling $behandlingId")
+        logger.info("Første vilkår med feil=$vilkårResultat, på personType=${person.type}, på behandling $behandlingId")
+        secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.personIdent.ident}, på behandling $behandlingId")
         vilkårResultat.evalueringÅrsaker.forEach { årsak ->
             vilkårsvurderingFørsteUtfall[person.type]?.get(årsak)?.increment()
         }
@@ -82,12 +92,14 @@ class VilkårsvurderingMetrics(
             val person = personer.firstOrNull { it.personIdent.ident == personResultat.personIdent }
                          ?: error("Finner ikke person")
 
-            val neiÅrsaker = personResultat.vilkårResultater.filter { vilkårResultat ->
+            val negativeVilkår = personResultat.vilkårResultater.filter { vilkårResultat ->
                 vilkårResultat.resultat == Resultat.NEI
-            }.map { it.evalueringÅrsaker }.flatten()
+            }
 
-            logger.info("Årsaker til NEI for ${person.type}=$neiÅrsaker på behandling ${behandlingResultat.behandling.id}")
-            secureLogger.info("Årsaker til NEI for ${person.personIdent.ident}=$neiÅrsaker på behandling ${behandlingResultat.behandling.id}")
+            if (negativeVilkår.isNotEmpty()) {
+                logger.info("Behandling: ${behandlingResultat.behandling.id}, personType=${person.type}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
+                secureLogger.info("Behandling: ${behandlingResultat.behandling.id}, person=${person.personIdent.ident}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
+            }
 
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 vilkårResultat.evalueringÅrsaker.forEach { årsak ->
