@@ -120,7 +120,8 @@ class FagsakService(
         return behandlinger.map { behandling ->
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
-            val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            val arbeidsfordelingPåBehandling =
+                    arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
                 val andelerTilkjentYtelse =
@@ -136,6 +137,7 @@ class FagsakService(
             RestBehandling(
                     aktiv = behandling.aktiv,
                     arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling.toRestArbeidsfordelingPåBehandling(),
+                    opprinnelse = behandling.opprinnelse,
                     behandlingId = behandling.id,
                     vedtakForBehandling = restVedtakForBehandling,
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
