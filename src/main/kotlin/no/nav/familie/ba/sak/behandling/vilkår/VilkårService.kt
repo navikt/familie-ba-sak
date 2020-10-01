@@ -142,7 +142,9 @@ class VilkårService(
                 personResultater = lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
             }
 
-            vilkårsvurderingMetrics.tellMetrikker(behandlingResultat)
+            if (førstegangskjøringAvVilkårsvurdering(behandlingResultat)) {
+                vilkårsvurderingMetrics.tellMetrikker(behandlingResultat)
+            }
         } else {
             behandlingResultat.apply {
                 personResultater = lagManuellVilkårsvurdering(behandlingResultat = behandlingResultat)
@@ -247,12 +249,6 @@ class VilkårService(
             val tom: LocalDate? =
                     if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
 
-            /*if (førstegangskjøringAvVilkårsvurdering(personResultat)) {
-                vilkårsvurderingMetrics.økTellereForEvaluering(evaluering = child,
-                                                               personType = person.type,
-                                                               behandlingOpprinnelse = personResultat.behandlingResultat.behandling.opprinnelse)
-            }*/
-
             var begrunnelse = "Vurdert og satt automatisk"
 
             if (child.resultat == Resultat.NEI || child.resultat == Resultat.KANSKJE) {
@@ -285,9 +281,9 @@ class VilkårService(
         }.toSortedSet(PersonResultat.comparator)
     }
 
-    private fun førstegangskjøringAvVilkårsvurdering(personResultat: PersonResultat): Boolean {
+    private fun førstegangskjøringAvVilkårsvurdering(behandlingResultat: BehandlingResultat): Boolean {
         return behandlingResultatService
-                .hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id) == null
+                .hentAktivForBehandling(behandlingId = behandlingResultat.behandling.id) == null
     }
 
     companion object {

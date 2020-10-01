@@ -28,12 +28,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                         søkerErMor(this) og barnBorMedSøker(this)
                     }
             ),
-            /*og Spesifikasjon(beskrivelse = "Bor med søker: har eksakt en søker",
-                             identifikator = "BOR_MED_SØKER:EN_SØKER",
-                             implementasjon = { harEnSøker(this) })
-            og Spesifikasjon(beskrivelse = "Bor med søker: søker må være mor",
-                             identifikator = "BOR_MED_SØKER:SØKER_ER_MOR",
-                             implementasjon = { søkerErMor(this) })*/
             begrunnelser = mapOf(
                     BehandlingResultatType.INNVILGET
                             to
