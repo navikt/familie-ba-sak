@@ -23,7 +23,7 @@ data class RestBeregningDetalj(
 
 data class BeregningEndring(
         val type: BeregningEndringType,
-        val skalVises: Boolean = true
+        val trengerBegrunnelse: Boolean = true
 )
 
 enum class BeregningEndringType {

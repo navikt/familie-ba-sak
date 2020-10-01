@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.erSenereEnnNesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -137,7 +138,8 @@ object TilkjentYtelseUtils {
 
         val segmenter = utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling)
         val segmenterFraForrigeTilkjentYtelse =
-                if (tilkjentYtelseForForrigeBehandling !== null) utledSegmenterFraTilkjentYtelse(tilkjentYtelseForForrigeBehandling) else emptyList()
+                if (tilkjentYtelseForForrigeBehandling !== null) utledSegmenterFraTilkjentYtelse(
+                        tilkjentYtelseForForrigeBehandling) else emptyList()
 
         return segmenter.map { segment ->
             val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
@@ -150,10 +152,15 @@ object TilkjentYtelseUtils {
                                         endringISegment =
                                         when {
                                             segmenterFraForrigeTilkjentYtelse.any { it == segment } ->
-                                                //TODO: Alle stedene vi lager BeregningEndring( må vi legge til pm skal vises
-                                                if (segment.erSatsendring()) BeregningEndring(BeregningEndringType.UENDRET_SATS) else BeregningEndring(BeregningEndringType.UENDRET)
+                                                if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.UENDRET_SATS,
+                                                                                              trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
+                                                else BeregningEndring(type = BeregningEndringType.UENDRET,
+                                                                      trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
                                             else ->
-                                                if (segment.erSatsendring()) BeregningEndring(BeregningEndringType.ENDRET_SATS) else BeregningEndring(BeregningEndringType.ENDRET)
+                                                if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.ENDRET_SATS,
+                                                                                              trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
+                                                else BeregningEndring(type = BeregningEndringType.ENDRET,
+                                                                      trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
                                         })
         }
     }

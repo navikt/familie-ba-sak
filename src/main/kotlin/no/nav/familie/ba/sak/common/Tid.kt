@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.common
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import java.time.LocalDate
+import java.time.LocalDate.now
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -21,6 +22,11 @@ fun LocalDate.sisteDagIForrigeMåned(): LocalDate {
     return sammeDagForrigeMåned.sisteDagIMåned()
 }
 
+fun LocalDate.sisteDagINesteMåned(): LocalDate {
+    val sammeDagNesteMåned = this.plusMonths(1)
+    return sammeDagNesteMåned.sisteDagIMåned()
+}
+
 fun senesteDatoAv(dato1: LocalDate, dato2: LocalDate): LocalDate {
     return if (dato1.isSameOrAfter(dato2)) dato1 else dato2
 }
@@ -32,14 +38,16 @@ fun LocalDate.sisteDagIMåned(): LocalDate {
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
 fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
 
+fun LocalDate.erSenereEnnNesteMåned() : Boolean = this.isAfter(now().sisteDagINesteMåned())
+
 fun LocalDate.erFraInneværendeMåned(): Boolean {
-    val førsteDatoInneværendeMåned = LocalDate.now().withDayOfMonth(1)
+    val førsteDatoInneværendeMåned = now().withDayOfMonth(1)
     val førsteDatoNesteMåned = førsteDatoInneværendeMåned.plusMonths(1)
     return this.isSameOrAfter(førsteDatoInneværendeMåned) && isBefore(førsteDatoNesteMåned)
 }
 
 fun LocalDate.erFraInneværendeEllerForrigeMåned(): Boolean {
-    val førsteDatoForrigeMåned = LocalDate.now().withDayOfMonth(1).minusMonths(1)
+    val førsteDatoForrigeMåned = now().withDayOfMonth(1).minusMonths(1)
     val førsteDatoNesteMåned = førsteDatoForrigeMåned.plusMonths(2)
     return this.isSameOrAfter(førsteDatoForrigeMåned) && isBefore(førsteDatoNesteMåned)
 }
