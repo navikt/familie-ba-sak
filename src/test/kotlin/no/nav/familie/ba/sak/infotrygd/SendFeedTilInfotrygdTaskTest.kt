@@ -22,7 +22,7 @@ class SendFeedTilInfotrygdTaskTest {
 
         val infotrygdFeedDto = objectMapper.readValue(testTask.payload, InfotrygdFødselhendelsesFeedTaskDto::class.java)
 
-        Assertions.assertEquals(fnrBarn, infotrygdFeedDto.fnrBarn)
+        Assertions.assertEquals(listOf(fnrBarn), infotrygdFeedDto.fnrBarn)
     }
 
 }
