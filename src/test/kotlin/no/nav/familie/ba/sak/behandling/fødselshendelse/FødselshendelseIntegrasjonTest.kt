@@ -323,7 +323,7 @@ class MockConfiguration {
 
         every {
             personopplysningerServiceMock.hentStatsborgerskap(Ident(morsfnr[2]))
-        } returns listOf(Statsborgerskap(land = "EØS", gyldigFraOgMed = now.minusYears(20), gyldigTilOgMed = null))
+        } returns listOf(Statsborgerskap(land = "USA", gyldigFraOgMed = now.minusYears(20), gyldigTilOgMed = null))
 
         every {
             personopplysningerServiceMock.hentOpphold(morsfnr[0])
