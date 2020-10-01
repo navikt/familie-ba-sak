@@ -26,19 +26,18 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                     private val stsRestClient: StsRestClient)
     : AbstractRestClient(restTemplate, "pdl.personinfo") {
 
-    private val pdlUri = UriUtil.uri(pdlBaseUrl,
-                                     PATH_GRAPHQL)
+    protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
 
     private val hentIdenterQuery = hentGraphqlQuery("hentIdenter")
 
-    fun hentPerson(personIdent: String, tema: String, personInfoQuery: PersonInfoQuery): PersonInfo {
+    fun hentPerson(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
 
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = personInfoQuery.graphQL)
         try {
             val response = postForEntity<PdlHentPersonResponse>(pdlUri,
                                                                 pdlPersonRequest,
-                                                                httpHeaders(tema))
+                                                                httpHeaders())
             if (!response.harFeil()) {
                 return Result.runCatching {
                     val familierelasjoner: Set<Familierelasjon> =
@@ -85,21 +84,12 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         }
     }
 
-    private fun httpHeaders(tema: String): HttpHeaders {
-        return HttpHeaders().apply {
-            contentType = MediaType.APPLICATION_JSON
-            accept = listOf(MediaType.APPLICATION_JSON)
-            add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
-            add("Tema", tema)
-        }
-    }
-
-    fun hentIdenter(personIdent: String, tema: String): PdlHentIdenterResponse {
+    fun hentIdenter(personIdent: String): PdlHentIdenterResponse {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = hentIdenterQuery)
         val response = postForEntity<PdlHentIdenterResponse>(pdlUri,
                                                              pdlPersonRequest,
-                                                             httpHeaders(tema))
+                                                             httpHeaders())
 
         if (!response.harFeil()) return response
         throw Feil(message = "Fant ikke identer for person: ${response.errorMessages()}",
@@ -107,11 +97,11 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-    fun hentDødsfall(personIdent: String, tema: String): List<Doedsfall> {
+    fun hentDødsfall(personIdent: String): List<Doedsfall> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = hentGraphqlQuery("doedsfall"))
         val response = try {
-            postForEntity<PdlDødsfallResponse>(pdlUri, pdlPersonRequest, httpHeaders(tema))
+            postForEntity<PdlDødsfallResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
             throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
                        frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
@@ -126,11 +116,11 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
     }
 
-    fun hentVergemaalEllerFremtidsfullmakt(personIdent: String, tema: String): List<VergemaalEllerFremtidsfullmakt> {
+    fun hentVergemaalEllerFremtidsfullmakt(personIdent: String): List<VergemaalEllerFremtidsfullmakt> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = hentGraphqlQuery("verge"))
         val response = try {
-            postForEntity<PdlVergeResponse>(pdlUri, pdlPersonRequest, httpHeaders(tema))
+            postForEntity<PdlVergeResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
             throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
                        frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
@@ -144,12 +134,12 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-    fun hentStatsborgerskap(ident: String, tema: String): List<Statsborgerskap> {
+    fun hentStatsborgerskap(ident: String): List<Statsborgerskap> {
 
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
                                                 query = hentGraphqlQuery("statsborgerskap"))
         val response = try {
-            postForEntity<PdlStatsborgerskapResponse>(pdlUri, pdlPersonRequest, httpHeaders(tema))
+            postForEntity<PdlStatsborgerskapResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
             throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
                        frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
@@ -163,11 +153,11 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-    fun hentOpphold(ident: String, tema: String): List<Opphold> {
+    fun hentOpphold(ident: String): List<Opphold> {
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
                                                 query = hentGraphqlQuery("opphold"))
         val response = try {
-            postForEntity<PdlOppholdResponse>(pdlUri, pdlPersonRequest, httpHeaders(tema))
+            postForEntity<PdlOppholdResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
             throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
                        frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
@@ -193,7 +183,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
                                                 query = hentGraphqlQuery("bostedsadresse-utenlandsk"))
         val response = try {
-            postForEntity<PdlUtenlandskAdressseResponse>(pdlUri, pdlPersonRequest, httpHeaders("BAR"))
+            postForEntity<PdlUtenlandskAdressseResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
             throw Feil(message = "Feil ved oppslag på utenlandsk bostedsadresse. Gav feil: ${
                 NestedExceptionUtils.getMostSpecificCause(e).message
@@ -203,7 +193,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                        throwable = e)
         }
 
-        if (!response.harFeil()) return response.data?.person?.bostedsadresse?.first()?.utenlandskAdresse
+        if (!response.harFeil()) return response.data?.person?.bostedsadresse?.firstOrNull()?.utenlandskAdresse
         throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
                    frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
                    httpStatus = HttpStatus.NOT_FOUND)
@@ -214,7 +204,7 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
         val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
                                                 query = hentGraphqlQuery("hentBostedsadresseperioder"))
         val response = try {
-            postForEntity<PdlBostedsadresseperioderResponse>(pdlUri, pdlPersonRequest, httpHeaders("BAR"))
+            postForEntity<PdlBostedsadresseperioderResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
             throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
                        frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
@@ -239,9 +229,18 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
                    httpStatus = HttpStatus.NOT_FOUND)
     }
 
-    companion object {
+    protected fun httpHeaders(): HttpHeaders {
+        return HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+            accept = listOf(MediaType.APPLICATION_JSON)
+            add("Nav-Consumer-Token", "Bearer ${stsRestClient.systemOIDCToken}")
+            add("Tema", TEMA)
+        }
+    }
 
+    companion object {
         private const val PATH_GRAPHQL = "graphql"
+        private const val TEMA = "BAR"
         val LOG = LoggerFactory.getLogger(PdlRestClient::class.java)
     }
 }
@@ -251,7 +250,7 @@ enum class PersonInfoQuery(val graphQL: String) {
     MED_RELASJONER(hentGraphqlQuery("hentperson-med-relasjoner"))
 }
 
-private fun hentGraphqlQuery(pdlResource: String): String {
+fun hentGraphqlQuery(pdlResource: String): String {
     return PersonInfoQuery::class.java.getResource("/pdl/$pdlResource.graphql").readText().graphqlCompatible()
 }
 

@@ -74,7 +74,7 @@ funksjonsbrytere:
     uri: http://dummy/api/
     cluster: localhost
     applicationName: familie-ba-sak
-  vedtak:
+  kafka:
     producer:
       enabled: false
 
@@ -102,6 +102,8 @@ STS_URL: "dummy"
 PDL_URL: "dummy"
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
+
+retry.backoff.delay: 5
 
 #Unleash
 UNLEASH_API_URL: http://localhost

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.PubliserVedtakTask.Companion.TASK_STEP_TYPE
-import no.nav.familie.ba.sak.vedtak.producer.VedtakProducer
+import no.nav.familie.ba.sak.vedtak.producer.KafkaProducer
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -14,14 +14,14 @@ import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Publiser vedtak til kafka", maxAntallFeil = 1)
-class PubliserVedtakTask(val vedtakProducer: VedtakProducer,
+class PubliserVedtakTask(val kafkaProducer: KafkaProducer,
                          val stønadsstatistikkService: StønadsstatistikkService,
                          val taskRepository: TaskRepository
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val vedtakDVH = stønadsstatistikkService.hentVedtak(task.payload.toLong())
-        task.metadata["offset"] = vedtakProducer.sendMessage(vedtakDVH).toString()
+        task.metadata["offset"] = kafkaProducer.sendMessage(vedtakDVH).toString()
 
         taskRepository.save(task)
     }
