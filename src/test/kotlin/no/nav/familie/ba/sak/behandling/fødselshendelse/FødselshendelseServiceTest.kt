@@ -259,10 +259,6 @@ class FødselshendelseServiceTest {
 
         mockkObject(OpprettOppgaveTask.Companion)
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
-
-        every {
-            vilkårsvurderingMetricsMock.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any())
-        } just runs
     }
 
     companion object {
