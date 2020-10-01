@@ -44,10 +44,12 @@ internal fun morHarIkkeVerge(fakta: Fakta): Evaluering {
 internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(fakta: Fakta): Evaluering {
     val dagIMånedenForDagensDato = fakta.dagensDato.dayOfMonth
     return when {
-        dagIMånedenForDagensDato < 21 && !fakta.barnaFraHendelse.any { it.fødselsdato.erFraInneværendeEllerForrigeMåned() } ->
-            Evaluering.nei("Saken medfører etterbetaling.")
-        dagIMånedenForDagensDato >= 21 && !fakta.barnaFraHendelse.any { it.fødselsdato.erFraInneværendeMåned() } ->
-            Evaluering.nei("Saken medfører etterbetaling.")
+        dagIMånedenForDagensDato < 21 && !fakta.barnaFraHendelse.all {
+            it.fødselsdato.erFraInneværendeEllerForrigeMåned(fakta.dagensDato)
+        } -> Evaluering.nei("Saken medfører etterbetaling.")
+        dagIMånedenForDagensDato >= 21 && !fakta.barnaFraHendelse.all {
+            it.fødselsdato.erFraInneværendeMåned(fakta.dagensDato)
+        } -> Evaluering.nei("Saken medfører etterbetaling.")
         else -> Evaluering.ja("Saken medfører ikke etterbetaling.")
     }
 }
