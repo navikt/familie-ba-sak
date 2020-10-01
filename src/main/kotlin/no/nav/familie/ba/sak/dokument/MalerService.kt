@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -51,7 +52,8 @@ class MalerService(
         return MalMedData(
                 mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap,
                                                          behandlingResultatType,
-                                                         vedtak.behandling.opprinnelse),
+                                                         vedtak.behandling.opprinnelse,
+                                                         vedtak.behandling.type),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
@@ -182,13 +184,19 @@ class MalerService(
 
         fun malNavnForMedlemskapOgResultatType(medlemskap: Medlemskap?,
                                                resultatType: BehandlingResultatType,
-                                               opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL): String {
-            if (opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+                                               behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL,
+                                               behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): String {
+            var malNavn = if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
                 return "${resultatType.brevMal}-autovedtak"
-            }
-            return when (medlemskap) {
+            } else when (medlemskap) {
                 Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-tredjelandsborger"
                 else -> resultatType.brevMal
+            }
+
+            return when (behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING ->
+                    malNavn
+                else -> "${malNavn}-${behandlingType.toString().toLowerCase()}"
             }
         }
     }
