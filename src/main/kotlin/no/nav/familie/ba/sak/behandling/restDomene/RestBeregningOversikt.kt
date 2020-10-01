@@ -21,7 +21,12 @@ data class RestBeregningDetalj(
         val utbetaltPerMnd: Int,
 )
 
-enum class BeregningEndring {
+data class BeregningEndring(
+        val type: BeregningEndringType,
+        val skalVises: Boolean = true
+)
+
+enum class BeregningEndringType {
     ENDRET,
     ENDRET_SATS, // Skal trigges som vanlig endring, men med satt begrunnelse
     UENDRET,

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.beregning
 
-import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndring
+import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
 import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -64,8 +64,8 @@ internal class TilkjentYtelseUtilsTest {
                 personopplysningGrunnlag = personopplysningsgrunnlag,
                 tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse)
                 .sortedBy { it.periodeFom }
-        assertEquals(BeregningEndring.UENDRET, oversikt[0].endring)
-        assertEquals(BeregningEndring.UENDRET_SATS, oversikt[1].endring)
+        assertEquals(BeregningEndringType.UENDRET, oversikt[0].endring.type)
+        assertEquals(BeregningEndringType.UENDRET_SATS, oversikt[1].endring.type)
     }
 
     @Test
@@ -94,7 +94,7 @@ internal class TilkjentYtelseUtilsTest {
                 personopplysningGrunnlag = personopplysningsgrunnlag,
                 tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse)
                 .sortedBy { it.periodeFom }
-        assertEquals(BeregningEndring.ENDRET, oversikt[0].endring)
-        assertEquals(BeregningEndring.ENDRET_SATS, oversikt[1].endring)
+        assertEquals(BeregningEndringType.ENDRET, oversikt[0].endring.type)
+        assertEquals(BeregningEndringType.ENDRET_SATS, oversikt[1].endring.type)
     }
 }

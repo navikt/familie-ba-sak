@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
@@ -35,7 +36,7 @@ class MalerService(
         private val persongrunnlagService: PersongrunnlagService,
         private val norg2RestClient: Norg2RestClient,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val søknadGrunnlagService: SøknadGrunnlagService
+        private val søknadGrunnlagService: SøknadGrunnlagService,
 ) {
 
     fun mapTilVedtakBrevfelter(vedtak: Vedtak,
@@ -45,12 +46,15 @@ class MalerService(
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
         val statsborgerskap =
-                persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap ?: error("Kan ikke hente statsborgerskap for søker på behandling")
+                persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap
+                ?: error("Kan ikke hente statsborgerskap for søker på behandling")
         val medlemskap = finnNåværendeMedlemskap(statsborgerskap)
         val sterkesteMedlemskap = finnSterkesteMedlemskap(medlemskap)
 
         return MalMedData(
-                mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap, behandlingResultatType, vedtak.behandling.opprinnelse),
+                mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap,
+                                                         behandlingResultatType,
+                                                         vedtak.behandling.opprinnelse),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
@@ -62,7 +66,8 @@ class MalerService(
 
     fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
         val enhetskode = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
-        val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
+        val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt
+                          ?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
 
         val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
                 soknadDato = søknadsDato.toLocalDate().tilDagMånedÅr().toString(),
@@ -87,9 +92,11 @@ class MalerService(
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
-
-        val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelseForBehandling = tilkjentYtelse,
-                                                                          personopplysningGrunnlag = personopplysningGrunnlag)
+        val forrigeTilkjentYtelse = beregningService.hentSisteTilkjentYtelseFørBehandling(behandling = vedtak.behandling)
+        val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(
+                tilkjentYtelseForBehandling = tilkjentYtelse,
+                tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse,
+                personopplysningGrunnlag = personopplysningGrunnlag)
                 .sortedBy { it.periodeFom }
 
         val enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn

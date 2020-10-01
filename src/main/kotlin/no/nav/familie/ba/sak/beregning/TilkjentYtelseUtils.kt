@@ -3,10 +3,7 @@ package no.nav.familie.ba.sak.beregning
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndring
-import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
-import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
-import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
+import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -153,9 +150,10 @@ object TilkjentYtelseUtils {
                                         endringISegment =
                                         when {
                                             segmenterFraForrigeTilkjentYtelse.any { it == segment } ->
-                                                if (segment.erSatsendring()) BeregningEndring.UENDRET_SATS else BeregningEndring.UENDRET
+                                                //TODO: Alle stedene vi lager BeregningEndring( må vi legge til pm skal vises
+                                                if (segment.erSatsendring()) BeregningEndring(BeregningEndringType.UENDRET_SATS) else BeregningEndring(BeregningEndringType.UENDRET)
                                             else ->
-                                                if (segment.erSatsendring()) BeregningEndring.ENDRET_SATS else BeregningEndring.ENDRET
+                                                if (segment.erSatsendring()) BeregningEndring(BeregningEndringType.ENDRET_SATS) else BeregningEndring(BeregningEndringType.ENDRET)
                                         })
         }
     }
@@ -174,7 +172,7 @@ object TilkjentYtelseUtils {
                                             andelerForSegment: List<AndelTilkjentYtelse>,
                                             behandling: Behandling,
                                             personopplysningGrunnlag: PersonopplysningGrunnlag,
-                                            endringISegment: BeregningEndring = BeregningEndring.ENDRET): RestBeregningOversikt =
+                                            endringISegment: BeregningEndring = BeregningEndring(BeregningEndringType.ENDRET)): RestBeregningOversikt =
             RestBeregningOversikt(
                     periodeFom = segment.fom,
                     periodeTom = segment.tom,

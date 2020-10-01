@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.dokument
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
@@ -82,6 +83,8 @@ class MalerServiceTest {
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns tilkjentYtelse.copy(
                 andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
+        every { beregningService.hentSisteTilkjentYtelseFørBehandling(any()) } returns
+                tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelse))
 
         val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultatType.INNVILGET)
 
@@ -124,6 +127,8 @@ class MalerServiceTest {
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker.first()
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
+                tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
+        every { beregningService.hentSisteTilkjentYtelseFørBehandling(any()) } returns
                 tilkjentYtelse.copy(andelerTilkjentYtelse = mutableSetOf(andelTilkjentYtelseBarn1, andelTilkjentYtelseBarn2))
 
         val brevfelter = malerService.mapTilVedtakBrevfelter(vedtak, BehandlingResultatType.INNVILGET)

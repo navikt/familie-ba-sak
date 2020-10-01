@@ -10,10 +10,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndring
-import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
@@ -147,7 +144,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     fun leggTilInitielleUtbetalingsbegrunnelser(fagsakId: Long, behandling: Behandling) {
         slettUtbetalingBegrunnelser(behandling.id)
-        val forrigeBehandling = behandlingService.hentForrigeBehandling(fagsakId, behandling);
+        val forrigeBehandling = behandlingService.hentForrigeBehandling(fagsakId, behandling)
         val forrigeTilkjentYtelse =
                 if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(forrigeBehandling.id) else null
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
@@ -158,8 +155,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse,
                 personopplysningGrunnlag = personopplysningsGrunnlag)
 
-        val uendrede = beregningsoversikt.filter { it.endring == BeregningEndring.UENDRET || it.endring == BeregningEndring.UENDRET_SATS }.map { Periode(it.periodeFom, it.periodeTom) }
-        val satsendringer = beregningsoversikt.filter { it.endring == BeregningEndring.ENDRET_SATS }.map { Periode(it.periodeFom, it.periodeTom) }
+        val uendrede = beregningsoversikt.filter { it.endring.type == BeregningEndringType.UENDRET || it.endring.type == BeregningEndringType.UENDRET_SATS }.map { Periode(it.periodeFom, it.periodeTom) }
+        val satsendringer = beregningsoversikt.filter { it.endring.type == BeregningEndringType.ENDRET_SATS }.map { Periode(it.periodeFom, it.periodeTom) }
         leggTilUtbetalingsbegrunnelseforuendrede(fagsakId, uendrede)
         leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId, satsendringer)
     }
