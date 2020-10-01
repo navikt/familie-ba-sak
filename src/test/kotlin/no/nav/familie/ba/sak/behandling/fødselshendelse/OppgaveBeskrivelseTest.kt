@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.*
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -15,13 +17,13 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.nare.Evaluering
+import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.nare.Spesifikasjon
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.nare.core.evaluations.Evaluering
-import no.nav.nare.core.evaluations.Resultat
-import no.nav.nare.core.specifications.Spesifikasjon
 import org.junit.Assert
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -168,20 +170,20 @@ class OppgaveBeskrivelseTest {
 
         private fun barnetLever(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.barnetLever)
-                Evaluering.ja("Det er ikke registrert dødsdato på barnet.")
-            else Evaluering.nei("Det er registrert dødsdato på barnet.")
+                Evaluering.ja(BARNET_LEVER)
+            else Evaluering.nei(BARNET_LEVER_IKKE)
         }
 
         private fun morLever(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.morLever)
-                Evaluering.ja("Det er ikke registrert dødsdato på mor.")
-            else Evaluering.nei("Det er registrert dødsdato på mor.")
+                Evaluering.ja(MOR_LEVER)
+            else Evaluering.nei(MOR_LEVER_IKKE)
         }
 
         private fun morErOver18år(input: TestFaktaForFiltreringsregler): Evaluering {
             return if (input.morErOver18År)
-                Evaluering.ja("Mor er over 18 år.")
-            else Evaluering.nei("Mor er under 18 år.")
+                Evaluering.ja(MOR_ER_OVER_18_ÅR)
+            else Evaluering.nei(MOR_ER_UNDER_18_ÅR)
         }
 
         val testSpesifikasjoner = Spesifikasjon<TestFaktaForFiltreringsregler>(

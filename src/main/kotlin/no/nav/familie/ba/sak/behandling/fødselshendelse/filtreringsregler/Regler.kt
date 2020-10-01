@@ -1,13 +1,16 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.*
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.*
 import no.nav.familie.ba.sak.common.erFraInneværendeEllerForrigeMåned
 import no.nav.familie.ba.sak.common.erFraInneværendeMåned
-import no.nav.nare.core.evaluations.Evaluering
+import no.nav.familie.ba.sak.nare.Evaluering
 
 internal fun morErOver18år(fakta: Fakta): Evaluering {
     return when (fakta.dagensDato.isAfter(fakta.mor.fødselsdato.plusYears(18))) {
-        true -> Evaluering.ja("Mor er over 18 år.")
-        false -> Evaluering.nei("Mor er under 18 år.")
+        true -> Evaluering.ja(MOR_ER_OVER_18_ÅR
+        )
+        false -> Evaluering.nei(MOR_ER_UNDER_18_ÅR)
     }
 }
 
@@ -15,29 +18,29 @@ internal fun merEnn5mndSidenForrigeBarn(fakta: Fakta): Evaluering {
     return when (fakta.barnaFraHendelse.all { barnFraHendelse ->
         fakta.restenAvBarna.all { barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) }
     }) {
-        true -> Evaluering.ja("Det har gått mer enn fem måneder siden forrige barn ble født.")
-        false -> Evaluering.nei("Det har gått mindre enn fem måneder siden forrige barn ble født.")
+        true -> Evaluering.ja(MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL)
+        false -> Evaluering.nei(MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL)
     }
 }
 
 internal fun morLever(fakta: Fakta): Evaluering {
     return when (fakta.morLever) {
-        true -> Evaluering.ja("Det er ikke registrert dødsdato på mor.")
-        false -> Evaluering.nei("Det er registrert dødsdato på mor.")
+        true -> Evaluering.ja(MOR_LEVER)
+        false -> Evaluering.nei(MOR_LEVER_IKKE)
     }
 }
 
 internal fun barnetLever(fakta: Fakta): Evaluering {
     return when (fakta.barnetLever) {
-        true -> Evaluering.ja("Det er ikke registrert dødsdato på barnet.")
-        false -> Evaluering.nei("Det er registrert dødsdato på barnet.")
+        true -> Evaluering.ja(BARNET_LEVER)
+        false -> Evaluering.nei(BARNET_LEVER_IKKE)
     }
 }
 
 internal fun morHarIkkeVerge(fakta: Fakta): Evaluering {
     return when (!fakta.morHarVerge) {
-        true -> Evaluering.ja("Mor er myndig.")
-        false -> Evaluering.nei("Mor er umyndig.")
+        true -> Evaluering.ja(MOR_ER_MYNDIG)
+        false -> Evaluering.nei(MOR_ER_UMYNDIG)
     }
 }
 
@@ -45,9 +48,9 @@ internal fun barnetsFødselsdatoInnebærerIkkeEtterbetaling(fakta: Fakta): Evalu
     val dagIMånedenForDagensDato = fakta.dagensDato.dayOfMonth
     return when {
         dagIMånedenForDagensDato < 21 && !fakta.barnaFraHendelse.any { it.fødselsdato.erFraInneværendeEllerForrigeMåned() } ->
-            Evaluering.nei("Saken medfører etterbetaling.")
+            Evaluering.nei(SAKEN_MEDFØRER_ETTERBETALING)
         dagIMånedenForDagensDato >= 21 && !fakta.barnaFraHendelse.any { it.fødselsdato.erFraInneværendeMåned() } ->
-            Evaluering.nei("Saken medfører etterbetaling.")
-        else -> Evaluering.ja("Saken medfører ikke etterbetaling.")
+            Evaluering.nei(SAKEN_MEDFØRER_ETTERBETALING)
+        else -> Evaluering.ja(SAKEN_MEDFØRER_IKKE_ETTERBETALING)
     }
 }

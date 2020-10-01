@@ -9,6 +9,9 @@ object RessursUtils {
     private val LOG = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
+    fun <T> unauthorized(errorMessage: String): ResponseEntity<Ressurs<T>> =
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Ressurs.failure(errorMessage))
+
     fun <T> notFound(errorMessage: String): ResponseEntity<Ressurs<T>> =
             errorResponse(HttpStatus.NOT_FOUND, errorMessage, null)
 

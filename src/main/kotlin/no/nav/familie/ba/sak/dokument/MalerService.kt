@@ -152,7 +152,7 @@ class MalerService(
                                      enhet: String): String {
         val barnaSortert = personopplysningGrunnlag.barna.sortedByDescending { it.fødselsdato }
         val etterbetalingsbeløp = etterbetalingsbeløpFraSimulering().takeIf { it > 0 }
-        val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker[0].navn,
+        val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker.navn,
                                                fodselsnummer = vedtak.behandling.fagsak.hentAktivIdent().ident,
                                                fodselsdato = Utils.slåSammen(barnaSortert.map { it.fødselsdato.tilKortString() }),
                                                belop = Utils.formaterBeløp(TilkjentYtelseUtils.beregnNåværendeBeløp(

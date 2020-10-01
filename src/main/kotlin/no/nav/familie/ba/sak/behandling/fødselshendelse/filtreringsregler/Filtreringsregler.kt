@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 
-import no.nav.nare.core.specifications.Spesifikasjon
+import no.nav.familie.ba.sak.nare.Spesifikasjon
 
-// Rekkefølgen på reglene er vesentlig, og brukes når man finner riktig begrunnelse
-// i forbindelse med opprettelse av oppgave.
+
+/**
+ * Rekkefølgen på reglene er vesentlig, og brukes når man finner riktig begrunnelse
+ * i forbindelse med opprettelse av oppgave.
+ */
 enum class Filtreringsregler(val spesifikasjon: Spesifikasjon<Fakta>) {
 
     BARNET_LEVER(Spesifikasjon(

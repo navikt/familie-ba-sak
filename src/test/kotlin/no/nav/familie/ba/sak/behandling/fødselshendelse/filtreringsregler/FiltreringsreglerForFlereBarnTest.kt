@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -15,7 +16,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.util.FnrGenerator
-import no.nav.nare.core.evaluations.Resultat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -83,8 +83,8 @@ class FiltreringsreglerForFlereBarnTest {
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
         val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                          setOf(barnFnr0.ident,
-                                                                                                   barnFnr1.ident))
+                                                                                                  setOf(barnFnr0.ident,
+                                                                                                        barnFnr1.ident))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
@@ -121,8 +121,8 @@ class FiltreringsreglerForFlereBarnTest {
         every { localDateServiceMock.now() } returns LocalDate.now()
 
         val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                             setOf(barnFnr0.ident,
-                                                                                                   barnFnr1.ident))
+                                                                                                  setOf(barnFnr0.ident,
+                                                                                                        barnFnr1.ident))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
     }

@@ -3,9 +3,10 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.nare.core.evaluations.Resultat
+import no.nav.familie.ba.sak.nare.Resultat
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -42,12 +43,27 @@ class VilkårResultat(
         @Column(name = "fk_behandling_id", nullable = false)
         var behandlingId: Long,
 
+        @Column(name = "evaluering_aarsak")
+        @Convert(converter = StringListConverter::class)
+        val evalueringÅrsaker: List<String> = emptyList(),
+
         @Column(name = "regel_input", columnDefinition = "TEXT")
         var regelInput: String?,
 
         @Column(name = "regel_output", columnDefinition = "TEXT")
         var regelOutput: String?
 ) : BaseEntitet() {
+
+    override fun toString(): String {
+        return "VilkårResultat(" +
+               "id=$id, " +
+               "vilkårType=$vilkårType, " +
+               "periodeFom=$periodeFom, " +
+               "periodeTom=$periodeTom, " +
+               "resultat=$resultat, " +
+               "evalueringÅrsaker=$evalueringÅrsaker" +
+               ")"
+    }
 
     fun nullstill() {
         periodeFom = null

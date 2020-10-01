@@ -15,6 +15,8 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.nare.Evaluering
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -23,8 +25,6 @@ import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.nare.core.evaluations.Evaluering
-import no.nav.nare.core.evaluations.Resultat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -83,7 +83,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val (faktaForFiltreringsregler, evalueringAvFiltrering) =
-                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling, nyBehandling.barnasIdenter.toSet())
+                evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
+                                                                                    nyBehandling.barnasIdenter.toSet())
 
         gdprService.lagreResultatAvFiltreringsregler(faktaForFiltreringsregler = faktaForFiltreringsregler,
                                                      evalueringAvFiltrering = evalueringAvFiltrering,
@@ -117,19 +118,6 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
                 vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
                 IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
-            }
-        }
-    }
-
-    private fun erVilkårForPersonNei(behandlingResultat: BehandlingResultat, personType: PersonType, vilkår: Vilkår): Boolean {
-        val personer = if (personType == PersonType.SØKER) {
-            listOf(persongrunnlagService.hentSøker(behandlingResultat.behandling))
-        } else {
-            persongrunnlagService.hentBarna(behandlingResultat.behandling)
-        }
-        return behandlingResultat.personResultater.any { personResultat ->
-            personer.map { it?.personIdent?.ident }.contains(personResultat.personIdent) && personResultat.vilkårResultater.any { vilkårResusltat ->
-                vilkårResusltat.vilkårType == vilkår && vilkårResusltat.resultat == Resultat.NEI
             }
         }
     }
@@ -204,11 +192,33 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     private fun økTellereForStansetIAutomatiskVilkårsvurdering(behandling: Behandling) {
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)!!
 
-        Vilkår.hentFødselshendelseVilkårsreglerRekkefølge().find { erVilkårForPersonNei(behandlingResultat, it.first, it.second) }?.let {
-            vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(it.second, it.first)
-        }
+        Vilkår.hentFødselshendelseVilkårsreglerRekkefølge()
+                .map { mapVilkårTilVilkårResultat(behandlingResultat, it.first, it.second) }
+                .firstOrNull { it?.resultat == Resultat.NEI }
+                ?.let {
+                    vilkårsvurderingMetrics.økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(it)
+                }
 
         stansetIAutomatiskVilkårsvurderingCounter.increment()
+    }
+
+    private fun mapVilkårTilVilkårResultat(behandlingResultat: BehandlingResultat,
+                                           personType: PersonType,
+                                           vilkår: Vilkår): VilkårResultat? {
+        val personer = if (personType == PersonType.SØKER) {
+            listOf(persongrunnlagService.hentSøker(behandlingResultat.behandling))
+        } else {
+            persongrunnlagService.hentBarna(behandlingResultat.behandling)
+        }
+
+        val personResultat = behandlingResultat.personResultater.firstOrNull { personResultat ->
+            personer.map { it?.personIdent?.ident }
+                    .contains(personResultat.personIdent)
+        }
+
+        return personResultat?.vilkårResultater?.firstOrNull { vilkårResusltat ->
+            vilkårResusltat.vilkårType == vilkår && vilkårResusltat.resultat == Resultat.NEI
+        }
     }
 
     private fun fødselshendelseSkalRullesTilbake(): Boolean =

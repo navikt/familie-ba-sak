@@ -15,8 +15,8 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPers
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPut
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.gdpr.GDPRService
-import no.nav.nare.core.evaluations.Evaluering
-import no.nav.nare.core.evaluations.Resultat
+import no.nav.familie.ba.sak.nare.Evaluering
+import no.nav.familie.ba.sak.nare.Resultat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -141,6 +141,8 @@ class VilkårService(
             behandlingResultat.apply {
                 personResultater = lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
             }
+
+            vilkårsvurderingMetrics.tellMetrikker(behandlingResultat)
         } else {
             behandlingResultat.apply {
                 personResultater = lagManuellVilkårsvurdering(behandlingResultat = behandlingResultat)
@@ -245,11 +247,11 @@ class VilkårService(
             val tom: LocalDate? =
                     if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
 
-            if (førstegangskjøringAvVilkårsvurdering(personResultat)) {
+            /*if (førstegangskjøringAvVilkårsvurdering(personResultat)) {
                 vilkårsvurderingMetrics.økTellereForEvaluering(evaluering = child,
                                                                personType = person.type,
                                                                behandlingOpprinnelse = personResultat.behandlingResultat.behandling.opprinnelse)
-            }
+            }*/
 
             var begrunnelse = "Vurdert og satt automatisk"
 
@@ -272,6 +274,7 @@ class VilkårService(
             VilkårResultat(personResultat = personResultat,
                            resultat = child.resultat,
                            vilkårType = vilkår,
+                           evalueringÅrsaker = child.evalueringÅrsaker.map { it.toString() },
                            periodeFom = fom,
                            periodeTom = tom,
                            begrunnelse = begrunnelse,

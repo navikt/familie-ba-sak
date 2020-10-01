@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.BARN
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.SØKER
-import no.nav.nare.core.specifications.Spesifikasjon
+import no.nav.familie.ba.sak.nare.Spesifikasjon
 import java.time.LocalDate
 
 
@@ -22,15 +22,18 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     BOR_MED_SØKER(
             parterDetteGjelderFor = listOf<PersonType>(BARN),
             spesifikasjon = Spesifikasjon<FaktaTilVilkårsvurdering>(
-                    beskrivelse = "Bor med søker: har samme adresse",
-                    identifikator = "BOR_MED_SØKER:SAMME_ADRESSE",
-                    implementasjon = { barnBorMedSøker(this) })
-                    og Spesifikasjon(beskrivelse = "Bor med søker: har eksakt en søker",
-                                     identifikator = "BOR_MED_SØKER:EN_SØKER",
-                                     implementasjon = { harEnSøker(this) })
-                    og Spesifikasjon(beskrivelse = "Bor med søker: søker må være mor",
-                                     identifikator = "BOR_MED_SØKER:SØKER_ER_MOR",
-                                     implementasjon = { søkerErMor(this) }),
+                    beskrivelse = "Bor med søker",
+                    identifikator = "BOR_MED_SØKER",
+                    implementasjon = {
+                        søkerErMor(this) og barnBorMedSøker(this)
+                    }
+            ),
+            /*og Spesifikasjon(beskrivelse = "Bor med søker: har eksakt en søker",
+                             identifikator = "BOR_MED_SØKER:EN_SØKER",
+                             implementasjon = { harEnSøker(this) })
+            og Spesifikasjon(beskrivelse = "Bor med søker: søker må være mor",
+                             identifikator = "BOR_MED_SØKER:SØKER_ER_MOR",
+                             implementasjon = { søkerErMor(this) })*/
             begrunnelser = mapOf(
                     BehandlingResultatType.INNVILGET
                             to
@@ -100,25 +103,23 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
         }
 
         fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Pair<PersonType, Vilkår>> {
-            return fødselshendelseVilkårsreglerRekkefølge
+            return listOf(
+                    //Mor bosatt i riket
+                    Pair(SØKER, BOSATT_I_RIKET),
+                    //Mor har lovlig opphold
+                    Pair(SØKER, LOVLIG_OPPHOLD),
+                    //Barnet er under 18 år
+                    Pair(BARN, UNDER_18_ÅR),
+                    //Barnet bor med søker
+                    Pair(BARN, BOR_MED_SØKER),
+                    //Barnet er ugift og har ikke inngått partnerskap
+                    Pair(BARN, GIFT_PARTNERSKAP),
+                    //Barnet er bosatt i riket
+                    Pair(BARN, BOSATT_I_RIKET),
+                    //Barnet har lovlig opphold
+                    Pair(BARN, LOVLIG_OPPHOLD),
+            )
         }
-
-        private val fødselshendelseVilkårsreglerRekkefølge = listOf(
-                //Mor bosatt i riket
-                Pair(SØKER, BOSATT_I_RIKET),
-                //Mor har lovlig opphold
-                Pair(SØKER, LOVLIG_OPPHOLD),
-                //Barnet er under 18 år
-                Pair(BARN, UNDER_18_ÅR),
-                //Barnet bor med søker
-                Pair(BARN, BOR_MED_SØKER),
-                //Barnet er ugift og har ikke inngått partnerskap
-                Pair(BARN, GIFT_PARTNERSKAP),
-                //Barnet er bosatt i riket
-                Pair(BARN, BOSATT_I_RIKET),
-                //Barnet har lovlig opphold
-                Pair(BARN, LOVLIG_OPPHOLD),
-        )
     }
 }
 
