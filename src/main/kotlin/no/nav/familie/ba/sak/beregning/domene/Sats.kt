@@ -2,11 +2,7 @@ package no.nav.familie.ba.sak.beregning.domene
 
 import java.time.LocalDate
 
-data class Sats(val type: SatsType,
-                val beløp: Int,
-                val gyldigFom: LocalDate = LocalDate.MIN,
-                val gyldigTom: LocalDate = LocalDate.MAX,
-                val ytelseType: YtelseType)
+data class Sats(val type: SatsType, val beløp:Int, val gyldigFom:LocalDate = LocalDate.MIN, val gyldigTom: LocalDate = LocalDate.MAX)
 
 enum class SatsType(val beskrivelse: String) {
     ORBA("Ordinær barnetrygd"),

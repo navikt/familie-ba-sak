@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
@@ -84,7 +85,7 @@ object TilkjentYtelseUtils {
                                             stønadFom = beløpsperiode.fraOgMed.atDay(1),
                                             stønadTom = beløpsperiode.tilOgMed.atEndOfMonth(),
                                             beløp = beløpsperiode.beløp,
-                                            type = beløpsperiode.ytelseType
+                                            type = YtelseType.ORDINÆR_BARNETRYGD
                                     )
                                 }
                             }
@@ -171,8 +172,8 @@ object TilkjentYtelseUtils {
 
 private fun slåSammenEtterfølgendePerioderMedSammeBeløp(sammenlagt: MutableList<BeløpPeriode>,
                                                         neste: BeløpPeriode): MutableList<BeløpPeriode> {
-    if (sammenlagt.isNotEmpty() && sammenlagt.last().sats.beløp == neste.sats.beløp) {
-        val forrigeOgNeste = BeløpPeriode(neste.sats, sammenlagt.last().fraOgMed, neste.tilOgMed)
+    if (sammenlagt.isNotEmpty() && sammenlagt.last().beløp == neste.beløp) {
+        val forrigeOgNeste = BeløpPeriode(neste.beløp, sammenlagt.last().fraOgMed, neste.tilOgMed)
         sammenlagt.removeLast()
         sammenlagt.add(forrigeOgNeste)
     } else {

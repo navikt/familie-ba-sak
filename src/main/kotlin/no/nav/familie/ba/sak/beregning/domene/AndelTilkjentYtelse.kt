@@ -106,10 +106,8 @@ data class AndelTilkjentYtelse(
 
 enum class YtelseType(val klassifisering: String) {
     ORDINÆR_BARNETRYGD("BATR"),
-    ORDINÆR_BARNETRYGD_UNDER_6_ÅR("BATR"),
     UTVIDET_BARNETRYGD("BAUT"),
     SMÅBARNSTILLEGG("BATRSMA"),
     EØS("BATR"),
-    MANUELL_VURDERING("BATR"),
-    FINNMARKSTILLEGG("BATR")
+    MANUELL_VURDERING("BATR")
 }
