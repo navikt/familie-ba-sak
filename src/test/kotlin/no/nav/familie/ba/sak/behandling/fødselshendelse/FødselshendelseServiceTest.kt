@@ -4,6 +4,8 @@ import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -18,6 +20,7 @@ import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -28,7 +31,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.nare.core.evaluations.Evaluering
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -45,7 +47,7 @@ class FødselshendelseServiceTest {
     private val evaluerFiltreringsreglerForFødselshendelseMock = mockk<EvaluerFiltreringsreglerForFødselshendelse>()
     private val taskRepositoryMock = mockk<TaskRepository>()
     private val behandlingResultatRepositoryMock = mockk<BehandlingResultatRepository>()
-    private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
+    private val persongrunnlagServiceMock = mockk<PersongrunnlagService>(relaxed = true)
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
     private val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
@@ -73,7 +75,7 @@ class FødselshendelseServiceTest {
         every { personopplysningerServiceMock.hentIdenter(any()) } returns listOf(IdentInformasjon(søkerFnr,
                                                                                                    false,
                                                                                                    "FOLKEREGISTERIDENT"))
-        every { infotrygdBarnetrygdClientMock.finnesIkkeHosInfotrygd(any(), any()) } returns false
+        every { infotrygdBarnetrygdClientMock.harIkkeLøpendeSakIInfotrygd(any(), any()) } returns false
 
         val skalBehandlesHosInfotrygd =
                 fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
@@ -94,7 +96,7 @@ class FødselshendelseServiceTest {
                                                                                                              "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
-        every { infotrygdBarnetrygdClientMock.finnesIkkeHosInfotrygd(capture(slot), any()) } returns false
+        every { infotrygdBarnetrygdClientMock.harIkkeLøpendeSakIInfotrygd(capture(slot), any()) } returns false
 
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
 
@@ -121,7 +123,7 @@ class FødselshendelseServiceTest {
                                                                                                              "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
-        every { infotrygdBarnetrygdClientMock.finnesIkkeHosInfotrygd(any(), capture(slot)) } returns false
+        every { infotrygdBarnetrygdClientMock.harIkkeLøpendeSakIInfotrygd(any(), capture(slot)) } returns false
 
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr, barn2Fnr))
 
@@ -131,7 +133,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.ja(""),
+                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
                   toggleVerdi = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -144,7 +146,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og toggle er skrudd av`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.AVSLÅTT,
-                  filtreringResultat = Evaluering.ja(""),
+                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
                   toggleVerdi = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -156,7 +158,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal kaste KontrollertRollbackException når toggle er skrudd på`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.ja(""),
+                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
                   toggleVerdi = true)
 
         assertThrows<KontrollertRollbackException> {
@@ -169,12 +171,12 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal ikke kjøre vilkårsvurdering og lage oppgave når filtreringsregler gir avslag`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.nei(""),
+                  filtreringResultat = Evaluering.nei(MOR_ER_UNDER_18_ÅR),
                   toggleVerdi = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
-        verify(exactly = 0) { stegServiceMock.evaluerVilkårForFødselshendelse(any()) }
+        verify(exactly = 0) { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) }
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(any(), any(), any()) }
         verify { IverksettMotOppdragTask.opprettTask(any(), any(), any()) wasNot called }
     }
@@ -182,7 +184,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.ja(""),
+                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
                   toggleVerdi = false,
                   flerlinlinger = true)
 
@@ -225,7 +227,7 @@ class FødselshendelseServiceTest {
         personopplysningGrunnlag.personer.add(søker)
 
         every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
-        every { stegServiceMock.evaluerVilkårForFødselshendelse(any()) } returns vilkårsvurderingsResultat
+        every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every {
             evaluerFiltreringsreglerForFødselshendelseMock.evaluerFiltreringsregler(any(),
@@ -245,7 +247,8 @@ class FødselshendelseServiceTest {
         every { behandlingRepositoryMock.finnBehandling(any()) } returns behandling
 
         every { gdprServiceMock.lagreResultatAvFiltreringsregler(any(), any(), any(), any()) } just runs
-        every { gdprServiceMock.hentFødselshendelsePreLansering(any()) } returns FødselshendelsePreLansering(personIdent = søker.personIdent.ident, behandlingId = behandling.id)
+        every { gdprServiceMock.hentFødselshendelsePreLansering(any()) } returns FødselshendelsePreLansering(personIdent = søker.personIdent.ident,
+                                                                                                             behandlingId = behandling.id)
 
         mockkObject(IverksettMotOppdragTask.Companion)
         every {
@@ -256,9 +259,6 @@ class FødselshendelseServiceTest {
 
         mockkObject(OpprettOppgaveTask.Companion)
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
-
-        every {vilkårsvurderingMetricsMock.
-        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} just runs
     }
 
     companion object {

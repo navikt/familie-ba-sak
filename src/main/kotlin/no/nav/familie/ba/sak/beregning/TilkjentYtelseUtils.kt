@@ -1,19 +1,20 @@
 package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.beregning.SatsService.BeløpPeriode
+import no.nav.familie.ba.sak.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.maksimum
+import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.erSenereEnnNesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.LocalDateInterval
@@ -29,19 +30,7 @@ object TilkjentYtelseUtils {
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
 
-        val søkerMap = personopplysningGrunnlag.søker
-                .associateBy { it.personIdent.ident }
-
-        val innvilgetPeriodeResultatSøker = behandlingResultat.periodeResultater(brukMåned = false).filter {
-            søkerMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
-                    PersonType.SØKER
-            )
-        }
-        val innvilgedePeriodeResultatBarna = behandlingResultat.periodeResultater(brukMåned = false).filter {
-            identBarnMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
-                    PersonType.BARN
-            )
-        }
+        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = behandlingResultat.hentInnvilgedePerioder(personopplysningGrunnlag)
 
         val tilkjentYtelse = TilkjentYtelse(
                 behandling = behandlingResultat.behandling,
@@ -85,6 +74,7 @@ object TilkjentYtelseUtils {
 
                                 val beløpsperioder =
                                         listOf(beløpsperioderFørFylte6År, beløpsperioderEtterFylte6År).flatten()
+                                                .sortedBy { it.fraOgMed }
                                                 .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
 
                                 beløpsperioder.map { beløpsperiode ->
@@ -206,22 +196,6 @@ object TilkjentYtelseUtils {
                     }
             )
 
-}
-
-private fun maksimum(periodeFomSoker: LocalDate?, periodeFomBarn: LocalDate?): LocalDate {
-    if (periodeFomSoker == null && periodeFomBarn == null) {
-        error("Både søker og barn kan ikke ha null i periodeFom-dato")
-    }
-
-    return maxOf(periodeFomSoker ?: LocalDate.MIN, periodeFomBarn ?: LocalDate.MIN)
-}
-
-private fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): LocalDate {
-    if (periodeTomSoker == null && periodeTomBarn == null) {
-        error("Både søker og barn kan ikke ha null i periodeTom-dato")
-    }
-
-    return minOf(periodeTomBarn ?: LocalDate.MAX, periodeTomSoker ?: LocalDate.MAX)
 }
 
 private fun slåSammenEtterfølgendePerioderMedSammeBeløp(sammenlagt: MutableList<BeløpPeriode>,

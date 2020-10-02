@@ -15,8 +15,8 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPers
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPut
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.gdpr.GDPRService
-import no.nav.nare.core.evaluations.Evaluering
-import no.nav.nare.core.evaluations.Resultat
+import no.nav.familie.ba.sak.nare.Evaluering
+import no.nav.familie.ba.sak.nare.Resultat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -103,8 +103,7 @@ class VilkårService(
             val behandlingResultat =
                     genererInitieltBehandlingResultatFraAnnenBehandling(behandling = behandling,
                                                                         annenBehandling = forrigeBehandling)
-            return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat,
-                                                                      loggHendelse = false)
+            return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
         } else {
             if (aktivBehandlingResultat != null) {
                 val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
@@ -117,8 +116,7 @@ class VilkårService(
                                frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
                     )
                 }
-                return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = initieltSomErOppdatert,
-                                                                          loggHendelse = false)
+                return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = initieltSomErOppdatert)
             } else {
                 behandlingResultatService.lagreInitielt(initieltBehandlingResultat)
             }
@@ -142,6 +140,10 @@ class VilkårService(
         if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             behandlingResultat.apply {
                 personResultater = lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
+            }
+
+            if (førstegangskjøringAvVilkårsvurdering(behandlingResultat)) {
+                vilkårsvurderingMetrics.tellMetrikker(behandlingResultat)
             }
         } else {
             behandlingResultat.apply {
@@ -201,7 +203,7 @@ class VilkårService(
                                             .maxByOrNull { it.fødselsdato }?.fødselsdato
                                     ?: error("Fant ikke barn i personopplysninger")
 
-        return personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(behandlingResultat = behandlingResultat,
                                                 personIdent = person.personIdent.ident)
 
@@ -247,12 +249,6 @@ class VilkårService(
             val tom: LocalDate? =
                     if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null
 
-            if (førstegangskjøringAvVilkårsvurdering(personResultat)) {
-                vilkårsvurderingMetrics.økTellereForEvaluering(evaluering = child,
-                                                               personType = person.type,
-                                                               behandlingOpprinnelse = personResultat.behandlingResultat.behandling.opprinnelse)
-            }
-
             var begrunnelse = "Vurdert og satt automatisk"
 
             if (child.resultat == Resultat.NEI || child.resultat == Resultat.KANSKJE) {
@@ -274,6 +270,7 @@ class VilkårService(
             VilkårResultat(personResultat = personResultat,
                            resultat = child.resultat,
                            vilkårType = vilkår,
+                           evalueringÅrsaker = child.evalueringÅrsaker.map { it.toString() },
                            periodeFom = fom,
                            periodeTom = tom,
                            begrunnelse = begrunnelse,
@@ -284,9 +281,9 @@ class VilkårService(
         }.toSortedSet(PersonResultat.comparator)
     }
 
-    private fun førstegangskjøringAvVilkårsvurdering(personResultat: PersonResultat): Boolean {
+    private fun førstegangskjøringAvVilkårsvurdering(behandlingResultat: BehandlingResultat): Boolean {
         return behandlingResultatService
-                .hentAktivForBehandling(behandlingId = personResultat.behandlingResultat.behandling.id) == null
+                .hentAktivForBehandling(behandlingId = behandlingResultat.behandling.id) == null
     }
 
     companion object {

@@ -24,7 +24,7 @@ import java.time.LocalDate
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-pdl")
+@ActiveProfiles("postgres", "mock-pdl", "mock-arbeidsfordeling")
 @Tag("integration")
 class BeregningServiceIntegrationTest {
 
@@ -179,7 +179,7 @@ class BeregningServiceIntegrationTest {
                                                                                   barn2Fnr,
                                                                                   dato_2020_11_01,
                                                                                   dato_2020_11_01.plusYears(17))
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat, loggHendelse = true)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 

@@ -1,14 +1,17 @@
 package no.nav.familie.ba.sak.beregning.domene
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_BEGYNNELSE
 import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
-import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 
 data class PeriodeResultat(

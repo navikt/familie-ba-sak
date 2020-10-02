@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.infotrygd
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
+import no.nav.familie.ba.sak.infotrygd.domene.InfotrygdFødselhendelsesFeedTaskDto
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
@@ -39,7 +40,7 @@ class InfotrygdFeedClientTest {
     fun setUp() {
         resetAllRequests()
         client = InfotrygdFeedClient(
-                URI.create("http://localhost:${environment.get("wiremock.server.port")}/api"),
+                URI.create("http://localhost:${environment["wiremock.server.port"]}/api"),
                 restOperations, environment
         )
     }
@@ -49,13 +50,16 @@ class InfotrygdFeedClientTest {
     fun `skal legge til fødselsnummer i infotrygd feed`() {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(
                 okJson(objectMapper.writeValueAsString(success("Create")))))
-        val request = InfotrygdFødselhendelsesFeedDto("fnr")
+        val request = InfotrygdFødselhendelsesFeedTaskDto(listOf("fnr"))
 
-        client.sendFødselhendelsesFeedTilInfotrygd(request)
+        request.fnrBarn.forEach {
+            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(fnrBarn = it))
+        }
 
         verify(anyRequestedFor(anyUrl())
                        .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
-                       .withRequestBody(equalToJson(objectMapper.writeValueAsString(request))))
+                       .withRequestBody(equalToJson(
+                               objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = request.fnrBarn.first())))))
     }
 
     @Test
@@ -64,8 +68,7 @@ class InfotrygdFeedClientTest {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
-            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(
-                    "fnr"))
+            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
         }
     }
 
@@ -75,8 +78,7 @@ class InfotrygdFeedClientTest {
         stubFor(post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(aResponse().withBody("Create")))
 
         assertThrows<RuntimeException> {
-            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto(
-                    "fnr"))
+            client.sendFødselhendelsesFeedTilInfotrygd(InfotrygdFødselhendelsesFeedDto("fnr"))
         }
     }
 }

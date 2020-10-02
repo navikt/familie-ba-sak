@@ -1,19 +1,19 @@
 package no.nav.familie.ba.sak.dokument
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
-import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.DokumentController.BrevType
+import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
+import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
@@ -50,7 +50,7 @@ class DokumentService(
                         ?: error("Finner ikke søker på vedtaket")
 
             val behandlingResultatType =
-                    behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandlingId = vedtak.behandling.id)
+                    behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling = vedtak.behandling)
 
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                            ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
@@ -115,7 +115,7 @@ class DokumentService(
         val fnr = behandling.fagsak.hentAktivIdent().ident
         val fagsakId = "${behandling.fagsak.id}"
         val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)
-        val enhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
+        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
         val journalføringsId = integrasjonClient.journalførManueltBrev(fnr = fnr,
                                                                        fagsakId = fagsakId,

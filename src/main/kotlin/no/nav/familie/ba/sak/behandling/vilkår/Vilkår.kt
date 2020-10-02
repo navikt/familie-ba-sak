@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.nare.core.specifications.Spesifikasjon
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.BARN
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.SØKER
+import no.nav.familie.ba.sak.nare.Spesifikasjon
 import java.time.LocalDate
 
 
@@ -11,24 +13,21 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
     UNDER_18_ÅR(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+            parterDetteGjelderFor = listOf<PersonType>(BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Er under 18 år",
                     identifikator = "UNDER_18_ÅR",
                     implementasjon = { barnUnder18År(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     BOR_MED_SØKER(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+            parterDetteGjelderFor = listOf<PersonType>(BARN),
             spesifikasjon = Spesifikasjon<FaktaTilVilkårsvurdering>(
-                    beskrivelse = "Bor med søker: har samme adresse",
-                    identifikator = "BOR_MED_SØKER:SAMME_ADRESSE",
-                    implementasjon = { barnBorMedSøker(this) })
-                    og Spesifikasjon(beskrivelse = "Bor med søker: har eksakt en søker",
-                                     identifikator = "BOR_MED_SØKER:EN_SØKER",
-                                     implementasjon = { harEnSøker(this) })
-                    og Spesifikasjon(beskrivelse = "Bor med søker: søker må være mor",
-                                     identifikator = "BOR_MED_SØKER:SØKER_ER_MOR",
-                                     implementasjon = { søkerErMor(this) }),
+                    beskrivelse = "Bor med søker",
+                    identifikator = "BOR_MED_SØKER",
+                    implementasjon = {
+                        søkerErMor(this) og barnBorMedSøker(this)
+                    }
+            ),
             begrunnelser = mapOf(
                     BehandlingResultatType.INNVILGET
                             to
@@ -40,14 +39,14 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     GIFT_PARTNERSKAP(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.BARN),
+            parterDetteGjelderFor = listOf<PersonType>(BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Gift/partnerskap",
                     identifikator = "GIFT_PARTNERSKAP",
                     implementasjon = { giftEllerPartnerskap(this) }),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     BOSATT_I_RIKET(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
+            parterDetteGjelderFor = listOf<PersonType>(SØKER, BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Bosatt i riket",
                     identifikator = "BOSATT_I_RIKET",
@@ -61,7 +60,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     LOVLIG_OPPHOLD(
-            parterDetteGjelderFor = listOf<PersonType>(PersonType.SØKER, PersonType.BARN),
+            parterDetteGjelderFor = listOf<PersonType>(SØKER, BARN),
             spesifikasjon = Spesifikasjon(
                     beskrivelse = "Lovlig opphold",
                     identifikator = "LOVLIG_OPPHOLD",
@@ -97,26 +96,15 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
             }.toSet()
         }
 
-        fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Pair<PersonType, Vilkår>> {
-            return fødselshendelseVilkårsreglerRekkefølge
+        fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Vilkår> {
+            return listOf(
+                    UNDER_18_ÅR,
+                    BOR_MED_SØKER,
+                    GIFT_PARTNERSKAP,
+                    BOSATT_I_RIKET,
+                    LOVLIG_OPPHOLD,
+            )
         }
-
-        private val fødselshendelseVilkårsreglerRekkefølge = listOf(
-                //Mor bosatt i riket
-                Pair(PersonType.SØKER, Vilkår.BOSATT_I_RIKET),
-                //Mor har lovlig opphold
-                Pair(PersonType.SØKER, Vilkår.LOVLIG_OPPHOLD),
-                //Barnet er under 18 år
-                Pair(PersonType.BARN, Vilkår.UNDER_18_ÅR),
-                //Barnet bor med søker
-                Pair(PersonType.BARN, Vilkår.BOR_MED_SØKER),
-                //Barnet er ugift og har ikke inngått partnerskap
-                Pair(PersonType.BARN, Vilkår.GIFT_PARTNERSKAP),
-                //Barnet er bosatt i riket
-                Pair(PersonType.BARN, Vilkår.BOSATT_I_RIKET),
-                //Barnet har lovlig opphold
-                Pair(PersonType.BARN, Vilkår.LOVLIG_OPPHOLD),
-        )
     }
 }
 

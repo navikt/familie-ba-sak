@@ -3,8 +3,9 @@ package no.nav.familie.ba.sak.dokument
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -16,15 +17,14 @@ import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
-import no.nav.familie.ba.sak.client.Norg2RestClient
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
 import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
 import no.nav.familie.ba.sak.dokument.domene.maler.InnhenteOpplysninger
 import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
-import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
@@ -34,7 +34,6 @@ class MalerService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
-        private val norg2RestClient: Norg2RestClient,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
 ) {
@@ -54,7 +53,8 @@ class MalerService(
         return MalMedData(
                 mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap,
                                                          behandlingResultatType,
-                                                         vedtak.behandling.opprinnelse),
+                                                         vedtak.behandling.opprinnelse,
+                                                         vedtak.behandling.type),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
@@ -65,14 +65,14 @@ class MalerService(
     }
 
     fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
-        val enhetskode = arbeidsfordelingService.bestemBehandlendeEnhet(behandling)
+        val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn
         val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt
                           ?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
 
         val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
                 soknadDato = søknadsDato.toLocalDate().tilDagMånedÅr().toString(),
                 fritekst = manueltBrevRequest.fritekst,
-                enhet = norg2RestClient.hentEnhet(enhetskode).navn,
+                enhet = enhetNavn,
                 saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
         ))
         return MalMedData(
@@ -100,14 +100,12 @@ class MalerService(
                 .filter { it.endring.trengerBegrunnelse }
                 .sortedBy { it.periodeFom }
 
-        val enhet = if (vedtak.ansvarligEnhet != null) norg2RestClient.hentEnhet(vedtak.ansvarligEnhet).navn
-        else throw Feil(message = "Ansvarlig enhet er ikke satt ved generering av brev",
-                        frontendFeilmelding = "Ansvarlig enhet er ikke satt ved generering av brev")
+        val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
 
         return if (vedtak.behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-            autovedtakBrevFelter(vedtak, personopplysningGrunnlag, beregningOversikt, enhet)
+            autovedtakBrevFelter(vedtak, personopplysningGrunnlag, beregningOversikt, enhetNavn)
         } else {
-            manueltVedtakBrevFelter(vedtak, beregningOversikt, enhet)
+            manueltVedtakBrevFelter(vedtak, beregningOversikt, enhetNavn)
         }
     }
 
@@ -160,7 +158,7 @@ class MalerService(
                                      enhet: String): String {
         val barnaSortert = personopplysningGrunnlag.barna.sortedByDescending { it.fødselsdato }
         val etterbetalingsbeløp = etterbetalingsbeløpFraSimulering().takeIf { it > 0 }
-        val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker[0].navn,
+        val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker.navn,
                                                fodselsnummer = vedtak.behandling.fagsak.hentAktivIdent().ident,
                                                fodselsdato = Utils.slåSammen(barnaSortert.map { it.fødselsdato.tilKortString() }),
                                                belop = Utils.formaterBeløp(TilkjentYtelseUtils.beregnNåværendeBeløp(
@@ -190,13 +188,19 @@ class MalerService(
 
         fun malNavnForMedlemskapOgResultatType(medlemskap: Medlemskap?,
                                                resultatType: BehandlingResultatType,
-                                               opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL): String {
-            if (opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+                                               behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL,
+                                               behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): String {
+            var malNavn = if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
                 return "${resultatType.brevMal}-autovedtak"
-            }
-            return when (medlemskap) {
+            } else when (medlemskap) {
                 Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-tredjelandsborger"
                 else -> resultatType.brevMal
+            }
+
+            return when (behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING ->
+                    malNavn
+                else -> "${malNavn}-${behandlingType.toString().toLowerCase()}"
             }
         }
     }

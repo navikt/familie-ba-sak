@@ -22,11 +22,11 @@ import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.nare.core.evaluations.Resultat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -79,6 +79,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         behandlingRepository.save(nyBehandling)
         loggService.opprettBehandlingLogg(nyBehandling)
 
+        arbeidsfordelingService.settBehandlendeEnhet(nyBehandling,
+                                                     arbeidsfordelingService.hentArbeidsfordelingsenhet(gjeldendeBehandling))
+
         val nyttVedtak = Vedtak(
                 behandling = nyBehandling,
                 vedtaksdato = now(),
@@ -114,13 +117,12 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         // TODO: Midlertidig fiks før støtte for delvis innvilget
         val behandlingResultatType = midlertidigUtledBehandlingResultatType(
-                hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id))
+                hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling))
         //val behandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling.id)
 
         val vedtak = Vedtak(
                 behandling = behandling,
                 forrigeVedtakId = forrigeVedtak?.id,
-                ansvarligEnhet = arbeidsfordelingService.bestemBehandlendeEnhet(behandling),
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
                         .førsteDagINesteMåned() else null,
                 vedtaksdato = if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) now() else null
@@ -361,7 +363,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     fun hentForrigeVedtakPåFagsak(sisteBehandlingPåFagsak: Behandling): Vedtak? {
         val behandlinger = behandlingService.hentBehandlinger(sisteBehandlingPåFagsak.fagsak.id)
-
 
         return when (val forrigeBehandling =
                 behandlinger.filter { it.id != sisteBehandlingPåFagsak.id }.maxByOrNull { it.opprettetTidspunkt }) {

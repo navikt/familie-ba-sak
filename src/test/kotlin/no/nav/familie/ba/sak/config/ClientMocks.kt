@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.domene.Tilgang
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
@@ -26,8 +25,10 @@ import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.*
+import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -201,16 +202,20 @@ class ClientMocks {
         every { mockIntegrasjonClient.opprettOppgave(any()) } returns
                 "12345678"
 
+        every { mockIntegrasjonClient.oppdaterOppgave(any()) } returns
+                OppgaveResponse(12345678L)
+
         every { mockIntegrasjonClient.fordelOppgave(any(), any()) } returns
                 "12345678"
 
         every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
                 OppdaterJournalpostResponse("1234567")
 
-        every { mockIntegrasjonClient.journalFørVedtaksbrev(any(), any(), any()) } returns "journalpostId"
+        every { mockIntegrasjonClient.journalførVedtaksbrev(any(), any(), any(), any()) } returns "journalpostId"
 
-        every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(Arbeidsfordelingsenhet("9999",
-                                                                                                          "Ukjent"))
+        every {
+            mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any())
+        } returns "journalpostId"
 
         every { mockIntegrasjonClient.distribuerBrev(any()) } returns success("bestillingsId")
 
@@ -231,14 +236,6 @@ class ClientMocks {
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(any<List<String>>())
         } returns listOf(Tilgang(true, null))
-
-        every {
-            mockIntegrasjonClient.journalFørVedtaksbrev(eq(søkerFnr[0]), any(), any())
-        } returns "Testrespons"
-
-        every {
-            mockIntegrasjonClient.journalførManueltBrev(eq(søkerFnr[0]), any(), any(), any(), any())
-        } returns "Testrespons"
 
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 

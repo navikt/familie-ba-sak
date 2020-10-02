@@ -4,17 +4,14 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.stønadsstatistikk.StønadsstatistikkService
-import no.nav.familie.ba.sak.vedtak.producer.VedtakProducer
-import no.nav.familie.ba.sak.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.vedtak.producer.KafkaProducer
+import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -24,8 +21,10 @@ class PubliserVedtakTaskTest {
 
     @MockK(relaxed = true)
     private lateinit var taskRepositoryMock: TaskRepository
+
     @MockK(relaxed = true)
-    private lateinit var vedtakProducerMock: VedtakProducer
+    private lateinit var kafkaProducerMock: KafkaProducer
+
     @MockK(relaxed = true)
     private lateinit var stønadsstatistikkService: StønadsstatistikkService
 
@@ -45,12 +44,12 @@ class PubliserVedtakTaskTest {
 
     @Test
     fun `skal kjøre task`() {
-        every { vedtakProducerMock.sendMessage(any()) }.returns(100)
+        every { kafkaProducerMock.sendMessage(ofType(VedtakDVH::class)) }.returns(100)
 
         publiserVedtakTask.doTask(PubliserVedtakTask.opprettTask("ident", 42))
 
         val slot = slot<Task>()
-        verify(exactly = 1)  { taskRepositoryMock.save(capture(slot)) }
+        verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
         assertThat(slot.captured.metadata["offset"]).isEqualTo("100")
     }
 }

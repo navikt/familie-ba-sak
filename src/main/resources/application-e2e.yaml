@@ -56,7 +56,7 @@ funksjonsbrytere:
     uri: http://dummy/api/
     cluster: e2e
     applicationName: familie-ba-sak
-  vedtak:
+  kafka:
     producer:
       enabled: false
 

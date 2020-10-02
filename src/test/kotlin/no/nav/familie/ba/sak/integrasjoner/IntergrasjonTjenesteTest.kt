@@ -109,9 +109,8 @@ class IntergrasjonTjenesteTest {
 
         val vedtak = lagVedtak(lagBehandling())
         vedtak.stønadBrevPdF = mockPdf
-        vedtak.ansvarligEnhet = "1"
 
-        val journalPostId = integrasjonClient.journalFørVedtaksbrev(mockFnr, mockFagsakId, vedtak)
+        val journalPostId = integrasjonClient.journalførVedtaksbrev(mockFnr, mockFagsakId, vedtak, "1")
 
         assertThat(journalPostId).isEqualTo(mockJournalpostForVedtakId)
         verify(anyRequestedFor(anyUrl())
@@ -210,7 +209,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `hentBehandlendeEnhet returnerer OK`() {
-        stubFor(get("/api/arbeidsfordeling/enhet/BAR")
+        stubFor(post("/api/arbeidsfordeling/enhet/BAR")
                         .withHeader("Accept", containing("json"))
                         .willReturn(okJson(objectMapper.writeValueAsString(success(listOf(
                                 Arbeidsfordelingsenhet("2", "foo")))))))

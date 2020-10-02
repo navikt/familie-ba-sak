@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
@@ -31,6 +33,7 @@ import java.time.Period
 
 @Service
 class FagsakService(
+        private val arbeidsfordelingService: ArbeidsfordelingService,
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
         private val fagsakRepository: FagsakRepository,
         private val fagsakPersonRepository: FagsakPersonRepository,
@@ -118,6 +121,10 @@ class FagsakService(
 
         return behandlinger.map { behandling ->
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+
+            val arbeidsfordelingPåBehandling =
+                    arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
                 val andelerTilkjentYtelse =
                         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
@@ -136,6 +143,8 @@ class FagsakService(
 
             RestBehandling(
                     aktiv = behandling.aktiv,
+                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling.toRestArbeidsfordelingPåBehandling(),
+                    opprinnelse = behandling.opprinnelse,
                     behandlingId = behandling.id,
                     vedtakForBehandling = restVedtakForBehandling,
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
@@ -144,8 +153,13 @@ class FagsakService(
                     steg = behandling.steg,
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
-                    samletResultat = behandlingResultatService.hentAktivForBehandling(behandling.id)?.hentSamletResultat()
-                                     ?: BehandlingResultatType.IKKE_VURDERT,
+                    samletResultat =
+                    if (personopplysningGrunnlag == null)
+                        BehandlingResultatType.IKKE_VURDERT
+                    else
+                        behandlingResultatService.hentAktivForBehandling(
+                                behandling.id)?.samletResultat
+                        ?: BehandlingResultatType.IKKE_VURDERT,
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
                     underkategori = behandling.underkategori,
@@ -242,7 +256,7 @@ class FagsakService(
                 it.relasjonsrolle == FAMILIERELASJONSROLLE.FAR || it.relasjonsrolle == FAMILIERELASJONSROLLE.MOR
                 || it.relasjonsrolle == FAMILIERELASJONSROLLE.MEDMOR
             }.forEach {
-                if (assosierteFagsakDeltager.find({ d -> d.ident == it.personIdent.id }) == null) {
+                if (assosierteFagsakDeltager.find { d -> d.ident == it.personIdent.id } == null) {
                     val forelderInfo = runCatching {
                         personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
                     }.fold(

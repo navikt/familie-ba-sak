@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.steg
 
+import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -19,6 +20,7 @@ data class JournalførVedtaksbrevDTO(
 class JournalførVedtaksbrev(
         private val vedtakService: VedtakService,
         private val integrasjonClient: IntegrasjonClient,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
         private val taskRepository: TaskRepository) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -28,7 +30,13 @@ class JournalførVedtaksbrev(
         val fnr = vedtak.behandling.fagsak.hentAktivIdent().ident
         val fagsakId = "${vedtak.behandling.fagsak.id}"
 
-        val journalpostId = integrasjonClient.journalFørVedtaksbrev(fnr, fagsakId, vedtak)
+        val behanlendeEnhet =
+                arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
+
+        val journalpostId = integrasjonClient.journalførVedtaksbrev(fnr = fnr,
+                                                                    fagsakId = fagsakId,
+                                                                    vedtak = vedtak,
+                                                                    journalførendeEnhet = behanlendeEnhet)
 
         val nyTask = Task.nyTask(
                 type = DistribuerVedtaksbrevTask.TASK_STEP_TYPE,

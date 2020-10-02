@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.journalføring.domene.DokumentType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -26,6 +28,18 @@ class LoggService(
                               it.visningsnavn)
     }.toMap()
 
+    fun opprettBehandlendeEnhetEndret(behandling: Behandling,
+                                      fraBehandlendeEnhetNavn: String,
+                                      tilBehandlendeEnhetNavn: String) {
+        lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLENDE_ENHET_ENDRET,
+                tittel = "Behandlende enhet endret",
+                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = "Fra $fraBehandlendeEnhetNavn til $tilBehandlendeEnhetNavn"
+        ))
+    }
+
     fun opprettMottattDokument(behandling: Behandling, datoMottatt: LocalDateTime, dokumentType: DokumentType) {
         lagre(Logg(
                 opprettetTidspunkt = datoMottatt,
@@ -36,6 +50,7 @@ class LoggService(
                 tekst = ""
         ))
     }
+
 
     fun opprettRegistrertSøknadLogg(behandling: Behandling, søknadFinnesFraFør: Boolean) {
         val tittel = if (!søknadFinnesFraFør) "Søknaden ble registrert" else "Søknaden ble endret"
@@ -49,26 +64,27 @@ class LoggService(
     }
 
     fun opprettVilkårsvurderingLogg(behandling: Behandling,
-                                    forrigeBehandlingResultat: BehandlingResultat?,
-                                    nyttBehandlingResultat: BehandlingResultat): Logg {
-        return if (forrigeBehandlingResultat != null) {
-            lagre(Logg(
-                    behandlingId = behandling.id,
-                    type = LoggType.VILKÅRSVURDERING,
-                    tittel = "Endring på vilkårsvurdering",
-                    rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat gikk fra ${forrigeBehandlingResultat.hentSamletResultat().displayName.toLowerCase()} " +
-                            "til ${nyttBehandlingResultat.hentSamletResultat().displayName.toLowerCase()}"
-            ))
-        } else {
-            lagre(Logg(
-                    behandlingId = behandling.id,
-                    type = LoggType.VILKÅRSVURDERING,
-                    tittel = "Opprettet vilkårsvurdering",
-                    rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                    tekst = "Resultat ble ${nyttBehandlingResultat.hentSamletResultat().displayName.toLowerCase()}"
-            ))
-        }
+                                    aktivBehandlingResultat: BehandlingResultat,
+                                    nyttBehandlingResultatType: BehandlingResultatType,
+                                    forrigeBehandlingResultat: BehandlingResultat?): Logg {
+        val forrigeBehandlingResultatType =
+                if (aktivBehandlingResultat.samletResultat != BehandlingResultatType.IKKE_VURDERT) aktivBehandlingResultat.samletResultat else forrigeBehandlingResultat?.samletResultat
+
+        val tekst = if (forrigeBehandlingResultatType != null) {
+            if (forrigeBehandlingResultatType != nyttBehandlingResultatType) {
+                "Resultat gikk fra ${forrigeBehandlingResultatType.displayName.toLowerCase()} til ${nyttBehandlingResultatType.displayName.toLowerCase()}"
+            } else {
+                "Resultat fortsatt ${nyttBehandlingResultatType.displayName.toLowerCase()}"
+            }
+        } else "Resultat ble ${nyttBehandlingResultatType.displayName.toLowerCase()}"
+
+        return lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.VILKÅRSVURDERING,
+                tittel = if (forrigeBehandlingResultatType != null) "Vilkårsvurdering endret" else "Vilkårsvurdering gjennomført",
+                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = tekst
+        ))
     }
 
     fun opprettFødselshendelseLogg(behandling: Behandling) {
@@ -108,7 +124,7 @@ class LoggService(
                 tittel = if (beslutning.erGodkjent()) "Godkjent vedtak" else "Underkjent vedtak",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = if (beslutning.erGodkjent()) "Vedtak godkjent"
-                        else "Vedtak underkjent" + if (begrunnelse != null) " med begrunnelse: $begrunnelse" else ""
+                else "Vedtak underkjent" + if (begrunnelse != null) " med begrunnelse: $begrunnelse" else ""
         ))
     }
 

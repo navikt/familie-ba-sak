@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.*
-import no.nav.nare.core.evaluations.Resultat
+import no.nav.familie.ba.sak.nare.Resultat
 import java.time.LocalDate
 import java.util.*
 
@@ -106,7 +106,7 @@ object VilkårsvurderingUtils {
         }
     }
 
-    fun fyllHullForVilkårResultater(personResultat: PersonResultat) {
+    private fun fyllHullForVilkårResultater(personResultat: PersonResultat) {
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toSortedSet(PersonResultat.comparator)
 
         kopiAvVilkårResultater.forEachIndexed { index, vilkårResultat ->
@@ -200,10 +200,10 @@ object VilkårsvurderingUtils {
         return Pair(initieltBehandlingResultat, aktivtBehandlingResultat)
     }
 
-    fun lagUvurdertVilkårsresultat(personResultat: PersonResultat,
-                                   vilkårType: Vilkår,
-                                   fom: LocalDate? = null,
-                                   tom: LocalDate? = null): VilkårResultat {
+    private fun lagUvurdertVilkårsresultat(personResultat: PersonResultat,
+                                           vilkårType: Vilkår,
+                                           fom: LocalDate? = null,
+                                           tom: LocalDate? = null): VilkårResultat {
         return VilkårResultat(personResultat = personResultat,
                               vilkårType = vilkårType,
                               resultat = Resultat.KANSKJE,

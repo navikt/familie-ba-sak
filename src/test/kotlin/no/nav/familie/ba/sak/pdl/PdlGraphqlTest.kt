@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.pdl
 import java.io.File
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.ba.sak.pdl.internal.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.ba.sak.pdl.internal.PdlNavn
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -52,9 +54,15 @@ class PdlGraphqlTest {
     }
 
     @Test
+    fun testAdressebeskyttelse() {
+        val resp = mapper.readValue(File(getFile("pdl/pdlAdressebeskyttelseResponse.json")), PdlAdressebeskyttelseResponse::class.java)
+        assertThat(resp.data.person!!.adressebeskyttelse.first().gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
+    }
+
+    @Test
     fun testDeserializationOfResponseWithErrors() {
         val resp = mapper.readValue(File(getFile("pdl/pdlPersonIkkeFunnetResponse.json")), PdlHentPersonResponse::class.java)
-        assertThat(resp.harFeil()).isTrue()
+        assertThat(resp.harFeil()).isTrue
         assertThat(resp.errorMessages()).contains("Fant ikke person", "Ikke tilgang")
     }
 

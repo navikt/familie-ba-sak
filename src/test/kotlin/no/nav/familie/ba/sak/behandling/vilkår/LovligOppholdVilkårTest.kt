@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOp
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
-import no.nav.nare.core.evaluations.Resultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

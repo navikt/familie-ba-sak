@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -15,7 +16,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.util.FnrGenerator
-import no.nav.nare.core.evaluations.Resultat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -46,12 +46,13 @@ class FiltreringsreglerForFlereBarnTest {
 
         val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
                 .evaluer(Fakta(mor, barn, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false,
-                               dagensDato = LocalDate.now().withDayOfMonth(15)))
+                               dagensDato = LocalDate.now()))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.identifikator)
+        Assertions.assertThat(evaluering.children
+                                      .filter { it.resultat == Resultat.NEI }
+                                      .any { it.identifikator == Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.identifikator }
+        )
     }
 
     @Test
@@ -83,13 +84,14 @@ class FiltreringsreglerForFlereBarnTest {
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
         val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                          setOf(barnFnr0.ident,
-                                                                                                   barnFnr1.ident))
+                                                                                                  setOf(barnFnr0.ident,
+                                                                                                        barnFnr1.ident))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }.size).isEqualTo(1)
-        Assertions.assertThat(evaluering.children.filter { it.resultat == Resultat.NEI }[0].identifikator).isEqualTo(
-                Filtreringsregler.BARNET_LEVER.spesifikasjon.identifikator)
+        Assertions.assertThat(evaluering.children
+                                      .filter { it.resultat == Resultat.NEI }
+                                      .any { it.identifikator == Filtreringsregler.BARNET_LEVER.spesifikasjon.identifikator }
+        )
     }
 
     @Test
@@ -121,10 +123,10 @@ class FiltreringsreglerForFlereBarnTest {
         every { localDateServiceMock.now() } returns LocalDate.now()
 
         val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
-                                                                                             setOf(barnFnr0.ident,
-                                                                                                   barnFnr1.ident))
+                                                                                                  setOf(barnFnr0.ident,
+                                                                                                        barnFnr1.ident))
 
-        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
     }
 
     private fun genererPerson(type: PersonType,

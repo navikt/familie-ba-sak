@@ -9,24 +9,30 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforho
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
-import no.nav.nare.core.evaluations.Resultat
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl")
+@ActiveProfiles("dev", "mock-pdl", "mock-arbeidsfordeling")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårVurderingTest(
         @Autowired
         private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val behandlingResultatService: BehandlingResultatService,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -79,15 +85,19 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
-        assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
+        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
+        val endretBehandlingResultat = behandlingResultatService.oppdater(behandlingResultat)
 
-        behandlingResultat.personResultater.forEach {
-            it.vilkårResultater.forEach {
-                assertNotNull(it.regelInput)
-                val fakta = ObjectMapper().readValue(it.regelInput, Map::class.java)
+        assertEquals(BehandlingResultatType.INNVILGET, endretBehandlingResultat.samletResultat)
+
+        endretBehandlingResultat.personResultater.forEach {
+            it.vilkårResultater.forEach { vilkårResultat ->
+                assertNotNull(vilkårResultat.regelInput)
+                val fakta = ObjectMapper().readValue(vilkårResultat.regelInput, Map::class.java)
                 assertTrue(fakta.containsKey("personForVurdering"))
-                assertNotNull(it.regelOutput)
-                val evaluering = ObjectMapper().readValue(it.regelOutput, Map::class.java)
+                assertNotNull(vilkårResultat.regelOutput)
+                val evaluering = ObjectMapper().readValue(vilkårResultat.regelOutput, Map::class.java)
                 assertEquals(evaluering["resultat"], "JA")
             }
         }
@@ -117,8 +127,11 @@ class VilkårVurderingTest(
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         val behandlingResultat = vilkårService.initierVilkårvurderingForBehandling(behandling, false)
+        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
+        val endretBehandlingResultat = behandlingResultatService.oppdater(behandlingResultat)
 
-        assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
+        assertEquals(BehandlingResultatType.AVSLÅTT, endretBehandlingResultat.samletResultat)
     }
 
     @Test
@@ -213,23 +226,7 @@ class VilkårVurderingTest(
     }
 
     @Test
-    fun `Negativ vurdering - To søker`() {
-        val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
-                                        "St. Olavsvegen", "1232", "whatever", "4322")
-
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 3)
-        val søker1 = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
-        personopplysningGrunnlag.personer.add(søker1)
-        val søker2 = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
-        personopplysningGrunnlag.personer.add(søker2)
-        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
-        personopplysningGrunnlag.personer.add(barn)
-
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
-    }
-
-    @Test
-    fun `Negativ vurdering - ingen søker`() {
+    fun `Skal kaste exception - ingen søker`() {
         val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
                                         "St. Olavsvegen", "1232", "whatever", "4322")
 
@@ -237,7 +234,9 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
+        assertThrows(IllegalStateException::class.java) {
+            Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat
+        }
     }
 
     @Test
@@ -331,8 +330,10 @@ class VilkårVurderingTest(
                     it.statsborgerskap =
                             listOf(
                                     GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null,
-                                                                                           fom = LocalDate.now().minusYears(1))
-                                                      , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it)
+                                                                                           fom = LocalDate.now().minusYears(1)),
+                                                      landkode = "DNK",
+                                                      medlemskap = Medlemskap.NORDEN,
+                                                      person = it)
                             )
                 }
 
@@ -346,14 +347,20 @@ class VilkårVurderingTest(
                 .also {
                     it.statsborgerskap =
                             listOf(
-                                    GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null)
-                                                      , landkode = "DNK", medlemskap = Medlemskap.NORDEN, person = it),
+                                    GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null),
+                                                      landkode = "DNK",
+                                                      medlemskap = Medlemskap.NORDEN,
+                                                      person = it),
                                     GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = null,
-                                                                                           fom = LocalDate.now().minusYears(1))
-                                                      , landkode = "DEU", medlemskap = Medlemskap.EØS, person = it),
+                                                                                           fom = LocalDate.now().minusYears(1)),
+                                                      landkode = "DEU",
+                                                      medlemskap = Medlemskap.EØS,
+                                                      person = it),
                                     GrStatsborgerskap(gyldigPeriode = DatoIntervallEntitet(tom = LocalDate.now().minusYears(2),
-                                                                                           fom = LocalDate.now().minusYears(2))
-                                                      , landkode = "POL", medlemskap = Medlemskap.EØS, person = it)
+                                                                                           fom = LocalDate.now().minusYears(2)),
+                                                      landkode = "POL",
+                                                      medlemskap = Medlemskap.EØS,
+                                                      person = it)
                             )
                 }
 

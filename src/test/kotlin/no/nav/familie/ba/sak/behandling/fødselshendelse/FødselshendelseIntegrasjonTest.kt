@@ -17,19 +17,19 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
-import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.*
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.nare.core.evaluations.Resultat
 import org.junit.Assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -51,7 +51,7 @@ import java.time.YearMonth
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("dev", "mock-dokgen", "mock-oauth", "mock-pdl-flere-barn")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl-flere-barn")
 @Tag("integration")
 class FødselshendelseIntegrasjonTest(
         @Autowired
@@ -85,7 +85,10 @@ class FødselshendelseIntegrasjonTest(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 
         @Autowired
-        private val gdprService: GDPRService
+        private val gdprService: GDPRService,
+
+        @Autowired
+        private val vilkårsvurderingMetrics: VilkårsvurderingMetrics
 ) {
 
     val now = LocalDate.now()
@@ -93,7 +96,6 @@ class FødselshendelseIntegrasjonTest(
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
     val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
     val featureToggleServiceMock = mockk<FeatureToggleService>()
-    val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
 
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
@@ -106,7 +108,7 @@ class FødselshendelseIntegrasjonTest(
                                                         behandlingResultatRepository,
                                                         persongrunnlagService,
                                                         behandlingRepository,
-                                                        vilkårsvurderingMetricsMock,
+                                                        vilkårsvurderingMetrics,
                                                         gdprService)
 
     @Test
@@ -118,13 +120,9 @@ class FødselshendelseIntegrasjonTest(
         ))
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsfnr[0]))
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsak!!.id)
-        val behandlingResultater = behandlingResultatRepository.finnBehandlingResultater(behandling!!.id)
+        val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling!!.id)!!
 
-        Assert.assertEquals(1, behandlingResultater.size)
-
-        val behandlingResultat = behandlingResultater[0]
-
-        Assert.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.hentSamletResultat())
+        Assert.assertEquals(BehandlingResultatType.INNVILGET, behandlingResultat.samletResultat)
         Assert.assertEquals(true, behandlingResultat.aktiv)
         Assert.assertEquals(3, behandlingResultat.personResultater.size)
 
@@ -171,9 +169,9 @@ class FødselshendelseIntegrasjonTest(
 
         Assert.assertEquals(1, behandlingResultater.size)
 
-        val behandlingResultat = behandlingResultater.get(0)
+        val behandlingResultat = behandlingResultater[0]
 
-        Assert.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.hentSamletResultat())
+        Assert.assertEquals(BehandlingResultatType.AVSLÅTT, behandlingResultat.samletResultat)
         Assert.assertEquals(true, behandlingResultat.aktiv)
         Assert.assertEquals(3, behandlingResultat.personResultater.size)
         Assert.assertTrue(behandlingResultat.personResultater.map { it.personIdent }.containsAll(
@@ -211,8 +209,6 @@ class FødselshendelseIntegrasjonTest(
     fun initMocks() {
         every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } just runs
         every { featureToggleServiceMock.isEnabled(any()) } returns false
-        every {vilkårsvurderingMetricsMock.
-        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} just runs
     }
 }
 
@@ -267,6 +263,17 @@ class MockConfiguration {
         )
 
         every {
+            personopplysningerServiceMock.hentPersoninfoMedRelasjoner(morsfnr[2])
+        } returns PersonInfo(
+                fødselsdato = now.minusYears(20),
+                navn = "Mor Søker Tre",
+                kjønn = Kjønn.KVINNE,
+                sivilstand = SIVILSTAND.UGIFT,
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
+                bostedsadresse = ikkeOppfyltSøkerBostedsadresse
+        )
+
+        every {
             personopplysningerServiceMock.hentPersoninfoMedRelasjoner(barnefnr[0])
         } returns PersonInfo(
                 fødselsdato = now.minusMonths(1),
@@ -307,12 +314,28 @@ class MockConfiguration {
         }
 
         every {
-            personopplysningerServiceMock.hentStatsborgerskap(any())
+            personopplysningerServiceMock.hentStatsborgerskap(Ident(morsfnr[0]))
         } returns listOf(Statsborgerskap(land = "NOR", gyldigFraOgMed = now.minusYears(20), gyldigTilOgMed = null))
 
         every {
-            personopplysningerServiceMock.hentOpphold(any())
+            personopplysningerServiceMock.hentStatsborgerskap(Ident(morsfnr[1]))
+        } returns listOf(Statsborgerskap(land = "NOR", gyldigFraOgMed = now.minusYears(20), gyldigTilOgMed = null))
+
+        every {
+            personopplysningerServiceMock.hentStatsborgerskap(Ident(morsfnr[2]))
+        } returns listOf(Statsborgerskap(land = "USA", gyldigFraOgMed = now.minusYears(20), gyldigTilOgMed = null))
+
+        every {
+            personopplysningerServiceMock.hentOpphold(morsfnr[0])
         } returns listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
+
+        every {
+            personopplysningerServiceMock.hentOpphold(morsfnr[1])
+        } returns listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
+
+        every {
+            personopplysningerServiceMock.hentOpphold(morsfnr[2])
+        } returns listOf()
 
         every {
             personopplysningerServiceMock.hentBostedsadresseperioder(any())
@@ -331,13 +354,19 @@ class MockConfiguration {
 
     companion object {
 
-        val morsfnr = listOf("12445678910", "12445678911")
+        val morsfnr = listOf("12445678910", "12445678911", "12345678914")
         val barnefnr = listOf("12345678911", "12345678912", "12345678913")
 
         val søkerBostedsadresse = Bostedsadresse(
                 vegadresse = Vegadresse(matrikkelId = 1111, husnummer = null, husbokstav = null,
                                         bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
                                         tilleggsnavn = null, postnummer = "2222")
+        )
+
+        val ikkeOppfyltSøkerBostedsadresse = Bostedsadresse(
+                vegadresse = Vegadresse(matrikkelId = 2211, husnummer = null, husbokstav = null,
+                                        bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
+                                        tilleggsnavn = null, postnummer = "0123")
         )
 
         val ikkeOppfyltBarnBostedsadresse = Bostedsadresse(

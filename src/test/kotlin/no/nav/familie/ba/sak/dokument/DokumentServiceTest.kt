@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.TEST_PDF
+import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -29,7 +30,7 @@ import java.time.LocalDate
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen-klient", "mock-oauth", "mock-pdl")
+@ActiveProfiles("postgres", "mock-dokgen-klient", "mock-oauth", "mock-pdl", "mock-arbeidsfordeling")
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class DokumentServiceTest(
@@ -55,25 +56,29 @@ class DokumentServiceTest(
         private val dokumentService: DokumentService,
 
         @Autowired
-        private val totrinnskontrollService: TotrinnskontrollService
+        private val totrinnskontrollService: TotrinnskontrollService,
+
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
 ) {
 
     @BeforeEach
     fun setup() {
+        databaseCleanupService.truncate()
         MockKAnnotations.init(this)
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
 
         stubFor(get(urlEqualTo("/api/personopplysning/v1/info/BAR"))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(PersonInfo(
-                                LocalDate.of(2019,
-                                        1,
-                                        1)))))))
+                        .willReturn(aResponse()
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(PersonInfo(
+                                                    LocalDate.of(2019,
+                                                                 1,
+                                                                 1)))))))
     }
 
     @Test
@@ -103,15 +108,18 @@ class DokumentServiceTest(
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
         val stønadTom = dato_2020_01_01.plusYears(17)
-        val behandlingResultat1 =
+        val behandlingResultat =
                 BehandlingResultat(behandling = behandling)
-        behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat1,
-                fnr,
-                barn1Fnr,
-                barn2Fnr,
-                dato_2020_01_01.minusMonths(1),
-                stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat1, loggHendelse = true)
+        behandlingResultat.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat,
+                                                                                  fnr,
+                                                                                  barn1Fnr,
+                                                                                  barn2Fnr,
+                                                                                  dato_2020_01_01.minusMonths(1),
+                                                                                  stønadTom)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
+        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
+        behandlingResultatService.oppdater(behandlingResultat)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling, "ansvarligSaksbehandler")
@@ -152,15 +160,18 @@ class DokumentServiceTest(
 
         val dato_2020_01_01 = LocalDate.of(2020, 1, 1)
         val stønadTom = dato_2020_01_01.plusYears(17)
-        val behandlingResultat1 =
+        val behandlingResultat =
                 BehandlingResultat(behandling = behandling)
-        behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat1,
-                fnr,
-                barn1Fnr,
-                barn2Fnr,
-                dato_2020_01_01.minusMonths(1),
-                stønadTom)
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat1, loggHendelse = true)
+        behandlingResultat.personResultater = lagPersonResultaterForSøkerOgToBarn(behandlingResultat,
+                                                                                  fnr,
+                                                                                  barn1Fnr,
+                                                                                  barn2Fnr,
+                                                                                  dato_2020_01_01.minusMonths(1),
+                                                                                  stønadTom)
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
+        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
+        behandlingResultatService.oppdater(behandlingResultat)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
