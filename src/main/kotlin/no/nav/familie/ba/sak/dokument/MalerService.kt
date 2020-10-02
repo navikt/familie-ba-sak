@@ -97,7 +97,6 @@ class MalerService(
                 tilkjentYtelseForBehandling = tilkjentYtelse,
                 tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse,
                 personopplysningGrunnlag = personopplysningGrunnlag)
-                .filter { it.endring.trengerBegrunnelse }
                 .sortedBy { it.periodeFom }
 
         val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
@@ -122,32 +121,34 @@ class MalerService(
                 hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11"))
         )
 
-        innvilget.duFaar = beregningOversikt.map {
-            val barnasFødselsdatoer =
-                    Utils.slåSammen(it.beregningDetaljer
-                                            .filter { restBeregningDetalj -> restBeregningDetalj.person.type == PersonType.BARN }
-                                            .sortedBy { restBeregningDetalj -> restBeregningDetalj.person.fødselsdato }
-                                            .map { restBeregningDetalj ->
-                                                restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
-                                            })
+        innvilget.duFaar = beregningOversikt
+                .filter { it.endring.trengerBegrunnelse }
+                .map {
+                    val barnasFødselsdatoer =
+                            Utils.slåSammen(it.beregningDetaljer
+                                                    .filter { restBeregningDetalj -> restBeregningDetalj.person.type == PersonType.BARN }
+                                                    .sortedBy { restBeregningDetalj -> restBeregningDetalj.person.fødselsdato }
+                                                    .map { restBeregningDetalj ->
+                                                        restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
+                                                    })
 
-            val begrunnelse =
-                    vedtak.utbetalingBegrunnelser.filter { stønadBrevBegrunnelse ->
-                        stønadBrevBegrunnelse.fom == it.periodeFom && stønadBrevBegrunnelse.tom == it.periodeTom
-                    }.toMutableSet().map { utbetalingBegrunnelse ->
-                        utbetalingBegrunnelse.brevBegrunnelse
-                        ?: "Ikke satt"
-                    }.toList()
+                    val begrunnelse =
+                            vedtak.utbetalingBegrunnelser.filter { stønadBrevBegrunnelse ->
+                                stønadBrevBegrunnelse.fom == it.periodeFom && stønadBrevBegrunnelse.tom == it.periodeTom
+                            }.toMutableSet().map { utbetalingBegrunnelse ->
+                                utbetalingBegrunnelse.brevBegrunnelse
+                                ?: "Ikke satt"
+                            }.toList()
 
-            DuFårSeksjon(
-                    fom = it.periodeFom!!.tilDagMånedÅr(),
-                    tom = it.periodeTom!!.tilDagMånedÅr(),
-                    belop = Utils.formaterBeløp(it.utbetaltPerMnd),
-                    antallBarn = it.antallBarn,
-                    barnasFodselsdatoer = barnasFødselsdatoer,
-                    begrunnelser = begrunnelse
-            )
-        }
+                    DuFårSeksjon(
+                            fom = it.periodeFom.tilDagMånedÅr(),
+                            tom = if (!it.periodeTom.erSenereEnnNesteMåned()) it.periodeTom.tilDagMånedÅr() else "",
+                            belop = Utils.formaterBeløp(it.utbetaltPerMnd),
+                            antallBarn = it.antallBarn,
+                            barnasFodselsdatoer = barnasFødselsdatoer,
+                            begrunnelser = begrunnelse
+                    )
+                }
 
         return objectMapper.writeValueAsString(innvilget)
     }
