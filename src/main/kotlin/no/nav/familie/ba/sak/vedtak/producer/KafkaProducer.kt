@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.vedtak.producer
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
@@ -79,5 +82,14 @@ class MockKafkaProducer : KafkaProducer {
 
     companion object {
         var sendteMeldinger = mutableMapOf<String, Any>()
+
+        fun meldingSendtFor(hendelse: Any): Any? {
+            return when (hendelse) {
+                is Behandling -> sendteMeldinger.get("behandling-${hendelse.id}")
+                is Fagsak -> sendteMeldinger.get("sak-${hendelse.id}")
+                is Vedtak -> sendteMeldinger.get("vedtak-${hendelse.behandling.id}")
+                else -> throw NotImplementedError()
+            }
+        }
     }
 }
