@@ -39,4 +39,10 @@ data class UtbetalingBegrunnelse(
 
         @Column(name = "brev_begrunnelse")
         var brevBegrunnelse: String? = ""
-): BaseEntitet()
+) : BaseEntitet() {
+    fun erLik(annen: UtbetalingBegrunnelse) = this.fom == annen.fom
+                                               && this.tom == annen.tom
+                                               && this.resultat == annen.resultat
+                                               && this.behandlingresultatOgVilkårBegrunnelse == annen.behandlingresultatOgVilkårBegrunnelse
+                                               && this.brevBegrunnelse == annen.brevBegrunnelse
+}

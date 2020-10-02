@@ -89,6 +89,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
+    fun hentForrigeBehandling(fagsakId: Long, behandlingFørFølgende: Behandling): Behandling? {
+        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+        return behandlinger
+                .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) }
+                .sortedBy { it.opprettetTidspunkt }
+                .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+    }
+
     fun lagre(behandling: Behandling): Behandling {
         return behandlingRepository.save(behandling)
     }

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 interface IVedtakBegrunnelse {
-    fun hentBeskrivelse(gjelderSøker: Boolean = false, barnasFødselsdatoer: String, vilkårsdato: String): String
+    fun hentBeskrivelse(gjelderSøker: Boolean = false, barnasFødselsdatoer: String = "", vilkårsdato: String): String
 }
 
 enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
@@ -45,6 +45,11 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
 
         override fun hentBeskrivelse(gjelderSøker: Boolean, barnasFødselsdatoer: String, vilkårsdato: String): String {
             return "Du får barnetrygd fordi vi har kommet fram til at du har fått fast omsorg for barn født $barnasFødselsdatoer fra $vilkårsdato."
+        }
+    },
+    SATSENDRING("Satsendring") {
+        override fun hentBeskrivelse(gjelderSøker: Boolean, barnasFødselsdatoer: String, vilkårsdato: String): String {
+            return "Barnetrygden er endret fordi det har vært en satsendring med virkning fra og med $vilkårsdato."
         }
     },
 }
