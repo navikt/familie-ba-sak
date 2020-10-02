@@ -34,7 +34,6 @@ class VilkårController(
         val nyVilkårsvurdering = vilkårService.endreVilkår(behandlingId = behandlingId,
                                                            vilkårId = vilkaarId,
                                                            restPersonResultat = restPersonResultat)
-
         settStegOgSlettUtbetalingBegrunnelser(behandlingId)
         return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
     }
@@ -73,7 +72,10 @@ class VilkårController(
         return ResponseEntity.ok(Ressurs.success(VilkårsvurderingUtils.hentVilkårsbegrunnelser()))
     }
 
-    fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
+    /**
+     * Når et vilkår vurderes (endres) vil begrunnelsene satt på dette vilkåret resettes
+     */
+    private fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
         behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingId, steg = StegType.VILKÅRSVURDERING)
         vedtakService.slettUtbetalingBegrunnelser(behandlingId)
     }

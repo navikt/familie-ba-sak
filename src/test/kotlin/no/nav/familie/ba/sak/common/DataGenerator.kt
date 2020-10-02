@@ -108,7 +108,7 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
 
 fun lagAndelTilkjentYtelse(fom: String,
                            tom: String,
-                           ytelseType: YtelseType,
+                           ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
                            beløp: Int = sats(ytelseType),
                            behandling: Behandling = lagBehandling(),
                            person: Person = tilfeldigPerson(),
@@ -153,7 +153,7 @@ fun lagAndelTilkjentYtelseUtvidet(fom: String,
 }
 
 
-fun lagInitiellTilkjentYtelse(behandling: Behandling): TilkjentYtelse {
+fun lagInitiellTilkjentYtelse(behandling: Behandling = lagBehandling()): TilkjentYtelse {
     return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
 }
 
