@@ -30,34 +30,37 @@ class VilkårController(
     @PutMapping(path = ["/{behandlingId}/{vilkaarId}"])
     fun endreVilkår(@PathVariable behandlingId: Long,
                     @PathVariable vilkaarId: Long,
-                    @RequestBody restPersonResultat: RestPersonResultat): ResponseEntity<Ressurs<List<RestPersonResultat>>> {
-        val nyVilkårsvurdering = vilkårService.endreVilkår(behandlingId = behandlingId,
-                                                           vilkårId = vilkaarId,
-                                                           restPersonResultat = restPersonResultat)
+                    @RequestBody restPersonResultat: RestPersonResultat): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingService.hent(behandlingId)
+        vilkårService.endreVilkår(behandlingId = behandling.id,
+                                  vilkårId = vilkaarId,
+                                  restPersonResultat = restPersonResultat)
 
-        settStegOgSlettUtbetalingBegrunnelser(behandlingId)
-        return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
+        settStegOgSlettUtbetalingBegrunnelser(behandling.id)
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
     @DeleteMapping(path = ["/{behandlingId}/{vilkaarId}"])
     fun slettVilkår(@PathVariable behandlingId: Long,
                     @PathVariable vilkaarId: Long,
-                    @RequestBody personIdent: String): ResponseEntity<Ressurs<List<RestPersonResultat>>> {
-        val nyVilkårsvurdering = vilkårService.deleteVilkår(behandlingId = behandlingId,
-                                                            vilkårId = vilkaarId,
-                                                            personIdent = personIdent)
+                    @RequestBody personIdent: String): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingService.hent(behandlingId)
+        vilkårService.deleteVilkår(behandlingId = behandling.id,
+                                   vilkårId = vilkaarId,
+                                   personIdent = personIdent)
 
-        settStegOgSlettUtbetalingBegrunnelser(behandlingId)
-        return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
+        settStegOgSlettUtbetalingBegrunnelser(behandling.id)
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
     @PostMapping(path = ["/{behandlingId}"])
     fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår):
-            ResponseEntity<Ressurs<List<RestPersonResultat>>> {
-        val nyVilkårsvurdering = vilkårService.postVilkår(behandlingId, restNyttVilkår)
+            ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingService.hent(behandlingId)
+        vilkårService.postVilkår(behandling.id, restNyttVilkår)
 
         settStegOgSlettUtbetalingBegrunnelser(behandlingId)
-        return ResponseEntity.ok(Ressurs.success(nyVilkårsvurdering))
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
     @PostMapping(path = ["/{behandlingId}/valider"])
@@ -73,7 +76,10 @@ class VilkårController(
         return ResponseEntity.ok(Ressurs.success(VilkårsvurderingUtils.hentVilkårsbegrunnelser()))
     }
 
-    fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
+    /**
+     * Når et vilkår vurderes (endres) vil begrunnelsene satt på dette vilkåret resettes
+     */
+    private fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
         behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingId, steg = StegType.VILKÅRSVURDERING)
         vedtakService.slettUtbetalingBegrunnelser(behandlingId)
     }

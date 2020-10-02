@@ -25,7 +25,7 @@ data class InnvilgetAutovedtak(
 
 data class DuFårSeksjon(
         val fom: String,
-        val tom: String,
+        val tom: String?,
         val belop: String,
         val antallBarn: Int,
         val barnasFodselsdatoer: String,

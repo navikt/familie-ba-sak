@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningDetalj
-import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
-import no.nav.familie.ba.sak.behandling.restDomene.RestPerson
+import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
@@ -17,6 +15,7 @@ import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
+import no.nav.familie.ba.sak.common.erSenereEnnNesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -121,54 +120,82 @@ object TilkjentYtelseUtils {
                 YearMonth.from(tilOgMed.sisteDagIMåned())
 
 
-    fun hentBeregningOversikt(tilkjentYtelseForBehandling: TilkjentYtelse, personopplysningGrunnlag: PersonopplysningGrunnlag)
+    fun hentBeregningOversikt(tilkjentYtelseForBehandling: TilkjentYtelse,
+                              personopplysningGrunnlag: PersonopplysningGrunnlag,
+                              tilkjentYtelseForForrigeBehandling: TilkjentYtelse? = null)
             : List<RestBeregningOversikt> {
         if (tilkjentYtelseForBehandling.andelerTilkjentYtelse.isEmpty()) return emptyList()
 
-        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
+        val segmenter = utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling)
+        val segmenterFraForrigeTilkjentYtelse =
+                if (tilkjentYtelseForForrigeBehandling !== null) utledSegmenterFraTilkjentYtelse(
+                        tilkjentYtelseForForrigeBehandling) else emptyList()
 
-        return utbetalingsPerioder.toSegments()
-                .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-                .map { segment ->
-                    val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
-                        segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
-                    }
-                    mapTilRestBeregningOversikt(segment,
-                                                andelerForSegment,
-                                                tilkjentYtelseForBehandling.behandling,
-                                                personopplysningGrunnlag)
-                }
+        return segmenter.map { segment ->
+            val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
+                segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
+            }
+            mapTilRestBeregningOversikt(segment = segment,
+                                        andelerForSegment = andelerForSegment,
+                                        behandling = tilkjentYtelseForBehandling.behandling,
+                                        personopplysningGrunnlag = personopplysningGrunnlag,
+                                        endringISegment =
+                                        when {
+                                            segmenterFraForrigeTilkjentYtelse.any { it == segment } ->
+                                                if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.UENDRET_SATS,
+                                                                                              trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
+                                                else BeregningEndring(type = BeregningEndringType.UENDRET,
+                                                                      trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
+                                            else ->
+                                                if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.ENDRET_SATS,
+                                                                                              trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
+                                                else BeregningEndring(type = BeregningEndringType.ENDRET,
+                                                                      trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
+                                        })
+        }
+    }
+
+    private fun LocalDateSegment<Int>.erSatsendring(): Boolean =
+            SatsService.hentAlleSatser()
+                    .filter { it.gyldigFom != LocalDate.MIN }
+                    .find { it.gyldigFom == this.fom && it.beløp == this.value } != null
+
+    private fun utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling: TilkjentYtelse): List<LocalDateSegment<Int>> {
+        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
+        return utbetalingsPerioder.toSegments().sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
     }
 
     private fun mapTilRestBeregningOversikt(segment: LocalDateSegment<Int>,
                                             andelerForSegment: List<AndelTilkjentYtelse>,
                                             behandling: Behandling,
-                                            personopplysningGrunnlag: PersonopplysningGrunnlag): RestBeregningOversikt {
-        return RestBeregningOversikt(
-                periodeFom = segment.fom,
-                periodeTom = segment.tom,
-                ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
-                utbetaltPerMnd = segment.value,
-                antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
-                sakstype = behandling.kategori,
-                beregningDetaljer = andelerForSegment.map { andel ->
-                    val personForAndel =
-                            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
-                            ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
-                    RestBeregningDetalj(
-                            person = RestPerson(
-                                    type = personForAndel.type,
-                                    kjønn = personForAndel.kjønn,
-                                    navn = personForAndel.navn,
-                                    fødselsdato = personForAndel.fødselsdato,
-                                    personIdent = personForAndel.personIdent.ident
-                            ),
-                            ytelseType = andel.type,
-                            utbetaltPerMnd = andel.beløp
-                    )
-                }
-        )
-    }
+                                            personopplysningGrunnlag: PersonopplysningGrunnlag,
+                                            endringISegment: BeregningEndring = BeregningEndring(BeregningEndringType.ENDRET)): RestBeregningOversikt =
+            RestBeregningOversikt(
+                    periodeFom = segment.fom,
+                    periodeTom = segment.tom,
+                    ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
+                    utbetaltPerMnd = segment.value,
+                    antallBarn = andelerForSegment.count { andel -> personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent } },
+                    sakstype = behandling.kategori,
+                    endring = endringISegment,
+                    beregningDetaljer = andelerForSegment.map { andel ->
+                        val personForAndel =
+                                personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                                ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+                        RestBeregningDetalj(
+                                person = RestPerson(
+                                        type = personForAndel.type,
+                                        kjønn = personForAndel.kjønn,
+                                        navn = personForAndel.navn,
+                                        fødselsdato = personForAndel.fødselsdato,
+                                        personIdent = personForAndel.personIdent.ident
+                                ),
+                                ytelseType = andel.type,
+                                utbetaltPerMnd = andel.beløp
+                        )
+                    }
+            )
+
 }
 
 private fun slåSammenEtterfølgendePerioderMedSammeBeløp(sammenlagt: MutableList<BeløpPeriode>,

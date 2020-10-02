@@ -49,6 +49,7 @@ class Vilkårsvurdering(
                 personopplysningGrunnlag)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        vedtakService.leggTilInitielleUtbetalingsbegrunnelser(fagsakId = behandling.fagsak.id, behandling = behandling)
 
         val nyttSamletBehandlingResultat = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
         behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, nyttSamletBehandlingResultat, behandling)
