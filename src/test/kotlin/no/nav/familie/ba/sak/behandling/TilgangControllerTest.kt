@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.util.FnrGenerator
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -31,16 +31,17 @@ class TilgangControllerTest (
 ) {
     @Test
     fun testHarTilgangTilKode6Person() {
+        val fnr = FnrGenerator.generer()
         every {
             mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(any())
         } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
         every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(any()))
+            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(fnr))
         } returns listOf(Tilgang(harTilgang = true))
-        val response = tilgangController.hentTilgangOgDiskresjonskode(FnrGenerator.generer())
-        Assertions.assertThat(response.body!!.data!!.adressebeskyttelsegradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
 
+        val response = tilgangController.hentTilgangOgDiskresjonskode(fnr)
+        val tilgangDTO = response.body?.data ?: error("Fikk ikke forventet respons")
+        assertThat(tilgangDTO.adressebeskyttelsegradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
+        assertThat(tilgangDTO.saksbehandlerHarTilgang).isEqualTo(true)
     }
-
-
 }
