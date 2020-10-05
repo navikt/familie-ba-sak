@@ -8,8 +8,10 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.logg.LoggService
 import org.slf4j.LoggerFactory
@@ -24,15 +26,23 @@ class FerdigstillBehandling(
         private val beregningService: BeregningService,
         private val behandlingService: BehandlingService,
         private val behandlingResultatService: BehandlingResultatService,
+        private val vedtakService: VedtakService,
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
 
-    private val antallBehandlingResultatTyper: Map<BehandlingResultatType, Counter> = BehandlingResultatType.values().map {
-        it to Metrics.counter("behandling.resultat", "type",
-                              it.name,
-                              "beskrivelse",
-                              it.displayName)
-    }.toMap()
+    private val antallBehandlingResultatTyper: Map<BehandlingResultatType, Counter> =
+            BehandlingResultatType.values().map {
+                it to Metrics.counter("behandling.resultat",
+                                      "type", it.name,
+                                      "beskrivelse", it.displayName)
+            }.toMap()
+
+    private val antallBrevBegrunnelser: Map<BehandlingresultatOgVilkårBegrunnelse, Counter> =
+            BehandlingresultatOgVilkårBegrunnelse.values().map {
+                it to Metrics.counter("brevbegrunnelse",
+                                      "type", it.name,
+                                      "beskrivelse", it.tittel)
+            }.toMap()
 
     private val behandlingstid: DistributionSummary = Metrics.summary("behandling.tid")
 
@@ -54,6 +64,10 @@ class FerdigstillBehandling(
         val dagerSidenOpprettet = ChronoUnit.DAYS.between(behandling.opprettetTidspunkt, LocalDateTime.now())
         behandlingstid.record(dagerSidenOpprettet.toDouble())
         antallBehandlingResultatTyper[behandlingResultatType]?.increment()
+
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id) ?: error("Finner ikke aktivt vedtak ved ferdigstilling av behandling ${behandling.id}")
+        vedtak.utbetalingBegrunnelser.mapNotNull { it.behandlingresultatOgVilkårBegrunnelse }
+                .forEach { brevbegrunelse: BehandlingresultatOgVilkårBegrunnelse -> antallBrevBegrunnelser[brevbegrunelse]?.increment() }
 
         return hentNesteStegForNormalFlyt(behandling)
     }
