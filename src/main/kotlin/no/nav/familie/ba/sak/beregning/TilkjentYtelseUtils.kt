@@ -30,7 +30,8 @@ object TilkjentYtelseUtils {
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
 
-        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = behandlingResultat.hentInnvilgedePerioder(personopplysningGrunnlag)
+        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = behandlingResultat.hentInnvilgedePerioder(
+                personopplysningGrunnlag)
 
         val tilkjentYtelse = TilkjentYtelse(
                 behandling = behandlingResultat.behandling,
@@ -144,18 +145,19 @@ object TilkjentYtelseUtils {
                                         personopplysningGrunnlag = personopplysningGrunnlag,
                                         endringISegment =
                                         when {
-                                            segmenterFraForrigeTilkjentYtelse.any { it == segment } -> {
-                                                førsteEndringVært = true
+                                            segmenterFraForrigeTilkjentYtelse.any { it == segment } ->
                                                 if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.UENDRET_SATS,
                                                                                               trengerBegrunnelse = segment.trengerBegrunnelse())
                                                 else BeregningEndring(type = BeregningEndringType.UENDRET,
                                                                       trengerBegrunnelse = segment.trengerBegrunnelse())
-                                            }
-                                            else ->
+
+                                            else -> {
+                                                førsteEndringVært = true
                                                 if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.ENDRET_SATS,
                                                                                               trengerBegrunnelse = segment.trengerBegrunnelse())
                                                 else BeregningEndring(type = BeregningEndringType.ENDRET,
                                                                       trengerBegrunnelse = segment.trengerBegrunnelse())
+                                            }
                                         })
         }
     }
