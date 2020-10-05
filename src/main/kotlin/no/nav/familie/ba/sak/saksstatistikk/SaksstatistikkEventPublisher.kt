@@ -13,8 +13,7 @@ class SaksstatistikkEventPublisher {
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
     fun publish(behandlingId: Long, forrigeBehandlingId: Long?) {
-        val customSpringEvent = SaksstatistikkEvent(this, behandlingId, forrigeBehandlingId)
-        applicationEventPublisher.publishEvent(customSpringEvent)
+        applicationEventPublisher.publishEvent(SaksstatistikkEvent(this, behandlingId, forrigeBehandlingId))
     }
 }
 
