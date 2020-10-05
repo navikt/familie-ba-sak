@@ -141,8 +141,8 @@ class MalerService(
                             }.toList()
 
                     DuFårSeksjon(
-                            fom = it.periodeFom.tilDagMånedÅr(),
-                            tom = if (!it.periodeTom.erSenereEnnNesteMåned()) it.periodeTom.tilDagMånedÅr() else "",
+                            fom = it.periodeFom.tilMånedÅr(),
+                            tom = if (!it.periodeTom.erSenereEnnNesteMåned()) it.periodeTom.tilMånedÅr() else "",
                             belop = Utils.formaterBeløp(it.utbetaltPerMnd),
                             antallBarn = it.antallBarn,
                             barnasFodselsdatoer = barnasFødselsdatoer,

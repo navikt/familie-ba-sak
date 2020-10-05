@@ -301,7 +301,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             }
 
             val vilkårsdato = if (personerMedUtgjørendeVilkårForUtbetalingsperiode.size == 1) {
-                personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilKortString()
+                personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilDagMånedÅr()
             } else {
                 stønadBrevBegrunnelse.fom.minusMonths(1).tilMånedÅr()
             }
