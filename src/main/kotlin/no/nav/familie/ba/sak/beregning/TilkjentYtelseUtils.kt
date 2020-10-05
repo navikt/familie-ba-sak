@@ -132,8 +132,8 @@ object TilkjentYtelseUtils {
                 if (tilkjentYtelseForForrigeBehandling !== null) utledSegmenterFraTilkjentYtelse(
                         tilkjentYtelseForForrigeBehandling) else emptyList()
 
-        var førsteEndringVært = false
-        fun LocalDateSegment<Int>.trengerBegrunnelse() = førsteEndringVært && !this.fom.erSenereEnnNesteMåned()
+        var erEtterFørsteEndring = false
+        fun LocalDateSegment<Int>.trengerBegrunnelse() = erEtterFørsteEndring && !this.fom.erSenereEnnNesteMåned()
 
         return segmenter.map { segment ->
             val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
@@ -152,7 +152,7 @@ object TilkjentYtelseUtils {
                                                                       trengerBegrunnelse = segment.trengerBegrunnelse())
 
                                             else -> {
-                                                førsteEndringVært = true
+                                                erEtterFørsteEndring = true
                                                 if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.ENDRET_SATS,
                                                                                               trengerBegrunnelse = segment.trengerBegrunnelse())
                                                 else BeregningEndring(type = BeregningEndringType.ENDRET,
