@@ -51,8 +51,8 @@ class DefaultKafkaProducer : KafkaProducer {
     companion object {
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
         private const val VEDTAK_TOPIC = "aapen-barnetrygd-vedtak-v1"
-        private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "aapen-barnetrygd-saksstatistkk-behandling-v1"
-        private const val SAKSSTATISTIKK_SAK_TOPIC = "aapen-barnetrygd-saksstatistkk-sak-v1"
+        private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "aapen-barnetrygd-saksstatistikk-behandling-v1"
+        private const val SAKSSTATISTIKK_SAK_TOPIC = "aapen-barnetrygd-saksstatistikk-sak-v1"
     }
 }
 
