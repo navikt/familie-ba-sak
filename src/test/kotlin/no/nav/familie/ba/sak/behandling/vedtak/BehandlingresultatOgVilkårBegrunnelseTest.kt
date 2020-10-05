@@ -188,7 +188,7 @@ class BehandlingresultatOgVilkårBegrunnelseTest(
 
         assert(begrunnelserLovligOppholdOgBosattIRiket.size == 2)
         Assertions.assertEquals(
-                "Du får barnetrygd fordi du er bosatt i Norge fra 24.12.09.",
+                "Du får barnetrygd fordi du er bosatt i Norge fra 24. desember 2009.",
                 begrunnelserLovligOppholdOgBosattIRiket.firstOrNull { it.behandlingresultatOgVilkårBegrunnelse == BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOSATT_I_RIKTET }!!.brevBegrunnelse)
 
         assertThrows<Feil> {
