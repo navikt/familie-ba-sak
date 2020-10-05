@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.restDomene.RestVedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.common.*
-import no.nav.nare.core.evaluations.Resultat
+import no.nav.familie.ba.sak.nare.Resultat
 import java.time.LocalDate
 import java.util.*
 
@@ -249,6 +249,11 @@ object VilkårsvurderingUtils {
                 }
             }
         }
+
+
+        val satsBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING
+        vilkårBegrunnelser[BehandlingResultatType.INNVILGET]?.add(RestVedtakBegrunnelse(id = satsBegrunnelse,
+                                                                                        navn = satsBegrunnelse.tittel))
 
         return vilkårBegrunnelser
     }

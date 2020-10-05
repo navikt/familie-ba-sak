@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.toJson
 import no.nav.familie.ba.sak.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.gdpr.domene.toJson
-import no.nav.nare.core.evaluations.Evaluering
+import no.nav.familie.ba.sak.nare.Evaluering
 import org.springframework.stereotype.Service
 
 @Service

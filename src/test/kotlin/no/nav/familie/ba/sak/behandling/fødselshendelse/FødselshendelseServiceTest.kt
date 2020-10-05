@@ -4,6 +4,8 @@ import io.mockk.*
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_18_ÅR
+import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt.MOR_ER_OVER_18_ÅR
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -18,6 +20,7 @@ import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.gdpr.domene.FødselshendelsePreLansering
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -28,7 +31,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
-import no.nav.nare.core.evaluations.Evaluering
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -131,7 +133,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.ja(""),
+                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
                   toggleVerdi = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -144,7 +146,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og toggle er skrudd av`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.AVSLÅTT,
-                  filtreringResultat = Evaluering.ja(""),
+                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
                   toggleVerdi = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -156,7 +158,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal kaste KontrollertRollbackException når toggle er skrudd på`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.ja(""),
+                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
                   toggleVerdi = true)
 
         assertThrows<KontrollertRollbackException> {
@@ -169,7 +171,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal ikke kjøre vilkårsvurdering og lage oppgave når filtreringsregler gir avslag`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.nei(""),
+                  filtreringResultat = Evaluering.nei(MOR_ER_UNDER_18_ÅR),
                   toggleVerdi = false)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -182,7 +184,7 @@ class FødselshendelseServiceTest {
     @Test
     fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
-                  filtreringResultat = Evaluering.ja(""),
+                  filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
                   toggleVerdi = false,
                   flerlinlinger = true)
 
@@ -257,9 +259,6 @@ class FødselshendelseServiceTest {
 
         mockkObject(OpprettOppgaveTask.Companion)
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns opprettOppgaveTask
-
-        every {vilkårsvurderingMetricsMock.
-        økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(any(), any())} just runs
     }
 
     companion object {

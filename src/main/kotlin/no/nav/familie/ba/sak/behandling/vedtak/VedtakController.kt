@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden

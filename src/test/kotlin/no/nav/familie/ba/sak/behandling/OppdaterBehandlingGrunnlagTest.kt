@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.flyttResu
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.nare.core.evaluations.Resultat
+import no.nav.familie.ba.sak.nare.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

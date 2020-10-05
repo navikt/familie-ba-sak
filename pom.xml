@@ -201,11 +201,6 @@
             <version>2.3-20200406045853-e288f17</version>
         </dependency>
         <dependency>
-            <groupId>no.nav</groupId>
-            <artifactId>nare</artifactId>
-            <version>012820b</version>
-        </dependency>
-        <dependency>
             <groupId>nav-foedselsnummer</groupId>
             <artifactId>core</artifactId>
             <version>1.0-SNAPSHOT.5</version>

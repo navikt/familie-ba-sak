@@ -4,9 +4,11 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -120,7 +122,8 @@ class FagsakService(
         return behandlinger.map { behandling ->
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
-            val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            val arbeidsfordelingPåBehandling =
+                    arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
             val restVedtakForBehandling = vedtakRepository.finnVedtakForBehandling(behandling.id).map { vedtak ->
                 val andelerTilkjentYtelse =
@@ -133,9 +136,15 @@ class FagsakService(
 
             val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId = behandling.id)
 
+            val forrigeBehandling = behandlinger
+                    .filter { it.opprettetTidspunkt.isBefore(behandling.opprettetTidspunkt) }
+                    .sortedBy { it.opprettetTidspunkt }
+                    .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+
             RestBehandling(
                     aktiv = behandling.aktiv,
                     arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling.toRestArbeidsfordelingPåBehandling(),
+                    opprinnelse = behandling.opprinnelse,
                     behandlingId = behandling.id,
                     vedtakForBehandling = restVedtakForBehandling,
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
@@ -159,7 +168,9 @@ class FagsakService(
                     beregningOversikt = if (tilkjentYtelse == null || personopplysningGrunnlag == null) emptyList() else
                         TilkjentYtelseUtils.hentBeregningOversikt(
                                 tilkjentYtelseForBehandling = tilkjentYtelse,
-                                personopplysningGrunnlag = personopplysningGrunnlag),
+                                personopplysningGrunnlag = personopplysningGrunnlag,
+                                tilkjentYtelseForForrigeBehandling = if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(
+                                        behandlingId = forrigeBehandling.id) else null),
                     gjeldendeForUtbetaling = behandling.gjeldendeForUtbetaling
             )
         }

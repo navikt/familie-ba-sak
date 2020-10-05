@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.nare.core.evaluations.Resultat
+import no.nav.familie.ba.sak.nare.Resultat
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

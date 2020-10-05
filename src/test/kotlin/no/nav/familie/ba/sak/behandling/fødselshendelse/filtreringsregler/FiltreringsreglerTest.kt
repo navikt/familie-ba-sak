@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.nare.Evaluering
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.util.FnrGenerator
-import no.nav.nare.core.evaluations.Evaluering
-import no.nav.nare.core.evaluations.Resultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

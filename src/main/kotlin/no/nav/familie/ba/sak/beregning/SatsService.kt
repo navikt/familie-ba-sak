@@ -20,6 +20,8 @@ object SatsService {
             Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31))
     )
 
+    fun hentAlleSatser() = satser
+
     fun hentGyldigSatsFor(satstype: SatsType,
                           stønadFraOgMed: YearMonth,
                           stønadTilOgMed: YearMonth,

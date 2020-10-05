@@ -9,15 +9,16 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforho
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
-import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -225,23 +226,7 @@ class VilkårVurderingTest(
     }
 
     @Test
-    fun `Negativ vurdering - To søker`() {
-        val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
-                                        "St. Olavsvegen", "1232", "whatever", "4322")
-
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 3)
-        val søker1 = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
-        personopplysningGrunnlag.personer.add(søker1)
-        val søker2 = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
-        personopplysningGrunnlag.personer.add(søker2)
-        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress)
-        personopplysningGrunnlag.personer.add(barn)
-
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
-    }
-
-    @Test
-    fun `Negativ vurdering - ingen søker`() {
+    fun `Skal kaste exception - ingen søker`() {
         val søkerAddress = GrVegadresse(1234, "11", "B", "H022",
                                         "St. Olavsvegen", "1232", "whatever", "4322")
 
@@ -249,7 +234,9 @@ class VilkårVurderingTest(
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
         personopplysningGrunnlag.personer.add(barn)
 
-        assertEquals(Resultat.NEI, Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat)
+        assertThrows(IllegalStateException::class.java) {
+            Vilkår.BOR_MED_SØKER.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(barn)).resultat
+        }
     }
 
     @Test

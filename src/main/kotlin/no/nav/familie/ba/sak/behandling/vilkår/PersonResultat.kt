@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.nare.core.evaluations.Resultat
+import no.nav.familie.ba.sak.nare.Resultat
 import java.util.*
 import javax.persistence.*
 

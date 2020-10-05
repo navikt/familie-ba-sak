@@ -12,10 +12,7 @@ class InfotrygdFeedService(val taskRepository: TaskRepository) {
     @Transactional
     fun sendTilInfotrygdFeed(barnsIdenter: List<String>) {
         LOG.info("Send ${barnsIdenter.size} av fødselsmeldinger til Infotrygd.")
-
-        barnsIdenter.forEach {
-            taskRepository.save(SendFeedTilInfotrygdTask.opprettTask(it))
-        }
+        taskRepository.save(SendFeedTilInfotrygdTask.opprettTask(barnsIdenter))
     }
 
 

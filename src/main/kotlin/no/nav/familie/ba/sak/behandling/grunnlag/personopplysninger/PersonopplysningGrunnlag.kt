@@ -29,8 +29,12 @@ data class PersonopplysningGrunnlag(
     val barna: List<Person>
         get() = personer.filter { it.type == PersonType.BARN }
 
-    val søker: List<Person>
-        get() = personer.filter { it.type == PersonType.SØKER }
+    val søker: Person
+        get() = personer.singleOrNull { it.type == PersonType.SØKER }
+                ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
+
+    val annenForelder: Person?
+        get() = personer.singleOrNull { it.type == PersonType.ANNENPART }
 
     override fun toString(): String {
         val sb = StringBuilder("PersonopplysningGrunnlagEntitet{")

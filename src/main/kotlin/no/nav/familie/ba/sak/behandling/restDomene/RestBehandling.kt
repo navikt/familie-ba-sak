@@ -1,20 +1,18 @@
 package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.RestArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.nare.core.evaluations.Resultat
+import no.nav.familie.ba.sak.nare.Resultat
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class RestBehandling(val aktiv: Boolean,
                           val arbeidsfordelingPåBehandling: RestArbeidsfordelingPåBehandling,
+                          val opprinnelse: BehandlingOpprinnelse,
                           val behandlingId: Long,
                           val type: BehandlingType,
                           val status: BehandlingStatus,
