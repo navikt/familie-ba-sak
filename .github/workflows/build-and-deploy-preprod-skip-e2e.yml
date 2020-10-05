@@ -37,11 +37,6 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
       - name: Push Docker image
         run: docker push $IMAGE
-      - uses: navikt/github-app-token-generator@master
-        id: get-token
-        with:
-          private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
-          app-id: ${{ secrets.REPO_CLONER_APP_ID }}
       - name: Deploy til dev-fss
         uses: nais/deploy/actions/deploy@v1
         env:
