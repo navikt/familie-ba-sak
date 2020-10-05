@@ -10,11 +10,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
@@ -114,7 +113,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     @Transactional
     fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
-        val forrigeVedtak = hentForrigeVedtak(behandling = behandling)
+        val forrigeVedtak = hentForrigeVedtakPåFagsak(sisteBehandlingPåFagsak = behandling)
 
         // TODO: Midlertidig fiks før støtte for delvis innvilget
         val behandlingResultatType = midlertidigUtledBehandlingResultatType(
@@ -140,6 +139,51 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         lagreOgDeaktiverGammel(vedtak)
     }
 
+    fun hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId: Long): List<UtbetalingBegrunnelse> {
+        val forrigeVedtak = hentForrigeVedtakPåFagsak(fagsakId)
+        return forrigeVedtak?.utbetalingBegrunnelser?.toList() ?: emptyList()
+    }
+
+    fun leggTilInitielleUtbetalingsbegrunnelser(fagsakId: Long, behandling: Behandling) {
+        slettUtbetalingBegrunnelser(behandling.id)
+        val forrigeBehandling = behandlingService.hentForrigeBehandling(fagsakId, behandling)
+        val forrigeTilkjentYtelse =
+                if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(forrigeBehandling.id) else null
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val personopplysningsGrunnlag =
+                persongrunnlagService.hentAktiv(behandling.id) ?: error("Finner ikke personopplhysningsgrunnlag på behandling")
+        val beregningsoversikt = TilkjentYtelseUtils.hentBeregningOversikt(
+                tilkjentYtelseForBehandling = tilkjentYtelse,
+                tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse,
+                personopplysningGrunnlag = personopplysningsGrunnlag)
+
+        val uendrede = beregningsoversikt.filter { it.endring.type == BeregningEndringType.UENDRET || it.endring.type == BeregningEndringType.UENDRET_SATS }.map { Periode(it.periodeFom, it.periodeTom) }
+        val satsendringer = beregningsoversikt.filter { it.endring.type == BeregningEndringType.ENDRET_SATS }.map { Periode(it.periodeFom, it.periodeTom) }
+        leggTilUtbetalingsbegrunnelseforuendrede(fagsakId, uendrede)
+        leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId, satsendringer)
+    }
+
+    private fun leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId: Long, perioder: List<Periode>) {
+        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+        perioder.forEach {
+            leggTilUtbetalingBegrunnelse(fagsakId,
+                                         UtbetalingBegrunnelse(vedtak = vedtak,
+                                                               fom = it.fom,
+                                                               tom = it.tom,
+                                                               resultat = BehandlingResultatType.INNVILGET,
+                                                               behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING,
+                                                               brevBegrunnelse =
+                                                               BehandlingresultatOgVilkårBegrunnelse.SATSENDRING.hentBeskrivelse(
+                                                                       vilkårsdato = it.fom.toString())))
+        }
+    }
+
+    private fun leggTilUtbetalingsbegrunnelseforuendrede(fagsakId: Long, perioder: List<Periode>) {
+        val utbetalingsbegrunnelser =
+                hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId).filter { Periode(it.fom, it.tom) in perioder }
+        utbetalingsbegrunnelser.forEach { leggTilUtbetalingBegrunnelse(fagsakId = fagsakId, utbetalingBegrunnelse = it) }
+    }
+
     @Transactional
     fun leggTilUtbetalingBegrunnelse(periode: Periode,
                                      fagsakId: Long): List<RestUtbetalingBegrunnelse> {
@@ -154,6 +198,30 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         vedtak.leggTilUtbetalingBegrunnelse(begrunnelse)
 
         lagreEllerOppdater(vedtak)
+
+        return vedtak.utbetalingBegrunnelser.map {
+            it.toRestUtbetalingBegrunnelse()
+        }
+    }
+
+    @Transactional
+    fun leggTilUtbetalingBegrunnelse(fagsakId: Long,
+                                     utbetalingBegrunnelse: UtbetalingBegrunnelse): List<RestUtbetalingBegrunnelse> {
+
+        val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
+
+        if (vedtak.utbetalingBegrunnelser.none { it.erLik(utbetalingBegrunnelse) }) {
+            val begrunnelse = UtbetalingBegrunnelse(vedtak = vedtak,
+                                                    fom = utbetalingBegrunnelse.fom,
+                                                    tom = utbetalingBegrunnelse.tom,
+                                                    resultat = utbetalingBegrunnelse.resultat,
+                                                    behandlingresultatOgVilkårBegrunnelse = utbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse,
+                                                    brevBegrunnelse = utbetalingBegrunnelse.brevBegrunnelse)
+
+            vedtak.leggTilUtbetalingBegrunnelse(begrunnelse)
+
+            lagreEllerOppdater(vedtak)
+        }
 
         return vedtak.utbetalingBegrunnelser.map {
             it.toRestUtbetalingBegrunnelse()
@@ -182,7 +250,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             lagreEllerOppdater(vedtak)
         }
     }
-
 
     @Transactional
     fun endreUtbetalingBegrunnelse(restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse,
@@ -294,15 +361,19 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     }
 
-    fun hentForrigeVedtak(behandling: Behandling): Vedtak? {
-        val behandlinger = behandlingService.hentBehandlinger(behandling.fagsak.id)
-
+    fun hentForrigeVedtakPåFagsak(sisteBehandlingPåFagsak: Behandling): Vedtak? {
+        val behandlinger = behandlingService.hentBehandlinger(sisteBehandlingPåFagsak.fagsak.id)
 
         return when (val forrigeBehandling =
-                behandlinger.filter { it.id != behandling.id }.maxByOrNull { it.opprettetTidspunkt }) {
+                behandlinger.filter { it.id != sisteBehandlingPåFagsak.id }.maxByOrNull { it.opprettetTidspunkt }) {
             null -> null
             else -> hentAktivForBehandling(behandlingId = forrigeBehandling.id)
         }
+    }
+
+    private fun hentForrigeVedtakPåFagsak(fagsakId: Long): Vedtak? {
+        val aktivtVedtak = hentVedtakForAktivBehandling(fagsakId) ?: error("Finner ingen aktivt vedtak på fagsak $fagsakId")
+        return if (aktivtVedtak.forrigeVedtakId != null) hent(aktivtVedtak.forrigeVedtakId) else null
     }
 
     fun hent(vedtakId: Long): Vedtak {
