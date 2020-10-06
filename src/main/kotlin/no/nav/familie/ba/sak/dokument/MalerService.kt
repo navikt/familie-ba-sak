@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
