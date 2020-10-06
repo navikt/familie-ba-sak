@@ -44,15 +44,9 @@ class MalerService(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                        ?: throw Feil(message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
                                                      frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev")
-        val statsborgerskap =
-                persongrunnlagService.hentSøker(vedtak.behandling)?.statsborgerskap
-                ?: error("Kan ikke hente statsborgerskap for søker på behandling")
-        val medlemskap = finnNåværendeMedlemskap(statsborgerskap)
-        val sterkesteMedlemskap = finnSterkesteMedlemskap(medlemskap)
 
         return MalMedData(
-                mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap,
-                                                         behandlingResultatType,
+                mal = malNavnForMedlemskapOgResultatType(behandlingResultatType,
                                                          vedtak.behandling.opprinnelse,
                                                          vedtak.behandling.type),
                 fletteFelter = when (behandlingResultatType) {
@@ -190,21 +184,17 @@ class MalerService(
 
     companion object {
 
-        fun malNavnForMedlemskapOgResultatType(medlemskap: Medlemskap?,
-                                               resultatType: BehandlingResultatType,
+        fun malNavnForMedlemskapOgResultatType(resultatType: BehandlingResultatType,
                                                behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL,
                                                behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): String {
-            var malNavn = if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
-                return "${resultatType.brevMal}-autovedtak"
-            } else when (medlemskap) {
-                Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-tredjelandsborger"
-                else -> resultatType.brevMal
-            }
-
-            return when (behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING ->
-                    malNavn
-                else -> "${malNavn}-${behandlingType.toString().toLowerCase()}"
+            return if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+                "${resultatType.brevMal}-autovedtak"
+            } else {
+                val malNavn = resultatType.brevMal
+                when (behandlingType) {
+                    BehandlingType.FØRSTEGANGSBEHANDLING -> malNavn
+                    else -> "${malNavn}-${behandlingType.toString().toLowerCase()}"
+                }
             }
         }
     }
