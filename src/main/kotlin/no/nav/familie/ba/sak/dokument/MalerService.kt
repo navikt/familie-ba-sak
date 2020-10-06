@@ -105,8 +105,7 @@ class MalerService(
         return if (vedtak.behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             autovedtakBrevFelter(vedtak, personopplysningGrunnlag, beregningOversikt, enhetNavn)
         } else {
-            val målform = personopplysningGrunnlag.søker.singleOrNull()?.målform
-                          ?: error("Det skal finnes nøyaktig en søker på personopplysningGrunnlag ved generering av vedtaksbrev.")
+            val målform = personopplysningGrunnlag.søker.målform
             manueltVedtakBrevFelter(vedtak, beregningOversikt, enhetNavn, målform)
         }
     }
