@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
@@ -29,14 +28,17 @@ class LoggService(
     }.toMap()
 
     fun opprettBehandlendeEnhetEndret(behandling: Behandling,
-                                      fraBehandlendeEnhetNavn: String,
-                                      tilBehandlendeEnhetNavn: String) {
+                                      fraEnhetId: String,
+                                      tilEnhetId: String,
+                                      manuellOppdatering: Boolean,
+                                      begrunnelse: String?) {
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLENDE_ENHET_ENDRET,
-                tittel = "Behandlende enhet endret",
+                tittel = "Endret enhet på behandling",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                tekst = "Fra $fraBehandlendeEnhetNavn til $tilBehandlendeEnhetNavn"
+                tekst = "Behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} endret fra $fraEnhetId til $tilEnhetId." +
+                        if (begrunnelse != null) "\n\n${begrunnelse}" else ""
         ))
     }
 
