@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
@@ -37,6 +38,14 @@ class BeregningService(
 
     fun hentTilkjentYtelseForBehandling(behandlingId: Long): TilkjentYtelse {
         return tilkjentYtelseRepository.findByBehandling(behandlingId)
+    }
+
+    fun hentSisteTilkjentYtelseFørBehandling(behandling: Behandling): TilkjentYtelse? {
+        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId = behandling.id)
+        val forrigeBehandling = behandlinger
+                .sortedBy { it.opprettetTidspunkt }
+                .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+        return if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(behandlingId = forrigeBehandling.id) else null
     }
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {

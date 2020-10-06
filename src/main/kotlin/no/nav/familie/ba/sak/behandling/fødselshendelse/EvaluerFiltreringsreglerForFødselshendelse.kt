@@ -7,11 +7,11 @@ import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Fakta
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.nare.Evaluering
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.nare.core.evaluations.Evaluering
-import no.nav.nare.core.evaluations.Resultat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -56,13 +56,12 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                        ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
-        val mor = personopplysningGrunnlag.søker.firstOrNull()
-                  ?: error("Fant ingen personer i grunnlaget med type=søker.")
+        val mor = personopplysningGrunnlag.søker
 
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
         val restenAvBarna =
-                personopplysningerService.hentPersoninfoMedRelasjoner(personopplysningGrunnlag.søker[0].personIdent.ident).familierelasjoner.filter {
+                personopplysningerService.hentPersoninfoMedRelasjoner(mor.personIdent.ident).familierelasjoner.filter {
                     it.relasjonsrolle == FAMILIERELASJONSROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }
                 }.map {
                     personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
@@ -75,8 +74,8 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         return Fakta(mor, barnaFraHendelse, restenAvBarna, morLever, barnLever, morHarVerge, localDateService.now())
     }
 
-    private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean{
-        if(evaluering.resultat == Resultat.NEI && førsteutfall){
+    private fun økTellereForFørsteUtfall(evaluering: Evaluering, førsteutfall: Boolean): Boolean {
+        if (evaluering.resultat == Resultat.NEI && førsteutfall) {
             filtreringsreglerFørsteUtfallMetrics[evaluering.identifikator]!!.increment()
             return false
         }
@@ -87,11 +86,11 @@ class EvaluerFiltreringsreglerForFødselshendelse(
         var førsteutfall = true
         if (evaluering.children.isEmpty()) {
             filtreringsreglerMetrics[evaluering.identifikator + evaluering.resultat.name]!!.increment()
-            førsteutfall= økTellereForFørsteUtfall(evaluering, førsteutfall)
+            førsteutfall = økTellereForFørsteUtfall(evaluering, førsteutfall)
         } else {
             evaluering.children.forEach {
                 filtreringsreglerMetrics[it.identifikator + it.resultat.name]!!.increment()
-                førsteutfall= økTellereForFørsteUtfall(it, førsteutfall)
+                førsteutfall = økTellereForFørsteUtfall(it, førsteutfall)
             }
         }
     }

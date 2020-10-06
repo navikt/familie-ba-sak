@@ -10,10 +10,10 @@ import no.nav.familie.ba.sak.beregning.domene.lagTidslinjeMedOverlappendePeriode
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandlingResultat
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
-import no.nav.nare.core.evaluations.Resultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

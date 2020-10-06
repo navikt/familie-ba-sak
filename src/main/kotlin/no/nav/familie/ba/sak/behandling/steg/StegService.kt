@@ -72,11 +72,15 @@ class StegService(
                                                                 bekreftEndringerViaFrontend = true))
     }
 
-    fun evaluerVilkårForFødselshendelse(behandling: Behandling, personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultatType? {
+    fun evaluerVilkårForFødselshendelse(behandling: Behandling,
+                                        personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultatType? {
         håndterVilkårsvurdering(behandling)
         val behandlingResultat = behandlingResultatRepository.findByBehandlingAndAktiv(behandling.id)
         return behandlingResultat?.samletResultat
-                .also { secureLogger.info("Behandling med søkerident ${behandling.fagsak.hentAktivIdent().ident} fullført med resultat: $it") }
+                .also {
+                    LOG.info("Vilkårsvurdering på behandling ${behandling.id} fullført med resultat: $it")
+                    secureLogger.info("Vilkårsvurdering på behandling ${behandling.id} med søkerident ${behandling.fagsak.hentAktivIdent().ident} fullført med resultat: $it")
+                }
     }
 
     @Transactional

@@ -1,8 +1,14 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
@@ -30,7 +36,7 @@ class MalerService(
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val søknadGrunnlagService: SøknadGrunnlagService
+        private val søknadGrunnlagService: SøknadGrunnlagService,
 ) {
 
     fun mapTilVedtakBrevfelter(vedtak: Vedtak,
@@ -48,7 +54,8 @@ class MalerService(
         return MalMedData(
                 mal = malNavnForMedlemskapOgResultatType(sterkesteMedlemskap,
                                                          behandlingResultatType,
-                                                         vedtak.behandling.opprinnelse),
+                                                         vedtak.behandling.opprinnelse,
+                                                         vedtak.behandling.type),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
                     BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
@@ -86,9 +93,11 @@ class MalerService(
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
-
-        val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(tilkjentYtelseForBehandling = tilkjentYtelse,
-                                                                          personopplysningGrunnlag = personopplysningGrunnlag)
+        val forrigeTilkjentYtelse = beregningService.hentSisteTilkjentYtelseFørBehandling(behandling = vedtak.behandling)
+        val beregningOversikt = TilkjentYtelseUtils.hentBeregningOversikt(
+                tilkjentYtelseForBehandling = tilkjentYtelse,
+                tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse,
+                personopplysningGrunnlag = personopplysningGrunnlag)
                 .sortedBy { it.periodeFom }
 
         val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
@@ -117,32 +126,34 @@ class MalerService(
                 maalform = målform.toString()
         )
 
-        innvilget.duFaar = beregningOversikt.map {
-            val barnasFødselsdatoer =
-                    Utils.slåSammen(it.beregningDetaljer
-                                            .filter { restBeregningDetalj -> restBeregningDetalj.person.type == PersonType.BARN }
-                                            .sortedBy { restBeregningDetalj -> restBeregningDetalj.person.fødselsdato }
-                                            .map { restBeregningDetalj ->
-                                                restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
-                                            })
+        innvilget.duFaar = beregningOversikt
+                .filter { it.endring.trengerBegrunnelse }
+                .map {
+                    val barnasFødselsdatoer =
+                            Utils.slåSammen(it.beregningDetaljer
+                                                    .filter { restBeregningDetalj -> restBeregningDetalj.person.type == PersonType.BARN }
+                                                    .sortedBy { restBeregningDetalj -> restBeregningDetalj.person.fødselsdato }
+                                                    .map { restBeregningDetalj ->
+                                                        restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
+                                                    })
 
-            val begrunnelse =
-                    vedtak.utbetalingBegrunnelser.filter { stønadBrevBegrunnelse ->
-                        stønadBrevBegrunnelse.fom == it.periodeFom && stønadBrevBegrunnelse.tom == it.periodeTom
-                    }.toMutableSet().map { utbetalingBegrunnelse ->
-                        utbetalingBegrunnelse.brevBegrunnelse
-                        ?: "Ikke satt"
-                    }.toList()
+                    val begrunnelse =
+                            vedtak.utbetalingBegrunnelser.filter { stønadBrevBegrunnelse ->
+                                stønadBrevBegrunnelse.fom == it.periodeFom && stønadBrevBegrunnelse.tom == it.periodeTom
+                            }.toMutableSet().map { utbetalingBegrunnelse ->
+                                utbetalingBegrunnelse.brevBegrunnelse
+                                ?: "Ikke satt"
+                            }.toList()
 
-            DuFårSeksjon(
-                    fom = it.periodeFom!!.tilDagMånedÅr(),
-                    tom = it.periodeTom!!.tilDagMånedÅr(),
-                    belop = Utils.formaterBeløp(it.utbetaltPerMnd),
-                    antallBarn = it.antallBarn,
-                    barnasFodselsdatoer = barnasFødselsdatoer,
-                    begrunnelser = begrunnelse
-            )
-        }
+                    DuFårSeksjon(
+                            fom = it.periodeFom.tilDagMånedÅr(),
+                            tom = if (!it.periodeTom.erSenereEnnNesteMåned()) it.periodeTom.tilDagMånedÅr() else "",
+                            belop = Utils.formaterBeløp(it.utbetaltPerMnd),
+                            antallBarn = it.antallBarn,
+                            barnasFodselsdatoer = barnasFødselsdatoer,
+                            begrunnelser = begrunnelse
+                    )
+                }
 
         return objectMapper.writeValueAsString(innvilget)
     }
@@ -153,7 +164,7 @@ class MalerService(
                                      enhet: String): String {
         val barnaSortert = personopplysningGrunnlag.barna.sortedByDescending { it.fødselsdato }
         val etterbetalingsbeløp = etterbetalingsbeløpFraSimulering().takeIf { it > 0 }
-        val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker[0].navn,
+        val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker.navn,
                                                fodselsnummer = vedtak.behandling.fagsak.hentAktivIdent().ident,
                                                fodselsdato = Utils.slåSammen(barnaSortert.map { it.fødselsdato.tilKortString() }),
                                                belop = Utils.formaterBeløp(TilkjentYtelseUtils.beregnNåværendeBeløp(
@@ -183,13 +194,19 @@ class MalerService(
 
         fun malNavnForMedlemskapOgResultatType(medlemskap: Medlemskap?,
                                                resultatType: BehandlingResultatType,
-                                               opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL): String {
-            if (opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+                                               behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL,
+                                               behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): String {
+            var malNavn = if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
                 return "${resultatType.brevMal}-autovedtak"
-            }
-            return when (medlemskap) {
+            } else when (medlemskap) {
                 Medlemskap.TREDJELANDSBORGER -> "${resultatType.brevMal}-tredjelandsborger"
                 else -> resultatType.brevMal
+            }
+
+            return when (behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING ->
+                    malNavn
+                else -> "${malNavn}-${behandlingType.toString().toLowerCase()}"
             }
         }
     }

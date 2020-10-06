@@ -17,11 +17,11 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.sats
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
-import no.nav.nare.core.evaluations.Resultat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -108,7 +108,7 @@ fun lagVedtak(behandling: Behandling = lagBehandling(),
 
 fun lagAndelTilkjentYtelse(fom: String,
                            tom: String,
-                           ytelseType: YtelseType,
+                           ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
                            beløp: Int = sats(ytelseType),
                            behandling: Behandling = lagBehandling(),
                            person: Person = tilfeldigPerson(),
@@ -153,7 +153,7 @@ fun lagAndelTilkjentYtelseUtvidet(fom: String,
 }
 
 
-fun lagInitiellTilkjentYtelse(behandling: Behandling): TilkjentYtelse {
+fun lagInitiellTilkjentYtelse(behandling: Behandling = lagBehandling()): TilkjentYtelse {
     return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
 }
 

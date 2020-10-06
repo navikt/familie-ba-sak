@@ -6,7 +6,10 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
@@ -22,6 +25,7 @@ import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -31,9 +35,9 @@ internal class SaksstatistikkServiceTest {
 
 
     private val behandlingService: BehandlingService = mockk()
-    private val journalføringRepository: JournalføringRepository  = mockk()
-    private val journalføringService: JournalføringService  = mockk()
-    private val arbeidsfordelingService: ArbeidsfordelingService  = mockk()
+    private val journalføringRepository: JournalføringRepository = mockk()
+    private val journalføringService: JournalføringService = mockk()
+    private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
     private val totrinnskontrollService: TotrinnskontrollService = mockk(relaxed = true)
 
     private val vedtakService: VedtakService = mockk()
@@ -46,12 +50,12 @@ internal class SaksstatistikkServiceTest {
                                                              vedtakService)
 
 
-
-
-
     @BeforeAll
     fun init() {
-        every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(behandlendeEnhetId = "4820", behandlendeEnhetNavn = "Nav", behandlingId = 1)
+        every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
+                behandlendeEnhetId = "4820",
+                behandlendeEnhetNavn = "Nav",
+                behandlingId = 1)
         every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
     }
 
@@ -67,14 +71,18 @@ internal class SaksstatistikkServiceTest {
 
         assertThat(behandlingDvh.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
-        assertThat(behandlingDvh.mottattDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt, SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh.registrertDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt, SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh.mottattDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
+                                                                         SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh.registrertDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
+                                                                            SaksstatistikkService.TIMEZONE))
         assertThat(behandlingDvh.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
         assertThat(behandlingDvh.behandlingId).isEqualTo(behandling.id.toString())
         assertThat(behandlingDvh.relatertBehandlingId).isEqualTo("1")
         assertThat(behandlingDvh.sakId).isEqualTo(behandling.fagsak.id.toString())
         assertThat(behandlingDvh.vedtakId).isEqualTo(vedtak.id.toString())
         assertThat(behandlingDvh.behandlingType).isEqualTo(behandling.type.name)
+        assertThat(behandlingDvh.behandlingKategori).isEqualTo(behandling.kategori.name)
+        assertThat(behandlingDvh.behandlingUnderkategori).isEqualTo(behandling.underkategori.name)
         assertThat(behandlingDvh.behandlingStatus).isEqualTo(behandling.status.name)
         assertThat(behandlingDvh.totrinnsbehandling).isFalse()
         assertThat(behandlingDvh.saksbehandler).isNull()
@@ -87,13 +95,28 @@ internal class SaksstatistikkServiceTest {
     @Test
     fun `Skal mappe til behandlingDVH for manuell rute`() {
         val behandling = lagBehandling(opprinnelse = BehandlingOpprinnelse.MANUELL)
-        val vedtak = lagVedtak(behandling)
+
+
+        val vedtak = lagVedtak(behandling).also {
+            it.utbetalingBegrunnelser.add(
+                    UtbetalingBegrunnelse(vedtak = it,
+                                          fom = LocalDate.now(),
+                                          tom = LocalDate.now(),
+                                          resultat = BehandlingResultatType.INNVILGET,
+                                          behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOR_HOS_SØKER))
+        }
+
+
         every { behandlingService.hent(any()) } returns behandling
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { journalføringRepository.findByBehandlingId(any())} returns listOf(DbJournalpost(1, "foo", LocalDateTime.now(), behandling, "123"))
-        val mottattDato = LocalDateTime.of(2019,12,20,10,0,0)
-        val jp = lagTestJournalpost ("123", "123").copy(relevanteDatoer = listOf(RelevantDato(mottattDato, "DATO_REGISTRERT")))
-        every { journalføringService.hentJournalpost(any())} returns Ressurs.Companion.success(jp)
+        every { journalføringRepository.findByBehandlingId(any()) } returns listOf(DbJournalpost(1,
+                                                                                                 "foo",
+                                                                                                 LocalDateTime.now(),
+                                                                                                 behandling,
+                                                                                                 "123"))
+        val mottattDato = LocalDateTime.of(2019, 12, 20, 10, 0, 0)
+        val jp = lagTestJournalpost("123", "123").copy(relevanteDatoer = listOf(RelevantDato(mottattDato, "DATO_REGISTRERT")))
+        every { journalføringService.hentJournalpost(any()) } returns Ressurs.Companion.success(jp)
 
         val behandlingDvh = sakstatistikkService.loggBehandlingStatus(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
@@ -112,6 +135,9 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh.totrinnsbehandling).isTrue()
         assertThat(behandlingDvh.saksbehandler).isNull()
         assertThat(behandlingDvh.beslutter).isNull()
+        assertThat(behandlingDvh.resultatBegrunnelser).hasSize(1)
+                .extracting("resultatBegrunnelse")
+                .containsOnly("INNVILGET_BOR_HOS_SØKER")
         assertThat(behandlingDvh.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh.versjon).isNotEmpty()
 

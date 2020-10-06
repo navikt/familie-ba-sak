@@ -9,9 +9,9 @@ import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -26,18 +26,17 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
     fun loggBehandlingStatus(behandlingId: Long, forrigeBehandlingId: Long?): BehandlingDVH {
         val behandling = behandlingService.hent(behandlingId)
 
-        var datoMottatt: LocalDateTime
-        when (behandling.opprinnelse) {
+        val datoMottatt = when (behandling.opprinnelse) {
             BehandlingOpprinnelse.MANUELL -> {
-            val journalpost = journalføringRepository.findByBehandlingId(behandlingId)
-                datoMottatt = journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
-                                      .filter { it.journalposttype == Journalposttype.I }
-                                      .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
-                                      .mapNotNull { it.datoMottatt }
-                                      .minOrNull() ?: behandling.opprettetTidspunkt
+                val journalpost = journalføringRepository.findByBehandlingId(behandlingId)
+                journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
+                        .filter { it.journalposttype == Journalposttype.I }
+                        .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
+                        .mapNotNull { it.datoMottatt }
+                        .minOrNull() ?: behandling.opprettetTidspunkt
             }
             BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE -> {
-                datoMottatt = behandling.opprettetTidspunkt
+                behandling.opprettetTidspunkt
             }
             else -> error("Statistikkhåndtering for behandling med opprinnelse ${behandling.opprinnelse.name} ikke implementert.")
         }
@@ -57,6 +56,8 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                           sakId = behandling.fagsak.id.toString(),
                                           behandlingType = behandling.type.name,
                                           behandlingStatus = behandling.status.name,
+                                          behandlingKategori = behandling.kategori.name,
+                                          behandlingUnderkategori = behandling.underkategori.name,
                                           utenlandstilsnitt = "NASJONAL",
                                           ansvarligEnhetKode = ansvarligEnhetKode,
                                           behandlendeEnhetKode = behandlendeEnhetsKode,
@@ -70,9 +71,11 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                           relatertBehandlingId = forrigeBehandlingId?.toString(),
                                           vedtakId = aktivtVedtak?.id?.toString(),
                                           resultat = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.resultat?.name,
-                                          resultatBegrunnelse = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.behandlingresultatOgVilkårBegrunnelse?.name,
+
                                           behandlingTypeBeskrivelse = behandling.type.visningsnavn,
-                                          resultatBegrunnelseBeskrivelse = aktivtVedtak?.utbetalingBegrunnelser?.mapNotNull { it.behandlingresultatOgVilkårBegrunnelse?.tittel }.orEmpty(),
+                                          resultatBegrunnelser = aktivtVedtak?.utbetalingBegrunnelser?.mapNotNull { it.behandlingresultatOgVilkårBegrunnelse }
+                                                  ?.map { ResultatBegrunnelseDVH(it.name, it.tittel) }
+                                                  .orEmpty(),
                                           behandlingOpprettetAv = behandling.opprettetAv,
                                           behandlingOpprettetType = "saksbehandlerId",
                                           behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling"
