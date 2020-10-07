@@ -184,11 +184,11 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun oppdaterOppgave(patchOppgave: Oppgave): OppgaveResponse {
-        val uri = URI.create("$integrasjonUri/oppgave/oppdater")
+    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
+        val uri = URI.create("$integrasjonUri/oppgave/${patchOppgave.id}/oppdater")
 
         return Result.runCatching {
-            postForEntity<Ressurs<OppgaveResponse>>(uri, patchOppgave, HttpHeaders().medContentTypeJsonUTF8())
+            patchForEntity<Ressurs<OppgaveResponse>>(uri, patchOppgave, HttpHeaders().medContentTypeJsonUTF8())
         }.fold(
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)

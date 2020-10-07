@@ -202,7 +202,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.opprettOppgave(any()) } returns
                 "12345678"
 
-        every { mockIntegrasjonClient.oppdaterOppgave(any()) } returns
+        every { mockIntegrasjonClient.patchOppgave(any()) } returns
                 OppgaveResponse(12345678L)
 
         every { mockIntegrasjonClient.fordelOppgave(any(), any()) } returns

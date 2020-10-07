@@ -115,7 +115,7 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
                 secureLogger.info("Oppgave(${oppgave.id}, ${oppgave.journalpostId}): $oppgave")
                 if (oppgave.tildeltEnhetsnr != oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId) {
                     logger.info("Oppdaterer enhet fra ${oppgave.tildeltEnhetsnr} til ${oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId} på oppgave ${oppgave.id}")
-                    oppgaveService.oppdaterOppgave(oppgave.copy(
+                    oppgaveService.patchOppgave(oppgave.copy(
                             tildeltEnhetsnr = oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId
                     ))
                 }

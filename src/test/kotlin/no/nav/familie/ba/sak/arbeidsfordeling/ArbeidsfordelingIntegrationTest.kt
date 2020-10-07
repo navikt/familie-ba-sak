@@ -234,7 +234,7 @@ class ArbeidsfordelingIntegrationTest(
         ))
 
         verify(exactly = 1) {
-            oppgaveService.oppdaterOppgave(any())
+            oppgaveService.patchOppgave(any())
         }
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
