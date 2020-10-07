@@ -67,7 +67,6 @@ class FødselshendelseServiceTest {
                                                                 behandlingResultatRepositoryMock,
                                                                 persongrunnlagServiceMock,
                                                                 behandlingRepositoryMock,
-                                                                vilkårsvurderingMetricsMock,
                                                                 gdprServiceMock)
 
     @Test

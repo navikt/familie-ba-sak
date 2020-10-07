@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.Filtreringsregler
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -11,7 +12,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -43,8 +44,8 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val behandlingResultatRepository: BehandlingResultatRepository,
                              private val persongrunnlagService: PersongrunnlagService,
                              private val behandlingRepository: BehandlingRepository,
-                             private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
-                             private val gdprService: GDPRService) {
+                             private val gdprService: GDPRService,
+                             private val totrinnskontrollService: TotrinnskontrollService) {
 
     val harLøpendeSakIInfotrygdCounter: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
     val harIkkeLøpendeSakIInfotrygdCounter: Counter =
@@ -114,11 +115,9 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                 }
 
                 opprettOppgaveForManuellBehandling(behandlingId = behandling.id, beskrivelse = beskrivelse)
+
             } else {
-                val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                             ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-                vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
-                IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
+                iverksett(behandling)
             }
         }
     }
@@ -179,6 +178,9 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         return null
     }
 
+    private fun fødselshendelseSkalRullesTilbake() : Boolean =
+            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
+
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
 
         val nyTask = OpprettOppgaveTask.opprettTask(
@@ -190,9 +192,16 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         taskRepository.save(nyTask)
     }
 
-    private fun fødselshendelseSkalRullesTilbake(): Boolean =
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
+    private fun iverksett(behandling: Behandling) {
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
 
+        totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
+
+        val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
+        taskRepository.save(task)
+    }
 
     companion object {
 

@@ -55,6 +55,14 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         lagreEllerOppdater(totrinnskontroll)
     }
 
+    fun opprettAutomatiskTotrinnskontroll(behandling: Behandling) {
+        lagreOgDeaktiverGammel(Totrinnskontroll(
+                behandling = behandling,
+                saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
+                beslutter = SikkerhetContext.hentSaksbehandlerNavn()
+        ))
+    }
+
     fun lagreOgDeaktiverGammel(totrinnskontroll: Totrinnskontroll): Totrinnskontroll {
         val aktivTotrinnskontroll = hentAktivForBehandling(totrinnskontroll.behandling.id)
 

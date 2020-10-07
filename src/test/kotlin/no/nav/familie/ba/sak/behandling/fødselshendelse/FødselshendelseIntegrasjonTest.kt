@@ -108,7 +108,6 @@ class FødselshendelseIntegrasjonTest(
                                                         behandlingResultatRepository,
                                                         persongrunnlagService,
                                                         behandlingRepository,
-                                                        vilkårsvurderingMetrics,
                                                         gdprService)
 
     @Test

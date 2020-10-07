@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.nare.Spesifikasjon
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert
@@ -42,7 +43,7 @@ class OppgaveBeskrivelseTest {
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
-    private val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
+    private val totrinnskontrollService = mockk<TotrinnskontrollService>()
 
     private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                                 infotrygdBarnetrygdClientMock,
@@ -55,8 +56,8 @@ class OppgaveBeskrivelseTest {
                                                                 behandlingResultatRepositoryMock,
                                                                 persongrunnlagServiceMock,
                                                                 behandlingRepositoryMock,
-                                                                vilkårsvurderingMetricsMock,
-                                                                gdprServiceMock)
+                                                                gdprServiceMock,
+                                                                totrinnskontrollService)
 
     @Test
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere begrunnelse av første regel som feilet`() {
