@@ -32,12 +32,10 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
         val forrigeArbeidsfordelingsenhet = Arbeidsfordelingsenhet(enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
                                                                    enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn)
 
-        val nyArbeidsfordelingsenhet = norg2RestClient.hentEnhet(endreBehandlendeEnhet.enhetId)
-
         val oppdatertArbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingRepository.save(
                 aktivArbeidsfordelingPåBehandling.copy(
-                        behandlendeEnhetId = nyArbeidsfordelingsenhet.enhetId.toString(),
-                        behandlendeEnhetNavn = nyArbeidsfordelingsenhet.navn,
+                        behandlendeEnhetId = endreBehandlendeEnhet.enhetId,
+                        behandlendeEnhetNavn = norg2RestClient.hentEnhet(endreBehandlendeEnhet.enhetId).navn,
                         manueltOverstyrt = true
                 )
         )
