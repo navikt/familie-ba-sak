@@ -199,7 +199,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.opprettOppgave(any()) } returns
                 "12345678"
 
-        every { mockIntegrasjonClient.oppdaterOppgave(any()) } returns
+        every { mockIntegrasjonClient.patchOppgave(any()) } returns
                 OppgaveResponse(12345678L)
 
         every { mockIntegrasjonClient.fordelOppgave(any(), any()) } returns
@@ -221,7 +221,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just runs
 
         every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns
-                listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
+                listOf(Arbeidsfordelingsenhet("4833", "NAV Familie- og pensjonsytelser Oslo 1"))
 
         every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
                 "mock data".toByteArray()
