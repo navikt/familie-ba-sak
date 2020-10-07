@@ -38,32 +38,6 @@ class MalerServiceTest {
                                                           søknadGrunnlagService)
 
     @Test
-    fun `Skal returnere malnavn innvilget-tredjelandsborger for medlemskap TREDJELANDSBORGER og resultat INNVILGET`() {
-
-        val malNavn = MalerService.malNavnForMedlemskapOgResultatType(Medlemskap.TREDJELANDSBORGER,
-                                                                      BehandlingResultatType.INNVILGET)
-
-        assertEquals("innvilget-tredjelandsborger", malNavn)
-    }
-
-    @Test
-    fun `Skal returnere malnavn innvilget for medlemskap NORDEN og resultat INNVILGET`() {
-
-        val malNavn = MalerService.malNavnForMedlemskapOgResultatType(Medlemskap.NORDEN,
-                                                                      BehandlingResultatType.INNVILGET)
-
-        assertEquals("innvilget", malNavn)
-    }
-
-    @Test
-    fun `Skal returnere malnavn innvilget for resultat INNVILGET når medlemskap er null`() {
-        val malNavn = MalerService.malNavnForMedlemskapOgResultatType(null,
-                                                                      BehandlingResultatType.INNVILGET)
-
-        assertEquals("innvilget", malNavn)
-    }
-
-    @Test
     fun `test mapTilInnvilgetBrevfelter for innvilget autovedtak med ett barn`() {
         every { norg2RestClient.hentEnhet(any()) } returns Enhet(1L, "enhet")
 
