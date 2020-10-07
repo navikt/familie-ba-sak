@@ -94,7 +94,6 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
                 forrigeArbeidsfordelingsenhet = forrigeArbeidsfordelingsenhet,
                 oppdatertArbeidsfordelingPåBehandling = oppdatertArbeidsfordelingPåBehandling,
                 manuellOppdatering = false,
-                begrunnelse = null
         )
     }
 
@@ -102,7 +101,7 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
                                              forrigeArbeidsfordelingsenhet: Arbeidsfordelingsenhet?,
                                              oppdatertArbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling,
                                              manuellOppdatering: Boolean,
-                                             begrunnelse: String?) {
+                                             begrunnelse: String = "") {
         logger.info("Fastsatt behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} på behandling ${behandling.id}: $oppdatertArbeidsfordelingPåBehandling")
 
         if (forrigeArbeidsfordelingsenhet != null && forrigeArbeidsfordelingsenhet.enhetId != oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId) {

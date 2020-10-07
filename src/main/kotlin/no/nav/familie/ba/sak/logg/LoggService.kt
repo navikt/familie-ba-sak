@@ -31,14 +31,14 @@ class LoggService(
                                       fraEnhetId: String,
                                       tilEnhetId: String,
                                       manuellOppdatering: Boolean,
-                                      begrunnelse: String?) {
+                                      begrunnelse: String) {
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLENDE_ENHET_ENDRET,
                 tittel = "Endret enhet på behandling",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = "Behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} endret fra $fraEnhetId til $tilEnhetId." +
-                        if (begrunnelse != null) "\n\n${begrunnelse}" else ""
+                        if (begrunnelse.isNotBlank()) "\n\n${begrunnelse}" else ""
         ))
     }
 
