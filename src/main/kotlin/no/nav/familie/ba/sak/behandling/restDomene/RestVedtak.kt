@@ -2,8 +2,10 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.BegrunnelseService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -29,8 +31,13 @@ data class RestPutUtbetalingBegrunnelse(
         val behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse?
 )
 
+data class RestPutUtbetalingBegrunnelseForslag(
+        val kategori: BegrunnelseService.BegrunnelseKategori?,
+        val vilkår: Vilkår?
+)
+
 data class RestVedtakBegrunnelse(
-        val id: BehandlingresultatOgVilkårBegrunnelse,
+        val id: BegrunnelseService.Begrunnelse,
         val navn: String
 )
 

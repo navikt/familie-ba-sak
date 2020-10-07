@@ -42,7 +42,8 @@ object BegrunnelseService {
             },
     )
 
-    fun hentBegrunnelserFor(vilkår: Vilkår): List<Begrunnelse> = begrunnelser.filter { it.relevantFor == vilkår }
+    fun hentBegrunnelserFor(vilkår: Vilkår, begrunnelsekategori: BegrunnelseKategori): List<Begrunnelse> = begrunnelser.filter { it.relevantFor == vilkår && it.begrunnelsekategori == begrunnelsekategori }
+    fun hentBegrunnelserFor(vilkår: Vilkår): List<Begrunnelse> = begrunnelser.filter { it.relevantFor == vilkår}
 
 
     data class Begrunnelse(val begrunnelsekategori: BegrunnelseKategori,

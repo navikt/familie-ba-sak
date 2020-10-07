@@ -3,13 +3,16 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.BARN
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.SØKER
+import no.nav.familie.ba.sak.behandling.vilkår.BegrunnelseService.hentBegrunnelserFor
+import no.nav.familie.ba.sak.behandling.vilkår.BegrunnelseService.BegrunnelseKategori
+import no.nav.familie.ba.sak.behandling.vilkår.BegrunnelseService.Begrunnelse
 import no.nav.familie.ba.sak.nare.Spesifikasjon
 import java.time.LocalDate
 
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
-                  val begrunnelser: Map<BehandlingResultatType, List<BehandlingresultatOgVilkårBegrunnelse>> = emptyMap(),
+                  val begrunnelser: List<Begrunnelse> = emptyMap(),
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
     UNDER_18_ÅR(
@@ -28,15 +31,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                         søkerErMor(this) og barnBorMedSøker(this)
                     }
             ),
-            begrunnelser = mapOf(
-                    BehandlingResultatType.INNVILGET
-                            to
-                            listOf(
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_OMSORG_FOR_BARN,
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOR_HOS_SØKER,
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_FAST_OMSORG_FOR_BARN
-                            )
-            ),
+            begrunnelser = hentBegrunnelserFor(BOR_MED_SØKER),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     GIFT_PARTNERSKAP(
             parterDetteGjelderFor = listOf<PersonType>(BARN),
@@ -51,13 +46,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     beskrivelse = "Bosatt i riket",
                     identifikator = "BOSATT_I_RIKET",
                     implementasjon = { bosattINorge(this) }),
-            begrunnelser = mapOf(
-                    BehandlingResultatType.INNVILGET
-                            to
-                            listOf(
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOSATT_I_RIKTET
-                            )
-            ),
+            begrunnelser = hentBegrunnelserFor(BOSATT_I_RIKET),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     LOVLIG_OPPHOLD(
             parterDetteGjelderFor = listOf<PersonType>(SØKER, BARN),
@@ -66,15 +55,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     identifikator = "LOVLIG_OPPHOLD",
                     implementasjon =
                     { lovligOpphold(this) }),
-            begrunnelser = mapOf(
-                    BehandlingResultatType.INNVILGET
-                            to
-                            listOf(
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER,
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_AAREG
-                            )
-            ),
+            begrunnelser = hentBegrunnelserFor(LOVLIG_OPPHOLD),
             gyldigVilkårsperiode = GyldigVilkårsperiode());
 
     override fun toString(): String {

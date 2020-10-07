@@ -258,7 +258,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     @Transactional
-    fun endreUtbetalingBegrunnelse(restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelse,
+    fun endreUtbetalingBegrunnelse(restPutUtbetalingBegrunnelse: RestPutUtbetalingBegrunnelseForslag,
                                    fagsakId: Long, utbetalingBegrunnelseId: Long): List<UtbetalingBegrunnelse> {
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
@@ -270,7 +270,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val stønadBrevBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
                                     ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
-        if (restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse != null && restPutUtbetalingBegrunnelse.resultat != null) {
+        if (restPutUtbetalingBegrunnelse.kategori != null && restPutUtbetalingBegrunnelse.vilkår != null) {
             val vilkår = Vilkår.values().firstOrNull {
                 it.begrunnelser.filter { begrunnelse ->
                     begrunnelse.value.contains(restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse)
@@ -309,10 +309,13 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
 
-            val begrunnelseSomSkalPersisteres =
-                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse.hentBeskrivelse(gjelderSøker,
-                                                                                                       barnasFødselsdatoer,
-                                                                                                       vilkårsdato)
+            val målform =
+                    persongrunnlagService.hentSøker(behandlingResultat.behandling)?.målform ?: error("Finner ikke søker i persongrunnlag")
+
+            val begrunnelseSomSkalPersisteres = BegrunnelseService.hentBegrunnelserFor(
+                    restPutUtbetalingBegrunnelse.vilkår, restPutUtbetalingBegrunnelse.kategori)
+                    .first() // TODO: Må avklare hvordan vilkår med flere begrunnelser skal håndteres
+                    .beskrivelseGenerator(gjelderSøker, barnasFødselsdatoer, vilkårsdato, målform)
 
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,

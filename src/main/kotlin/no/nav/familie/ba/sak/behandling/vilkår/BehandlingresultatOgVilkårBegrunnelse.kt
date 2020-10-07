@@ -4,6 +4,7 @@ interface IVedtakBegrunnelse {
     fun hentBeskrivelse(gjelderSøker: Boolean = false, barnasFødselsdatoer: String = "", vilkårsdato: String): String
 }
 
+// GÅR ALTSÅ BORT I FRA :
 enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
 
