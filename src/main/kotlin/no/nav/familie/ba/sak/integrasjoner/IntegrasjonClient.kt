@@ -84,7 +84,7 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
     @Retryable(value = [IntegrasjonException::class], maxAttempts = 3, backoff = Backoff(delayExpression = "\${retry.backoff.delay:5000}"))
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
         if (environment.activeProfiles.contains("e2e")) {
-            return listOf(Arbeidsfordelingsenhet("2970", "enhetsNavn"))
+            return listOf(Arbeidsfordelingsenhet("4833", "NAV Familie- og pensjonsytelser Oslo 1"))
         }
         val uri = UriComponentsBuilder.fromUri(integrasjonUri)
                 .pathSegment("arbeidsfordeling", "enhet", "BAR")
@@ -184,11 +184,11 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
         )
     }
 
-    fun oppdaterOppgave(patchOppgave: Oppgave): OppgaveResponse {
-        val uri = URI.create("$integrasjonUri/oppgave/oppdater")
+    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
+        val uri = URI.create("$integrasjonUri/oppgave/${patchOppgave.id}/oppdater")
 
         return Result.runCatching {
-            postForEntity<Ressurs<OppgaveResponse>>(uri, patchOppgave, HttpHeaders().medContentTypeJsonUTF8())
+            patchForEntity<Ressurs<OppgaveResponse>>(uri, patchOppgave, HttpHeaders().medContentTypeJsonUTF8())
         }.fold(
                 onSuccess = {
                     assertGenerelleSuksessKriterier(it)

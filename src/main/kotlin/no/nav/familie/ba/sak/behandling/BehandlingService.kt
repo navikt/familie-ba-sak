@@ -110,7 +110,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
         return behandlingRepository.save(behandling).also {
-            arbeidsfordelingService.fastsettBehandlendeEnhet(it, false)
+            arbeidsfordelingService.fastsettBehandlendeEnhet(it)
         }
     }
 

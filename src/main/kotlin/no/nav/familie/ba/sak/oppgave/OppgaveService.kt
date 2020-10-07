@@ -66,8 +66,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         }
     }
 
-    fun oppdaterOppgave(patchOppgave: Oppgave): OppgaveResponse {
-        return integrasjonClient.oppdaterOppgave(patchOppgave)
+    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
+        return integrasjonClient.patchOppgave(patchOppgave)
     }
 
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String): String {
