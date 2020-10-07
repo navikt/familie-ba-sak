@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -9,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -104,13 +104,15 @@ class MalerService(
         return if (vedtak.behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
             autovedtakBrevFelter(vedtak, personopplysningGrunnlag, beregningOversikt, enhetNavn)
         } else {
-            manueltVedtakBrevFelter(vedtak, beregningOversikt, enhetNavn)
+            val målform = personopplysningGrunnlag.søker.målform
+            manueltVedtakBrevFelter(vedtak, beregningOversikt, enhetNavn, målform)
         }
     }
 
     private fun manueltVedtakBrevFelter(vedtak: Vedtak,
                                         beregningOversikt: List<RestBeregningOversikt>,
-                                        enhet: String): String {
+                                        enhet: String,
+                                        målform: Målform): String {
         val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(vedtak.behandling)
 
         val innvilget = Innvilget(
@@ -118,7 +120,8 @@ class MalerService(
                 saksbehandler = totrinnskontroll.saksbehandler,
                 beslutter = totrinnskontroll.beslutter
                             ?: totrinnskontroll.saksbehandler,
-                hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11"))
+                hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11")),
+                maalform = målform.toString()
         )
 
         innvilget.duFaar = beregningOversikt
