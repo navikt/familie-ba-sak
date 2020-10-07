@@ -309,10 +309,14 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
 
+            val målform = persongrunnlagService.hentSøker(behandlingResultat.behandling)?.målform
+                          ?: error("Finner ikke søker i persongrunnlag")
+
             val begrunnelseSomSkalPersisteres =
                     restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse.hentBeskrivelse(gjelderSøker,
                                                                                                        barnasFødselsdatoer,
-                                                                                                       vilkårsdato)
+                                                                                                       vilkårsdato,
+                                                                                                       målform)
 
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
