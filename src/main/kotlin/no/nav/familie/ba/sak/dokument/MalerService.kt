@@ -108,14 +108,16 @@ class MalerService(
                                         enhet: String,
                                         målform: Målform): String {
         val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(vedtak.behandling)
-
+        val etterbetalingsbeløp = etterbetalingsbeløpFraSimulering().takeIf { it > 0 }
         val innvilget = Innvilget(
                 enhet = enhet,
                 saksbehandler = totrinnskontroll.saksbehandler,
                 beslutter = totrinnskontroll.beslutter
                             ?: totrinnskontroll.saksbehandler,
                 hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11")),
-                maalform = målform.toString()
+                maalform = målform.toString(),
+                etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) } ?: "",
+                erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
         )
 
         innvilget.duFaar = beregningOversikt
@@ -170,6 +172,9 @@ class MalerService(
     }
 
     private fun etterbetalingsbeløpFraSimulering() = 0 //TODO Må legges inn senere når simulering er implementert.
+    // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
+
+    private fun tilbakekrevingsbeløpFraSimulering() = 0 //TODO Må legges inn senere når simulering er implementert.
     // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
 
     private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
