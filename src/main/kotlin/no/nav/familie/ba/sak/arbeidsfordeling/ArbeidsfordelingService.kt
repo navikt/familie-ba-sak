@@ -112,7 +112,6 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
             oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
                 val oppgave = oppgaveService.hentOppgave(dbOppgave.gsakId.toLong())
 
-                secureLogger.info("Oppgave(${oppgave.id}, ${oppgave.journalpostId}): $oppgave")
                 if (oppgave.tildeltEnhetsnr != oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId) {
                     logger.info("Oppdaterer enhet fra ${oppgave.tildeltEnhetsnr} til ${oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId} på oppgave ${oppgave.id}")
                     oppgaveService.patchOppgave(oppgave.copy(
