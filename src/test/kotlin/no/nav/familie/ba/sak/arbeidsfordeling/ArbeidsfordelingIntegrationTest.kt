@@ -196,14 +196,16 @@ class ArbeidsfordelingIntegrationTest(
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(behandling,
-                                                                Arbeidsfordelingsenhet(enhetId = MANUELT_OVERSTYRT_ENHET,
-                                                                                       enhetNavn = "manuelt overstyrt enhet"))
+                                                                RestEndreBehandlendeEnhet(
+                                                                        enhetId = MANUELT_OVERSTYRT_ENHET,
+                                                                        begrunnelse = ""))
 
-        stegService.håndterSøknad(behandling, RestRegistrerSøknad(
-                søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.søkerFnr,
-                                      listOf(ArbeidsfordelingMockConfiguration.barnUtenDiskresjonskode)),
-                bekreftEndringerViaFrontend = false
-        ))
+        stegService.håndterSøknad(behandling,
+                                  RestRegistrerSøknad(
+                                          søknad = lagSøknadDTO(ArbeidsfordelingMockConfiguration.søkerFnr,
+                                                                listOf(ArbeidsfordelingMockConfiguration.barnUtenDiskresjonskode)),
+                                          bekreftEndringerViaFrontend = false
+                                  ))
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
                 arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
@@ -232,7 +234,7 @@ class ArbeidsfordelingIntegrationTest(
         ))
 
         verify(exactly = 1) {
-            oppgaveService.oppdaterOppgave(any())
+            oppgaveService.patchOppgave(any())
         }
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
