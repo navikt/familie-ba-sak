@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandli
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.client.Norg2RestClient
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -19,10 +20,11 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
                               private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
                               private val oppgaveService: OppgaveService,
                               private val loggService: LoggService,
+                              private val norg2RestClient: Norg2RestClient,
                               private val integrasjonClient: IntegrasjonClient,
                               private val personopplysningerService: PersonopplysningerService) {
 
-    fun manueltOppdaterBehandlendeEnhet(behandling: Behandling, nyArbeidsfordelingsenhet: Arbeidsfordelingsenhet) {
+    fun manueltOppdaterBehandlendeEnhet(behandling: Behandling, endreBehandlendeEnhet: RestEndreBehandlendeEnhet) {
         val aktivArbeidsfordelingPåBehandling =
                 arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
                 ?: throw Feil("Finner ikke tilknyttet arbeidsfordelingsenhet på behandling ${behandling.id}")
@@ -30,15 +32,21 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
         val forrigeArbeidsfordelingsenhet = Arbeidsfordelingsenhet(enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
                                                                    enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn)
 
-
         val oppdatertArbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingRepository.save(
                 aktivArbeidsfordelingPåBehandling.copy(
-                        behandlendeEnhetId = nyArbeidsfordelingsenhet.enhetId,
-                        behandlendeEnhetNavn = nyArbeidsfordelingsenhet.enhetNavn,
+                        behandlendeEnhetId = endreBehandlendeEnhet.enhetId,
+                        behandlendeEnhetNavn = norg2RestClient.hentEnhet(endreBehandlendeEnhet.enhetId).navn,
                         manueltOverstyrt = true
                 )
         )
-        postFastsattBehandlendeEnhet(behandling, forrigeArbeidsfordelingsenhet, oppdatertArbeidsfordelingPåBehandling)
+
+        postFastsattBehandlendeEnhet(
+                behandling = behandling,
+                forrigeArbeidsfordelingsenhet = forrigeArbeidsfordelingsenhet,
+                oppdatertArbeidsfordelingPåBehandling = oppdatertArbeidsfordelingPåBehandling,
+                manuellOppdatering = true,
+                begrunnelse = endreBehandlendeEnhet.begrunnelse
+        )
     }
 
     fun settBehandlendeEnhet(behandling: Behandling, arbeidsfordelingsenhet: Arbeidsfordelingsenhet) {
@@ -49,8 +57,7 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
         )
     }
 
-    fun fastsettBehandlendeEnhet(behandling: Behandling,
-                                 manuellOppdatering: Boolean) {
+    fun fastsettBehandlendeEnhet(behandling: Behandling) {
         val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
 
         val aktivArbeidsfordelingPåBehandling =
@@ -67,12 +74,9 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
                                                                                          behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn))
             }
             else -> {
-                if ((!aktivArbeidsfordelingPåBehandling.manueltOverstyrt || manuellOppdatering) &&
+                if (!aktivArbeidsfordelingPåBehandling.manueltOverstyrt &&
                     (aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != arbeidsfordelingsenhet.enhetId)) {
 
-                    loggService.opprettBehandlendeEnhetEndret(behandling,
-                                                              aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn,
-                                                              arbeidsfordelingsenhet.enhetNavn)
                     aktivArbeidsfordelingPåBehandling.also {
                         it.behandlendeEnhetId = arbeidsfordelingsenhet.enhetId
                         it.behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn
@@ -83,27 +87,34 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
             }
         }
 
-        postFastsattBehandlendeEnhet(behandling,
-                                     forrigeArbeidsfordelingsenhet,
-                                     oppdatertArbeidsfordelingPåBehandling)
+        postFastsattBehandlendeEnhet(
+                behandling = behandling,
+                forrigeArbeidsfordelingsenhet = forrigeArbeidsfordelingsenhet,
+                oppdatertArbeidsfordelingPåBehandling = oppdatertArbeidsfordelingPåBehandling,
+                manuellOppdatering = false,
+        )
     }
 
     private fun postFastsattBehandlendeEnhet(behandling: Behandling,
                                              forrigeArbeidsfordelingsenhet: Arbeidsfordelingsenhet?,
-                                             oppdatertArbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling) {
-        logger.info("Fastsatt behandlende enhet på behandling ${behandling.id}: $oppdatertArbeidsfordelingPåBehandling")
+                                             oppdatertArbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling,
+                                             manuellOppdatering: Boolean,
+                                             begrunnelse: String = "") {
+        logger.info("Fastsatt behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} på behandling ${behandling.id}: $oppdatertArbeidsfordelingPåBehandling")
 
         if (forrigeArbeidsfordelingsenhet != null && forrigeArbeidsfordelingsenhet.enhetId != oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId) {
-            loggService.opprettBehandlendeEnhetEndret(behandling,
-                                                      forrigeArbeidsfordelingsenhet.enhetNavn,
-                                                      oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetNavn)
+            loggService.opprettBehandlendeEnhetEndret(behandling = behandling,
+                                                      fraEnhetId = forrigeArbeidsfordelingsenhet.enhetId,
+                                                      tilEnhetId = oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId,
+                                                      manuellOppdatering = manuellOppdatering,
+                                                      begrunnelse = begrunnelse)
 
             oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
                 val oppgave = oppgaveService.hentOppgave(dbOppgave.gsakId.toLong())
 
                 if (oppgave.tildeltEnhetsnr != oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId) {
                     logger.info("Oppdaterer enhet fra ${oppgave.tildeltEnhetsnr} til ${oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId} på oppgave ${oppgave.id}")
-                    oppgaveService.oppdaterOppgave(oppgave.copy(
+                    oppgaveService.patchOppgave(oppgave.copy(
                             tildeltEnhetsnr = oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId
                     ))
                 }
@@ -145,5 +156,6 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
     companion object {
 
         val logger = LoggerFactory.getLogger(this::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
