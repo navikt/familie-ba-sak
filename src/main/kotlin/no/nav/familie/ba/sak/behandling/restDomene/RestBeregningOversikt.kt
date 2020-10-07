@@ -24,7 +24,13 @@ data class RestBeregningDetalj(
 data class BeregningEndring(
         val type: BeregningEndringType,
         val trengerBegrunnelse: Boolean = true
-)
+) {
+
+    fun erEndret(): Boolean = when (this.type) {
+        BeregningEndringType.ENDRET, BeregningEndringType.ENDRET_SATS -> true
+        BeregningEndringType.UENDRET, BeregningEndringType.UENDRET_SATS -> false
+    }
+}
 
 enum class BeregningEndringType {
     ENDRET,
