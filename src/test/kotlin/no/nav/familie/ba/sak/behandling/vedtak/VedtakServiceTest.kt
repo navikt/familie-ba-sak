@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -69,7 +70,10 @@ class VedtakServiceTest(
         val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
         @Autowired
-        val loggService: LoggService
+        val loggService: LoggService,
+
+        @Autowired
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -92,7 +96,9 @@ class VedtakServiceTest(
                 beregningService,
                 fagsakService,
                 loggService,
-                arbeidsfordelingService)
+                arbeidsfordelingService,
+                saksstatistikkEventPublisher
+        )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
                         .willReturn(aResponse()

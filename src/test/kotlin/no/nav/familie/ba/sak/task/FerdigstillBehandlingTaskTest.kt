@@ -14,10 +14,12 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
+import no.nav.familie.ba.sak.vedtak.producer.MockKafkaProducer.Companion.meldingSendtFor
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -101,10 +103,11 @@ class FerdigstillBehandlingTaskTest {
         ferdigstillBehandlingTask.onCompletion(testTask)
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
-        Assertions.assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
+        assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
+        assertEquals(BehandlingStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltBehandling) as BehandlingDVH).behandlingStatus)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
-        Assertions.assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
+        assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
     }
 
     @Test
@@ -117,10 +120,10 @@ class FerdigstillBehandlingTaskTest {
         ferdigstillBehandlingTask.onCompletion(testTask)
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
-        Assertions.assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
+        assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
-        Assertions.assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
+        assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
     }
 
     fun iverksettMotOppdrag(vedtakId: Long) {
