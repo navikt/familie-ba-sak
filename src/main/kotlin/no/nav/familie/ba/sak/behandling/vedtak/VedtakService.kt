@@ -157,13 +157,19 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 tilkjentYtelseForForrigeBehandling = forrigeTilkjentYtelse,
                 personopplysningGrunnlag = personopplysningsGrunnlag)
 
-        val uendrede = beregningsoversikt.filter { it.endring.type == BeregningEndringType.UENDRET || it.endring.type == BeregningEndringType.UENDRET_SATS }.map { Periode(it.periodeFom, it.periodeTom) }
-        val satsendringer = beregningsoversikt.filter { it.endring.type == BeregningEndringType.ENDRET_SATS }.map { Periode(it.periodeFom, it.periodeTom) }
-        leggTilUtbetalingsbegrunnelseforuendrede(fagsakId, uendrede)
-        leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId, satsendringer)
+        val relevantePerioder = beregningsoversikt.filter { it.endring.trengerBegrunnelse }
+
+        val uendrede = relevantePerioder
+                .filter { !it.endring.erEndret() }
+                .map { Periode(it.periodeFom, it.periodeTom) }
+        val satsendringer = relevantePerioder
+                .filter { it.endring.type == BeregningEndringType.ENDRET_SATS }
+                .map { Periode(it.periodeFom, it.periodeTom) }
+        leggTilUtbetalingsbegrunnelseForUendrede(fagsakId, uendrede)
+        leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId, satsendringer)
     }
 
-    private fun leggTilUtbetalingsbegrunnelseforsatsendring(fagsakId: Long, perioder: List<Periode>) {
+    private fun leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId: Long, perioder: List<Periode>) {
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
         perioder.forEach {
             leggTilUtbetalingBegrunnelse(fagsakId,
@@ -178,7 +184,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         }
     }
 
-    private fun leggTilUtbetalingsbegrunnelseforuendrede(fagsakId: Long, perioder: List<Periode>) {
+    private fun leggTilUtbetalingsbegrunnelseForUendrede(fagsakId: Long, perioder: List<Periode>) {
         val utbetalingsbegrunnelser =
                 hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId).filter { Periode(it.fom, it.tom) in perioder }
         utbetalingsbegrunnelser.forEach { leggTilUtbetalingBegrunnelse(fagsakId = fagsakId, utbetalingBegrunnelse = it) }
@@ -295,7 +301,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             }
 
             val vilkårsdato = if (personerMedUtgjørendeVilkårForUtbetalingsperiode.size == 1) {
-                personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilKortString()
+                personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilDagMånedÅr()
             } else {
                 stønadBrevBegrunnelse.fom.minusMonths(1).tilMånedÅr()
             }

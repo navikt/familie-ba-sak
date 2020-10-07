@@ -49,7 +49,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     SATSENDRING("Satsendring") {
         override fun hentBeskrivelse(gjelderSøker: Boolean, barnasFødselsdatoer: String, vilkårsdato: String): String {
-            return "Barnetrygden er endret fordi det har vært en satsendring med virkning fra og med $vilkårsdato."
+            return "Barnetrygden endres fordi det har vært en satsendring."
         }
     },
 }

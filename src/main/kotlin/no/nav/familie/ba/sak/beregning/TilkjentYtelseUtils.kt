@@ -30,7 +30,8 @@ object TilkjentYtelseUtils {
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
 
-        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = behandlingResultat.hentInnvilgedePerioder(personopplysningGrunnlag)
+        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = behandlingResultat.hentInnvilgedePerioder(
+                personopplysningGrunnlag)
 
         val tilkjentYtelse = TilkjentYtelse(
                 behandling = behandlingResultat.behandling,
@@ -131,6 +132,9 @@ object TilkjentYtelseUtils {
                 if (tilkjentYtelseForForrigeBehandling !== null) utledSegmenterFraTilkjentYtelse(
                         tilkjentYtelseForForrigeBehandling) else emptyList()
 
+        var erEtterFørsteEndring = false
+        fun LocalDateSegment<Int>.trengerBegrunnelse() = erEtterFørsteEndring && !this.fom.erSenereEnnNesteMåned()
+
         return segmenter.map { segment ->
             val andelerForSegment = tilkjentYtelseForBehandling.andelerTilkjentYtelse.filter {
                 segment.localDateInterval.overlaps(LocalDateInterval(it.stønadFom, it.stønadTom))
@@ -143,14 +147,17 @@ object TilkjentYtelseUtils {
                                         when {
                                             segmenterFraForrigeTilkjentYtelse.any { it == segment } ->
                                                 if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.UENDRET_SATS,
-                                                                                              trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
+                                                                                              trengerBegrunnelse = segment.trengerBegrunnelse())
                                                 else BeregningEndring(type = BeregningEndringType.UENDRET,
-                                                                      trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
-                                            else ->
+                                                                      trengerBegrunnelse = segment.trengerBegrunnelse())
+
+                                            else -> {
+                                                erEtterFørsteEndring = true
                                                 if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.ENDRET_SATS,
-                                                                                              trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
+                                                                                              trengerBegrunnelse = segment.trengerBegrunnelse())
                                                 else BeregningEndring(type = BeregningEndringType.ENDRET,
-                                                                      trengerBegrunnelse = !segment.fom.erSenereEnnNesteMåned())
+                                                                      trengerBegrunnelse = segment.trengerBegrunnelse())
+                                            }
                                         })
         }
     }
