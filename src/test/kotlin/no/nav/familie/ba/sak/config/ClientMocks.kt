@@ -377,7 +377,7 @@ class ClientMocks {
 
         val søkerFnr = arrayOf("12345678910", "11223344556")
         val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(2), LocalDate.now().førsteDagIInneværendeMåned())
-        val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMYY()+"00033", barnFødselsdatoer[1].tilddMMYY()+"00033")
+        val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMYY() + "00033", barnFødselsdatoer[1].tilddMMYY() + "00033")
         val integrasjonerFnr = "10000111111"
         val bostedsadresse = Bostedsadresse(
                 matrikkeladresse = Matrikkeladresse(matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
@@ -395,12 +395,12 @@ class ClientMocks {
                                           sivilstand = SIVILSTAND.GIFT,
                                           kjønn = Kjønn.MANN,
                                           navn = "Far Faresen"),
-                barnFnr[0] to PersonInfo(fødselsdato = LocalDate.now().minusYears(2),
+                barnFnr[0] to PersonInfo(fødselsdato = barnFødselsdatoer[0],
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UOPPGITT,
                                          kjønn = Kjønn.MANN,
                                          navn = "Gutten Barnesen"),
-                barnFnr[1] to PersonInfo(fødselsdato = LocalDate.now().førsteDagIInneværendeMåned(),
+                barnFnr[1] to PersonInfo(fødselsdato = barnFødselsdatoer[1],
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UGIFT,
                                          kjønn = Kjønn.KVINNE,
