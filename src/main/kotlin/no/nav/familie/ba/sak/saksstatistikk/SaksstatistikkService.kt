@@ -23,7 +23,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                             private val totrinnskontrollService: TotrinnskontrollService,
                             private val vedtakService: VedtakService) {
 
-    fun loggBehandlingStatus(behandlingId: Long, forrigeBehandlingId: Long?): BehandlingDVH {
+    fun loggBehandlingStatus(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH {
         val behandling = behandlingService.hent(behandlingId)
 
         val datoMottatt = when (behandling.opprinnelse) {
@@ -49,7 +49,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
         val now = ZonedDateTime.now()
         val behandlingDVH = BehandlingDVH(funksjonellTid = now,
-                                          tekniskTid = now, //now()
+                                          tekniskTid = now, // TODO burde denne vært satt til opprettetTidspunkt/endretTidspunkt?
                                           mottattDato = datoMottatt.atZone(TIMEZONE),
                                           registrertDato = datoMottatt.atZone(TIMEZONE),
                                           behandlingId = behandling.id.toString(),
@@ -84,6 +84,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             behandlingDVH.copy(beslutter = totrinnskontroll.beslutter,
                                saksbehandler = totrinnskontroll.saksbehandler)
         }
+
         return behandlingDVH
     }
 
