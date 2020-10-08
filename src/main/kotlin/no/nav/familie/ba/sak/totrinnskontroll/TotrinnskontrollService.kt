@@ -48,11 +48,12 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
             error("Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak")
         }
 
+        lagreEllerOppdater(totrinnskontroll)
+
         behandlingService.oppdaterStatusPåBehandling(
                 behandlingId = behandling.id,
                 status = if (beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES)
 
-        lagreEllerOppdater(totrinnskontroll)
     }
 
     fun opprettAutomatiskTotrinnskontroll(behandling: Behandling) {
