@@ -44,8 +44,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
                              private val behandlingResultatRepository: BehandlingResultatRepository,
                              private val persongrunnlagService: PersongrunnlagService,
                              private val behandlingRepository: BehandlingRepository,
-                             private val gdprService: GDPRService,
-                             private val totrinnskontrollService: TotrinnskontrollService) {
+                             private val gdprService: GDPRService) {
 
     val harLøpendeSakIInfotrygdCounter: Counter = Metrics.counter("foedselshendelse.mor.eller.barn.finnes.loepende.i.infotrygd")
     val harIkkeLøpendeSakIInfotrygdCounter: Counter =
@@ -193,11 +192,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     }
 
     private fun iverksett(behandling: Behandling) {
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
-
-        totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
+        val vedtak = vedtakService.oppdaterAutomatiskVedtak(behandling)
 
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)

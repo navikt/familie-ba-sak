@@ -50,7 +50,6 @@ class FødselshendelseServiceTest {
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>(relaxed = true)
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
-    private val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
 
     private val søkerFnr = "12345678910"
     private val barn1Fnr = "12345678911"
@@ -238,7 +237,7 @@ class FødselshendelseServiceTest {
                              barnaFraHendelse = barna,
                              restenAvBarna = emptyList()), filtreringResultat)
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
-        every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } just Runs
+        every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } returns vedtak
         every { taskRepositoryMock.save(any()) } returns opprettOppgaveTask
         every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns behandlingResultat
         every { persongrunnlagServiceMock.hentSøker(any()) } returns søker

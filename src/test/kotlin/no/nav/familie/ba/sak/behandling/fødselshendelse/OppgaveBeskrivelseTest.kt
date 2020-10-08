@@ -43,7 +43,6 @@ class OppgaveBeskrivelseTest {
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
-    private val totrinnskontrollService = mockk<TotrinnskontrollService>()
 
     private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                                 infotrygdBarnetrygdClientMock,
@@ -56,8 +55,7 @@ class OppgaveBeskrivelseTest {
                                                                 behandlingResultatRepositoryMock,
                                                                 persongrunnlagServiceMock,
                                                                 behandlingRepositoryMock,
-                                                                gdprServiceMock,
-                                                                totrinnskontrollService)
+                                                                gdprServiceMock)
 
     @Test
     fun `hentBegrunnelseFraFiltreringsregler() skal returnere begrunnelse av første regel som feilet`() {

@@ -46,6 +46,15 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     private val dokumentService: DokumentService,
                     private val totrinnskontrollService: TotrinnskontrollService) {
 
+    fun oppdaterAutomatiskVedtak(behandling: Behandling): Vedtak {
+        totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
+
+        val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
+                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+
+        return lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
+    }
+
     @Transactional
     fun opphørVedtak(saksbehandler: String,
                      gjeldendeBehandlingsId: Long,
@@ -132,11 +141,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
 
-    @Transactional
-    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak) {
+    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
         vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak)
-
-        lagreOgDeaktiverGammel(vedtak)
+        return vedtak
     }
 
     fun hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId: Long): List<UtbetalingBegrunnelse> {
@@ -416,10 +423,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     fun besluttVedtak(vedtak: Vedtak) {
         vedtak.vedtaksdato = now()
-        oppdaterVedtakMedStønadsbrev(vedtak)
+        lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
-        lagreEllerOppdater(vedtak)
     }
 
     companion object {
