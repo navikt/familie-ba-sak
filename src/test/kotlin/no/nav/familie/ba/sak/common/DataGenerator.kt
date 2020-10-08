@@ -60,13 +60,15 @@ val defaultFagsak = Fagsak(1).also {
 fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                   behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
                   behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                  opprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL
+                  årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                  automatiskOpprettelse: Boolean = false
 ) = Behandling(id = nesteBehandlingId(),
                fagsak = fagsak,
+               skalBehandlesAutomatisk = automatiskOpprettelse,
                type = behandlingType,
                kategori = behandlingKategori,
                underkategori = BehandlingUnderkategori.ORDINÆR,
-               opprinnelse = opprinnelse)
+               opprettetÅrsak = årsak)
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
                     personType: PersonType = PersonType.BARN,

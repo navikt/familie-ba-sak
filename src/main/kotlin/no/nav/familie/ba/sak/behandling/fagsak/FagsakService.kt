@@ -144,7 +144,7 @@ class FagsakService(
             RestBehandling(
                     aktiv = behandling.aktiv,
                     arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling.toRestArbeidsfordelingPåBehandling(),
-                    opprinnelse = behandling.opprinnelse,
+                    årsak = behandling.opprettetÅrsak,
                     behandlingId = behandling.id,
                     vedtakForBehandling = restVedtakForBehandling,
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),

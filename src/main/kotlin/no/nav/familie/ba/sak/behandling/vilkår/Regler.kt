@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresse.Companion.erSammeAdresse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
@@ -57,8 +56,7 @@ internal fun bosattINorge(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering):
         ?: Evaluering.nei(BOR_IKKE_I_RIKET)
 
 internal fun lovligOpphold(faktaTilVilkårsvurdering: FaktaTilVilkårsvurdering): Evaluering {
-    if (faktaTilVilkårsvurdering.behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE &&
-        faktaTilVilkårsvurdering.personForVurdering.type == PersonType.BARN) {
+    if (faktaTilVilkårsvurdering.personForVurdering.type == PersonType.BARN) {
         return Evaluering.ja(AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
     }
 

@@ -199,7 +199,7 @@ class VedtakServiceTest(
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                                opprinnelse = BehandlingOpprinnelse.MANUELL))
+                                                                                opprettetÅrsak = BehandlingÅrsak.SØKNAD))
 
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
@@ -213,7 +213,7 @@ class VedtakServiceTest(
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                                opprinnelse = BehandlingOpprinnelse.MANUELL))
+                                                                                opprettetÅrsak = BehandlingÅrsak.SØKNAD))
 
         val forrigeVedtak = vedtakService.hentForrigeVedtakPåFagsak(revurderingOpphørBehandling)
         Assertions.assertNotNull(forrigeVedtak)

@@ -13,13 +13,13 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
@@ -34,6 +34,7 @@ import org.junit.Assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -51,7 +52,7 @@ import java.time.YearMonth
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl-flere-barn")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-oauth", "mock-pdl-flere-barn", "mock-task-repository")
 @Tag("integration")
 class FødselshendelseIntegrasjonTest(
         @Autowired
@@ -85,14 +86,17 @@ class FødselshendelseIntegrasjonTest(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 
         @Autowired
-        private val gdprService: GDPRService
+        private val gdprService: GDPRService,
+
+        @Autowired
+        private val databaseCleanupService: DatabaseCleanupService
 ) {
 
     val now = LocalDate.now()
 
-    final val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
-    final val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
-    final val featureToggleServiceMock = mockk<FeatureToggleService>()
+    private final val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
+    private final val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
+    private final val featureToggleServiceMock = mockk<FeatureToggleService>()
 
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
@@ -106,6 +110,11 @@ class FødselshendelseIntegrasjonTest(
                                                         persongrunnlagService,
                                                         behandlingRepository,
                                                         gdprService)
+
+    @BeforeEach
+    fun setup() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `Fødselshendelse med flere barn med oppfylt vilkårsvurdering skal håndteres riktig`() {

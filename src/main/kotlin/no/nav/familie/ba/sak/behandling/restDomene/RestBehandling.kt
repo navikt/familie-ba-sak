@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 
 data class RestBehandling(val aktiv: Boolean,
                           val arbeidsfordelingPåBehandling: RestArbeidsfordelingPåBehandling,
-                          val opprinnelse: BehandlingOpprinnelse,
+                          val årsak: BehandlingÅrsak,
                           val behandlingId: Long,
                           val type: BehandlingType,
                           val status: BehandlingStatus,

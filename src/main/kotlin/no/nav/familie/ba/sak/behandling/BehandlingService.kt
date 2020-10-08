@@ -44,10 +44,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
             val behandling = Behandling(fagsak = fagsak,
-                                        opprinnelse = nyBehandling.behandlingOpprinnelse,
+                                        opprettetÅrsak = nyBehandling.behandlingÅrsak,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
+                                        skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk,
                                         steg = initSteg(nyBehandling.behandlingType))
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)

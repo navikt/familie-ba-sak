@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -38,7 +37,7 @@ class RegistrerPersongrunnlag(
                                                                                data.målform)
         }
 
-        if (behandling.opprinnelse == BehandlingOpprinnelse.MANUELL) {
+        if (!behandling.skalBehandlesAutomatisk) {
             vilkårService.initierVilkårvurderingForBehandling(behandling = behandling,
                                                               bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
                                                               forrigeBehandling = forrigeBehandlingSomErIverksatt)

@@ -54,7 +54,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import javax.transaction.Transactional
 
-
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])

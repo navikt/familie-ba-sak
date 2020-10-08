@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.behandling
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -49,7 +49,7 @@ class BehandlingController(private val fagsakService: FagsakService,
         }
 
         return Result.runCatching {
-            stegService.håndterNyBehandling(nyBehandling.copy(behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL))
+            stegService.håndterNyBehandling(nyBehandling)
         }.fold(
                 onSuccess = {
                     val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
@@ -90,7 +90,8 @@ data class NyBehandling(
         val søkersIdent: String,
         val behandlingType: BehandlingType,
         val journalpostID: String? = null,
-        val behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL,
+        val behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+        val skalBehandlesAutomatisk: Boolean = false,
         val barnasIdenter: List<String> = emptyList())
 
 class NyBehandlingHendelse(
