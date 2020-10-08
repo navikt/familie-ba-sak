@@ -179,8 +179,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                                                resultat = BehandlingResultatType.INNVILGET,
                                                                behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING,
                                                                brevBegrunnelse =
-                                                               BehandlingresultatOgVilkårBegrunnelse.SATSENDRING.hentBeskrivelse(
-                                                                       vilkårsdato = it.fom.toString())))
+                                                               BehandlingresultatOgVilkårBegrunnelse.SATSENDRING.hentBeskrivelse()))
         }
     }
 
@@ -301,7 +300,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             }
 
             val vilkårsdato = if (personerMedUtgjørendeVilkårForUtbetalingsperiode.size == 1) {
-                personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilDagMånedÅr()
+                personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilMånedÅr()
             } else {
                 stønadBrevBegrunnelse.fom.minusMonths(1).tilMånedÅr()
             }

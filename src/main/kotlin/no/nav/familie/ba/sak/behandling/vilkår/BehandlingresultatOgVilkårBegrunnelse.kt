@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 interface IVedtakBegrunnelse {
-    fun hentBeskrivelse(gjelderSøker: Boolean = false, barnasFødselsdatoer: String = "", vilkårsdato: String): String
+    fun hentBeskrivelse(gjelderSøker: Boolean = false, barnasFødselsdatoer: String = "", vilkårsdato: String = ""): String
 }
 
 enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
