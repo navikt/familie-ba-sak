@@ -19,12 +19,14 @@ class TilgangController(private val personopplysningerService: Personopplysninge
                         private val integrasjonClient: IntegrasjonClient) {
 
     @PostMapping(path = ["tilgang"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentTilgangOgDiskresjonskode(@RequestBody personIdent: String): ResponseEntity<Ressurs<TilgangDTO>> {
-        val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personIdent)
-        val tilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
+    fun hentTilgangOgDiskresjonskode(@RequestBody tilgangRequestDTO: TilgangRequestDTO): ResponseEntity<Ressurs<TilgangDTO>> {
+        val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(tilgangRequestDTO.brukerIdent)
+        val tilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(tilgangRequestDTO.brukerIdent)).first().harTilgang
         return ResponseEntity.ok(Ressurs.success(data = TilgangDTO(
                 saksbehandlerHarTilgang = tilgang,
                 adressebeskyttelsegradering = adressebeskyttelse)))
 
     }
 }
+
+class TilgangRequestDTO(val brukerIdent: String)

@@ -39,7 +39,7 @@ class TilgangControllerTest (
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(fnr))
         } returns listOf(Tilgang(harTilgang = true))
 
-        val response = tilgangController.hentTilgangOgDiskresjonskode(fnr)
+        val response = tilgangController.hentTilgangOgDiskresjonskode(TilgangRequestDTO(fnr))
         val tilgangDTO = response.body?.data ?: error("Fikk ikke forventet respons")
         assertThat(tilgangDTO.adressebeskyttelsegradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         assertThat(tilgangDTO.saksbehandlerHarTilgang).isEqualTo(true)
