@@ -12,11 +12,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.maksimum
-import no.nav.familie.ba.sak.common.minimum
-import no.nav.familie.ba.sak.common.erSenereEnnNesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.*
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
@@ -99,10 +95,9 @@ object TilkjentYtelseUtils {
 
     fun beregnNåværendeBeløp(beregningOversikt: List<RestBeregningOversikt>, vedtak: Vedtak): Int {
         return beregningOversikt.find {
-            it.periodeFom !== null && it.periodeTom !== null
-            && it.periodeFom <= vedtak.vedtaksdato && it.periodeTom > vedtak.vedtaksdato
+            it.periodeFom <= vedtak.vedtaksdato && it.periodeTom > vedtak.vedtaksdato
         }?.utbetaltPerMnd
-               ?: beregningOversikt.find { it.periodeTom != null && it.periodeTom > vedtak.vedtaksdato }?.utbetaltPerMnd
+               ?: beregningOversikt.find { it.periodeTom > vedtak.vedtaksdato }?.utbetaltPerMnd
                ?: throw Feil("Finner ikke gjeldende beløp for virkningstidspunkt",
                              "Finner ikke gjeldende beløp for virkningstidspunkt")
     }

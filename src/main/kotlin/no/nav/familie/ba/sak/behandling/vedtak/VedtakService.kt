@@ -10,7 +10,10 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
@@ -45,6 +48,16 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokumentService: DokumentService,
                     private val totrinnskontrollService: TotrinnskontrollService) {
+
+    fun opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling: Behandling): Vedtak {
+        totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
+        loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
+
+        val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
+                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+
+        return lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
+    }
 
     @Transactional
     fun opphørVedtak(saksbehandler: String,
@@ -132,11 +145,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
 
-    @Transactional
-    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak) {
+    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
         vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak)
-
-        lagreOgDeaktiverGammel(vedtak)
+        return vedtak
     }
 
     fun hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId: Long): List<UtbetalingBegrunnelse> {
@@ -415,10 +426,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     fun besluttVedtak(vedtak: Vedtak) {
         vedtak.vedtaksdato = now()
-        oppdaterVedtakMedStønadsbrev(vedtak)
+        lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
-        lagreEllerOppdater(vedtak)
     }
 
     companion object {
