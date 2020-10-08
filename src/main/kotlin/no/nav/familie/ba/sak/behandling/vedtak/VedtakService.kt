@@ -6,10 +6,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
@@ -176,11 +173,12 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val satsendringer = relevantePerioder
                 .filter { it.endring.type == BeregningEndringType.ENDRET_SATS }
                 .map { Periode(it.periodeFom, it.periodeTom) }
+        val målform = personopplysningsGrunnlag.søker.målform
         leggTilUtbetalingsbegrunnelseForUendrede(fagsakId, uendrede)
-        leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId, satsendringer)
+        leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId, satsendringer, målform)
     }
 
-    private fun leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId: Long, perioder: List<Periode>) {
+    private fun leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId: Long, perioder: List<Periode>, målform: Målform) {
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
         perioder.forEach {
             leggTilUtbetalingBegrunnelse(fagsakId,
@@ -191,7 +189,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                                                behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING,
                                                                brevBegrunnelse =
                                                                BehandlingresultatOgVilkårBegrunnelse.SATSENDRING.hentBeskrivelse(
-                                                                       vilkårsdato = it.fom.toString())))
+                                                                       vilkårsdato = it.fom.toString(), målform = målform)))
         }
     }
 
@@ -274,6 +272,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
+                                       ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
+
 
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(vedtak.behandling.id)
                                  ?: throw Feil("Finner ikke behandlingsresultat ved fastsetting av begrunnelse")
@@ -323,7 +324,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val begrunnelseSomSkalPersisteres =
                     restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse.hentBeskrivelse(gjelderSøker,
                                                                                                        barnasFødselsdatoer,
-                                                                                                       vilkårsdato)
+                                                                                                       vilkårsdato,
+                                                                                                       personopplysningGrunnlag.søker.målform)
 
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
