@@ -94,15 +94,15 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
                     Målform.NN -> "Du får barnetrygd fordi vi har kome fram til at barn fødd $barnasFødselsdatoer bur fast hos deg frå $vilkårsdato."
                 }
     },
-    REDUKSJON_BOSATT_I_RIKTET("Flyttet fra Norge") {
+    REDUKSJON_BOSATT_I_RIKTET("Barn har flyttet fra Norge") {
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
                                      målform: Målform): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn født $barnasFødselsdatoer " else ""} har flyttet fra Norge i $vilkårsdato."
-                    Målform.NN -> "Barnetrygda er redusert fordi${if (gjelderSøker && barnasFødselsdatoer.isNotBlank()) " du og " else if (gjelderSøker) " du " else " "}${if (barnasFødselsdatoer.isNotBlank()) "barn fødd $barnasFødselsdatoer " else ""} har flyttet frå Noreg i $vilkårsdato."
+                    Målform.NB -> "Barnetrygden reduseres fordi barn født $barnasFødselsdatoer har flyttet fra Norge i $vilkårsdato."
+                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer har flytta frå Noreg i $vilkårsdato."
                 }
     },
     REDUKSJON_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE_BARN("Barn har ikke oppholdstillatelse") {
@@ -116,7 +116,18 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer ikkje lenger har opphaldsløyve i Noreg frå $vilkårsdato."
                 }
     },
-    REDUKSJON_BOR_HOS_SØKER("Barn har flyttet fra søker eller søker har flyttet fra barn") { // TODO: Tekst 2 som går på at bruker har flyttet
+    REDUKSJON_FLYTTET_FORELDER("Søker har flyttet fra barn") {
+
+        override fun hentBeskrivelse(gjelderSøker: Boolean,
+                                     barnasFødselsdatoer: String,
+                                     vilkårsdato: String, // TODO: [BARN TOM DATO BOR MED SØKER]
+                                     målform: Målform): String =
+                when (målform) {
+                    Målform.NB -> "Barnetrygden reduseres fordi du $vilkårsdato flyttet fra barn født $barnasFødselsdatoer."
+                    Målform.NN -> "Barnetrygda er redusert fordi du $vilkårsdato flyttå frå barn fødd $barnasFødselsdatoer."
+                }
+    },
+    REDUKSJON_FLYTTET_BARN("Barn har flyttet fra søker (flytting mellom foreldre, andre omsorgspersoner)") {
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -127,11 +138,22 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer har flytta frå deg $vilkårsdato."
                 }
     },
+    REDUKSJON_BARN_DØD("Barn død") {
+
+        override fun hentBeskrivelse(gjelderSøker: Boolean,
+                                     barnasFødselsdatoer: String,
+                                     vilkårsdato: String, // TODO: [BARNS DØDSDATO]
+                                     målform: Målform): String =
+                when (målform) {
+                    Målform.NB -> "Barnetrygden reduseres fordi barn født $barnasFødselsdatoer døde i $vilkårsdato. "
+                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer døydde i $vilkårsdato. "
+                }
+    },
     REDUKSJON_FAST_OMSORG_FOR_BARN("Søker har ikke lenger fast omsorg for barn: Beredskapshjem, fosterhjem, institusjon, vurdering fast bosted mellom foreldrene") {
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
-                                     vilkårsdato: String,
+                                     vilkårsdato: String, // TODO:  [BARN TOM DATO BOR MED SØKER]
                                      målform: Målform): String =
                 when (målform) {
                     Målform.NB -> "Barnetrygden reduseres fordi vi har kommet fram til at barn født $barnasFødselsdatoer ikke lenger bor fast hos deg fra $vilkårsdato."
