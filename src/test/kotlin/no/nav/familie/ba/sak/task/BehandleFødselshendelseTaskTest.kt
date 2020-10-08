@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -29,6 +30,9 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
                                       @Autowired private val behandlingRepository: BehandlingRepository,
                                       @Autowired private val databaseCleanupService: DatabaseCleanupService) {
 
+    val barnIdent = ClientMocks.barnFnr[0]
+    val morsIdent = ClientMocks.søkerFnr[0]
+
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
@@ -40,8 +44,8 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns true
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101900033")))))
-        Assertions.assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910")))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+        Assertions.assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
     }
 
     @Test
@@ -50,8 +54,8 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns false
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101900033")))))
-        Assertions.assertNotNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910")))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
+        Assertions.assertNotNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
     }
 
     @Test
@@ -60,9 +64,9 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns false
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter =listOf("01101900033")))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
 
-        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910"))!!
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
         behandling.status = BehandlingStatus.AVSLUTTET
         behandlingRepository.save(behandling)
@@ -71,7 +75,7 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns true
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent ="12345678910", barnasIdenter = listOf("01101900033")))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         Assertions.assertEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 
@@ -81,15 +85,15 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns false
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101900033")))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
 
-        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent("12345678910"))!!
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent))!!
         val behandling = behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!
         behandling.status = BehandlingStatus.AVSLUTTET
         behandlingRepository.save(behandling)
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
-                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101900033")))))
+                BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         Assertions.assertNotEquals(behandling.id, behandlingRepository.findByFagsakAndAktiv(fagsakId = fagsak.id)!!.id)
     }
 }
