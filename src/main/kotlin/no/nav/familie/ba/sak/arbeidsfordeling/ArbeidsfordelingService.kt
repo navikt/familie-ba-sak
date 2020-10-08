@@ -104,8 +104,8 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
 
         if (forrigeArbeidsfordelingsenhet != null && forrigeArbeidsfordelingsenhet.enhetId != oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId) {
             loggService.opprettBehandlendeEnhetEndret(behandling = behandling,
-                                                      fraEnhetId = forrigeArbeidsfordelingsenhet.enhetId,
-                                                      tilEnhetId = oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId,
+                                                      fraEnhet = forrigeArbeidsfordelingsenhet,
+                                                      tilEnhet = oppdatertArbeidsfordelingPåBehandling,
                                                       manuellOppdatering = manuellOppdatering,
                                                       begrunnelse = begrunnelse)
 
