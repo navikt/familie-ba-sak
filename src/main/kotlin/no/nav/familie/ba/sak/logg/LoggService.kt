@@ -70,7 +70,10 @@ class LoggService(
                                     nyttBehandlingResultatType: BehandlingResultatType,
                                     forrigeBehandlingResultat: BehandlingResultat?): Logg {
         val forrigeBehandlingResultatType =
-                if (aktivBehandlingResultat.samletResultat != BehandlingResultatType.IKKE_VURDERT) aktivBehandlingResultat.samletResultat else forrigeBehandlingResultat?.samletResultat
+                if (aktivBehandlingResultat.samletResultat != BehandlingResultatType.IKKE_VURDERT)
+                    aktivBehandlingResultat.samletResultat
+                else
+                    forrigeBehandlingResultat?.samletResultat
 
         val tekst = if (forrigeBehandlingResultatType != null) {
             if (forrigeBehandlingResultatType != nyttBehandlingResultatType) {
@@ -119,14 +122,13 @@ class LoggService(
         ))
     }
 
-    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, begrunnelse: String?) {
+    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, begrunnelse: String? = null) {
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.GODKJENNE_VEDTAK,
-                tittel = if (beslutning.erGodkjent()) "Godkjent vedtak" else "Underkjent vedtak",
+                tittel = if (beslutning.erGodkjent()) "Vedtak godkjent " else "Vedtak underkjent",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.BESLUTTER),
-                tekst = if (beslutning.erGodkjent()) "Vedtak godkjent"
-                else "Vedtak underkjent" + if (begrunnelse != null) " med begrunnelse: $begrunnelse" else ""
+                tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else ""
         ))
     }
 

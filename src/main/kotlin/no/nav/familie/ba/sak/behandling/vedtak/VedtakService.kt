@@ -48,6 +48,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     fun oppdaterAutomatiskVedtak(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
+        loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
 
         val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
