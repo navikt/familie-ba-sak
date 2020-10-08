@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 
 interface IVedtakBegrunnelse {
-
+    val begrunnelseType: BegrunnelseType;
     fun hentBeskrivelse(gjelderSøker: Boolean = false,
                         barnasFødselsdatoer: String = "",
                         vilkårsdato: String,
@@ -13,6 +13,7 @@ interface IVedtakBegrunnelse {
 enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
 
+        override val begrunnelseType = BegrunnelseType.INNVILGET
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -25,6 +26,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger bosatt før lovlig opphold i Norge") {
 
+        override val begrunnelseType = BegrunnelseType.INNVILGET
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -37,6 +39,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER("EØS-borger: Søker har oppholdsrett") {
 
+        override val begrunnelseType = BegrunnelseType.INNVILGET
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -49,6 +52,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING("EØS-borger: Skjønnsmessig vurdering av oppholdsrett.") {
 
+        override val begrunnelseType = BegrunnelseType.INNVILGET
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -61,6 +65,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_OMSORG_FOR_BARN("Adopsjon, surrogati: Omsorgen for barn") {
 
+        override val begrunnelseType = BegrunnelseType.INNVILGET
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -73,6 +78,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_BOR_HOS_SØKER("Barn har flyttet til søker") {
 
+        override val begrunnelseType = BegrunnelseType.INNVILGET
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -85,6 +91,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_FAST_OMSORG_FOR_BARN("Søker har fast omsorg for barn") {
 
+        override val begrunnelseType = BegrunnelseType.INNVILGET
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -96,6 +103,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_BOSATT_I_RIKTET("Barn har flyttet fra Norge") {
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -107,6 +115,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE_BARN("Barn har ikke oppholdstillatelse") {
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -118,6 +127,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_FLYTTET_FORELDER("Søker har flyttet fra barn") {
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String, // TODO: [BARN TOM DATO BOR MED SØKER]
@@ -129,6 +139,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_FLYTTET_BARN("Barn har flyttet fra søker (flytting mellom foreldre, andre omsorgspersoner)") {
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String, // TODO: Husk å sette tom-dato hvis reduksjon
@@ -140,6 +151,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_BARN_DØD("Barn død") {
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String, // TODO: [BARNS DØDSDATO]
@@ -151,6 +163,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_FAST_OMSORG_FOR_BARN("Søker har ikke lenger fast omsorg for barn: Beredskapshjem, fosterhjem, institusjon, vurdering fast bosted mellom foreldrene") {
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String, // TODO:  [BARN TOM DATO BOR MED SØKER]
@@ -162,6 +175,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_MANGLENDE_OPPLYSNINGER("Ikke mottatt dokumentasjon") {
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -173,6 +187,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_UNDER_18_ÅR("Barn 18 år") {
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -184,6 +199,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_UNDER_6_ÅR("Barn 6 år") {
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -195,6 +211,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_DELT_BOSTED_ENIGHET("Enighet om opphør av avtale om delt bosted") {
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String, // TODO:  [BARN TOM DATO BOR MED SØKER]
@@ -206,6 +223,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     REDUKSJON_DELT_BOSTED_UENIGHET("Uenighet om opphør av avtale om delt bosted") { // TODO: Skal komme to kulepunkt hvor det nå er newline
 
+        override val begrunnelseType = BegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String, // TODO:  [BARN TOM DATO BOR MED SØKER]
@@ -219,6 +237,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     SATSENDRING("Satsendring") {
 
+        override val begrunnelseType = BegrunnelseType.SATSENDRING
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -228,6 +247,10 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
                     Målform.NN -> "Barnetrygda er endra fordi det har vore ei satsendring."
                 }
     },
+}
 
-    //TODO: Tekst 4 - barn døde
+enum class BegrunnelseType {
+    INNVILGET,
+    REDUKSJON,
+    SATSENDRING
 }

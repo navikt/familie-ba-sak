@@ -228,33 +228,12 @@ object VilkårsvurderingUtils {
         return advarsel
     }
 
-    fun hentVilkårsbegrunnelser(): MutableMap<BehandlingResultatType, MutableList<RestVedtakBegrunnelse>> {
-        val vilkårBegrunnelser = mutableMapOf<BehandlingResultatType, MutableList<RestVedtakBegrunnelse>>()
-
-        Vilkår.values().forEach { vilkår ->
-            BehandlingResultatType.values().forEach { behandlingResultatType ->
-                if (vilkårBegrunnelser[behandlingResultatType] == null) {
-                    vilkårBegrunnelser[behandlingResultatType] = mutableListOf()
-                }
-
-                val begrunnelserForVilkår = vilkår.begrunnelser[behandlingResultatType]
-
-                if (begrunnelserForVilkår != null) {
-                    vilkårBegrunnelser[behandlingResultatType]!!.addAll(begrunnelserForVilkår.map {
-                        RestVedtakBegrunnelse(
-                                id = it,
-                                navn = it.tittel
-                        )
-                    })
+    fun hentVilkårsbegrunnelser(): Map<BegrunnelseType, List<RestVedtakBegrunnelse>> = BehandlingresultatOgVilkårBegrunnelse.values()
+            .groupBy { it.begrunnelseType }
+            .mapValues {
+                it.value.map { behandlingResultatOgVilkårBegrunnelse ->
+                    RestVedtakBegrunnelse(id = behandlingResultatOgVilkårBegrunnelse,
+                                          navn = behandlingResultatOgVilkårBegrunnelse.tittel)
                 }
             }
-        }
-
-
-        val satsBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING
-        vilkårBegrunnelser[BehandlingResultatType.INNVILGET]?.add(RestVedtakBegrunnelse(id = satsBegrunnelse,
-                                                                                        navn = satsBegrunnelse.tittel))
-
-        return vilkårBegrunnelser
-    }
 }
