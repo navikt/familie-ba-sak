@@ -85,17 +85,14 @@ class FødselshendelseIntegrasjonTest(
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 
         @Autowired
-        private val gdprService: GDPRService,
-
-        @Autowired
-        private val vilkårsvurderingMetrics: VilkårsvurderingMetrics
+        private val gdprService: GDPRService
 ) {
 
     val now = LocalDate.now()
 
-    val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
-    val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
-    val featureToggleServiceMock = mockk<FeatureToggleService>()
+    final val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
+    final val infotrygdFeedServiceMock = mockk<InfotrygdFeedService>()
+    final val featureToggleServiceMock = mockk<FeatureToggleService>()
 
     val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                         infotrygdBarnetrygdClientMock,
@@ -108,7 +105,6 @@ class FødselshendelseIntegrasjonTest(
                                                         behandlingResultatRepository,
                                                         persongrunnlagService,
                                                         behandlingRepository,
-                                                        vilkårsvurderingMetrics,
                                                         gdprService)
 
     @Test

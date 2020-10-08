@@ -2,12 +2,14 @@ package no.nav.familie.ba.sak.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.config.RolleConfig
+import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.journalføring.domene.DokumentType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
@@ -28,8 +30,8 @@ class LoggService(
     }.toMap()
 
     fun opprettBehandlendeEnhetEndret(behandling: Behandling,
-                                      fraEnhetId: String,
-                                      tilEnhetId: String,
+                                      fraEnhet: Arbeidsfordelingsenhet,
+                                      tilEnhet: ArbeidsfordelingPåBehandling,
                                       manuellOppdatering: Boolean,
                                       begrunnelse: String) {
         lagre(Logg(
@@ -37,7 +39,8 @@ class LoggService(
                 type = LoggType.BEHANDLENDE_ENHET_ENDRET,
                 tittel = "Endret enhet på behandling",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                tekst = "Behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} endret fra $fraEnhetId til $tilEnhetId." +
+                tekst = "Behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} endret fra " +
+                        "${fraEnhet.enhetId} ${fraEnhet.enhetNavn} til ${tilEnhet.behandlendeEnhetId} ${tilEnhet.behandlendeEnhetNavn}." +
                         if (begrunnelse.isNotBlank()) "\n\n${begrunnelse}" else ""
         ))
     }
@@ -70,7 +73,10 @@ class LoggService(
                                     nyttBehandlingResultatType: BehandlingResultatType,
                                     forrigeBehandlingResultat: BehandlingResultat?): Logg {
         val forrigeBehandlingResultatType =
-                if (aktivBehandlingResultat.samletResultat != BehandlingResultatType.IKKE_VURDERT) aktivBehandlingResultat.samletResultat else forrigeBehandlingResultat?.samletResultat
+                if (aktivBehandlingResultat.samletResultat != BehandlingResultatType.IKKE_VURDERT)
+                    aktivBehandlingResultat.samletResultat
+                else
+                    forrigeBehandlingResultat?.samletResultat
 
         val tekst = if (forrigeBehandlingResultatType != null) {
             if (forrigeBehandlingResultatType != nyttBehandlingResultatType) {
@@ -119,14 +125,13 @@ class LoggService(
         ))
     }
 
-    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, begrunnelse: String?) {
+    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, begrunnelse: String? = null) {
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.GODKJENNE_VEDTAK,
-                tittel = if (beslutning.erGodkjent()) "Godkjent vedtak" else "Underkjent vedtak",
+                tittel = if (beslutning.erGodkjent()) "Vedtak godkjent " else "Vedtak underkjent",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.BESLUTTER),
-                tekst = if (beslutning.erGodkjent()) "Vedtak godkjent"
-                else "Vedtak underkjent" + if (begrunnelse != null) " med begrunnelse: $begrunnelse" else ""
+                tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else ""
         ))
     }
 

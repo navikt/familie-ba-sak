@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -50,7 +49,6 @@ class FødselshendelseServiceTest {
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>(relaxed = true)
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
-    private val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
 
     private val søkerFnr = "12345678910"
     private val barn1Fnr = "12345678911"
@@ -67,7 +65,6 @@ class FødselshendelseServiceTest {
                                                                 behandlingResultatRepositoryMock,
                                                                 persongrunnlagServiceMock,
                                                                 behandlingRepositoryMock,
-                                                                vilkårsvurderingMetricsMock,
                                                                 gdprServiceMock)
 
     @Test
@@ -239,7 +236,8 @@ class FødselshendelseServiceTest {
                              barnaFraHendelse = barna,
                              restenAvBarna = emptyList()), filtreringResultat)
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
-        every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } just Runs
+        every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } returns vedtak
+        every { vedtakServiceMock.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(any()) } returns vedtak
         every { taskRepositoryMock.save(any()) } returns opprettOppgaveTask
         every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns behandlingResultat
         every { persongrunnlagServiceMock.hentSøker(any()) } returns søker

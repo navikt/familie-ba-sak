@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -29,7 +31,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val beregningService: BeregningService,
                         private val fagsakService: FagsakService,
                         private val loggService: LoggService,
-                        private val arbeidsfordelingService: ArbeidsfordelingService) {
+                        private val arbeidsfordelingService: ArbeidsfordelingService,
+                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -39,7 +42,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
-        return if (aktivBehandling == null || aktivBehandling.status == BehandlingStatus.AVSLUTTET) {
+        return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
             val behandling = Behandling(fagsak = fagsak,
                                         opprinnelse = nyBehandling.behandlingOpprinnelse,
                                         type = nyBehandling.behandlingType,
@@ -48,6 +51,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         steg = initSteg(nyBehandling.behandlingType))
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
+            loggBehandlinghendelse(behandling)
             behandling
         } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
             aktivBehandling.steg = initSteg(nyBehandling.behandlingType)
@@ -59,6 +63,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
+    private fun loggBehandlinghendelse(behandling: Behandling) {
+        saksstatistikkEventPublisher.publish(behandling.id,
+                                             hentForrigeBehandlingSomErIverksatt(behandling.fagsak.id)
+                                                 .takeIf { erRevurderingEllerKlage(behandling) }?.id)
+    }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
@@ -115,7 +124,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {
-        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.FATTER_VEDTAK)
+        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = FATTER_VEDTAK)
     }
 
     fun oppdaterStatusPåBehandling(behandlingId: Long, status: BehandlingStatus): Behandling {
@@ -123,7 +132,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
         behandling.status = status
-        return behandlingRepository.save(behandling)
+        return behandlingRepository.save(behandling).also { loggBehandlinghendelse(behandling) }
     }
 
     fun oppdaterStegPåBehandling(behandlingId: Long, steg: StegType): Behandling {
@@ -168,6 +177,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun hentGjeldendeForFagsak(fagsakId: Long): List<Behandling> {
         return behandlingRepository.findByFagsakAndGjeldendeForUtbetaling(fagsakId)
     }
+
+    private fun erRevurderingEllerKlage(behandling: Behandling) =
+            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.KLAGE
+
 
     companion object {
 
