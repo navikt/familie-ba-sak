@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.KontrollertRollbackException
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
-import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -192,7 +191,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     }
 
     private fun iverksett(behandling: Behandling) {
-        val vedtak = vedtakService.oppdaterAutomatiskVedtak(behandling)
+        val vedtak = vedtakService.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling)
 
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)

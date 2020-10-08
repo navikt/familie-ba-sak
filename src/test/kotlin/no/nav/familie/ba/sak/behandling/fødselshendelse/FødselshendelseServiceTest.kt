@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -238,7 +237,7 @@ class FødselshendelseServiceTest {
                              restenAvBarna = emptyList()), filtreringResultat)
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
         every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } returns vedtak
-        every { vedtakServiceMock.oppdaterAutomatiskVedtak(any()) } returns vedtak
+        every { vedtakServiceMock.opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(any()) } returns vedtak
         every { taskRepositoryMock.save(any()) } returns opprettOppgaveTask
         every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns behandlingResultat
         every { persongrunnlagServiceMock.hentSøker(any()) } returns søker
