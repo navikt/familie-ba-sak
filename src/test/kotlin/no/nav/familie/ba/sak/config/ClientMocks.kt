@@ -236,7 +236,7 @@ class ClientMocks {
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(any<List<String>>())
-        } returns listOf(Tilgang(false, null))
+        } returns listOf(Tilgang(true, null))
 
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
