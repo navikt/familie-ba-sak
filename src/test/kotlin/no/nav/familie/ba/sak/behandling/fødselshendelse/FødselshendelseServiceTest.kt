@@ -238,6 +238,7 @@ class FødselshendelseServiceTest {
                              restenAvBarna = emptyList()), filtreringResultat)
         every { vedtakServiceMock.hentAktivForBehandling(any()) } returns vedtak
         every { vedtakServiceMock.oppdaterVedtakMedStønadsbrev(any()) } returns vedtak
+        every { vedtakServiceMock.oppdaterAutomatiskVedtak(any()) } returns vedtak
         every { taskRepositoryMock.save(any()) } returns opprettOppgaveTask
         every { behandlingResultatRepositoryMock.findByBehandlingAndAktiv(any()) } returns behandlingResultat
         every { persongrunnlagServiceMock.hentSøker(any()) } returns søker
