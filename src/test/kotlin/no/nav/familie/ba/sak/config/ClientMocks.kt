@@ -171,6 +171,10 @@ class ClientMocks {
                         Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
                                         relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
 
+        every {
+            mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(any())
+        } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
+
         return mockPersonopplysningerService
     }
 
