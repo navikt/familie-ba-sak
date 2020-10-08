@@ -23,12 +23,12 @@ import no.nav.familie.ba.sak.beregning.domene.SatsType
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.task.OpphørVedtakTask
 import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -96,9 +96,6 @@ class BehandlingIntegrationTest(
         private val fagsakService: FagsakService,
 
         @Autowired
-        private val integrasjonClient: IntegrasjonClient,
-
-        @Autowired
         private val personopplysningerService: PersonopplysningerService,
 
         @Autowired
@@ -108,7 +105,10 @@ class BehandlingIntegrationTest(
         private val loggService: LoggService,
 
         @Autowired
-        private val arbeidsfordelingService: ArbeidsfordelingService
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+
+        @Autowired
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -125,7 +125,9 @@ class BehandlingIntegrationTest(
                 beregningService,
                 fagsakService,
                 loggService,
-                arbeidsfordelingService)
+                arbeidsfordelingService,
+                saksstatistikkEventPublisher
+        )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
                         .willReturn(aResponse()
