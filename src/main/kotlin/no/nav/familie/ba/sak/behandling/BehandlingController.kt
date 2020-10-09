@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.behandling
 
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
@@ -32,8 +30,6 @@ class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService,
                            private val taskRepository: TaskRepository) {
 
-    private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingMetrikker("manuell")
-
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @PostMapping(path = ["behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -53,7 +49,6 @@ class BehandlingController(private val fagsakService: FagsakService,
         }.fold(
                 onSuccess = {
                     val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
-                    antallManuelleBehandlingerOpprettet[nyBehandling.behandlingType]?.increment()
                     restFagsak
                 },
                 onFailure = {
@@ -72,15 +67,6 @@ class BehandlingController(private val fagsakService: FagsakService,
         } catch (ex: Throwable) {
             illegalState("Task kunne ikke opprettes for behandling av fødselshendelse: ${ex.message}", ex)
         }
-    }
-
-    private fun initBehandlingMetrikker(type: String): Map<BehandlingType, Counter> {
-        return BehandlingType.values().map {
-            it to Metrics.counter("behandling.opprettet.$type", "type",
-                                  it.name,
-                                  "beskrivelse",
-                                  it.visningsnavn)
-        }.toMap()
     }
 }
 

@@ -66,13 +66,13 @@ data class Behandling(
 /**
  * Årsak er knyttet til en behandling og sier noe om hvorfor behandling ble opprettet.
  */
-enum class BehandlingÅrsak {
-    SØKNAD,
-    FØDSELSHENDELSE,
-    ÅRLIG_KONTROLL,
-    DØDSFALL,
-    NYE_OPPLYSNINGER,
-    TEKNISK_OPPHØR
+enum class BehandlingÅrsak(val visningsnavn: String) {
+    SØKNAD("Søknad"),
+    FØDSELSHENDELSE("Fødselshendelse"),
+    ÅRLIG_KONTROLL("Årsak kontroll"),
+    DØDSFALL("Dødsfall"),
+    NYE_OPPLYSNINGER("Nye opplysninger"),
+    TEKNISK_OPPHØR("Teknisk opphør")
 }
 
 enum class BehandlingType(val visningsnavn: String) {

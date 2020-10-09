@@ -101,6 +101,9 @@ class BehandlingIntegrationTest(
         private val databaseCleanupService: DatabaseCleanupService,
 
         @Autowired
+        private val behandlingMetrikker: BehandlingMetrikker,
+
+        @Autowired
         private val loggService: LoggService,
 
         @Autowired
@@ -119,6 +122,7 @@ class BehandlingIntegrationTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
+                behandlingMetrikker,
                 fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,

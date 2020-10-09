@@ -26,6 +26,7 @@ import java.time.LocalDate
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
+                        private val behandlingMetrikker: BehandlingMetrikker,
                         private val fagsakPersonRepository: FagsakPersonRepository,
                         private val persongrunnlagService: PersongrunnlagService,
                         private val beregningService: BeregningService,
@@ -121,6 +122,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
         return behandlingRepository.save(behandling).also {
             arbeidsfordelingService.fastsettBehandlendeEnhet(it)
+
+            if (it.versjon == 0L) {
+                behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(it)
+            }
         }
     }
 
