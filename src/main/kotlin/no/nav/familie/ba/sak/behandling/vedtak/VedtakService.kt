@@ -186,9 +186,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                                                fom = it.fom,
                                                                tom = it.tom,
                                                                resultat = BehandlingResultatType.INNVILGET,
-                                                               behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING,
+                                                               behandlingresultatOgVilkårBegrunnelse = VedtakBegrunnelse.SATSENDRING,
                                                                brevBegrunnelse =
-                                                               BehandlingresultatOgVilkårBegrunnelse.SATSENDRING.hentBeskrivelse(
+                                                               VedtakBegrunnelse.SATSENDRING.hentBeskrivelse(
                                                                        vilkårsdato = it.fom.toString(), målform = målform)))
         }
     }
@@ -282,10 +282,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val stønadBrevBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
                                     ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
-        if (restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse != null && restPutUtbetalingBegrunnelse.resultat != null) {
+        if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null && restPutUtbetalingBegrunnelse.resultat != null) {
             val vilkår = Vilkår.values().firstOrNull {
                 it.begrunnelser.filter { begrunnelse ->
-                    begrunnelse.value.contains(restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse)
+                    begrunnelse.value.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)
                 }.isNotEmpty()
             } ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
 
@@ -314,6 +314,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
             val vilkårsdato = if (personerMedUtgjørendeVilkårForUtbetalingsperiode.size == 1) {
                 personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilDagMånedÅr()
+                personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeTom!!.tilDagMånedÅr()
             } else {
                 stønadBrevBegrunnelse.fom.minusMonths(1).tilMånedÅr()
             }
@@ -322,22 +323,22 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
 
             val begrunnelseSomSkalPersisteres =
-                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse.hentBeskrivelse(gjelderSøker,
-                                                                                                       barnasFødselsdatoer,
-                                                                                                       vilkårsdato,
-                                                                                                       personopplysningGrunnlag.søker.målform)
+                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(gjelderSøker,
+                                                                                   barnasFødselsdatoer,
+                                                                                   vilkårsdato,
+                                                                                   personopplysningGrunnlag.søker.målform)
 
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
                     restPutUtbetalingBegrunnelse.resultat,
-                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse,
+                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
                     begrunnelseSomSkalPersisteres
             )
         } else {
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
                     restPutUtbetalingBegrunnelse.resultat,
-                    restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse,
+                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
                     ""
             )
         }

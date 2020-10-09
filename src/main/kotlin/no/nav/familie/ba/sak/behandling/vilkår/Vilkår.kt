@@ -9,7 +9,7 @@ import java.time.LocalDate
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
-                  val begrunnelser: Map<BehandlingResultatType, List<BehandlingresultatOgVilkårBegrunnelse>> = emptyMap(),
+                  val begrunnelser: Map<BehandlingResultatType, List<VedtakBegrunnelse>> = emptyMap(),
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
     UNDER_18_ÅR(
@@ -32,9 +32,9 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     BehandlingResultatType.INNVILGET
                             to
                             listOf(
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_OMSORG_FOR_BARN,
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOR_HOS_SØKER,
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_FAST_OMSORG_FOR_BARN
+                                    VedtakBegrunnelse.INNVILGET_OMSORG_FOR_BARN,
+                                    VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER,
+                                    VedtakBegrunnelse.INNVILGET_FAST_OMSORG_FOR_BARN
                             )
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
@@ -55,7 +55,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     BehandlingResultatType.INNVILGET
                             to
                             listOf(
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOSATT_I_RIKTET
+                                    VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET
                             )
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
@@ -70,9 +70,9 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     BehandlingResultatType.INNVILGET
                             to
                             listOf(
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER,
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING
+                                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+                                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER,
+                                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING
                             )
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode());

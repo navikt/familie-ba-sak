@@ -23,8 +23,8 @@ class BehandlingMetrikker(
                                       "beskrivelse", it.displayName)
             }.toMap()
 
-    private val antallBrevBegrunnelser: Map<BehandlingresultatOgVilkårBegrunnelse, Counter> =
-            BehandlingresultatOgVilkårBegrunnelse.values().map {
+    private val antallBrevBegrunnelser: Map<VedtakBegrunnelse, Counter> =
+            VedtakBegrunnelse.values().map {
                 it to Metrics.counter("brevbegrunnelse",
                                       "type", it.name,
                                       "beskrivelse", it.tittel)
@@ -52,6 +52,6 @@ class BehandlingMetrikker(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
         vedtak.utbetalingBegrunnelser.mapNotNull { it.behandlingresultatOgVilkårBegrunnelse }
-                .forEach { brevbegrunelse: BehandlingresultatOgVilkårBegrunnelse -> antallBrevBegrunnelser[brevbegrunelse]?.increment() }
+                .forEach { brevbegrunelse: VedtakBegrunnelse -> antallBrevBegrunnelser[brevbegrunelse]?.increment() }
     }
 }

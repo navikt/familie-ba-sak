@@ -228,8 +228,8 @@ object VilkårsvurderingUtils {
         return advarsel
     }
 
-    fun hentVilkårsbegrunnelser(): Map<BegrunnelseType, List<RestVedtakBegrunnelse>> = BehandlingresultatOgVilkårBegrunnelse.values()
-            .groupBy { it.begrunnelseType }
+    fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelse>> = VedtakBegrunnelse.values()
+            .groupBy { it.vedtakBegrunnelseType }
             .mapValues {
                 it.value.map { behandlingResultatOgVilkårBegrunnelse ->
                     RestVedtakBegrunnelse(id = behandlingResultatOgVilkårBegrunnelse,

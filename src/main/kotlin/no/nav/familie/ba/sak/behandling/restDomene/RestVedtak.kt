@@ -2,8 +2,9 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -20,17 +21,17 @@ data class RestUtbetalingBegrunnelse(
         val fom: LocalDate,
         val tom: LocalDate,
         val resultat: BehandlingResultatType?,
-        var behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse?,
+        var behandlingresultatOgVilkårVedtakBegrunnelse: VedtakBegrunnelse?,
         val opprettetTidspunkt: LocalDateTime
 )
 
 data class RestPutUtbetalingBegrunnelse(
-        val resultat: BehandlingResultatType?,
-        val behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse?
+        val vedtakBegrunnelseType: VedtakBegrunnelseType,
+        val vedtakBegrunnelse: VedtakBegrunnelse?
 )
 
 data class RestVedtakBegrunnelse(
-        val id: BehandlingresultatOgVilkårBegrunnelse,
+        val id: VedtakBegrunnelse,
         val navn: String
 )
 
@@ -50,7 +51,7 @@ fun UtbetalingBegrunnelse.toRestUtbetalingBegrunnelse() =
                 fom = this.fom,
                 tom = this.tom,
                 resultat = this.resultat,
-                behandlingresultatOgVilkårBegrunnelse = this.behandlingresultatOgVilkårBegrunnelse,
+                behandlingresultatOgVilkårVedtakBegrunnelse = this.behandlingresultatOgVilkårBegrunnelse,
                 opprettetTidspunkt = this.opprettetTidspunkt
         )
 

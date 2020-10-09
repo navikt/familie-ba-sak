@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.vedtak.producer.KafkaProducer
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -105,7 +104,7 @@ internal class SaksstatistikkServiceTest {
                                           fom = LocalDate.now(),
                                           tom = LocalDate.now(),
                                           resultat = BehandlingResultatType.INNVILGET,
-                                          behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOR_HOS_SØKER))
+                                          behandlingresultatOgVilkårBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER))
         }
 
 
