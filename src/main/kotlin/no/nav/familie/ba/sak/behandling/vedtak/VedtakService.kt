@@ -279,8 +279,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(vedtak.behandling.id)
                                  ?: throw Feil("Finner ikke behandlingsresultat ved fastsetting av begrunnelse")
 
-        val stønadBrevBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
-                                    ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
+        val opprinneligUtbetalingBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
+                                               ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
         if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null) {
             val vilkår = Vilkår.values().firstOrNull {
@@ -293,7 +293,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                     hentPersonerMedUtgjørendeVilkår(
                             behandlingResultat = behandlingResultat,
-                            utbetalingBegrunnelse = stønadBrevBegrunnelse,
+                            oppdatertBegrunnelseType = restPutUtbetalingBegrunnelse.vedtakBegrunnelseType,
+                            utbetalingBegrunnelse = opprinneligUtbetalingBegrunnelse,
                             vilkår = vilkår)
 
             if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
@@ -313,9 +314,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
             val vilkårsdato = if (personerMedUtgjørendeVilkårForUtbetalingsperiode.size == 1) {
                 personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilDagMånedÅr()
-                personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeTom!!.tilDagMånedÅr()
             } else {
-                stønadBrevBegrunnelse.fom.minusMonths(1).tilMånedÅr()
+                opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
             }
 
 
@@ -328,13 +328,13 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                                                                    personopplysningGrunnlag.søker.målform)
 
             vedtak.endreUtbetalingBegrunnelse(
-                    stønadBrevBegrunnelse.id,
+                    opprinneligUtbetalingBegrunnelse.id,
                     restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
                     begrunnelseSomSkalPersisteres
             )
         } else {
             vedtak.endreUtbetalingBegrunnelse(
-                    stønadBrevBegrunnelse.id,
+                    opprinneligUtbetalingBegrunnelse.id,
                     restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
                     ""
             )
@@ -345,10 +345,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         return vedtak.utbetalingBegrunnelser.toList()
     }
 
-    private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat,
-                                                utbetalingBegrunnelse: UtbetalingBegrunnelse,
-                                                vilkår: Vilkår): List<Pair<Person, VilkårResultat>> {
-        val begrunnelseType = utbetalingBegrunnelse.begrunnelseType ?: "Finner ikke type på utbetalingsbegrunnelse"
+    private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat, // Kontrollerer mot denne
+                                                oppdatertBegrunnelseType: VedtakBegrunnelseType, // Brukes til å se om man skal se på fom eller tom
+                                                utbetalingBegrunnelse: UtbetalingBegrunnelse, // Brukes til å sammenligne med vilkår i behandlingResultat
+                                                vilkår: Vilkår): List<Pair<Person, VilkårResultat>> {// Brukes til å sammenligne med vilkår i behandlingResultat
         return behandlingResultat.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkår = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
                 when {
@@ -356,7 +356,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     vilkårResultat.periodeFom == null -> {
                         false
                     }
-                    begrunnelseType == VedtakBegrunnelseType.INNVILGET -> {
+                    oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGET -> {
                         vilkårResultat.periodeFom!!.monthValue == utbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
                     }
                     else -> {
