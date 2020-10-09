@@ -72,7 +72,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                             listOf(
                                     BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
                                     BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER,
-                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_AAREG
+                                    BehandlingresultatOgVilkårBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING
                             )
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode());
