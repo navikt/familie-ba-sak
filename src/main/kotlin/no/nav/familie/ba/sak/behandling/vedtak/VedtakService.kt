@@ -185,8 +185,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                          UtbetalingBegrunnelse(vedtak = vedtak,
                                                                fom = it.fom,
                                                                tom = it.tom,
-                                                               resultat = BehandlingResultatType.INNVILGET,
-                                                               behandlingresultatOgVilkårBegrunnelse = VedtakBegrunnelse.SATSENDRING,
+                                                               begrunnelseType = VedtakBegrunnelseType.SATSENDRING,
+                                                               vedtakBegrunnelse = VedtakBegrunnelse.SATSENDRING,
                                                                brevBegrunnelse =
                                                                VedtakBegrunnelse.SATSENDRING.hentBeskrivelse(
                                                                        vilkårsdato = it.fom.toString(), målform = målform)))
@@ -229,8 +229,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val begrunnelse = UtbetalingBegrunnelse(vedtak = vedtak,
                                                     fom = utbetalingBegrunnelse.fom,
                                                     tom = utbetalingBegrunnelse.tom,
-                                                    resultat = utbetalingBegrunnelse.resultat,
-                                                    behandlingresultatOgVilkårBegrunnelse = utbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse,
+                                                    begrunnelseType = utbetalingBegrunnelse.vedtakBegrunnelse?.vedtakBegrunnelseType,
+                                                    vedtakBegrunnelse = utbetalingBegrunnelse.vedtakBegrunnelse,
                                                     brevBegrunnelse = utbetalingBegrunnelse.brevBegrunnelse)
 
             vedtak.leggTilUtbetalingBegrunnelse(begrunnelse)
@@ -282,7 +282,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val stønadBrevBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
                                     ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
-        if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null && restPutUtbetalingBegrunnelse.resultat != null) {
+        if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null) {
             val vilkår = Vilkår.values().firstOrNull {
                 it.begrunnelser.filter { begrunnelse ->
                     begrunnelse.value.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)
@@ -294,7 +294,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     hentPersonerMedUtgjørendeVilkår(
                             behandlingResultat = behandlingResultat,
                             utbetalingBegrunnelse = stønadBrevBegrunnelse,
-                            resultat = restPutUtbetalingBegrunnelse.resultat,
                             vilkår = vilkår)
 
             if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
@@ -330,14 +329,12 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
-                    restPutUtbetalingBegrunnelse.resultat,
                     restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
                     begrunnelseSomSkalPersisteres
             )
         } else {
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
-                    restPutUtbetalingBegrunnelse.resultat,
                     restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
                     ""
             )
@@ -350,8 +347,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat,
                                                 utbetalingBegrunnelse: UtbetalingBegrunnelse,
-                                                resultat: BehandlingResultatType,
                                                 vilkår: Vilkår): List<Pair<Person, VilkårResultat>> {
+        val begrunnelseType = utbetalingBegrunnelse.begrunnelseType ?: "Finner ikke type på utbetalingsbegrunnelse"
         return behandlingResultat.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkår = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
                 when {
@@ -359,7 +356,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     vilkårResultat.periodeFom == null -> {
                         false
                     }
-                    resultat == BehandlingResultatType.INNVILGET -> {
+                    begrunnelseType == VedtakBegrunnelseType.INNVILGET -> {
                         vilkårResultat.periodeFom!!.monthValue == utbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
                     }
                     else -> {

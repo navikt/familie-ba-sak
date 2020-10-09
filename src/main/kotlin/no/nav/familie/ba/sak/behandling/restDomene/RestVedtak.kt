@@ -20,8 +20,8 @@ data class RestUtbetalingBegrunnelse(
         val id: Long?,
         val fom: LocalDate,
         val tom: LocalDate,
-        val resultat: BehandlingResultatType?,
-        var behandlingresultatOgVilkårVedtakBegrunnelse: VedtakBegrunnelse?,
+        val begrunnelseType: VedtakBegrunnelseType?,
+        var vedtakBegrunnelse: VedtakBegrunnelse?,
         val opprettetTidspunkt: LocalDateTime
 )
 
@@ -50,8 +50,8 @@ fun UtbetalingBegrunnelse.toRestUtbetalingBegrunnelse() =
                 id = this.id,
                 fom = this.fom,
                 tom = this.tom,
-                resultat = this.resultat,
-                behandlingresultatOgVilkårVedtakBegrunnelse = this.behandlingresultatOgVilkårBegrunnelse,
+                begrunnelseType = this.vedtakBegrunnelse?.vedtakBegrunnelseType,
+                vedtakBegrunnelse = this.vedtakBegrunnelse,
                 opprettetTidspunkt = this.opprettetTidspunkt
         )
 

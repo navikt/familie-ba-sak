@@ -70,7 +70,7 @@ class BehandlingMetrikker(
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                      ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
-        vedtak.utbetalingBegrunnelser.mapNotNull { it.behandlingresultatOgVilkårBegrunnelse }
+        vedtak.utbetalingBegrunnelser.mapNotNull { it.vedtakBegrunnelse }
                 .forEach { brevbegrunelse: VedtakBegrunnelse -> antallBrevBegrunnelser[brevbegrunelse]?.increment() }
     }
 

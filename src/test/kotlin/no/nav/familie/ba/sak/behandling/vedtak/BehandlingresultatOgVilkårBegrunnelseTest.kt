@@ -26,7 +26,7 @@ import java.time.LocalDate
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("mock-pdl", "postgres", "mock-arbeidsfordeling")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class BehandlingresultatOgVilkårBegrunnelseTest(
+class VedtakBegrunnelseTest(
         @Autowired
         private val behandlingRepository: BehandlingRepository,
 
@@ -175,7 +175,7 @@ class BehandlingresultatOgVilkårBegrunnelseTest(
 
         val begrunnelserLovligOpphold =
                 vedtakService.endreUtbetalingBegrunnelse(
-                        RestPutUtbetalingBegrunnelse(resultat = BehandlingResultatType.INNVILGET,
+                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
                                                      vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE),
                         fagsakId = fagsak.id,
                         utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelseLovligOpphold[0].id!!)
@@ -183,7 +183,7 @@ class BehandlingresultatOgVilkårBegrunnelseTest(
         assert(begrunnelserLovligOpphold.size == 1)
         Assertions.assertEquals(
                 "Du får barnetrygd fordi du og barn født 01.01.19 har oppholdstillatelse fra desember 2009.",
-                begrunnelserLovligOpphold.firstOrNull { it.behandlingresultatOgVilkårBegrunnelse == VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE }!!.brevBegrunnelse)
+                begrunnelserLovligOpphold.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE }!!.brevBegrunnelse)
 
         val initertRestUtbetalingBegrunnelseBosattIRiket =
                 vedtakService.leggTilUtbetalingBegrunnelse(periode = Periode(fom = LocalDate.of(2010, 1, 1),
@@ -192,7 +192,7 @@ class BehandlingresultatOgVilkårBegrunnelseTest(
 
         val begrunnelserLovligOppholdOgBosattIRiket =
                 vedtakService.endreUtbetalingBegrunnelse(
-                        RestPutUtbetalingBegrunnelse(resultat = BehandlingResultatType.INNVILGET,
+                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
                                                      vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET),
                         fagsakId = fagsak.id,
                         utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelseBosattIRiket[1].id!!)
@@ -200,11 +200,11 @@ class BehandlingresultatOgVilkårBegrunnelseTest(
         assert(begrunnelserLovligOppholdOgBosattIRiket.size == 2)
         Assertions.assertEquals(
                 "Du får barnetrygd fordi du er bosatt i Norge fra 24. desember 2009.",
-                begrunnelserLovligOppholdOgBosattIRiket.firstOrNull { it.behandlingresultatOgVilkårBegrunnelse == VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET }!!.brevBegrunnelse)
+                begrunnelserLovligOppholdOgBosattIRiket.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET }!!.brevBegrunnelse)
 
         assertThrows<Feil> {
             vedtakService.endreUtbetalingBegrunnelse(
-                    RestPutUtbetalingBegrunnelse(resultat = BehandlingResultatType.INNVILGET,
+                    RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
                                                  vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER),
                     fagsakId = fagsak.id,
                     utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelseBosattIRiket[1].id!!)
