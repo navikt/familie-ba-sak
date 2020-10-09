@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
