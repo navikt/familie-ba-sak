@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.nare.Resultat
@@ -54,8 +53,7 @@ class BarnBorMedSøkerVilkårTest {
         barnMedAdresse.personopplysningGrunnlag.personer.clear()
         barnMedAdresse.personopplysningGrunnlag.personer.add(søker.copy(bostedsadresse = bostedsadresseSøker))
 
-        return FaktaTilVilkårsvurdering(personForVurdering = barnMedAdresse,
-                                        behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+        return FaktaTilVilkårsvurdering(personForVurdering = barnMedAdresse)
     }
 
     companion object {

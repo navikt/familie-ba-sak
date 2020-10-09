@@ -3,10 +3,8 @@ package no.nav.familie.ba.sak.dokument
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -41,20 +39,24 @@ class MalerServiceTest {
     fun `test mapTilInnvilgetBrevfelter for innvilget autovedtak med ett barn`() {
         every { norg2RestClient.hentEnhet(any()) } returns Enhet(1L, "enhet")
 
-        val behandling = lagBehandling().copy(opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE,
-                                              fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
-                                                                                           .copy(personIdent = PersonIdent(
-                                                                                                   søkerFnr[0])))))
+        val behandling = lagBehandling().copy(
+                opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                skalBehandlesAutomatisk = true,
+                fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
+                                                             .copy(personIdent = PersonIdent(
+                                                                     søkerFnr[0]))))
+        )
+
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList().subList(0, 1))
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
         val vedtak = lagVedtak(behandling)
-            vedtak.vedtaksdato = fødselsdato.plusDays(7)
+        vedtak.vedtaksdato = fødselsdato.plusDays(7)
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                fødselsdato.plusYears(18).toString(),
-                YtelseType.ORDINÆR_BARNETRYGD,
-                behandling = behandling,
-                person = personopplysningGrunnlag.barna.first())
+                                                         fødselsdato.plusYears(18).toString(),
+                                                         YtelseType.ORDINÆR_BARNETRYGD,
+                                                         behandling = behandling,
+                                                         person = personopplysningGrunnlag.barna.first())
 
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
@@ -78,27 +80,30 @@ class MalerServiceTest {
     fun `test mapTilVedtakBrevfelter for innvilget autovedtak med flere barn og etterbetaling`() {
         every { norg2RestClient.hentEnhet(any()) } returns Enhet(1L, "enhet")
 
-        val behandling = lagBehandling().copy(opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE,
-                                              fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
-                                                                                           .copy(personIdent = PersonIdent(
-                                                                                                   søkerFnr[0])))))
+        val behandling = lagBehandling().copy(
+                opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                skalBehandlesAutomatisk = true,
+                fagsak = Fagsak(søkerIdenter = setOf(defaultFagsak.søkerIdenter.first()
+                                                             .copy(personIdent = PersonIdent(
+                                                                     søkerFnr[0]))))
+        )
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val barn1 = personopplysningGrunnlag.barna.first()
         val barn2 = personopplysningGrunnlag.barna.last()
         val vedtak = lagVedtak(behandling)
-            vedtak.vedtaksdato = barn2.fødselsdato.plusMonths(6)
+        vedtak.vedtaksdato = barn2.fødselsdato.plusMonths(6)
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                barn1.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                behandling = behandling,
-                person = barn1)
+                                                              barn1.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
+                                                              ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                                              behandling = behandling,
+                                                              person = barn1)
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(barn2.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
-                barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                behandling = behandling,
-                person = barn2)
+                                                              barn2.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
+                                                              ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                                                              behandling = behandling,
+                                                              person = barn2)
 
         every { persongrunnlagService.hentSøker(any()) } returns personopplysningGrunnlag.søker
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag

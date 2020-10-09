@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.*
@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.nare.Spesifikasjon
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert
@@ -274,7 +273,8 @@ class OppgaveBeskrivelseTest {
         val fagsak = Fagsak(søkerIdenter = emptySet())
         val behandling = lagBehandling(
                 fagsak = fagsak,
-                opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE,
+                årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                automatiskOpprettelse = true,
                 behandlingKategori = BehandlingKategori.EØS
         )
         val søker = Person(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 12), kjønn = Kjønn.KVINNE,

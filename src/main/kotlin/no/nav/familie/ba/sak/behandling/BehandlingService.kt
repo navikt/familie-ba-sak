@@ -26,6 +26,7 @@ import java.time.LocalDate
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
+                        private val behandlingMetrikker: BehandlingMetrikker,
                         private val fagsakPersonRepository: FagsakPersonRepository,
                         private val persongrunnlagService: PersongrunnlagService,
                         private val beregningService: BeregningService,
@@ -44,10 +45,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
             val behandling = Behandling(fagsak = fagsak,
-                                        opprinnelse = nyBehandling.behandlingOpprinnelse,
+                                        opprettetÅrsak = nyBehandling.behandlingÅrsak,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
+                                        skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk,
                                         steg = initSteg(nyBehandling.behandlingType))
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
@@ -120,6 +122,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
         return behandlingRepository.save(behandling).also {
             arbeidsfordelingService.fastsettBehandlendeEnhet(it)
+
+            if (it.versjon == 0L) {
+                behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(it)
+            }
         }
     }
 

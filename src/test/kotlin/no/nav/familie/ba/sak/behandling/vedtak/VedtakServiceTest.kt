@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
@@ -40,37 +41,40 @@ import java.time.LocalDate
 @AutoConfigureWireMock(port = 28085)
 class VedtakServiceTest(
         @Autowired
-        val behandlingRepository: BehandlingRepository,
+        private val behandlingRepository: BehandlingRepository,
 
         @Autowired
-        val behandlingResultatService: BehandlingResultatService,
+        private val behandlingMetrikker: BehandlingMetrikker,
 
         @Autowired
-        val arbeidsfordelingService: ArbeidsfordelingService,
+        private val behandlingResultatService: BehandlingResultatService,
 
         @Autowired
-        val vedtakService: VedtakService,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
 
         @Autowired
-        val persongrunnlagService: PersongrunnlagService,
+        private val vedtakService: VedtakService,
 
         @Autowired
-        val beregningService: BeregningService,
+        private val persongrunnlagService: PersongrunnlagService,
 
         @Autowired
-        val fagsakService: FagsakService,
+        private val beregningService: BeregningService,
 
         @Autowired
-        val fagsakPersonRepository: FagsakPersonRepository,
+        private val fagsakService: FagsakService,
 
         @Autowired
-        val totrinnskontrollService: TotrinnskontrollService,
+        private val fagsakPersonRepository: FagsakPersonRepository,
 
         @Autowired
-        val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val totrinnskontrollService: TotrinnskontrollService,
 
         @Autowired
-        val loggService: LoggService,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+
+        @Autowired
+        private val loggService: LoggService,
 
         @Autowired
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
@@ -91,6 +95,7 @@ class VedtakServiceTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
+                behandlingMetrikker,
                 fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,
@@ -199,7 +204,7 @@ class VedtakServiceTest(
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                                opprinnelse = BehandlingOpprinnelse.MANUELL))
+                                                                                opprettetÅrsak = BehandlingÅrsak.SØKNAD))
 
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
@@ -213,7 +218,7 @@ class VedtakServiceTest(
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                                opprinnelse = BehandlingOpprinnelse.MANUELL))
+                                                                                opprettetÅrsak = BehandlingÅrsak.SØKNAD))
 
         val forrigeVedtak = vedtakService.hentForrigeVedtakPåFagsak(revurderingOpphørBehandling)
         Assertions.assertNotNull(forrigeVedtak)
