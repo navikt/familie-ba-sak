@@ -13,7 +13,7 @@ interface IVedtakBegrunnelse {
 enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
 
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -26,7 +26,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     },
     INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger bosatt før lovlig opphold i Norge") {
 
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -39,7 +39,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER("EØS-borger: Søker har oppholdsrett") {
 
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -52,7 +52,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING("EØS-borger: Skjønnsmessig vurdering av oppholdsrett.") {
 
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -65,7 +65,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     },
     INNVILGET_OMSORG_FOR_BARN("Adopsjon, surrogati: Omsorgen for barn") {
 
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -78,7 +78,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     },
     INNVILGET_BOR_HOS_SØKER("Barn har flyttet til søker") {
 
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -91,7 +91,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     },
     INNVILGET_FAST_OMSORG_FOR_BARN("Søker har fast omsorg for barn") {
 
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -250,7 +250,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
 }
 
 enum class VedtakBegrunnelseType {
-    INNVILGET,
+    INNVILGELSE,
     REDUKSJON,
     SATSENDRING
 }
