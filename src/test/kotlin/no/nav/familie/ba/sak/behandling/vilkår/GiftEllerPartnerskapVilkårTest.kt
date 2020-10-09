@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.nare.Resultat
@@ -12,7 +11,7 @@ class GiftEllerPartnerskapVilkårTest {
 
     @Test
     fun `Gift-vilkår gir resultat JA for fødselshendelse når sivilstand er uoppgitt`() {
-        val fakta = FaktaTilVilkårsvurdering(personForVurdering = barn, behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+        val fakta = FaktaTilVilkårsvurdering(personForVurdering = barn)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)

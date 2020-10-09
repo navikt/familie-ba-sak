@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 
@@ -15,7 +15,7 @@ interface BehandlingSteg<T> {
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
         return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(),
                                              behandlingType = behandling.type,
-                                             behandlingOpprinnelse = behandling.opprinnelse)
+                                             behandlingÅrsak = behandling.opprettetÅrsak)
     }
 
     fun preValiderSteg(behandling: Behandling, stegService: StegService? = null) {}
@@ -23,8 +23,8 @@ interface BehandlingSteg<T> {
     fun postValiderSteg(behandling: Behandling) {}
 }
 
-fun initSteg(behandlingType: BehandlingType? = null, behandlingOpprinnelse: BehandlingOpprinnelse? = null): StegType {
-    return if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
+fun initSteg(behandlingType: BehandlingType? = null, behandlingÅrsak: BehandlingÅrsak? = null): StegType {
+    return if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
                || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
         StegType.REGISTRERE_PERSONGRUNNLAG
     } else {
@@ -105,8 +105,8 @@ enum class StegType(val rekkefølge: Int,
 
     fun hentNesteSteg(utførendeStegType: StegType,
                       behandlingType: BehandlingType? = null,
-                      behandlingOpprinnelse: BehandlingOpprinnelse? = null): StegType {
-        return if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+                      behandlingÅrsak: BehandlingÅrsak? = null): StegType {
+        return if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG

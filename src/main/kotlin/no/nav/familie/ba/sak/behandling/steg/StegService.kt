@@ -61,7 +61,8 @@ class StegService(
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
+                behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                skalBehandlesAutomatisk = true
         ))
 
         loggService.opprettFødselshendelseLogg(behandling)

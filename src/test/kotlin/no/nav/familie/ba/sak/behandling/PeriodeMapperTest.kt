@@ -39,7 +39,7 @@ class PeriodeMapperTest {
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                    opprinnelse = BehandlingOpprinnelse.MANUELL)
+                                    opprettetÅrsak = BehandlingÅrsak.SØKNAD)
         behandlingResultat = lagBehandlingResultat("", behandling, Resultat.KANSKJE)
     }
 
