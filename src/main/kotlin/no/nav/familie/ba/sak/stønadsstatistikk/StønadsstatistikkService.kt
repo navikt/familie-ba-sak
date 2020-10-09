@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.stønadsstatistikk
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -24,9 +25,6 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                                private val beregningService: BeregningService,
                                private val vedtakService: VedtakService,
                                private val personopplysningerService: PersonopplysningerService) {
-    val LOG = LoggerFactory.getLogger(this::class.java)
-    val secureLogger = LoggerFactory.getLogger("secureLogger")
-
 
     fun hentVedtak(behandlingId: Long): VedtakDVH {
 
@@ -42,7 +40,11 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                          kategori = Kategori.valueOf(behandling.kategori.name),
                          underkategori = Underkategori.valueOf(behandling.underkategori.name),
                          behandlingType = BehandlingType.valueOf(behandling.type.name),
-                         behandlingOpprinnelse = BehandlingOpprinnelse.valueOf(behandling.opprinnelse.name),
+                         behandlingOpprinnelse = when (behandling.opprettetÅrsak) {
+                             BehandlingÅrsak.SØKNAD -> BehandlingOpprinnelse.MANUELL
+                             BehandlingÅrsak.FØDSELSHENDELSE -> BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
+                             else -> BehandlingOpprinnelse.MANUELL
+                         },
                          utbetalingsperioder = hentUtbetalingsperioder(behandlingId))
     }
 
@@ -126,5 +128,10 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
             }
             landKode
         }
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(this::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

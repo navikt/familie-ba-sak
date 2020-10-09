@@ -117,7 +117,7 @@ class DokumentServiceTest(
                                                                                   dato_2020_01_01.minusMonths(1),
                                                                                   stønadTom)
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
-        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
         behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
         behandlingResultatService.oppdater(behandlingResultat)
 
@@ -169,7 +169,7 @@ class DokumentServiceTest(
                                                                                   dato_2020_01_01.minusMonths(1),
                                                                                   stønadTom)
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
-        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        val nyBehandlingResultatType = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
         behandlingResultat.oppdaterSamletResultat(nyBehandlingResultatType)
         behandlingResultatService.oppdater(behandlingResultat)
 

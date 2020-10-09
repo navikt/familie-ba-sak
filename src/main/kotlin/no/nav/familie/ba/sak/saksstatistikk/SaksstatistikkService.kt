@@ -2,11 +2,12 @@ package no.nav.familie.ba.sak.saksstatistikk
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
@@ -26,8 +27,8 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
     fun loggBehandlingStatus(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH {
         val behandling = behandlingService.hent(behandlingId)
 
-        val datoMottatt = when (behandling.opprinnelse) {
-            BehandlingOpprinnelse.MANUELL -> {
+        val datoMottatt = when (behandling.opprettetÅrsak) {
+            BehandlingÅrsak.SØKNAD -> {
                 val journalpost = journalføringRepository.findByBehandlingId(behandlingId)
                 journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
                         .filter { it.journalposttype == Journalposttype.I }
@@ -35,10 +36,13 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                         .mapNotNull { it.datoMottatt }
                         .minOrNull() ?: behandling.opprettetTidspunkt
             }
-            BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE -> {
+            BehandlingÅrsak.FØDSELSHENDELSE -> {
                 behandling.opprettetTidspunkt
             }
-            else -> error("Statistikkhåndtering for behandling med opprinnelse ${behandling.opprinnelse.name} ikke implementert.")
+            BehandlingÅrsak.TEKNISK_OPPHØR -> {
+                behandling.opprettetTidspunkt
+            }
+            else -> error("Statistikkhåndtering for behandling med opprinnelse ${behandling.opprettetÅrsak.name} ikke implementert.")
         }
 
         val behandlendeEnhetsKode = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
@@ -63,7 +67,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                           behandlendeEnhetKode = behandlendeEnhetsKode,
                                           ansvarligEnhetType = "NORG",
                                           behandlendeEnhetType = "NORG",
-                                          totrinnsbehandling = behandling.opprinnelse == BehandlingOpprinnelse.MANUELL,
+                                          totrinnsbehandling = totrinnskontroll?.saksbehandler != SYSTEM_NAVN,
                                           avsender = "familie-ba-sak",
                                           versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
                 // Ikke påkrevde felt
@@ -71,7 +75,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                           relatertBehandlingId = forrigeBehandlingId?.toString(),
                                           vedtakId = aktivtVedtak?.id?.toString(),
                                           resultat = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.resultat?.name,
-
                                           behandlingTypeBeskrivelse = behandling.type.visningsnavn,
                                           resultatBegrunnelser = aktivtVedtak?.utbetalingBegrunnelser?.mapNotNull { it.behandlingresultatOgVilkårBegrunnelse }
                                                   ?.map { ResultatBegrunnelseDVH(it.name, it.tittel) }

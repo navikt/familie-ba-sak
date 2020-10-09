@@ -144,7 +144,7 @@ class OppgaveServiceTest {
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                opprinnelse = BehandlingOpprinnelse.MANUELL)
+                opprettetÅrsak = BehandlingÅrsak.SØKNAD)
     }
 
     private fun lagTestOppgave(): DbOppgave {
