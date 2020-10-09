@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
@@ -35,14 +34,14 @@ class Vilkårsvurdering(
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
-                ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+                                       ?: error("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+        if (behandling.skalBehandlesAutomatisk) {
             vilkårService.initierVilkårvurderingForBehandling(behandling, true)
         }
 
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
-                ?: throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
+                                 ?: throw Feil("Fant ikke aktiv behandlingresultat på behandling ${behandling.id}")
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
                 behandling,
@@ -51,13 +50,14 @@ class Vilkårsvurdering(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         vedtakService.leggTilInitielleUtbetalingsbegrunnelser(fagsakId = behandling.fagsak.id, behandling = behandling)
 
-        val nyttSamletBehandlingResultat = behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling.opprinnelse)
+        val nyttSamletBehandlingResultat =
+                behandlingResultat.beregnSamletResultat(personopplysningGrunnlag, behandling)
         behandlingResultatService.loggOpprettBehandlingsresultat(behandlingResultat, nyttSamletBehandlingResultat, behandling)
 
         behandlingResultat.oppdaterSamletResultat(nyttSamletBehandlingResultat)
         behandlingResultatService.oppdater(behandlingResultat)
 
-        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+        if (behandling.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         }
 
@@ -69,11 +69,11 @@ class Vilkårsvurdering(
     }
 
     override fun postValiderSteg(behandling: Behandling) {
-        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) return
+        if (behandling.skalBehandlesAutomatisk) return
 
         if (behandling.type != BehandlingType.TEKNISK_OPPHØR && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val behandlingResultat = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
-                    ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
+                                     ?: error("Finner ikke vilkårsvurdering på behandling ved validering.")
 
             val listeAvFeil = mutableListOf<String>()
 
@@ -81,7 +81,7 @@ class Vilkårsvurdering(
 
             val harGyldigePerioder = periodeResultater.any { periodeResultat ->
                 periodeResultat.allePåkrevdeVilkårVurdert(PersonType.SØKER) &&
-                        periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN)
+                periodeResultat.allePåkrevdeVilkårVurdert(PersonType.BARN)
             }
 
             when {
@@ -103,7 +103,7 @@ class Vilkårsvurdering(
                                 listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato før barnets fødselsdato.")
                             }
                             if (vilkårResultat.periodeFom != null &&
-                                    vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18))) {
+                                vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18))) {
                                 listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato} har fra-og-med dato etter barnet har fylt 18.")
                             }
                         }
@@ -111,14 +111,15 @@ class Vilkårsvurdering(
 
             if (listeAvFeil.isNotEmpty()) {
                 throw VilkårsvurderingFeil(message = "Validering av vilkårsvurdering feilet for behandling ${behandling.id}",
-                        frontendFeilmelding = RessursUtils.lagFrontendMelding("Vilkårsvurderingen er ugyldig med følgende feil:",
-                                listeAvFeil)
+                                           frontendFeilmelding = RessursUtils.lagFrontendMelding("Vilkårsvurderingen er ugyldig med følgende feil:",
+                                                                                                 listeAvFeil)
                 )
             }
         }
     }
 
     companion object {
+
         val LOG: Logger = LoggerFactory.getLogger(Vilkårsvurdering::class.java)
     }
 }
