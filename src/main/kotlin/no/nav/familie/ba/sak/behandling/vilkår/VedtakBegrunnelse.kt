@@ -186,7 +186,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                     Målform.NN -> "Barnetrygda er redusert fordi du ikkje har sendt oss dei opplysningane vi ba om for barn fødd  $barnasFødselsdatoer."
                 }
     },
-    REDUKSJON_UNDER_18_ÅR("Barn 18 år") {
+    REDUKSJON_UNDER_18_ÅR("Barn har fylt 18 år") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -198,7 +198,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer fylte 18 år. "
                 }
     },
-    REDUKSJON_UNDER_6_ÅR("Barn 6 år") {
+    REDUKSJON_UNDER_6_ÅR("Barn har fylt 6 år") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -206,8 +206,8 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                                      vilkårsdato: String,
                                      målform: Målform): String =
                 when (målform) {
-                    Målform.NB -> "Barnetrygden reduseres fordi barn født $barnasFødselsdatoer fylte 6 år."
-                    Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer fylte 6 år. "
+                    Målform.NB -> "Barnetrygden reduseres fordi du har barn som har fylt 6 år."
+                    Målform.NN -> "Barnetrygda er redusert fordi du har barn som har fylt 6 år."
                 }
     },
     REDUKSJON_DELT_BOSTED_ENIGHET("Enighet om opphør av avtale om delt bosted") {
