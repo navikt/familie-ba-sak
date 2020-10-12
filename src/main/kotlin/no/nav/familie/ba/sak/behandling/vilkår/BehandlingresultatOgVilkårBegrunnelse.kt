@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import java.util.*
 
 interface IVedtakBegrunnelse {
 
-    fun hentHjemler(): Set<Int>
+    fun hentHjemler(): SortedSet<Int>
 
     fun hentBeskrivelse(gjelderSøker: Boolean = false,
                         barnasFødselsdatoer: String = "",
@@ -15,7 +16,7 @@ interface IVedtakBegrunnelse {
 enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
 
-        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11, 2)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -27,7 +28,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger bosatt før lovlig opphold i Norge") {
 
-        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -39,7 +40,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER("EØS-borger: Søker har oppholdsrett") {
 
-        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -51,7 +52,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING("EØS-borger: Skjønnsmessig vurdering av oppholdsrett.") {
 
-        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -63,7 +64,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_OMSORG_FOR_BARN("Adopsjon, surrogati: Omsorgen for barn") {
 
-        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -75,7 +76,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_BOR_HOS_SØKER("Barn har flyttet til søker") {
 
-        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -87,7 +88,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_FAST_OMSORG_FOR_BARN("Søker har fast omsorg for barn") {
 
-        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -99,7 +100,7 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     SATSENDRING("Satsendring") {
 
-        override fun hentHjemler(): Set<Int> = setOf(10)
+        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,

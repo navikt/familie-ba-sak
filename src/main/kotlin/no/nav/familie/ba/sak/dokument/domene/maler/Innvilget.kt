@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.dokument.domene.maler
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import java.util.*
 
 data class Innvilget(
         val enhet: String,
         val saksbehandler: String,
         val beslutter: String,
-        var hjemler: Set<Int> = emptySet(),
+        var hjemler: SortedSet<Int> = sortedSetOf(),
         var duFaar: List<DuFårSeksjon> = emptyList(),
         val maalform: String,
         val etterbetalingsbelop: String? = "",
