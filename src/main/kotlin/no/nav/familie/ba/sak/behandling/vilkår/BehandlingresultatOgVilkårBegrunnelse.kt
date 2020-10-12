@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 
 interface IVedtakBegrunnelse {
 
+    fun hentHjemler(): Set<Int>
+
     fun hentBeskrivelse(gjelderSøker: Boolean = false,
                         barnasFødselsdatoer: String = "",
                         vilkårsdato: String,
@@ -12,6 +14,8 @@ interface IVedtakBegrunnelse {
 
 enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
+
+        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -23,6 +27,8 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger bosatt før lovlig opphold i Norge") {
 
+        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -32,6 +38,8 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
         }
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER("EØS-borger: Søker har oppholdsrett") {
+
+        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -43,6 +51,8 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING("EØS-borger: Skjønnsmessig vurdering av oppholdsrett.") {
 
+        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -52,6 +62,8 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
         }
     },
     INNVILGET_OMSORG_FOR_BARN("Adopsjon, surrogati: Omsorgen for barn") {
+
+        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
@@ -63,6 +75,8 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_BOR_HOS_SØKER("Barn har flyttet til søker") {
 
+        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -73,6 +87,8 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
     },
     INNVILGET_FAST_OMSORG_FOR_BARN("Søker har fast omsorg for barn") {
 
+        override fun hentHjemler(): Set<Int> = setOf(2, 4, 11)
+
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
                                      vilkårsdato: String,
@@ -82,6 +98,8 @@ enum class BehandlingresultatOgVilkårBegrunnelse(val tittel: String) : IVedtakB
         }
     },
     SATSENDRING("Satsendring") {
+
+        override fun hentHjemler(): Set<Int> = setOf(10)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,

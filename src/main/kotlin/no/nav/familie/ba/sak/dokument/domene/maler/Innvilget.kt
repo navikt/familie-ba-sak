@@ -1,13 +1,12 @@
 package no.nav.familie.ba.sak.dokument.domene.maler
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 
 data class Innvilget(
         val enhet: String,
         val saksbehandler: String,
         val beslutter: String,
-        val hjemmel: String, // "§2, 4 og 11"
+        var hjemler: Set<Int> = emptySet(),
         var duFaar: List<DuFårSeksjon> = emptyList(),
         val maalform: String,
         val etterbetalingsbelop: String? = "",
