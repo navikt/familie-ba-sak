@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.pdl
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -16,18 +17,33 @@ import org.springframework.web.context.annotation.ApplicationScope
 @ApplicationScope
 class PersonopplysningerService(
         val pdlRestClient: PdlRestClient,
-        val stsOnlyPdlRestClient: StsOnlyPdlRestClient) {
+        val stsOnlyPdlRestClient: StsOnlyPdlRestClient,
+        val integrasjonClient: IntegrasjonClient) {
 
     fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfo(personIdent, PersonInfoQuery.MED_RELASJONER)
+        val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FAMILIERELASJONSROLLE>>()
         val familierelasjoner = personinfo.familierelasjoner.map {
-            val relasjonsinfo = hentPersoninfo(it.personIdent.id, PersonInfoQuery.ENKEL)
-            Familierelasjon(personIdent = it.personIdent,
-                            relasjonsrolle = it.relasjonsrolle,
-                            fødselsdato = relasjonsinfo.fødselsdato,
-                            navn = relasjonsinfo.navn)
+            val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).first().harTilgang
+            if (harTilgang) {
+                val relasjonsinfo = hentPersoninfo(it.personIdent.id, PersonInfoQuery.ENKEL)
+                Familierelasjon(personIdent = it.personIdent,
+                                relasjonsrolle = it.relasjonsrolle,
+                                fødselsdato = relasjonsinfo.fødselsdato,
+                                navn = relasjonsinfo.navn,
+                                adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering)
+            } else {
+                identerMedAdressebeskyttelse.add(Pair(it.personIdent.id, it.relasjonsrolle))
+                null
+            }
+
+        }.filterNotNull().toSet()
+        val familierelasjonMaskert = identerMedAdressebeskyttelse.map {
+            FamilierelasjonMaskert(relasjonsrolle = it.second,
+                                   adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
+            )
         }.toSet()
-        return personinfo.copy(familierelasjoner = familierelasjoner)
+        return personinfo.copy(familierelasjoner = familierelasjoner, familierelasjonerMaskert = familierelasjonMaskert)
     }
 
     fun hentPersoninfo(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
@@ -105,7 +121,7 @@ class PersonopplysningerService(
     }
 
     fun hentAdressebeskyttelseSomSystembruker(ident: String): ADRESSEBESKYTTELSEGRADERING =
-        stsOnlyPdlRestClient.hentAdressebeskyttelse(ident).first().gradering
+            stsOnlyPdlRestClient.hentAdressebeskyttelse(ident).first().gradering
 
     companion object {
 
