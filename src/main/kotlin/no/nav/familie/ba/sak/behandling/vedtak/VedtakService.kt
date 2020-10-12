@@ -289,7 +289,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 }.isNotEmpty()
             } ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
 
-
             val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                     hentPersonerMedUtgjørendeVilkår(
                             behandlingResultat = behandlingResultat,
@@ -312,11 +311,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 it.first
             }
 
-            val vilkårsdato = if (personerMedUtgjørendeVilkårForUtbetalingsperiode.size == 1) {
-                personerMedUtgjørendeVilkårForUtbetalingsperiode[0].second.periodeFom!!.tilDagMånedÅr()
-            } else {
+            val vilkårsdato = if (restPutUtbetalingBegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON)
+                opprinneligUtbetalingBegrunnelse.tom.minusMonths(1).tilMånedÅr() else
                 opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
-            }
 
 
             val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
