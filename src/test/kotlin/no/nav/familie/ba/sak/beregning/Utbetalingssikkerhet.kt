@@ -177,4 +177,58 @@ class Utbetalingssikkerhet {
                                                                                          personopplysningGrunnlag)
         }
     }
+
+    @Test
+    fun `Skal kaste feil når et barn har perioder utover 0-18 år`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn = tilfeldigPerson()
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(
+                behandlingId = 1,
+                personer = mutableSetOf(søker, barn)
+        )
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
+                lagAndelTilkjentYtelse(now().minusYears(20).toString(),
+                                       "2020-01-01",
+                                       YtelseType.UTVIDET_BARNETRYGD,
+                                       1054,
+                                       person = barn)
+        ))
+
+        val feil = assertThrows<Feil> {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseKunHarGyldigTotalPeriode(tilkjentYtelse,
+                                                                                     personopplysningGrunnlag)
+        }
+
+        assertTrue(feil.frontendFeilmelding?.contains("${barn.personIdent.ident} har utbetalinger utover 0-18 år")!!)
+    }
+
+    @Test
+    fun `Skal kaste feil når søker har perioder utover 0-18 år`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn = tilfeldigPerson()
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(
+                behandlingId = 1,
+                personer = mutableSetOf(søker, barn)
+        )
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
+                lagAndelTilkjentYtelse(now().minusYears(20).toString(),
+                                       "2020-01-01",
+                                       YtelseType.UTVIDET_BARNETRYGD,
+                                       1054,
+                                       person = søker)
+        ))
+
+        val feil = assertThrows<Feil> {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseKunHarGyldigTotalPeriode(tilkjentYtelse,
+                                                                                     personopplysningGrunnlag)
+        }
+
+        assertTrue(feil.frontendFeilmelding?.contains("Søker har utbetalinger")!!)
+    }
 }

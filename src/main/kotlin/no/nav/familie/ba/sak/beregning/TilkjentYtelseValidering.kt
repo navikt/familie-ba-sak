@@ -52,6 +52,36 @@ object TilkjentYtelseValidering {
             }
         }
     }
+
+    /**
+     * Validerer at barna kun har andeler som løper i alderen 0-18 år.
+     * Validerer at søker kun har andeler som løper i fra 0 år på eldste barn til 18 år på yngste barn.
+     */
+    fun validerAtTilkjentYtelseKunHarGyldigTotalPeriode(tilkjentYtelse: TilkjentYtelse,
+                                                        personopplysningGrunnlag: PersonopplysningGrunnlag) {
+        val søker = personopplysningGrunnlag.søker
+        val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
+        val minUtbetalingsdato = barna.first().fødselsdato
+        val maksUtbetalingsdato = barna.last().fødselsdato.plusYears(18)
+
+        val søkersAndeler = hentSøkersAndeler(tilkjentYtelse.andelerTilkjentYtelse.toList(), søker)
+        val barnasAndeler = hentBarnasAndeler(tilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
+
+        barnasAndeler.forEach { barnMedAndeler ->
+            if (barnMedAndeler.second.any {
+                        it.stønadFom < barnMedAndeler.first.fødselsdato || it.stønadTom > barnMedAndeler.first.fødselsdato.plusYears(
+                                18)
+                    }) {
+                throw Feil(message = "Barn har andeler som strekker seg utover 0-18 år",
+                           frontendFeilmelding = "${barnMedAndeler.first.personIdent.ident} har utbetalinger utover 0-18 år. Ta kontakt med teamet for hjelp.")
+            }
+        }
+
+        if (søkersAndeler.any { it.stønadFom < minUtbetalingsdato || it.stønadTom > maksUtbetalingsdato }) {
+            throw Feil(message = "Søker har andeler som strekker seg utover barnas 0-18 års periode",
+                       frontendFeilmelding = "Søker har utbetalinger utover barnas 0-18 års periode. Ta kontakt med teamet for hjelp.")
+        }
+    }
 }
 
 private fun validerAtAndelerForPartErGyldige(andeler: List<AndelTilkjentYtelse>,

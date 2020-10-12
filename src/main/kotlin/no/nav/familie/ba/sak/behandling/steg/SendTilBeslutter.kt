@@ -33,14 +33,17 @@ class SendTilBeslutter(
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         vilkårsvurdering.postValiderSteg(behandling)
 
-        // TODO feilmeldingstekster
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(
+                behandlingId = behandling.id)!!
 
         TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
 
         TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(tilkjentYtelse = tilkjentYtelse,
-                                                                                     personopplysningGrunnlag = persongrunnlagService.hentAktiv(
-                                                                                             behandlingId = behandling.id)!!)
+                                                                                     personopplysningGrunnlag = personopplysningGrunnlag)
+
+        TilkjentYtelseValidering.validerAtTilkjentYtelseKunHarGyldigTotalPeriode(tilkjentYtelse = tilkjentYtelse,
+                                                                                 personopplysningGrunnlag = personopplysningGrunnlag)
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
