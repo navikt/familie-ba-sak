@@ -7,6 +7,10 @@ import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandli
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
@@ -18,12 +22,14 @@ import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeAll
@@ -166,8 +172,31 @@ internal class SaksstatistikkServiceTest {
 
 
     @Test
-    fun `Skal mappe til sakDVH for manuell rute`() {
-        
+    fun `Skal mappe til sakDVH`() {
+        every { fagsakService.hentRestFagsak(any()) } returns Ressurs.success(RestFagsak(LocalDateTime.now(),
+                                                                                         1, "12345678910",
+                                                                                         FagsakStatus.OPPRETTET,
+                                                                                         true,
+                                                                                         emptyList()))
+
+        every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
+        every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
+
+        every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(ident = "12345678910",
+                                                                                            rolle = FagsakDeltagerRolle.FORELDER,
+                                                                                            fagsakId = 1),
+                                                                         RestFagsakDeltager(ident = "12345678911",
+                                                                                            rolle = FagsakDeltagerRolle.BARN,
+                                                                                            fagsakId = 2))
+
+        val sakDvh = sakstatistikkService.mapTilSakDvh(1)
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
+
+        assertThat(sakDvh.aktorId).isEqualTo(1234567891011)
+        assertThat(sakDvh.aktorer).hasSize(1).extracting("rolle").containsOnly("FORELDER")
+        assertThat(sakDvh.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
+        assertThat(sakDvh.avsender).isEqualTo("familie-ba-sak")
+
     }
 
 }
