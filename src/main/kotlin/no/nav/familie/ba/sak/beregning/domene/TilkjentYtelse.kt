@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.beregning.domene
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.fpsak.tidsserie.LocalDateTimeline
+import no.nav.fpsak.tidsserie.StandardCombinators
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -35,7 +38,41 @@ data class TilkjentYtelse(
         var utbetalingsoppdrag: String? = null,
 
         @OneToMany(fetch = FetchType.EAGER,
-                mappedBy = "tilkjentYtelse",
-                cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
+                   mappedBy = "tilkjentYtelse",
+                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
         val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf()
 )
+
+private fun kombinerAndeler(lhs: LocalDateTimeline<List<AndelTilkjentYtelse>>,
+                            rhs: LocalDateTimeline<AndelTilkjentYtelse>): LocalDateTimeline<List<AndelTilkjentYtelse>> {
+    return lhs.combine(rhs,
+                       { datoIntervall, sammenlagt, neste ->
+                           StandardCombinators.allValues(datoIntervall,
+                                                         sammenlagt,
+                                                         neste)
+                       },
+                       LocalDateTimeline.JoinStyle.CROSS_JOIN)
+}
+
+fun lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer: List<LocalDateTimeline<AndelTilkjentYtelse>>): LocalDateTimeline<List<AndelTilkjentYtelse>> {
+    if (tidslinjer.isEmpty()) return LocalDateTimeline(emptyList())
+
+    val førsteSegment = tidslinjer.first().toSegments().first()
+    val initiellSammenlagt =
+            LocalDateTimeline(listOf(LocalDateSegment(førsteSegment.fom, førsteSegment.tom, listOf(førsteSegment.value))))
+    val resterende = tidslinjer.drop(1)
+
+    return resterende.fold(initiellSammenlagt) { sammenlagt, neste ->
+        kombinerAndeler(sammenlagt, neste)
+    }
+}
+
+fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjentYtelse>> {
+    val tidslinjer = this.andelerTilkjentYtelse.map { andelTilkjentYtelse ->
+        LocalDateTimeline(listOf(LocalDateSegment(andelTilkjentYtelse.stønadFom,
+                                                  andelTilkjentYtelse.stønadTom,
+                                                  andelTilkjentYtelse)))
+    }
+
+    return lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer)
+}

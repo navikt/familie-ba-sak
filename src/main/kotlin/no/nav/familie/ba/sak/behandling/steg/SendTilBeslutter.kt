@@ -2,7 +2,10 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -17,16 +20,27 @@ import java.time.LocalDate
 @Service
 class SendTilBeslutter(
         private val behandlingService: BehandlingService,
+        private val beregningService: BeregningService,
         private val taskRepository: TaskRepository,
         private val oppgaveService: OppgaveService,
         private val loggService: LoggService,
         private val totrinnskontrollService: TotrinnskontrollService,
-        private val behandlingResultatService: BehandlingResultatService
+        private val behandlingResultatService: BehandlingResultatService,
+        private val persongrunnlagService: PersongrunnlagService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         vilkårsvurdering.postValiderSteg(behandling)
+
+        // TODO feilmeldingstekster
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+        TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
+
+        TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(tilkjentYtelse = tilkjentYtelse,
+                                                                                     personopplysningGrunnlag = persongrunnlagService.hentAktiv(
+                                                                                             behandlingId = behandling.id)!!)
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -58,8 +72,8 @@ class SendTilBeslutter(
         }
         behandlingService.sendBehandlingTilBeslutter(behandling)
 
-        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)?:
-                                 throw Feil("Fant ikke behandlingsresultat på behandling")
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
+                                 ?: throw Feil("Fant ikke behandlingsresultat på behandling")
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat.kopier())
 
