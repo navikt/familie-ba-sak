@@ -27,12 +27,13 @@ class VedtakUtilsTest {
 
     @Test
     fun `hjemler skal være unike og sorterte ved kombinasjon av flere begrunnelser`() {
-        val utbetalingBegrunnelser = BehandlingresultatOgVilkårBegrunnelse.values()
+        val utbetalingBegrunnelser = arrayOf(BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                             BehandlingresultatOgVilkårBegrunnelse.SATSENDRING)
                 .map { lagUtbetalingBegrunnesle(behandlingresultatOgVilkårBegrunnelse = it) }
                 .toMutableSet()
         val vedtak = lagVedtak(utbetalingBegrunnelser = utbetalingBegrunnelser)
         val hjemler = hentHjemlerBruktIVedtak(vedtak)
-        Assertions.assertEquals(hjemler, hjemler.distinct().toSet())
+        Assertions.assertEquals(hjemler, arrayOf(2, 4, 10, 11).toSet())
         Assertions.assertTrue(erSortertMinstTilStørst(hjemler))
     }
 }
