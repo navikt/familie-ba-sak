@@ -130,7 +130,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
-                                     vilkårsdato: String, // TODO: [BARN TOM DATO BOR MED SØKER]
+                                     vilkårsdato: String,
                                      målform: Målform): String =
                 when (målform) {
                     Målform.NB -> "Barnetrygden reduseres fordi du $vilkårsdato flyttet fra barn født $barnasFødselsdatoer."
@@ -142,14 +142,14 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
-                                     vilkårsdato: String, // TODO: Husk å sette tom-dato hvis reduksjon
+                                     vilkårsdato: String,
                                      målform: Målform): String =
                 when (målform) {
                     Målform.NB -> "Barnetrygden reduseres fordi barn født $barnasFødselsdatoer har flyttet fra deg $vilkårsdato."
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer har flytta frå deg $vilkårsdato."
                 }
     },
-    REDUKSJON_BARN_DØD("Barn død") {
+    REDUKSJON_BARN_DØD("Barn død") { // TODO: Håndter
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -166,14 +166,14 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
-                                     vilkårsdato: String, // TODO:  [BARN TOM DATO BOR MED SØKER]
+                                     vilkårsdato: String,
                                      målform: Målform): String =
                 when (målform) {
                     Målform.NB -> "Barnetrygden reduseres fordi vi har kommet fram til at barn født $barnasFødselsdatoer ikke lenger bor fast hos deg fra $vilkårsdato."
                     Målform.NN -> "Barnetrygda er redusert fordi vi har kome fram til at barn fødd $barnasFødselsdatoer ikkje lenger bur fast hos deg frå $vilkårsdato."
                 }
     },
-    REDUKSJON_MANGLENDE_OPPLYSNINGER("Ikke mottatt dokumentasjon") {
+    REDUKSJON_MANGLENDE_OPPLYSNINGER("Ikke mottatt dokumentasjon") { // TODO: Håndter
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -197,7 +197,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer fylte 18 år. "
                 }
     },
-    REDUKSJON_UNDER_6_ÅR("Barn 6 år") {
+    REDUKSJON_UNDER_6_ÅR("Barn 6 år") { // TODO: Håndter
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -214,7 +214,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
-                                     vilkårsdato: String, // TODO:  [BARN TOM DATO BOR MED SØKER]
+                                     vilkårsdato: String,
                                      målform: Målform): String =
                 when (målform) {
                     Målform.NB -> "Barnetrygden reduseres fordi avtalen om delt bosted for barn født $barnasFødselsdatoer er opphørt fra $vilkårsdato."
@@ -226,7 +226,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
                                      barnasFødselsdatoer: String,
-                                     vilkårsdato: String, // TODO:  [BARN TOM DATO BOR MED SØKER]
+                                     vilkårsdato: String,
                                      målform: Målform): String =
                 when (målform) {
                     Målform.NB -> "Du og den andre forelderen er uenige om avtalen om delt bosted. Vi har kommet fram til at avtalen om delt bosted for barn født $barnasFødselsdatoer ikke lenger praktiseres fra $vilkårsdato." +
