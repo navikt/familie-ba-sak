@@ -9,7 +9,7 @@ class SaksstatistikkEventListener(private val saksstatistikkService: Saksstatist
                                   private val kafkaProducer: KafkaProducer) : ApplicationListener<SaksstatistikkEvent> {
 
     override fun onApplicationEvent(event: SaksstatistikkEvent) {
-        saksstatistikkService.loggBehandlingStatus(event.behandlingId, event.forrigeBehandlingId).also {
+        saksstatistikkService.mapTilBehandlingDVH(event.behandlingId, event.forrigeBehandlingId).also {
             kafkaProducer.sendMessage(it)
         }
     }
