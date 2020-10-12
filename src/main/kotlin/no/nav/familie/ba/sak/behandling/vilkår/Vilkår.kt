@@ -69,7 +69,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     identifikator = "LOVLIG_OPPHOLD",
                     implementasjon =
                     { lovligOpphold(this) }),
-            begrunnelser = listOf<VedtakBegrunnelse>(
+            begrunnelser = listOf(
                     VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
                     VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER,
                     VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING,
