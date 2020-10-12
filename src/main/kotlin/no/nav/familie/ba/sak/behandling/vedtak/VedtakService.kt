@@ -283,52 +283,61 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                                ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
         if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null) {
-            val personerMedUtgjørendeVilkårForUtbetalingsperiode =
-                    hentPersonerMedUtgjørendeVilkår(
-                            behandlingResultat = behandlingResultat,
-                            opprinneligUtbetalingBegrunnelse = opprinneligUtbetalingBegrunnelse,
-                            oppdatertBegrunnelseType = restPutUtbetalingBegrunnelse.vedtakBegrunnelseType,
-                            oppdatertVilkår = Vilkår.finnForBegrunnelse(restPutUtbetalingBegrunnelse.vedtakBegrunnelse))
 
-            if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
-                throw Feil(message = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
-                           frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
+            if (VedtakBegrunnelse.utenVilkår().contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
+                vedtak.endreUtbetalingBegrunnelse(
+                        opprinneligUtbetalingBegrunnelse.id,
+                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
+                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform)
+                )
+            } else {
+                val personerMedUtgjørendeVilkårForUtbetalingsperiode =
+                        hentPersonerMedUtgjørendeVilkår(
+                                behandlingResultat = behandlingResultat,
+                                opprinneligUtbetalingBegrunnelse = opprinneligUtbetalingBegrunnelse,
+                                oppdatertBegrunnelseType = restPutUtbetalingBegrunnelse.vedtakBegrunnelseType,
+                                oppdatertVilkår = Vilkår.finnForBegrunnelse(restPutUtbetalingBegrunnelse.vedtakBegrunnelse))
+
+                if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
+                    throw Feil(message = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
+                               frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
+                }
+
+                val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
+                    it.first.type == PersonType.SØKER
+                }
+
+                val barnaMedVilkårSomPåvirkerUtbetaling = personerMedUtgjørendeVilkårForUtbetalingsperiode.filter {
+                    it.first.type == PersonType.BARN
+                }.map {
+                    it.first
+                }
+
+                val vilkårsdato = if (restPutUtbetalingBegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON)
+                    opprinneligUtbetalingBegrunnelse.tom.minusMonths(1).tilMånedÅr() else
+                    opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
+
+
+                val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
+
+                val begrunnelseSomSkalPersisteres =
+                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(gjelderSøker,
+                                                                                       barnasFødselsdatoer,
+                                                                                       vilkårsdato,
+                                                                                       personopplysningGrunnlag.søker.målform)
+
+                vedtak.endreUtbetalingBegrunnelse(
+                        opprinneligUtbetalingBegrunnelse.id,
+                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
+                        begrunnelseSomSkalPersisteres
+                )
             }
-
-            val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
-                it.first.type == PersonType.SØKER
-            }
-
-            val barnaMedVilkårSomPåvirkerUtbetaling = personerMedUtgjørendeVilkårForUtbetalingsperiode.filter {
-                it.first.type == PersonType.BARN
-            }.map {
-                it.first
-            }
-
-            val vilkårsdato = if (restPutUtbetalingBegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON)
-                opprinneligUtbetalingBegrunnelse.tom.minusMonths(1).tilMånedÅr() else
-                opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).tilMånedÅr()
-
-
-            val barnasFødselsdatoer = slåSammen(barnaMedVilkårSomPåvirkerUtbetaling.map { it.fødselsdato.tilKortString() })
-
-            val begrunnelseSomSkalPersisteres =
-                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(gjelderSøker,
-                                                                                   barnasFødselsdatoer,
-                                                                                   vilkårsdato,
-                                                                                   personopplysningGrunnlag.søker.målform)
-
-            vedtak.endreUtbetalingBegrunnelse(
-                    opprinneligUtbetalingBegrunnelse.id,
-                    restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
-                    begrunnelseSomSkalPersisteres
-            )
         } else {
+
             vedtak.endreUtbetalingBegrunnelse(
                     opprinneligUtbetalingBegrunnelse.id,
                     restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
-                    ""
-            )
+                    "")
         }
 
         lagreEllerOppdater(vedtak)

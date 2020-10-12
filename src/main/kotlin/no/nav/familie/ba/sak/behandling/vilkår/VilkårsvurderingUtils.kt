@@ -230,10 +230,12 @@ object VilkårsvurderingUtils {
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelse>> = VedtakBegrunnelse.values()
             .groupBy { it.vedtakBegrunnelseType }
-            .mapValues {
-                it.value.map { behandlingResultatOgVilkårBegrunnelse ->
-                    RestVedtakBegrunnelse(id = behandlingResultatOgVilkårBegrunnelse,
-                                          navn = behandlingResultatOgVilkårBegrunnelse.tittel)
-                }
+            .mapValues { begrunnelseGruppe ->
+                begrunnelseGruppe.value
+                        .filter { !VedtakBegrunnelse.ikkeMuligÅSetteManuelt().contains(it) }
+                        .map { behandlingResultatOgVilkårBegrunnelse ->
+                            RestVedtakBegrunnelse(id = behandlingResultatOgVilkårBegrunnelse,
+                                                  navn = behandlingResultatOgVilkårBegrunnelse.tittel)
+                        }
             }
 }

@@ -3,10 +3,11 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 
 interface IVedtakBegrunnelse {
+
     val vedtakBegrunnelseType: VedtakBegrunnelseType;
     fun hentBeskrivelse(gjelderSøker: Boolean = false,
                         barnasFødselsdatoer: String = "",
-                        vilkårsdato: String,
+                        vilkårsdato: String = "",
                         målform: Målform): String
 }
 
@@ -149,7 +150,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer har flytta frå deg $vilkårsdato."
                 }
     },
-    REDUKSJON_BARN_DØD("Barn død") { // TODO: Håndter
+    REDUKSJON_BARN_DØD("Barn død") { // TODO: Ikke støttet enda
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -173,7 +174,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                     Målform.NN -> "Barnetrygda er redusert fordi vi har kome fram til at barn fødd $barnasFødselsdatoer ikkje lenger bur fast hos deg frå $vilkårsdato."
                 }
     },
-    REDUKSJON_MANGLENDE_OPPLYSNINGER("Ikke mottatt dokumentasjon") { // TODO: Håndter
+    REDUKSJON_MANGLENDE_OPPLYSNINGER("Ikke mottatt dokumentasjon") { // TODO: Ikke støttet enda
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -197,7 +198,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                     Målform.NN -> "Barnetrygda er redusert fordi barn fødd $barnasFødselsdatoer fylte 18 år. "
                 }
     },
-    REDUKSJON_UNDER_6_ÅR("Barn 6 år") { // TODO: Håndter
+    REDUKSJON_UNDER_6_ÅR("Barn 6 år") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -246,8 +247,18 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                     Målform.NB -> "Barnetrygden endres fordi det har vært en satsendring."
                     Målform.NN -> "Barnetrygda er endra fordi det har vore ei satsendring."
                 }
-    },
+    };
+
+    companion object {
+
+        fun ikkeMuligÅSetteManuelt(): List<VedtakBegrunnelse> = listOf(SATSENDRING,
+                                                                       REDUKSJON_MANGLENDE_OPPLYSNINGER,
+                                                                       REDUKSJON_BARN_DØD)
+
+        fun utenVilkår(): List<VedtakBegrunnelse> = listOf(REDUKSJON_UNDER_6_ÅR)
+    }
 }
+
 
 enum class VedtakBegrunnelseType {
     INNVILGELSE,
