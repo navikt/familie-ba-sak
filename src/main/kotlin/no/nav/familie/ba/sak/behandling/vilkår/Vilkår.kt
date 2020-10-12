@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.vilkår
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.BARN
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType.SØKER
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.nare.Spesifikasjon
 import java.time.LocalDate
 
@@ -82,6 +83,10 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     }
 
     companion object {
+
+        fun finnForBegrunnelse(begrunnelse: VedtakBegrunnelse): Vilkår =
+                values().find { it.begrunnelser.contains(begrunnelse) }
+                ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
 
         fun hentSamletSpesifikasjonForPerson(personType: PersonType): Spesifikasjon<FaktaTilVilkårsvurdering> {
             return hentVilkårFor(personType)

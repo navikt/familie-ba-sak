@@ -283,18 +283,12 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                                ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
         if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null) {
-            val vilkår = Vilkår.values().firstOrNull {
-                it.begrunnelser.filter { begrunnelse ->
-                    begrunnelse.value.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)
-                }.isNotEmpty()
-            } ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
-
             val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                     hentPersonerMedUtgjørendeVilkår(
                             behandlingResultat = behandlingResultat,
+                            opprinneligUtbetalingBegrunnelse = opprinneligUtbetalingBegrunnelse,
                             oppdatertBegrunnelseType = restPutUtbetalingBegrunnelse.vedtakBegrunnelseType,
-                            utbetalingBegrunnelse = opprinneligUtbetalingBegrunnelse,
-                            vilkår = vilkår)
+                            oppdatertVilkår = Vilkår.finnForBegrunnelse(restPutUtbetalingBegrunnelse.vedtakBegrunnelse))
 
             if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
                 throw Feil(message = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
@@ -342,22 +336,34 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         return vedtak.utbetalingBegrunnelser.toList()
     }
 
-    private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat, // Kontrollerer mot denne
-                                                oppdatertBegrunnelseType: VedtakBegrunnelseType, // Brukes til å se om man skal se på fom eller tom
-                                                utbetalingBegrunnelse: UtbetalingBegrunnelse, // Brukes til å sammenligne med vilkår i behandlingResultat
-                                                vilkår: Vilkår): List<Pair<Person, VilkårResultat>> {// Brukes til å sammenligne med vilkår i behandlingResultat
+    /**
+     * Må vite om det gjelder søker og/eller barn da dette bestememr ordlyd i brev.
+     * Funksjonen utleder hvilke personer som trigger en gitt endring ved å kontrollere
+     * at vilkår og begrunnelsetype som man forsøker å oppdatere mot resultatet man
+     * skal begrunne.
+     *
+     * @param behandlingResultat - Behandlingresultatet man skal begrunne
+     * @param opprinneligUtbetalingBegrunnelse - Begrunnelsen man ønsker å oppdatere
+     * @param oppdatertBegrunnelseType - Brukes til å se om man skal sammenligne fom eller tom-dato
+     * @param oppdatertVilkår -  Brukes til å sammenligne vilkår i behandlingResultat
+     * @return List med par bestående av person og vilkåret de trigger endring på
+     */
+    private fun hentPersonerMedUtgjørendeVilkår(behandlingResultat: BehandlingResultat,
+                                                opprinneligUtbetalingBegrunnelse: UtbetalingBegrunnelse,
+                                                oppdatertBegrunnelseType: VedtakBegrunnelseType,
+                                                oppdatertVilkår: Vilkår): List<Pair<Person, VilkårResultat>> {
         return behandlingResultat.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkår = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
                 when {
-                    vilkårResultat.vilkårType != vilkår -> false
+                    vilkårResultat.vilkårType != oppdatertVilkår -> false
                     vilkårResultat.periodeFom == null -> {
                         false
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        vilkårResultat.periodeFom!!.monthValue == utbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
+                        vilkårResultat.periodeFom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
                     }
                     else -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == utbetalingBegrunnelse.fom.minusMonths(
+                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(
                                 1).monthValue && vilkårResultat.resultat == Resultat.NEI
                     }
                 }
