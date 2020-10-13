@@ -198,7 +198,7 @@
         <dependency>
             <groupId>no.nav.fpsak.tidsserie</groupId>
             <artifactId>fpsak-tidsserie</artifactId>
-            <version>2.3-20200406045853-e288f17</version>
+            <version>2.3-20200916135826-7cba840</version>
         </dependency>
         <dependency>
             <groupId>nav-foedselsnummer</groupId>
