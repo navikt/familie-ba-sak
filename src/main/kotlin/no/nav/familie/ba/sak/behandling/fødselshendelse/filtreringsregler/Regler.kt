@@ -16,7 +16,8 @@ internal fun morErOver18år(fakta: Fakta): Evaluering {
 
 internal fun merEnn5mndSidenForrigeBarn(fakta: Fakta): Evaluering {
     return when (fakta.barnaFraHendelse.all { barnFraHendelse ->
-        fakta.restenAvBarna.all { barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) }
+        fakta.restenAvBarna.all { barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) ||
+                                  barnFraHendelse.fødselsdato.isBefore(it.fødselsdato.plusDays(6))}
     }) {
         true -> Evaluering.ja(MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL)
         false -> Evaluering.nei(MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL)
