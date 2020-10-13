@@ -44,6 +44,16 @@ class SendTilBeslutter(
 
         TilkjentYtelseValidering.validerAtTilkjentYtelseKunHarGyldigTotalPeriode(tilkjentYtelse = tilkjentYtelse,
                                                                                  personopplysningGrunnlag = personopplysningGrunnlag)
+
+
+        val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map {
+            Pair(it,
+                 beregningService.hentIverksattTilkjentYtelseForBarn(it.personIdent, behandling)
+            )
+        }
+        TilkjentYtelseValidering.valider100ProsentGraderingForBarna(behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
+                                                                    barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
+                                                                    personopplysningGrunnlag = personopplysningGrunnlag)
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling,

@@ -2,8 +2,10 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
@@ -12,6 +14,7 @@ import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -25,7 +28,8 @@ class BeregningService(
         private val fagsakService: FagsakService,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val behandlingRepository: BehandlingRepository
+        private val behandlingRepository: BehandlingRepository,
+        private val persongrunnlagService: PersongrunnlagService,
 ) {
 
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
@@ -51,6 +55,33 @@ class BeregningService(
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
         return iverksatteBehandlinger.mapNotNull { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(it.id) }
+    }
+
+    /**
+     * Denne metoden henter alle tilkjent ytelser for en barn gruppert på behandling.
+     * Den går gjennom alle fagsaker og sørger for å filtrere bort bort behandlende behandling,
+     * samt fagsaker som ikke lengre har barn i gjeldende behandling.
+     */
+    fun hentIverksattTilkjentYtelseForBarn(barnIdent: PersonIdent,
+                                           behandlendeBehandling: Behandling): List<TilkjentYtelse> {
+        val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnIdent)
+                .filter { it.id != behandlendeBehandling.fagsak.id }
+
+        return andreFagsaker.map { fagsak ->
+            behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
+                    .filter { it.status == BehandlingStatus.AVSLUTTET }
+                    .map { behandling ->
+                        hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+                    }
+                    .sortedBy { tilkjentYtelse -> tilkjentYtelse.opprettetDato }
+                    .firstOrNull { tilkjentYtelse ->
+                        val barnFinnesIBehandling =
+                                persongrunnlagService.hentAktiv(behandlingId = tilkjentYtelse.behandling.id)?.barna?.map { it.personIdent }
+                                        ?.contains(barnIdent)!!
+
+                        barnFinnesIBehandling && tilkjentYtelse.erSendtTilIverksetting()
+                    }
+        }.mapNotNull { it }
     }
 
     @Transactional

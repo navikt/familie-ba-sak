@@ -3,17 +3,14 @@ package no.nav.familie.ba.sak.beregning
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate.now
 
-class Utbetalingssikkerhet {
+class UtbetalingssikkerhetTest {
 
     @Test
     fun `Skal kaste feil når tilkjent ytelse går mer enn 3 år og 2 mnd tilbake i tid`() {
@@ -29,7 +26,7 @@ class Utbetalingssikkerhet {
 
         tilkjentYtelse.andelerTilkjentYtelse.add(andel)
 
-        assertThrows<Feil> {
+        assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
         }
     }
@@ -81,7 +78,7 @@ class Utbetalingssikkerhet {
                                        person = person)
         ))
 
-        val feil = assertThrows<Feil> {
+        val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(tilkjentYtelse,
                                                                                          personopplysningGrunnlag)
         }
@@ -131,17 +128,17 @@ class Utbetalingssikkerhet {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
                 lagAndelTilkjentYtelse(now().minusYears(1).toString(),
                                        "2020-01-01",
-                                       YtelseType.UTVIDET_BARNETRYGD,
+                                       YtelseType.ORDINÆR_BARNETRYGD,
                                        1054,
                                        person = person),
                 lagAndelTilkjentYtelse(now().minusYears(1).toString(),
                                        "2020-01-01",
                                        YtelseType.UTVIDET_BARNETRYGD,
-                                       1054,
-                                       person = person)
+                                       1500,
+                                       person = person),
         ))
 
-        val feil = assertThrows<Feil> {
+        val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(tilkjentYtelse,
                                                                                          personopplysningGrunnlag)
         }
@@ -190,14 +187,14 @@ class Utbetalingssikkerhet {
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
-                lagAndelTilkjentYtelse(now().minusYears(20).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(barn.fødselsdato.minusYears(1).toString(),
+                                       barn.fødselsdato.plusYears(10).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = barn)
         ))
 
-        val feil = assertThrows<Feil> {
+        val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseKunHarGyldigTotalPeriode(tilkjentYtelse,
                                                                                      personopplysningGrunnlag)
         }
@@ -217,18 +214,123 @@ class Utbetalingssikkerhet {
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
-                lagAndelTilkjentYtelse(now().minusYears(20).toString(),
-                                       "2020-01-01",
+                lagAndelTilkjentYtelse(barn.fødselsdato.minusYears(1).toString(),
+                                       barn.fødselsdato.plusYears(10).toString(),
                                        YtelseType.UTVIDET_BARNETRYGD,
                                        1054,
                                        person = søker)
         ))
 
-        val feil = assertThrows<Feil> {
+        val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseKunHarGyldigTotalPeriode(tilkjentYtelse,
                                                                                      personopplysningGrunnlag)
         }
 
         assertTrue(feil.frontendFeilmelding?.contains("Søker har utbetalinger")!!)
+    }
+
+    @Test
+    fun `Skal ikke kaste feil når barn har riktig 0-18 år periode`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn = tilfeldigPerson()
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(
+                behandlingId = 1,
+                personer = mutableSetOf(søker, barn)
+        )
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
+                lagAndelTilkjentYtelse(barn.fødselsdato.førsteDagINesteMåned().toString(),
+                                       barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                                       YtelseType.UTVIDET_BARNETRYGD,
+                                       1054,
+                                       person = barn)
+        ))
+
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseKunHarGyldigTotalPeriode(tilkjentYtelse,
+                                                                                     personopplysningGrunnlag)
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil når barn får har over 100% gradering for ytelsetype`() {
+        val barn = tilfeldigPerson()
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
+                lagAndelTilkjentYtelse(barn.fødselsdato.førsteDagINesteMåned().toString(),
+                                       barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       person = barn)
+        ))
+
+        val far = tilfeldigPerson(personType = PersonType.SØKER)
+        val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
+                behandlingId = 1,
+                personer = mutableSetOf(far, barn)
+        )
+
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(listOf(
+                lagAndelTilkjentYtelse(barn.fødselsdato.førsteDagINesteMåned().toString(),
+                                       barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       person = barn),
+                lagAndelTilkjentYtelse(barn.fødselsdato.førsteDagINesteMåned().toString(),
+                                       barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                                       YtelseType.SMÅBARNSTILLEGG,
+                                       660,
+                                       person = barn)
+        ))
+
+        val feil = assertThrows<UtbetalingsikkerhetFeil> {
+            TilkjentYtelseValidering.valider100ProsentGraderingForBarna(tilkjentYtelse2,
+                                                                        listOf(Pair(barn, listOf(tilkjentYtelse))),
+                                                                        personopplysningGrunnlag2)
+        }
+
+        assertTrue(feil.frontendFeilmelding?.contains("Det utbetales allerede barnetrygd (${YtelseType.ORDINÆR_BARNETRYGD}) for ${barn.personIdent}")!!)
+    }
+
+    @Test
+    fun `Skal ikke kaste feil når man ser sender inn ulike barn`() {
+        val barn = tilfeldigPerson()
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(listOf(
+                lagAndelTilkjentYtelse(barn.fødselsdato.førsteDagINesteMåned().toString(),
+                                       barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       person = barn)
+        ))
+
+        val far = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn2 = tilfeldigPerson()
+        val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
+                behandlingId = 1,
+                personer = mutableSetOf(far, barn2)
+        )
+
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(listOf(
+                lagAndelTilkjentYtelse(barn2.fødselsdato.førsteDagINesteMåned().toString(),
+                                       barn2.fødselsdato.plusYears(18).sisteDagIForrigeMåned().toString(),
+                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                       1054,
+                                       person = barn2)
+        ))
+
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.valider100ProsentGraderingForBarna(tilkjentYtelse2,
+                                                                        listOf(Pair(barn, listOf(tilkjentYtelse))),
+                                                                        personopplysningGrunnlag2)
+        }
     }
 }

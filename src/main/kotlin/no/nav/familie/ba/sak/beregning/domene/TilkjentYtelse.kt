@@ -41,7 +41,9 @@ data class TilkjentYtelse(
                    mappedBy = "tilkjentYtelse",
                    cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
         val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf()
-)
+) {
+    fun erSendtTilIverksetting(): Boolean = utbetalingsoppdrag != null
+}
 
 private fun kombinerAndeler(lhs: LocalDateTimeline<List<AndelTilkjentYtelse>>,
                             rhs: LocalDateTimeline<AndelTilkjentYtelse>): LocalDateTimeline<List<AndelTilkjentYtelse>> {
