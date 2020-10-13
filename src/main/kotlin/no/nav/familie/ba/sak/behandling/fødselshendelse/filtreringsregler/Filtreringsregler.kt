@@ -30,7 +30,7 @@ enum class Filtreringsregler(val spesifikasjon: Spesifikasjon<Fakta>) {
             implementasjon = { morHarIkkeVerge(this) })
     ),
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN(Spesifikasjon(
-            "Det har gått mer enn 5 måneder siden forrige barn ble født",
+            "Det har gått mer enn 5 måneder eller mindre enn 5 dager siden forrige barn ble født",
             "MER_ENN_5_MND_SIDEN_FORRIGE_BARN",
             implementasjon = { merEnn5mndSidenForrigeBarn(this) })
     ),
