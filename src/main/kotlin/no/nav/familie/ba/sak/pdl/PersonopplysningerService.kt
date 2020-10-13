@@ -24,7 +24,8 @@ class PersonopplysningerService(
         val personinfo = hentPersoninfo(personIdent, PersonInfoQuery.MED_RELASJONER)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FAMILIERELASJONSROLLE>>()
         val familierelasjoner = personinfo.familierelasjoner.map {
-            val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).first().harTilgang
+            val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
+                             ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
                 val relasjonsinfo = hentPersoninfo(it.personIdent.id, PersonInfoQuery.ENKEL)
                 Familierelasjon(personIdent = it.personIdent,
