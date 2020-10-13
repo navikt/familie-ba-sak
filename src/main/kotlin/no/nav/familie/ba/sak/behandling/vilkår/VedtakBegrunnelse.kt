@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 
 interface IVedtakBegrunnelse {
 
-    val vedtakBegrunnelseType: VedtakBegrunnelseType;
+    val vedtakBegrunnelseType: VedtakBegrunnelseType
     fun hentBeskrivelse(gjelderSøker: Boolean = false,
                         barnasFødselsdatoer: String = "",
                         vilkårsdato: String = "",

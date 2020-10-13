@@ -26,7 +26,7 @@ data class RestUtbetalingBegrunnelse(
 )
 
 data class RestPutUtbetalingBegrunnelse(
-        val vedtakBegrunnelseType: VedtakBegrunnelseType,
+        val vedtakBegrunnelseType: VedtakBegrunnelseType?,
         val vedtakBegrunnelse: VedtakBegrunnelse?
 )
 

@@ -282,7 +282,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val opprinneligUtbetalingBegrunnelse = vedtak.hentUtbetalingBegrunnelse(utbetalingBegrunnelseId)
                                                ?: throw Feil(message = "Fant ikke stønadbrevbegrunnelse med innsendt id")
 
-        if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null) {
+        if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null && restPutUtbetalingBegrunnelse.vedtakBegrunnelseType != null) {
 
             if (VedtakBegrunnelse.utenVilkår().contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
                 vedtak.endreUtbetalingBegrunnelse(
