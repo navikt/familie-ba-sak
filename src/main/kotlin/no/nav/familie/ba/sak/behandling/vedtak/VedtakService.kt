@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -284,7 +285,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null && restPutUtbetalingBegrunnelse.vedtakBegrunnelseType != null) {
 
-            if (VedtakBegrunnelse.utenVilkår().contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
+            if (VedtakBegrunnelseSerivce.utenVilkår.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
                 vedtak.endreUtbetalingBegrunnelse(
                         opprinneligUtbetalingBegrunnelse.id,
                         restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
@@ -296,7 +297,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                 behandlingResultat = behandlingResultat,
                                 opprinneligUtbetalingBegrunnelse = opprinneligUtbetalingBegrunnelse,
                                 oppdatertBegrunnelseType = restPutUtbetalingBegrunnelse.vedtakBegrunnelseType,
-                                oppdatertVilkår = Vilkår.finnForBegrunnelse(restPutUtbetalingBegrunnelse.vedtakBegrunnelse))
+                                oppdatertVilkår = restPutUtbetalingBegrunnelse.vedtakBegrunnelse.finnVilkårFor())
 
                 if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
                     throw Feil(message = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
@@ -346,7 +347,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     /**
-     * Må vite om det gjelder søker og/eller barn da dette bestememr ordlyd i brev.
+     * Må vite om det gjelder søker og/eller barn da dette bestemmer ordlyd i brev.
      * Funksjonen utleder hvilke personer som trigger en gitt endring ved å kontrollere
      * at vilkår og begrunnelsetype som man forsøker å oppdatere mot resultatet man
      * skal begrunne.

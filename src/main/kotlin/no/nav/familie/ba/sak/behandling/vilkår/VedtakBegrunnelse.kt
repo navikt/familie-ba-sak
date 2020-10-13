@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.common.Feil
 
 interface IVedtakBegrunnelse {
 
@@ -250,15 +251,15 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     };
 
     companion object {
+        fun VedtakBegrunnelse.finnVilkårFor(): Vilkår = VedtakBegrunnelseSerivce.vilkårBegrunnelser
+                                                                .filter { it.value.contains(this) }
+                                                                .map { it.key }
+                                                                .singleOrNull()
+                                                        ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
 
-        fun ikkeMuligÅSetteManuelt(): List<VedtakBegrunnelse> = listOf(SATSENDRING,
-                                                                       REDUKSJON_MANGLENDE_OPPLYSNINGER,
-                                                                       REDUKSJON_BARN_DØD)
 
-        fun utenVilkår(): List<VedtakBegrunnelse> = listOf(REDUKSJON_UNDER_6_ÅR)
     }
 }
-
 
 enum class VedtakBegrunnelseType {
     INNVILGELSE,

@@ -10,7 +10,6 @@ import java.time.LocalDate
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                   val spesifikasjon: Spesifikasjon<FaktaTilVilkårsvurdering>,
-                  val begrunnelser: List<VedtakBegrunnelse> = emptyList(),
                   val gyldigVilkårsperiode: GyldigVilkårsperiode) {
 
     UNDER_18_ÅR(
@@ -19,8 +18,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     beskrivelse = "Er under 18 år",
                     identifikator = "UNDER_18_ÅR",
                     implementasjon = { barnUnder18År(this) }),
-            gyldigVilkårsperiode = GyldigVilkårsperiode(),
-            begrunnelser = listOf(VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR)),
+            gyldigVilkårsperiode = GyldigVilkårsperiode()),
     BOR_MED_SØKER(
             parterDetteGjelderFor = listOf<PersonType>(BARN),
             spesifikasjon = Spesifikasjon<FaktaTilVilkårsvurdering>(
@@ -29,17 +27,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     implementasjon = {
                         søkerErMor(this) og barnBorMedSøker(this)
                     }
-            ),
-            begrunnelser =
-            listOf(
-                    VedtakBegrunnelse.INNVILGET_OMSORG_FOR_BARN,
-                    VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER,
-                    VedtakBegrunnelse.INNVILGET_FAST_OMSORG_FOR_BARN,
-                    VedtakBegrunnelse.REDUKSJON_FLYTTET_FORELDER,
-                    VedtakBegrunnelse.REDUKSJON_FLYTTET_BARN,
-                    VedtakBegrunnelse.REDUKSJON_FAST_OMSORG_FOR_BARN,
-                    VedtakBegrunnelse.REDUKSJON_DELT_BOSTED_ENIGHET,
-                    VedtakBegrunnelse.REDUKSJON_DELT_BOSTED_UENIGHET
             ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     GIFT_PARTNERSKAP(
@@ -55,12 +42,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     beskrivelse = "Bosatt i riket",
                     identifikator = "BOSATT_I_RIKET",
                     implementasjon = { bosattINorge(this) }),
-            begrunnelser =
-            listOf(
-                    VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                    VedtakBegrunnelse.REDUKSJON_BOSATT_I_RIKTET
-
-            ),
             gyldigVilkårsperiode = GyldigVilkårsperiode()),
     LOVLIG_OPPHOLD(
             parterDetteGjelderFor = listOf<PersonType>(SØKER, BARN),
@@ -69,11 +50,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     identifikator = "LOVLIG_OPPHOLD",
                     implementasjon =
                     { lovligOpphold(this) }),
-            begrunnelser = listOf(
-                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER,
-                    VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING,
-                    VedtakBegrunnelse.REDUKSJON_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE_BARN),
             gyldigVilkårsperiode = GyldigVilkårsperiode());
 
     override fun toString(): String {
@@ -81,10 +57,6 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
     }
 
     companion object {
-
-        fun finnForBegrunnelse(begrunnelse: VedtakBegrunnelse): Vilkår =
-                values().find { it.begrunnelser.contains(begrunnelse) }
-                ?: throw Feil("Finner ikke vilkår for valgt begrunnelse")
 
         fun hentSamletSpesifikasjonForPerson(personType: PersonType): Spesifikasjon<FaktaTilVilkårsvurdering> {
             return hentVilkårFor(personType)
