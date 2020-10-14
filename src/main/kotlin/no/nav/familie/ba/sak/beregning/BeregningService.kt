@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
@@ -29,7 +29,7 @@ class BeregningService(
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val behandlingRepository: BehandlingRepository,
-        private val persongrunnlagService: PersongrunnlagService,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 ) {
 
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
@@ -74,10 +74,13 @@ class BeregningService(
                         hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
                     }
                     .sortedBy { tilkjentYtelse -> tilkjentYtelse.opprettetDato }
-                    .firstOrNull { tilkjentYtelse ->
+                    .lastOrNull { tilkjentYtelse ->
                         val barnFinnesIBehandling =
-                                persongrunnlagService.hentAktiv(behandlingId = tilkjentYtelse.behandling.id)?.barna?.map { it.personIdent }
-                                        ?.contains(barnIdent)!!
+                                personopplysningGrunnlagRepository
+                                        .findByBehandlingAndAktiv(behandlingId = tilkjentYtelse.behandling.id)
+                                        ?.barna?.map { it.personIdent }
+                                        ?.contains(barnIdent)
+                                ?: false
 
                         barnFinnesIBehandling && tilkjentYtelse.erSendtTilIverksetting()
                     }

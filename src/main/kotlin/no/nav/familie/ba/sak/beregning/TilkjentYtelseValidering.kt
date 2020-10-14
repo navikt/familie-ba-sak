@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 // 3 år (krav i loven) og 2 måneder (på grunn av behandlingstid)
@@ -36,8 +37,8 @@ object TilkjentYtelseValidering {
         if (tilkjentYtelse.andelerTilkjentYtelse.any {
                     it.stønadFom < gyldigEtterbetalingFom
                 }) {
-            throw UtbetalingsikkerhetFeil(message = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid. Gå tilbake til vilkårsvurderingen og endre på datoene, , eller ta kontakt med teamet for hjelp.",
-                                          frontendFeilmelding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid. Gå tilbake til vilkårsvurderingen og endre på datoene, , eller ta kontakt med teamet for hjelp.")
+            throw UtbetalingsikkerhetFeil(message = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid.",
+                                          frontendFeilmelding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid. Vennligst gå tilbake til vilkårsvurderingen og endre på datoene, eller ta kontakt med teamet for hjelp.")
         }
     }
 
@@ -52,10 +53,10 @@ object TilkjentYtelseValidering {
             val søkersAndeler = hentSøkersAndeler(it.value, søker)
             val barnasAndeler = hentBarnasAndeler(it.value, barna)
 
-            validerAtAndelerForPartErGyldige(søker, søkersAndeler)
+            validerAtBeløpForPartStemmerMedSatser(søker, søkersAndeler)
 
             barnasAndeler.forEach { (person, andeler) ->
-                validerAtAndelerForPartErGyldige(person, andeler)
+                validerAtBeløpForPartStemmerMedSatser(person, andeler)
             }
         }
     }
@@ -74,25 +75,26 @@ object TilkjentYtelseValidering {
         val søkersAndeler = hentSøkersAndeler(tilkjentYtelse.andelerTilkjentYtelse.toList(), søker)
         val barnasAndeler = hentBarnasAndeler(tilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
 
-        barnasAndeler.forEach { barnMedAndeler ->
-            if (barnMedAndeler.second.any {
-                        it.stønadFom < barnMedAndeler.first.fødselsdato.førsteDagINesteMåned() || it.stønadTom > barnMedAndeler.first.fødselsdato.plusYears(
-                                18).sisteDagIForrigeMåned()
-                    }) {
+        barnasAndeler.forEach { (barn, andeler) ->
+            if (andelerErInnenforGyldigPeriode(
+                            andeler,
+                            barn.fødselsdato.førsteDagINesteMåned(),
+                            barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned())
+            ) {
                 throw UtbetalingsikkerhetFeil(message = "Barn har andeler som strekker seg utover 0-18 år",
-                                              frontendFeilmelding = "${barnMedAndeler.first.personIdent.ident} har utbetalinger utover 0-18 år. Ta kontakt med teamet for hjelp.")
+                                              frontendFeilmelding = "${barn.personIdent.ident} har utbetalinger utover 0-18 år. Ta kontakt med teamet for hjelp.")
             }
         }
 
-        if (søkersAndeler.any { it.stønadFom < minUtbetalingsdato || it.stønadTom > maksUtbetalingsdato }) {
+        if (andelerErInnenforGyldigPeriode(søkersAndeler, minUtbetalingsdato, maksUtbetalingsdato)) {
             throw UtbetalingsikkerhetFeil(message = "Søker har andeler som strekker seg utover barnas 0-18 års periode",
                                           frontendFeilmelding = "Søker har utbetalinger utover barnas 0-18 års periode. Ta kontakt med teamet for hjelp.")
         }
     }
 
-    fun valider100ProsentGraderingForBarna(behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
-                                           barnMedAndreTilkjentYtelse: List<Pair<Person, List<TilkjentYtelse>>>,
-                                           personopplysningGrunnlag: PersonopplysningGrunnlag) {
+    fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
+                                                          barnMedAndreTilkjentYtelse: List<Pair<Person, List<TilkjentYtelse>>>,
+                                                          personopplysningGrunnlag: PersonopplysningGrunnlag) {
         val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
 
         val barnasAndeler = hentBarnasAndeler(behandlendeBehandlingTilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
@@ -103,20 +105,36 @@ object TilkjentYtelseValidering {
                             .flatMap { it.second }
                             .flatMap { it.andelerTilkjentYtelse }
 
-            andeler.forEach { andelTilkjentYtelse ->
-                if (barnsAndelerFraAndreBehandlinger.any { andelTilkjentYtelse.overlapperMed(it) }) {
-                    throw UtbetalingsikkerhetFeil(message = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
-                                                  frontendFeilmelding = "Det utbetales allerede barnetrygd (${andelTilkjentYtelse.type.name}) for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom} - ${andelTilkjentYtelse.stønadTom}.")
-                }
+            validerIngenOverlappAvAndeler(andeler,
+                                          barnsAndelerFraAndreBehandlinger,
+                                          behandlendeBehandlingTilkjentYtelse,
+                                          barn)
+        }
+    }
+
+    private fun andelerErInnenforGyldigPeriode(andeler: List<AndelTilkjentYtelse>,
+                                               gyldigFom: LocalDate,
+                                               gyldigTom: LocalDate): Boolean {
+        return andeler.any { it.stønadFom < gyldigFom || it.stønadTom > gyldigTom }
+    }
+
+    private fun validerIngenOverlappAvAndeler(andeler: List<AndelTilkjentYtelse>,
+                                              barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
+                                              behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
+                                              barn: Person) {
+        andeler.forEach { andelTilkjentYtelse ->
+            if (barnsAndelerFraAndreBehandlinger.any { andelTilkjentYtelse.overlapperMed(it) }) {
+                throw UtbetalingsikkerhetFeil(message = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
+                                              frontendFeilmelding = "Det utbetales allerede barnetrygd (${andelTilkjentYtelse.type.name}) for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom} - ${andelTilkjentYtelse.stønadTom}.")
             }
         }
     }
 }
 
-private fun validerAtAndelerForPartErGyldige(person: Person,
-                                             andeler: List<AndelTilkjentYtelse>,
-                                             maksAntallAndeler: Int = 2,
-                                             maksTotalBeløp: Int = 2500) {
+private fun validerAtBeløpForPartStemmerMedSatser(person: Person,
+                                                  andeler: List<AndelTilkjentYtelse>,
+                                                  maksAntallAndeler: Int = 2,
+                                                  maksTotalBeløp: Int = 2500) {
     if (andeler.size > maksAntallAndeler) {
         throw UtbetalingsikkerhetFeil(message = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatte andeler = ${maksAntallAndeler}, faktiske andeler = ${andeler.size}.",
                                       frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. Kontakt teamet for hjelp")

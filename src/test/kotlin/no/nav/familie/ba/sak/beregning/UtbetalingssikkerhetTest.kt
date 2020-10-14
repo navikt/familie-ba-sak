@@ -289,9 +289,9 @@ class UtbetalingssikkerhetTest {
         ))
 
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
-            TilkjentYtelseValidering.valider100ProsentGraderingForBarna(tilkjentYtelse2,
-                                                                        listOf(Pair(barn, listOf(tilkjentYtelse))),
-                                                                        personopplysningGrunnlag2)
+            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(tilkjentYtelse2,
+                                                                                       listOf(Pair(barn, listOf(tilkjentYtelse))),
+                                                                                       personopplysningGrunnlag2)
         }
 
         assertTrue(feil.frontendFeilmelding?.contains("Det utbetales allerede barnetrygd (${YtelseType.ORDINÆR_BARNETRYGD}) for ${barn.personIdent.ident}")!!)
@@ -328,9 +328,9 @@ class UtbetalingssikkerhetTest {
         ))
 
         assertDoesNotThrow {
-            TilkjentYtelseValidering.valider100ProsentGraderingForBarna(tilkjentYtelse2,
-                                                                        listOf(Pair(barn, listOf(tilkjentYtelse))),
-                                                                        personopplysningGrunnlag2)
+            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(tilkjentYtelse2,
+                                                                                       listOf(Pair(barn, listOf(tilkjentYtelse))),
+                                                                                       personopplysningGrunnlag2)
         }
     }
 }
