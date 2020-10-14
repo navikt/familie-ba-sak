@@ -157,6 +157,22 @@ class ClientMocks {
                                         relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
 
         every {
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr[2]))
+        } returns personInfo.getValue(søkerFnr[2]).copy(
+                familierelasjoner = setOf(
+                        Familierelasjon(personIdent = Personident(id = barnFnr[0]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[0]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                        Familierelasjon(personIdent = Personident(id = barnFnr[1]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[1]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
+                                        adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG),
+                        Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
+
+        every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(integrasjonerFnr))
         } returns personInfo.getValue(integrasjonerFnr).copy(
                 familierelasjoner = setOf(
@@ -379,7 +395,7 @@ class ClientMocks {
                     .returns(kodeverkLand)
         }
 
-        val søkerFnr = arrayOf("12345678910", "11223344556")
+        val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
         val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(2), LocalDate.now().førsteDagIInneværendeMåned())
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMYY() + "00033", barnFødselsdatoer[1].tilddMMYY() + "00033")
         val integrasjonerFnr = "10000111111"
@@ -399,6 +415,11 @@ class ClientMocks {
                                           sivilstand = SIVILSTAND.GIFT,
                                           kjønn = Kjønn.MANN,
                                           navn = "Far Faresen"),
+                søkerFnr[2] to PersonInfo(fødselsdato = LocalDate.of(1985, 7, 10),
+                                          bostedsadresse = null,
+                                          sivilstand = SIVILSTAND.GIFT,
+                                          kjønn = Kjønn.KVINNE,
+                                          navn = "Moder Jord"),
                 barnFnr[0] to PersonInfo(fødselsdato = barnFødselsdatoer[0],
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UOPPGITT,

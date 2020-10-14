@@ -16,6 +16,7 @@ data class PersonInfo(
         @JsonDeserialize(using = KjonnDeserializer::class)
         val kjønn: Kjønn? = null,
         val familierelasjoner: Set<Familierelasjon> = emptySet(),
+        val familierelasjonerMaskert: Set<FamilierelasjonMaskert> = emptySet(),
         val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         val bostedsadresse: Bostedsadresse? = null,
         val sivilstand: SIVILSTAND? = null
@@ -25,7 +26,13 @@ data class Familierelasjon(
         val personIdent: Personident,
         val relasjonsrolle: FAMILIERELASJONSROLLE,
         val navn: String? = null,
-        val fødselsdato: LocalDate? = null
+        val fødselsdato: LocalDate? = null,
+        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
+)
+
+data class FamilierelasjonMaskert(
+        val relasjonsrolle: FAMILIERELASJONSROLLE,
+        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
 )
 
 data class Personident(
