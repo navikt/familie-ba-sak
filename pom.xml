@@ -23,7 +23,7 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>2.2.5.RELEASE</spring.cloud.version>
         <spring.vault.version>2.2.2.RELEASE</spring.vault.version>
-        <felles.version>1.20200921151640_5bbb06a</felles.version>
+        <felles.version>1.20201012050219_e63b118</felles.version>
         <felles-kontrakter.version>2.0_20200923130242_766e389</felles-kontrakter.version>
         <felles.prosessering.version>1.20200624154125_0d8ff39</felles.prosessering.version>
         <familie.kontrakter.saksstatistikk>2.0_20200930143114_268ea08</familie.kontrakter.saksstatistikk>
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
-            <version>2.11.2</version>
+            <version>2.11.3</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -124,7 +124,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.12.4</version>
+            <version>1.15.0-rc2</version>
             <scope>test</scope>
         </dependency>
 

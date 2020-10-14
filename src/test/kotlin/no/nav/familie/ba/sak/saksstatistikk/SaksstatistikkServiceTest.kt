@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
@@ -117,8 +117,8 @@ internal class SaksstatistikkServiceTest {
                     UtbetalingBegrunnelse(vedtak = it,
                                           fom = LocalDate.now(),
                                           tom = LocalDate.now(),
-                                          resultat = BehandlingResultatType.INNVILGET,
-                                          behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOR_HOS_SØKER))
+                                          begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                          vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER))
         }
 
 

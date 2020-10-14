@@ -2,9 +2,11 @@ package no.nav.familie.ba.sak.behandling
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.*
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.AVSLUTTET
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
@@ -68,7 +70,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun loggBehandlinghendelse(behandling: Behandling) {
         saksstatistikkEventPublisher.publish(behandling.id,
                                              hentForrigeBehandlingSomErIverksatt(behandling.fagsak.id)
-                                                 .takeIf { erRevurderingEllerKlage(behandling) }?.id)
+                                                     .takeIf { erRevurderingEllerKlage(behandling) }?.id)
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
@@ -158,11 +160,11 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         tilkjenteYtelser.forEach {
             if (it.stønadTom!! >= utbetalingsMåned && it.stønadFom != null) {
-                behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForUtbetaling = true })
+                behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForFremtidigUtbetaling = true })
             }
             if (it.opphørFom != null && it.opphørFom!! <= utbetalingsMåned) {
                 val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(it)
-                behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForUtbetaling = false })
+                behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForFremtidigUtbetaling = false })
             }
         }
 

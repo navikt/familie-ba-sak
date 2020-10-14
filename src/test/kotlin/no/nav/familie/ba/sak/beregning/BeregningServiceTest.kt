@@ -4,6 +4,7 @@ import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.toRestFagsak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
@@ -26,6 +27,7 @@ class BeregningServiceTest {
     val behandlingResultatRepository = mockk<BehandlingResultatRepository>()
     val behandlingRepository = mockk<BehandlingRepository>()
     val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
+    val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
 
     lateinit var beregningService: BeregningService
 
@@ -38,7 +40,8 @@ class BeregningServiceTest {
                                             fagsakService,
                                             tilkjentYtelseRepository,
                                             behandlingResultatRepository,
-                                            behandlingRepository)
+                                            behandlingRepository,
+                                            personopplysningGrunnlagRepository)
 
         every { andelTilkjentYtelseRepository.slettAlleAndelerTilkjentYtelseForBehandling(any()) } just Runs
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs

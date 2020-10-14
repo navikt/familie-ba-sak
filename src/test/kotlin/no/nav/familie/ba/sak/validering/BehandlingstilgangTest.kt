@@ -34,7 +34,7 @@ internal class BehandlingstilgangTest {
 
     @Test
     fun `isValid returnerer true hvis sjekkTilgangTilPersoner returnerer true for alle personer knyttet til behandling`() {
-        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
                 .returns(listOf(Tilgang(true),
                                 Tilgang(true),
                                 Tilgang(true)))
@@ -46,7 +46,7 @@ internal class BehandlingstilgangTest {
 
     @Test
     fun `isValid returnerer false hvis sjekkTilgangTilPersoner returnerer false for en person knyttet til behandling`() {
-        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
                 .returns(listOf(Tilgang(true),
                                 Tilgang(false),
                                 Tilgang(true)))

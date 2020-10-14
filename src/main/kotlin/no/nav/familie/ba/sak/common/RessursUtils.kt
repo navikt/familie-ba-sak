@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
 object RessursUtils {
+
     private val LOG = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -31,13 +32,13 @@ object RessursUtils {
     private fun <T> errorResponse(httpStatus: HttpStatus,
                                   errorMessage: String,
                                   throwable: Throwable?): ResponseEntity<Ressurs<T>> {
-        secureLogger.info("En feil har oppstått: $errorMessage", throwable)
+        secureLogger.error("En feil har oppstått: $errorMessage", throwable)
         LOG.error("En feil har oppstått: $errorMessage")
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
     }
 
     private fun <T> frontendErrorResponse(feil: Feil): ResponseEntity<Ressurs<T>> {
-        secureLogger.info("En håndtert feil har oppstått(${feil.httpStatus}): " +
+        secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): " +
                            "${feil.frontendFeilmelding}, ${feil.stackTrace}", feil.throwable)
         LOG.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
 

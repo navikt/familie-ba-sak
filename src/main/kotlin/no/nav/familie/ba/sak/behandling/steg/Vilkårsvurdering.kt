@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårService
 import no.nav.familie.ba.sak.beregning.BeregningService
+import no.nav.familie.ba.sak.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.VilkårsvurderingFeil
@@ -116,6 +117,24 @@ class Vilkårsvurdering(
                 )
             }
         }
+
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(
+                behandlingId = behandling.id)!!
+
+        TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(tilkjentYtelse = tilkjentYtelse,
+                                                                                     personopplysningGrunnlag = personopplysningGrunnlag)
+
+        TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
+
+        val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map {
+            Pair(it,
+                 beregningService.hentIverksattTilkjentYtelseForBarn(it.personIdent, behandling)
+            )
+        }
+        TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
+                                                                                   barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
+                                                                                   personopplysningGrunnlag = personopplysningGrunnlag)
     }
 
     companion object {
