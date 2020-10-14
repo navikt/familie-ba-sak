@@ -38,7 +38,7 @@ object TilkjentYtelseValidering {
                     it.stønadFom < gyldigEtterbetalingFom
                 }) {
             throw UtbetalingsikkerhetFeil(message = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid.",
-                                          frontendFeilmelding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid. Vennligst gå tilbake til vilkårsvurderingen og endre på datoene, eller ta kontakt med teamet for hjelp.")
+                                          frontendFeilmelding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid. Vennligst endre på datoene, eller ta kontakt med teamet for hjelp.")
         }
     }
 
@@ -58,37 +58,6 @@ object TilkjentYtelseValidering {
             barnasAndeler.forEach { (person, andeler) ->
                 validerAtBeløpForPartStemmerMedSatser(person, andeler)
             }
-        }
-    }
-
-    /**
-     * Validerer at barna kun har andeler som løper i alderen 0-18 år.
-     * Validerer at søker kun har andeler som løper i fra 0 år på eldste barn til 18 år på yngste barn.
-     */
-    fun validerAtTilkjentYtelseKunHarGyldigTotalPeriode(tilkjentYtelse: TilkjentYtelse,
-                                                        personopplysningGrunnlag: PersonopplysningGrunnlag) {
-        val søker = personopplysningGrunnlag.søker
-        val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
-        val minUtbetalingsdato = barna.first().fødselsdato.førsteDagINesteMåned()
-        val maksUtbetalingsdato = barna.last().fødselsdato.plusYears(18).sisteDagIForrigeMåned()
-
-        val søkersAndeler = hentSøkersAndeler(tilkjentYtelse.andelerTilkjentYtelse.toList(), søker)
-        val barnasAndeler = hentBarnasAndeler(tilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
-
-        barnasAndeler.forEach { (barn, andeler) ->
-            if (andelerErInnenforGyldigPeriode(
-                            andeler,
-                            barn.fødselsdato.førsteDagINesteMåned(),
-                            barn.fødselsdato.plusYears(18).sisteDagIForrigeMåned())
-            ) {
-                throw UtbetalingsikkerhetFeil(message = "Barn har andeler som strekker seg utover 0-18 år",
-                                              frontendFeilmelding = "${barn.personIdent.ident} har utbetalinger utover 0-18 år. Ta kontakt med teamet for hjelp.")
-            }
-        }
-
-        if (andelerErInnenforGyldigPeriode(søkersAndeler, minUtbetalingsdato, maksUtbetalingsdato)) {
-            throw UtbetalingsikkerhetFeil(message = "Søker har andeler som strekker seg utover barnas 0-18 års periode",
-                                          frontendFeilmelding = "Søker har utbetalinger utover barnas 0-18 års periode. Ta kontakt med teamet for hjelp.")
         }
     }
 
