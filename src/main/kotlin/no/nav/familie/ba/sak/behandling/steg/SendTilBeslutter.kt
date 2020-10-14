@@ -2,10 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
@@ -20,40 +17,16 @@ import java.time.LocalDate
 @Service
 class SendTilBeslutter(
         private val behandlingService: BehandlingService,
-        private val beregningService: BeregningService,
         private val taskRepository: TaskRepository,
         private val oppgaveService: OppgaveService,
         private val loggService: LoggService,
         private val totrinnskontrollService: TotrinnskontrollService,
-        private val behandlingResultatService: BehandlingResultatService,
-        private val persongrunnlagService: PersongrunnlagService
+        private val behandlingResultatService: BehandlingResultatService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         vilkårsvurdering.postValiderSteg(behandling)
-
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(
-                behandlingId = behandling.id)!!
-
-        TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
-
-        TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(tilkjentYtelse = tilkjentYtelse,
-                                                                                     personopplysningGrunnlag = personopplysningGrunnlag)
-
-        TilkjentYtelseValidering.validerAtTilkjentYtelseKunHarGyldigTotalPeriode(tilkjentYtelse = tilkjentYtelse,
-                                                                                 personopplysningGrunnlag = personopplysningGrunnlag)
-
-
-        val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map {
-            Pair(it,
-                 beregningService.hentIverksattTilkjentYtelseForBarn(it.personIdent, behandling)
-            )
-        }
-        TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-                                                                                   barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
-                                                                                   personopplysningGrunnlag = personopplysningGrunnlag)
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling,

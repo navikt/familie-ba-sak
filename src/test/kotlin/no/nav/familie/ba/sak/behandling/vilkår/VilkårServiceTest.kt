@@ -94,6 +94,7 @@ class VilkårServiceTest(
         val behandlingSteg: Vilkårsvurdering = stegService.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         Assertions.assertNotNull(behandlingSteg)
 
+        behandlingSteg.utførStegOgAngiNeste(behandling, "")
         Assertions.assertDoesNotThrow { behandlingSteg.postValiderSteg(behandling) }
     }
 
