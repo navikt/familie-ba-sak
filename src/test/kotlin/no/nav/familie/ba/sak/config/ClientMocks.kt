@@ -157,6 +157,26 @@ class ClientMocks {
                                         relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
 
         every {
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr[2]))
+        } returns personInfo.getValue(søkerFnr[2]).copy(
+                familierelasjoner = setOf(
+                        Familierelasjon(personIdent = Personident(id = barnFnr[0]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[0]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                        Familierelasjon(personIdent = Personident(id = barnFnr[1]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[1]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
+                                        adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering),
+                        Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.FAR)),
+                familierelasjonerMaskert = setOf(
+                        FamilierelasjonMaskert(relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                               adressebeskyttelseGradering = personInfo.getValue(barnDetIkkeGisTilgangTilFnr).adressebeskyttelseGradering!!)
+                ))
+
+        every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(integrasjonerFnr))
         } returns personInfo.getValue(integrasjonerFnr).copy(
                 familierelasjoner = setOf(
@@ -230,13 +250,15 @@ class ClientMocks {
         every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
                 "mock data".toByteArray()
 
+        val idSlot = slot<List<String>>()
         every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())
-        } returns listOf(Tilgang(true, null))
-
-        every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(any<List<String>>())
-        } returns listOf(Tilgang(true, null))
+            mockIntegrasjonClient.sjekkTilgangTilPersoner(capture(idSlot))
+        } answers {
+            if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(barnDetIkkeGisTilgangTilFnr))
+                listOf(Tilgang(false, null))
+            else
+                listOf(Tilgang(true, null))
+        }
 
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
@@ -379,9 +401,10 @@ class ClientMocks {
                     .returns(kodeverkLand)
         }
 
-        val søkerFnr = arrayOf("12345678910", "11223344556")
-        val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(2), LocalDate.now().førsteDagIInneværendeMåned())
+        val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
+        val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(4), LocalDate.now().førsteDagIInneværendeMåned())
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMYY() + "00033", barnFødselsdatoer[1].tilddMMYY() + "00033")
+        val barnDetIkkeGisTilgangTilFnr = "12345678912"
         val integrasjonerFnr = "10000111111"
         val bostedsadresse = Bostedsadresse(
                 matrikkeladresse = Matrikkeladresse(matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
@@ -399,6 +422,12 @@ class ClientMocks {
                                           sivilstand = SIVILSTAND.GIFT,
                                           kjønn = Kjønn.MANN,
                                           navn = "Far Faresen"),
+                søkerFnr[2] to PersonInfo(fødselsdato = LocalDate.of(1985, 7, 10),
+                                          bostedsadresse = null,
+                                          sivilstand = SIVILSTAND.GIFT,
+                                          kjønn = Kjønn.KVINNE,
+                                          navn = "Moder Jord",
+                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT),
                 barnFnr[0] to PersonInfo(fødselsdato = barnFødselsdatoer[0],
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UOPPGITT,
@@ -408,12 +437,19 @@ class ClientMocks {
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UGIFT,
                                          kjønn = Kjønn.KVINNE,
-                                         navn = "Jenta Barnesen"),
+                                         navn = "Jenta Barnesen",
+                                         adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
                 integrasjonerFnr to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
                                                bostedsadresse = bostedsadresse,
                                                sivilstand = SIVILSTAND.GIFT,
                                                kjønn = Kjønn.KVINNE,
-                                               navn = "Mor Moresen")
+                                               navn = "Mor Moresen"),
+                barnDetIkkeGisTilgangTilFnr to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
+                                                          bostedsadresse = bostedsadresse,
+                                                          sivilstand = SIVILSTAND.UGIFT,
+                                                          kjønn = Kjønn.KVINNE,
+                                                          navn = "Maskert Banditt",
+                                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         )
     }
 

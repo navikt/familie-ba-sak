@@ -20,14 +20,12 @@ class Vedtaktilgang(private val vedtakRepository: VedtakRepository,
     @Transactional
     override fun isValid(vedtakId: Long, ctx: ConstraintValidatorContext): Boolean {
 
-        val personer = vedtakRepository.findById(vedtakId)
-                .map { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it.behandling.id)?.personer }
+        val vedtak = vedtakRepository.finnVedtak(vedtakId)
+        val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)?.personer?.map {
+            it.personIdent.ident
+        } ?: emptyList()
 
-        if (personer.isEmpty) {
-            return false
-        }
-
-        integrasjonClient.sjekkTilgangTilPersoner(personer.get())
+        integrasjonClient.sjekkTilgangTilPersoner(personer)
                 .filterNot { it.harTilgang }
                 .forEach {
                     logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")

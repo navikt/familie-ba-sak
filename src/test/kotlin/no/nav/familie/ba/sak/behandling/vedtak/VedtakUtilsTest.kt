@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils.hentHjemlerBruktIVedtak
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingresultatOgVilkårBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingBegrunnesle
 import no.nav.familie.ba.sak.common.lagVedtak
 import org.junit.jupiter.api.Assertions
@@ -16,9 +16,9 @@ class VedtakUtilsTest {
 
     @Test
     fun `hjemler skal være sorterte`() {
-        BehandlingresultatOgVilkårBegrunnelse.values().forEach {
+        VedtakBegrunnelse.values().forEach {
             val vedtak = lagVedtak()
-            val utbetalingBegrunnelse = lagUtbetalingBegrunnesle(behandlingresultatOgVilkårBegrunnelse = it)
+            val utbetalingBegrunnelse = lagUtbetalingBegrunnesle(vedtakBegrunnelse = it)
             vedtak.utbetalingBegrunnelser.add(utbetalingBegrunnelse)
             val hjemler = hentHjemlerBruktIVedtak(vedtak)
             Assertions.assertTrue(erSortertMinstTilStørst(hjemler))
@@ -27,9 +27,9 @@ class VedtakUtilsTest {
 
     @Test
     fun `hjemler skal være unike og sorterte ved kombinasjon av flere begrunnelser`() {
-        val utbetalingBegrunnelser = arrayOf(BehandlingresultatOgVilkårBegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                                             BehandlingresultatOgVilkårBegrunnelse.SATSENDRING)
-                .map { lagUtbetalingBegrunnesle(behandlingresultatOgVilkårBegrunnelse = it) }
+        val utbetalingBegrunnelser = arrayOf(VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                                             VedtakBegrunnelse.SATSENDRING)
+                .map { lagUtbetalingBegrunnesle(vedtakBegrunnelse = it) }
                 .toMutableSet()
         val vedtak = lagVedtak(utbetalingBegrunnelser = utbetalingBegrunnelser)
         val hjemler = hentHjemlerBruktIVedtak(vedtak)

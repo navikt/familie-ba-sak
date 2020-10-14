@@ -33,26 +33,25 @@ class FiltreringsreglerForFlereBarnTest {
             personopplysningerServiceMock, personopplysningGrunnlagRepositoryMock, localDateServiceMock)
 
     @Test
-    fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige minst ett barn ble født`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barn = listOf(
-                tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(personIdent = barnFnr0),
-                tilfeldigPerson(LocalDate.now().minusMonths(3)).copy(personIdent = barnFnr1)
+    fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(
+                genererFaktaMedTidligereBarn(1, 3, 7,0)
         )
-
-        val restenAvBarna: List<PersonInfo> = listOf(
-                PersonInfo(LocalDate.now().minusMonths(7))
-        )
-
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor, barn, restenAvBarna, morLever = true, barnetLever = true, morHarVerge = false,
-                               dagensDato = LocalDate.now()))
 
         Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
         Assertions.assertThat(evaluering.children
                                       .filter { it.resultat == Resultat.NEI }
                                       .any { it.identifikator == Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.identifikator }
         )
+    }
+
+    @Test
+    fun `Regelevaluering skal resultere i JA når det har ikke gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
+        val evaluering = Filtreringsregler.hentSamletSpesifikasjon().evaluer(
+                genererFaktaMedTidligereBarn(0, 0, 0, 5)
+        )
+
+        Assertions.assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
     }
 
     @Test
@@ -165,5 +164,29 @@ class FiltreringsreglerForFlereBarnTest {
                                     navn = "navn $it")
                 }?.toSet() ?: emptySet()
         )
+    }
+
+    private fun genererFaktaMedTidligereBarn(manaderFodselEtt: Long,
+                                             manaderFodselTo: Long,
+                                             manaderFodselForrigeFodsel: Long,
+                                             dagerFodselForrigeFodsel: Long): Fakta {
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
+        val barn = listOf(
+                tilfeldigPerson(LocalDate.now().minusMonths(manaderFodselEtt)).copy(personIdent = barnFnr0),
+                tilfeldigPerson(LocalDate.now().minusMonths(manaderFodselTo)).copy(personIdent = barnFnr1)
+        )
+
+        val restenAvBarna: List<PersonInfo> = listOf(
+                PersonInfo(LocalDate.now().minusMonths(manaderFodselForrigeFodsel).minusDays(dagerFodselForrigeFodsel))
+        )
+
+        return Fakta(mor,
+                     barn,
+                     restenAvBarna,
+                     morLever = true,
+                     barnetLever = true,
+                     morHarVerge = false,
+                     dagensDato = LocalDate.now())
+
     }
 }

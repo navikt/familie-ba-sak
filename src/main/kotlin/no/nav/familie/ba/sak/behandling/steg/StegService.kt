@@ -254,8 +254,8 @@ class StegService(
         } catch (exception: Exception) {
             stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
             LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
-            secureLogger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.",
-                              exception)
+            secureLogger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.",
+                               exception)
             throw exception
         }
     }
