@@ -72,10 +72,16 @@ data class AndelTilkjentYtelse(
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (this.personIdent == other.personIdent
-               && this.stønadFom == other.stønadFom
-               && this.stønadTom == other.stønadTom
-               && this.beløp == other.beløp
-               && this.type == other.type)
+                && this.stønadFom == other.stønadFom
+                && this.stønadTom == other.stønadTom
+                && this.beløp == other.beløp
+                && this.type == other.type)
+    }
+
+    fun overlapperMed(andelFraAnnenBehandling: AndelTilkjentYtelse): Boolean {
+        return this.type == andelFraAnnenBehandling.type &&
+               this.stønadFom <= andelFraAnnenBehandling.stønadTom &&
+               this.stønadTom >= andelFraAnnenBehandling.stønadFom
     }
 
     companion object {

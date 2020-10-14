@@ -85,6 +85,15 @@ class FagsakService(
         return fagsak
     }
 
+    fun hentFagsakerPåPerson(personIdent: PersonIdent): List<Fagsak> {
+        val versjonerAvBarn = personRepository.findByPersonIdent(personIdent)
+        return versjonerAvBarn.map {
+            it.personopplysningGrunnlag.behandlingId
+        }.map {
+            behandlingRepository.finnBehandling(it).fagsak
+        }.distinct()
+    }
+
     @Transactional
     fun lagre(fagsak: Fagsak): Fagsak {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter fagsak $fagsak")
@@ -172,7 +181,7 @@ class FagsakService(
                                 personopplysningGrunnlag = personopplysningGrunnlag,
                                 tilkjentYtelseForForrigeBehandling = if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(
                                         behandlingId = forrigeBehandling.id) else null),
-                    gjeldendeForUtbetaling = behandling.gjeldendeForUtbetaling
+                    gjeldendeForUtbetaling = behandling.gjeldendeForFremtidigUtbetaling
             )
         }
     }

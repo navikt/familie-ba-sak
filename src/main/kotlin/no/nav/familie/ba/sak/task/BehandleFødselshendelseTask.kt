@@ -62,12 +62,12 @@ class BehandleFødselshendelseTask(
             }
             LOG.info("Rollback utført. Data ikke persistert.")
         } catch (e: Throwable) {
-            LOG.info("FødselshendelseTask kjørte med Feil=${e.message}")
+            LOG.error("FødselshendelseTask kjørte med Feil=${e.message}")
 
             if (e is Feil) {
-                secureLogger.info("FødselshendelseTask kjørte med Feil=${e.frontendFeilmelding}", e)
+                secureLogger.error("FødselshendelseTask kjørte med Feil=${e.frontendFeilmelding}", e)
             } else {
-                secureLogger.info("FødselshendelseTask feilet!", e)
+                secureLogger.error("FødselshendelseTask feilet!", e)
             }
             throw e
         }
