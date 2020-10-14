@@ -74,9 +74,9 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                           vedtaksDato = aktivtVedtak?.vedtaksdato,
                                           relatertBehandlingId = forrigeBehandlingId?.toString(),
                                           vedtakId = aktivtVedtak?.id?.toString(),
-                                          resultat = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.resultat?.name,
+                                          resultat = aktivtVedtak?.hentUtbetalingBegrunnelse(behandlingId)?.begrunnelseType?.name,
                                           behandlingTypeBeskrivelse = behandling.type.visningsnavn,
-                                          resultatBegrunnelser = aktivtVedtak?.utbetalingBegrunnelser?.mapNotNull { it.behandlingresultatOgVilkårBegrunnelse }
+                                          resultatBegrunnelser = aktivtVedtak?.utbetalingBegrunnelser?.mapNotNull { it.vedtakBegrunnelse }
                                                   ?.map { ResultatBegrunnelseDVH(it.name, it.tittel) }
                                                   .orEmpty(),
                                           behandlingOpprettetAv = behandling.opprettetAv,
