@@ -30,8 +30,8 @@ class BehandlingMetrikker(
                                       "beskrivelse", it.displayName)
             }.toMap()
 
-    private val antallBrevBegrunnelser: Map<BehandlingresultatOgVilkårBegrunnelse, Counter> =
-            BehandlingresultatOgVilkårBegrunnelse.values().map {
+    private val antallBrevBegrunnelser: Map<VedtakBegrunnelse, Counter> =
+            VedtakBegrunnelse.values().map {
                 it to Metrics.counter("brevbegrunnelse",
                                       "type", it.name,
                                       "beskrivelse", it.tittel)
@@ -70,8 +70,8 @@ class BehandlingMetrikker(
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                      ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
-        vedtak.utbetalingBegrunnelser.mapNotNull { it.behandlingresultatOgVilkårBegrunnelse }
-                .forEach { brevbegrunelse: BehandlingresultatOgVilkårBegrunnelse -> antallBrevBegrunnelser[brevbegrunelse]?.increment() }
+        vedtak.utbetalingBegrunnelser.mapNotNull { it.vedtakBegrunnelse }
+                .forEach { brevbegrunelse: VedtakBegrunnelse -> antallBrevBegrunnelser[brevbegrunelse]?.increment() }
     }
 
     private fun initBehandlingTypeMetrikker(type: String): Map<BehandlingType, Counter> {
