@@ -9,6 +9,7 @@ data class RestPersonInfo(
         var fødselsdato: LocalDate,
         val navn: String? = null,
         val kjønn: Kjønn? = null,
+        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         val familierelasjoner: List<RestFamilierelasjon>,
         val familierelasjonerMaskert: List<RestFamilierelasjonMaskert> = emptyList()
 )
@@ -45,6 +46,7 @@ fun PersonInfo.toRestPersonInfo(personIdent: String) = RestPersonInfo(
         fødselsdato = this.fødselsdato,
         navn = this.navn,
         kjønn = this.kjønn,
+        adressebeskyttelseGradering = this.adressebeskyttelseGradering,
         familierelasjoner = this.familierelasjoner.map { it.toRestFamilieRelasjon() },
         familierelasjonerMaskert = this.familierelasjonerMaskert.map { it.toRestFamilierelasjonMaskert() }
 )
