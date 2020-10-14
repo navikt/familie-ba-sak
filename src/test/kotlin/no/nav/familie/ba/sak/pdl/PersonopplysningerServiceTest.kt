@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.mockk.every
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.internal.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
@@ -31,11 +34,25 @@ class PersonopplysningerServiceTest {
     @Autowired
     lateinit var personopplysningerService: PersonopplysningerService
 
+    @Autowired
+    lateinit var mockIntegrasjonClient: IntegrasjonClient
+
     @Test
     fun `hentPersoninfoMedRelasjoner() skal return riktig personinfo`(){
+
+        every {
+            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
+        } returns listOf(Tilgang(true, null))
+        every {
+            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
+        } returns listOf(Tilgang(false, null))
+
         val personInfo= personopplysningerService.hentPersoninfoMedRelasjoner(ID_MOR)
 
         assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
+        assertThat(personInfo.adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
+        assertThat(personInfo.familierelasjoner.size).isEqualTo(1)
+        assertThat(personInfo.familierelasjonerMaskert.size).isEqualTo(1)
     }
 
     @Test
@@ -67,7 +84,7 @@ class PersonopplysningerServiceTest {
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen landkode `(){
-        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_BARN)
+        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_BARN_1)
         assertThat(landkode).isEqualTo("ZZ")
     }
 
@@ -79,7 +96,7 @@ class PersonopplysningerServiceTest {
 
     @Test
     fun `hentadressebeskyttelse skal returnere gradering`(){
-        val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_BARN)
+        val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_BARN_1)
         assertThat(gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }
 
@@ -91,7 +108,8 @@ class PersonopplysningerServiceTest {
     companion object{
         val ID_MOR= "22345678901"
         val ID_MOR_MED_TOM_BOSTEDSADRESSE= "22345678903"
-        val ID_BARN= "32345678901"
+        val ID_BARN_1= "32345678901"
+        val ID_BARN_2= "32345678902"
 
         private fun gyldigRequest(queryFilnavn: String, requestFilnavn: String): String {
             return readfile(requestFilnavn)
@@ -126,6 +144,9 @@ class PersonopplysningerServiceTest {
             lagMockForPdl("hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
                           readfile("PdlIntegrasjon/personinfoResponseForBarn.json"))
 
+            lagMockForPdl("hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn2.json",
+                          readfile("PdlIntegrasjon/personinfoResponseForBarnMedAdressebeskyttelse.json"))
+
             lagMockForPdl("statsborgerskap.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
 
@@ -148,7 +169,7 @@ class PersonopplysningerServiceTest {
                           readfile("pdlAdressebeskyttelseResponse.json"))
 
             lagMockForPdl("hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse2.json",
-                          readfile("pdlPersonIkkeFunnetResponse.json"))
+                          readfile("pdlAdressebeskyttelseResponse.json"))
         }
 
     }
