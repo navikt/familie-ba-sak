@@ -396,7 +396,7 @@ class ClientMocks {
         }
 
         val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
-        val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(2), LocalDate.now().førsteDagIInneværendeMåned())
+        val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(4), LocalDate.now().førsteDagIInneværendeMåned())
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMYY() + "00033", barnFødselsdatoer[1].tilddMMYY() + "00033")
         val integrasjonerFnr = "10000111111"
         val bostedsadresse = Bostedsadresse(
