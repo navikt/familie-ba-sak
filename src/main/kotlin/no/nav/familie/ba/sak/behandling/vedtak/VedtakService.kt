@@ -189,8 +189,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                                                begrunnelseType = VedtakBegrunnelseType.SATSENDRING,
                                                                vedtakBegrunnelse = VedtakBegrunnelse.SATSENDRING,
                                                                brevBegrunnelse =
-                                                               VedtakBegrunnelse.SATSENDRING.hentBeskrivelse(
-                                                                       vilkårsdato = it.fom.toString(), målform = målform)))
+                                                               VedtakBegrunnelse.SATSENDRING.hentBeskrivelse(målform = målform)))
         }
     }
 
