@@ -124,7 +124,7 @@ object TilkjentYtelseUtils {
 
         val segmenter = utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling)
         val segmenterFraForrigeTilkjentYtelse =
-                if (tilkjentYtelseForForrigeBehandling !== null) utledSegmenterFraTilkjentYtelse(
+                if (tilkjentYtelseForForrigeBehandling !== null && tilkjentYtelseForForrigeBehandling.andelerTilkjentYtelse.isNotEmpty()) utledSegmenterFraTilkjentYtelse(
                         tilkjentYtelseForForrigeBehandling) else emptyList()
 
         var erEtterFørsteEndring = false
