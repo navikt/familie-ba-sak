@@ -232,7 +232,7 @@ object VilkårsvurderingUtils {
             .groupBy { it.vedtakBegrunnelseType }
             .mapValues { begrunnelseGruppe ->
                 begrunnelseGruppe.value
-                        .filter { !VedtakBegrunnelseSerivce.ikkeMuligÅSetteManuelt.contains(it) }
+                        .filter { !VedtakBegrunnelseSerivce.ikkeStøttet.contains(it) }
                         .map { vedtakBegrunnelse ->
                             RestVedtakBegrunnelse(id = vedtakBegrunnelse,
                                                   navn = vedtakBegrunnelse.tittel)

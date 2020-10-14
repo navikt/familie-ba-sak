@@ -28,9 +28,8 @@ object VedtakBegrunnelseSerivce {
                     VedtakBegrunnelse.REDUKSJON_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE_BARN)
     )
 
-    val ikkeMuligÅSetteManuelt = listOf(VedtakBegrunnelse.SATSENDRING,
-                                                                   VedtakBegrunnelse.REDUKSJON_MANGLENDE_OPPLYSNINGER,
-                                                                   VedtakBegrunnelse.REDUKSJON_BARN_DØD)
+    val ikkeStøttet = listOf(VedtakBegrunnelse.REDUKSJON_MANGLENDE_OPPLYSNINGER,
+                             VedtakBegrunnelse.REDUKSJON_BARN_DØD)
 
     val utenVilkår = listOf(VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR)
 }
