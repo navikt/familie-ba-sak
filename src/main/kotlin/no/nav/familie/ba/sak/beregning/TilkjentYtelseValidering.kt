@@ -106,7 +106,7 @@ object TilkjentYtelseValidering {
             andeler.forEach { andelTilkjentYtelse ->
                 if (barnsAndelerFraAndreBehandlinger.any { andelTilkjentYtelse.overlapperMed(it) }) {
                     throw UtbetalingsikkerhetFeil(message = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
-                                                  frontendFeilmelding = "Det utbetales allerede barnetrygd (${andelTilkjentYtelse.type.name}) for ${barn.personIdent} i perioden ${andelTilkjentYtelse.stønadFom} - ${andelTilkjentYtelse.stønadTom}.")
+                                                  frontendFeilmelding = "Det utbetales allerede barnetrygd (${andelTilkjentYtelse.type.name}) for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom} - ${andelTilkjentYtelse.stønadTom}.")
                 }
             }
         }
