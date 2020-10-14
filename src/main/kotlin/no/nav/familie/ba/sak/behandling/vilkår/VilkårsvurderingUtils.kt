@@ -233,9 +233,9 @@ object VilkårsvurderingUtils {
             .mapValues { begrunnelseGruppe ->
                 begrunnelseGruppe.value
                         .filter { !VedtakBegrunnelseSerivce.ikkeMuligÅSetteManuelt.contains(it) }
-                        .map { behandlingResultatOgVilkårBegrunnelse ->
-                            RestVedtakBegrunnelse(id = behandlingResultatOgVilkårBegrunnelse,
-                                                  navn = behandlingResultatOgVilkårBegrunnelse.tittel)
+                        .map { vedtakBegrunnelse ->
+                            RestVedtakBegrunnelse(id = vedtakBegrunnelse,
+                                                  navn = vedtakBegrunnelse.tittel)
                         }
             }
 }

@@ -9,11 +9,9 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgers
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
-import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
-import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
-import no.nav.familie.ba.sak.behandling.vilkår.VilkårResultat
+import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.YtelseType
@@ -33,6 +31,7 @@ fun randomFnr(): String = UUID.randomUUID().toString()
 fun randomAktørId(): AktørId = AktørId(UUID.randomUUID().toString())
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
+private var gjeldendeUtbetalingBegrunnelseId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeBehandlingId: Long = abs(Random.nextLong(10000000))
 private var gjeldendePersonId: Long = abs(Random.nextLong(10000000))
 private val id_inkrement = 50
@@ -40,6 +39,11 @@ private val id_inkrement = 50
 fun nesteVedtakId(): Long {
     gjeldendeVedtakId += id_inkrement
     return gjeldendeVedtakId
+}
+
+fun nesteUtbetalingBegrunnelseId(): Long {
+    gjeldendeUtbetalingBegrunnelseId += id_inkrement
+    return gjeldendeUtbetalingBegrunnelseId
 }
 
 fun nesteBehandlingId(): Long {
@@ -98,14 +102,38 @@ fun tilfeldigSøker(fødselsdato: LocalDate = LocalDate.now(),
         sivilstand = SIVILSTAND.UGIFT
 )
 
-fun lagVedtak(behandling: Behandling = lagBehandling(),
-              forrigeVedtak: Vedtak? = null,
-              opphørsdato: LocalDate? = null) =
-        Vedtak(id = nesteVedtakId(),
-               behandling = behandling,
-               vedtaksdato = LocalDate.now(),
-               forrigeVedtakId = forrigeVedtak?.id,
-               opphørsdato = opphørsdato
+fun lagUtbetalingBegrunnesle(
+        vedtak: Vedtak = lagVedtak(),
+        fom: LocalDate = LocalDate.now(),
+        tom: LocalDate = LocalDate.now(),
+        begrunnelseType: VedtakBegrunnelseType? = null,
+        vedtakBegrunnelse: VedtakBegrunnelse? = null,
+        brevBegrunnelse: String? = null,
+): UtbetalingBegrunnelse =
+        UtbetalingBegrunnelse(
+                id = nesteUtbetalingBegrunnelseId(),
+                vedtak = vedtak,
+                fom = fom,
+                tom = tom,
+                begrunnelseType = begrunnelseType,
+                vedtakBegrunnelse = vedtakBegrunnelse,
+                brevBegrunnelse = brevBegrunnelse,
+        )
+
+
+fun lagVedtak(
+        behandling: Behandling = lagBehandling(),
+        forrigeVedtak: Vedtak? = null,
+        opphørsdato: LocalDate? = null,
+        utbetalingBegrunnelser: MutableSet<UtbetalingBegrunnelse> = mutableSetOf(),
+) =
+        Vedtak(
+                id = nesteVedtakId(),
+                behandling = behandling,
+                vedtaksdato = LocalDate.now(),
+                forrigeVedtakId = forrigeVedtak?.id,
+                opphørsdato = opphørsdato,
+                utbetalingBegrunnelser = utbetalingBegrunnelser,
         )
 
 fun lagAndelTilkjentYtelse(fom: String,
