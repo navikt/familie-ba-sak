@@ -254,16 +254,11 @@ class ClientMocks {
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(capture(idSlot))
         } answers {
-            if (idSlot.captured.contains(barnDetIkkeGisTilgangTilFnr))
+            if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(barnDetIkkeGisTilgangTilFnr))
                 listOf(Tilgang(false, null))
             else
                 listOf(Tilgang(true, null))
         }
-
-        every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())
-        } returns listOf(Tilgang(false, null))
-
 
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
