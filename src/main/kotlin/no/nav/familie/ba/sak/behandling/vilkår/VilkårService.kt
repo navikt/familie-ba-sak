@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -87,7 +86,7 @@ class VilkårService(
                                             bekreftEndringerViaFrontend: Boolean,
                                             forrigeBehandling: Behandling? = null): BehandlingResultat {
 
-        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+        if (behandling.skalBehandlesAutomatisk) {
             val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                                            ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
             val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
@@ -137,7 +136,7 @@ class VilkårService(
     private fun genererInitieltBehandlingResultat(behandling: Behandling): BehandlingResultat {
         val behandlingResultat = BehandlingResultat(behandling = behandling)
 
-        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+        if (behandling.skalBehandlesAutomatisk) {
             behandlingResultat.apply {
                 personResultater = lagOgKjørAutomatiskVilkårsvurdering(behandlingResultat = behandlingResultat)
             }
@@ -208,8 +207,7 @@ class VilkårService(
                                                 personIdent = person.personIdent.ident)
 
             val samletSpesifikasjonForPerson = Vilkår.hentSamletSpesifikasjonForPerson(person.type)
-            val faktaTilVilkårsvurdering = FaktaTilVilkårsvurdering(personForVurdering = person,
-                                                                    behandlingOpprinnelse = behandlingResultat.behandling.opprinnelse)
+            val faktaTilVilkårsvurdering = FaktaTilVilkårsvurdering(personForVurdering = person)
             val evalueringForVilkårsvurdering = samletSpesifikasjonForPerson.evaluer(faktaTilVilkårsvurdering)
 
             gdprService.oppdaterFødselshendelsePreLanseringMedVilkårsvurderingForPerson(behandlingId = behandlingResultat.behandling.id,

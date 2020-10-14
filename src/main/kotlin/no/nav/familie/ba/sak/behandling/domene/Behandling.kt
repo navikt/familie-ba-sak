@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.domene
 
-import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
@@ -24,8 +23,11 @@ data class Behandling(
         val type: BehandlingType,
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "behandling_opprinnelse", nullable = false)
-        val opprinnelse: BehandlingOpprinnelse,
+        @Column(name = "opprettet_aarsak", nullable = false)
+        val opprettetÅrsak: BehandlingÅrsak,
+
+        @Column(name = "skal_behandles_automatisk", nullable = false, updatable = false)
+        val skalBehandlesAutomatisk: Boolean = false,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "kategori", nullable = false)
@@ -62,12 +64,15 @@ data class Behandling(
 }
 
 /**
- * Opprinnelse er knyttet til en behandling og sier noe om hvordan behandling ble opprettet.
+ * Årsak er knyttet til en behandling og sier noe om hvorfor behandling ble opprettet.
  */
-enum class BehandlingOpprinnelse {
-    MANUELL,
-    AUTOMATISK_VED_FØDSELSHENDELSE,
-    AUTOMATISK_VED_JOURNALFØRING
+enum class BehandlingÅrsak(val visningsnavn: String) {
+    SØKNAD("Søknad"),
+    FØDSELSHENDELSE("Fødselshendelse"),
+    ÅRLIG_KONTROLL("Årsak kontroll"),
+    DØDSFALL("Dødsfall"),
+    NYE_OPPLYSNINGER("Nye opplysninger"),
+    TEKNISK_OPPHØR("Teknisk opphør")
 }
 
 enum class BehandlingType(val visningsnavn: String) {

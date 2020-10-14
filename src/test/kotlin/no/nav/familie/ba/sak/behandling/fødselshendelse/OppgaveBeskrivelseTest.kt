@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.behandling.fødselshendelse
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt.*
@@ -42,7 +42,6 @@ class OppgaveBeskrivelseTest {
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     private val behandlingRepositoryMock = mockk<BehandlingRepository>()
     private val gdprServiceMock = mockk<GDPRService>()
-    private val vilkårsvurderingMetricsMock = mockk<VilkårsvurderingMetrics>()
 
     private val fødselshendelseService = FødselshendelseService(infotrygdFeedServiceMock,
                                                                 infotrygdBarnetrygdClientMock,
@@ -55,7 +54,6 @@ class OppgaveBeskrivelseTest {
                                                                 behandlingResultatRepositoryMock,
                                                                 persongrunnlagServiceMock,
                                                                 behandlingRepositoryMock,
-                                                                vilkårsvurderingMetricsMock,
                                                                 gdprServiceMock)
 
     @Test
@@ -275,7 +273,8 @@ class OppgaveBeskrivelseTest {
         val fagsak = Fagsak(søkerIdenter = emptySet())
         val behandling = lagBehandling(
                 fagsak = fagsak,
-                opprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE,
+                årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                automatiskOpprettelse = true,
                 behandlingKategori = BehandlingKategori.EØS
         )
         val søker = Person(type = PersonType.SØKER, fødselsdato = LocalDate.of(1990, 1, 12), kjønn = Kjønn.KVINNE,

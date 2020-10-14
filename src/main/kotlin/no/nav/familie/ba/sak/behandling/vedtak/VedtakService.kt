@@ -3,14 +3,14 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
+import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
+import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
@@ -46,6 +46,16 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     private val dokumentService: DokumentService,
                     private val totrinnskontrollService: TotrinnskontrollService) {
 
+    fun opprettVedtakOgTotrinnskontrollForAutomatiskBehandling(behandling: Behandling): Vedtak {
+        totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
+        loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
+
+        val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
+                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+
+        return lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
+    }
+
     @Transactional
     fun opphørVedtak(saksbehandler: String,
                      gjeldendeBehandlingsId: Long,
@@ -72,7 +82,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori,
-                                      opprinnelse = BehandlingOpprinnelse.MANUELL)
+                                      opprettetÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR)
 
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
         behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
@@ -125,18 +135,16 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 forrigeVedtakId = forrigeVedtak?.id,
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
                         .førsteDagINesteMåned() else null,
-                vedtaksdato = if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) now() else null
+                vedtaksdato = if (behandling.skalBehandlesAutomatisk) now() else null
         )
 
         return lagreOgDeaktiverGammel(vedtak)
     }
 
 
-    @Transactional
-    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak) {
+    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
         vedtak.stønadBrevPdF = dokumentService.genererBrevForVedtak(vedtak)
-
-        lagreOgDeaktiverGammel(vedtak)
+        return vedtak
     }
 
     fun hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId: Long): List<UtbetalingBegrunnelse> {
@@ -165,11 +173,12 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val satsendringer = relevantePerioder
                 .filter { it.endring.type == BeregningEndringType.ENDRET_SATS }
                 .map { Periode(it.periodeFom, it.periodeTom) }
+        val målform = personopplysningsGrunnlag.søker.målform
         leggTilUtbetalingsbegrunnelseForUendrede(fagsakId, uendrede)
-        leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId, satsendringer)
+        leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId, satsendringer, målform)
     }
 
-    private fun leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId: Long, perioder: List<Periode>) {
+    private fun leggTilUtbetalingsbegrunnelseForSatsendring(fagsakId: Long, perioder: List<Periode>, målform: Målform) {
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
         perioder.forEach {
             leggTilUtbetalingBegrunnelse(fagsakId,
@@ -180,7 +189,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                                                behandlingresultatOgVilkårBegrunnelse = BehandlingresultatOgVilkårBegrunnelse.SATSENDRING,
                                                                brevBegrunnelse =
                                                                BehandlingresultatOgVilkårBegrunnelse.SATSENDRING.hentBeskrivelse(
-                                                                       vilkårsdato = it.fom.toString())))
+                                                                       vilkårsdato = it.fom.toString(), målform = målform)))
         }
     }
 
@@ -263,6 +272,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId) ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
 
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
+                                       ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
+
 
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(vedtak.behandling.id)
                                  ?: throw Feil("Finner ikke behandlingsresultat ved fastsetting av begrunnelse")
@@ -312,7 +324,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val begrunnelseSomSkalPersisteres =
                     restPutUtbetalingBegrunnelse.behandlingresultatOgVilkårBegrunnelse.hentBeskrivelse(gjelderSøker,
                                                                                                        barnasFødselsdatoer,
-                                                                                                       vilkårsdato)
+                                                                                                       vilkårsdato,
+                                                                                                       personopplysningGrunnlag.søker.målform)
 
             vedtak.endreUtbetalingBegrunnelse(
                     stønadBrevBegrunnelse.id,
@@ -416,10 +429,9 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     fun besluttVedtak(vedtak: Vedtak) {
         vedtak.vedtaksdato = now()
-        oppdaterVedtakMedStønadsbrev(vedtak)
+        lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
-        lagreEllerOppdater(vedtak)
     }
 
     companion object {

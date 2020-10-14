@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.GrOpphold
@@ -26,7 +25,8 @@ class LovligOppholdVilkårTest {
         val statsløsEvaluering = vilkår.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(personForVurdering = statsløsPerson))
         assertThat(statsløsEvaluering.resultat).isEqualTo(Resultat.NEI)
 
-        val ukjentStatsborgerskapEvaluering = vilkår.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(personForVurdering = ukjentStatsborger))
+        val ukjentStatsborgerskapEvaluering =
+                vilkår.spesifikasjon.evaluer(FaktaTilVilkårsvurdering(personForVurdering = ukjentStatsborger))
         assertThat(ukjentStatsborgerskapEvaluering.resultat).isEqualTo(Resultat.NEI)
     }
 
@@ -42,23 +42,23 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold vurdert på bakgrunn av status for statsløs søker`() {
-        var fakta= FaktaTilVilkårsvurdering(personForVurdering = statsløsPerson.copy(
+        var fakta = FaktaTilVilkårsvurdering(personForVurdering = statsløsPerson.copy(
         ).apply {
-            opphold= listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
+            opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
         })
         var evaluering = vilkår.spesifikasjon.evaluer(fakta)
         assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
 
-        fakta= FaktaTilVilkårsvurdering(personForVurdering = ukjentStatsborger.copy(
+        fakta = FaktaTilVilkårsvurdering(personForVurdering = ukjentStatsborger.copy(
         ).apply {
-            opphold= listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
+            opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
         })
         evaluering = vilkår.spesifikasjon.evaluer(fakta)
         assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
 
-        fakta= FaktaTilVilkårsvurdering(personForVurdering = statsløsPerson.copy(
+        fakta = FaktaTilVilkårsvurdering(personForVurdering = statsløsPerson.copy(
         ).apply {
-            opphold= listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, person = this))
+            opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, person = this))
         })
         evaluering = vilkår.spesifikasjon.evaluer(fakta)
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
@@ -87,7 +87,7 @@ class LovligOppholdVilkårTest {
         })
         evaluering = vilkår.spesifikasjon.evaluer(fakta)
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-   }
+    }
 
     @Test
     fun `Lovlig opphold dersom status med gjeldende periode`() {
@@ -131,7 +131,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold gir resultat JA for barn ved fødselshendelse`() {
-        val fakta = FaktaTilVilkårsvurdering(personForVurdering = barn, behandlingOpprinnelse = BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+        val fakta = FaktaTilVilkårsvurdering(personForVurdering = barn)
 
         val evaluering = vilkår.spesifikasjon.evaluer(fakta)
         assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
@@ -146,21 +146,19 @@ class LovligOppholdVilkårTest {
     }
 
     companion object {
+
         val vilkår = Vilkår.LOVLIG_OPPHOLD
         val tredjelandsborger = tilfeldigPerson(personType = PersonType.SØKER).apply {
             statsborgerskap = listOf(GrStatsborgerskap(
                     landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = this))
         }
-        val statsløsPerson= tilfeldigPerson().apply{
-            statsborgerskap= listOf(GrStatsborgerskap(
+        val statsløsPerson = tilfeldigPerson(personType = PersonType.SØKER).apply {
+            statsborgerskap = listOf(GrStatsborgerskap(
                     landkode = "XXX", medlemskap = Medlemskap.STATSLØS, person = this))
         }
-        val ukjentStatsborger= tilfeldigPerson().apply{
-            statsborgerskap= listOf(GrStatsborgerskap(
+        val ukjentStatsborger = tilfeldigPerson(personType = PersonType.SØKER).apply {
+            statsborgerskap = listOf(GrStatsborgerskap(
                     landkode = "XUK", medlemskap = Medlemskap.UKJENT, person = this))
-        }
-        val personMedTomtStatsborgerskap= tilfeldigPerson().apply{
-            statsborgerskap= emptyList()
         }
 
         val barn = tilfeldigPerson(personType = PersonType.BARN)

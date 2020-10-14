@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -169,7 +169,7 @@ class GDPRInnhentingTest(
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 søkersIdent = GDPRMockConfiguration.morsfnr[4],
                 barnasIdenter = listOf(GDPRMockConfiguration.barnefnr[4]),
-                behandlingOpprinnelse = BehandlingOpprinnelse.MANUELL,
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 

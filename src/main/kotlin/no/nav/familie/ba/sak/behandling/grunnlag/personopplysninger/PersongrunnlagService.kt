@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.opphold.OppholdService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
@@ -78,7 +77,7 @@ class PersongrunnlagService(
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.addAll(hentBarn(barnasFødselsnummer, personopplysningGrunnlag))
 
-        if (behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+        if (behandling.skalBehandlesAutomatisk) {
             søker.also {
                 it.statsborgerskap = statsborgerskapService.hentStatsborgerskapMedMedlemskapOgHistorikk(Ident(fødselsnummer), it)
                 it.bostedsadresseperiode = personopplysningerService.hentBostedsadresseperioder(it.personIdent.ident)

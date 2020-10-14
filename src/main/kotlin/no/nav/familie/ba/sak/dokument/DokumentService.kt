@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
@@ -58,7 +57,7 @@ class DokumentService(
 
             val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
                                                     navn = søker.navn,
-                                                    antallBarn = if (vedtak.behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE)
+                                                    antallBarn = if (vedtak.behandling.skalBehandlesAutomatisk)
                                                         personopplysningGrunnlag.barna.size else null,
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr())
 

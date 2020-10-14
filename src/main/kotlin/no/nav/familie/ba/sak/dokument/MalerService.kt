@@ -2,19 +2,17 @@ package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Medlemskap
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
-import no.nav.familie.ba.sak.behandling.vilkår.finnNåværendeMedlemskap
-import no.nav.familie.ba.sak.behandling.vilkår.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.common.*
@@ -47,7 +45,7 @@ class MalerService(
 
         return MalMedData(
                 mal = malNavnForMedlemskapOgResultatType(behandlingResultatType,
-                                                         vedtak.behandling.opprinnelse,
+                                                         vedtak.behandling.opprettetÅrsak,
                                                          vedtak.behandling.type),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
@@ -95,7 +93,7 @@ class MalerService(
 
         val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
 
-        return if (vedtak.behandling.opprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+        return if (vedtak.behandling.skalBehandlesAutomatisk) {
             autovedtakBrevFelter(vedtak, personopplysningGrunnlag, beregningOversikt, enhetNavn)
         } else {
             val målform = personopplysningGrunnlag.søker.målform
@@ -114,7 +112,7 @@ class MalerService(
                 saksbehandler = totrinnskontroll.saksbehandler,
                 beslutter = totrinnskontroll.beslutter
                             ?: totrinnskontroll.saksbehandler,
-                hjemmel = Utils.slåSammen(listOf("§§ 2", "4", "11")),
+                hjemler = VedtakUtils.hentHjemlerBruktIVedtak(vedtak),
                 maalform = målform.toString(),
                 etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) } ?: "",
                 erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
@@ -190,9 +188,9 @@ class MalerService(
     companion object {
 
         fun malNavnForMedlemskapOgResultatType(resultatType: BehandlingResultatType,
-                                               behandlingOpprinnelse: BehandlingOpprinnelse = BehandlingOpprinnelse.MANUELL,
-                                               behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): String {
-            return if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) {
+                                               behandlingÅrsak: BehandlingÅrsak,
+                                               behandlingType: BehandlingType): String {
+            return if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
                 "${resultatType.brevMal}-autovedtak"
             } else {
                 val malNavn = resultatType.brevMal

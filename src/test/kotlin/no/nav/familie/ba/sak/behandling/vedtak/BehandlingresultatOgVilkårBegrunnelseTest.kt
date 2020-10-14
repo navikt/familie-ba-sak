@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.vedtak
 
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
@@ -28,6 +29,9 @@ import java.time.LocalDate
 class BehandlingresultatOgVilkårBegrunnelseTest(
         @Autowired
         private val behandlingRepository: BehandlingRepository,
+
+        @Autowired
+        private val behandlingMetrikker: BehandlingMetrikker,
 
         @Autowired
         private val behandlingResultatService: BehandlingResultatService,
@@ -64,6 +68,7 @@ class BehandlingresultatOgVilkårBegrunnelseTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
+                behandlingMetrikker,
                 fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,

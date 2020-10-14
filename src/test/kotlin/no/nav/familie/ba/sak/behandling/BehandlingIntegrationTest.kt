@@ -54,7 +54,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import javax.transaction.Transactional
 
-
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
@@ -102,6 +101,9 @@ class BehandlingIntegrationTest(
         private val databaseCleanupService: DatabaseCleanupService,
 
         @Autowired
+        private val behandlingMetrikker: BehandlingMetrikker,
+
+        @Autowired
         private val loggService: LoggService,
 
         @Autowired
@@ -120,6 +122,7 @@ class BehandlingIntegrationTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
+                behandlingMetrikker,
                 fagsakPersonRepository,
                 persongrunnlagService,
                 beregningService,

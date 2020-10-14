@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingOpprinnelse
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -51,20 +50,20 @@ data class BehandlingResultat(
     }
 
     fun beregnSamletResultat(personopplysningGrunnlag: PersonopplysningGrunnlag?,
-                             behandlingOpprinnelse: BehandlingOpprinnelse): BehandlingResultatType {
+                             behandling: Behandling): BehandlingResultatType {
         if (personopplysningGrunnlag == null || personResultater.isEmpty() ||
             personResultater.any { it.hentSamletResultat() == BehandlingResultatType.IKKE_VURDERT }) {
             return BehandlingResultatType.IKKE_VURDERT
         }
 
         val minimumStørrelseForInnvilgelse =
-                if (behandlingOpprinnelse == BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE) personopplysningGrunnlag.barna.size else 1
+                if (behandling.skalBehandlesAutomatisk) personopplysningGrunnlag.barna.size else 1
 
         return when {
             hentOppfyltePerioderPerBarn(personopplysningGrunnlag).size >= minimumStørrelseForInnvilgelse ->
                 BehandlingResultatType.INNVILGET
             else ->
-                if (behandling.type == BehandlingType.REVURDERING) BehandlingResultatType.OPPHØRT
+                if (this.behandling.type == BehandlingType.REVURDERING) BehandlingResultatType.OPPHØRT
                 else BehandlingResultatType.AVSLÅTT
         }
     }
