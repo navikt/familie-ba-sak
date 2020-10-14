@@ -58,7 +58,7 @@ class BeregningService(
     }
 
     /**
-     * Denne metoden henter alle tilkjent ytelser for en barn gruppert på behandling.
+     * Denne metoden henter alle tilkjent ytelser for et barn gruppert på behandling.
      * Den går gjennom alle fagsaker og sørger for å filtrere bort bort behandlende behandling,
      * samt fagsaker som ikke lengre har barn i gjeldende behandling.
      */
