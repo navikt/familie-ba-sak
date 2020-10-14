@@ -430,12 +430,6 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
 
     val tilgangUri = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()
 
-    fun sjekkTilgangTilPersoner(personer: Set<Person>): List<Tilgang> {
-        return sjekkTilgangTilPersoner(
-                personer.map { it.personIdent.ident }
-        )
-    }
-
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
         return postForEntity(tilgangUri, personIdenter)
     }

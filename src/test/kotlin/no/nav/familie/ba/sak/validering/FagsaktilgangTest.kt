@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.validering
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -23,12 +24,15 @@ internal class FagsaktilgangTest {
 
     private lateinit var behandlingRepository: BehandlingRepository
 
+    private lateinit var fagsakRepository: FagsakRepository
+
     private lateinit var fagsaktilgang: Fagsaktilgang
 
     @BeforeEach
     fun setUp() {
         behandlingRepository = mockk()
         personopplysningGrunnlagRepository = mockk()
+        fagsakRepository = mockk(relaxed = true)
         client = mockk()
         every { behandlingRepository.finnBehandlinger(any()) }
                 .returns(behandlinger)
@@ -36,13 +40,14 @@ internal class FagsaktilgangTest {
                 .returns(personopplysningsgrunnlag)
         fagsaktilgang = Fagsaktilgang(behandlingRepository,
                                       personopplysningGrunnlagRepository,
-                                      client)
+                                      client,
+                                      fagsakRepository)
     }
 
 
     @Test
     fun `isValid returnerer true om sjekkTilgangTilPersoner gir true for alle personer knyttet til behandlinger for fagsak`() {
-        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
                 .returns(listOf(Tilgang(true),
                                 Tilgang(true),
                                 Tilgang(true)))
@@ -54,7 +59,7 @@ internal class FagsaktilgangTest {
 
     @Test
     fun `isValid returnerer false om sjekkTilgangTilPersoner gir false for en person knyttet til en behandling for fagsak`() {
-        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
                 .returns(listOf(Tilgang(true),
                                 Tilgang(false),
                                 Tilgang(true)))

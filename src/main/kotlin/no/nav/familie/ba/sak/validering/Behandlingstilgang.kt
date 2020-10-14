@@ -19,6 +19,7 @@ class Behandlingstilgang(private val personopplysningGrunnlagRepository: Persono
     override fun isValid(behandlingId: Long, ctx: ConstraintValidatorContext): Boolean {
 
         val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.personer
+                ?.map { it.personIdent.ident }
         if (personer != null) {
             integrasjonClient.sjekkTilgangTilPersoner(personer)
                     .filterNot { it.harTilgang }

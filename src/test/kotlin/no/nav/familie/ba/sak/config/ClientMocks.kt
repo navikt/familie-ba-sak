@@ -168,9 +168,13 @@ class ClientMocks {
                                         relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
                                         navn = personInfo.getValue(barnFnr[1]).navn,
                                         fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
-                                        adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG),
+                                        adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering),
                         Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.FAR)),
+                familierelasjonerMaskert = setOf(
+                        FamilierelasjonMaskert(relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                               adressebeskyttelseGradering = personInfo.getValue(barnDetIkkeGisTilgangTilFnr).adressebeskyttelseGradering!!)
+                ))
 
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(integrasjonerFnr))
@@ -246,13 +250,15 @@ class ClientMocks {
         every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
                 "mock data".toByteArray()
 
+        val idSlot = slot<List<String>>()
         every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(any<Set<Person>>())
-        } returns listOf(Tilgang(true, null))
-
-        every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(any<List<String>>())
-        } returns listOf(Tilgang(true, null))
+            mockIntegrasjonClient.sjekkTilgangTilPersoner(capture(idSlot))
+        } answers {
+            if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(barnDetIkkeGisTilgangTilFnr))
+                listOf(Tilgang(false, null))
+            else
+                listOf(Tilgang(true, null))
+        }
 
         every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
@@ -398,6 +404,7 @@ class ClientMocks {
         val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
         val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(4), LocalDate.now().førsteDagIInneværendeMåned())
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMYY() + "00033", barnFødselsdatoer[1].tilddMMYY() + "00033")
+        val barnDetIkkeGisTilgangTilFnr = "12345678912"
         val integrasjonerFnr = "10000111111"
         val bostedsadresse = Bostedsadresse(
                 matrikkeladresse = Matrikkeladresse(matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
@@ -419,7 +426,8 @@ class ClientMocks {
                                           bostedsadresse = null,
                                           sivilstand = SIVILSTAND.GIFT,
                                           kjønn = Kjønn.KVINNE,
-                                          navn = "Moder Jord"),
+                                          navn = "Moder Jord",
+                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT),
                 barnFnr[0] to PersonInfo(fødselsdato = barnFødselsdatoer[0],
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UOPPGITT,
@@ -429,12 +437,19 @@ class ClientMocks {
                                          bostedsadresse = bostedsadresse,
                                          sivilstand = SIVILSTAND.UGIFT,
                                          kjønn = Kjønn.KVINNE,
-                                         navn = "Jenta Barnesen"),
+                                         navn = "Jenta Barnesen",
+                                         adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
                 integrasjonerFnr to PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
                                                bostedsadresse = bostedsadresse,
                                                sivilstand = SIVILSTAND.GIFT,
                                                kjønn = Kjønn.KVINNE,
-                                               navn = "Mor Moresen")
+                                               navn = "Mor Moresen"),
+                barnDetIkkeGisTilgangTilFnr to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
+                                                          bostedsadresse = bostedsadresse,
+                                                          sivilstand = SIVILSTAND.UGIFT,
+                                                          kjønn = Kjønn.KVINNE,
+                                                          navn = "Maskert Banditt",
+                                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         )
     }
 
