@@ -106,8 +106,8 @@ fun lagUtbetalingBegrunnesle(
         vedtak: Vedtak = lagVedtak(),
         fom: LocalDate = LocalDate.now(),
         tom: LocalDate = LocalDate.now(),
-        resultat: BehandlingResultatType? = null,
-        behandlingresultatOgVilkårBegrunnelse: BehandlingresultatOgVilkårBegrunnelse? = null,
+        begrunnelseType: VedtakBegrunnelseType? = null,
+        vedtakBegrunnelse: VedtakBegrunnelse? = null,
         brevBegrunnelse: String? = null,
 ): UtbetalingBegrunnelse =
         UtbetalingBegrunnelse(
@@ -115,8 +115,8 @@ fun lagUtbetalingBegrunnesle(
                 vedtak = vedtak,
                 fom = fom,
                 tom = tom,
-                resultat = resultat,
-                behandlingresultatOgVilkårBegrunnelse = behandlingresultatOgVilkårBegrunnelse,
+                begrunnelseType = begrunnelseType,
+                vedtakBegrunnelse = vedtakBegrunnelse,
                 brevBegrunnelse = brevBegrunnelse,
         )
 
