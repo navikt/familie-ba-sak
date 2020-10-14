@@ -294,7 +294,7 @@ class UtbetalingssikkerhetTest {
                                                                         personopplysningGrunnlag2)
         }
 
-        assertTrue(feil.frontendFeilmelding?.contains("Det utbetales allerede barnetrygd (${YtelseType.ORDINÆR_BARNETRYGD}) for ${barn.personIdent}")!!)
+        assertTrue(feil.frontendFeilmelding?.contains("Det utbetales allerede barnetrygd (${YtelseType.ORDINÆR_BARNETRYGD}) for ${barn.personIdent.ident}")!!)
     }
 
     @Test
