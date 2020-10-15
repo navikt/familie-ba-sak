@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.saksstatistikk
 
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.LoggerFactory
@@ -27,7 +28,18 @@ class SaksstatistikkTestController(
         try {
             return saksstatistikkService.mapTilBehandlingDVH(behandlingId, null)
         } catch (e: Exception) {
-            LOG.error("Feil ved henting av sakstatistikk", e)
+            LOG.warn("Feil ved henting av sakstatistikk", e)
+            throw e
+        }
+    }
+
+    @GetMapping(path = ["/sak/{fagsakId}"])
+    @Unprotected
+    fun hentSakDvh(@PathVariable(name = "fagsakId", required = true) fagsakId: Long): SakDVH {
+        try {
+            return saksstatistikkService.mapTilSakDvh(fagsakId)
+        } catch (e: Exception) {
+            LOG.warn("Feil ved henting av sakstatistikk sak", e)
             throw e
         }
     }
