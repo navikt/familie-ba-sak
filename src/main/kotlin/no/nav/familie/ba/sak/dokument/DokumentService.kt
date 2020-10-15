@@ -59,7 +59,8 @@ class DokumentService(
                                                     navn = søker.navn,
                                                     antallBarn = if (vedtak.behandling.skalBehandlesAutomatisk)
                                                         personopplysningGrunnlag.barna.size else null,
-                                                    dokumentDato = LocalDate.now().tilDagMånedÅr())
+                                                    dokumentDato = LocalDate.now().tilDagMånedÅr(),
+                                                    målform = søker.målform.toString())
 
             val malMedData = malerService.mapTilVedtakBrevfelter(vedtak,
                                                                  behandlingResultatType
@@ -86,7 +87,8 @@ class DokumentService(
                             ?: error("Finner ikke søker på vedtaket")
                 val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
                                                         navn = søker.navn,
-                                                        dokumentDato = LocalDate.now().tilDagMånedÅr())
+                                                        dokumentDato = LocalDate.now().tilDagMånedÅr(),
+                                                        målform = søker.målform.toString())
                 val malMedData = when (brevmal) {
                     BrevType.INNHENTE_OPPLYSNINGER -> malerService.mapTilInnhenteOpplysningerBrevfelter(behandling,
                                                                                                         manueltBrevRequest)

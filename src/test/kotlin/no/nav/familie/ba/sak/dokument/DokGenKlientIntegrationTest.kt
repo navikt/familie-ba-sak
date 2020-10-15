@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.dokument
 
 
-import io.mockk.verify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.dokument.domene.DokumentRequest
@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
-import java.lang.RuntimeException
 import java.time.LocalDate
 
 @SpringBootTest
@@ -73,4 +72,5 @@ class DokGenKlientIntegrationTest {
 
 val testDokumentHeaderFelter = DokumentHeaderFelter(navn = "Mockersen",
                                                     dokumentDato = LocalDate.now().toString(),
-                                                    fodselsnummer = "1234")
+                                                    fodselsnummer = "1234",
+                                                    målform = "NB")
