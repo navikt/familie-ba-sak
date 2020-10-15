@@ -7,8 +7,6 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -37,7 +35,7 @@ object TilkjentYtelseValidering {
         if (tilkjentYtelse.andelerTilkjentYtelse.any {
                     it.stønadFom < gyldigEtterbetalingFom
                 }) {
-            throw UtbetalingsikkerhetFeil(message = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid.",
+            throw UtbetalingsikkerhetFeil(melding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid.",
                                           frontendFeilmelding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid. Vennligst endre på datoene, eller ta kontakt med teamet for hjelp.")
         }
     }
@@ -93,7 +91,7 @@ object TilkjentYtelseValidering {
                                               barn: Person) {
         andeler.forEach { andelTilkjentYtelse ->
             if (barnsAndelerFraAndreBehandlinger.any { andelTilkjentYtelse.overlapperMed(it) }) {
-                throw UtbetalingsikkerhetFeil(message = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
+                throw UtbetalingsikkerhetFeil(melding = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
                                               frontendFeilmelding = "Det utbetales allerede barnetrygd (${andelTilkjentYtelse.type.name}) for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom} - ${andelTilkjentYtelse.stønadTom}.")
             }
         }
@@ -105,14 +103,14 @@ private fun validerAtBeløpForPartStemmerMedSatser(person: Person,
                                                   maksAntallAndeler: Int = 2,
                                                   maksTotalBeløp: Int = 2500) {
     if (andeler.size > maksAntallAndeler) {
-        throw UtbetalingsikkerhetFeil(message = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatte andeler = ${maksAntallAndeler}, faktiske andeler = ${andeler.size}.",
+        throw UtbetalingsikkerhetFeil(melding = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatte andeler = ${maksAntallAndeler}, faktiske andeler = ${andeler.size}.",
                                       frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. Kontakt teamet for hjelp")
     }
 
     val totalbeløp = andeler.map { it.beløp }
             .fold(0) { sum, beløp -> sum + beløp }
     if (totalbeløp > maksTotalBeløp) {
-        throw UtbetalingsikkerhetFeil(message = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatt totalbeløp = ${maksTotalBeløp}, faktiske totalbeløp = ${totalbeløp}.",
+        throw UtbetalingsikkerhetFeil(melding = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatt totalbeløp = ${maksTotalBeløp}, faktiske totalbeløp = ${totalbeløp}.",
                                       frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. Kontakt teamet for hjelp")
     }
 }

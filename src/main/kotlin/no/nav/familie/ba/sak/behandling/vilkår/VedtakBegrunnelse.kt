@@ -16,7 +16,7 @@ interface IVedtakBegrunnelse {
 
 enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk, tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11, 2)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -28,7 +28,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         }
     },
     INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger bosatt før lovlig opphold i Norge") {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -40,7 +40,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         }
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER("EØS-borger: Søker har oppholdsrett") {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -52,7 +52,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         }
     },
     INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING("EØS-borger: Skjønnsmessig vurdering av oppholdsrett.") {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -64,7 +64,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         }
     },
     INNVILGET_OMSORG_FOR_BARN("Adopsjon, surrogati: Omsorgen for barn") {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -76,7 +76,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         }
     },
     INNVILGET_BOR_HOS_SØKER("Barn har flyttet til søker") {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -88,7 +88,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
         }
     },
     INNVILGET_FAST_OMSORG_FOR_BARN("Søker har fast omsorg for barn") {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
 
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -270,7 +270,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
 }
 
 enum class VedtakBegrunnelseType {
-    INNVILGELSE,
+    INNVILGET,
     REDUKSJON,
     SATSENDRING
 }
