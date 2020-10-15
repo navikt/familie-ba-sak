@@ -141,14 +141,14 @@ object TilkjentYtelseUtils {
                                         endringISegment =
                                         when {
                                             segmenterFraForrigeTilkjentYtelse.any { it == segment } ->
-                                                if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.UENDRET_SATS,
+                                                if (segment.erSatsendring(andelerForSegment)) BeregningEndring(type = BeregningEndringType.UENDRET_SATS,
                                                                                               trengerBegrunnelse = segment.trengerBegrunnelse())
                                                 else BeregningEndring(type = BeregningEndringType.UENDRET,
                                                                       trengerBegrunnelse = segment.trengerBegrunnelse())
 
                                             else -> {
                                                 erEtterFørsteEndring = true
-                                                if (segment.erSatsendring()) BeregningEndring(type = BeregningEndringType.ENDRET_SATS,
+                                                if (segment.erSatsendring(andelerForSegment)) BeregningEndring(type = BeregningEndringType.ENDRET_SATS,
                                                                                               trengerBegrunnelse = segment.trengerBegrunnelse())
                                                 else BeregningEndring(type = BeregningEndringType.ENDRET,
                                                                       trengerBegrunnelse = segment.trengerBegrunnelse())
@@ -157,10 +157,14 @@ object TilkjentYtelseUtils {
         }
     }
 
-    private fun LocalDateSegment<Int>.erSatsendring(): Boolean =
-            SatsService.hentAlleSatser()
-                    .filter { it.gyldigFom != LocalDate.MIN }
-                    .find { it.gyldigFom == this.fom && it.beløp == this.value } != null
+    private fun LocalDateSegment<Int>.erSatsendring(inkluderteAndeler: List<AndelTilkjentYtelse>): Boolean {
+        val satserMedStartISegment = SatsService.hentAlleSatser()
+                .filter { it.gyldigFom == this.fom }
+                .filter { it.gyldigFom != LocalDate.MIN }
+                .map { it.beløp }
+        val andelerMedStartISegment = inkluderteAndeler.filter { it.stønadFom == this.fom }
+        return andelerMedStartISegment.find { satserMedStartISegment.contains(it.beløp) } != null
+    }
 
     private fun utledSegmenterFraTilkjentYtelse(tilkjentYtelseForBehandling: TilkjentYtelse): List<LocalDateSegment<Int>> {
         val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelseForBehandling.andelerTilkjentYtelse)
