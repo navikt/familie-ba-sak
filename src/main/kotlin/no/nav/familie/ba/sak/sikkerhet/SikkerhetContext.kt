@@ -16,6 +16,8 @@ object SikkerhetContext {
                 )
     }
 
+    fun erSystemKontekst() = hentSaksbehandler() == SYSTEM_FORKORTELSE
+
     fun hentSaksbehandlerNavn(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
                 .fold(
