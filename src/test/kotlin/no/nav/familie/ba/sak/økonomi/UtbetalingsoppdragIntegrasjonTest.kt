@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
@@ -27,9 +29,6 @@ import java.time.LocalDate.now
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UtbetalingsoppdragIntegrasjonTest(
         @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
-
-        @Autowired
         private val beregningService: BeregningService,
 
         @Autowired
@@ -47,7 +46,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     @BeforeAll
     fun setUp() {
         databaseCleanupService.truncate()
-        utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(persongrunnlagService, beregningService)
+        utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(beregningService, behandlingService)
     }
 
     @Test
@@ -99,11 +98,12 @@ class UtbetalingsoppdragIntegrasjonTest(
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATRSMA")[1], 2, 1, 660, "2026-05-01", "2027-06-30")
     }
 
+    // TODO samme som den under
     @Test
     fun `skal opprette et fullstendig opphør med felles løpende periodeId og separat kjeding på to personer`() {
-        val behandling = lagBehandling()
-        val vedtak = lagVedtak(behandling = behandling)
         val personMedFlerePerioder = tilfeldigPerson()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(personMedFlerePerioder.personIdent.ident)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val andelerTilkjentYtelse = listOf(
                 lagAndelTilkjentYtelse("2019-04-01",
                                        "2023-03-31",
@@ -155,11 +155,11 @@ class UtbetalingsoppdragIntegrasjonTest(
                                  opphørFom)
     }
 
-
+    // TODO er det mulig å lage et fullstendig opphør uten en førstegangsbehandling? Er ikke dette et rent avslag isåfall?
     @Test
     fun `skal opprette et fullstendig opphør hvor periodens fom-dato er opphørsdato når denne er senere`() {
         val behandling = lagBehandling()
-        val vedtak = lagVedtak(behandling)
+
         val andelerTilkjentYtelse = listOf(
                 lagAndelTilkjentYtelse("2010-03-01", "2030-02-28", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 0),
                 lagAndelTilkjentYtelse("2025-01-01", "2030-02-28", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 1))
@@ -201,9 +201,8 @@ class UtbetalingsoppdragIntegrasjonTest(
     fun `skal opprette revurdering med endring på eksisterende periode`() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
-        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val person = tilfeldigPerson()
         val vedtak = lagVedtak(behandling)
         val fomDatoSomEndres = "2033-01-01"
@@ -240,12 +239,17 @@ class UtbetalingsoppdragIntegrasjonTest(
                                                           oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                                                   andelerFørstegangsbehandling))
 
+        ferdigstillBehandling(behandling)
+
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
+        val vedtak2 = lagVedtak(behandling2)
         val andelerRevurdering = listOf(
                 lagAndelTilkjentYtelse("2020-01-01",
                                        "2029-12-31",
                                        ORDINÆR_BARNETRYGD,
                                        1054,
-                                       behandling,
+                                       behandling2,
                                        periodeIdOffset = 0,
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse),
@@ -271,7 +275,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         val utbetalingsoppdrag =
                 utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
-                                                                  vedtak,
+                                                                  vedtak2,
                                                                   behandlingResultatType,
                                                                   false,
                                                                   forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
@@ -340,6 +344,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                                                           true,
                                                           oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                                                   andelerFørstegangsbehandling))
+
+        ferdigstillBehandling(behandling)
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
@@ -443,13 +449,13 @@ class UtbetalingsoppdragIntegrasjonTest(
         }
     }
 
-    fun assertUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode,
-                                 periodeId: Long,
-                                 forrigePeriodeId: Long?,
-                                 sats: Int,
-                                 fom: String,
-                                 tom: String,
-                                 opphørFom: LocalDate? = null
+    private fun assertUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode,
+                                         periodeId: Long,
+                                         forrigePeriodeId: Long?,
+                                         sats: Int,
+                                         fom: String,
+                                         tom: String,
+                                         opphørFom: LocalDate? = null
     ) {
         assertEquals(periodeId, utbetalingsperiode.periodeId)
         assertEquals(forrigePeriodeId, utbetalingsperiode.forrigePeriodeId)
@@ -459,5 +465,10 @@ class UtbetalingsoppdragIntegrasjonTest(
         if (opphørFom != null) {
             assertEquals(opphørFom, utbetalingsperiode.opphør?.opphørDatoFom)
         }
+    }
+
+    private fun ferdigstillBehandling(behandling: Behandling) {
+        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
+        behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.BEHANDLING_AVSLUTTET)
     }
 }

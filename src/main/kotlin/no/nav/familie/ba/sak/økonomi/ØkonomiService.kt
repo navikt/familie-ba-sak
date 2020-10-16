@@ -56,7 +56,7 @@ class ØkonomiService(
                             erFørsteIverksatteBehandlingPåFagsak,
                             oppdaterteKjeder = oppdaterteKjeder)
                 } else {
-                    val forrigeBehandling = behandlingService.hentForrigeFerdigstilteBehandling(fagsakId = oppdatertBehandling.fagsak.id, behandlingFørFølgende = oppdatertBehandling)
+                    val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = oppdatertBehandling.fagsak.id, behandlingFørFølgende = oppdatertBehandling)
                                             ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
 
                     val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)

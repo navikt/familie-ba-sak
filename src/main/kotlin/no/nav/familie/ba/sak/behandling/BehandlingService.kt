@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
@@ -69,7 +68,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun loggBehandlinghendelse(behandling: Behandling) {
         saksstatistikkEventPublisher.publish(behandling.id,
-                                             hentForrigeBehandlingSomErIverksatt(behandling.fagsak.id)
+                                             hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
                                                      .takeIf { erRevurderingEllerKlage(behandling) }?.id)
     }
 
@@ -95,19 +94,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
-    fun hentForrigeBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
+    fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
         val behandlinger = hentBehandlinger(fagsakId)
-        return behandlinger
-                .sortedBy { it.opprettetTidspunkt }
-                .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+        return Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
     }
 
-    fun hentForrigeFerdigstilteBehandling(fagsakId: Long, behandlingFørFølgende: Behandling): Behandling? {
+    fun hentForrigeBehandlingSomErIverksatt(fagsakId: Long, behandlingFørFølgende: Behandling): Behandling? {
         val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
-        return behandlinger
-                .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) }
-                .sortedBy { it.opprettetTidspunkt }
-                .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+        return Behandlingutils.hentForrigeIverksatteBehandling(behandlinger, behandlingFørFølgende)
     }
 
     fun lagre(behandling: Behandling): Behandling {
