@@ -94,14 +94,21 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
+    private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
+        return hentBehandlinger(fagsakId).filter {
+            val tilkjentYtelsePåBehandling = beregningService.hentOptionalTilkjentYtelseForBehandling(it.id)
+            tilkjentYtelsePåBehandling != null && tilkjentYtelsePåBehandling.erSendtTilIverksetting()
+        }
+    }
+
     fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
-        val behandlinger = hentBehandlinger(fagsakId)
-        return Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
+        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
+        return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
     }
 
     fun hentForrigeBehandlingSomErIverksatt(fagsakId: Long, behandlingFørFølgende: Behandling): Behandling? {
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
-        return Behandlingutils.hentForrigeIverksatteBehandling(behandlinger, behandlingFørFølgende)
+        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
+        return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandlingFørFølgende)
     }
 
     fun lagre(behandling: Behandling): Behandling {

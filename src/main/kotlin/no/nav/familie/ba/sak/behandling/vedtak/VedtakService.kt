@@ -144,7 +144,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     fun hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId: Long): List<UtbetalingBegrunnelse> {
-        val forrigeVedtak = hentForrigeVedtakPåAktivBehandlingPåFagsak(fagsakId)
+        val forrigeVedtak = hentVedtakPåNestSisteBehandling(fagsakId)
         return forrigeVedtak?.utbetalingBegrunnelser?.toList() ?: emptyList()
     }
 
@@ -385,17 +385,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     }
 
-    fun hentForrigeVedtakPåAktivBehandlingPåFagsak(sisteBehandlingPåFagsak: Behandling): Vedtak? {
-        val behandlinger = behandlingService.hentBehandlinger(sisteBehandlingPåFagsak.fagsak.id)
-
-        return when (val forrigeBehandling =
-                behandlinger.filter { it.id != sisteBehandlingPåFagsak.id }.maxByOrNull { it.opprettetTidspunkt }) {
-            null -> null
-            else -> hentAktivForBehandling(behandlingId = forrigeBehandling.id)
-        }
-    }
-
-    private fun hentForrigeVedtakPåAktivBehandlingPåFagsak(fagsakId: Long): Vedtak? {
+    private fun hentVedtakPåNestSisteBehandling(fagsakId: Long): Vedtak? {
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId)
                               ?: error("Finner ikke aktiv behandling på fagsak $fagsakId")
         val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId, aktivBehandling)

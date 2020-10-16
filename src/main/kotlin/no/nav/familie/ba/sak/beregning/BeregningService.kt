@@ -44,9 +44,13 @@ class BeregningService(
         return tilkjentYtelseRepository.findByBehandling(behandlingId)
     }
 
+    fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long): TilkjentYtelse? {
+        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+    }
+
     fun hentSisteTilkjentYtelseFørBehandling(behandling: Behandling): TilkjentYtelse? {
         val forrigeBehandling =
-                Behandlingutils.hentForrigeIverksatteBehandling(behandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id),
+                Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id),
                                                                 behandlingFørFølgende = behandling)
         return if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(behandlingId = forrigeBehandling.id) else null
     }
