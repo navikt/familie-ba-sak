@@ -94,9 +94,9 @@ class UtbetalingsoppdragIntegrasjonTest(
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0], 0, null, 1054, "2019-03-01", "2037-02-28")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], 1, null, 660, "2019-04-01", "2023-03-31")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], 2, 1, 660, "2026-05-01", "2027-06-30")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATR")[0], 0, null, 1054, "2019-03-01", "2037-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATRSMA")[0], 1, null, 660, "2019-04-01", "2023-03-31")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATRSMA")[1], 2, 1, 660, "2026-05-01", "2027-06-30")
     }
 
     @Test
@@ -123,7 +123,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        periodeIdOffset = 2))
 
         val opphørFom = now()
-        val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = opphørFom)
+        val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
 
         val utbetalingsoppdrag =
@@ -139,14 +139,14 @@ class UtbetalingsoppdragIntegrasjonTest(
 
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0],
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
                                  1,
                                  null,
                                  660,
                                  "2026-05-01",
                                  "2027-06-30",
                                  opphørFom)
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0],
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATR")[0],
                                  2,
                                  null,
                                  1054,
@@ -165,7 +165,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 lagAndelTilkjentYtelse("2025-01-01", "2030-02-28", ORDINÆR_BARNETRYGD, 1054, behandling, periodeIdOffset = 1))
 
         val opphørFom = dato("2020-01-01")
-        val opphørVedtak = lagVedtak(forrigeVedtak = vedtak, opphørsdato = opphørFom)
+        val opphørVedtak = lagVedtak(opphørsdato = opphørFom)
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
 
         val utbetalingsoppdrag =
@@ -181,14 +181,14 @@ class UtbetalingsoppdragIntegrasjonTest(
 
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![0],
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATR")[0],
                                  0,
                                  null,
                                  1054,
                                  "2010-03-01",
                                  "2030-02-28",
                                  opphørFom)
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATR"]!![1],
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATR")[1],
                                  1,
                                  null,
                                  1054,
@@ -419,9 +419,9 @@ class UtbetalingsoppdragIntegrasjonTest(
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BAUT"]!![0], 0, null, 1054, "2019-03-01", "2037-02-28")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![0], 1, null, 660, "2019-04-01", "2023-03-31")
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse["BATRSMA"]!![1], 2, 1, 660, "2026-05-01", "2027-06-30")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BAUT")[0], 0, null, 1054, "2019-03-01", "2037-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATRSMA")[0], 1, null, 660, "2019-04-01", "2023-03-31")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATRSMA")[1], 2, 1, 660, "2026-05-01", "2027-06-30")
     }
 
     @Test

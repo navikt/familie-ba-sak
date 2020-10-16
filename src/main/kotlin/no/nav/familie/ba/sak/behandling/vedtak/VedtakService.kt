@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
@@ -95,9 +95,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val nyttVedtak = Vedtak(
                 behandling = nyBehandling,
-                vedtaksdato = now(),
-                forrigeVedtakId = gjeldendeVedtak.id,
-                opphørsdato = opphørsdato
+                vedtaksdato = now()
         )
 
         // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
@@ -124,8 +122,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     @Transactional
     fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
-        val forrigeVedtak = hentForrigeVedtakPåFagsak(sisteBehandlingPåFagsak = behandling)
-
         // TODO: Midlertidig fiks før støtte for delvis innvilget
         val behandlingResultatType = midlertidigUtledBehandlingResultatType(
                 hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling))
@@ -133,7 +129,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val vedtak = Vedtak(
                 behandling = behandling,
-                forrigeVedtakId = forrigeVedtak?.id,
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
                         .førsteDagINesteMåned() else null,
                 vedtaksdato = if (behandling.skalBehandlesAutomatisk) now() else null
@@ -149,13 +144,13 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     fun hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId: Long): List<UtbetalingBegrunnelse> {
-        val forrigeVedtak = hentForrigeVedtakPåFagsak(fagsakId)
+        val forrigeVedtak = hentForrigeVedtakPåAktivBehandlingPåFagsak(fagsakId)
         return forrigeVedtak?.utbetalingBegrunnelser?.toList() ?: emptyList()
     }
 
     fun leggTilInitielleUtbetalingsbegrunnelser(fagsakId: Long, behandling: Behandling) {
         slettUtbetalingBegrunnelser(behandling.id)
-        val forrigeBehandling = behandlingService.hentForrigeBehandling(fagsakId, behandling)
+        val forrigeBehandling = behandlingService.hentForrigeFerdigstilteBehandling(fagsakId, behandling)
         val forrigeTilkjentYtelse =
                 if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(forrigeBehandling.id) else null
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
@@ -390,7 +385,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     }
 
-    fun hentForrigeVedtakPåFagsak(sisteBehandlingPåFagsak: Behandling): Vedtak? {
+    fun hentForrigeVedtakPåAktivBehandlingPåFagsak(sisteBehandlingPåFagsak: Behandling): Vedtak? {
         val behandlinger = behandlingService.hentBehandlinger(sisteBehandlingPåFagsak.fagsak.id)
 
         return when (val forrigeBehandling =
@@ -400,9 +395,11 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         }
     }
 
-    private fun hentForrigeVedtakPåFagsak(fagsakId: Long): Vedtak? {
-        val aktivtVedtak = hentVedtakForAktivBehandling(fagsakId) ?: error("Finner ingen aktivt vedtak på fagsak $fagsakId")
-        return if (aktivtVedtak.forrigeVedtakId != null) hent(aktivtVedtak.forrigeVedtakId) else null
+    private fun hentForrigeVedtakPåAktivBehandlingPåFagsak(fagsakId: Long): Vedtak? {
+        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId)
+                              ?: error("Finner ikke aktiv behandling på fagsak $fagsakId")
+        val forrigeBehandling = behandlingService.hentForrigeFerdigstilteBehandling(fagsakId, aktivBehandling)
+        return if (forrigeBehandling != null) hentAktivForBehandling(forrigeBehandling.id) else null
     }
 
     fun hent(vedtakId: Long): Vedtak {
