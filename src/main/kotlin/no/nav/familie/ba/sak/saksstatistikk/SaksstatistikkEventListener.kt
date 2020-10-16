@@ -11,11 +11,11 @@ class SaksstatistikkEventListener(private val saksstatistikkService: Saksstatist
     override fun onApplicationEvent(event: SaksstatistikkEvent) {
         if (event.behandlingId != null) {
             saksstatistikkService.mapTilBehandlingDVH(event.behandlingId, event.forrigeBehandlingId).also {
-                kafkaProducer.sendMessage(it)
+                kafkaProducer.sendMessageForTopicBehandling(it)
             }
         } else if (event.fagsakId != null){
             saksstatistikkService.mapTilSakDvh(event.fagsakId).also {
-                kafkaProducer.sendMessage(it)
+                kafkaProducer.sendMessageForTopicSak(it)
             }
         }
     }

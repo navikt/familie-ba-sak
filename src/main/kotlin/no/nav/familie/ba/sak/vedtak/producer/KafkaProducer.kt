@@ -14,9 +14,9 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
 interface KafkaProducer {
-    fun sendMessage(vedtak: VedtakDVH): Long
-    fun sendMessage(behandling: BehandlingDVH): Long
-    fun sendMessage(sak: SakDVH): Long
+    fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long
+    fun sendMessageForTopicBehandling(behandling: BehandlingDVH): Long
+    fun sendMessageForTopicSak(sak: SakDVH): Long
 }
 
 @Service
@@ -30,19 +30,19 @@ class DefaultKafkaProducer : KafkaProducer {
     @Autowired
     lateinit var kafkaTemplate: KafkaTemplate<String, Any>
 
-    override fun sendMessage(vedtak: VedtakDVH): Long {
+    override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
         val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.behandlingsId, vedtak).get()
         logger.info("$VEDTAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         return response.recordMetadata.offset()
     }
 
-    override fun sendMessage(behandling: BehandlingDVH): Long {
+    override fun sendMessageForTopicBehandling(behandling: BehandlingDVH): Long {
         val response = kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, behandling.behandlingId, behandling).get()
         logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         return response.recordMetadata.offset()
     }
 
-    override fun sendMessage(sak: SakDVH): Long {
+    override fun sendMessageForTopicSak(sak: SakDVH): Long {
         val response = kafkaTemplate.send(SAKSSTATISTIKK_SAK_TOPIC, sak.sakId, sak).get()
         logger.info("$SAKSSTATISTIKK_SAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         return response.recordMetadata.offset()
@@ -61,20 +61,20 @@ class MockKafkaProducer : KafkaProducer {
 
     val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun sendMessage(vedtak: VedtakDVH): Long {
+    override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
         logger.info("Skipper sending av vedtak for ${vedtak.behandlingsId} fordi kafka ikke er enablet")
 
         sendteMeldinger["vedtak-${vedtak.behandlingsId}"] = vedtak
         return 0
     }
 
-    override fun sendMessage(behandling: BehandlingDVH): Long {
+    override fun sendMessageForTopicBehandling(behandling: BehandlingDVH): Long {
         logger.info("Skipper sending av saksstatistikk behandling for ${behandling.behandlingId} fordi kafka ikke er enablet")
         sendteMeldinger["behandling-${behandling.behandlingId}"] = behandling
         return 0
     }
 
-    override fun sendMessage(sak: SakDVH): Long {
+    override fun sendMessageForTopicSak(sak: SakDVH): Long {
         logger.info("Skipper sending av saksstatistikk sak for ${sak.sakId} fordi kafka ikke er enablet")
         sendteMeldinger["sak-${sak.sakId}"] = sak
         return 0

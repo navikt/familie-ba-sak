@@ -84,6 +84,7 @@ class FagsakService(
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
                 lagre(it)
             }
+            saksstatistikkEventPublisher.publish(fagsak.id)
         }
         return fagsak
     }
