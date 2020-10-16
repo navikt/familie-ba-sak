@@ -117,7 +117,7 @@ internal class SaksstatistikkServiceTest {
                     UtbetalingBegrunnelse(vedtak = it,
                                           fom = LocalDate.now(),
                                           tom = LocalDate.now(),
-                                          begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                          begrunnelseType = VedtakBegrunnelseType.INNVILGET,
                                           vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER))
         }
 

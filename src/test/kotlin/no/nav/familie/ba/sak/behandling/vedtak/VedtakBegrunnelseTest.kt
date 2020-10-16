@@ -175,7 +175,7 @@ class VedtakBegrunnelseTest(
 
         val begrunnelserLovligOpphold =
                 vedtakService.endreUtbetalingBegrunnelse(
-                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
                                                      vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE),
                         fagsakId = fagsak.id,
                         utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelseLovligOpphold[0].id!!)
@@ -192,7 +192,7 @@ class VedtakBegrunnelseTest(
 
         val begrunnelserLovligOppholdOgBosattIRiket =
                 vedtakService.endreUtbetalingBegrunnelse(
-                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                        RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
                                                      vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET),
                         fagsakId = fagsak.id,
                         utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelseBosattIRiket[1].id!!)
@@ -204,7 +204,7 @@ class VedtakBegrunnelseTest(
 
         assertThrows<Feil> {
             vedtakService.endreUtbetalingBegrunnelse(
-                    RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                    RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
                                                  vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER),
                     fagsakId = fagsak.id,
                     utbetalingBegrunnelseId = initertRestUtbetalingBegrunnelseBosattIRiket[1].id!!)

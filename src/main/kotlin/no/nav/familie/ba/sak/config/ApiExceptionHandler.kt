@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.frontendFeil
+import no.nav.familie.ba.sak.common.RessursUtils.funksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
-import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.springframework.http.ResponseEntity
@@ -29,8 +30,8 @@ class ApiExceptionHandler {
         return frontendFeil(feil)
     }
 
-    @ExceptionHandler(UtbetalingsikkerhetFeil::class)
-    fun handleFeil(feil: UtbetalingsikkerhetFeil): ResponseEntity<Ressurs<Nothing>> {
-        return frontendFeil(feil)
+    @ExceptionHandler(FunksjonellFeil::class)
+    fun handleFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<Nothing>> {
+        return funksjonellFeil(funksjonellFeil)
     }
 }

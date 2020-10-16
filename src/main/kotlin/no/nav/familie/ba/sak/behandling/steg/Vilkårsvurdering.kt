@@ -111,7 +111,7 @@ class Vilkårsvurdering(
             }
 
             if (listeAvFeil.isNotEmpty()) {
-                throw VilkårsvurderingFeil(message = "Validering av vilkårsvurdering feilet for behandling ${behandling.id}",
+                throw VilkårsvurderingFeil(melding = "Validering av vilkårsvurdering feilet for behandling ${behandling.id}",
                                            frontendFeilmelding = RessursUtils.lagFrontendMelding("Vilkårsvurderingen er ugyldig med følgende feil:",
                                                                                                  listeAvFeil)
                 )
