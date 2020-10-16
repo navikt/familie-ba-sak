@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.config
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
@@ -11,7 +10,6 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
-import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -103,19 +101,19 @@ class ClientMocks {
         } returns "NO"
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[0]), PersonInfoQuery.ENKEL)
+            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[0]))
         } returns personInfo.getValue(barnFnr[0])
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[1]), PersonInfoQuery.ENKEL)
+            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[1]))
         } returns personInfo.getValue(barnFnr[1])
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[0]), PersonInfoQuery.ENKEL)
+            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[0]))
         } returns personInfo.getValue(søkerFnr[0])
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[1]), PersonInfoQuery.ENKEL)
+            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[1]))
         } returns personInfo.getValue(søkerFnr[1])
 
         every {

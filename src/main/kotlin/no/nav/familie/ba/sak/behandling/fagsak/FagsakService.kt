@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -44,7 +45,8 @@ class FagsakService(
         private val vedtakRepository: VedtakRepository,
         private val totrinnskontrollRepository: TotrinnskontrollRepository,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-        private val personopplysningerService: PersonopplysningerService) {
+        private val personopplysningerService: PersonopplysningerService,
+        private val integrasjonClient: IntegrasjonClient) {
 
 
     private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
@@ -202,6 +204,7 @@ class FagsakService(
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
         val personer = personRepository.findByPersonIdent(PersonIdent(personIdent))
+        var harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(personIdent))
         val personInfo = runCatching {
             personopplysningerService.hentPersoninfoMedRelasjoner(personIdent)
         }.fold(
@@ -227,7 +230,7 @@ class FagsakService(
                     //get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
                     val søkerInfo = if (behandling.fagsak.hentAktivIdent().ident == personIdent) personInfo else
                         runCatching {
-                            personopplysningerService.hentPersoninfoMedRelasjoner(behandling.fagsak.hentAktivIdent().ident)
+                            personopplysningerService.hentPersoninfo(behandling.fagsak.hentAktivIdent().ident)
                         }.fold(
                                 onSuccess = { it },
                                 onFailure = {
@@ -268,7 +271,7 @@ class FagsakService(
             }.forEach {
                 if (assosierteFagsakDeltager.find { d -> d.ident == it.personIdent.id } == null) {
                     val forelderInfo = runCatching {
-                        personopplysningerService.hentPersoninfoMedRelasjoner(it.personIdent.id)
+                        personopplysningerService.hentPersoninfo(it.personIdent.id)
                     }.fold(
                             onSuccess = { it },
                             onFailure = {
