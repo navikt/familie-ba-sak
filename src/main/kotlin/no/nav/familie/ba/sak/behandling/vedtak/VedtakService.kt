@@ -368,7 +368,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                     vilkårResultat.periodeFom == null -> {
                         false
                     }
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGET -> {
+                    oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
                         vilkårResultat.periodeFom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
                     }
                     else -> {
