@@ -25,6 +25,9 @@ object RessursUtils {
     fun <T> illegalState(errorMessage: String, throwable: Throwable): ResponseEntity<Ressurs<T>> =
             errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
 
+    fun <T> funksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> = funksjonellErrorResponse(
+            funksjonellFeil)
+
     fun <T> frontendFeil(feil: Feil): ResponseEntity<Ressurs<T>> = frontendErrorResponse(feil)
 
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
@@ -45,6 +48,15 @@ object RessursUtils {
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(
                 frontendFeilmelding = feil.frontendFeilmelding,
                 errorMessage = feil.message.toString()
+        ))
+    }
+
+    private fun <T> funksjonellErrorResponse(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> {
+        LOG.info("En funksjonell feil har oppstått(${funksjonellFeil.httpStatus}): ${funksjonellFeil.message} ")
+
+        return ResponseEntity.status(funksjonellFeil.httpStatus).body(Ressurs.funksjonellFeil(
+                frontendFeilmelding = funksjonellFeil.frontendFeilmelding,
+                melding = funksjonellFeil.melding
         ))
     }
 
