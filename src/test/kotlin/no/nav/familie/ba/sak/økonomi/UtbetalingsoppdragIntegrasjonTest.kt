@@ -1,10 +1,7 @@
 package no.nav.familie.ba.sak.økonomi
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.YtelseType.*
@@ -12,10 +9,12 @@ import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.mockito.InjectMocks
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -44,7 +43,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     @BeforeAll
     fun setUp() {
         databaseCleanupService.truncate()
-        utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(beregningService, behandlingService)
+        utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(beregningService)
     }
 
     @Test
@@ -80,12 +79,14 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
-                                                                  vedtak,
-                                                                  behandlingResultatType,
-                                                                  true,
-                                                                  oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                          andelerTilkjentYtelse))
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                        "saksbehandler",
+                        vedtak,
+                        behandlingResultatType,
+                        true,
+                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerTilkjentYtelse),
+                )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -96,7 +97,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATRSMA")[1], 2, 1, 660, "2026-05-01", "2027-06-30")
     }
 
-    // TODO samme som den under
     @Test
     fun `skal opprette et fullstendig opphør med felles løpende periodeId og separat kjeding på to personer`() {
         val personMedFlerePerioder = tilfeldigPerson()
@@ -125,12 +125,16 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
-                                                                  opphørVedtak,
-                                                                  behandlingResultatType,
-                                                                  false,
-                                                                  forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                          andelerTilkjentYtelse))
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                        "saksbehandler",
+                        opphørVedtak,
+                        behandlingResultatType,
+                        false,
+                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerTilkjentYtelse),
+                        // Setter inn samme behandling fordi vi forventer en tidligere behandling ved opphør
+                        forrigeBehandling = behandling
+                )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -153,7 +157,6 @@ class UtbetalingsoppdragIntegrasjonTest(
                                  opphørFom)
     }
 
-    // TODO er det mulig å lage et fullstendig opphør uten en førstegangsbehandling? Er ikke dette et rent avslag isåfall?
     @Test
     fun `skal opprette et fullstendig opphør hvor periodens fom-dato er opphørsdato når denne er senere`() {
         val behandling = lagBehandling()
@@ -167,12 +170,16 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandlingResultatType = BehandlingResultatType.OPPHØRT
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
-                                                                  opphørVedtak,
-                                                                  behandlingResultatType,
-                                                                  false,
-                                                                  forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                          andelerTilkjentYtelse))
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                        "saksbehandler",
+                        opphørVedtak,
+                        behandlingResultatType,
+                        false,
+                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerTilkjentYtelse),
+                        // Setter inn samme behandling fordi vi forventer en tidligere behandling ved opphør
+                        forrigeBehandling = behandling
+                )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -230,14 +237,14 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse))
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
-                                                          vedtak,
-                                                          BehandlingResultatType.INNVILGET,
-                                                          true,
-                                                          oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                  andelerFørstegangsbehandling))
-
-        ferdigstillBehandling(behandling)
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                "saksbehandler",
+                vedtak,
+                BehandlingResultatType.INNVILGET,
+                true,
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                        andelerFørstegangsbehandling),
+        )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
@@ -272,14 +279,17 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandlingResultatType = BehandlingResultatType.DELVIS_INNVILGET
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
-                                                                  vedtak2,
-                                                                  behandlingResultatType,
-                                                                  false,
-                                                                  forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                          andelerFørstegangsbehandling),
-                                                                  oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                          andelerRevurdering))
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                        "saksbehandler",
+                        vedtak2,
+                        behandlingResultatType,
+                        false,
+                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerFørstegangsbehandling),
+                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerRevurdering),
+                        forrigeBehandling = behandling
+                )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -336,14 +346,14 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        person = person,
                                        tilkjentYtelse = tilkjentYtelse))
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
-                                                          vedtak,
-                                                          BehandlingResultatType.INNVILGET,
-                                                          true,
-                                                          oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                  andelerFørstegangsbehandling))
-
-        ferdigstillBehandling(behandling)
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                "saksbehandler",
+                vedtak,
+                BehandlingResultatType.INNVILGET,
+                true,
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                        andelerFørstegangsbehandling),
+        )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
@@ -369,14 +379,17 @@ class UtbetalingsoppdragIntegrasjonTest(
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
         val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
-                                                                  vedtak2,
-                                                                  BehandlingResultatType.INNVILGET,
-                                                                  false,
-                                                                  forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                          andelerFørstegangsbehandling),
-                                                                  oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                          andelerRevurdering))
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                        "saksbehandler",
+                        vedtak2,
+                        BehandlingResultatType.INNVILGET,
+                        false,
+                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerFørstegangsbehandling),
+                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                                andelerRevurdering),
+                        forrigeBehandling = behandling
+                )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -412,12 +425,14 @@ class UtbetalingsoppdragIntegrasjonTest(
                                        person = personMedFlerePerioder))
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
-        val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
-                                                                                   vedtak,
-                                                                                   behandlingResultatType,
-                                                                                   true,
-                                                                                   oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                                           andelerTilkjentYtelse))
+        val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                "saksbehandler",
+                vedtak,
+                behandlingResultatType,
+                true,
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                        andelerTilkjentYtelse),
+        )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -438,12 +453,14 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         val behandlingResultatType = BehandlingResultatType.INNVILGET
         assertThrows<java.lang.IllegalArgumentException> {
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag("saksbehandler",
-                                                              vedtak,
-                                                              behandlingResultatType,
-                                                              true,
-                                                              oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                                                      andelerTilkjentYtelse))
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                    "saksbehandler",
+                    vedtak,
+                    behandlingResultatType,
+                    true,
+                    oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                            andelerTilkjentYtelse),
+            )
         }
     }
 
@@ -463,10 +480,5 @@ class UtbetalingsoppdragIntegrasjonTest(
         if (opphørFom != null) {
             assertEquals(opphørFom, utbetalingsperiode.opphør?.opphørDatoFom)
         }
-    }
-
-    private fun ferdigstillBehandling(behandling: Behandling) {
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
-        behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.BEHANDLING_AVSLUTTET)
     }
 }

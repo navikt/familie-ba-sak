@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -21,7 +21,6 @@ import java.time.LocalDate
 @Component
 class UtbetalingsoppdragGenerator(
         private val beregningService: BeregningService,
-        private val behandlingService: BehandlingService,
 ) {
 
     /**
@@ -32,8 +31,10 @@ class UtbetalingsoppdragGenerator(
      * @param[vedtak] for å hente fagsakid, behandlingid, vedtaksdato, ident, og evt opphørsdato
      * @param[behandlingResultatType] for å sjekke om fullstendig opphør
      * @param[erFørsteBehandlingPåFagsak] for å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
-     * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye, har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
      * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
+     * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
+     * har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
+     * @param[forrigeBehandling] peker til forrige iverksatte behandling. Brukes på opphørsperioder.
      * @return Utbetalingsoppdrag for vedtak
      */
     fun lagUtbetalingsoppdrag(saksbehandlerId: String,
@@ -41,7 +42,9 @@ class UtbetalingsoppdragGenerator(
                               behandlingResultatType: BehandlingResultatType,
                               erFørsteBehandlingPåFagsak: Boolean,
                               forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
-                              oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap()): Utbetalingsoppdrag {
+                              oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
+                              forrigeBehandling: Behandling? = null
+    ): Utbetalingsoppdrag {
 
         val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
 
@@ -76,12 +79,16 @@ class UtbetalingsoppdragGenerator(
                     erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                     vedtak = vedtak,
                     sisteOffsetIKjedeOversikt = gjeldendeForrigeOffsetForKjede(forrigeKjeder),
-                    sisteOffsetPåFagsak = sisteOffsetPåFagsak) else emptyList()
+                    sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                    forrigeBehandling = forrigeBehandling
+            ) else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
             lagUtbetalingsperioderForOpphør(
                     andeler = andelerTilOpphør,
-                    vedtak = vedtak) else emptyList()
+                    vedtak = vedtak,
+                    forrigeBehandling = forrigeBehandling
+            ) else emptyList()
 
         return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -94,14 +101,12 @@ class UtbetalingsoppdragGenerator(
     }
 
     fun lagUtbetalingsperioderForOpphør(andeler: List<Pair<AndelTilkjentYtelse, LocalDate>>,
-                                        vedtak: Vedtak): List<Utbetalingsperiode> {
+                                        vedtak: Vedtak,
+                                        forrigeBehandling: Behandling?): List<Utbetalingsperiode> {
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
                 vedtak = vedtak,
                 erEndringPåEksisterendePeriode = true,
-                forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(
-                        fagsakId = vedtak.behandling.fagsak.id,
-                        behandlingFørFølgende = vedtak.behandling
-                )
+                forrigeBehandling = forrigeBehandling
         )
 
         return andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
@@ -116,7 +121,8 @@ class UtbetalingsoppdragGenerator(
                                              vedtak: Vedtak,
                                              erFørsteBehandlingPåFagsak: Boolean,
                                              sisteOffsetIKjedeOversikt: Map<String, Int>,
-                                             sisteOffsetPåFagsak: Int? = null): List<Utbetalingsperiode> {
+                                             sisteOffsetPåFagsak: Int? = null,
+                                             forrigeBehandling: Behandling?): List<Utbetalingsperiode> {
         var offset =
                 if (!erFørsteBehandlingPåFagsak)
                     sisteOffsetPåFagsak?.plus(1)
@@ -125,10 +131,7 @@ class UtbetalingsoppdragGenerator(
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
                 vedtak = vedtak,
-                forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(
-                        fagsakId = vedtak.behandling.fagsak.id,
-                        behandlingFørFølgende = vedtak.behandling
-                )
+                forrigeBehandling = forrigeBehandling
         )
 
         val utbetalingsperioder = andeler.filter { kjede -> kjede.isNotEmpty() }

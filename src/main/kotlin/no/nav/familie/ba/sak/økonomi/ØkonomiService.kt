@@ -47,17 +47,23 @@ class ØkonomiService(
         val erFørsteIverksatteBehandlingPåFagsak =
                 beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
 
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = oppdatertBehandling.fagsak.id,
+                                                                                      behandlingFørFølgende = oppdatertBehandling)
+
         val utbetalingsoppdrag: Utbetalingsoppdrag =
                 if (erFørsteIverksatteBehandlingPåFagsak) {
                     utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
-                            saksbehandlerId,
-                            vedtak,
-                            behandlingResultatType,
-                            erFørsteIverksatteBehandlingPåFagsak,
-                            oppdaterteKjeder = oppdaterteKjeder)
+                            saksbehandlerId = saksbehandlerId,
+                            vedtak = vedtak,
+                            behandlingResultatType = behandlingResultatType,
+                            erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
+                            oppdaterteKjeder = oppdaterteKjeder,
+                            forrigeBehandling = forrigeBehandling
+                    )
                 } else {
-                    val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = oppdatertBehandling.fagsak.id, behandlingFørFølgende = oppdatertBehandling)
-                                            ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
+                    if (forrigeBehandling == null) {
+                        error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
+                    }
 
                     val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
                     // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
@@ -72,7 +78,9 @@ class ØkonomiService(
                             behandlingResultatType,
                             erFørsteIverksatteBehandlingPåFagsak,
                             forrigeKjeder = forrigeKjeder,
-                            oppdaterteKjeder = oppdaterteKjeder)
+                            oppdaterteKjeder = oppdaterteKjeder,
+                            forrigeBehandling = forrigeBehandling
+                    )
                 }
 
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
