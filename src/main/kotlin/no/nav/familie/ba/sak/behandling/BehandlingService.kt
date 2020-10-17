@@ -153,9 +153,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsMåned: LocalDate): List<Behandling> {
-        val ferdigstilteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
+        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
 
-        val tilkjenteYtelser = ferdigstilteBehandlinger
+        val tilkjenteYtelser = iverksatteBehandlinger
                 .sortedBy { it.opprettetTidspunkt }
                 .map { beregningService.hentTilkjentYtelseForBehandling(it.id) }
 
