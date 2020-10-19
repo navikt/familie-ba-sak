@@ -21,7 +21,7 @@ class PubliserVedtakTask(val kafkaProducer: KafkaProducer,
 
     override fun doTask(task: Task) {
         val vedtakDVH = stønadsstatistikkService.hentVedtak(task.payload.toLong())
-        task.metadata["offset"] = kafkaProducer.sendMessage(vedtakDVH).toString()
+        task.metadata["offset"] = kafkaProducer.sendMessageForTopicVedtak(vedtakDVH).toString()
 
         taskRepository.save(task)
     }
