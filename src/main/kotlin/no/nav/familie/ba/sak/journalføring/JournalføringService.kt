@@ -3,15 +3,13 @@ package no.nav.familie.ba.sak.journalføring
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.*
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
-import no.nav.familie.kontrakter.felles.journalpost.Dokumentstatus
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
 import no.nav.familie.kontrakter.felles.journalpost.Sak
@@ -56,9 +54,12 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         return sak.fagsakId ?: ""
     }
 
-    fun lagreJournalPost(behandling: Behandling, journalpostId: String) = journalføringRepository.save(DbJournalpost(behandling = behandling, journalpostId = journalpostId))
+    fun lagreJournalPost(behandling: Behandling,
+                         journalpostId: String) = journalføringRepository.save(DbJournalpost(behandling = behandling,
+                                                                                             journalpostId = journalpostId))
 
-    fun lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder: List<String>, journalpostId: String): Pair<Sak, List<Behandling>> {
+    fun lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder: List<String>,
+                                                    journalpostId: String): Pair<Sak, List<Behandling>> {
 
         val behandlinger = tilknyttedeBehandlingIder.map {
             behandlingService.hent(it.toLong())
@@ -70,13 +71,10 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
 
         val fagsak = when (tilknyttedeBehandlingIder.isNotEmpty()) {
             true -> {
-                val fagsaker = behandlinger.map { it.fagsak }.toSet()
+                behandlinger.map { it.fagsak }.toSet().firstOrNull()
+                ?: throw FunksjonellFeil(melding = "Behandlings'idene tilhørerer ikke samme fagsak, eller vi fant ikke fagsaken.",
+                                         frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn.")
 
-                if (fagsaker.size != 1) {
-                    throw Feil(message = "Behandlings'idene tilhørerer ikke samme fagsak, eller vi fant ikke fagsaken.",
-                               frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn.")
-                }
-                fagsaker.first()
             }
             false -> null
         }
@@ -134,6 +132,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
     }
 
     companion object {
+
         private val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

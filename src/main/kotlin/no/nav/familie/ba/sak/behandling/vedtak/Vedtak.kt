@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -58,8 +59,9 @@ class Vedtak(
     }
 
     fun slettUtbetalingBegrunnelse(begrunnelseId: Long) {
-        hentUtbetalingBegrunnelse(begrunnelseId) ?: throw Feil(message = "Prøver å slette en begrunnelse som ikke finnes",
-                                                               frontendFeilmelding = "Begrunnelsen du prøver å slette finnes ikke i systemet.")
+        hentUtbetalingBegrunnelse(begrunnelseId)
+        ?: throw FunksjonellFeil(melding = "Prøver å slette en begrunnelse som ikke finnes",
+                                 frontendFeilmelding = "Begrunnelsen du prøver å slette finnes ikke i systemet.")
 
         settUtbetalingBegrunnelser(utbetalingBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }
