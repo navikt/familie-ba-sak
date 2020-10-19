@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse
 
 @SpringBootTest(classes = [RolleConfig::class])
 @ActiveProfiles("dev")
-internal class AutoriserInterceptorTest {
+internal class RolletilgangInterceptorTest {
 
     @Autowired
     lateinit var rolleConfig: RolleConfig
@@ -23,6 +23,6 @@ internal class AutoriserInterceptorTest {
 
     @Test
     fun `Verifiser at systembruker har tilgang`() {
-        assertTrue(AutoriserInterceptor(rolleConfig).preHandle(request, response, handler))
+        assertTrue(RolletilgangInterceptor(rolleConfig).preHandle(request, response, handler))
     }
 }

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.config
 
-import no.nav.familie.ba.sak.common.http.interceptor.AutoriserInterceptor
+import no.nav.familie.ba.sak.common.http.interceptor.RolletilgangInterceptor
 import no.nav.familie.http.interceptor.InternLoggerInterceptor
 import no.nav.familie.sikkerhet.OIDCUtil
 import org.springframework.context.annotation.Configuration
@@ -17,7 +17,7 @@ class WebConfig(
 
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(InternLoggerInterceptor(oidcUtil))
-        registry.addInterceptor(AutoriserInterceptor(rolleConfig))
+        registry.addInterceptor(RolletilgangInterceptor(rolleConfig))
         super.addInterceptors(registry)
     }
 }

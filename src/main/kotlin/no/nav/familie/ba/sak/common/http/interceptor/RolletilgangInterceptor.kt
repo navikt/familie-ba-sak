@@ -12,10 +12,10 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 @Import(RolleConfig::class)
-class AutoriserInterceptor(private val rolleConfig: RolleConfig) : HandlerInterceptorAdapter() {
+class RolletilgangInterceptor(private val rolleConfig: RolleConfig) : HandlerInterceptorAdapter() {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean =
-            SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.VEILEDER)
+            SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.VEILEDER)
                     .takeIf { it != BehandlerRolle.UKJENT }
                     ?.let { super.preHandle(request, response, handler) }
             ?: run {
@@ -26,6 +26,6 @@ class AutoriserInterceptor(private val rolleConfig: RolleConfig) : HandlerInterc
 
     companion object {
 
-        private val LOG = LoggerFactory.getLogger(AutoriserInterceptor::class.java)
+        private val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
