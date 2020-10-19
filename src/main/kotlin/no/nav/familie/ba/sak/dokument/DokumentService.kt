@@ -118,30 +118,34 @@ class DokumentService(
         val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
-        val journalføringsId = integrasjonClient.journalførManueltBrev(fnr = fnr,
-                                                                       fagsakId = fagsakId,
-                                                                       journalførendeEnhet = enhet,
-                                                                       brev = generertBrev,
-                                                                       brevType = brevmal.arkivType)
+        val journalpostId = integrasjonClient.journalførManueltBrev(fnr = fnr,
+                                                                    fagsakId = fagsakId,
+                                                                    journalførendeEnhet = enhet,
+                                                                    brev = generertBrev,
+                                                                    brevType = brevmal.arkivType)
 
-        journalføringService.lagreJournalPost(behandling, journalføringsId)
-        val distribuertBrevRessurs = integrasjonClient.distribuerBrev(journalføringsId)
+        journalføringService.lagreJournalPost(behandling, journalpostId)
 
-        loggService.opprettDistribuertBrevLogg(behandlingId = behandling.id,
-                                               tekst = "Brev for ${brevmal.visningsTekst} er sendt til bruker",
-                                               rolle = BehandlerRolle.SAKSBEHANDLER)
-        antallBrevSendt[brevmal]?.increment()
-
-        return distribuertBrevRessurs
+        return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
+                                            behandlingId = behandling.id,
+                                            loggTekst = "Brev for ${brevmal.visningsTekst} er sendt til bruker",
+                                            loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                            brevType = brevmal)
     }
 
-    fun sendVedtaksbrev(journalpostId: String,
-                        behandlingId: Long) {
+    fun distribuerBrevOgLoggHendelse(journalpostId: String,
+                                     behandlingId: Long,
+                                     loggTekst: String,
+                                     loggBehandlerRolle: BehandlerRolle,
+                                     brevType: BrevType
 
-        integrasjonClient.distribuerBrev(journalpostId)
+    ): Ressurs<String> {
+        val distribuerBrevBestillingId = integrasjonClient.distribuerBrev(journalpostId)
         loggService.opprettDistribuertBrevLogg(behandlingId = behandlingId,
-                                               tekst = "Vedtaksbrev er sendt til bruker",
-                                               rolle = BehandlerRolle.SYSTEM)
-        antallBrevSendt[BrevType.VEDTAK]?.increment()
+                                               tekst = loggTekst,
+                                               rolle = loggBehandlerRolle)
+        antallBrevSendt[brevType]?.increment()
+
+        return distribuerBrevBestillingId
     }
 }

@@ -139,7 +139,7 @@ class LoggService(
         lagre(Logg(
                 behandlingId = behandlingId,
                 type = LoggType.DISTRIBUERE_BREV,
-                tittel = "Dokument er sendt",
+                tittel = "Brev sendt",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, rolle),
                 tekst = tekst
         ))

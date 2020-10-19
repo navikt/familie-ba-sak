@@ -10,8 +10,6 @@ import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
-import no.nav.familie.kontrakter.felles.journalpost.Dokumentstatus
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
 import no.nav.familie.kontrakter.felles.journalpost.Sak
