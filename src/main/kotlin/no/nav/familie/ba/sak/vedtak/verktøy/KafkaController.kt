@@ -22,6 +22,6 @@ class KafkaController @Autowired internal constructor(private val producer: Kafk
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     @Deprecated("For midlertidig testbruk")
     fun sendMessageToKafkaTopic(@RequestBody vedtak: VedtakDVH) {
-        producer.sendMessage(vedtak)
+        producer.sendMessageForTopicVedtak(vedtak)
     }
 }

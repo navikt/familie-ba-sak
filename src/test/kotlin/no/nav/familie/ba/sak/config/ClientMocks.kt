@@ -191,6 +191,21 @@ class ClientMocks {
                         Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
                                         relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
 
+        every{
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(any())
+        } returns personInfo.getValue(integrasjonerFnr).copy(
+                familierelasjoner = setOf(
+                        Familierelasjon(personIdent = Personident(id = barnFnr[0]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[0]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                        Familierelasjon(personIdent = Personident(id = barnFnr[1]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                        navn = personInfo.getValue(barnFnr[1]).navn,
+                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                        Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
+                                        relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+
         every {
             mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(any())
         } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
