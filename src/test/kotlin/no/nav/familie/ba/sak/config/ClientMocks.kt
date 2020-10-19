@@ -189,9 +189,15 @@ class ClientMocks {
                         Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
                                         relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
 
+        val idSlot = slot<String>()
         every {
-            mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(any())
-        } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
+            mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
+        } answers {
+            if (barnDetIkkeGisTilgangTilFnr == idSlot.captured)
+                ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
+            else
+                ADRESSEBESKYTTELSEGRADERING.UGRADERT
+        }
 
         return mockPersonopplysningerService
     }

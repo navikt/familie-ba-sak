@@ -47,8 +47,7 @@ class FagsakService(
         private val totrinnskontrollRepository: TotrinnskontrollRepository,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val personopplysningerService: PersonopplysningerService,
-        private val integrasjonClient: IntegrasjonClient,
-        private val stsOnlyPdlRestClient: StsOnlyPdlRestClient) {
+        private val integrasjonClient: IntegrasjonClient) {
 
 
     private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
@@ -309,10 +308,10 @@ class FagsakService(
     private fun hentMaskertFagsakdeltakerVedManglendeTilgang(personIdent: String): RestFagsakDeltager? {
         val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
         return if (!harTilgang) {
-            val adressebeskyttelse = stsOnlyPdlRestClient.hentAdressebeskyttelse(personIdent).first()
+            val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personIdent)
             RestFagsakDeltager(
                     rolle = FagsakDeltagerRolle.UKJENT,
-                    adressebeskyttelsegradering = adressebeskyttelse.gradering,
+                    adressebeskyttelsegradering = adressebeskyttelse,
                     harTilgang = false
             )
         } else null
