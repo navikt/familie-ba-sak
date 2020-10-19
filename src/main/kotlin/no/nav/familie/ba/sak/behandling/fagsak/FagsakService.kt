@@ -18,9 +18,9 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.pdl.StsOnlyPdlRestClient
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -47,7 +47,8 @@ class FagsakService(
         private val totrinnskontrollRepository: TotrinnskontrollRepository,
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val personopplysningerService: PersonopplysningerService,
-        private val integrasjonClient: IntegrasjonClient) {
+        private val integrasjonClient: IntegrasjonClient,
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
 
 
     private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
@@ -78,12 +79,14 @@ class FagsakService(
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
+            saksstatistikkEventPublisher.publish(fagsak.id)
             antallFagsakerOpprettet.increment()
         } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent == personIdent }) {
             fagsak.also {
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
                 lagre(it)
             }
+            saksstatistikkEventPublisher.publish(fagsak.id)
         }
         return fagsak
     }
@@ -108,6 +111,7 @@ class FagsakService(
         fagsak.status = nyStatus
 
         lagre(fagsak)
+        saksstatistikkEventPublisher.publish(fagsak.id)
     }
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {

@@ -27,8 +27,8 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
-fun randomFnr(): String = UUID.randomUUID().toString()
-fun randomAktørId(): AktørId = AktørId(UUID.randomUUID().toString())
+fun randomFnr(): String = Random.nextLong(10_000_000_000, 31_121_299_999).toString()
+fun randomAktørId(): AktørId = AktørId(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString())
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeUtbetalingBegrunnelseId: Long = abs(Random.nextLong(10000000))
