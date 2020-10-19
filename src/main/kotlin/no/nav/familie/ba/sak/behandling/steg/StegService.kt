@@ -208,7 +208,7 @@ class StegService(
                             utførendeSteg: () -> StegType): Behandling {
         try {
             val behandlerRolle =
-                    SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, behandling.steg.tillattFor.minByOrNull { it.nivå })
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, behandling.steg.tillattFor.minByOrNull { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
