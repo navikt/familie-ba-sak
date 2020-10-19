@@ -301,8 +301,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                 oppdatertVilkår = restPutUtbetalingBegrunnelse.vedtakBegrunnelse.finnVilkårFor())
 
                 if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
-                    throw Feil(message = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
-                               frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
+                    throw FunksjonellFeil(melding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
+                                          frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
                 }
 
                 val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {

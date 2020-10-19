@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
@@ -39,8 +39,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
         val fagsak = fagsakPersonRepository.finnFagsak(setOf(PersonIdent(nyBehandling.søkersIdent)))
-                     ?: throw Feil(message = "Kan ikke lage behandling på person uten tilknyttet fagsak",
-                                   frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak")
+                     ?: throw FunksjonellFeil(melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
+                                              frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak")
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
@@ -61,8 +61,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             aktivBehandling.status = initStatus()
             lagre(aktivBehandling)
         } else {
-            throw Feil(message = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
-                       frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
+            throw FunksjonellFeil(melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
+                                  frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
     }
 
