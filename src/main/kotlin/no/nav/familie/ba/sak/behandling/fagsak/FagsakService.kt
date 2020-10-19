@@ -64,9 +64,7 @@ class FagsakService(
                     HttpStatus.BAD_REQUEST
             )
         }
-
         val fagsak = hentEllerOpprettFagsak(personIdent)
-
         return hentRestFagsak(fagsakId = fagsak.id)
     }
 
@@ -224,7 +222,6 @@ class FagsakService(
                         throw IllegalStateException("Feil ved henting av person fra PDL", it)
                     }
                 }
-
         )
 
         //We find all cases that either have the given person as applicant, or have it as a child
@@ -235,24 +232,39 @@ class FagsakService(
                 val behandling = behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId)
                 if (behandling.aktiv && !assosierteFagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
                     //get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
-                    val søkerInfo = if (behandling.fagsak.hentAktivIdent().ident == personIdent) personInfoMedRelasjoner else
-                        runCatching {
-                            personopplysningerService.hentPersoninfo(behandling.fagsak.hentAktivIdent().ident)
-                        }.fold(
-                                onSuccess = { it },
-                                onFailure = {
-                                    throw IllegalStateException("Feil ved henting av person fra PDL", it)
-                                }
-
+                    if (behandling.fagsak.hentAktivIdent().ident == personIdent) {
+                        assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
+                                navn = personInfoMedRelasjoner.navn,
+                                ident = behandling.fagsak.hentAktivIdent().ident,
+                                rolle = FagsakDeltagerRolle.FORELDER,
+                                kjønn = personInfoMedRelasjoner.kjønn,
+                                fagsakId = behandling.fagsak.id
                         )
+                    } else {
+                        val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.hentAktivIdent().ident)
+                        if (maskertForelder != null) {
+                            assosierteFagsakDeltagerMap[behandling.fagsak.id] =
+                                    maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER)
+                        } else {
+                            val personinfo =
+                                    runCatching {
+                                        personopplysningerService.hentPersoninfo(behandling.fagsak.hentAktivIdent().ident)
+                                    }.fold(
+                                            onSuccess = { it },
+                                            onFailure = {
+                                                throw IllegalStateException("Feil ved henting av person fra PDL", it)
+                                            }
 
-                    assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
-                            navn = søkerInfo.navn,
-                            ident = behandling.fagsak.hentAktivIdent().ident,
-                            rolle = FagsakDeltagerRolle.FORELDER,
-                            kjønn = søkerInfo.kjønn,
-                            fagsakId = behandling.fagsak.id
-                    )
+                                    )
+                            assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
+                                    navn = personinfo.navn,
+                                    ident = behandling.fagsak.hentAktivIdent().ident,
+                                    rolle = FagsakDeltagerRolle.FORELDER,
+                                    kjønn = personinfo.kjønn,
+                                    fagsakId = behandling.fagsak.id
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -305,7 +317,6 @@ class FagsakService(
                 }
             }
         }
-
         return assosierteFagsakDeltager
     }
 
@@ -322,7 +333,6 @@ class FagsakService(
     }
 
     companion object {
-
         val LOG = LoggerFactory.getLogger(FagsakService::class.java)
     }
 }
