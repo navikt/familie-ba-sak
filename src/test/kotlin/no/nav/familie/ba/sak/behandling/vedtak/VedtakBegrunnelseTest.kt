@@ -202,7 +202,7 @@ class VedtakBegrunnelseTest(
                 "Du får barnetrygd fordi du er bosatt i Norge fra desember 2009.",
                 begrunnelserLovligOppholdOgBosattIRiket.firstOrNull { it.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET }!!.brevBegrunnelse)
 
-        assertThrows<Feil> {
+        assertThrows<FunksjonellFeil> {
             vedtakService.endreUtbetalingBegrunnelse(
                     RestPutUtbetalingBegrunnelse(vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
                                                  vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER),
