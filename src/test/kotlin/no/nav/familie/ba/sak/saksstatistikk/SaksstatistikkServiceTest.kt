@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
@@ -51,6 +53,7 @@ internal class SaksstatistikkServiceTest {
     private val totrinnskontrollService: TotrinnskontrollService = mockk()
     private val fagsakService: FagsakService = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     private val vedtakService: VedtakService = mockk()
 
@@ -62,7 +65,8 @@ internal class SaksstatistikkServiceTest {
             totrinnskontrollService,
             vedtakService,
             fagsakService,
-            personopplysningerService)
+            personopplysningerService,
+            featureToggleService)
 
 
     @BeforeAll
@@ -72,6 +76,7 @@ internal class SaksstatistikkServiceTest {
                 behandlendeEnhetNavn = "Nav",
                 behandlingId = 1)
         every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
+        every { featureToggleService.isEnabled(any()) } returns false
     }
 
     @Test
@@ -90,26 +95,26 @@ internal class SaksstatistikkServiceTest {
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
-        assertThat(behandlingDvh.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
-        assertThat(behandlingDvh.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
-        assertThat(behandlingDvh.mottattDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
-                                                                         SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh.registrertDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
-                                                                            SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
-        assertThat(behandlingDvh.behandlingId).isEqualTo(behandling.id.toString())
-        assertThat(behandlingDvh.relatertBehandlingId).isEqualTo("1")
-        assertThat(behandlingDvh.sakId).isEqualTo(behandling.fagsak.id.toString())
-        assertThat(behandlingDvh.vedtakId).isEqualTo(vedtak.id.toString())
-        assertThat(behandlingDvh.behandlingType).isEqualTo(behandling.type.name)
-        assertThat(behandlingDvh.behandlingKategori).isEqualTo(behandling.kategori.name)
-        assertThat(behandlingDvh.behandlingUnderkategori).isEqualTo(behandling.underkategori.name)
-        assertThat(behandlingDvh.behandlingStatus).isEqualTo(behandling.status.name)
-        assertThat(behandlingDvh.totrinnsbehandling).isFalse
-        assertThat(behandlingDvh.saksbehandler).isNull()
-        assertThat(behandlingDvh.beslutter).isNull()
-        assertThat(behandlingDvh.avsender).isEqualTo("familie-ba-sak")
-        assertThat(behandlingDvh.versjon).isNotEmpty
+        assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
+        assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
+        assertThat(behandlingDvh?.mottattDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
+                                                                          SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh?.registrertDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
+                                                                             SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
+        assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
+        assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo("1")
+        assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())
+        assertThat(behandlingDvh?.vedtakId).isEqualTo(vedtak.id.toString())
+        assertThat(behandlingDvh?.behandlingType).isEqualTo(behandling.type.name)
+        assertThat(behandlingDvh?.behandlingKategori).isEqualTo(behandling.kategori.name)
+        assertThat(behandlingDvh?.behandlingUnderkategori).isEqualTo(behandling.underkategori.name)
+        assertThat(behandlingDvh?.behandlingStatus).isEqualTo(behandling.status.name)
+        assertThat(behandlingDvh?.totrinnsbehandling).isFalse
+        assertThat(behandlingDvh?.saksbehandler).isNull()
+        assertThat(behandlingDvh?.beslutter).isNull()
+        assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
+        assertThat(behandlingDvh?.versjon).isNotEmpty
 
     }
 
@@ -148,25 +153,25 @@ internal class SaksstatistikkServiceTest {
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
-        assertThat(behandlingDvh.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
-        assertThat(behandlingDvh.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
-        assertThat(behandlingDvh.mottattDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh.registrertDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
-        assertThat(behandlingDvh.behandlingId).isEqualTo(behandling.id.toString())
-        assertThat(behandlingDvh.relatertBehandlingId).isEqualTo("1")
-        assertThat(behandlingDvh.sakId).isEqualTo(behandling.fagsak.id.toString())
-        assertThat(behandlingDvh.vedtakId).isEqualTo(vedtak.id.toString())
-        assertThat(behandlingDvh.behandlingType).isEqualTo(behandling.type.name)
-        assertThat(behandlingDvh.behandlingStatus).isEqualTo(behandling.status.name)
-        assertThat(behandlingDvh.totrinnsbehandling).isTrue
-        assertThat(behandlingDvh.saksbehandler).isNull()
-        assertThat(behandlingDvh.beslutter).isNull()
-        assertThat(behandlingDvh.resultatBegrunnelser).hasSize(1)
+        assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
+        assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
+        assertThat(behandlingDvh?.mottattDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh?.registrertDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
+        assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
+        assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo("1")
+        assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())
+        assertThat(behandlingDvh?.vedtakId).isEqualTo(vedtak.id.toString())
+        assertThat(behandlingDvh?.behandlingType).isEqualTo(behandling.type.name)
+        assertThat(behandlingDvh?.behandlingStatus).isEqualTo(behandling.status.name)
+        assertThat(behandlingDvh?.totrinnsbehandling).isTrue
+        assertThat(behandlingDvh?.saksbehandler).isNull()
+        assertThat(behandlingDvh?.beslutter).isNull()
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
                 .extracting("resultatBegrunnelse")
                 .containsOnly("INNVILGET_BOR_HOS_SØKER")
-        assertThat(behandlingDvh.avsender).isEqualTo("familie-ba-sak")
-        assertThat(behandlingDvh.versjon).isNotEmpty
+        assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
+        assertThat(behandlingDvh?.versjon).isNotEmpty
 
     }
 
@@ -188,14 +193,15 @@ internal class SaksstatistikkServiceTest {
                                                                          RestFagsakDeltager(ident = "12345678911",
                                                                                             rolle = FagsakDeltagerRolle.BARN,
                                                                                             fagsakId = 2))
+        every { behandlingService.hentAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
-        assertThat(sakDvh.aktorId).isEqualTo(1234567891011)
-        assertThat(sakDvh.aktorer).hasSize(1).extracting("rolle").containsOnly("FORELDER")
-        assertThat(sakDvh.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
-        assertThat(sakDvh.avsender).isEqualTo("familie-ba-sak")
+        assertThat(sakDvh?.aktorId).isEqualTo(1234567891011)
+        assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").containsOnly("FORELDER")
+        assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
+        assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
 
     }
 

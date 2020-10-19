@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -32,10 +33,13 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                             private val totrinnskontrollService: TotrinnskontrollService,
                             private val vedtakService: VedtakService,
                             private val fagsakService: FagsakService,
-                            private val personopplysningerService: PersonopplysningerService) {
+                            private val personopplysningerService: PersonopplysningerService,
+                            private val featureToggleService: FeatureToggleService) {
 
-    fun mapTilBehandlingDVH(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH {
+    fun mapTilBehandlingDVH(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH? {
         val behandling = behandlingService.hent(behandlingId)
+
+        if (behandling.skalBehandlesAutomatisk && fødselshendelseSkalRullesTilbake()) return null
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
@@ -101,8 +105,12 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         return behandlingDVH
     }
 
-    fun mapTilSakDvh(sakId: Long): SakDVH {
+    fun mapTilSakDvh(sakId: Long): SakDVH? {
         val fagsak = fagsakService.hentRestFagsak(sakId).getDataOrThrow()
+
+        //Skipper saker som har automatisk behandling
+        val skalBehandleAutomatisk = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)?.skalBehandlesAutomatisk ?: false
+        if (skalBehandleAutomatisk && fødselshendelseSkalRullesTilbake()) return null
 
         val søkersAktørId = personopplysningerService.hentAktivAktørId(Ident(fagsak.søkerFødselsnummer))
 
@@ -121,6 +129,10 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                 versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
         )
     }
+
+
+    private fun fødselshendelseSkalRullesTilbake() : Boolean =
+            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
 
     companion object {
 
