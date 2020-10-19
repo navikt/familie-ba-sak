@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.senesteDatoAv
@@ -13,11 +14,13 @@ import java.time.LocalDate
  *
  * @param[vedtak] for vedtakdato og opphørsdato hvis satt
  * @param[erEndringPåEksisterendePeriode] ved true vil oppdrag sette asksjonskode ENDR på linje og ikke referere bakover
+ * @param[forrigeBehandling] peker til forrige iverksatte behandling. Brukes på opphørsperioder.
  * @return mal med tilpasset lagPeriodeFraAndel
  */
 data class UtbetalingsperiodeMal(
         val vedtak: Vedtak,
-        val erEndringPåEksisterendePeriode: Boolean = false
+        val erEndringPåEksisterendePeriode: Boolean = false,
+        val forrigeBehandling: Behandling?,
 ) {
 
     /**
@@ -46,7 +49,10 @@ data class UtbetalingsperiodeMal(
                     sats = BigDecimal(andel.beløp),
                     satsType = Utbetalingsperiode.SatsType.MND,
                     utbetalesTil = vedtak.behandling.fagsak.hentAktivIdent().ident,
-                    behandlingId = vedtak.behandling.id
+                    behandlingId = if (erEndringPåEksisterendePeriode)
+                        forrigeBehandling?.id
+                        ?: error("Prøver å sette forrige behandling på opphørsperiode til utbetaling, men har ikke klart å finne forrige behandling")
+                    else vedtak.behandling.id
             )
 
 
