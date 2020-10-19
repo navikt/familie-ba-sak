@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.gdpr.domene.FødelshendelsePreLanseringRepository
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -263,7 +262,7 @@ class GDPRMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfo(barnefnr[0], PersonInfoQuery.ENKEL)
+            personopplysningerServiceMock.hentPersoninfo(barnefnr[0])
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
@@ -313,7 +312,7 @@ class GDPRMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfo(barnefnr[1], PersonInfoQuery.ENKEL)
+            personopplysningerServiceMock.hentPersoninfo(barnefnr[1])
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
@@ -363,7 +362,7 @@ class GDPRMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfo(barnefnr[2], PersonInfoQuery.ENKEL)
+            personopplysningerServiceMock.hentPersoninfo(barnefnr[2])
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
@@ -413,7 +412,7 @@ class GDPRMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfo(barnefnr[3], PersonInfoQuery.ENKEL)
+            personopplysningerServiceMock.hentPersoninfo(barnefnr[3])
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
@@ -452,7 +451,7 @@ class GDPRMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfo(barnefnr[4], PersonInfoQuery.ENKEL)
+            personopplysningerServiceMock.hentPersoninfo(barnefnr[4])
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
@@ -487,7 +486,7 @@ class GDPRMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfo(barnefnr[4], PersonInfoQuery.ENKEL)
+            personopplysningerServiceMock.hentPersoninfo(barnefnr[4])
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Jente Barn",
