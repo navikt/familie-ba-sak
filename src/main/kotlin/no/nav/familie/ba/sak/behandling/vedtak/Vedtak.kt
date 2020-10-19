@@ -19,9 +19,6 @@ class Vedtak(
         @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
         val behandling: Behandling,
 
-        @Column(name = "ansvarlig_enhet", nullable = true)
-        var ansvarligEnhet: String? = null,
-
         @Column(name = "vedtaksdato", nullable = true)
         var vedtaksdato: LocalDate? = null,
 
@@ -30,9 +27,6 @@ class Vedtak(
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
-
-        @Column(name = "fk_forrige_vedtak_id")
-        val forrigeVedtakId: Long? = null,
 
         @Column(name = "opphor_dato")
         val opphørsdato: LocalDate? = null,
@@ -47,7 +41,7 @@ class Vedtak(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
+        return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, opphørsdato=$opphørsdato)"
     }
 
     private fun settUtbetalingBegrunnelser(nyeBegrunnelser: Set<UtbetalingBegrunnelse>) {
