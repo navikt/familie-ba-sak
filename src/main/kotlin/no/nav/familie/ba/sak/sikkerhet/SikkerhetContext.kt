@@ -37,7 +37,7 @@ object SikkerhetContext {
                 )
     }
 
-    fun hentBehandlerRolleForSteg(rolleConfig: RolleConfig, lavesteSikkerhetsnivå: BehandlerRolle?): BehandlerRolle {
+    fun hentRolletilgangFraSikkerhetscontext(rolleConfig: RolleConfig, lavesteSikkerhetsnivå: BehandlerRolle?): BehandlerRolle {
         if (hentSaksbehandler() == SYSTEM_FORKORTELSE) return BehandlerRolle.SYSTEM
 
         val grupper = hentGrupper()
