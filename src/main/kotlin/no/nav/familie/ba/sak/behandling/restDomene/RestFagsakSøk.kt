@@ -19,6 +19,6 @@ data class RestFagsakDeltager(
         var rolle: FagsakDeltagerRolle,
         var kjønn: Kjønn? = Kjønn.UKJENT,
         var fagsakId: Long? = null,
-        var adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING? = null,
+        var adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         var harTilgang: Boolean = true
 )

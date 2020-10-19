@@ -315,7 +315,7 @@ class FagsakService(
             val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personIdent)
             RestFagsakDeltager(
                     rolle = FagsakDeltagerRolle.UKJENT,
-                    adressebeskyttelsegradering = adressebeskyttelse,
+                    adressebeskyttelseGradering = adressebeskyttelse,
                     harTilgang = false
             )
         } else null
