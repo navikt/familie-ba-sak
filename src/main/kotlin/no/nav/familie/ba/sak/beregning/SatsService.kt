@@ -22,6 +22,14 @@ object SatsService {
 
     fun hentAlleSatser() = satser
 
+    fun finnSatsendring(startDato: LocalDate, beløp: Int): List<Sats> =
+            finnSatsendring(startDato)
+            .filter { it.beløp == beløp }
+
+    fun finnSatsendring(startDato: LocalDate): List<Sats> = satser
+            .filter { it.gyldigFom == startDato }
+            .filter { it.gyldigFom != LocalDate.MIN }
+
     fun hentGyldigSatsFor(satstype: SatsType,
                           stønadFraOgMed: YearMonth,
                           stønadTilOgMed: YearMonth,
@@ -55,8 +63,8 @@ object SatsService {
             }
 
     private fun hentPeriodeOver6år(seksårsdag: LocalDate,
-                           oppfyltFom: LocalDate,
-                           oppfyltTom: LocalDate): Periode? =
+                                   oppfyltFom: LocalDate,
+                                   oppfyltTom: LocalDate): Periode? =
             when {
                 oppfyltTom.isSameOrBefore(seksårsdag) -> {
                     null
