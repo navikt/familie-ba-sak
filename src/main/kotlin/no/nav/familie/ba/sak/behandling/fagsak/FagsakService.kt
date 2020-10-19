@@ -242,6 +242,7 @@ class FagsakService(
                         )
                     } else {
                         val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.hentAktivIdent().ident)
+                        LOG.info("Sjekket tilgang med resultat: $maskertForelder")
                         if (maskertForelder != null) {
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] =
                                     maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER)
