@@ -5,5 +5,5 @@ data class DokumentHeaderFelter(
         val navn: String,
         val dokumentDato: String,
         val antallBarn: Int? = null,
-        val målform: String,
+        val maalform: String,
 )
