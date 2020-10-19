@@ -152,7 +152,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
-    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsMåned: LocalDate): List<Behandling> {
+    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsmåned: LocalDate): List<Behandling> {
         val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
 
         val tilkjenteYtelser = iverksatteBehandlinger
@@ -160,10 +160,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                 .map { beregningService.hentTilkjentYtelseForBehandling(it.id) }
 
         tilkjenteYtelser.forEach {
-            if (it.stønadTom!! >= utbetalingsMåned && it.stønadFom != null) {
+            if (it.erLøpende(utbetalingsmåned)) {
                 behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForFremtidigUtbetaling = true })
+            } else if (it.erUtløpt(utbetalingsmåned)) {
+                behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForFremtidigUtbetaling = false })
             }
-            if (it.opphørFom != null && it.opphørFom!! <= utbetalingsMåned) {
+
+            if (it.harOpphørPåTidligereBehandling(utbetalingsmåned)) {
                 val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(it)
                 behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForFremtidigUtbetaling = false })
             }
