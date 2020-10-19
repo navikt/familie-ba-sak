@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.ba.sak.vedtak.producer.MockKafkaProducer.Companion.meldingSendtFor
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -108,6 +109,7 @@ class FerdigstillBehandlingTaskTest {
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
+        assertEquals(FagsakStatus.LØPENDE.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH).sakStatus)
     }
 
     @Test
@@ -124,6 +126,7 @@ class FerdigstillBehandlingTaskTest {
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
+        assertEquals(FagsakStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH).sakStatus)
     }
 
     fun iverksettMotOppdrag(vedtakId: Long) {

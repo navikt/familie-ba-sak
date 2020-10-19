@@ -22,6 +22,8 @@ import no.nav.familie.ba.sak.pdl.internal.Familierelasjon
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.pdl.internal.Personident
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.vedtak.producer.MockKafkaProducer
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.TestInstance.Lifecycle
@@ -43,9 +45,6 @@ class FagsakServiceTest(
 
         @Autowired
         private val stegService: StegService,
-
-        @Autowired
-        private val integrasjonClient: IntegrasjonClient,
 
         @Autowired
         private val personopplysningerService: PersonopplysningerService,
@@ -186,6 +185,11 @@ class FagsakServiceTest(
         assertEquals(1, søkeresultat3.filter { it.ident == søker3Fnr }.size)
         assertEquals("søker3", søkeresultat3.filter { it.ident == søker3Fnr }[0].navn)
         assertNull(søkeresultat3.find { it.ident == søker3Fnr }!!.fagsakId)
+
+        val fagsak = fagsakService.hent(PersonIdent(søker1Fnr))!!
+        Assertions.assertEquals(FagsakStatus.OPPRETTET.name,
+                                (MockKafkaProducer.meldingSendtFor(fagsak) as SakDVH).sakStatus)
+
     }
 
     @Test

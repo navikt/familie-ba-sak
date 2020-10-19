@@ -13,8 +13,15 @@ class SaksstatistikkEventPublisher {
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
     fun publish(behandlingId: Long, forrigeBehandlingId: Long?) {
-        applicationEventPublisher.publishEvent(SaksstatistikkEvent(this, behandlingId, forrigeBehandlingId))
+        applicationEventPublisher.publishEvent(SaksstatistikkEvent(this, null, behandlingId, forrigeBehandlingId))
+    }
+
+    fun publish(fagsakId: Long) {
+        applicationEventPublisher.publishEvent(SaksstatistikkEvent(this, fagsakId, null, null))
     }
 }
 
-class SaksstatistikkEvent(source: Any, val behandlingId: Long, val forrigeBehandlingId: Long?) : ApplicationEvent(source)
+class SaksstatistikkEvent(source: Any,
+                          val fagsakId: Long?,
+                          val behandlingId: Long?,
+                          val forrigeBehandlingId: Long?) : ApplicationEvent(source)
