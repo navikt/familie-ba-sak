@@ -114,8 +114,8 @@ class FagsakService(
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
-                     ?: throw Feil(message = "Finner ikke fagsak med id $fagsakId",
-                                   frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
+                     ?: throw FunksjonellFeil(melding = "Finner ikke fagsak med id $fagsakId",
+                                              frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
 
         val restBehandlinger: List<RestBehandling> = lagRestBehandlinger(fagsak)
         return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
