@@ -186,10 +186,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                          UtbetalingBegrunnelse(vedtak = vedtak,
                                                                fom = it.fom,
                                                                tom = it.tom,
-                                                               begrunnelseType = VedtakBegrunnelseType.SATSENDRING,
-                                                               vedtakBegrunnelse = VedtakBegrunnelse.SATSENDRING,
+                                                               begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                                               vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_SATSENDRING,
                                                                brevBegrunnelse =
-                                                               VedtakBegrunnelse.SATSENDRING.hentBeskrivelse(målform = målform)))
+                                                               VedtakBegrunnelse.INNVILGET_SATSENDRING.hentBeskrivelse(målform = målform)))
         }
     }
 
