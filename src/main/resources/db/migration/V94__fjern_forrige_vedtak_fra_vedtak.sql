@@ -3,3 +3,6 @@ ALTER TABLE VEDTAK
 
 ALTER TABLE VEDTAK
     DROP COLUMN ansvarlig_enhet;
+
+ALTER TABLE VEDTAK
+    DROP COLUMN stonad_brev_markdown;
