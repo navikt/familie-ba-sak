@@ -71,7 +71,7 @@ class DokumentService(
                         onSuccess = { it },
                         onFailure = {
                             throw Feil(message = "Klarte ikke generere vedtaksbrev",
-                                       frontendFeilmelding = "Noe gikk galt ved generering av vedtaksbrev og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
+                                       frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                                        throwable = it)
                         }
@@ -102,7 +102,7 @@ class DokumentService(
                         if (it is Feil) {
                             throw it
                         } else throw Feil(message = "Klarte ikke generere brev for innhente opplysninger",
-                                          frontendFeilmelding = "Noe gikk galt ved generering av brev for å innhente opplysninger og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
+                                          frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                                           throwable = it)
                     }
