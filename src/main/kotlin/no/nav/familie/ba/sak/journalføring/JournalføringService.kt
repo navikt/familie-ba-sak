@@ -130,7 +130,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                 "${dokumentInfo.tittel}" +
                 dokumentInfo.logiskeVedlegg?.fold("") { logiskeVedleggTekst, logiskVedlegg ->
                     logiskeVedleggTekst +
-                    "\n\u2002${logiskVedlegg.tittel}"
+                    "\n\u2002\u2002${logiskVedlegg.tittel}"
                 } + "\n"
             } ?: throw FunksjonellFeil("Fant ingen dokumenter",
                                        frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.")
