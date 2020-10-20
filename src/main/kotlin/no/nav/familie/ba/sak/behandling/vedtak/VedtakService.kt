@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -181,10 +182,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                          UtbetalingBegrunnelse(vedtak = vedtak,
                                                                fom = it.fom,
                                                                tom = it.tom,
-                                                               begrunnelseType = VedtakBegrunnelseType.SATSENDRING,
-                                                               vedtakBegrunnelse = VedtakBegrunnelse.SATSENDRING,
+                                                               begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                                               vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_SATSENDRING,
                                                                brevBegrunnelse =
-                                                               VedtakBegrunnelse.SATSENDRING.hentBeskrivelse(målform = målform)))
+                                                               VedtakBegrunnelse.INNVILGET_SATSENDRING.hentBeskrivelse(målform = målform)))
         }
     }
 
@@ -280,11 +281,17 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null && restPutUtbetalingBegrunnelse.vedtakBegrunnelseType != null) {
 
             if (VedtakBegrunnelseSerivce.utenVilkår.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
-                vedtak.endreUtbetalingBegrunnelse(
-                        opprinneligUtbetalingBegrunnelse.id,
-                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
-                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform)
-                )
+                if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_SATSENDRING
+                    && SatsService.finnSatsendring(opprinneligUtbetalingBegrunnelse.fom).isEmpty()) {
+                    throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
+                                          frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse.")
+                } else {
+                    vedtak.endreUtbetalingBegrunnelse(
+                            opprinneligUtbetalingBegrunnelse.id,
+                            restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
+                            restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform)
+                    )
+                }
             } else {
                 val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                         hentPersonerMedUtgjørendeVilkår(
