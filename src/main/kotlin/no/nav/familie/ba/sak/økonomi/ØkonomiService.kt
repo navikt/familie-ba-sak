@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -35,10 +34,17 @@ class ØkonomiService(
         iverksettOppdrag(utbetalingsoppdrag)
     }
 
+    /**
+     * SOAP integrasjonen støtter ikke full epost som MQ,
+     * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
+     * Denne verdien brukes ikke til noe i simulering.
+     */
     fun hentEtterbetalingsbeløp(vedtak: Vedtak): RestSimulerResultat {
         Result.runCatching {
-            økonomiKlient.hentEtterbetalingsbeløp(genererUtbetalingsoppdrag(vedtak,
-                                                                            SikkerhetContext.hentSaksbehandler()))
+            økonomiKlient.hentEtterbetalingsbeløp(genererUtbetalingsoppdrag(vedtak = vedtak,
+
+                                                                            saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+                                                                                    .substring(0, 8)))
         }
                 .fold(
                         onSuccess = {
