@@ -42,9 +42,8 @@ class ØkonomiService(
     fun hentEtterbetalingsbeløp(vedtak: Vedtak): RestSimulerResultat {
         Result.runCatching {
             økonomiKlient.hentEtterbetalingsbeløp(genererUtbetalingsoppdrag(vedtak = vedtak,
-
                                                                             saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                                                                                    .substring(0, 8)))
+                                                                                    .take(8)))
         }
                 .fold(
                         onSuccess = {
