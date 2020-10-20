@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDate.now
 
 /**
  * Lager mal for generering av utbetalingsperioder med tilpasset setting av verdier basert på parametre
@@ -42,7 +43,7 @@ data class UtbetalingsperiodeMal(
                                                                                     opphørForLinje = opphørKjedeFom!!) else null,
                     forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() },
                     periodeId = periodeIdOffset.toLong(),
-                    datoForVedtak = vedtak.vedtaksdato ?: error("Prøver å lage utbetalingsperiode uten vedtaksdato"),
+                    datoForVedtak = vedtak.vedtaksdato ?: now(),
                     klassifisering = andel.type.klassifisering,
                     vedtakdatoFom = andel.stønadFom,
                     vedtakdatoTom = andel.stønadTom,
