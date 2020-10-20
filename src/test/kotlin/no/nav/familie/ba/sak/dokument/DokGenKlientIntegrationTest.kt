@@ -73,4 +73,4 @@ class DokGenKlientIntegrationTest {
 val testDokumentHeaderFelter = DokumentHeaderFelter(navn = "Mockersen",
                                                     dokumentDato = LocalDate.now().toString(),
                                                     fodselsnummer = "1234",
-                                                    målform = "NB")
+                                                    maalform = "NB")
