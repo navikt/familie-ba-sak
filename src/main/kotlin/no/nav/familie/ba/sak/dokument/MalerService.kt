@@ -120,30 +120,30 @@ class MalerService(
 
         innvilget.duFaar = beregningOversikt
                 .filter { it.endring.trengerBegrunnelse }
-                .map {
+                .map { utbetalingsperiode ->
                     val barnasFødselsdatoer =
-                            Utils.slåSammen(it.beregningDetaljer
+                            Utils.slåSammen(utbetalingsperiode.beregningDetaljer
                                                     .filter { restBeregningDetalj -> restBeregningDetalj.person.type == PersonType.BARN }
                                                     .sortedBy { restBeregningDetalj -> restBeregningDetalj.person.fødselsdato }
                                                     .map { restBeregningDetalj ->
                                                         restBeregningDetalj.person.fødselsdato?.tilKortString() ?: ""
                                                     })
 
-                    val begrunnelse =
-                            vedtak.utbetalingBegrunnelser.filter { stønadBrevBegrunnelse ->
-                                stønadBrevBegrunnelse.fom == it.periodeFom && stønadBrevBegrunnelse.tom == it.periodeTom
-                            }.toMutableSet().map { utbetalingBegrunnelse ->
-                                utbetalingBegrunnelse.brevBegrunnelse
-                                ?: "Ikke satt"
-                            }.toList()
+                    val begrunnelser =
+                            vedtak.utbetalingBegrunnelser
+                                    .filter { it.fom == utbetalingsperiode.periodeFom && it.tom == utbetalingsperiode.periodeTom }
+                                    .map {
+                                        it.brevBegrunnelse?.lines() ?: listOf("Ikke satt")
+                                    }
+                                    .flatten()
 
                     DuFårSeksjon(
-                            fom = it.periodeFom.tilMånedÅr(),
-                            tom = if (!it.periodeTom.erSenereEnnNesteMåned()) it.periodeTom.tilMånedÅr() else "",
-                            belop = Utils.formaterBeløp(it.utbetaltPerMnd),
-                            antallBarn = it.antallBarn,
+                            fom = utbetalingsperiode.periodeFom.tilMånedÅr(),
+                            tom = if (!utbetalingsperiode.periodeTom.erSenereEnnNesteMåned()) utbetalingsperiode.periodeTom.tilMånedÅr() else "",
+                            belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                            antallBarn = utbetalingsperiode.antallBarn,
                             barnasFodselsdatoer = barnasFødselsdatoer,
-                            begrunnelser = begrunnelse
+                            begrunnelser = begrunnelser
                     )
                 }
 
