@@ -4,10 +4,13 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.domene.*
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.journalføring.domene.Sakstype.GENERELL_SAK
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -17,12 +20,14 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import javax.transaction.Transactional
 
 @Service
 class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                            private val behandlingService: BehandlingService,
                            private val oppgaveService: OppgaveService,
-                           private val journalføringRepository: JournalføringRepository) {
+                           private val journalføringRepository: JournalføringRepository,
+                           private val loggService: LoggService) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
         return integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
@@ -32,6 +37,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         return integrasjonClient.hentJournalpost(journalpostId)
     }
 
+    @Transactional
     fun ferdigstill(request: RestOppdaterJournalpost,
                     journalpostId: String,
                     behandlendeEnhet: String,
@@ -44,7 +50,8 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         oppdaterOgFerdigstill(request = request.oppdaterMedDokumentOgSak(sak),
                               journalpostId = journalpostId,
                               behandlendeEnhet = behandlendeEnhet,
-                              oppgaveId = oppgaveId)
+                              oppgaveId = oppgaveId,
+                              behandlinger = behandlinger)
 
         when (val aktivBehandling = behandlinger.find { it.aktiv }) {
             null -> LOG.info("Knytter til ${behandlinger.size} behandlinger som ikke er aktive")
@@ -54,9 +61,12 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         return sak.fagsakId ?: ""
     }
 
-    fun lagreJournalPost(behandling: Behandling, journalpostId: String) = journalføringRepository.save(DbJournalpost(behandling = behandling, journalpostId = journalpostId))
+    fun lagreJournalPost(behandling: Behandling,
+                         journalpostId: String) = journalføringRepository.save(DbJournalpost(behandling = behandling,
+                                                                                             journalpostId = journalpostId))
 
-    fun lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder: List<String>, journalpostId: String): Pair<Sak, List<Behandling>> {
+    fun lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder: List<String>,
+                                                    journalpostId: String): Pair<Sak, List<Behandling>> {
 
         val behandlinger = tilknyttedeBehandlingIder.map {
             behandlingService.hent(it.toLong())
@@ -108,9 +118,31 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
     private fun oppdaterOgFerdigstill(request: OppdaterJournalpostRequest,
                                       journalpostId: String,
                                       behandlendeEnhet: String,
-                                      oppgaveId: String) {
+                                      oppgaveId: String,
+                                      behandlinger: List<Behandling>) {
         runCatching {
             integrasjonClient.oppdaterJournalpost(request, journalpostId)
+
+            val journalpost = hentJournalpost(journalpostId)
+            assertGenerelleSuksessKriterier(journalpost)
+            val loggTekst = journalpost.data?.dokumenter?.fold("") { loggTekst, dokumentInfo ->
+                loggTekst +
+                "${dokumentInfo.tittel}" +
+                dokumentInfo.logiskeVedlegg?.fold("") { logiskeVedleggTekst, logiskVedlegg ->
+                    logiskeVedleggTekst +
+                    "\n\u2002${logiskVedlegg.tittel}"
+                } + "\n"
+            } ?: throw FunksjonellFeil("Fant ingen dokumenter",
+                                       frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.")
+
+            val datoMottatt = journalpost.data?.datoMottatt ?: throw FunksjonellFeil("Fant ingen dokumenter",
+                                                                                     frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.")
+            behandlinger.forEach {
+                loggService.opprettMottattDokument(behandling = it,
+                                                   tekst = loggTekst,
+                                                   mottattDato = datoMottatt)
+            }
+
             integrasjonClient.ferdigstillJournalpost(journalpostId = journalpostId, journalførendeEnhet = behandlendeEnhet)
             integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
         }.onFailure {
@@ -132,6 +164,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
     }
 
     companion object {
+
         private val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }

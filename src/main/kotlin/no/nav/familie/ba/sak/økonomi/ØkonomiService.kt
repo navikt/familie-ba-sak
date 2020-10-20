@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
-import no.nav.familie.ba.sak.common.RessursUtils.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
+import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId

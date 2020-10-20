@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.journalføring.domene.DokumentType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -45,14 +45,13 @@ class LoggService(
         ))
     }
 
-    fun opprettMottattDokument(behandling: Behandling, datoMottatt: LocalDateTime, dokumentType: DokumentType) {
+    fun opprettMottattDokument(behandling: Behandling, tekst: String, mottattDato: LocalDateTime) {
         lagre(Logg(
-                opprettetTidspunkt = datoMottatt,
                 behandlingId = behandling.id,
                 type = LoggType.DOKUMENT_MOTTATT,
-                tittel = "${dokumentType.navn} ble mottatt",
+                tittel = "Brev mottatt ${mottattDato.toLocalDate().tilKortString()}",
                 rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                tekst = ""
+                tekst = tekst
         ))
     }
 
