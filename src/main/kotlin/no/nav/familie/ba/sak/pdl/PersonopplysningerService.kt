@@ -21,13 +21,13 @@ class PersonopplysningerService(
         val integrasjonClient: IntegrasjonClient) {
 
     fun hentPersoninfoMedRelasjoner(personIdent: String): PersonInfo {
-        val personinfo = hentPersoninfo(personIdent, PersonInfoQuery.MED_RELASJONER)
+        val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FAMILIERELASJONSROLLE>>()
         val familierelasjoner = personinfo.familierelasjoner.map {
             val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
                              ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
-                val relasjonsinfo = hentPersoninfo(it.personIdent.id, PersonInfoQuery.ENKEL)
+                val relasjonsinfo = hentPersoninfo(it.personIdent.id)
                 Familierelasjon(personIdent = it.personIdent,
                                 relasjonsrolle = it.relasjonsrolle,
                                 fødselsdato = relasjonsinfo.fødselsdato,
@@ -47,7 +47,11 @@ class PersonopplysningerService(
         return personinfo.copy(familierelasjoner = familierelasjoner, familierelasjonerMaskert = familierelasjonMaskert)
     }
 
-    fun hentPersoninfo(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
+    fun hentPersoninfo(personIdent: String): PersonInfo {
+        return hentPersoninfoMedQuery(personIdent, PersonInfoQuery.ENKEL)
+    }
+
+    private fun hentPersoninfoMedQuery(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
         return pdlRestClient.hentPerson(personIdent, personInfoQuery)
     }
 
