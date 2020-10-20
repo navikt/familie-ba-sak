@@ -5,17 +5,15 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -23,8 +21,10 @@ import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
@@ -37,7 +37,6 @@ import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -47,18 +46,21 @@ internal class SaksstatistikkServiceTest {
 
 
     private val behandlingService: BehandlingService = mockk()
+    private val behandlingRestultatService: BehandlingResultatService = mockk()
     private val journalføringRepository: JournalføringRepository = mockk()
     private val journalføringService: JournalføringService = mockk()
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
     private val totrinnskontrollService: TotrinnskontrollService = mockk()
     private val fagsakService: FagsakService = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
+    private val persongrunnlagService: PersongrunnlagService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
 
     private val vedtakService: VedtakService = mockk()
 
     private val sakstatistikkService = SaksstatistikkService(
             behandlingService,
+            behandlingRestultatService,
             journalføringRepository,
             journalføringService,
             arbeidsfordelingService,
@@ -66,6 +68,7 @@ internal class SaksstatistikkServiceTest {
             vedtakService,
             fagsakService,
             personopplysningerService,
+            persongrunnlagService,
             featureToggleService)
 
 
@@ -82,8 +85,12 @@ internal class SaksstatistikkServiceTest {
     @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true)
+        val behandlingResultat = lagBehandlingResultat(behandling.fagsak.hentAktivIdent().ident,
+                                                       behandling,
+                                                       Resultat.JA).copy(samletResultat = BehandlingResultatType.INNVILGET)
         val vedtak = lagVedtak(behandling)
         every { behandlingService.hent(any()) } returns behandling
+        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = SYSTEM_NAVN,
@@ -115,12 +122,21 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.beslutter).isNull()
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
-
+        assertThat(behandlingDvh?.resultat).isEqualTo(behandlingResultat.samletResultat.name)
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
+                .extracting("resultatBegrunnelse")
+                .containsOnly("Alle vilkår er oppfylt")
+        assertThat(behandlingDvh?.resultatBegrunnelser)
+                .extracting("resultatBegrunnelseBeskrivelse").toString()
+                .endsWith("Vilkår vurdert for barn: [Er under 18 år, Bor med søker, Gift/partnerskap, Bosatt i riket]")
     }
 
     @Test
     fun `Skal mappe til behandlingDVH for manuell rute`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val behandlingResultat = lagBehandlingResultat("01010000001",
+                                                       behandling,
+                                                       Resultat.NEI).copy(samletResultat = BehandlingResultatType.AVSLÅTT)
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = "Saksbehandler",
@@ -129,17 +145,14 @@ internal class SaksstatistikkServiceTest {
                 behandling = behandling
         )
 
-        val vedtak = lagVedtak(behandling).also {
-            it.utbetalingBegrunnelser.add(
-                    UtbetalingBegrunnelse(vedtak = it,
-                                          fom = LocalDate.now(),
-                                          tom = LocalDate.now(),
-                                          begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
-                                          vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_BOR_HOS_SØKER))
-        }
-
+        val vedtak = lagVedtak(behandling)
 
         every { behandlingService.hent(any()) } returns behandling
+        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
+        every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
+        every { persongrunnlagService.hentBarna(any()) } returns listOf(tilfeldigPerson()
+                                                                                .copy(personIdent = PersonIdent("01010000001")))
+
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { journalføringRepository.findByBehandlingId(any()) } returns listOf(DbJournalpost(1,
                                                                                                  "foo",
@@ -169,7 +182,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.beslutter).isNull()
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
                 .extracting("resultatBegrunnelse")
-                .containsOnly("INNVILGET_BOR_HOS_SØKER")
+                .containsOnly("BOSATT_I_RIKET ikke oppfylt for barn 01010000001")
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
 
