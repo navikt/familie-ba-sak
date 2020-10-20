@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.økonomi
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
@@ -20,7 +21,8 @@ class ØkonomiService(
         private val behandlingResultatService: BehandlingResultatService,
         private val vedtakService: VedtakService,
         private val beregningService: BeregningService,
-        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
+        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
+        private val behandlingService: BehandlingService
 ) {
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId: Long, saksbehandlerId: String) {
@@ -45,16 +47,24 @@ class ØkonomiService(
         val erFørsteIverksatteBehandlingPåFagsak =
                 beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
 
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = oppdatertBehandling.fagsak.id,
+                                                                                      behandlingFørFølgende = oppdatertBehandling)
+
         val utbetalingsoppdrag: Utbetalingsoppdrag =
                 if (erFørsteIverksatteBehandlingPåFagsak) {
                     utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
-                            saksbehandlerId,
-                            vedtak,
-                            behandlingResultatType,
-                            erFørsteIverksatteBehandlingPåFagsak,
-                            oppdaterteKjeder = oppdaterteKjeder)
+                            saksbehandlerId = saksbehandlerId,
+                            vedtak = vedtak,
+                            behandlingResultatType = behandlingResultatType,
+                            erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
+                            oppdaterteKjeder = oppdaterteKjeder,
+                            forrigeBehandling = forrigeBehandling
+                    )
                 } else {
-                    val forrigeBehandling = vedtakService.hent(vedtak.forrigeVedtakId!!).behandling
+                    if (forrigeBehandling == null) {
+                        error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
+                    }
+
                     val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
                     // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
                     val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
@@ -68,7 +78,9 @@ class ØkonomiService(
                             behandlingResultatType,
                             erFørsteIverksatteBehandlingPåFagsak,
                             forrigeKjeder = forrigeKjeder,
-                            oppdaterteKjeder = oppdaterteKjeder)
+                            oppdaterteKjeder = oppdaterteKjeder,
+                            forrigeBehandling = forrigeBehandling
+                    )
                 }
 
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)

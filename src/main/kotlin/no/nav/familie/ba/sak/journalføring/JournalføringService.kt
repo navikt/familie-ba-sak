@@ -78,13 +78,10 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
 
         val fagsak = when (tilknyttedeBehandlingIder.isNotEmpty()) {
             true -> {
-                val fagsaker = behandlinger.map { it.fagsak }.toSet()
+                behandlinger.map { it.fagsak }.toSet().firstOrNull()
+                ?: throw FunksjonellFeil(melding = "Behandlings'idene tilhørerer ikke samme fagsak, eller vi fant ikke fagsaken.",
+                                         frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn.")
 
-                if (fagsaker.size != 1) {
-                    throw Feil(message = "Behandlings'idene tilhørerer ikke samme fagsak, eller vi fant ikke fagsaken.",
-                               frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn.")
-                }
-                fagsaker.first()
             }
             false -> null
         }

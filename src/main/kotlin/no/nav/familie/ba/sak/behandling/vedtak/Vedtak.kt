@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import java.time.LocalDate
 import javax.persistence.*
 
@@ -19,9 +20,6 @@ class Vedtak(
         @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
         val behandling: Behandling,
 
-        @Column(name = "ansvarlig_enhet", nullable = true)
-        var ansvarligEnhet: String? = null,
-
         @Column(name = "vedtaksdato", nullable = true)
         var vedtaksdato: LocalDate? = null,
 
@@ -30,9 +28,6 @@ class Vedtak(
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
-
-        @Column(name = "fk_forrige_vedtak_id")
-        val forrigeVedtakId: Long? = null,
 
         @Column(name = "opphor_dato")
         val opphørsdato: LocalDate? = null,
@@ -47,7 +42,7 @@ class Vedtak(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, forrigeVedtakId=$forrigeVedtakId, opphørsdato=$opphørsdato)"
+        return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv, opphørsdato=$opphørsdato)"
     }
 
     private fun settUtbetalingBegrunnelser(nyeBegrunnelser: Set<UtbetalingBegrunnelse>) {
@@ -64,8 +59,9 @@ class Vedtak(
     }
 
     fun slettUtbetalingBegrunnelse(begrunnelseId: Long) {
-        hentUtbetalingBegrunnelse(begrunnelseId) ?: throw Feil(message = "Prøver å slette en begrunnelse som ikke finnes",
-                                                               frontendFeilmelding = "Begrunnelsen du prøver å slette finnes ikke i systemet.")
+        hentUtbetalingBegrunnelse(begrunnelseId)
+        ?: throw FunksjonellFeil(melding = "Prøver å slette en begrunnelse som ikke finnes",
+                                 frontendFeilmelding = "Begrunnelsen du prøver å slette finnes ikke i systemet.")
 
         settUtbetalingBegrunnelser(utbetalingBegrunnelser.filter { begrunnelseId != it.id }.toSet())
     }

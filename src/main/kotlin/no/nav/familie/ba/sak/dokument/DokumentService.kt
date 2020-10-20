@@ -60,7 +60,7 @@ class DokumentService(
                                                     antallBarn = if (vedtak.behandling.skalBehandlesAutomatisk)
                                                         personopplysningGrunnlag.barna.size else null,
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr(),
-                                                    målform = søker.målform.toString())
+                                                    maalform = søker.målform.toString())
 
             val malMedData = malerService.mapTilVedtakBrevfelter(vedtak,
                                                                  behandlingResultatType
@@ -88,7 +88,7 @@ class DokumentService(
                 val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
                                                         navn = søker.navn,
                                                         dokumentDato = LocalDate.now().tilDagMånedÅr(),
-                                                        målform = søker.målform.toString())
+                                                        maalform = søker.målform.toString())
                 val malMedData = when (brevmal) {
                     BrevType.INNHENTE_OPPLYSNINGER -> malerService.mapTilInnhenteOpplysningerBrevfelter(behandling,
                                                                                                         manueltBrevRequest)

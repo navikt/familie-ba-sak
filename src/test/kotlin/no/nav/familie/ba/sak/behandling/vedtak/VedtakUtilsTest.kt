@@ -28,7 +28,7 @@ class VedtakUtilsTest {
     @Test
     fun `hjemler skal være unike og sorterte ved kombinasjon av flere begrunnelser`() {
         val utbetalingBegrunnelser = arrayOf(VedtakBegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                                             VedtakBegrunnelse.SATSENDRING)
+                                             VedtakBegrunnelse.INNVILGET_SATSENDRING)
                 .map { lagUtbetalingBegrunnesle(vedtakBegrunnelse = it) }
                 .toMutableSet()
         val vedtak = lagVedtak(utbetalingBegrunnelser = utbetalingBegrunnelser)
