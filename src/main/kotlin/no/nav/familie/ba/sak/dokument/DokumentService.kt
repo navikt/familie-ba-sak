@@ -101,7 +101,7 @@ class DokumentService(
                     onFailure = {
                         if (it is Feil) {
                             throw it
-                        } else throw Feil(message = "Klarte ikke generere brev for innhente opplysninger",
+                        } else throw Feil(message = "Klarte ikke generere brev for ${brevmal.visningsTekst}",
                                           frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                                           throwable = it)
@@ -128,7 +128,7 @@ class DokumentService(
 
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
                                             behandlingId = behandling.id,
-                                            loggTekst = "${brevmal.visningsTekst}",
+                                            loggTekst = "${brevmal.visningsTekst.capitalize()}",
                                             loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                             brevType = brevmal)
     }
