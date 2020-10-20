@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
 import no.nav.familie.ba.sak.beregning.SatsService.BeløpPeriode
+import no.nav.familie.ba.sak.beregning.SatsService.finnSatsendring
 import no.nav.familie.ba.sak.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.SatsType
@@ -158,10 +159,7 @@ object TilkjentYtelseUtils {
     }
 
     private fun LocalDateSegment<Int>.erSatsendring(inkluderteAndeler: List<AndelTilkjentYtelse>): Boolean {
-        val satserMedStartISegment = SatsService.hentAlleSatser()
-                .filter { it.gyldigFom == this.fom }
-                .filter { it.gyldigFom != LocalDate.MIN }
-                .map { it.beløp }
+        val satserMedStartISegment = finnSatsendring(this.fom).map { it.beløp }
         val andelerMedStartISegment = inkluderteAndeler.filter { it.stønadFom == this.fom }
         return andelerMedStartISegment.find { satserMedStartISegment.contains(it.beløp) } != null
     }
