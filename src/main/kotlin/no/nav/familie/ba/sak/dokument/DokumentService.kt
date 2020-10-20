@@ -128,7 +128,7 @@ class DokumentService(
 
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
                                             behandlingId = behandling.id,
-                                            loggTekst = "Brev for ${brevmal.visningsTekst} er sendt til bruker",
+                                            loggTekst = "${brevmal.visningsTekst}",
                                             loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                             brevType = brevmal)
     }
