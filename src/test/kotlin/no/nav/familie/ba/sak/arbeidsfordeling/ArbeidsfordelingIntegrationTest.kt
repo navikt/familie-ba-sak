@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.oppgave.OppgaveService
-import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -282,7 +281,7 @@ class ArbeidsfordelingMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfo(barnUtenDiskresjonskode, PersonInfoQuery.ENKEL)
+            personopplysningerServiceMock.hentPersoninfo(barnUtenDiskresjonskode)
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
@@ -309,7 +308,7 @@ class ArbeidsfordelingMockConfiguration {
         )
 
         every {
-            personopplysningerServiceMock.hentPersoninfo(barnMedDiskresjonskode, PersonInfoQuery.ENKEL)
+            personopplysningerServiceMock.hentPersoninfo(barnMedDiskresjonskode)
         } returns PersonInfo(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",

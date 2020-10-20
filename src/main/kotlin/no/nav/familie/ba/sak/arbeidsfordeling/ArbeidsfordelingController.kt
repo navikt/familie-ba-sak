@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.arbeidsfordeling
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -26,8 +26,8 @@ class ArbeidsfordelingController(private val fagsakService: FagsakService,
     fun endreBehandlendeEnhet(@PathVariable behandlingId: Long,
                               @RequestBody
                               endreBehandlendeEnhet: RestEndreBehandlendeEnhet): ResponseEntity<Ressurs<RestFagsak>> {
-        if (endreBehandlendeEnhet.begrunnelse.isBlank()) throw Feil(message = "Begrunnelse kan ikke være tom",
-                                                                    frontendFeilmelding = "Du må skrive en begrunnelse for endring av enhet")
+        if (endreBehandlendeEnhet.begrunnelse.isBlank()) throw FunksjonellFeil(melding = "Begrunnelse kan ikke være tom",
+                                                                               frontendFeilmelding = "Du må skrive en begrunnelse for endring av enhet")
 
         val behandling = behandlingService.hent(behandlingId)
         arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(behandling = behandling,

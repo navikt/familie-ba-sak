@@ -42,7 +42,20 @@ data class TilkjentYtelse(
                    cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE])
         val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf()
 ) {
+
     fun erSendtTilIverksetting(): Boolean = utbetalingsoppdrag != null
+
+    fun erLøpende(utbetalingsmåned: LocalDate) =
+            this.stønadTom!! >= utbetalingsmåned &&
+            this.stønadFom != null &&
+            !this.behandling.gjeldendeForFremtidigUtbetaling
+
+    fun erUtløpt(utbetalingsmåned: LocalDate) =
+            this.stønadTom!! < utbetalingsmåned &&
+            this.behandling.gjeldendeForFremtidigUtbetaling
+
+    fun harOpphørPåTidligereBehandling(utbetalingsmåned: LocalDate) =
+            this.opphørFom != null && this.opphørFom!! <= utbetalingsmåned
 }
 
 private fun kombinerAndeler(lhs: LocalDateTimeline<List<AndelTilkjentYtelse>>,

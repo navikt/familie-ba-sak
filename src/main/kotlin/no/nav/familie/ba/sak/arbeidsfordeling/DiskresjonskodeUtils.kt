@@ -14,6 +14,12 @@ fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebesk
                                  neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG -> {
                                      neste
                                  }
+                                 person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND -> {
+                                     person
+                                 }
+                                 neste.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND -> {
+                                     neste
+                                 }
                                  person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.FORTROLIG -> {
                                      person
                                  }

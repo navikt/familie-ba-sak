@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.beregning
 
+import no.nav.familie.ba.sak.behandling.Behandlingutils
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
@@ -8,7 +9,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
@@ -44,11 +44,14 @@ class BeregningService(
         return tilkjentYtelseRepository.findByBehandling(behandlingId)
     }
 
+    fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long): TilkjentYtelse? {
+        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+    }
+
     fun hentSisteTilkjentYtelseFørBehandling(behandling: Behandling): TilkjentYtelse? {
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId = behandling.id)
-        val forrigeBehandling = behandlinger
-                .sortedBy { it.opprettetTidspunkt }
-                .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+        val forrigeBehandling =
+                Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id),
+                                                                behandlingFørFølgende = behandling)
         return if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(behandlingId = forrigeBehandling.id) else null
     }
 
