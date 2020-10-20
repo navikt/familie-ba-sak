@@ -185,7 +185,6 @@ class ClientMocks {
             }
         }
 
-        val idSlot = slot<String>()
         every {
             mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
         } answers {
