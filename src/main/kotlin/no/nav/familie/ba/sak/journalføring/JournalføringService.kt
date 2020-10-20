@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.journalføring
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.restDomene.RestOppdaterJournalpost
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
@@ -120,25 +119,7 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
         runCatching {
             integrasjonClient.oppdaterJournalpost(request, journalpostId)
 
-            val journalpost = hentJournalpost(journalpostId)
-            assertGenerelleSuksessKriterier(journalpost)
-            val loggTekst = journalpost.data?.dokumenter?.fold("") { loggTekst, dokumentInfo ->
-                loggTekst +
-                "${dokumentInfo.tittel}" +
-                dokumentInfo.logiskeVedlegg?.fold("") { logiskeVedleggTekst, logiskVedlegg ->
-                    logiskeVedleggTekst +
-                    "\n\u2002\u2002${logiskVedlegg.tittel}"
-                } + "\n"
-            } ?: throw FunksjonellFeil("Fant ingen dokumenter",
-                                       frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.")
-
-            val datoMottatt = journalpost.data?.datoMottatt ?: throw FunksjonellFeil("Fant ingen dokumenter",
-                                                                                     frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.")
-            behandlinger.forEach {
-                loggService.opprettMottattDokument(behandling = it,
-                                                   tekst = loggTekst,
-                                                   mottattDato = datoMottatt)
-            }
+            genererOgOpprettLogg(journalpostId, behandlinger)
 
             integrasjonClient.ferdigstillJournalpost(journalpostId = journalpostId, journalførendeEnhet = behandlendeEnhet)
             integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
@@ -158,6 +139,28 @@ class JournalføringService(private val integrasjonClient: IntegrasjonClient,
                                       oppgavetype = Oppgavetype.BehandleSak,
                                       fristForFerdigstillelse = LocalDate.now(),
                                       tilordnetNavIdent = navIdent)
+    }
+
+    private fun genererOgOpprettLogg(journalpostId: String, behandlinger: List<Behandling>) {
+        val journalpost = hentJournalpost(journalpostId)
+        assertGenerelleSuksessKriterier(journalpost)
+        val loggTekst = journalpost.data?.dokumenter?.fold("") { loggTekst, dokumentInfo ->
+            loggTekst +
+            "${dokumentInfo.tittel}" +
+            dokumentInfo.logiskeVedlegg?.fold("") { logiskeVedleggTekst, logiskVedlegg ->
+                logiskeVedleggTekst +
+                "\n\u2002\u2002${logiskVedlegg.tittel}"
+            } + "\n"
+        } ?: throw FunksjonellFeil("Fant ingen dokumenter",
+                                   frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.")
+
+        val datoMottatt = journalpost.data?.datoMottatt ?: throw FunksjonellFeil("Fant ingen dokumenter",
+                                                                                 frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.")
+        behandlinger.forEach {
+            loggService.opprettMottattDokument(behandling = it,
+                                               tekst = loggTekst,
+                                               mottattDato = datoMottatt)
+        }
     }
 
     companion object {
