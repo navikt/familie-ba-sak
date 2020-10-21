@@ -27,6 +27,9 @@ data class UtbetalingsperiodeMal(
     /**
      * Lager utbetalingsperioder som legges på utbetalingsoppdrag. En utbetalingsperiode tilsvarer linjer hos økonomi
      *
+     * Denne metoden brukes også til simulering og på dette tidspunktet er ikke vedtaksdatoen satt.
+     * Derfor defaulter vi til now() når vedtaksdato mangler.
+     *
      * @param[andel] andel som skal mappes til periode
      * @param[periodeIdOffset] brukes til å synce våre linjer med det som ligger hos økonomi
      * @param[forrigePeriodeIdOffset] peker til forrige i kjeden. Kun relevant når IKKE erEndringPåEksisterendePeriode
