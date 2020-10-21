@@ -71,7 +71,7 @@ spring:
 
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
-FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.intern.nav.no
+FAMILIE_BA_DOKGEN_API_URL: https://familie-ba-dokgen.dev.intern.nav.no
 NORG2_BASE_URL: https://app-q1.adeo.no/norg2
 STS_URL: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
 PDL_URL: http://pdl-api
