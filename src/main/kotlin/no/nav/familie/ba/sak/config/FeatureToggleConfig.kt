@@ -5,6 +5,7 @@ import no.finn.unleash.UnleashContext
 import no.finn.unleash.UnleashContextProvider
 import no.finn.unleash.strategy.Strategy
 import no.finn.unleash.util.UnleashConfig
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -39,7 +40,9 @@ class FeatureToggleConfig(private val enabled: Boolean,
                                              .appName(unleash.applicationName)
                                              .unleashAPI(unleash.uri)
                                              .unleashContextProvider(lagUnleashContextProvider())
-                                             .build(), ByClusterStrategy(unleash.cluster))
+                                             .build(),
+                                     ByClusterStrategy(unleash.cluster),
+                                     ByAnsvarligSaksbehandler(unleash.cluster))
 
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
@@ -58,12 +61,24 @@ class FeatureToggleConfig(private val enabled: Boolean,
     }
 
     class ByClusterStrategy(private val clusterName: String) : Strategy {
+
         override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
             if (parameters.isNullOrEmpty()) return false
             return parameters["cluster"]?.contains(clusterName) ?: false
         }
 
         override fun getName(): String = "byCluster"
+    }
+
+    class ByAnsvarligSaksbehandler(private val clusterName: String) : Strategy {
+
+        override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
+            if (parameters.isNullOrEmpty()) return false
+            LOG.info("Parameters: $parameters, saksbehandler: ${SikkerhetContext.hentSaksbehandler()}")
+            return parameters["cluster"]?.contains(clusterName) ?: false
+        }
+
+        override fun getName(): String = "byAnsvarligSaksbehandler"
     }
 
     private fun lagDummyFeatureToggleService(): FeatureToggleService {
@@ -77,6 +92,10 @@ class FeatureToggleConfig(private val enabled: Boolean,
         }
     }
 
+    companion object {
+
+        val LOG = LoggerFactory.getLogger(this::class.java)
+    }
 }
 
 
