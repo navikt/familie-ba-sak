@@ -431,6 +431,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         return vedtakRepository.save(vedtak)
     }
 
+    /**
+     * Oppdater vedtaksdato og brev.
+     * Vi oppdaterer brevet for å garantere å få riktig beslutter og vedtaksdato.
+     */
     fun besluttVedtak(vedtak: Vedtak) {
         vedtak.vedtaksdato = now()
         lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
