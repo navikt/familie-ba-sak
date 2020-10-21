@@ -18,6 +18,8 @@ import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Service
 class StønadsstatistikkService(private val behandlingService: BehandlingService,
@@ -30,12 +32,17 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
 
         val behandling = behandlingService.hent(behandlingId)
 
+        //DVH ønsker tidspunkt med klokkeslett
+        val datoVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.vedtaksdato
+                ?: error("Fant ikke vedtaksdato")
+        val klokkeslettVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.endretTidspunkt?.toLocalTime()
+                ?: error("Fant ikke sist endret klokkeslett for vedtaket")
+        val tidspunktVedtak = LocalDateTime.of(datoVedtak, klokkeslettVedtak)
 
         return VedtakDVH(fagsakId = behandling.fagsak.id.toString(),
                          behandlingsId = behandlingId.toString(),
-                         tidspunktVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.vedtaksdato
-                                           ?: error("Fant ikke vedtaksdato"),
-                         personIdent = behandling.fagsak.hentAktivIdent().ident,
+                         tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
+                         person = hentSøker(behandlingId),
                          ensligForsørger = utledEnsligForsørger(behandlingId), //TODO implementere støtte for dette
                          kategori = Kategori.valueOf(behandling.kategori.name),
                          underkategori = Underkategori.valueOf(behandling.underkategori.name),
@@ -48,6 +55,11 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                          utbetalingsperioder = hentUtbetalingsperioder(behandlingId))
     }
 
+    private fun hentSøker(behandlingId: Long): PersonDVH {
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId) ?: error("Fant ikke aktivt persongrunnlag")
+        val søker = persongrunnlag.søker
+        return lagPersonDVH(søker)
+    }
 
     private fun hentUtbetalingsperioder(behandlingId: Long)
             : List<UtbetalingsperiodeDVH> {
@@ -96,19 +108,7 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                             personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
                             ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                     UtbetalingsDetaljDVH(
-                            person = PersonDVH(
-                                    rolle = personForAndel.type.name,
-                                    statsborgerskap = personForAndel.statsborgerskap.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode },
-                                    bostedsland = hentLandkode(personForAndel),
-                                    primærland = "IKKE IMPLMENTERT",
-                                    sekundærland = "IKKE IMPLEMENTERT",
-                                    delingsprosentOmsorg = 0, // TODO ikke implementert
-                                    delingsprosentYtelse = 0, // TODO ikke implementert
-                                    annenpartBostedsland = "Ikke implementert",
-                                    annenpartPersonident = "ikke implementert",
-                                    annenpartStatsborgerskap = "ikke implementert",
-                                    personIdent = personForAndel.personIdent.ident
-                            ),
+                            person = lagPersonDVH(personForAndel),
                             klassekode = andel.type.klassifisering,
                             utbetaltPrMnd = andel.beløp,
                             delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
@@ -116,6 +116,22 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                 }
         )
 
+    }
+
+    private fun lagPersonDVH(person: Person): PersonDVH {
+        return PersonDVH(
+                rolle = person.type.name,
+                statsborgerskap = person.statsborgerskap.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode },
+                bostedsland = hentLandkode(person),
+                primærland = "IKKE IMPLMENTERT",
+                sekundærland = "IKKE IMPLEMENTERT",
+                delingsprosentOmsorg = 0, // TODO ikke implementert
+                delingsprosentYtelse = 0, // TODO ikke implementert
+                annenpartBostedsland = "Ikke implementert",
+                annenpartPersonident = "ikke implementert",
+                annenpartStatsborgerskap = "ikke implementert",
+                personIdent = person.personIdent.ident
+        )
     }
 
     private fun hentLandkode(person: Person): String {
@@ -133,5 +149,6 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
     companion object {
         val LOG = LoggerFactory.getLogger(this::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
+        val TIMEZONE = ZoneId.of("Europe/Paris")
     }
 }
