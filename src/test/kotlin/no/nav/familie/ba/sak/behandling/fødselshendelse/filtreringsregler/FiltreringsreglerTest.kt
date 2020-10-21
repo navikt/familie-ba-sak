@@ -49,14 +49,15 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(8).minusDays(1)),
                                                      PersonInfo(LocalDate.now().minusMonths(8)))
 
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor,
-                               listOf(barnet1, barnet2),
-                               restenAvBarna,
-                               morLever = true,
-                               barnetLever = true,
-                               morHarVerge = false))
 
+        val evaluering = Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.evaluer(
+                Fakta(mor,
+                      listOf(barnet1, barnet2),
+                      restenAvBarna,
+                      morLever = true,
+                      barnetLever = true,
+                      morHarVerge = false)
+        )
         assertThat(evaluering.resultat).isEqualTo(Resultat.JA)
     }
 
@@ -68,16 +69,15 @@ internal class FiltreringsreglerTest {
         val restenAvBarna: List<PersonInfo> = listOf(PersonInfo(LocalDate.now().minusMonths(5).minusDays(1)),
                                                      PersonInfo(LocalDate.now().minusMonths(8)))
 
-        val evaluering = Filtreringsregler.hentSamletSpesifikasjon()
-                .evaluer(Fakta(mor,
-                               listOf(barnet1, barnet2),
-                               restenAvBarna,
-                               morLever = true,
-                               barnetLever = true,
-                               morHarVerge = false))
+        val evaluering = Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.spesifikasjon.evaluer(
+                Fakta(mor,
+                      listOf(barnet1, barnet2),
+                      restenAvBarna,
+                      morLever = true,
+                      barnetLever = true,
+                      morHarVerge = false))
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.NEI)
-        assertEnesteRegelMedResultatNei(evaluering.children, Filtreringsregler.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
     }
 
     @Test
