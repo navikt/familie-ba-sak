@@ -58,6 +58,10 @@ enum class StegType(val rekkefølge: Int,
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
+    HENLEGG_SØKNAD(
+            rekkefølge = 5,
+            tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES, BehandlingStatus.FATTER_VEDTAK)),
     IVERKSETT_MOT_OPPDRAG(
             rekkefølge = 5,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
@@ -129,6 +133,7 @@ enum class StegType(val rekkefølge: Int,
                         BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                         IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                         VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                        HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
                         FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                         BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                         else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
@@ -144,6 +149,7 @@ enum class StegType(val rekkefølge: Int,
                         VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                         JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                         DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                        HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
                         FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                         BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                     }
@@ -158,4 +164,16 @@ enum class BehandlerRolle(val nivå: Int) {
     SAKSBEHANDLER(2),
     VEILEDER(1),
     UKJENT(0)
+}
+
+enum class BehandlingStegStatus(val navn: String, val beskrivelse: String) {
+    STARTET("STARTET", "Steget er startet"),
+    INNGANG("INNGANG", "Inngangkriterier er ikke oppfylt"),
+    UTGANG("UTGANG", "Utgangskriterier er ikke oppfylt"),
+    VENTER("VENTER", "På vent"),
+    AVBRUTT("AVBRUTT", "Avbrutt"),
+    UTFØRT("UTFØRT", "Utført"),
+    FREMOVERFØRT("FREMOVERFØRT", "Fremoverført"),
+    TILBAKEFØRT("TILBAKEFØRT", "Tilbakeført"),
+    UDEFINERT("-", "Ikke definert")
 }

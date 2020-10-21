@@ -100,6 +100,7 @@ fun initStatus(): BehandlingStatus {
 
 enum class BehandlingStatus {
     OPPRETTET,
+    HENLEGG,
     UTREDES,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
