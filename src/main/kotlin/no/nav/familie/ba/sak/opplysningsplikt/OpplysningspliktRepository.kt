@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.opplysningsplikt
 
-import no.nav.familie.ba.sak.opplysningsplikt.domene.Opplysningsplikt
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
