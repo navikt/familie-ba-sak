@@ -108,7 +108,7 @@ class MalerService(
                                         enhet: String,
                                         målform: Målform): String {
         val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(vedtak.behandling)
-        val etterbetalingsbeløp = etterbetalingsbeløpFraSimulering(vedtak).takeIf { it > 0 }
+        val etterbetalingsbeløp = økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }
         val innvilget = Innvilget(
                 enhet = enhet,
                 saksbehandler = totrinnskontroll.saksbehandler,
@@ -157,7 +157,8 @@ class MalerService(
                                      beregningOversikt: List<RestBeregningOversikt>,
                                      enhet: String): String {
         val barnaSortert = personopplysningGrunnlag.barna.sortedByDescending { it.fødselsdato }
-        val etterbetalingsbeløp = etterbetalingsbeløpFraSimulering(vedtak).takeIf { it > 0 }
+        val etterbetalingsbeløp = økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }
+
         val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker.navn,
                                                fodselsnummer = vedtak.behandling.fagsak.hentAktivIdent().ident,
                                                fodselsdato = Utils.slåSammen(barnaSortert.map { it.fødselsdato.tilKortString() }),
@@ -170,8 +171,6 @@ class MalerService(
                                                etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) })
         return objectMapper.writeValueAsString(flettefelter)
     }
-
-    private fun etterbetalingsbeløpFraSimulering(vedtak: Vedtak) = økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling
 
     private fun tilbakekrevingsbeløpFraSimulering() = 0 //TODO Må legges inn senere når simulering er implementert.
     // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
