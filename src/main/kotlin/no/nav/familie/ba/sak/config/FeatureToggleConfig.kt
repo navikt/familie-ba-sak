@@ -42,7 +42,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
                                              .unleashContextProvider(lagUnleashContextProvider())
                                              .build(),
                                      ByClusterStrategy(unleash.cluster),
-                                     ByAnsvarligSaksbehandler(unleash.cluster))
+                                     ByAnsvarligSaksbehandler())
 
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
@@ -70,12 +70,13 @@ class FeatureToggleConfig(private val enabled: Boolean,
         override fun getName(): String = "byCluster"
     }
 
-    class ByAnsvarligSaksbehandler(private val clusterName: String) : Strategy {
+    class ByAnsvarligSaksbehandler : Strategy {
 
         override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
             if (parameters.isNullOrEmpty()) return false
             LOG.info("Parameters: $parameters, saksbehandler: ${SikkerhetContext.hentSaksbehandler()}")
-            return parameters["cluster"]?.contains(clusterName) ?: false
+
+            return parameters["saksbehandler"]?.contains(SikkerhetContext.hentSaksbehandler()) ?: false
         }
 
         override fun getName(): String = "byAnsvarligSaksbehandler"
