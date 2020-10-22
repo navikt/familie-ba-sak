@@ -96,9 +96,9 @@ object TilkjentYtelseUtils {
 
     fun beregnNåværendeBeløp(beregningOversikt: List<RestBeregningOversikt>, vedtak: Vedtak): Int {
         return beregningOversikt.find {
-            it.periodeFom <= vedtak.vedtaksdato && it.periodeTom > vedtak.vedtaksdato
+            it.periodeFom <= vedtak.vedtaksdato?.toLocalDate() && it.periodeTom > vedtak.vedtaksdato?.toLocalDate()
         }?.utbetaltPerMnd
-               ?: beregningOversikt.find { it.periodeTom > vedtak.vedtaksdato }?.utbetaltPerMnd
+               ?: beregningOversikt.find { it.periodeTom > vedtak.vedtaksdato?.toLocalDate() }?.utbetaltPerMnd
                ?: throw Feil("Finner ikke gjeldende beløp for virkningstidspunkt",
                              "Finner ikke gjeldende beløp for virkningstidspunkt")
     }

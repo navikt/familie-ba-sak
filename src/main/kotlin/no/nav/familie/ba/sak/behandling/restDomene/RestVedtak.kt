@@ -2,9 +2,8 @@ package no.nav.familie.ba.sak.behandling.restDomene
 
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
-import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
+import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -38,7 +37,7 @@ data class RestVedtakBegrunnelse(
 fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
         aktiv = this.aktiv,
         personBeregninger = restVedtakPerson,
-        vedtaksdato = this.vedtaksdato,
+        vedtaksdato = this.vedtaksdato?.toLocalDate(),
         id = this.id,
         utbetalingBegrunnelser = this.utbetalingBegrunnelser.map {
             it.toRestUtbetalingBegrunnelse()

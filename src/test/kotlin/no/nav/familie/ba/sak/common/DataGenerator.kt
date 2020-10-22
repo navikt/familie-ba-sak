@@ -23,7 +23,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -129,7 +128,7 @@ fun lagVedtak(
         Vedtak(
                 id = nesteVedtakId(),
                 behandling = behandling,
-                vedtaksdato = LocalDate.now(),
+                vedtaksdato = LocalDateTime.now(),
                 opphørsdato = opphørsdato,
                 utbetalingBegrunnelser = utbetalingBegrunnelser,
         )

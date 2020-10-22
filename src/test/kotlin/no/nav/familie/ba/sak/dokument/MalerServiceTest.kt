@@ -18,11 +18,11 @@ import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 class MalerServiceTest {
 
@@ -56,7 +56,7 @@ class MalerServiceTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
         val vedtak = lagVedtak(behandling)
-        vedtak.vedtaksdato = fødselsdato.plusDays(7)
+        vedtak.vedtaksdato = LocalDateTime.of(fødselsdato.year, fødselsdato.month, fødselsdato.plusDays(7).dayOfMonth, 4, 35)
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                                                          fødselsdato.plusYears(18).toString(),
                                                          YtelseType.ORDINÆR_BARNETRYGD,
@@ -100,7 +100,7 @@ class MalerServiceTest {
         val barn1 = personopplysningGrunnlag.barna.first()
         val barn2 = personopplysningGrunnlag.barna.last()
         val vedtak = lagVedtak(behandling)
-        vedtak.vedtaksdato = barn2.fødselsdato.plusMonths(6)
+        vedtak.vedtaksdato = LocalDateTime.of(barn2.fødselsdato.year, barn2.fødselsdato.plusMonths(6).month,barn2.fødselsdato.dayOfMonth,4, 35)
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(barn1.fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                                                               barn1.fødselsdato.plusYears(18).sisteDagIMåned().toString(),
                                                               ytelseType = YtelseType.ORDINÆR_BARNETRYGD,

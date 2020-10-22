@@ -15,7 +15,8 @@ import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
@@ -96,7 +97,7 @@ internal class SaksstatistikkServiceTest {
                                                                          SaksstatistikkService.TIMEZONE))
         assertThat(behandlingDvh.registrertDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
                                                                             SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
+        assertThat(behandlingDvh.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh.behandlingId).isEqualTo(behandling.id.toString())
         assertThat(behandlingDvh.relatertBehandlingId).isEqualTo("1")
         assertThat(behandlingDvh.sakId).isEqualTo(behandling.fagsak.id.toString())
@@ -152,7 +153,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh.mottattDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
         assertThat(behandlingDvh.registrertDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
+        assertThat(behandlingDvh.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh.behandlingId).isEqualTo(behandling.id.toString())
         assertThat(behandlingDvh.relatertBehandlingId).isEqualTo("1")
         assertThat(behandlingDvh.sakId).isEqualTo(behandling.fagsak.id.toString())
