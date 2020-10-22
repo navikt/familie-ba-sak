@@ -367,15 +367,18 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
             val utgjørendeVilkår = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
                 when {
                     vilkårResultat.vilkårType != oppdatertVilkår -> false
-                    vilkårResultat.periodeFom == null -> {
-                        false
-                    }
+                    vilkårResultat.periodeFom == null -> false
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        vilkårResultat.periodeFom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
+                        vilkårResultat.periodeFom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.forrigeMåned() &&
+                        vilkårResultat.resultat == Resultat.JA
+                    }
+                    oppdatertVilkår == Vilkår.UNDER_18_ÅR -> {
+                        vilkårResultat.periodeTom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.monthValue &&
+                        vilkårResultat.resultat == Resultat.NEI
                     }
                     else -> {
-                        vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(
-                                1).monthValue && vilkårResultat.resultat == Resultat.NEI
+                        vilkårResultat.periodeTom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.forrigeMåned() &&
+                        vilkårResultat.resultat == Resultat.NEI
                     }
                 }
             }
