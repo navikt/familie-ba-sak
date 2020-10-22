@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPers
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.behandling.vilkår.VilkårsvurderingUtils.muterPersonResultatPut
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.gdpr.GDPRService
 import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.ba.sak.nare.Resultat
@@ -111,8 +112,8 @@ class VilkårService(
                 )
 
                 if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
-                    throw Feil(message = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
-                               frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
+                    throw FunksjonellFeil(melding = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
+                                          frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
                     )
                 }
                 return behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = initieltSomErOppdatert)

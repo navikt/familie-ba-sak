@@ -60,10 +60,6 @@ object RessursUtils {
         ))
     }
 
-    inline fun <reified T> assertGenerelleSuksessKriterier(it: Ressurs<T>?) {
-        val status = it?.status ?: error("Finner ikke ressurs")
-        if (status == Ressurs.Status.SUKSESS && it.data == null) error("Ressurs har status suksess, men mangler data")
-    }
 
     fun lagFrontendMelding(tittel: String, feilmeldinger: List<String>): String {
         var melding = tittel
@@ -72,4 +68,9 @@ object RessursUtils {
         }
         return melding
     }
+}
+
+inline fun <reified T> assertGenerelleSuksessKriterier(it: Ressurs<T>?) {
+    val status = it?.status ?: error("Finner ikke ressurs")
+    if (status == Ressurs.Status.SUKSESS && it.data == null) error("Ressurs har status suksess, men mangler data")
 }

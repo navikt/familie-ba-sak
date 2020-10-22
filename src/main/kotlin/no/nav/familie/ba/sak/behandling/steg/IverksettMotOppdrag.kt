@@ -16,7 +16,7 @@ class IverksettMotOppdrag(private val økonomiService: ØkonomiService,
                           private val totrinnskontrollService: TotrinnskontrollService,
                           private val infotrygdFeedClient: InfotrygdFeedClient,
                           private val vedtakService: VedtakService
-                          ) : BehandlingSteg<IverksettingTaskDTO> {
+) : BehandlingSteg<IverksettingTaskDTO> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
@@ -45,8 +45,8 @@ class IverksettMotOppdrag(private val økonomiService: ØkonomiService,
                 hentFnrStoenadsmottaker(behandling.fagsak),
                 hentVedtaksdato(behandling.id)))
 
-        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(data.vedtaksId,
-                                                               data.saksbehandlerId)
+        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak = vedtakService.hent(data.vedtaksId),
+                                                               saksbehandlerId = data.saksbehandlerId)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

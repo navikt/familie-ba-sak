@@ -229,7 +229,7 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                     Målform.NN -> "Barnetrygda er redusert fordi avtalen om delt bustad for barn fødd $barnasFødselsdatoer er opphøyrt frå $vilkårsdato."
                 }
     },
-    REDUKSJON_DELT_BOSTED_UENIGHET("Uenighet om opphør av avtale om delt bosted") { // TODO: Skal komme to kulepunkt hvor det nå er newline
+    REDUKSJON_DELT_BOSTED_UENIGHET("Uenighet om opphør av avtale om delt bosted") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2,11)
@@ -244,8 +244,8 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
                                   "\nNår de er usamde om avtalen om delt bustad, kan vi opphøyre barnetrygda til deg frå og med månaden etter at vi fekk søknad om full barnetrygd. "
                 }
     },
-    SATSENDRING("Satsendring") {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.SATSENDRING
+    INNVILGET_SATSENDRING("Satsendring") {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
 
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
         override fun hentBeskrivelse(gjelderSøker: Boolean,
@@ -271,6 +271,5 @@ enum class VedtakBegrunnelse(val tittel: String) : IVedtakBegrunnelse {
 
 enum class VedtakBegrunnelseType {
     INNVILGELSE,
-    REDUKSJON,
-    SATSENDRING
+    REDUKSJON
 }

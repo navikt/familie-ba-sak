@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.behandling.vedtak
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
+import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
@@ -95,9 +96,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val nyttVedtak = Vedtak(
                 behandling = nyBehandling,
-                vedtaksdato = now(),
-                forrigeVedtakId = gjeldendeVedtak.id,
-                opphørsdato = opphørsdato
+                vedtaksdato = now()
         )
 
         // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
@@ -124,8 +123,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     @Transactional
     fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
-        val forrigeVedtak = hentForrigeVedtakPåFagsak(sisteBehandlingPåFagsak = behandling)
-
         // TODO: Midlertidig fiks før støtte for delvis innvilget
         val behandlingResultatType = midlertidigUtledBehandlingResultatType(
                 hentetBehandlingResultatType = behandlingResultatService.hentBehandlingResultatTypeFraBehandling(behandling))
@@ -133,7 +130,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val vedtak = Vedtak(
                 behandling = behandling,
-                forrigeVedtakId = forrigeVedtak?.id,
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
                         .førsteDagINesteMåned() else null,
                 vedtaksdato = if (behandling.skalBehandlesAutomatisk) now() else null
@@ -149,13 +145,13 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     fun hentUtbetalingBegrunnelserPåForrigeVedtak(fagsakId: Long): List<UtbetalingBegrunnelse> {
-        val forrigeVedtak = hentForrigeVedtakPåFagsak(fagsakId)
+        val forrigeVedtak = hentVedtakPåNestSisteBehandling(fagsakId)
         return forrigeVedtak?.utbetalingBegrunnelser?.toList() ?: emptyList()
     }
 
     fun leggTilInitielleUtbetalingsbegrunnelser(fagsakId: Long, behandling: Behandling) {
         slettUtbetalingBegrunnelser(behandling.id)
-        val forrigeBehandling = behandlingService.hentForrigeBehandling(fagsakId, behandling)
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId, behandling)
         val forrigeTilkjentYtelse =
                 if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(forrigeBehandling.id) else null
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
@@ -186,10 +182,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                          UtbetalingBegrunnelse(vedtak = vedtak,
                                                                fom = it.fom,
                                                                tom = it.tom,
-                                                               begrunnelseType = VedtakBegrunnelseType.SATSENDRING,
-                                                               vedtakBegrunnelse = VedtakBegrunnelse.SATSENDRING,
+                                                               begrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+                                                               vedtakBegrunnelse = VedtakBegrunnelse.INNVILGET_SATSENDRING,
                                                                brevBegrunnelse =
-                                                               VedtakBegrunnelse.SATSENDRING.hentBeskrivelse(målform = målform)))
+                                                               VedtakBegrunnelse.INNVILGET_SATSENDRING.hentBeskrivelse(målform = målform)))
         }
     }
 
@@ -285,11 +281,17 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse != null && restPutUtbetalingBegrunnelse.vedtakBegrunnelseType != null) {
 
             if (VedtakBegrunnelseSerivce.utenVilkår.contains(restPutUtbetalingBegrunnelse.vedtakBegrunnelse)) {
-                vedtak.endreUtbetalingBegrunnelse(
-                        opprinneligUtbetalingBegrunnelse.id,
-                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
-                        restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform)
-                )
+                if (restPutUtbetalingBegrunnelse.vedtakBegrunnelse == VedtakBegrunnelse.INNVILGET_SATSENDRING
+                    && SatsService.finnSatsendring(opprinneligUtbetalingBegrunnelse.fom).isEmpty()) {
+                    throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
+                                          frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse.")
+                } else {
+                    vedtak.endreUtbetalingBegrunnelse(
+                            opprinneligUtbetalingBegrunnelse.id,
+                            restPutUtbetalingBegrunnelse.vedtakBegrunnelse,
+                            restPutUtbetalingBegrunnelse.vedtakBegrunnelse.hentBeskrivelse(målform = personopplysningGrunnlag.søker.målform)
+                    )
+                }
             } else {
                 val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                         hentPersonerMedUtgjørendeVilkår(
@@ -299,8 +301,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                 oppdatertVilkår = restPutUtbetalingBegrunnelse.vedtakBegrunnelse.finnVilkårFor())
 
                 if (personerMedUtgjørendeVilkårForUtbetalingsperiode.isEmpty()) {
-                    throw Feil(message = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
-                               frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
+                    throw FunksjonellFeil(melding = "Begrunnelsen samsvarte ikke med vilkårsvurderingen",
+                                          frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.")
                 }
 
                 val gjelderSøker = personerMedUtgjørendeVilkårForUtbetalingsperiode.any {
@@ -390,19 +392,11 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     }
 
-    fun hentForrigeVedtakPåFagsak(sisteBehandlingPåFagsak: Behandling): Vedtak? {
-        val behandlinger = behandlingService.hentBehandlinger(sisteBehandlingPåFagsak.fagsak.id)
-
-        return when (val forrigeBehandling =
-                behandlinger.filter { it.id != sisteBehandlingPåFagsak.id }.maxByOrNull { it.opprettetTidspunkt }) {
-            null -> null
-            else -> hentAktivForBehandling(behandlingId = forrigeBehandling.id)
-        }
-    }
-
-    private fun hentForrigeVedtakPåFagsak(fagsakId: Long): Vedtak? {
-        val aktivtVedtak = hentVedtakForAktivBehandling(fagsakId) ?: error("Finner ingen aktivt vedtak på fagsak $fagsakId")
-        return if (aktivtVedtak.forrigeVedtakId != null) hent(aktivtVedtak.forrigeVedtakId) else null
+    private fun hentVedtakPåNestSisteBehandling(fagsakId: Long): Vedtak? {
+        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId)
+                              ?: error("Finner ikke aktiv behandling på fagsak $fagsakId")
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId, aktivBehandling)
+        return if (forrigeBehandling != null) hentAktivForBehandling(forrigeBehandling.id) else null
     }
 
     fun hent(vedtakId: Long): Vedtak {
@@ -437,6 +431,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         return vedtakRepository.save(vedtak)
     }
 
+    /**
+     * Oppdater vedtaksdato og brev.
+     * Vi oppdaterer brevet for å garantere å få riktig beslutter og vedtaksdato.
+     */
     fun besluttVedtak(vedtak: Vedtak) {
         vedtak.vedtaksdato = now()
         lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
