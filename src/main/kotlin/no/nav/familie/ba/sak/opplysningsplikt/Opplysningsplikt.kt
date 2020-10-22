@@ -14,8 +14,9 @@ data class Opplysningsplikt(
         @Column(name = "fk_behandling_id")
         val behandlingId: Long,
 
-        @Column(name = "opplysningsplikt_status")
-        var opplysningspliktStatus: OpplysningspliktStatus? = null,
+        @Enumerated(EnumType.STRING)
+        @Column(name = "status")
+        var status: OpplysningspliktStatus? = null,
 
         @Column(name = "begrunnelse")
         var begrunnelse: String? = null
@@ -23,6 +24,8 @@ data class Opplysningsplikt(
 
 }
 
-enum class OpplysningspliktStatus {
-    MOTTATT, IKKE_MOTTATT_AVSLAG, IKKE_MOTTATT_FORTSETT
+enum class OpplysningspliktStatus(val visningsTekst: String) {
+    MOTTATT("oppfylt"),
+    IKKE_MOTTATT_AVSLAG("avslått"),
+    IKKE_MOTTATT_FORTSETT("delvis oppfylt")
 }

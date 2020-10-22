@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.opplysningsplikt.Opplysningsplikt
-import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktRepository
+import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -33,7 +33,7 @@ class DokumentService(
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
         private val journalføringService: JournalføringService,
-        private val opplysningspliktRepository: OpplysningspliktRepository
+        private val opplysningspliktService: OpplysningspliktService
 ) {
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
         it to Metrics.counter("brev.sendt",
@@ -129,9 +129,8 @@ class DokumentService(
 
         journalføringService.lagreJournalPost(behandling, journalpostId)
 
-        // TODO: Avklar om vi skal toggle aktiv-flagg og opprette ny rad eller endre rad når eksisterende
         if (brevmal == BrevType.INNHENTE_OPPLYSNINGER) {
-            opplysningspliktRepository.save(Opplysningsplikt(behandlingId = behandling.id))
+            opplysningspliktService.lagreBlankOpplysningsplikt(behandlingId = behandling.id)
         }
 
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
