@@ -118,7 +118,12 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         totrinnskontrollService.opprettEllerHentTotrinnskontroll(nyBehandling, saksbehandler)
         totrinnskontrollService.besluttTotrinnskontroll(nyBehandling, SYSTEM_NAVN, Beslutning.GODKJENT)
 
-        behandlingRepository.save(nyBehandling.also { it.steg = StegType.FERDIGSTILLE_BEHANDLING })
+
+        behandlingRepository.save(nyBehandling.also {
+            it.steg = StegType.FERDIGSTILLE_BEHANDLING
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it,
+                                                                 behandlingSteg = StegType.FERDIGSTILLE_BEHANDLING))
+        })
 
         postProsessor(nyttVedtak)
 
