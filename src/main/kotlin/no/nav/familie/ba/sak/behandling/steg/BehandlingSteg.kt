@@ -168,12 +168,5 @@ enum class BehandlerRolle(val nivå: Int) {
 
 enum class BehandlingStegStatus(val navn: String, val beskrivelse: String) {
     STARTET("STARTET", "Steget er startet"),
-    INNGANG("INNGANG", "Inngangkriterier er ikke oppfylt"),
-    UTGANG("UTGANG", "Utgangskriterier er ikke oppfylt"),
-    VENTER("VENTER", "På vent"),
-    AVBRUTT("AVBRUTT", "Avbrutt"),
     UTFØRT("UTFØRT", "Utført"),
-    FREMOVERFØRT("FREMOVERFØRT", "Fremoverført"),
-    TILBAKEFØRT("TILBAKEFØRT", "Tilbakeført"),
-    UDEFINERT("-", "Ikke definert")
 }

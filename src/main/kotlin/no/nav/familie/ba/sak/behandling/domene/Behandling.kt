@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.domene
 
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
@@ -17,6 +18,9 @@ data class Behandling(
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         val fagsak: Fagsak,
+
+        @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+        val behandlingStegTilstand: MutableList<BehandlingStegTilstand>,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
@@ -67,6 +71,7 @@ data class Behandling(
  * Årsak er knyttet til en behandling og sier noe om hvorfor behandling ble opprettet.
  */
 enum class BehandlingÅrsak(val visningsnavn: String) {
+
     SØKNAD("Søknad"),
     FØDSELSHENDELSE("Fødselshendelse"),
     ÅRLIG_KONTROLL("Årsak kontroll"),

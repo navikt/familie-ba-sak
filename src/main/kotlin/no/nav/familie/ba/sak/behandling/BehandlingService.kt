@@ -4,10 +4,12 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.FATTER_VEDTAK
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -28,6 +30,7 @@ import java.time.LocalDate
 
 @Service
 class BehandlingService(private val behandlingRepository: BehandlingRepository,
+                        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository,
                         private val behandlingMetrikker: BehandlingMetrikker,
                         private val fagsakPersonRepository: FagsakPersonRepository,
                         private val persongrunnlagService: PersongrunnlagService,
@@ -47,12 +50,16 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
             val behandling = Behandling(fagsak = fagsak,
+                                        behandlingStegTilstand = mutableListOf(),
                                         opprettetÅrsak = nyBehandling.behandlingÅrsak,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
                                         skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk,
                                         steg = initSteg(nyBehandling.behandlingType))
+
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, initSteg(nyBehandling.behandlingType)))
+
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
             loggBehandlinghendelse(behandling)
@@ -60,6 +67,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
             aktivBehandling.steg = initSteg(nyBehandling.behandlingType)
             aktivBehandling.status = initStatus()
+
             lagre(aktivBehandling)
         } else {
             throw Feil(message = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
@@ -114,6 +122,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
+    fun lagre(behandlingStegTilstand: BehandlingStegTilstand): BehandlingStegTilstand {
+        return behandlingStegTilstandRepository.save(behandlingStegTilstand)
+    }
+
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = hentAktivForFagsak(behandling.fagsak.id)
 
@@ -145,8 +157,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterStegPåBehandling(behandlingId: Long, steg: StegType): Behandling {
         val behandling = hent(behandlingId)
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer steg på behandling $behandlingId fra ${behandling.steg} til $steg")
+        val sisteBehandlingStegTilstand = behandling.behandlingStegTilstand.filter { it.behandlingStegStatus != BehandlingStegStatus.UTFØRT }.first()
 
+        sisteBehandlingStegTilstand.behandlingStegStatus = BehandlingStegStatus.UTFØRT
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling, behandlingSteg = steg))
+
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer siste steg på behandling $behandlingId fra ${sisteBehandlingStegTilstand.behandlingSteg} til $steg")
+        // TODO: Oppdatreing av steg direkte på behandling skal fjernes når frontendkoden for å håntere behandlingsstegtilgang er klar,
+        //       inkludert migrering av tidligere behandlinger som ikke har relaterte behandlingsstegtilgang.
         behandling.steg = steg
         return behandlingRepository.save(behandling)
     }

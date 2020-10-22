@@ -6,10 +6,13 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
@@ -42,6 +45,9 @@ import java.time.LocalDate
 class VedtakServiceTest(
         @Autowired
         private val behandlingRepository: BehandlingRepository,
+
+        @Autowired
+        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository,
 
         @Autowired
         private val behandlingMetrikker: BehandlingMetrikker,
@@ -95,6 +101,7 @@ class VedtakServiceTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
+                behandlingStegTilstandRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
                 persongrunnlagService,
@@ -201,10 +208,13 @@ class VedtakServiceTest(
 
         val revurderingInnvilgetBehandling =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
+                                                                                behandlingStegTilstand = mutableListOf(),
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                                opprettetÅrsak = BehandlingÅrsak.SØKNAD))
+                                                                                opprettetÅrsak = BehandlingÅrsak.SØKNAD)).also {
+                    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+                }
 
 
         vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
@@ -215,10 +225,13 @@ class VedtakServiceTest(
 
         val revurderingOpphørBehandling =
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
+                                                                                behandlingStegTilstand = mutableListOf(),
                                                                                 type = BehandlingType.REVURDERING,
                                                                                 kategori = BehandlingKategori.NASJONAL,
                                                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                                opprettetÅrsak = BehandlingÅrsak.SØKNAD))
+                                                                                opprettetÅrsak = BehandlingÅrsak.SØKNAD)).also {
+                    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+                }
 
         val forrigeVedtak = vedtakService.hentForrigeVedtakPåFagsak(revurderingOpphørBehandling)
         Assertions.assertNotNull(forrigeVedtak)

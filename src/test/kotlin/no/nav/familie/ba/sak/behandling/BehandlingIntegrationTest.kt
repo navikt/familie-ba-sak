@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -63,6 +64,9 @@ import javax.transaction.Transactional
 class BehandlingIntegrationTest(
         @Autowired
         private val behandlingRepository: BehandlingRepository,
+
+        @Autowired
+        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository,
 
         @Autowired
         private val personRepository: PersonRepository,
@@ -122,6 +126,7 @@ class BehandlingIntegrationTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
+                behandlingStegTilstandRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
                 persongrunnlagService,

@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.behandling.domene.tilstand
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
-import no.nav.familie.ba.sak.behandling.steg.BehandlingSteg
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -29,9 +26,9 @@ data class BehandlingStegTilstand(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_steg_status", nullable = false)
-        val behandlingStegStatus: BehandlingStegStatus = BehandlingStegStatus.UDEFINERT
+        var behandlingStegStatus: BehandlingStegStatus = BehandlingStegStatus.STARTET
 
-        ) : BaseEntitet() {
+) : BaseEntitet() {
 
     override fun toString(): String {
         return "BehandlingStegTilstand(id=$id, beahndling=${behandling.id}, behandlingSteg=$behandlingSteg, behandlingStegStatus=$behandlingStegStatus)"

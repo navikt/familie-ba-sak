@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
@@ -9,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgers
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.*
@@ -68,11 +70,14 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                   automatiskOpprettelse: Boolean = false
 ) = Behandling(id = nesteBehandlingId(),
                fagsak = fagsak,
+               behandlingStegTilstand = mutableListOf(),
                skalBehandlesAutomatisk = automatiskOpprettelse,
                type = behandlingType,
                kategori = behandlingKategori,
                underkategori = BehandlingUnderkategori.ORDINÆR,
-               opprettetÅrsak = årsak)
+               opprettetÅrsak = årsak).also {
+    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+}
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
                     personType: PersonType = PersonType.BARN,
