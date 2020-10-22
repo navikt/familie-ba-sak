@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -42,6 +43,20 @@ class LoggService(
                 tekst = "Behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} endret fra " +
                         "${fraEnhet.enhetId} ${fraEnhet.enhetNavn} til ${tilEnhet.behandlendeEnhetId} ${tilEnhet.behandlendeEnhetNavn}." +
                         if (begrunnelse.isNotBlank()) "\n\n${begrunnelse}" else ""
+        ))
+    }
+
+    fun opprettOpplysningspliktEndret(behandlingId: Long,
+                                      fraStatus: OpplysningspliktStatus? = null,
+                                      tilStatus: OpplysningspliktStatus,
+                                      begrunnelse: String? = null) {
+        val endringstekst = "Opplysningsplikt er satt til ${tilStatus.visningsTekst}."
+        lagre(Logg(
+                behandlingId = behandlingId,
+                type = LoggType.BEHANDLENDE_ENHET_ENDRET,
+                tittel = if (fraStatus !== null) "Opplysningsplikt endret på behandling" else "Opplysningsplikt satt på behandling",
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = endringstekst + if (begrunnelse !== null) "\n\n${begrunnelse}" else ""
         ))
     }
 

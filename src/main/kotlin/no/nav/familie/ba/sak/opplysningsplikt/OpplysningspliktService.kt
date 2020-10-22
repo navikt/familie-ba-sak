@@ -8,6 +8,9 @@ class OpplysningspliktService(
         private val opplysningspliktRepository: OpplysningspliktRepository,
         private val loggService: LoggService
 ) {
+
+    fun hentOpplysningsplikt(behandlingId: Long): Opplysningsplikt? = opplysningspliktRepository.findByBehandlingId(behandlingId)
+
     fun lagreBlankOpplysningsplikt(behandlingId: Long) {
         val lagretOpplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId)
         if (lagretOpplysningsplikt == null) {
