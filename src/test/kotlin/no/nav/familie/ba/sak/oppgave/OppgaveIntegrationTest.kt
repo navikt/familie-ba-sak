@@ -62,7 +62,10 @@ class OppgaveIntegrationTest {
 
         Assertions.assertNotNull(opprettetOppgave)
         Assertions.assertEquals(Oppgavetype.GodkjenneVedtak, opprettetOppgave!!.type)
-        Assertions.assertEquals(behandling, opprettetOppgave.behandling)
+        Assertions.assertEquals(behandling.id, opprettetOppgave.behandling.id)
+        Assertions.assertEquals(behandling.status, opprettetOppgave.behandling.status)
+        Assertions.assertEquals(behandling.behandlingStegTilstand.first().behandlingSteg, opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingSteg)
+        Assertions.assertEquals(behandling.behandlingStegTilstand.first().behandlingStegStatus, opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingStegStatus)
         Assertions.assertFalse(opprettetOppgave.erFerdigstilt)
         Assertions.assertEquals(godkjenneVedtakOppgaveId, opprettetOppgave.gsakId)
 

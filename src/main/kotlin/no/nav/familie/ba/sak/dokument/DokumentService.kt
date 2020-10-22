@@ -60,7 +60,7 @@ class DokumentService(
                                                     antallBarn = if (vedtak.behandling.skalBehandlesAutomatisk)
                                                         personopplysningGrunnlag.barna.size else null,
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr(),
-                                                    målform = søker.målform.toString())
+                                                    maalform = søker.målform.toString())
 
             val malMedData = malerService.mapTilVedtakBrevfelter(vedtak,
                                                                  behandlingResultatType
@@ -71,7 +71,7 @@ class DokumentService(
                         onSuccess = { it },
                         onFailure = {
                             throw Feil(message = "Klarte ikke generere vedtaksbrev",
-                                       frontendFeilmelding = "Noe gikk galt ved generering av vedtaksbrev og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
+                                       frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                                        throwable = it)
                         }
@@ -88,7 +88,7 @@ class DokumentService(
                 val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
                                                         navn = søker.navn,
                                                         dokumentDato = LocalDate.now().tilDagMånedÅr(),
-                                                        målform = søker.målform.toString())
+                                                        maalform = søker.målform.toString())
                 val malMedData = when (brevmal) {
                     BrevType.INNHENTE_OPPLYSNINGER -> malerService.mapTilInnhenteOpplysningerBrevfelter(behandling,
                                                                                                         manueltBrevRequest)
@@ -101,8 +101,8 @@ class DokumentService(
                     onFailure = {
                         if (it is Feil) {
                             throw it
-                        } else throw Feil(message = "Klarte ikke generere brev for innhente opplysninger",
-                                          frontendFeilmelding = "Noe gikk galt ved generering av brev for å innhente opplysninger og systemansvarlige er varslet. Prøv igjen senere, men hvis problemet vedvarer kontakt brukerstøtte",
+                        } else throw Feil(message = "Klarte ikke generere brev for ${brevmal.visningsTekst}",
+                                          frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                                           throwable = it)
                     }
@@ -118,30 +118,34 @@ class DokumentService(
         val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
-        val journalføringsId = integrasjonClient.journalførManueltBrev(fnr = fnr,
-                                                                       fagsakId = fagsakId,
-                                                                       journalførendeEnhet = enhet,
-                                                                       brev = generertBrev,
-                                                                       brevType = brevmal.arkivType)
+        val journalpostId = integrasjonClient.journalførManueltBrev(fnr = fnr,
+                                                                    fagsakId = fagsakId,
+                                                                    journalførendeEnhet = enhet,
+                                                                    brev = generertBrev,
+                                                                    brevType = brevmal.arkivType)
 
-        journalføringService.lagreJournalPost(behandling, journalføringsId)
-        val distribuertBrevRessurs = integrasjonClient.distribuerBrev(journalføringsId)
+        journalføringService.lagreJournalPost(behandling, journalpostId)
 
-        loggService.opprettDistribuertBrevLogg(behandlingId = behandling.id,
-                                               tekst = "Brev for ${brevmal.visningsTekst} er sendt til bruker",
-                                               rolle = BehandlerRolle.SAKSBEHANDLER)
-        antallBrevSendt[brevmal]?.increment()
-
-        return distribuertBrevRessurs
+        return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
+                                            behandlingId = behandling.id,
+                                            loggTekst = "${brevmal.visningsTekst.capitalize()}",
+                                            loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                                            brevType = brevmal)
     }
 
-    fun sendVedtaksbrev(journalpostId: String,
-                        behandlingId: Long) {
+    fun distribuerBrevOgLoggHendelse(journalpostId: String,
+                                     behandlingId: Long,
+                                     loggTekst: String,
+                                     loggBehandlerRolle: BehandlerRolle,
+                                     brevType: BrevType
 
-        integrasjonClient.distribuerBrev(journalpostId)
+    ): Ressurs<String> {
+        val distribuerBrevBestillingId = integrasjonClient.distribuerBrev(journalpostId)
         loggService.opprettDistribuertBrevLogg(behandlingId = behandlingId,
-                                               tekst = "Vedtaksbrev er sendt til bruker",
-                                               rolle = BehandlerRolle.SYSTEM)
-        antallBrevSendt[BrevType.VEDTAK]?.increment()
+                                               tekst = loggTekst,
+                                               rolle = loggBehandlerRolle)
+        antallBrevSendt[brevType]?.increment()
+
+        return distribuerBrevBestillingId
     }
 }

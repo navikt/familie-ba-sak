@@ -128,7 +128,6 @@ fun lagUtbetalingBegrunnesle(
 
 fun lagVedtak(
         behandling: Behandling = lagBehandling(),
-        forrigeVedtak: Vedtak? = null,
         opphørsdato: LocalDate? = null,
         utbetalingBegrunnelser: MutableSet<UtbetalingBegrunnelse> = mutableSetOf(),
 ) =
@@ -136,7 +135,6 @@ fun lagVedtak(
                 id = nesteVedtakId(),
                 behandling = behandling,
                 vedtaksdato = LocalDate.now(),
-                forrigeVedtakId = forrigeVedtak?.id,
                 opphørsdato = opphørsdato,
                 utbetalingBegrunnelser = utbetalingBegrunnelser,
         )

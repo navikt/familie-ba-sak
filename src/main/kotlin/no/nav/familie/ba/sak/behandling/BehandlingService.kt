@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
@@ -43,8 +43,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
         val fagsak = fagsakPersonRepository.finnFagsak(setOf(PersonIdent(nyBehandling.søkersIdent)))
-                     ?: throw Feil(message = "Kan ikke lage behandling på person uten tilknyttet fagsak",
-                                   frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak")
+                     ?: throw FunksjonellFeil(melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
+                                              frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak")
 
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
@@ -70,14 +70,14 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
             lagre(aktivBehandling)
         } else {
-            throw Feil(message = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
-                       frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
+            throw FunksjonellFeil(melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
+                                  frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
     }
 
     private fun loggBehandlinghendelse(behandling: Behandling) {
         saksstatistikkEventPublisher.publish(behandling.id,
-                                             hentForrigeBehandlingSomErIverksatt(behandling.fagsak.id)
+                                             hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
                                                      .takeIf { erRevurderingEllerKlage(behandling) }?.id)
     }
 
@@ -103,19 +103,21 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
-    fun hentForrigeBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
-        val behandlinger = hentBehandlinger(fagsakId)
-        return behandlinger
-                .sortedBy { it.opprettetTidspunkt }
-                .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+    private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
+        return hentBehandlinger(fagsakId).filter {
+            val tilkjentYtelsePåBehandling = beregningService.hentOptionalTilkjentYtelseForBehandling(it.id)
+            tilkjentYtelsePåBehandling != null && tilkjentYtelsePåBehandling.erSendtTilIverksetting()
+        }
     }
 
-    fun hentForrigeBehandling(fagsakId: Long, behandlingFørFølgende: Behandling): Behandling? {
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
-        return behandlinger
-                .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) }
-                .sortedBy { it.opprettetTidspunkt }
-                .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+    fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
+        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
+        return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+    }
+
+    fun hentForrigeBehandlingSomErIverksatt(fagsakId: Long, behandlingFørFølgende: Behandling): Behandling? {
+        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
+        return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandlingFørFølgende)
     }
 
     fun lagre(behandling: Behandling): Behandling {
@@ -169,18 +171,21 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
-    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsMåned: LocalDate): List<Behandling> {
-        val ferdigstilteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
+    fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsmåned: LocalDate): List<Behandling> {
+        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
 
-        val tilkjenteYtelser = ferdigstilteBehandlinger
+        val tilkjenteYtelser = iverksatteBehandlinger
                 .sortedBy { it.opprettetTidspunkt }
                 .map { beregningService.hentTilkjentYtelseForBehandling(it.id) }
 
         tilkjenteYtelser.forEach {
-            if (it.stønadTom!! >= utbetalingsMåned && it.stønadFom != null) {
+            if (it.erLøpende(utbetalingsmåned)) {
                 behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForFremtidigUtbetaling = true })
+            } else if (it.erUtløpt(utbetalingsmåned)) {
+                behandlingRepository.saveAndFlush(it.behandling.apply { gjeldendeForFremtidigUtbetaling = false })
             }
-            if (it.opphørFom != null && it.opphørFom!! <= utbetalingsMåned) {
+
+            if (it.harOpphørPåTidligereBehandling(utbetalingsmåned)) {
                 val behandlingSomOpphører = hentBehandlingSomSkalOpphøres(it)
                 behandlingRepository.saveAndFlush(behandlingSomOpphører.apply { gjeldendeForFremtidigUtbetaling = false })
             }

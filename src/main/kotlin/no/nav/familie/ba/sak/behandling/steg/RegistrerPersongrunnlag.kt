@@ -20,7 +20,7 @@ class RegistrerPersongrunnlag(
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: RegistrerPersongrunnlagDTO): StegType {
         val forrigeBehandlingSomErIverksatt =
-                behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErIverksatt != null) {
             val forrigePersongrunnlag = persongrunnlagService.hentAktiv(behandlingId = forrigeBehandlingSomErIverksatt.id)
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }!!

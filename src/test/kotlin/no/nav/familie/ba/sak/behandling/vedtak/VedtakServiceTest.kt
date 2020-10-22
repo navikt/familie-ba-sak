@@ -6,13 +6,10 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.*
-import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
@@ -75,9 +72,6 @@ class VedtakServiceTest(
 
         @Autowired
         private val totrinnskontrollService: TotrinnskontrollService,
-
-        @Autowired
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
         @Autowired
         private val loggService: LoggService,
@@ -188,56 +182,6 @@ class VedtakServiceTest(
         Assertions.assertNotNull(totrinnskontroll)
         Assertions.assertEquals("ansvarligSaksbehandler", totrinnskontroll!!.saksbehandler)
     }
-
-    @Test
-    fun `Skal hente forrige behandling`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandling
-        )
-
-        val revurderingInnvilgetBehandling =
-                behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
-                                                                                behandlingStegTilstand = mutableListOf(),
-                                                                                type = BehandlingType.REVURDERING,
-                                                                                kategori = BehandlingKategori.NASJONAL,
-                                                                                underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                                opprettetÅrsak = BehandlingÅrsak.SØKNAD)).also {
-                    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
-                }
-
-
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = revurderingInnvilgetBehandling
-        )
-
-
-        val revurderingOpphørBehandling =
-                behandlingService.lagreNyOgDeaktiverGammelBehandling(Behandling(fagsak = fagsak,
-                                                                                behandlingStegTilstand = mutableListOf(),
-                                                                                type = BehandlingType.REVURDERING,
-                                                                                kategori = BehandlingKategori.NASJONAL,
-                                                                                underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                                opprettetÅrsak = BehandlingÅrsak.SØKNAD)).also {
-                    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
-                }
-
-        val forrigeVedtak = vedtakService.hentForrigeVedtakPåFagsak(revurderingOpphørBehandling)
-        Assertions.assertNotNull(forrigeVedtak)
-        Assertions.assertEquals(revurderingInnvilgetBehandling.id, forrigeVedtak?.behandling?.id)
-    }
-
 
     @Test
     @Tag("integration")

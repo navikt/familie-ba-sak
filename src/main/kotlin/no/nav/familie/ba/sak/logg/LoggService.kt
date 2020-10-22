@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.journalføring.domene.DokumentType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -38,21 +38,20 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLENDE_ENHET_ENDRET,
                 tittel = "Endret enhet på behandling",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = "Behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} endret fra " +
                         "${fraEnhet.enhetId} ${fraEnhet.enhetNavn} til ${tilEnhet.behandlendeEnhetId} ${tilEnhet.behandlendeEnhetNavn}." +
                         if (begrunnelse.isNotBlank()) "\n\n${begrunnelse}" else ""
         ))
     }
 
-    fun opprettMottattDokument(behandling: Behandling, datoMottatt: LocalDateTime, dokumentType: DokumentType) {
+    fun opprettMottattDokument(behandling: Behandling, tekst: String, mottattDato: LocalDateTime) {
         lagre(Logg(
-                opprettetTidspunkt = datoMottatt,
                 behandlingId = behandling.id,
                 type = LoggType.DOKUMENT_MOTTATT,
-                tittel = "${dokumentType.navn} ble mottatt",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                tekst = ""
+                tittel = "Brev mottatt ${mottattDato.toLocalDate().tilKortString()}",
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = tekst
         ))
     }
 
@@ -63,7 +62,7 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.SØKNAD_REGISTRERT,
                 tittel = tittel,
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = ""
         ))
     }
@@ -90,7 +89,7 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.VILKÅRSVURDERING,
                 tittel = if (forrigeBehandlingResultatType != null) "Vilkårsvurdering endret" else "Vilkårsvurdering gjennomført",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = tekst
         ))
     }
@@ -100,7 +99,7 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.FØDSELSHENDELSE,
                 tittel = "Mottok fødselshendelse",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = ""
         ))
     }
@@ -110,7 +109,7 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLING_OPPRETTET,
                 tittel = "${behandling.type.visningsnavn} opprettet",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = ""
         ))
     }
@@ -120,7 +119,7 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.SEND_TIL_BESLUTTER,
                 tittel = "Sendt til beslutter",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = ""
         ))
     }
@@ -130,7 +129,7 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.GODKJENNE_VEDTAK,
                 tittel = if (beslutning.erGodkjent()) "Vedtak godkjent " else "Vedtak underkjent",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.BESLUTTER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else ""
         ))
     }
@@ -139,8 +138,8 @@ class LoggService(
         lagre(Logg(
                 behandlingId = behandlingId,
                 type = LoggType.DISTRIBUERE_BREV,
-                tittel = "Dokument er sendt",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, rolle),
+                tittel = "Brev sendt",
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, rolle),
                 tekst = tekst
         ))
     }
@@ -150,7 +149,7 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.FERDIGSTILLE_BEHANDLING,
                 tittel = "Ferdigstilt behandling",
-                rolle = SikkerhetContext.hentBehandlerRolleForSteg(rolleConfig, BehandlerRolle.SYSTEM),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
                 tekst = ""
         ))
     }

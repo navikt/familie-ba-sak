@@ -28,7 +28,7 @@ fun LocalDate.sisteDagINesteMåned(): LocalDate {
 }
 
 fun senesteDatoAv(dato1: LocalDate, dato2: LocalDate): LocalDate {
-    return if (dato1.isSameOrAfter(dato2)) dato1 else dato2
+    return maxOf(dato1, dato2)
 }
 
 fun LocalDate.sisteDagIMåned(): LocalDate {

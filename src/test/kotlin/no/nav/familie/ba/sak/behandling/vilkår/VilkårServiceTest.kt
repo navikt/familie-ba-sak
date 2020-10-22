@@ -67,7 +67,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val forrigeBehandlingSomErIverksatt =
-                behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
@@ -107,7 +107,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val forrigeBehandlingSomErIverksatt =
-                behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
@@ -149,7 +149,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val forrigeBehandlingSomErIverksatt =
-                behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
@@ -178,7 +178,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val forrigeBehandlingSomErIverksatt =
-                behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
@@ -240,7 +240,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val forrigeBehandlingSomErIverksatt =
-                behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+                behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
