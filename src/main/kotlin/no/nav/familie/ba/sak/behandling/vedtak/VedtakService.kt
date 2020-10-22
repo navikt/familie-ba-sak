@@ -372,13 +372,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                         vilkårResultat.periodeFom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.forrigeMåned() &&
                         vilkårResultat.resultat == Resultat.JA
                     }
-                    oppdatertVilkår == Vilkår.UNDER_18_ÅR -> {
-                        vilkårResultat.periodeTom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.monthValue &&
-                        vilkårResultat.resultat == Resultat.NEI
-                    }
                     else -> {
+                        vilkårResultat.periodeTom != null &&
                         vilkårResultat.periodeTom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.forrigeMåned() &&
-                        vilkårResultat.resultat == Resultat.NEI
+                        vilkårResultat.resultat == Resultat.JA
                     }
                 }
             }
