@@ -28,6 +28,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
@@ -77,7 +78,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
         infotrygdFeedService.sendTilInfotrygdFeed(barnIdenter)
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettBehandlingOgKjørReglerForFødselshendelse(nyBehandling: NyBehandlingHendelse) {
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
