@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.opplysningsplikt.Opplysningsplikt
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpStatus
@@ -117,12 +116,12 @@ class DokumentService(
                         manueltBrevRequest: ManueltBrevRequest): Ressurs<String> {
 
         val fnr = behandling.fagsak.hentAktivIdent().ident
-        val fagsakId = "${behandling.fagsak.id}"
+        val fagsakId = behandling.fagsak.id
         val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = fnr,
-                                                                    fagsakId = fagsakId,
+                                                                    fagsakId = fagsakId.toString(),
                                                                     journalførendeEnhet = enhet,
                                                                     brev = generertBrev,
                                                                     brevType = brevmal.arkivType)
