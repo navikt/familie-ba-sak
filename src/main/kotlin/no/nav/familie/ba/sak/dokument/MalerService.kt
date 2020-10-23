@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
 import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 
@@ -34,6 +35,7 @@ class MalerService(
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val søknadGrunnlagService: SøknadGrunnlagService,
+        private val økonomiService: ØkonomiService
 ) {
 
     fun mapTilVedtakBrevfelter(vedtak: Vedtak,
@@ -106,7 +108,7 @@ class MalerService(
                                         enhet: String,
                                         målform: Målform): String {
         val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(vedtak.behandling)
-        val etterbetalingsbeløp = etterbetalingsbeløpFraSimulering().takeIf { it > 0 }
+        val etterbetalingsbeløp = økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }
         val innvilget = Innvilget(
                 enhet = enhet,
                 saksbehandler = totrinnskontroll.saksbehandler,
@@ -155,7 +157,8 @@ class MalerService(
                                      beregningOversikt: List<RestBeregningOversikt>,
                                      enhet: String): String {
         val barnaSortert = personopplysningGrunnlag.barna.sortedByDescending { it.fødselsdato }
-        val etterbetalingsbeløp = etterbetalingsbeløpFraSimulering().takeIf { it > 0 }
+        val etterbetalingsbeløp = økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }
+
         val flettefelter = InnvilgetAutovedtak(navn = personopplysningGrunnlag.søker.navn,
                                                fodselsnummer = vedtak.behandling.fagsak.hentAktivIdent().ident,
                                                fodselsdato = Utils.slåSammen(barnaSortert.map { it.fødselsdato.tilKortString() }),
@@ -168,9 +171,6 @@ class MalerService(
                                                etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) })
         return objectMapper.writeValueAsString(flettefelter)
     }
-
-    private fun etterbetalingsbeløpFraSimulering() = 0 //TODO Må legges inn senere når simulering er implementert.
-    // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
 
     private fun tilbakekrevingsbeløpFraSimulering() = 0 //TODO Må legges inn senere når simulering er implementert.
     // Inntil da er det tryggest å utelate denne informasjonen fra brevet.

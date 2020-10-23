@@ -113,7 +113,7 @@ class ØkonomiIntegrasjonTest {
         Assertions.assertEquals(Ressurs.Status.SUKSESS, oppdatertFagsak.status)
 
         assertDoesNotThrow {
-            økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak.id, "ansvarligSaksbehandler")
+            økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak, "ansvarligSaksbehandler")
         }
     }
 
@@ -148,7 +148,7 @@ class ØkonomiIntegrasjonTest {
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak.id, "ansvarligSaksbehandler")
+        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak, "ansvarligSaksbehandler")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
         behandlingService.oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsak.id, LocalDate.now())
 

@@ -281,12 +281,14 @@ class FagsakService(
         val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
 
         if (assosierteFagsakDeltager.find { it.ident == personIdent } == null) {
+            val fagsakId = if (!erBarn) fagsakRepository.finnFagsakForPersonIdent(PersonIdent(personIdent))?.id else null
             assosierteFagsakDeltager.add(RestFagsakDeltager(
                     navn = personInfoMedRelasjoner.navn,
                     ident = personIdent,
                     //we set the role to unknown when the person is not a child because the person may not have a child
                     rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
-                    kjønn = personInfoMedRelasjoner.kjønn
+                    kjønn = personInfoMedRelasjoner.kjønn,
+                    fagsakId = fagsakId
             ))
         }
 
