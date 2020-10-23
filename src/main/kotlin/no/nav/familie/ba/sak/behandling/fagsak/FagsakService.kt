@@ -116,7 +116,7 @@ class FagsakService(
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
                      ?: throw FunksjonellFeil(melding = "Finner ikke fagsak med id $fagsakId",
-                                                   frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
+                                              frontendFeilmelding = "Finner ikke fagsak med id $fagsakId")
 
         val restBehandlinger: List<RestBehandling> = lagRestBehandlinger(fagsak)
         return Ressurs.success(data = fagsak.toRestFagsak(restBehandlinger))
@@ -242,7 +242,8 @@ class FagsakService(
                                 fagsakId = behandling.fagsak.id
                         )
                     } else {
-                        val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.hentAktivIdent().ident)
+                        val maskertForelder =
+                                hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.hentAktivIdent().ident)
                         if (maskertForelder != null) {
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] =
                                     maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER)
@@ -275,12 +276,14 @@ class FagsakService(
         val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
 
         if (assosierteFagsakDeltager.find { it.ident == personIdent } == null) {
+            val fagsakId = if (!erBarn) fagsakRepository.finnFagsakForPersonIdent(PersonIdent(personIdent))?.id else null
             assosierteFagsakDeltager.add(RestFagsakDeltager(
                     navn = personInfoMedRelasjoner.navn,
                     ident = personIdent,
                     //we set the role to unknown when the person is not a child because the person may not have a child
                     rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
-                    kjønn = personInfoMedRelasjoner.kjønn
+                    kjønn = personInfoMedRelasjoner.kjønn,
+                    fagsakId = fagsakId
             ))
         }
 
@@ -334,6 +337,7 @@ class FagsakService(
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(FagsakService::class.java)
     }
 }
