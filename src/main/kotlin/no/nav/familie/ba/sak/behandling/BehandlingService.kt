@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Persongrunnl
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -19,9 +21,11 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -38,7 +42,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakService: FagsakService,
                         private val loggService: LoggService,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
-                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
+                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+                        private val taskRepository: TaskRepository,
+                        private val behandlingResultatService: BehandlingResultatService) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -73,6 +79,17 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             throw FunksjonellFeil(melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
                                   frontendFeilmelding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.")
         }
+    }
+
+    @Transactional
+    fun henleggBehandling(behandlingId: Long): Behandling {
+        oppdaterAktivBehandlingsResultatPåBehandling(behandlingId)
+        oppdaterStegPåBehandling(behandlingId, StegType.FERDIGSTILLE_BEHANDLING)
+
+        //TODO: Trenger man hente personIdent når den ikke blir brukt?
+        taskRepository.save(FerdigstillBehandlingTask.opprettTask(personIdent = "", behandlingsId = behandlingId))
+
+        return hent(behandlingId)
     }
 
     private fun loggBehandlinghendelse(behandling: Behandling) {
@@ -124,10 +141,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
-    fun lagre(behandlingStegTilstand: BehandlingStegTilstand): BehandlingStegTilstand {
-        return behandlingStegTilstandRepository.save(behandlingStegTilstand)
-    }
-
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = hentAktivForFagsak(behandling.fagsak.id)
 
@@ -159,7 +172,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun oppdaterStegPåBehandling(behandlingId: Long, steg: StegType): Behandling {
         val behandling = hent(behandlingId)
-        val sisteBehandlingStegTilstand = behandling.behandlingStegTilstand.filter { it.behandlingStegStatus != BehandlingStegStatus.UTFØRT }.first()
+        val sisteBehandlingStegTilstand =
+                behandling.behandlingStegTilstand.filter { it.behandlingStegStatus != BehandlingStegStatus.UTFØRT }.first()
 
         sisteBehandlingStegTilstand.behandlingStegStatus = BehandlingStegStatus.UTFØRT
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling, behandlingSteg = steg))
@@ -170,6 +184,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         behandling.steg = steg
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling, behandlingSteg = steg))
         return behandlingRepository.save(behandling)
+    }
+
+    private fun oppdaterAktivBehandlingsResultatPåBehandling(behandlingId: Long) {
+        behandlingResultatService.hentAktivForBehandling(behandlingId)
+                ?.also { it.samletResultat = BehandlingResultatType.HENLAGT }
+                ?.let { behandlingResultatService.oppdater(it) }
     }
 
     fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsmåned: LocalDate): List<Behandling> {

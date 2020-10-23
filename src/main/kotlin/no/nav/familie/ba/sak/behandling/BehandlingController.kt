@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.behandling
 
-import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.steg.StegService
@@ -21,6 +18,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import javax.websocket.server.PathParam
 
 @RestController
 @RequestMapping("/api")
@@ -28,6 +26,7 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService,
+                           private val behandlingsService: BehandlingService,
                            private val taskRepository: TaskRepository) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -67,6 +66,21 @@ class BehandlingController(private val fagsakService: FagsakService,
         } catch (ex: Throwable) {
             illegalState("Task kunne ikke opprettes for behandling av fødselshendelse: ${ex.message}", ex)
         }
+    }
+
+    @PutMapping(path = ["behandlinger/{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun henleggBehandling(@PathParam behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+        return Result.runCatching {
+            behandlingsService.henleggBehandling(behandlingId)
+        }.fold(
+                onSuccess = {
+                    val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
+                    restFagsak
+                },
+                onFailure = {
+                    throw it
+                }
+        )
     }
 }
 
