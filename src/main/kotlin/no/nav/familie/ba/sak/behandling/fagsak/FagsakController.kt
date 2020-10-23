@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakSøk
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
@@ -30,7 +32,7 @@ import java.time.LocalDateTime
 @Validated
 class FagsakController(
         private val fagsakService: FagsakService,
-        private val taskRepository: TaskRepository
+        private val taskRepository: TaskRepository,
 ) {
 
     @PostMapping(path = ["fagsaker"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -83,6 +85,21 @@ class FagsakController(
                                 illegalState("Søker fagsak feilet: ${it.message}", it)
                             }
                         }
+                )
+    }
+
+    @PostMapping(path = ["fagsaker/sok/ba-sak-og-infotrygd"])
+    fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<RestPågåendeSakSøk>> {
+        return Result.runCatching {
+            RestPågåendeSakSøk(
+                    harPågåendeSakIBaSak = fagsakService.hent(PersonIdent(restSøkParam.personIdent))?.status
+                            .let { it != null && it != FagsakStatus.AVSLUTTET },
+                    harPågåendeSakIInfotrygd = fagsakService.harLøpendeSakIInfotrygd(restSøkParam.personIdent)
+            )
+        }
+                .fold(
+                        onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
+                        onFailure = { throw it }
                 )
     }
 

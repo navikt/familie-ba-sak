@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -49,7 +50,8 @@ class FagsakService(
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val personopplysningerService: PersonopplysningerService,
         private val integrasjonClient: IntegrasjonClient,
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient) {
 
 
     private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
@@ -334,6 +336,11 @@ class FagsakService(
                     harTilgang = false
             )
         } else null
+    }
+
+    fun harLøpendeSakIInfotrygd(personIdent: String): Boolean {
+        val identer = personopplysningerService.hentIdenter(Ident(personIdent)).map { it.ident }
+        return infotrygdBarnetrygdClient.harIkkeLøpendeSakIInfotrygd(søkersIdenter = identer).not()
     }
 
     companion object {
