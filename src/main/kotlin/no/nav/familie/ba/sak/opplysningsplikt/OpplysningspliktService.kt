@@ -11,6 +11,7 @@ class OpplysningspliktService(
         private val loggService: LoggService
 ) {
 
+    fun hent(behandlingId: Long): Opplysningsplikt? = opplysningspliktRepository.findByBehandlingId(behandlingId)
 
     fun lagreBlankOpplysningsplikt(behandlingId: Long) {
         val lagretOpplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId)
