@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -338,9 +339,20 @@ class FagsakService(
         } else null
     }
 
-    fun harLøpendeSakIInfotrygd(personIdent: String): Boolean {
+    fun hentPågåendeSakStatus(personIdent: String): RestPågåendeSakSøk {
+        val fagsak = hent(PersonIdent(personIdent))
+        val behandling = fagsak?.let { behandlingRepository.findByFagsakAndAktiv(it.id) }
+
+        return RestPågåendeSakSøk(
+                harPågåendeSakIBaSak = fagsak?.status.let { it == FagsakStatus.LØPENDE } ||
+                                       behandling?.status.let { it != null && it != BehandlingStatus.AVSLUTTET },
+                harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(personIdent)
+        )
+    }
+
+    private fun harLøpendeSakIInfotrygd(personIdent: String): Boolean {
         val identer = personopplysningerService.hentIdenter(Ident(personIdent)).map { it.ident }
-        return infotrygdBarnetrygdClient.harIkkeLøpendeSakIInfotrygd(søkersIdenter = identer).not()
+        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter = identer)
     }
 
     companion object {
