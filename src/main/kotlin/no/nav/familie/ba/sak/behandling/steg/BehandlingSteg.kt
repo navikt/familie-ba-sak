@@ -61,7 +61,7 @@ enum class StegType(val rekkefølge: Int,
     HENLEGG_SØKNAD(
             rekkefølge = 0,
             tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES, BehandlingStatus.FATTER_VEDTAK)),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     IVERKSETT_MOT_OPPDRAG(
             rekkefølge = 5,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
@@ -85,11 +85,11 @@ enum class StegType(val rekkefølge: Int,
     FERDIGSTILLE_BEHANDLING(
             rekkefølge = 9,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.HENLAGT)),
     BEHANDLING_AVSLUTTET(
             rekkefølge = 10,
             tillattFor = emptyList(),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET));
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET, BehandlingStatus.HENLAGT));
 
     fun displayName(): String {
         return this.name.replace('_', ' ').toLowerCase().capitalize()

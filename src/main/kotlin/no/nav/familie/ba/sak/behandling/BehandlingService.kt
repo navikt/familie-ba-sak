@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -169,7 +168,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         // TODO: Oppdatreing av steg direkte på behandling skal fjernes når frontendkoden for å håntere behandlingsstegtilgang er klar,
         //       inkludert migrering av tidligere behandlinger som ikke har relaterte behandlingsstegtilgang.
         behandling.steg = steg
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling, behandlingSteg = steg))
         return behandlingRepository.save(behandling)
     }
 

@@ -62,6 +62,8 @@ data class Behandling(
                && type !== BehandlingType.TEKNISK_OPPHØR
     }
 
+    fun erHenlagt() = status == BehandlingStatus.HENLAGT
+
     override fun toString(): String {
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }

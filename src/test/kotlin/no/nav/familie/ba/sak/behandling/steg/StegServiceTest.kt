@@ -2,6 +2,9 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.HenleggÅrsak
+import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -264,5 +267,69 @@ class StegServiceTest(
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
         Assertions.assertEquals(StegType.REGISTRERE_SØKNAD, behandlingEtterPersongrunnlagSteg.steg)
+    }
+
+    @Test
+    fun `Henlegge før behandling er sendt til beslutter`() {
+        val vilkårsvurdertBehandling = kjørGjennomStegInkludertVilkårsvurdering()
+
+        val henlagtBehandling = stegService.håndterHenleggBehandling(
+                vilkårsvurdertBehandling, RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
+                                                                    begrunnelse = ""))
+        Assertions.assertEquals(BehandlingStatus.HENLAGT, henlagtBehandling.status)
+        Assertions.assertTrue(henlagtBehandling.behandlingStegTilstand.filter {
+            it.behandlingSteg == StegType.HENLEGG_SØKNAD && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+        }
+                                      .firstOrNull() != null)
+        Assertions.assertTrue(henlagtBehandling.behandlingStegTilstand.filter {
+            it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.STARTET
+        }
+                                      .firstOrNull() != null)
+
+        stegService.håndterFerdigstillBehandling(henlagtBehandling)
+
+        val behandlingEtterFerdigstiltBehandling = behandlingService.hent(behandlingId = henlagtBehandling.id)
+        // TODO: Verifisere hva som skal være riktig statuser og steg her.
+        Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.steg)
+        Assertions.assertEquals(BehandlingStatus.HENLAGT, behandlingEtterFerdigstiltBehandling.status)
+        //Assertions.assertEquals(FagsakStatus.LØPENDE, behandlingEtterFerdigstiltBehandling.fagsak.status)
+    }
+
+    @Test
+    fun `Henlegge etter behandling er sendt til beslutter`() {
+        val vilkårsvurdertBehandling = kjørGjennomStegInkludertVilkårsvurdering()
+        stegService.håndterSendTilBeslutter(vilkårsvurdertBehandling, "1234")
+
+        val behandlingEtterSendTilBeslutter = behandlingService.hent(behandlingId = vilkårsvurdertBehandling.id)
+
+        assertThrows<IllegalStateException> {
+            stegService.håndterHenleggBehandling(behandlingEtterSendTilBeslutter,
+                                                 RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
+                                                                           begrunnelse = ""))
+        }
+    }
+
+    private fun kjørGjennomStegInkludertVilkårsvurdering(): Behandling {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        stegService.håndterSøknad(behandling = behandling,
+                                  restRegistrerSøknad = RestRegistrerSøknad(
+                                          søknad = lagSøknadDTO(søkerIdent = søkerFnr,
+                                                                barnasIdenter = listOf(barnFnr)),
+                                          bekreftEndringerViaFrontend = true))
+
+        val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)!!
+        val barn: Person =
+                persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.find { it.personIdent.ident == barnFnr }!!
+        vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
+        behandlingResultatService.oppdater(behandlingResultat)
+        stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
+        return behandlingService.hent(behandlingId = behandling.id)
     }
 }

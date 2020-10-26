@@ -31,16 +31,26 @@ class FerdigstillBehandling(
         }
 
         loggService.opprettFerdigstillBehandling(behandling)
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
 
-        oppdaterFagsakStatus(behandling = behandling)
+        if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
+            behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
 
-        behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
+            oppdaterFagsakStatus(behandling = behandling)
+
+            behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
+        } else {
+            // TODO: hva skal skje her når behandlingen er henlagt??
+            // Dersom det fra før var en aktiv behandling - hvordan skal vi evt finne tilbake til den og sette den tilbake til aktiv igjen?
+        }
 
         return hentNesteStegForNormalFlyt(behandling)
     }
 
     private fun oppdaterFagsakStatus(behandling: Behandling) {
+        if (behandling.erHenlagt()) {
+            // TODO: Hva settes fagsakstatus til her??
+            return
+        }
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val erLøpende = tilkjentYtelse.andelerTilkjentYtelse.any { it.stønadTom >= now() }
         if (erLøpende) {

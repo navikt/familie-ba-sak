@@ -255,7 +255,7 @@ class StegService(
             }
 
             if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hent(behandling.id).status)) {
-                error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandling.status}")
+                error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandlingService.hent(behandling.id).status}")
             }
 
             val returBehandling = behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
