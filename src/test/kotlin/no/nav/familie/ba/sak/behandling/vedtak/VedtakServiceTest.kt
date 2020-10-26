@@ -45,9 +45,6 @@ class VedtakServiceTest(
         private val behandlingRepository: BehandlingRepository,
 
         @Autowired
-        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository,
-
-        @Autowired
         private val behandlingMetrikker: BehandlingMetrikker,
 
         @Autowired
@@ -102,7 +99,6 @@ class VedtakServiceTest(
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
                 behandlingRepository,
-                behandlingStegTilstandRepository,
                 behandlingMetrikker,
                 fagsakPersonRepository,
                 persongrunnlagService,
