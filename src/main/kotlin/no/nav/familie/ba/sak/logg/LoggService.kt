@@ -47,14 +47,14 @@ class LoggService(
     }
 
     fun opprettOpplysningspliktEndret(behandlingId: Long,
-                                      fraStatus: OpplysningspliktStatus? = null,
-                                      tilStatus: OpplysningspliktStatus,
+                                      endring: Boolean = false,
+                                      status: OpplysningspliktStatus,
                                       begrunnelse: String? = null) {
-        val endringstekst = "Opplysningsplikt er satt til ${tilStatus.visningsTekst}."
+        val endringstekst = status.visningsTekst.capitalize()
         lagre(Logg(
                 behandlingId = behandlingId,
-                type = LoggType.BEHANDLENDE_ENHET_ENDRET,
-                tittel = if (fraStatus !== null) "Opplysningsplikt endret på behandling" else "Opplysningsplikt satt på behandling",
+                type = LoggType.OPPLYSNINGSPLIKT,
+                tittel = if (endring) "Opplysningsplikt endret" else "Opplysningsplikt satt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = endringstekst + if (begrunnelse !== null) "\n\n${begrunnelse}" else ""
         ))

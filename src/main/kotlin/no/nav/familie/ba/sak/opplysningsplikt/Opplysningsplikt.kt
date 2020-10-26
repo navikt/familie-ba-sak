@@ -25,6 +25,7 @@ data class Opplysningsplikt(
 }
 
 enum class OpplysningspliktStatus(val visningsTekst: String) {
+    IKKE_SATT("ikke vurdert"),
     MOTTATT("oppfylt"),
     IKKE_MOTTATT_AVSLAG("avslått"),
     IKKE_MOTTATT_FORTSETT("delvis oppfylt")
