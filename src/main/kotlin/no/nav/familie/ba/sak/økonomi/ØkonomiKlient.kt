@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.BaseService
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.log.NavHttpHeaders
 import no.nav.familie.log.mdc.MDCConstants
@@ -45,6 +46,17 @@ class ØkonomiKlient(
 
         return restOperations.exchange(
                 URI.create("$familieOppdragUri/oppdrag"),
+                HttpMethod.POST,
+                HttpEntity(utbetalingsoppdrag, headers))
+    }
+
+    fun hentEtterbetalingsbeløp(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<RestSimulerResultat>> {
+        val headers = HttpHeaders()
+                .medContentTypeJsonUTF8()
+        headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
+
+        return restOperations.exchange(
+                URI.create("$familieOppdragUri/simulering/etterbetalingsbelop"),
                 HttpMethod.POST,
                 HttpEntity(utbetalingsoppdrag, headers))
     }

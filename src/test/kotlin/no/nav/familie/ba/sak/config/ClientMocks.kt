@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.config
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.GrBostedsadresseperiode
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonException
@@ -11,7 +10,6 @@ import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.journalføring.domene.OppdaterJournalpostResponse
-import no.nav.familie.ba.sak.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.*
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -103,112 +101,98 @@ class ClientMocks {
         } returns "NO"
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[0]), PersonInfoQuery.ENKEL)
+            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[0]))
         } returns personInfo.getValue(barnFnr[0])
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[1]), PersonInfoQuery.ENKEL)
+            mockPersonopplysningerService.hentPersoninfo(eq(barnFnr[1]))
         } returns personInfo.getValue(barnFnr[1])
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[0]), PersonInfoQuery.ENKEL)
+            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[0]))
         } returns personInfo.getValue(søkerFnr[0])
 
         every {
-            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[1]), PersonInfoQuery.ENKEL)
+            mockPersonopplysningerService.hentPersoninfo(eq(søkerFnr[1]))
         } returns personInfo.getValue(søkerFnr[1])
 
+        val idSlot = slot<String>()
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(barnFnr[0]))
-        } returns personInfo.getValue(barnFnr[0])
+            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(capture(idSlot))
+        } answers {
+            when (val id = idSlot.captured) {
+                barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
+
+                søkerFnr[0] -> personInfo.getValue(id).copy(
+                        familierelasjoner = setOf(
+                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                navn = personInfo.getValue(barnFnr[0]).navn,
+                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                navn = personInfo.getValue(barnFnr[1]).navn,
+                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+
+                søkerFnr[1] -> personInfo.getValue(id).copy(
+                        familierelasjoner = setOf(
+                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                navn = personInfo.getValue(barnFnr[0]).navn,
+                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                navn = personInfo.getValue(barnFnr[1]).navn,
+                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
+
+                søkerFnr[2] -> personInfo.getValue(id).copy(
+                        familierelasjoner = setOf(
+                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                navn = personInfo.getValue(barnFnr[0]).navn,
+                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                navn = personInfo.getValue(barnFnr[1]).navn,
+                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
+                                                adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering),
+                                Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.FAR)),
+                        familierelasjonerMaskert = setOf(
+                                FamilierelasjonMaskert(relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                       adressebeskyttelseGradering = personInfo.getValue(
+                                                               barnDetIkkeGisTilgangTilFnr).adressebeskyttelseGradering!!)
+                        ))
+
+                integrasjonerFnr -> personInfo.getValue(id).copy(
+                        familierelasjoner = setOf(
+                                Familierelasjon(personIdent = Personident(id = barnFnr[0]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                navn = personInfo.getValue(barnFnr[0]).navn,
+                                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
+                                Familierelasjon(personIdent = Personident(id = barnFnr[1]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
+                                                navn = personInfo.getValue(barnFnr[1]).navn,
+                                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
+                                Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
+                                                relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
+
+                else -> personInfo.getValue(integrasjonerFnr)
+            }
+        }
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(barnFnr[1]))
-        } returns personInfo.getValue(barnFnr[1])
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr[0]))
-        } returns personInfo.getValue(søkerFnr[0]).copy(
-                familierelasjoner = setOf(
-                        Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                        navn = personInfo.getValue(barnFnr[0]).navn,
-                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                        Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                        navn = personInfo.getValue(barnFnr[1]).navn,
-                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
-                        Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr[1]))
-        } returns personInfo.getValue(søkerFnr[1]).copy(
-                familierelasjoner = setOf(
-                        Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                        navn = personInfo.getValue(barnFnr[0]).navn,
-                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                        Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                        navn = personInfo.getValue(barnFnr[1]).navn,
-                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
-                        Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.FAR)))
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(søkerFnr[2]))
-        } returns personInfo.getValue(søkerFnr[2]).copy(
-                familierelasjoner = setOf(
-                        Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                        navn = personInfo.getValue(barnFnr[0]).navn,
-                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                        Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                        navn = personInfo.getValue(barnFnr[1]).navn,
-                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
-                                        adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering),
-                        Familierelasjon(personIdent = Personident(id = søkerFnr[0]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.FAR)),
-                familierelasjonerMaskert = setOf(
-                        FamilierelasjonMaskert(relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                               adressebeskyttelseGradering = personInfo.getValue(barnDetIkkeGisTilgangTilFnr).adressebeskyttelseGradering!!)
-                ))
-
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(eq(integrasjonerFnr))
-        } returns personInfo.getValue(integrasjonerFnr).copy(
-                familierelasjoner = setOf(
-                        Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                        navn = personInfo.getValue(barnFnr[0]).navn,
-                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                        Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                        navn = personInfo.getValue(barnFnr[1]).navn,
-                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
-                        Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
-
-        every{
-            mockPersonopplysningerService.hentPersoninfoMedRelasjoner(any())
-        } returns personInfo.getValue(integrasjonerFnr).copy(
-                familierelasjoner = setOf(
-                        Familierelasjon(personIdent = Personident(id = barnFnr[0]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                        navn = personInfo.getValue(barnFnr[0]).navn,
-                                        fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato),
-                        Familierelasjon(personIdent = Personident(id = barnFnr[1]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.BARN,
-                                        navn = personInfo.getValue(barnFnr[1]).navn,
-                                        fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato),
-                        Familierelasjon(personIdent = Personident(id = søkerFnr[1]),
-                                        relasjonsrolle = FAMILIERELASJONSROLLE.MEDMOR)))
-
-        every {
-            mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(any())
-        } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
+            mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
+        } answers {
+            if (barnDetIkkeGisTilgangTilFnr == idSlot.captured)
+                ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
+            else
+                ADRESSEBESKYTTELSEGRADERING.UGRADERT
+        }
 
         return mockPersonopplysningerService
     }

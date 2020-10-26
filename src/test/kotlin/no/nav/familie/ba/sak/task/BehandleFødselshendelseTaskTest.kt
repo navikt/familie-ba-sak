@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
@@ -39,16 +41,19 @@ class BehandleFødselshendelseTaskTest(@Autowired private val behandleFødselshe
     }
 
     @Test
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun `ved behandling av fødselshendelse persisteres ikke behandlingsdata til databasen`() {
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
         } returns true
+
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barnIdent)))))
         Assertions.assertNull(fagsakRepository.finnFagsakForPersonIdent(PersonIdent(morsIdent)))
     }
 
     @Test
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun `ved behandling av fødselshendelse persisteres behandlingsdata til databasen`() {
         every {
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")

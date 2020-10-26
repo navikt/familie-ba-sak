@@ -119,7 +119,7 @@ class FiltreringsreglerForFlereBarnTest {
 
         every { personopplysningerServiceMock.hentVergeData(Ident(gyldigFnr.ident)) } returns VergeData(harVerge = false)
 
-        every { localDateServiceMock.now() } returns LocalDate.now()
+        every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(20)
 
         val (_, evaluering) = evaluerFiltreringsreglerForFødselshendelse.evaluerFiltreringsregler(behandling,
                                                                                                   setOf(barnFnr0.ident,

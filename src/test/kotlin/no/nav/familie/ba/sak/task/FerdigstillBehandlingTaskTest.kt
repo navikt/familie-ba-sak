@@ -33,7 +33,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-dokgen", "mock-pdl", "mock-iverksett", "mock-infotrygd-feed", "mock-arbeidsfordeling")
+@ActiveProfiles("postgres", "mock-dokgen", "mock-pdl", "mock-økonomi", "mock-infotrygd-feed", "mock-arbeidsfordeling")
 @Tag("integration")
 class FerdigstillBehandlingTaskTest {
 
@@ -96,7 +96,7 @@ class FerdigstillBehandlingTaskTest {
     @Test
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
         val testTask = lagTestTask(Resultat.JA)
-        iverksettMotOppdrag(vedtakId = vedtak!!.id)
+        iverksettMotOppdrag(vedtak = vedtak!!)
 
         val ferdigstillBehandlingDTO = objectMapper.readValue(testTask.payload, FerdigstillBehandlingDTO::class.java)
 
@@ -129,7 +129,7 @@ class FerdigstillBehandlingTaskTest {
         assertEquals(FagsakStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH).sakStatus)
     }
 
-    fun iverksettMotOppdrag(vedtakId: Long) {
-        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtakId, "ansvarligSaksbehandler")
+    private fun iverksettMotOppdrag(vedtak: Vedtak) {
+        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak, "ansvarligSaksbehandler")
     }
 }

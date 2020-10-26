@@ -41,7 +41,7 @@ import java.time.LocalDate
 
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-iverksett", "mock-pdl", "mock-infotrygd-feed")
+@ActiveProfiles("dev", "mock-totrinnkontroll", "mock-dokgen", "mock-økonomi", "mock-pdl", "mock-infotrygd-feed")
 @TestInstance(Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired
