@@ -79,17 +79,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
-    @Transactional
-    fun henleggBehandling(behandlingId: Long): Behandling {
-        oppdaterAktivBehandlingsResultatPåBehandling(behandlingId)
-        oppdaterStegPåBehandling(behandlingId, StegType.FERDIGSTILLE_BEHANDLING)
-
-        //TODO: Trenger man hente personIdent når den ikke blir brukt?
-        taskRepository.save(FerdigstillBehandlingTask.opprettTask(personIdent = "", behandlingsId = behandlingId))
-
-        return hent(behandlingId)
-    }
-
     private fun loggBehandlinghendelse(behandling: Behandling) {
         saksstatistikkEventPublisher.publish(behandling.id,
                                              hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
@@ -184,7 +173,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
-    private fun oppdaterAktivBehandlingsResultatPåBehandling(behandlingId: Long) {
+    fun settBehandlingResultatTilHenlagt(behandlingId: Long) {
         behandlingResultatService.hentAktivForBehandling(behandlingId)
                 ?.also { it.samletResultat = BehandlingResultatType.HENLAGT }
                 ?.let { behandlingResultatService.oppdater(it) }

@@ -59,7 +59,7 @@ enum class StegType(val rekkefølge: Int,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
     HENLEGG_SØKNAD(
-            rekkefølge = 5,
+            rekkefølge = 0,
             tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES, BehandlingStatus.FATTER_VEDTAK)),
     IVERKSETT_MOT_OPPDRAG(
