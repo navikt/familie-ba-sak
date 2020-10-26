@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -10,9 +11,9 @@ import org.springframework.stereotype.Service
 class HenleggBehandling(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository,
-) : BehandlingSteg<HenleggBehandlingInfo> {
+) : BehandlingSteg<RestHenleggBehandlingInfo> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling, data: HenleggBehandlingInfo): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {
         behandlingService.settBehandlingResultatTilHenlagt(behandling.id)
 
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.FERDIGSTILLE_BEHANDLING)
