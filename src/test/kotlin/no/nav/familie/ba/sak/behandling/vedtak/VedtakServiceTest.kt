@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -77,7 +78,13 @@ class VedtakServiceTest(
         private val loggService: LoggService,
 
         @Autowired
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+
+        @Autowired
+        private val taskRepository: TaskRepository,
+
+        @Autowired
+        private val behandlingResultService: BehandlingResultatService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -103,7 +110,9 @@ class VedtakServiceTest(
                 fagsakService,
                 loggService,
                 arbeidsfordelingService,
-                saksstatistikkEventPublisher
+                saksstatistikkEventPublisher,
+                taskRepository,
+                behandlingResultatService
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))

@@ -25,7 +25,8 @@ class FerdigstillBehandling(
                                       data: String): StegType {
         LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
 
-        if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK) {
+        if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK &&
+            behandling.status !== BehandlingStatus.HENLAGT) {
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 

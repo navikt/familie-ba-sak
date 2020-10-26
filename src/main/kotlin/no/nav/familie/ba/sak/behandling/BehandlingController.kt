@@ -69,7 +69,7 @@ class BehandlingController(private val fagsakService: FagsakService,
     }
 
     @PutMapping(path = ["behandlinger/{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun henleggBehandling(@PathParam behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+    fun henleggBehandling(@PathVariable(name = "behandlingId") behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         return Result.runCatching {
             behandlingsService.henleggBehandling(behandlingId)
         }.fold(

@@ -114,7 +114,13 @@ class BehandlingIntegrationTest(
         private val arbeidsfordelingService: ArbeidsfordelingService,
 
         @Autowired
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+
+        @Autowired
+        private val taskRepository: TaskRepository,
+
+        @Autowired
+        private val behandlingResultService: BehandlingResultatService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -134,7 +140,9 @@ class BehandlingIntegrationTest(
                 fagsakService,
                 loggService,
                 arbeidsfordelingService,
-                saksstatistikkEventPublisher
+                saksstatistikkEventPublisher,
+                taskRepository,
+                behandlingResultService
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
