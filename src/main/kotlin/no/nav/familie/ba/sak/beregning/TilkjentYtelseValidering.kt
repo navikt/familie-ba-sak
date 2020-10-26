@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import java.time.LocalDate
+import no.nav.familie.ba.sak.common.tilKortString
 import java.time.LocalDateTime
 
 // 3 år (krav i loven) og 2 måneder (på grunn av behandlingstid)
@@ -79,12 +79,6 @@ object TilkjentYtelseValidering {
         }
     }
 
-    private fun andelerErInnenforGyldigPeriode(andeler: List<AndelTilkjentYtelse>,
-                                               gyldigFom: LocalDate,
-                                               gyldigTom: LocalDate): Boolean {
-        return andeler.any { it.stønadFom < gyldigFom || it.stønadTom > gyldigTom }
-    }
-
     private fun validerIngenOverlappAvAndeler(andeler: List<AndelTilkjentYtelse>,
                                               barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
                                               behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
@@ -92,7 +86,7 @@ object TilkjentYtelseValidering {
         andeler.forEach { andelTilkjentYtelse ->
             if (barnsAndelerFraAndreBehandlinger.any { andelTilkjentYtelse.overlapperMed(it) }) {
                 throw UtbetalingsikkerhetFeil(melding = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
-                                              frontendFeilmelding = "Det utbetales allerede barnetrygd (${andelTilkjentYtelse.type.name}) for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom} - ${andelTilkjentYtelse.stønadTom}.")
+                                              frontendFeilmelding = "Det utbetales allerede barnetrygd for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}.")
             }
         }
     }
