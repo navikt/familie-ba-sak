@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
@@ -51,6 +53,7 @@ class FagsakService(
         private val personopplysningerService: PersonopplysningerService,
         private val integrasjonClient: IntegrasjonClient,
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
         private val opplysningspliktRepository: OpplysningspliktRepository) {
 
 
@@ -339,6 +342,22 @@ class FagsakService(
                     harTilgang = false
             )
         } else null
+    }
+
+    fun hentPågåendeSakStatus(personIdent: String): RestPågåendeSakSøk {
+        val fagsak = hent(PersonIdent(personIdent))
+        val behandling = fagsak?.let { behandlingRepository.findByFagsakAndAktiv(it.id) }
+
+        return RestPågåendeSakSøk(
+                harPågåendeSakIBaSak = fagsak?.status.let { it == FagsakStatus.LØPENDE } ||
+                                       behandling?.status.let { it != null && it != BehandlingStatus.AVSLUTTET },
+                harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(personIdent)
+        )
+    }
+
+    private fun harLøpendeSakIInfotrygd(personIdent: String): Boolean {
+        val identer = personopplysningerService.hentIdenter(Ident(personIdent)).map { it.ident }
+        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter = identer)
     }
 
     companion object {
