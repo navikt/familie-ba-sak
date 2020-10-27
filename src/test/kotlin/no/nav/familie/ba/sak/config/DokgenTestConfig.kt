@@ -20,9 +20,15 @@ class DokgenTestConfig {
         val dokumentService: DokumentService = mockk()
         every { dokumentService.hentBrevForVedtak(any()) } returns success("pdf".toByteArray())
         every { dokumentService.genererBrevForVedtak(any()) } returns TEST_PDF
-        every { dokumentService.genererManueltBrev(any(), any(), any()) } returns "pdf".toByteArray()
-        every { dokumentService.sendManueltBrev(any(), any(), any()) } returns success("distribuerBrevBestillingId")
-        every { dokumentService.distribuerBrevOgLoggHendelse(any(), any(), any(), any(), any()) } returns success("distribuerBrevBestillingId")
+        every { dokumentService.genererManueltBrev(any(), any()) } returns "pdf".toByteArray()
+        every { dokumentService.sendManueltBrev(any(), any()) } returns success("distribuerBrevBestillingId")
+        every {
+            dokumentService.distribuerBrevOgLoggHendelse(any(),
+                                                         any(),
+                                                         any(),
+                                                         any(),
+                                                         any())
+        } returns success("distribuerBrevBestillingId")
         return dokumentService
     }
 

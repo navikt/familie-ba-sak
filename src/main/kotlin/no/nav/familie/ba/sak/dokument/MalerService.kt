@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
@@ -34,7 +33,6 @@ class MalerService(
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val søknadGrunnlagService: SøknadGrunnlagService,
         private val økonomiService: ØkonomiService
 ) {
 
@@ -60,14 +58,14 @@ class MalerService(
 
     fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
         val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn
-        val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt
-                          ?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
+        val målform = persongrunnlagService.hentSøker(behandling)?.målform
 
         val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
-                soknadDato = søknadsDato.toLocalDate().tilDagMånedÅr().toString(),
                 fritekst = manueltBrevRequest.fritekst,
                 enhet = enhetNavn,
-                saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
+                dokumenter = manueltBrevRequest.multiselectVerdier,
+                saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
+                maalform = målform.toString()
         ))
         return MalMedData(
                 mal = "innhente-opplysninger",
