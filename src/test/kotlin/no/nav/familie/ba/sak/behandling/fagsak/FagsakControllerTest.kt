@@ -1,15 +1,18 @@
 package no.nav.familie.ba.sak.behandling.fagsak
 
 import io.mockk.every
+import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
+import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -21,7 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ActiveProfiles("dev", "mock-dokgen", "mock-pdl")
+@ActiveProfiles("dev", "mock-dokgen", "mock-pdl", "mock-infotrygd-barnetrygd")
 @Tag("integration")
 class FagsakControllerTest(
         @Autowired
@@ -31,7 +34,13 @@ class FagsakControllerTest(
         private val fagsakController: FagsakController,
 
         @Autowired
-        private val mockPersonopplysningerService: PersonopplysningerService
+        private val mockPersonopplysningerService: PersonopplysningerService,
+
+        @Autowired
+        private val behandlingService: BehandlingService,
+
+        @Autowired
+        private val mockInfotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
 ) {
 
     @Test
@@ -126,5 +135,48 @@ class FagsakControllerTest(
                 personIdent = null, aktørId = aktørId.id))
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
+    }
+
+    @Test
+    fun `Skal flagge pågående sak ved løpende fagsak på personIdent`() {
+        val personIdent = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
+                .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
+
+        fagsakController.søkEtterPågåendeSak(RestSøkParam(personIdent)).apply {
+            assertTrue(body!!.data!!.harPågåendeSakIBaSak)
+            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
+        }
+    }
+
+    @Test
+    fun `Skal flagge pågående sak ved pågående behandling på fagsak`() {
+        val personIdent = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
+        behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
+
+        fagsakController.søkEtterPågåendeSak(RestSøkParam(personIdent)).apply {
+            assertTrue(body!!.data!!.harPågåendeSakIBaSak)
+            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
+        }
+    }
+
+    @Test
+    fun `Skal flagge pågående sak i Infotrygd`() {
+        val personIdent = randomFnr()
+
+        every {
+            mockInfotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(any())
+        } returns true andThen false
+
+        fagsakController.søkEtterPågåendeSak(RestSøkParam(personIdent)).apply {
+            assertFalse(body!!.data!!.harPågåendeSakIBaSak)
+            assertTrue(body!!.data!!.harPågåendeSakIInfotrygd)
+        }
+        fagsakController.søkEtterPågåendeSak(RestSøkParam(personIdent)).apply {
+            assertFalse(body!!.data!!.harPågåendeSakIInfotrygd)
+        }
     }
 }

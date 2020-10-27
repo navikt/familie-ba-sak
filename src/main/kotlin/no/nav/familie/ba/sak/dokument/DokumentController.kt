@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.dokument
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
+import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -18,7 +20,8 @@ import org.springframework.web.bind.annotation.*
 class DokumentController(
         private val dokumentService: DokumentService,
         private val vedtakService: VedtakService,
-        private val behandlingService: BehandlingService
+        private val behandlingService: BehandlingService,
+        private val fagsakService: FagsakService
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -77,7 +80,7 @@ class DokumentController(
             @PathVariable brevMalId: String,
             @PathVariable behandlingId: Long,
             @RequestBody manueltBrevRequest: GammelManueltBrevRequest)
-            : Ressurs<String> {
+            : Ressurs<RestFagsak> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: $brevMalId")
 
         if (manueltBrevRequest.fritekst.isEmpty()) {
@@ -93,6 +96,7 @@ class DokumentController(
                     brevmal = brevMal,
                     fritekst = manueltBrevRequest.fritekst
             ))
+            fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
         } else {
             throw Feil(message = "Finnes ingen støttet brevmal for type $brevMal",
                        frontendFeilmelding = "Klarte ikke sende brev. Finnes ingen støttet brevmal for type $brevMalId")
@@ -117,11 +121,14 @@ class DokumentController(
     fun sendBrev(
             @PathVariable behandlingId: Long,
             @RequestBody manueltBrevRequest: ManueltBrevRequest)
-            : Ressurs<String> {
+            : Ressurs<RestFagsak> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: ${manueltBrevRequest.brevmal}")
 
-        return dokumentService.sendManueltBrev(behandling = behandlingService.hent(behandlingId),
-                                               manueltBrevRequest = manueltBrevRequest)
+        val behandling = behandlingService.hent(behandlingId)
+
+        dokumentService.sendManueltBrev(behandling = behandlingService.hent(behandlingId),
+                                        manueltBrevRequest = manueltBrevRequest)
+        return fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
     }
 
     enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String) {

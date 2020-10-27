@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -31,7 +32,8 @@ class DokumentService(
         private val integrasjonClient: IntegrasjonClient,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
-        private val journalføringService: JournalføringService
+        private val journalføringService: JournalføringService,
+        private val opplysningspliktService: OpplysningspliktService
 ) {
 
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
@@ -125,6 +127,10 @@ class DokumentService(
                                                                     brevType = manueltBrevRequest.brevmal.arkivType)
 
         journalføringService.lagreJournalPost(behandling, journalpostId)
+
+        if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER) {
+            opplysningspliktService.lagreBlankOpplysningsplikt(behandlingId = behandling.id)
+        }
 
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
                                             behandlingId = behandling.id,
