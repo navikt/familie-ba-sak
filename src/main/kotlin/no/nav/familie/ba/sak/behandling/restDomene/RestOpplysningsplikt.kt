@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.opplysningsplikt.Opplysningsplikt
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
 
 data class RestOpplysningsplikt(
-        val status: OpplysningspliktStatus?,
+        val status: OpplysningspliktStatus,
         val begrunnelse: String?
 )
 

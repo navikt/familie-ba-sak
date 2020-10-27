@@ -160,40 +160,40 @@ class FagsakService(
 
             val opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
 
-                    RestBehandling(
-                            aktiv = behandling.aktiv,
-                            arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling.toRestArbeidsfordelingPåBehandling(),
-                            årsak = behandling.opprettetÅrsak,
-                            skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
-                            behandlingId = behandling.id,
-                            vedtakForBehandling = restVedtakForBehandling,
-                            personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
-                            type = behandling.type,
-                            status = behandling.status,
-                            steg = behandling.steg,
-                            personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
-                                                       ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
-                            samletResultat =
-                            if (personopplysningGrunnlag == null)
-                                BehandlingResultatType.IKKE_VURDERT
-                            else
-                                behandlingResultatService.hentAktivForBehandling(
-                                        behandling.id)?.samletResultat
-                                ?: BehandlingResultatType.IKKE_VURDERT,
-                            opprettetTidspunkt = behandling.opprettetTidspunkt,
-                            kategori = behandling.kategori,
-                            underkategori = behandling.underkategori,
-                            endretAv = behandling.endretAv,
-                            totrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll(),
-                            beregningOversikt = if (tilkjentYtelse == null || personopplysningGrunnlag == null) emptyList() else
-                                TilkjentYtelseUtils.hentBeregningOversikt(
-                                        tilkjentYtelseForBehandling = tilkjentYtelse,
-                                        personopplysningGrunnlag = personopplysningGrunnlag,
-                                        tilkjentYtelseForForrigeBehandling = if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(
-                                                behandlingId = forrigeBehandling.id) else null),
-                            gjeldendeForUtbetaling = behandling.gjeldendeForFremtidigUtbetaling,
-                            opplysningsplikt = opplysningsplikt?.toRestOpplysningsplikt()
-                    )
+            RestBehandling(
+                    aktiv = behandling.aktiv,
+                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling.toRestArbeidsfordelingPåBehandling(),
+                    årsak = behandling.opprettetÅrsak,
+                    skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
+                    behandlingId = behandling.id,
+                    vedtakForBehandling = restVedtakForBehandling,
+                    personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
+                    type = behandling.type,
+                    status = behandling.status,
+                    steg = behandling.steg,
+                    personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
+                                               ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
+                    samletResultat =
+                    if (personopplysningGrunnlag == null)
+                        BehandlingResultatType.IKKE_VURDERT
+                    else
+                        behandlingResultatService.hentAktivForBehandling(
+                                behandling.id)?.samletResultat
+                        ?: BehandlingResultatType.IKKE_VURDERT,
+                    opprettetTidspunkt = behandling.opprettetTidspunkt,
+                    kategori = behandling.kategori,
+                    underkategori = behandling.underkategori,
+                    endretAv = behandling.endretAv,
+                    totrinnskontroll = totrinnskontroll?.toRestTotrinnskontroll(),
+                    beregningOversikt = if (tilkjentYtelse == null || personopplysningGrunnlag == null) emptyList() else
+                        TilkjentYtelseUtils.hentBeregningOversikt(
+                                tilkjentYtelseForBehandling = tilkjentYtelse,
+                                personopplysningGrunnlag = personopplysningGrunnlag,
+                                tilkjentYtelseForForrigeBehandling = if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(
+                                        behandlingId = forrigeBehandling.id) else null),
+                    gjeldendeForUtbetaling = behandling.gjeldendeForFremtidigUtbetaling,
+                    opplysningsplikt = opplysningsplikt?.toRestOpplysningsplikt()
+            )
         }
     }
 

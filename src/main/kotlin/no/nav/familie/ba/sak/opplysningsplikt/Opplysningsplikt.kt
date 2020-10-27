@@ -16,7 +16,7 @@ data class Opplysningsplikt(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "status")
-        var status: OpplysningspliktStatus? = null,
+        var status: OpplysningspliktStatus = OpplysningspliktStatus.IKKE_SATT,
 
         @Column(name = "begrunnelse")
         var begrunnelse: String? = null

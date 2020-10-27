@@ -2,7 +2,7 @@ CREATE TABLE OPPLYSNINGSPLIKT
 (
     ID               BIGINT PRIMARY KEY,
     FK_BEHANDLING_ID BIGINT REFERENCES behandling (id)   NOT NULL,
-    STATUS           VARCHAR,
+    STATUS           VARCHAR                             NOT NULL,
     BEGRUNNELSE      TEXT,
     VERSJON          BIGINT       DEFAULT 0              NOT NULL,
     OPPRETTET_AV     VARCHAR      DEFAULT 'VL'           NOT NULL,
