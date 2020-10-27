@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -30,7 +31,8 @@ class DokumentService(
         private val integrasjonClient: IntegrasjonClient,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
-        private val journalføringService: JournalføringService
+        private val journalføringService: JournalføringService,
+        private val opplysningspliktService: OpplysningspliktService
 ) {
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
         it to Metrics.counter("brev.sendt",
@@ -114,21 +116,25 @@ class DokumentService(
                         manueltBrevRequest: ManueltBrevRequest): Ressurs<String> {
 
         val fnr = behandling.fagsak.hentAktivIdent().ident
-        val fagsakId = "${behandling.fagsak.id}"
+        val fagsakId = behandling.fagsak.id
         val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = fnr,
-                                                                    fagsakId = fagsakId,
+                                                                    fagsakId = fagsakId.toString(),
                                                                     journalførendeEnhet = enhet,
                                                                     brev = generertBrev,
                                                                     brevType = brevmal.arkivType)
 
         journalføringService.lagreJournalPost(behandling, journalpostId)
 
+        if (brevmal == BrevType.INNHENTE_OPPLYSNINGER) {
+            opplysningspliktService.lagreBlankOpplysningsplikt(behandlingId = behandling.id)
+        }
+
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
                                             behandlingId = behandling.id,
-                                            loggTekst = "${brevmal.visningsTekst.capitalize()}",
+                                            loggTekst = brevmal.visningsTekst.capitalize(),
                                             loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                                             brevType = brevmal)
     }
