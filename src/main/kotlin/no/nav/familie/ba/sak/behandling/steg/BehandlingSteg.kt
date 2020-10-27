@@ -40,15 +40,11 @@ enum class StegType(val rekkefølge: Int,
 
     REGISTRERE_SØKNAD(
             rekkefølge = 1,
-            tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     REGISTRERE_PERSONGRUNNLAG(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    OPPLYSNINGSPLIKT(
-            rekkefølge = 2,
-            tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     VILKÅRSVURDERING(
             rekkefølge = 2,
@@ -56,11 +52,11 @@ enum class StegType(val rekkefølge: Int,
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     SEND_TIL_BESLUTTER(
             rekkefølge = 3,
-            tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     BESLUTTE_VEDTAK(
             rekkefølge = 4,
-            tillattFor = listOf(BehandlerRolle.BESLUTTER),
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
     IVERKSETT_MOT_OPPDRAG(
             rekkefølge = 5,
@@ -141,7 +137,6 @@ enum class StegType(val rekkefølge: Int,
                     when (utførendeStegType) {
                         REGISTRERE_SØKNAD -> REGISTRERE_PERSONGRUNNLAG
                         REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                        OPPLYSNINGSPLIKT -> VILKÅRSVURDERING
                         VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
                         SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                         BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
