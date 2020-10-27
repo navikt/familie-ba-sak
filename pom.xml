@@ -17,13 +17,13 @@
 
     <properties>
         <java.version>11</java.version>
-        <kotlin.version>1.4.0</kotlin.version>
+        <kotlin.version>1.4.10</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>2.2.5.RELEASE</spring.cloud.version>
         <spring.vault.version>2.2.2.RELEASE</spring.vault.version>
-        <felles.version>1.20201019090015_53d0e1b</felles.version>
+        <felles.version>1.20201023090015_d7ea16a</felles.version>
         <felles-kontrakter.version>2.0_20201019114215_23568f6</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20201012132018_dc05978</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20201021122803_a1ef69e</familie.kontrakter.stønadsstatistikk>
@@ -315,7 +315,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.5</version>
+                    <version>0.8.6</version>
                 </plugin>
             </plugins>
         </pluginManagement>
