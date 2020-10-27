@@ -16,7 +16,7 @@ class InfotrygdBarnetrygdConfig {
     @Primary
     fun mockInfotrygdBarnetrygd(): InfotrygdBarnetrygdClient {
         val mockk = mockk<InfotrygdBarnetrygdClient>(relaxed = true)
-        every { mockk.harIkkeLøpendeSakIInfotrygd(any(), any()) } returns true
+        every { mockk.harLøpendeSakIInfotrygd(any(), any()) } returns false
         return mockk
     }
 }

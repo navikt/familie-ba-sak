@@ -68,11 +68,11 @@ class FødselshendelseServiceTest {
                                                                 gdprServiceMock)
 
     @Test
-    fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer false`() {
+    fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer true`() {
         every { personopplysningerServiceMock.hentIdenter(any()) } returns listOf(IdentInformasjon(søkerFnr,
                                                                                                    false,
                                                                                                    "FOLKEREGISTERIDENT"))
-        every { infotrygdBarnetrygdClientMock.harIkkeLøpendeSakIInfotrygd(any(), any()) } returns false
+        every { infotrygdBarnetrygdClientMock.harLøpendeSakIInfotrygd(any(), any()) } returns true
 
         val skalBehandlesHosInfotrygd =
                 fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
@@ -93,7 +93,7 @@ class FødselshendelseServiceTest {
                                                                                                              "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
-        every { infotrygdBarnetrygdClientMock.harIkkeLøpendeSakIInfotrygd(capture(slot), any()) } returns false
+        every { infotrygdBarnetrygdClientMock.harLøpendeSakIInfotrygd(capture(slot), any()) } returns true
 
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
 
@@ -120,7 +120,7 @@ class FødselshendelseServiceTest {
                                                                                                              "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
-        every { infotrygdBarnetrygdClientMock.harIkkeLøpendeSakIInfotrygd(any(), capture(slot)) } returns false
+        every { infotrygdBarnetrygdClientMock.harLøpendeSakIInfotrygd(any(), capture(slot)) } returns true
 
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr, barn2Fnr))
 
