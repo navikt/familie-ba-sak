@@ -16,8 +16,8 @@ import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
