@@ -247,6 +247,7 @@ class StegService(
             behandlingSteg.preValiderSteg(behandling, this)
             val nesteSteg = utførendeSteg()
             behandlingSteg.postValiderSteg(behandling)
+            val behandlingEtterUtførtSteg = behandlingService.hent(behandling.id)
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
@@ -254,8 +255,8 @@ class StegService(
                 LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
             }
 
-            if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hent(behandling.id).status)) {
-                error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandlingService.hent(behandling.id).status}")
+            if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingEtterUtførtSteg.status)) {
+                error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandlingEtterUtførtSteg.status}")
             }
 
             val returBehandling = behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)

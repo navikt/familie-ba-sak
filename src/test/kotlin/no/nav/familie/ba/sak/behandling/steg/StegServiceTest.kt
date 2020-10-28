@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.behandling.stegTemp
+package no.nav.familie.ba.sak.behandling.steg
 
 import io.mockk.verify
 import no.nav.familie.ba.sak.behandling.BehandlingService
@@ -295,7 +295,6 @@ class StegServiceTest(
         // TODO: Verifisere hva som skal være riktig statuser og steg her.
         Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.stegTemp)
         Assertions.assertEquals(BehandlingStatus.HENLAGT, behandlingEtterFerdigstiltBehandling.status)
-        //Assertions.assertEquals(FagsakStatus.LØPENDE, behandlingEtterFerdigstiltBehandling.fagsak.status)
     }
 
     @Test
