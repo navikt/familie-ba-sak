@@ -116,12 +116,11 @@ class DokumentService(
     fun sendManueltBrev(behandling: Behandling,
                         manueltBrevRequest: ManueltBrevRequest): Ressurs<String> {
 
-        val fagsakId = "${behandling.fagsak.id}"
         val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
-                                                                    fagsakId = fagsakId,
+                                                                    fagsakId = behandling.fagsak.id.toString(),
                                                                     journalførendeEnhet = enhet,
                                                                     brev = generertBrev,
                                                                     brevType = manueltBrevRequest.brevmal.arkivType)
