@@ -51,7 +51,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
         if (behandling.skalBehandlesAutomatisk && fødselshendelseSkalRullesTilbake()) return null
 
-        val behandlingResultat =  behandlingResultatService.hentAktivForBehandling(behandlingId)
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
@@ -62,13 +62,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                         .mapNotNull { it.datoMottatt }
                         .minOrNull() ?: behandling.opprettetTidspunkt
             }
-            BehandlingÅrsak.FØDSELSHENDELSE -> {
-                behandling.opprettetTidspunkt
-            }
-            BehandlingÅrsak.TEKNISK_OPPHØR -> {
-                behandling.opprettetTidspunkt
-            }
-            else -> error("Statistikkhåndtering for behandling med opprinnelse ${behandling.opprettetÅrsak.name} ikke implementert.")
+            else -> behandling.opprettetTidspunkt
         }
 
         val behandlendeEnhetsKode = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
@@ -184,7 +178,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         }
     }
 
-    private fun fødselshendelseSkalRullesTilbake() : Boolean =
+    private fun fødselshendelseSkalRullesTilbake(): Boolean =
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
 
     companion object {
