@@ -186,13 +186,7 @@ object TilkjentYtelseUtils {
                                 personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
                                 ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                         RestBeregningDetalj(
-                                person = RestPerson(
-                                        type = personForAndel.type,
-                                        kjønn = personForAndel.kjønn,
-                                        navn = personForAndel.navn,
-                                        fødselsdato = personForAndel.fødselsdato,
-                                        personIdent = personForAndel.personIdent.ident
-                                ),
+                                person = personForAndel.toRestPerson(),
                                 ytelseType = andel.type,
                                 utbetaltPerMnd = andel.beløp
                         )

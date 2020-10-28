@@ -50,7 +50,7 @@ class DokumentController(
     fun hentForhåndsvisning(
             @PathVariable brevMalId: String,
             @PathVariable behandlingId: Long,
-            @RequestBody manueltBrevRequest: ManueltBrevRequest)
+            @RequestBody manueltBrevRequest: GammelManueltBrevRequest)
             : Ressurs<ByteArray> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: $brevMalId")
 
@@ -61,7 +61,11 @@ class DokumentController(
         val behandling = behandlingService.hent(behandlingId)
         val brevMal = BrevType.values().find { it.malId == brevMalId }
         return if (brevMal != null) {
-            dokumentService.genererManueltBrev(behandling, brevMal, manueltBrevRequest).let {
+            dokumentService.genererManueltBrev(behandling, ManueltBrevRequest(
+                    mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
+                    brevmal = brevMal,
+                    fritekst = manueltBrevRequest.fritekst
+            )).let {
                 Ressurs.success(it)
             }
         } else {
@@ -75,7 +79,7 @@ class DokumentController(
     fun sendBrev(
             @PathVariable brevMalId: String,
             @PathVariable behandlingId: Long,
-            @RequestBody manueltBrevRequest: ManueltBrevRequest)
+            @RequestBody manueltBrevRequest: GammelManueltBrevRequest)
             : Ressurs<RestFagsak> {
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: $brevMalId")
 
@@ -87,7 +91,11 @@ class DokumentController(
         val brevMal = BrevType.values().find { it.malId == brevMalId }
 
         return if (brevMal != null) {
-            dokumentService.sendManueltBrev(behandling, brevMal, manueltBrevRequest)
+            dokumentService.sendManueltBrev(behandling, ManueltBrevRequest(
+                    mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
+                    brevmal = brevMal,
+                    fritekst = manueltBrevRequest.fritekst
+            ))
             fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
         } else {
             throw Feil(message = "Finnes ingen støttet brevmal for type $brevMal",
@@ -95,14 +103,54 @@ class DokumentController(
         }
     }
 
-    enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String) {
-        INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER", "innhenting av opplysninger"),
-        VEDTAK("vedtak", "BARNETRYGD_VEDTAK", "vedtak")
+    @PostMapping(path = ["forhaandsvis-brev/{behandlingId}"])
+    fun hentForhåndsvisning(
+            @PathVariable behandlingId: Long,
+            @RequestBody manueltBrevRequest: ManueltBrevRequest)
+            : Ressurs<ByteArray> {
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter brev for mal: ${manueltBrevRequest.brevmal}")
+
+        return dokumentService.genererManueltBrev(behandling = behandlingService.hent(behandlingId),
+                                                  manueltBrevRequest = manueltBrevRequest).let {
+            Ressurs.success(it)
+        }
     }
 
-    data class ManueltBrevRequest(val fritekst: String)
+
+    @PostMapping(path = ["send-brev/{behandlingId}"])
+    fun sendBrev(
+            @PathVariable behandlingId: Long,
+            @RequestBody manueltBrevRequest: ManueltBrevRequest)
+            : Ressurs<RestFagsak> {
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og send brev: ${manueltBrevRequest.brevmal}")
+
+        val behandling = behandlingService.hent(behandlingId)
+
+        dokumentService.sendManueltBrev(behandling = behandlingService.hent(behandlingId),
+                                        manueltBrevRequest = manueltBrevRequest)
+        return fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
+    }
+
+    enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String) {
+        INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER", "innhenting av opplysninger"),
+        VEDTAK("vedtak", "BARNETRYGD_VEDTAK", "vedtak");
+
+        override fun toString(): String {
+            return visningsTekst
+        }
+    }
+
+    data class GammelManueltBrevRequest(
+            val fritekst: String)
+
+    data class ManueltBrevRequest(
+            val brevmal: BrevType,
+            val multiselectVerdier: List<String> = emptyList(),
+            val mottakerIdent: String,
+            val fritekst: String)
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(DokumentController::class.java)
     }
 }

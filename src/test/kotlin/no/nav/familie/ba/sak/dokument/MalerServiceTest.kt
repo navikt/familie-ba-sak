@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,7 +36,6 @@ class MalerServiceTest {
                                                           beregningService,
                                                           persongrunnlagService,
                                                           arbeidsfordelingService,
-                                                          søknadGrunnlagService,
                                                           økonomiService)
 
     @Test
