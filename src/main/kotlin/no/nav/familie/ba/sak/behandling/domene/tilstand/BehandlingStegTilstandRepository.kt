@@ -7,6 +7,6 @@ interface BehandlingStegTilstandRepository : JpaRepository<BehandlingStegTilstan
     @Query(value = "SELECT b FROM BehandlingStegTilstand b WHERE b.behandling.id = :behandlingId")
     fun finnBehandlingStegTilstand(behandlingId: Long): List<BehandlingStegTilstand>
 
-    @Query(value = "SELECT b FROM BehandlingStegTilstand b WHERE b.behandling.id = :behandlingId and not b.behandlingStegStatus = 'UTFØRT'")
+    @Query(value = "SELECT b FROM BehandlingStegTilstand b WHERE b.behandling.id = :behandlingId and b.utført = false")
     fun finnSisteBehandlingStegTilstand(behandlingId: Long): BehandlingStegTilstand
 }

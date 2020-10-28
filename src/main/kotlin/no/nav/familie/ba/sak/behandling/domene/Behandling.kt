@@ -56,6 +56,10 @@ data class Behandling(
         var steg: StegType = initSteg()
 ) : BaseEntitet() {
 
+    //TODO: Etter at oppgaven er klar skal steg fjernes og stegTemp skal endre navn til steg.
+    val stegTemp: StegType
+        get() = behandlingStegTilstand.firstOrNull { !it.utført }?.behandlingSteg ?: steg
+
     fun sendVedtaksbrev(): Boolean {
         return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
                && type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT

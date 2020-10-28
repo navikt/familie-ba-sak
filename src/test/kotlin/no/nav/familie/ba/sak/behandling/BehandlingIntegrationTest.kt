@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
@@ -191,7 +192,7 @@ class BehandlingIntegrationTest(
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
-        behandling.steg = StegType.BESLUTTE_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandlingRepository.saveAndFlush(behandling)
 
         Assertions.assertThrows(Exception::class.java) {

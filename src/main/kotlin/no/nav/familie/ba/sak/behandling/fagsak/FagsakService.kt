@@ -154,7 +154,7 @@ class FagsakService(
             val forrigeBehandling = behandlinger
                     .filter { it.opprettetTidspunkt.isBefore(behandling.opprettetTidspunkt) }
                     .sortedBy { it.opprettetTidspunkt }
-                    .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+                    .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.stegTemp == StegType.BEHANDLING_AVSLUTTET }
 
             RestBehandling(
                     aktiv = behandling.aktiv,
@@ -166,7 +166,7 @@ class FagsakService(
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
                     type = behandling.type,
                     status = behandling.status,
-                    steg = behandling.steg,
+                    steg = behandling.stegTemp,
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                     samletResultat =

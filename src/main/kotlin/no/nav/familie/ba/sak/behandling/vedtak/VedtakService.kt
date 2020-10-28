@@ -88,7 +88,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori,
                                       opprettetÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR).also {
-            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it, behandlingSteg = initSteg()))
         }
 
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
@@ -120,7 +120,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
 
         behandlingRepository.save(nyBehandling.also {
-            it.steg = StegType.FERDIGSTILLE_BEHANDLING
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it, behandlingSteg = StegType.FERDIGSTILLE_BEHANDLING))
             it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it,
                                                                  behandlingSteg = StegType.FERDIGSTILLE_BEHANDLING))
         })

@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.behandling.domene.tilstand
 
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.common.BaseEntitet
 import javax.persistence.*
@@ -24,13 +23,12 @@ data class BehandlingStegTilstand(
         @Column(name = "behandling_steg", nullable = false)
         val behandlingSteg: StegType,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "behandling_steg_status", nullable = false)
-        var behandlingStegStatus: BehandlingStegStatus = BehandlingStegStatus.STARTET
+        @Column(name = "utfort", nullable = false)
+        var utført: Boolean = false
 
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "BehandlingStegTilstand(id=$id, beahndling=${behandling.id}, behandlingSteg=$behandlingSteg, behandlingStegStatus=$behandlingStegStatus)"
+        return "BehandlingStegTilstand(id=$id, beahndling=${behandling.id}, behandlingSteg=$behandlingSteg, utført=$utført)"
     }
 }

@@ -73,18 +73,10 @@ class BehandlingController(private val fagsakService: FagsakService,
     @PutMapping(path = ["behandlinger/{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun henleggBehandling(@PathVariable(name = "behandlingId") behandlingId: Long,
                           @RequestBody henleggInfo: RestHenleggBehandlingInfo): ResponseEntity<Ressurs<RestFagsak>> {
-        return Result.runCatching {
-            val behandling = behandlingsService.hent(behandlingId)
-            stegService.håndterHenleggBehandling(behandling, henleggInfo)
-        }.fold(
-                onSuccess = {
-                    val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
-                    restFagsak
-                },
-                onFailure = {
-                    throw it
-                }
-        )
+        val behandling = behandlingsService.hent(behandlingId)
+        val response = stegService.håndterHenleggBehandling(behandling, henleggInfo)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = response.fagsak.id))
     }
 }
 

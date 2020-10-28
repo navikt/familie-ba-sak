@@ -13,7 +13,7 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
-        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(),
+        return behandling.stegTemp.hentNesteSteg(utførendeStegType = this.stegType(),
                                              behandlingType = behandling.type,
                                              behandlingÅrsak = behandling.opprettetÅrsak)
     }
@@ -37,7 +37,12 @@ val sisteSteg = StegType.BEHANDLING_AVSLUTTET
 enum class StegType(val rekkefølge: Int,
                     val tillattFor: List<BehandlerRolle>,
                     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
-
+    // Henlegg søknad går utenfor den normale stegflyten og går direkte til ferdigstilt.
+    // Denne typen av steg skal bli endret til å bli av type aksjonspunkt isteden for steg.
+    HENLEGG_SØKNAD(
+            rekkefølge = 0,
+            tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     REGISTRERE_SØKNAD(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
@@ -58,10 +63,6 @@ enum class StegType(val rekkefølge: Int,
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
-    HENLEGG_SØKNAD(
-            rekkefølge = 0,
-            tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     IVERKSETT_MOT_OPPDRAG(
             rekkefølge = 5,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
@@ -164,9 +165,4 @@ enum class BehandlerRolle(val nivå: Int) {
     SAKSBEHANDLER(2),
     VEILEDER(1),
     UKJENT(0)
-}
-
-enum class BehandlingStegStatus(val navn: String, val beskrivelse: String) {
-    STARTET("STARTET", "Steget er startet"),
-    UTFØRT("UTFØRT", "Utført"),
 }

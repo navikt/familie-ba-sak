@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
@@ -58,17 +57,16 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
-                                        skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk,
-                                        steg = initSteg(nyBehandling.behandlingType))
-
-            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, initSteg(nyBehandling.behandlingType)))
+                                        skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk).also {
+                                            it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it, behandlingSteg = initSteg(nyBehandling.behandlingType)))
+                                        }
 
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
             loggBehandlinghendelse(behandling)
             behandling
-        } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
-            aktivBehandling.steg = initSteg(nyBehandling.behandlingType)
+        } else if (aktivBehandling.stegTemp < StegType.BESLUTTE_VEDTAK) {
+            aktivBehandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = aktivBehandling, behandlingSteg = initSteg(nyBehandling.behandlingType)))
             aktivBehandling.status = initStatus()
 
             lagre(aktivBehandling)
@@ -159,15 +157,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     fun oppdaterStegPåBehandling(behandlingId: Long, steg: StegType): Behandling {
         val behandling = hent(behandlingId)
         val sisteBehandlingStegTilstand =
-                behandling.behandlingStegTilstand.filter { it.behandlingStegStatus != BehandlingStegStatus.UTFØRT }.first()
+                behandling.behandlingStegTilstand.filter { !it.utført }.single()
 
-        sisteBehandlingStegTilstand.behandlingStegStatus = BehandlingStegStatus.UTFØRT
+        sisteBehandlingStegTilstand.utført = true
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling, behandlingSteg = steg))
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer siste steg på behandling $behandlingId fra ${sisteBehandlingStegTilstand.behandlingSteg} til $steg")
-        // TODO: Oppdatreing av steg direkte på behandling skal fjernes når frontendkoden for å håntere behandlingsstegtilgang er klar,
-        //       inkludert migrering av tidligere behandlinger som ikke har relaterte behandlingsstegtilgang.
-        behandling.steg = steg
         return behandlingRepository.save(behandling)
     }
 

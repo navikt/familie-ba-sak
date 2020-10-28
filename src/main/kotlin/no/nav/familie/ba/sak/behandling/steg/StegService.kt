@@ -219,29 +219,29 @@ class StegService(
                             utførendeSteg: () -> StegType): Behandling {
         try {
             val behandlerRolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, behandling.steg.tillattFor.minByOrNull { it.nivå })
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, behandling.stegTemp.tillattFor.minByOrNull { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
-            if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
+            if (!behandling.stegTemp.tillattFor.contains(behandlerRolle)) {
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} kan ikke utføre steg '${
                     behandlingSteg.stegType()
                             .displayName()
                 } pga manglende rolle.")
             }
 
-            if (behandling.steg == sisteSteg) {
+            if (behandling.stegTemp == sisteSteg) {
                 error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
-            if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType().kommerEtter(behandling.steg)) {
+            if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType().kommerEtter(behandling.stegTemp)) {
                 error("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
                     behandlingSteg.stegType()
                             .displayName()
-                }', men behandlingen er på steg '${behandling.steg.displayName()}'")
+                }', men behandlingen er på steg '${behandling.stegTemp.displayName()}'")
             }
 
-            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
-                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
+            if (behandling.stegTemp == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
+                error("Behandlingen er på steg '${behandling.stegTemp.displayName()}', og er da låst for alle andre type endringer.")
             }
 
             behandlingSteg.preValiderSteg(behandling, this)

@@ -19,7 +19,6 @@ class HenleggBehandling(
 
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.HENLEGG_SØKNAD)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.HENLAGT)
-        //TODO: Trenger man hente personIdent når den ikke blir brukt?
         opprettFerdigstillBehandling(behandling.id, behandling.fagsak.hentAktivIdent().ident)
 
         return StegType.FERDIGSTILLE_BEHANDLING
