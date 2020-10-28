@@ -39,8 +39,11 @@ class FerdigstillBehandling(
 
             behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
         } else {
-            // TODO: hva skal skje her når behandlingen er henlagt??
-            // Dersom det fra før var en aktiv behandling - hvordan skal vi evt finne tilbake til den og sette den tilbake til aktiv igjen?
+            behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.apply {
+                aktiv = true
+                behandlingService.lagre(this)
+
+            }
         }
 
         return hentNesteStegForNormalFlyt(behandling)
@@ -48,7 +51,6 @@ class FerdigstillBehandling(
 
     private fun oppdaterFagsakStatus(behandling: Behandling) {
         if (behandling.erHenlagt()) {
-            // TODO: Hva settes fagsakstatus til her??
             return
         }
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
