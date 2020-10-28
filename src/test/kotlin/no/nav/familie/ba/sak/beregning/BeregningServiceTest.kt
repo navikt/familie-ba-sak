@@ -157,7 +157,7 @@ class BeregningServiceTest {
 
         Assertions.assertEquals(1054, andelerTilkjentYtelse.last().beløp)
         Assertions.assertEquals(satsPeriode2Start, andelerTilkjentYtelse.last().stønadFom)
-        Assertions.assertEquals(periodeTom.sisteDagIForrigeMåned(), andelerTilkjentYtelse.last().stønadTom)
+        Assertions.assertEquals(periodeTom.sisteDagIMåned(), andelerTilkjentYtelse.last().stønadTom)
     }
 
     @Test
@@ -216,14 +216,14 @@ class BeregningServiceTest {
 
 
         val periode1Fom = LocalDate.of(2020, 1, 1)
-        val periode1Tom = LocalDate.of(2020, 11, 1)
+        val periode1Tom = LocalDate.of(2020, 11, 13)
 
         val periode2Fom = LocalDate.of(2020, 12, 1)
         val periode2Midt = LocalDate.of(2021, 6, 1)
         val periode2Tom = LocalDate.of(2021, 12, 11)
 
         val periode3Fom = LocalDate.of(2022, 1, 12)
-        val periode3Midt = LocalDate.of(2023, 6, 1)
+        val periode3Midt = LocalDate.of(2023, 6, 10)
         val periode3Tom = LocalDate.of(2028, 1, 1)
 
         val tilleggFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)
@@ -304,7 +304,7 @@ class BeregningServiceTest {
 
         // Barn 1 - første periode (etter satsendring)
         Assertions.assertEquals(tilleggFom, andelerBarn1[1].stønadFom)
-        Assertions.assertEquals(periode1Tom.sisteDagIForrigeMåned(), andelerBarn1[1].stønadTom)
+        Assertions.assertEquals(periode1Tom.sisteDagIMåned(), andelerBarn1[1].stønadTom)
         Assertions.assertEquals(1354, andelerBarn1[1].beløp)
 
         // Barn 1 - andre periode (før fylte 6 år)
@@ -319,7 +319,7 @@ class BeregningServiceTest {
 
         // Barn 2 - eneste periode (etter satsendring)
         Assertions.assertEquals(periode3Fom.førsteDagINesteMåned(), andelerBarn2[0].stønadFom)
-        Assertions.assertEquals(periode3Midt.sisteDagIForrigeMåned(), andelerBarn2[0].stønadTom)
+        Assertions.assertEquals(periode3Midt.sisteDagIMåned(), andelerBarn2[0].stønadTom)
         Assertions.assertEquals(1354, andelerBarn2[0].beløp)
 
     }
