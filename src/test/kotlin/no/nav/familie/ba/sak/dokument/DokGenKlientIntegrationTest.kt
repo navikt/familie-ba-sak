@@ -4,6 +4,7 @@ package no.nav.familie.ba.sak.dokument
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.restDomene.DocFormat
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.dokument.domene.DokumentRequest
@@ -73,4 +74,4 @@ class DokGenKlientIntegrationTest {
 val testDokumentHeaderFelter = DokumentHeaderFelter(navn = "Mockersen",
                                                     dokumentDato = LocalDate.now().toString(),
                                                     fodselsnummer = "1234",
-                                                    maalform = "NB")
+                                                    maalform = Målform.NB)

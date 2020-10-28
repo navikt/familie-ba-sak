@@ -58,14 +58,14 @@ class MalerService(
 
     fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
         val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn
-        val målform = persongrunnlagService.hentSøker(behandling)?.målform
+        val målform = persongrunnlagService.hentSøker(behandling)?.målform ?: Målform.NB
 
         val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
                 fritekst = manueltBrevRequest.fritekst,
                 enhet = enhetNavn,
                 dokumenter = manueltBrevRequest.multiselectVerdier,
                 saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
-                maalform = målform.toString()
+                maalform = målform
         ))
         return MalMedData(
                 mal = "innhente-opplysninger",
@@ -113,7 +113,7 @@ class MalerService(
                 beslutter = totrinnskontroll.beslutter
                             ?: totrinnskontroll.saksbehandler,
                 hjemler = VedtakUtils.hentHjemlerBruktIVedtak(vedtak),
-                maalform = målform.toString(),
+                maalform = målform,
                 etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) } ?: "",
                 erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
         )
