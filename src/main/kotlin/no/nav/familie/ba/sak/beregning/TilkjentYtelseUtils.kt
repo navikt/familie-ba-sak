@@ -58,13 +58,12 @@ object TilkjentYtelseUtils {
                                 val beløpsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.TILLEGG_ORBA,
                                         stønadFraOgMed = settRiktigStønadFom(fraOgMed = periodeUnder6År.fom),
-                                        stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = true,
-                                                                             tilOgMed = periodeUnder6År.tom)
+                                        stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom)
                                 ) else emptyList()
 
                                 val beløpsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
                                         satstype = SatsType.ORBA,
-                                        stønadFraOgMed = settRiktigStønadFom(skalStarteMånedenFør = periodeUnder6År != null,
+                                        stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = periodeUnder6År != null,
                                                                              fraOgMed = periodeOver6år.fom),
                                         stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
                                                                              tilOgMed = periodeOver6år.tom)
@@ -104,13 +103,13 @@ object TilkjentYtelseUtils {
     }
 
 
-    private fun settRiktigStønadFom(skalStarteMånedenFør: Boolean = false, fraOgMed: LocalDate): YearMonth =
-            if (skalStarteMånedenFør)
+    private fun settRiktigStønadFom(skalStarteSammeMåned: Boolean = false, fraOgMed: LocalDate): YearMonth =
+            if (skalStarteSammeMåned)
                 YearMonth.from(fraOgMed.withDayOfMonth(1))
             else
                 YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
 
-    private fun settRiktigStønadTom(skalAvsluttesMånedenFør: Boolean, tilOgMed: LocalDate): YearMonth =
+    private fun settRiktigStønadTom(skalAvsluttesMånedenFør: Boolean = false, tilOgMed: LocalDate): YearMonth =
             if (skalAvsluttesMånedenFør)
                 YearMonth.from(tilOgMed.minusMonths(1).sisteDagIMåned())
             else
@@ -143,14 +142,14 @@ object TilkjentYtelseUtils {
                                         when {
                                             segmenterFraForrigeTilkjentYtelse.any { it == segment } ->
                                                 if (segment.erSatsendring(andelerForSegment)) BeregningEndring(type = BeregningEndringType.UENDRET_SATS,
-                                                                                              trengerBegrunnelse = segment.trengerBegrunnelse())
+                                                                                                               trengerBegrunnelse = segment.trengerBegrunnelse())
                                                 else BeregningEndring(type = BeregningEndringType.UENDRET,
                                                                       trengerBegrunnelse = segment.trengerBegrunnelse())
 
                                             else -> {
                                                 erEtterFørsteEndring = true
                                                 if (segment.erSatsendring(andelerForSegment)) BeregningEndring(type = BeregningEndringType.ENDRET_SATS,
-                                                                                              trengerBegrunnelse = segment.trengerBegrunnelse())
+                                                                                                               trengerBegrunnelse = segment.trengerBegrunnelse())
                                                 else BeregningEndring(type = BeregningEndringType.ENDRET,
                                                                       trengerBegrunnelse = segment.trengerBegrunnelse())
                                             }
