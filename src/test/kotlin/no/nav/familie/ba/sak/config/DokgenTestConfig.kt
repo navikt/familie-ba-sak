@@ -31,14 +31,4 @@ class DokgenTestConfig {
         } returns success("distribuerBrevBestillingId")
         return dokumentService
     }
-
-    @Bean
-    @Profile("mock-dokgen-klient")
-    @Primary
-    fun mockDokGenKlient(): DokGenKlient {
-        val dokGenKlient: DokGenKlient = mockk()
-        every { dokGenKlient.lagPdfForMal(any(), any()) } returns TEST_PDF
-        return dokGenKlient
-    }
-
 }

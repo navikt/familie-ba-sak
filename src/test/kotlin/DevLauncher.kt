@@ -6,7 +6,7 @@ object DevLauncher {
     fun main(args: Array<String>) {
         val app = SpringApplicationBuilder(ApplicationConfig::class.java)
                 .profiles("dev",
-                          "mock-dokgen",
+                          "mock-dokgen-klient",
                           "mock-økonomi",
                           "mock-infotrygd-feed",
                           "mock-infotrygd-barnetrygd",
