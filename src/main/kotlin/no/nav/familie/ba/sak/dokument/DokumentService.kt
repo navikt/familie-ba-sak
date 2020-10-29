@@ -123,7 +123,7 @@ class DokumentService(
 
         val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
-        val førsteside = Førsteside(maalform =  mottaker.målform.toString(),
+        val førsteside = Førsteside(maalform =  mottaker.målform.name,
                                     navSkjemaId = "NAV 33.00-07",
                                     overskriftsTittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
 
