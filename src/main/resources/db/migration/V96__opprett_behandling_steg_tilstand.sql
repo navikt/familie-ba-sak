@@ -1,5 +1,7 @@
+DROP TABLE IF EXISTS BEHANDLING_STEG_TILSTAND
+
 CREATE TABLE BEHANDLING_STEG_TILSTAND
-(	
+(
     id                      BIGINT                            primary key,
     fk_behandling_id        BIGINT references BEHANDLING(id)     not null,
     behandling_steg         VARCHAR                              not null,
