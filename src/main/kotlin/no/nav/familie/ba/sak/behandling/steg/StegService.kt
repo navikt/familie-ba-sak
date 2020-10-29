@@ -259,7 +259,7 @@ class StegService(
                 error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandlingEtterUtførtSteg.status}")
             }
 
-            val returBehandling = behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
+            val returBehandling = behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id, steg = nesteSteg)
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             return returBehandling

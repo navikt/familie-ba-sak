@@ -71,6 +71,11 @@ data class Behandling(
     override fun toString(): String {
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }
+
+    fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
+        this.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+        return this
+    }
 }
 
 /**

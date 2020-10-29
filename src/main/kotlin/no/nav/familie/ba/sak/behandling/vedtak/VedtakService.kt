@@ -87,9 +87,8 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori,
-                                      opprettetÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR).also {
-            it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it, behandlingSteg = initSteg()))
-        }
+                                      opprettetÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR)
+                .leggTilBehandlingStegTilstand(initSteg())
 
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
         behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
@@ -118,12 +117,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         totrinnskontrollService.opprettEllerHentTotrinnskontroll(nyBehandling, saksbehandler)
         totrinnskontrollService.besluttTotrinnskontroll(nyBehandling, SYSTEM_NAVN, Beslutning.GODKJENT)
 
-
-        behandlingRepository.save(nyBehandling.also {
-            it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it, behandlingSteg = StegType.FERDIGSTILLE_BEHANDLING))
-            it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it,
-                                                                 behandlingSteg = StegType.FERDIGSTILLE_BEHANDLING))
-        })
+        behandlingRepository.save(nyBehandling.leggTilBehandlingStegTilstand(StegType.FERDIGSTILLE_BEHANDLING))
 
         postProsessor(nyttVedtak)
 

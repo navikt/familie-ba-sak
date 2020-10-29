@@ -21,7 +21,7 @@ class HenleggBehandling(
 
         behandlingService.settBehandlingResultatTilHenlagt(behandling.id, data.årsak, data.begrunnelse)
 
-        behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.HENLEGG_SØKNAD)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.HENLEGG_SØKNAD)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.HENLAGT)
         opprettFerdigstillBehandling(behandling.id, behandling.fagsak.hentAktivIdent().ident)
 

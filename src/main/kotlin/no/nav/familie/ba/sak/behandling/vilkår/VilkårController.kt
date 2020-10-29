@@ -80,7 +80,7 @@ class VilkårController(
      * Når et vilkår vurderes (endres) vil begrunnelsene satt på dette vilkåret resettes
      */
     private fun settStegOgSlettUtbetalingBegrunnelser(behandlingId: Long) {
-        behandlingService.oppdaterStegPåBehandling(behandlingId = behandlingId, steg = StegType.VILKÅRSVURDERING)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId, steg = StegType.VILKÅRSVURDERING)
         vedtakService.slettUtbetalingBegrunnelser(behandlingId)
     }
 }

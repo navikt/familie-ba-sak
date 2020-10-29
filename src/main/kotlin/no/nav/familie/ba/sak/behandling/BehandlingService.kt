@@ -57,10 +57,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
-                                        skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk).also {
-                it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it,
-                                                                     behandlingSteg = initSteg(nyBehandling.behandlingType)))
-            }
+                                        skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk)
+                    .leggTilBehandlingStegTilstand(initSteg(nyBehandling.behandlingType))
 
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
@@ -156,7 +154,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling).also { loggBehandlinghendelse(behandling) }
     }
 
-    fun oppdaterStegPåBehandling(behandlingId: Long, steg: StegType): Behandling {
+    fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId: Long, steg: StegType): Behandling {
         val behandling = hent(behandlingId)
         val sisteBehandlingStegTilstand =
                 behandling.behandlingStegTilstand.filter { !it.utført }.single()
