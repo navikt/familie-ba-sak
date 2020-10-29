@@ -139,7 +139,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             IKKE_VURDERT -> emptyList()
             AVSLÅTT -> finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
-            HENLAGT -> TODO()
+            HENLAGT -> emptyList() //TODO: Tor må hete henlagtinfo (årsak og begrunnelse) fra resultat tabellen.
             OPPHØRT -> TODO()
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
                                                        "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
