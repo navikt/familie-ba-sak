@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.dokument.domene.maler
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import java.util.*
 
 data class Innvilget(
@@ -9,7 +10,7 @@ data class Innvilget(
         val beslutter: String,
         var hjemler: SortedSet<Int> = sortedSetOf(),
         var duFaar: List<DuFårSeksjon> = emptyList(),
-        val maalform: String,
+        val maalform: Målform,
         val etterbetalingsbelop: String? = "",
         val erFeilutbetaling: Boolean? = false,
 )

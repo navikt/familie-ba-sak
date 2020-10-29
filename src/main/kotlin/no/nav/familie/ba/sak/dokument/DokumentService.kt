@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
+import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -30,8 +32,10 @@ class DokumentService(
         private val integrasjonClient: IntegrasjonClient,
         private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
-        private val journalføringService: JournalføringService
+        private val journalføringService: JournalføringService,
+        private val opplysningspliktService: OpplysningspliktService
 ) {
+
     private val antallBrevSendt: Map<BrevType, Counter> = BrevType.values().map {
         it to Metrics.counter("brev.sendt",
                               "brevmal", it.visningsTekst)
@@ -60,7 +64,7 @@ class DokumentService(
                                                     antallBarn = if (vedtak.behandling.skalBehandlesAutomatisk)
                                                         personopplysningGrunnlag.barna.size else null,
                                                     dokumentDato = LocalDate.now().tilDagMånedÅr(),
-                                                    maalform = søker.målform.toString())
+                                                    maalform = søker.målform)
 
             val malMedData = malerService.mapTilVedtakBrevfelter(vedtak,
                                                                  behandlingResultatType
@@ -79,21 +83,21 @@ class DokumentService(
     }
 
     fun genererManueltBrev(behandling: Behandling,
-                           brevmal: BrevType,
                            manueltBrevRequest: ManueltBrevRequest): ByteArray =
             Result.runCatching {
+                val mottaker =
+                        persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
+                        ?: error("Finner ikke mottaker på vedtaket")
 
-                val søker = persongrunnlagService.hentSøker(behandling)
-                            ?: error("Finner ikke søker på vedtaket")
-                val headerFelter = DokumentHeaderFelter(fodselsnummer = søker.personIdent.ident,
-                                                        navn = søker.navn,
+                val headerFelter = DokumentHeaderFelter(fodselsnummer = mottaker.personIdent.ident,
+                                                        navn = mottaker.navn,
                                                         dokumentDato = LocalDate.now().tilDagMånedÅr(),
-                                                        maalform = søker.målform.toString())
-                val malMedData = when (brevmal) {
+                                                        maalform = mottaker.målform)
+                val malMedData = when (manueltBrevRequest.brevmal) {
                     BrevType.INNHENTE_OPPLYSNINGER -> malerService.mapTilInnhenteOpplysningerBrevfelter(behandling,
                                                                                                         manueltBrevRequest)
-                    else -> throw Feil(message = "Brevmal $brevmal er ikke støttet for manuelle brev.",
-                                       frontendFeilmelding = "Klarte ikke generere brev. Brevmal ${brevmal.malId} er ikke støttet.")
+                    else -> throw Feil(message = "Brevmal ${manueltBrevRequest.brevmal} er ikke støttet for manuelle brev.",
+                                       frontendFeilmelding = "Klarte ikke generere brev. Brevmal ${manueltBrevRequest.brevmal.malId} er ikke støttet.")
                 }
                 dokGenKlient.lagPdfForMal(malMedData, headerFelter)
             }.fold(
@@ -101,7 +105,7 @@ class DokumentService(
                     onFailure = {
                         if (it is Feil) {
                             throw it
-                        } else throw Feil(message = "Klarte ikke generere brev for ${brevmal.visningsTekst}",
+                        } else throw Feil(message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal.visningsTekst}",
                                           frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                                           throwable = it)
@@ -110,27 +114,28 @@ class DokumentService(
 
 
     fun sendManueltBrev(behandling: Behandling,
-                        brevmal: BrevType,
                         manueltBrevRequest: ManueltBrevRequest): Ressurs<String> {
 
-        val fnr = behandling.fagsak.hentAktivIdent().ident
-        val fagsakId = "${behandling.fagsak.id}"
-        val generertBrev = genererManueltBrev(behandling, brevmal, manueltBrevRequest)
+        val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
 
-        val journalpostId = integrasjonClient.journalførManueltBrev(fnr = fnr,
-                                                                    fagsakId = fagsakId,
+        val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
+                                                                    fagsakId = behandling.fagsak.id.toString(),
                                                                     journalførendeEnhet = enhet,
                                                                     brev = generertBrev,
-                                                                    brevType = brevmal.arkivType)
+                                                                    brevType = manueltBrevRequest.brevmal.arkivType)
 
         journalføringService.lagreJournalPost(behandling, journalpostId)
 
+        if (manueltBrevRequest.brevmal == BrevType.INNHENTE_OPPLYSNINGER) {
+            opplysningspliktService.lagreBlankOpplysningsplikt(behandlingId = behandling.id)
+        }
+
         return distribuerBrevOgLoggHendelse(journalpostId = journalpostId,
                                             behandlingId = behandling.id,
-                                            loggTekst = "${brevmal.visningsTekst.capitalize()}",
+                                            loggTekst = manueltBrevRequest.brevmal.visningsTekst.capitalize(),
                                             loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                            brevType = brevmal)
+                                            brevType = manueltBrevRequest.brevmal)
     }
 
     fun distribuerBrevOgLoggHendelse(journalpostId: String,

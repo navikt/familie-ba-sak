@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.dokument
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -32,7 +33,8 @@ class DokumentControllerTest(
     fun `Test generer vedtaksbrev`() {
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk(relaxed = true)
-        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService)
+        val fagsakService: FagsakService = mockk()
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService)
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.genererBrevForVedtak(any()) } returns "pdf".toByteArray()
 
@@ -45,7 +47,8 @@ class DokumentControllerTest(
     fun `Test hent pdf vedtak`() {
         val mockDokumentService: DokumentService = mockk()
         val vedtakService: VedtakService = mockk()
-        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService)
+        val fagsakService: FagsakService = mockk()
+        val mockDokumentController = DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService)
         every { vedtakService.hent(any()) } returns lagVedtak()
         every { mockDokumentService.hentBrevForVedtak(any()) } returns Ressurs.success("pdf".toByteArray())
 

@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.beregning.domene.Sats
 import no.nav.familie.ba.sak.beregning.domene.SatsType
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.*
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -58,7 +56,7 @@ object SatsService {
                     null
                 }
                 else -> {
-                    Periode(oppfyltFom, minOf(oppfyltTom, seksårsdag))
+                    Periode(oppfyltFom, minOf(oppfyltTom, seksårsdag.sisteDagIForrigeMåned()))
                 }
             }
 
@@ -70,10 +68,17 @@ object SatsService {
                     null
                 }
                 else -> {
-                    Periode(maxOf(oppfyltFom, seksårsdag.plusDays(1)), oppfyltTom)
+                    Periode(maxOf(oppfyltFom, seksårsdag.førsteDagIInneværendeMåned()), oppfyltTom)
                 }
             }
 
+    /**
+     * Denne splitter perioden basert på seksårsalderen til barnet.
+     * F.eks. hvis barnet fyller 6 år 10.10.2020 og perioden er 01.01.2020 - 31.13.2020
+     * får vi 2 nye perioder:
+     * 01.01.2020 - 30.09.2020
+     * 01.10.2020 - 31.12.2020
+     */
     fun splittPeriodePå6Årsdag(seksårsdag: LocalDate, fom: LocalDate, tom: LocalDate): Pair<Periode?, Periode?> =
             Pair(hentPeriodeUnder6år(seksårsdag, fom, tom), hentPeriodeOver6år(seksårsdag, fom, tom))
 
