@@ -119,7 +119,7 @@ class DokumentService(
 
         val mottaker =
                 persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
-                        ?: error("Finner ikke mottaker på vedtaket")
+                        ?: error("Finner ikke mottaker på behandlingen")
 
         val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
