@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.dokarkiv.Førsteside
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -116,13 +117,21 @@ class DokumentService(
     fun sendManueltBrev(behandling: Behandling,
                         manueltBrevRequest: ManueltBrevRequest): Ressurs<String> {
 
+        val mottaker =
+                persongrunnlagService.hentPersonPåBehandling(PersonIdent(manueltBrevRequest.mottakerIdent), behandling)
+                        ?: error("Finner ikke mottaker på vedtaket")
+
         val generertBrev = genererManueltBrev(behandling, manueltBrevRequest)
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetId
+        val førsteside = Førsteside(maalform =  mottaker.målform.toString(),
+                                    navSkjemaId = "NAV 33.00-07",
+                                    overskriftsTittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07")
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
                                                                     fagsakId = behandling.fagsak.id.toString(),
                                                                     journalførendeEnhet = enhet,
                                                                     brev = generertBrev,
+                                                                    førsteside = førsteside,
                                                                     brevType = manueltBrevRequest.brevmal.arkivType)
 
         journalføringService.lagreJournalPost(behandling, journalpostId)
