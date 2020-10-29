@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
@@ -32,6 +33,13 @@ data class BehandlingResultat(
         @Enumerated(EnumType.STRING)
         @Column(name = "samlet_resultat")
         var samletResultat: BehandlingResultatType = BehandlingResultatType.IKKE_VURDERT,
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "henlegg_arsak", nullable = true)
+        var henleggÅrsak: HenleggÅrsak? = null,
+
+        @Column(name = "begrunnelse", nullable = true)
+        var begrunnelse: String? = null,
 
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "behandlingResultat",
@@ -113,7 +121,9 @@ data class BehandlingResultat(
         val nyttBehandlingResultat = BehandlingResultat(
                 behandling = behandling,
                 aktiv = aktiv,
-                samletResultat = samletResultat
+                samletResultat = samletResultat,
+                begrunnelse = begrunnelse,
+                henleggÅrsak = henleggÅrsak
         )
 
         nyttBehandlingResultat.personResultater = personResultater.map { it.kopierMedParent(nyttBehandlingResultat) }.toSet()

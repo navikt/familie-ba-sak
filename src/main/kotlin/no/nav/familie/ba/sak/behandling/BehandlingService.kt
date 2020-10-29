@@ -58,15 +58,17 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
                                         skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk).also {
-                                            it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it, behandlingSteg = initSteg(nyBehandling.behandlingType)))
-                                        }
+                it.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = it,
+                                                                     behandlingSteg = initSteg(nyBehandling.behandlingType)))
+            }
 
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
             loggBehandlinghendelse(behandling)
             behandling
         } else if (aktivBehandling.stegTemp < StegType.BESLUTTE_VEDTAK) {
-            aktivBehandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = aktivBehandling, behandlingSteg = initSteg(nyBehandling.behandlingType)))
+            aktivBehandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = aktivBehandling,
+                                                                              behandlingSteg = initSteg(nyBehandling.behandlingType)))
             aktivBehandling.status = initStatus()
 
             lagre(aktivBehandling)
@@ -166,9 +168,13 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling)
     }
 
-    fun settBehandlingResultatTilHenlagt(behandlingId: Long) {
+    fun settBehandlingResultatTilHenlagt(behandlingId: Long, henleggÅrsak: HenleggÅrsak, begrunnelse: String) {
         behandlingResultatService.hentAktivForBehandling(behandlingId)
-                ?.also { it.samletResultat = BehandlingResultatType.HENLAGT }
+                ?.also {
+                    it.samletResultat = BehandlingResultatType.HENLAGT
+                    it.henleggÅrsak = henleggÅrsak
+                    it.begrunnelse = begrunnelse
+                }
                 ?.let { behandlingResultatService.oppdater(it) }
     }
 

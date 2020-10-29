@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -12,10 +13,13 @@ import org.springframework.stereotype.Service
 class HenleggBehandling(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository,
+        private val loggService: LoggService
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {
-        behandlingService.settBehandlingResultatTilHenlagt(behandling.id)
+        loggService.opprettHenleggBehandling(behandling, data.årsak.name, data.begrunnelse)
+
+        behandlingService.settBehandlingResultatTilHenlagt(behandling.id, data.årsak, data.begrunnelse)
 
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.HENLEGG_SØKNAD)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.HENLAGT)
