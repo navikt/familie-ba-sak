@@ -86,11 +86,11 @@ enum class StegType(val rekkefølge: Int,
     FERDIGSTILLE_BEHANDLING(
             rekkefølge = 9,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.HENLAGT)),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
     BEHANDLING_AVSLUTTET(
             rekkefølge = 10,
             tillattFor = emptyList(),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET, BehandlingStatus.HENLAGT));
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET));
 
     fun displayName(): String {
         return this.name.replace('_', ' ').toLowerCase().capitalize()

@@ -279,7 +279,6 @@ class StegServiceTest(
         val henlagtBehandling = stegService.håndterHenleggBehandling(
                 vilkårsvurdertBehandling, RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
                                                                     begrunnelse = ""))
-        Assertions.assertEquals(BehandlingStatus.HENLAGT, henlagtBehandling.status)
         Assertions.assertTrue(henlagtBehandling.behandlingStegTilstand.filter {
             it.behandlingSteg == StegType.HENLEGG_SØKNAD && it.utført
         }
@@ -294,7 +293,6 @@ class StegServiceTest(
         val behandlingEtterFerdigstiltBehandling = behandlingService.hent(behandlingId = henlagtBehandling.id)
         // TODO: Verifisere hva som skal være riktig statuser og steg her.
         Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.stegTemp)
-        Assertions.assertEquals(BehandlingStatus.HENLAGT, behandlingEtterFerdigstiltBehandling.status)
     }
 
     @Test

@@ -83,9 +83,7 @@ class VedtakBegrunnelseTest(
                 fagsakService,
                 loggService,
                 arbeidsfordelingService,
-                saksstatistikkEventPublisher,
-                taskRepository,
-                behandlingResultatService
+                saksstatistikkEventPublisher
         )
     }
 

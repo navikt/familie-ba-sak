@@ -34,13 +34,6 @@ data class BehandlingResultat(
         @Column(name = "samlet_resultat")
         var samletResultat: BehandlingResultatType = BehandlingResultatType.IKKE_VURDERT,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "henlegg_arsak", nullable = true)
-        var henleggÅrsak: HenleggÅrsak? = null,
-
-        @Column(name = "begrunnelse", nullable = true)
-        var begrunnelse: String? = null,
-
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "behandlingResultat",
                    cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
@@ -122,13 +115,14 @@ data class BehandlingResultat(
                 behandling = behandling,
                 aktiv = aktiv,
                 samletResultat = samletResultat,
-                begrunnelse = begrunnelse,
-                henleggÅrsak = henleggÅrsak
         )
 
         nyttBehandlingResultat.personResultater = personResultater.map { it.kopierMedParent(nyttBehandlingResultat) }.toSet()
         return nyttBehandlingResultat
     }
+
+    fun erHenlagt() =
+        samletResultat == BehandlingResultatType.HENLAGT_FEILREGISTRERING || samletResultat == BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
 }
 
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {
@@ -136,7 +130,8 @@ enum class BehandlingResultatType(val brevMal: String, val displayName: String) 
     DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt"),
-    HENLAGT(brevMal = "ukjent", displayName = "Henlagt"),
+    HENLAGT_FEILREGISTRERING(brevMal = "ukjent", displayName = "Henlagt feilregistrering"),
+    HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket"),
     IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert")
 }
 

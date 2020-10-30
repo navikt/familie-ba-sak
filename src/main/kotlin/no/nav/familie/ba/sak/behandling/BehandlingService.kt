@@ -10,8 +10,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
-import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -22,7 +20,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.OppdragIdForFagsystem
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -38,9 +35,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakService: FagsakService,
                         private val loggService: LoggService,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
-                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-                        private val taskRepository: TaskRepository,
-                        private val behandlingResultatService: BehandlingResultatService) {
+                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -65,8 +60,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             loggBehandlinghendelse(behandling)
             behandling
         } else if (aktivBehandling.stegTemp < StegType.BESLUTTE_VEDTAK) {
-            aktivBehandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = aktivBehandling,
-                                                                              behandlingSteg = initSteg(nyBehandling.behandlingType)))
+            aktivBehandling.leggTilBehandlingStegTilstand(initSteg(nyBehandling.behandlingType))
             aktivBehandling.status = initStatus()
 
             lagre(aktivBehandling)
@@ -156,24 +150,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId: Long, steg: StegType): Behandling {
         val behandling = hent(behandlingId)
-        val sisteBehandlingStegTilstand =
-                behandling.behandlingStegTilstand.filter { !it.utført }.single()
+        behandling.leggTilBehandlingStegTilstand(steg)
 
-        sisteBehandlingStegTilstand.utført = true
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling, behandlingSteg = steg))
-
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer siste steg på behandling $behandlingId fra ${sisteBehandlingStegTilstand.behandlingSteg} til $steg")
         return behandlingRepository.save(behandling)
-    }
-
-    fun settBehandlingResultatTilHenlagt(behandlingId: Long, henleggÅrsak: HenleggÅrsak, begrunnelse: String) {
-        behandlingResultatService.hentAktivForBehandling(behandlingId)
-                ?.also {
-                    it.samletResultat = BehandlingResultatType.HENLAGT
-                    it.henleggÅrsak = henleggÅrsak
-                    it.begrunnelse = begrunnelse
-                }
-                ?.let { behandlingResultatService.oppdater(it) }
     }
 
     fun oppdaterGjeldendeBehandlingForFremtidigUtbetaling(fagsakId: Long, utbetalingsmåned: LocalDate): List<Behandling> {

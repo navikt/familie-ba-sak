@@ -106,9 +106,7 @@ class VedtakServiceTest(
                 fagsakService,
                 loggService,
                 arbeidsfordelingService,
-                saksstatistikkEventPublisher,
-                taskRepository,
-                behandlingResultatService
+                saksstatistikkEventPublisher
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))

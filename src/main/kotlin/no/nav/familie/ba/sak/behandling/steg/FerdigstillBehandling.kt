@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.logg.LoggService
 import org.slf4j.LoggerFactory
@@ -18,6 +20,7 @@ class FerdigstillBehandling(
         private val beregningService: BeregningService,
         private val behandlingService: BehandlingService,
         private val behandlingMetrikker: BehandlingMetrikker,
+        private val behandlingResultatService: BehandlingResultatService,
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
 
@@ -25,8 +28,10 @@ class FerdigstillBehandling(
                                       data: String): StegType {
         LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
 
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
+
         if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK &&
-            behandling.status !== BehandlingStatus.HENLAGT) {
+            behandlingResultat?.erHenlagt() ?: false) {
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 
@@ -50,9 +55,7 @@ class FerdigstillBehandling(
     }
 
     private fun oppdaterFagsakStatus(behandling: Behandling) {
-        if (behandling.erHenlagt()) {
-            return
-        }
+
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val erLøpende = tilkjentYtelse.andelerTilkjentYtelse.any { it.stønadTom >= now() }
         if (erLøpende) {

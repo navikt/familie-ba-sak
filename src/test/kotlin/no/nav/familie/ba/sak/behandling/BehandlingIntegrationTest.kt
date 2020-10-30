@@ -137,9 +137,7 @@ class BehandlingIntegrationTest(
                 fagsakService,
                 loggService,
                 arbeidsfordelingService,
-                saksstatistikkEventPublisher,
-                taskRepository,
-                behandlingResultService
+                saksstatistikkEventPublisher
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))

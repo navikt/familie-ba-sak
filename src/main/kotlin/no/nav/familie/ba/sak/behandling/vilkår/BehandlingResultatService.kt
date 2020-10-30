@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
+import no.nav.familie.ba.sak.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -9,7 +10,8 @@ import org.springframework.stereotype.Service
 @Service
 class BehandlingResultatService(
         private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val loggService: LoggService
+        private val loggService: LoggService,
+        private val behandlingResultatService: BehandlingResultatService
 ) {
 
     fun hentBehandlingResultatTypeFraBehandling(behandling: Behandling): BehandlingResultatType {
@@ -67,6 +69,14 @@ class BehandlingResultatService(
         }
 
         return behandlingResultatRepository.save(behandlingResultat)
+    }
+
+    fun settBehandlingResultatTilHenlagt(behandlingId: Long, behandlingResultatType: BehandlingResultatType) {
+        behandlingResultatService.hentAktivForBehandling(behandlingId)
+                ?.also {
+                    it.samletResultat = behandlingResultatType
+                }
+                ?.let { behandlingResultatService.oppdater(it) }
     }
 
     companion object {

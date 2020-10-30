@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.behandling.domene
 
+import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import javax.persistence.*
 
 @Entity(name = "Behandling")
@@ -66,14 +68,17 @@ data class Behandling(
                && type !== BehandlingType.TEKNISK_OPPHØR
     }
 
-    fun erHenlagt() = status == BehandlingStatus.HENLAGT
-
     override fun toString(): String {
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }
 
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
+        val sisteBehandlingStegTilstand =
+                this.behandlingStegTilstand.filter { !it.utført }.single()
+        sisteBehandlingStegTilstand.utført = true
         this.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+
+        BehandlingService.LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer siste steg på behandling ${this.id} fra ${sisteBehandlingStegTilstand.behandlingSteg} til $steg")
         return this
     }
 }
@@ -116,7 +121,6 @@ fun initStatus(): BehandlingStatus {
 
 enum class BehandlingStatus {
     OPPRETTET,
-    HENLAGT,
     UTREDES,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
