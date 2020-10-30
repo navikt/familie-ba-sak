@@ -356,7 +356,8 @@ class FagsakService(
     }
 
     private fun harLøpendeSakIInfotrygd(personIdent: String): Boolean {
-        val identer = personopplysningerService.hentIdenter(Ident(personIdent)).map { it.ident }
+        val identer = personopplysningerService.hentIdenter(Ident(personIdent)).filter { it.gruppe == "FOLKEREGISTERIDENT" }
+                .map { it.ident }
         return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter = identer)
     }
 

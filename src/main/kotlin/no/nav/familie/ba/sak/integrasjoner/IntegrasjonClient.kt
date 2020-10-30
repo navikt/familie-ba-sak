@@ -14,10 +14,7 @@ import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.FilType
+import no.nav.familie.kontrakter.felles.dokarkiv.*
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -371,10 +368,12 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                               fagsakId: String,
                               journalførendeEnhet: String,
                               brev: ByteArray,
-                              brevType: String): String {
+                              brevType: String,
+                              førsteside: Førsteside?): String {
         return lagJournalpostForBrev(fnr = fnr,
                                      fagsakId = fagsakId,
                                      journalførendeEnhet = journalførendeEnhet,
+                                     førsteside = førsteside,
                                      brev = listOf(Dokument(brev, FilType.PDFA, dokumentType = brevType)))
     }
 
@@ -382,7 +381,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                               fagsakId: String,
                               journalførendeEnhet: String? = null,
                               brev: List<Dokument>,
-                              vedlegg: List<Dokument> = emptyList()): String {
+                              vedlegg: List<Dokument> = emptyList(),
+                              førsteside: Førsteside? = null): String {
         val uri = URI.create("$integrasjonUri/arkiv/v3")
         logger.info("Sender vedtak pdf til DokArkiv: $uri")
 
@@ -396,7 +396,8 @@ class IntegrasjonClient(@Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val 
                                                                 hoveddokumentvarianter = brev,
                                                                 vedleggsdokumenter = vedlegg,
                                                                 fagsakId = fagsakId,
-                                                                journalførendeEnhet = journalførendeEnhet)
+                                                                journalførendeEnhet = journalførendeEnhet,
+                                                                førsteside = førsteside)
             val arkiverDokumentResponse = postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
             arkiverDokumentResponse
         }.fold(

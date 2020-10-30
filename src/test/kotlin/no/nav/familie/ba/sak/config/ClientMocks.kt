@@ -234,7 +234,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.journalførVedtaksbrev(any(), any(), any(), any()) } returns "journalpostId"
 
         every {
-            mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any())
+            mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any(), any())
         } returns "journalpostId"
 
         every { mockIntegrasjonClient.distribuerBrev(any()) } returns success("bestillingsId")

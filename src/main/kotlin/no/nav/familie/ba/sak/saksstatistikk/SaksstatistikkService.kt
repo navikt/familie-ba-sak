@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.nare.Resultat.*
+import no.nav.familie.ba.sak.nare.Resultat.NEI
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -72,7 +72,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId)
 
         val now = ZonedDateTime.now()
-        val behandlingDVH = BehandlingDVH(funksjonellTid = now,
+        return BehandlingDVH(funksjonellTid = now,
                                           tekniskTid = now, // TODO burde denne vært satt til opprettetTidspunkt/endretTidspunkt?
                                           mottattDato = datoMottatt.atZone(TIMEZONE),
                                           registrertDato = datoMottatt.atZone(TIMEZONE),
@@ -99,14 +99,10 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                           resultatBegrunnelser = behandlingResultat?.samletResultatBegrunnelser() ?: emptyList(),
                                           behandlingOpprettetAv = behandling.opprettetAv,
                                           behandlingOpprettetType = "saksbehandlerId",
-                                          behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling"
+                                          behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
+                                          beslutter = totrinnskontroll?.beslutter,
+                                          saksbehandler = totrinnskontroll?.saksbehandler
         )
-        if (totrinnskontroll != null) {
-            behandlingDVH.copy(beslutter = totrinnskontroll.beslutter,
-                               saksbehandler = totrinnskontroll.saksbehandler)
-        }
-
-        return behandlingDVH
     }
 
     fun mapTilSakDvh(sakId: Long): SakDVH? {
