@@ -28,22 +28,26 @@ object RessursUtils {
     fun <T> funksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> = funksjonellErrorResponse(
             funksjonellFeil)
 
-    fun <T> frontendFeil(feil: Feil): ResponseEntity<Ressurs<T>> = frontendErrorResponse(feil)
+    fun <T> frontendFeil(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> = frontendErrorResponse(feil, throwable)
 
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
 
     private fun <T> errorResponse(httpStatus: HttpStatus,
                                   errorMessage: String,
                                   throwable: Throwable?): ResponseEntity<Ressurs<T>> {
-        secureLogger.error("En feil har oppstått: $errorMessage", throwable)
-        LOG.error("En feil har oppstått: $errorMessage")
+        val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
+
+        secureLogger.error("$className En feil har oppstått: $errorMessage", throwable)
+        LOG.error("$className En feil har oppstått: $errorMessage")
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
     }
 
-    private fun <T> frontendErrorResponse(feil: Feil): ResponseEntity<Ressurs<T>> {
-        secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): " +
-                           "${feil.frontendFeilmelding}, ${feil.stackTrace}", feil.throwable)
-        LOG.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
+    private fun <T> frontendErrorResponse(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> {
+        val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
+
+        secureLogger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): " +
+                           "${feil.frontendFeilmelding}, ${feil.stackTrace}", throwable)
+        LOG.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
 
         return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(
                 frontendFeilmelding = feil.frontendFeilmelding,
@@ -52,7 +56,9 @@ object RessursUtils {
     }
 
     private fun <T> funksjonellErrorResponse(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> {
-        LOG.info("En funksjonell feil har oppstått(${funksjonellFeil.httpStatus}): ${funksjonellFeil.message} ")
+        val className = if (funksjonellFeil.throwable != null) "[${funksjonellFeil.throwable!!::class.java.name}] " else ""
+
+        LOG.info("$className En funksjonell feil har oppstått(${funksjonellFeil.httpStatus}): ${funksjonellFeil.message} ")
 
         return ResponseEntity.status(funksjonellFeil.httpStatus).body(Ressurs.funksjonellFeil(
                 frontendFeilmelding = funksjonellFeil.frontendFeilmelding,

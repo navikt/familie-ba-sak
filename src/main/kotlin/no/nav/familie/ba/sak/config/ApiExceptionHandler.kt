@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
+import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -22,12 +23,17 @@ class ApiExceptionHandler {
 
     @ExceptionHandler(Throwable::class)
     fun handleThrowable(throwable: Throwable): ResponseEntity<Ressurs<Nothing>> {
-        return illegalState((throwable.cause?.message ?: throwable.message).toString(), throwable)
+        val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(throwable)
+
+        return illegalState(mostSpecificThrowable.message.toString(), mostSpecificThrowable)
     }
 
     @ExceptionHandler(Feil::class)
     fun handleFeil(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
-        return frontendFeil(feil)
+        val mostSpecificThrowable =
+                if (feil.throwable != null) NestedExceptionUtils.getMostSpecificCause(feil.throwable!!) else null
+
+        return frontendFeil(feil, mostSpecificThrowable)
     }
 
     @ExceptionHandler(FunksjonellFeil::class)

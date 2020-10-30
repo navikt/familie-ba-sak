@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.dokument.DokumentController
 import no.nav.familie.ba.sak.dokument.DokumentService
+import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -33,7 +34,7 @@ class DistribuerVedtaksbrev(
                                                      behandlingId = data.behandlingId,
                                                      loggTekst = loggTekst,
                                                      loggBehandlerRolle = BehandlerRolle.SYSTEM,
-                                                     brevType = DokumentController.BrevType.VEDTAK)
+                                                     brevType = BrevType.VEDTAK)
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
                 personIdent = data.personIdent,
