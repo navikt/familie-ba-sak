@@ -20,7 +20,7 @@ class HenleggBehandling(
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {
-        loggService.opprettHenleggBehandling(behandling, data.årsak.name, data.begrunnelse)
+        loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)
 
         val henleggelseType = when (data.årsak) {
             HenleggÅrsak.FEILAKTIG_OPPRETTET -> BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET

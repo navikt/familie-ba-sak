@@ -100,7 +100,7 @@ class RestHenleggBehandlingInfo(
         val begrunnelse: String
 )
 
-enum class HenleggÅrsak() {
-    SØKNAD_TRUKKET,
-    FEILAKTIG_OPPRETTET
+enum class HenleggÅrsak(val beskrivelse: String) {
+    SØKNAD_TRUKKET("Søknad trukket"),
+    FEILAKTIG_OPPRETTET("Behandling feilaktig opprettet")
 }

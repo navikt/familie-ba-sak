@@ -173,7 +173,7 @@ class LoggService(
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.HENLEGG_BEHANDLING,
-                tittel = "Henlegg behandling",
+                tittel = "Behandling er henlagt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = "$årsak: $begrunnelse"
         ))

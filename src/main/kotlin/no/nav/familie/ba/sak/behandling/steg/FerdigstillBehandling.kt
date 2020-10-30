@@ -34,7 +34,9 @@ class FerdigstillBehandling(
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 
-        loggService.opprettFerdigstillBehandling(behandling)
+        if (behandlingResultat?.erHenlagt() == false) {
+            loggService.opprettFerdigstillBehandling(behandling)
+        }
 
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
             behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
