@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.dokument.DokumentController.BrevType
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
+import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.dokument.domene.DokumentHeaderFelter
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.journalføring.JournalføringService
@@ -94,12 +94,8 @@ class DokumentService(
                                                         navn = mottaker.navn,
                                                         dokumentDato = LocalDate.now().tilDagMånedÅr(),
                                                         maalform = mottaker.målform)
-                val malMedData = when (manueltBrevRequest.brevmal) {
-                    BrevType.INNHENTE_OPPLYSNINGER -> malerService.mapTilInnhenteOpplysningerBrevfelter(behandling,
-                                                                                                        manueltBrevRequest)
-                    else -> throw Feil(message = "Brevmal ${manueltBrevRequest.brevmal} er ikke støttet for manuelle brev.",
-                                       frontendFeilmelding = "Klarte ikke generere brev. Brevmal ${manueltBrevRequest.brevmal.malId} er ikke støttet.")
-                }
+                val malMedData =
+                        malerService.mapTilManuellMalMedData(behandling = behandling, manueltBrevRequest = manueltBrevRequest)
                 dokGenKlient.lagPdfForMal(malMedData, headerFelter)
             }.fold(
                     onSuccess = { it },
