@@ -1,15 +1,14 @@
 package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -23,8 +22,11 @@ class HenleggBehandling(
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {
         loggService.opprettHenleggBehandling(behandling, data.årsak.name, data.begrunnelse)
 
-
-        behandlingResultatService.settBehandlingResultatTilHenlagt(behandling.id, )
+        val henleggelseType = when (data.årsak) {
+            HenleggÅrsak.FEILAKTIG_OPPRETTET -> BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET
+            HenleggÅrsak.SØKNAD_TRUKKET -> BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
+        }
+        behandlingResultatService.settBehandlingResultatTilHenlagt(behandling, henleggelseType)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.HENLEGG_SØKNAD)
         opprettFerdigstillBehandling(behandling.id, behandling.fagsak.hentAktivIdent().ident)

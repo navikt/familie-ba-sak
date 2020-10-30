@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
-import no.nav.familie.ba.sak.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
@@ -122,7 +121,7 @@ data class BehandlingResultat(
     }
 
     fun erHenlagt() =
-        samletResultat == BehandlingResultatType.HENLAGT_FEILREGISTRERING || samletResultat == BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
+            samletResultat == BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET || samletResultat == BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
 }
 
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {
@@ -130,7 +129,7 @@ enum class BehandlingResultatType(val brevMal: String, val displayName: String) 
     DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt"),
-    HENLAGT_FEILREGISTRERING(brevMal = "ukjent", displayName = "Henlagt feilregistrering"),
+    HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent", displayName = "Henlagt feilaktig opprettet"),
     HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket"),
     IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert")
 }

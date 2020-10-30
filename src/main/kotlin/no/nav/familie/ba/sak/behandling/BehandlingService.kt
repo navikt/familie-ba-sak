@@ -53,7 +53,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
                                         skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk)
-                    .leggTilBehandlingStegTilstand(initSteg(nyBehandling.behandlingType))
+                    .initBehandlingStegTilstand()
 
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)

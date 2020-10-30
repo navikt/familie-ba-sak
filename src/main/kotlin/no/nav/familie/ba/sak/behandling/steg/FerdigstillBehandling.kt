@@ -30,8 +30,7 @@ class FerdigstillBehandling(
 
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
 
-        if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK &&
-            behandlingResultat?.erHenlagt() ?: false) {
+        if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK && behandlingResultat?.erHenlagt() == false) {
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 

@@ -10,8 +10,7 @@ import org.springframework.stereotype.Service
 @Service
 class BehandlingResultatService(
         private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val loggService: LoggService,
-        private val behandlingResultatService: BehandlingResultatService
+        private val loggService: LoggService
 ) {
 
     fun hentBehandlingResultatTypeFraBehandling(behandling: Behandling): BehandlingResultatType {
@@ -71,12 +70,11 @@ class BehandlingResultatService(
         return behandlingResultatRepository.save(behandlingResultat)
     }
 
-    fun settBehandlingResultatTilHenlagt(behandlingId: Long, behandlingResultatType: BehandlingResultatType) {
-        behandlingResultatService.hentAktivForBehandling(behandlingId)
-                ?.also {
-                    it.samletResultat = behandlingResultatType
-                }
-                ?.let { behandlingResultatService.oppdater(it) }
+    fun settBehandlingResultatTilHenlagt(behandling: Behandling, behandlingResultatType: BehandlingResultatType) {
+        val behandlingsresultat = hentAktivForBehandling(behandling.id) ?:
+                                  lagreInitielt(BehandlingResultat(behandling = behandling))
+        behandlingsresultat.samletResultat = behandlingResultatType
+        oppdater(behandlingsresultat)
     }
 
     companion object {

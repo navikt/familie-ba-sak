@@ -73,12 +73,18 @@ data class Behandling(
     }
 
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
-        val sisteBehandlingStegTilstand =
-                this.behandlingStegTilstand.filter { !it.utført }.single()
+        val sisteBehandlingStegTilstand = behandlingStegTilstand.filter { !it.utført }.single()
         sisteBehandlingStegTilstand.utført = true
-        this.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+        behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
 
-        BehandlingService.LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer siste steg på behandling ${this.id} fra ${sisteBehandlingStegTilstand.behandlingSteg} til $steg")
+        BehandlingService.LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer siste steg på behandling $id fra ${sisteBehandlingStegTilstand.behandlingSteg} til $steg")
+        return this
+    }
+
+    fun initBehandlingStegTilstand(): Behandling {
+        behandlingStegTilstand.add(BehandlingStegTilstand(
+                behandling = this,
+                behandlingSteg = initSteg(behandlingType = type, behandlingÅrsak = opprettetÅrsak)))
         return this
     }
 }
