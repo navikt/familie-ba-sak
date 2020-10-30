@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestBeregningOversikt
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakUtils
@@ -17,11 +16,9 @@ import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.dokument.DokumentController.ManueltBrevRequest
+import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.dokument.domene.MalMedData
-import no.nav.familie.ba.sak.dokument.domene.maler.DuFårSeksjon
-import no.nav.familie.ba.sak.dokument.domene.maler.InnhenteOpplysninger
-import no.nav.familie.ba.sak.dokument.domene.maler.Innvilget
-import no.nav.familie.ba.sak.dokument.domene.maler.InnvilgetAutovedtak
+import no.nav.familie.ba.sak.dokument.domene.maler.*
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
@@ -34,7 +31,6 @@ class MalerService(
         private val beregningService: BeregningService,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val søknadGrunnlagService: SøknadGrunnlagService,
         private val økonomiService: ØkonomiService
 ) {
 
@@ -51,37 +47,51 @@ class MalerService(
                                                          vedtak.behandling.type),
                 fletteFelter = when (behandlingResultatType) {
                     BehandlingResultatType.INNVILGET -> mapTilInnvilgetBrevFelter(vedtak, personopplysningGrunnlag)
-                    BehandlingResultatType.AVSLÅTT -> mapTilAvslagBrevFelter(vedtak)
-                    BehandlingResultatType.OPPHØRT -> mapTilOpphørtBrevFelter(vedtak)
-                    else -> error("Invalid/unsupported behandling resultat type")
+                    else -> throw FunksjonellFeil(melding = "Brev ikke støttet for behandlingsresultat=$behandlingResultatType",
+                                                  frontendFeilmelding = "Brev ikke støttet for behandlingsresultat=$behandlingResultatType")
                 }
         )
     }
 
-    fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
-        val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn
-        val søknadsDato = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.opprettetTidspunkt
-                          ?: error("Finner ikke et aktivt søknadsgrunnlag ved sending av manuelt brev.")
+    fun mapTilManuellMalMedData(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
+        return when (manueltBrevRequest.brevmal) {
+            BrevType.INNHENTE_OPPLYSNINGER -> mapTilInnhenteOpplysningerBrevfelter(behandling,
+                                                                                   manueltBrevRequest)
+            BrevType.VARSEL_OM_REVURDERING -> mapTilVarselOmRevurderingBrevfelter(behandling,
+                                                                                  manueltBrevRequest)
+            else -> throw Feil(message = "Brevmal ${manueltBrevRequest.brevmal} er ikke støttet for manuelle brev.",
+                               frontendFeilmelding = "Klarte ikke generere brev. Brevmal ${manueltBrevRequest.brevmal.malId} er ikke støttet.")
+        }
+    }
 
-        val felter = objectMapper.writeValueAsString(InnhenteOpplysninger(
-                soknadDato = søknadsDato.toLocalDate().tilDagMånedÅr().toString(),
-                fritekst = manueltBrevRequest.fritekst,
-                enhet = enhetNavn,
-                saksbehandler = SikkerhetContext.hentSaksbehandlerNavn()
-        ))
+    fun mapTilVarselOmRevurderingBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
+        val (enhetNavn, målform) = hentMålformOgEnhetNavn(behandling)
+
         return MalMedData(
-                mal = "innhente-opplysninger",
-                fletteFelter = felter
+                mal = manueltBrevRequest.brevmal.malId,
+                fletteFelter = objectMapper.writeValueAsString(VarselOmRevurdering(
+                        fritekst = manueltBrevRequest.fritekst,
+                        enhet = enhetNavn,
+                        aarsaker = manueltBrevRequest.multiselectVerdier,
+                        saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
+                        maalform = målform
+                ))
         )
     }
 
-    private fun mapTilOpphørtBrevFelter(vedtak: Vedtak): String {
-        val behandling = vedtak.behandling
-        return "{\"fodselsnummer\": \"${behandling.fagsak.hentAktivIdent().ident}\",\n" +
-               "\"navn\": \"No Name\",\n" +
-               "\"tdato\": \"01.01.01\",\n" +
-               "\"hjemmel\": \"\",\n" +
-               "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
+    fun mapTilInnhenteOpplysningerBrevfelter(behandling: Behandling, manueltBrevRequest: ManueltBrevRequest): MalMedData {
+        val (enhetNavn, målform) = hentMålformOgEnhetNavn(behandling)
+
+        return MalMedData(
+                mal = manueltBrevRequest.brevmal.malId,
+                fletteFelter = objectMapper.writeValueAsString(InnhenteOpplysninger(
+                        fritekst = manueltBrevRequest.fritekst,
+                        enhet = enhetNavn,
+                        dokumenter = manueltBrevRequest.multiselectVerdier,
+                        saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
+                        maalform = målform
+                ))
+        )
     }
 
     private fun mapTilInnvilgetBrevFelter(vedtak: Vedtak, personopplysningGrunnlag: PersonopplysningGrunnlag): String {
@@ -93,12 +103,11 @@ class MalerService(
                 personopplysningGrunnlag = personopplysningGrunnlag)
                 .sortedBy { it.periodeFom }
 
-        val enhetNavn = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
+        val (enhetNavn, målform) = hentMålformOgEnhetNavn(vedtak.behandling)
 
         return if (vedtak.behandling.skalBehandlesAutomatisk) {
             autovedtakBrevFelter(vedtak, personopplysningGrunnlag, beregningOversikt, enhetNavn)
         } else {
-            val målform = personopplysningGrunnlag.søker.målform
             manueltVedtakBrevFelter(vedtak, beregningOversikt, enhetNavn, målform)
         }
     }
@@ -115,7 +124,7 @@ class MalerService(
                 beslutter = totrinnskontroll.beslutter
                             ?: totrinnskontroll.saksbehandler,
                 hjemler = VedtakUtils.hentHjemlerBruktIVedtak(vedtak),
-                maalform = målform.toString(),
+                maalform = målform,
                 etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) } ?: "",
                 erFeilutbetaling = tilbakekrevingsbeløpFraSimulering() > 0,
         )
@@ -140,8 +149,8 @@ class MalerService(
                                     .flatten()
 
                     DuFårSeksjon(
-                            fom = utbetalingsperiode.periodeFom.tilMånedÅr(),
-                            tom = if (!utbetalingsperiode.periodeTom.erSenereEnnNesteMåned()) utbetalingsperiode.periodeTom.tilMånedÅr() else "",
+                            fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
+                            tom = if (!utbetalingsperiode.periodeTom.erSenereEnnNesteMåned()) utbetalingsperiode.periodeTom.tilDagMånedÅr() else "",
                             belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
                             antallBarn = utbetalingsperiode.antallBarn,
                             barnasFodselsdatoer = barnasFødselsdatoer,
@@ -175,14 +184,9 @@ class MalerService(
     private fun tilbakekrevingsbeløpFraSimulering() = 0 //TODO Må legges inn senere når simulering er implementert.
     // Inntil da er det tryggest å utelate denne informasjonen fra brevet.
 
-    private fun mapTilAvslagBrevFelter(vedtak: Vedtak): String {
-        val behandling = vedtak.behandling
-
-        //TODO: sett navn, hjemmel og fritekst
-        return "{\"fodselsnummer\": \"${behandling.fagsak.hentAktivIdent().ident}\",\n" +
-               "\"navn\": \"No Name\",\n" +
-               "\"hjemmel\": \"\",\n" +
-               "\"fritekst\": \"${""}\"}" //TODO: Begrunnelse her
+    private fun hentMålformOgEnhetNavn(behandling: Behandling): Pair<String, Målform> {
+        return Pair(arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn,
+                    persongrunnlagService.hentSøker(behandling)?.målform ?: Målform.NB)
     }
 
     companion object {

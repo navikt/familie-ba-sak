@@ -22,7 +22,7 @@ internal class TilkjentYtelseUtilsTest {
         val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
         val seksårsdag = LocalDate.of(2021, 1, 1)
 
-        assertEquals(Periode(periode.fom, seksårsdag),
+        assertEquals(Periode(periode.fom, seksårsdag.sisteDagIForrigeMåned()),
                      SatsService.hentPeriodeUnder6år(seksårsdag, periode.fom, periode.tom))
     }
 

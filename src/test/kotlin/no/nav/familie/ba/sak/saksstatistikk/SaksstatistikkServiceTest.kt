@@ -118,8 +118,8 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.behandlingUnderkategori).isEqualTo(behandling.underkategori.name)
         assertThat(behandlingDvh?.behandlingStatus).isEqualTo(behandling.status.name)
         assertThat(behandlingDvh?.totrinnsbehandling).isFalse
-        assertThat(behandlingDvh?.saksbehandler).isNull()
-        assertThat(behandlingDvh?.beslutter).isNull()
+        assertThat(behandlingDvh?.saksbehandler).isEqualTo(SYSTEM_NAVN)
+        assertThat(behandlingDvh?.beslutter).isEqualTo(SYSTEM_NAVN)
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
         assertThat(behandlingDvh?.resultat).isEqualTo(behandlingResultat.samletResultat.name)
@@ -178,8 +178,8 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.behandlingType).isEqualTo(behandling.type.name)
         assertThat(behandlingDvh?.behandlingStatus).isEqualTo(behandling.status.name)
         assertThat(behandlingDvh?.totrinnsbehandling).isTrue
-        assertThat(behandlingDvh?.saksbehandler).isNull()
-        assertThat(behandlingDvh?.beslutter).isNull()
+        assertThat(behandlingDvh?.saksbehandler).isEqualTo("Saksbehandler")
+        assertThat(behandlingDvh?.beslutter).isEqualTo("Beslutter")
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
                 .extracting("resultatBegrunnelse")
                 .containsOnly("BOSATT_I_RIKET ikke oppfylt for barn 01010000001")
@@ -216,6 +216,17 @@ internal class SaksstatistikkServiceTest {
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
 
+    }
+
+
+    @Test
+    fun `Skal gi feil hvis det kommer en ny BehandlingÅrsak som det ikke er tatt høyde for mot statistikk - Ved feil diskuterer ønsket resultat med statistikk`() {
+        assertThat(enumValues<BehandlingÅrsak>()).containsOnly(BehandlingÅrsak.SØKNAD,
+                                                               BehandlingÅrsak.FØDSELSHENDELSE,
+                                                               BehandlingÅrsak.TEKNISK_OPPHØR,
+                                                               BehandlingÅrsak.DØDSFALL,
+                                                               BehandlingÅrsak.ÅRLIG_KONTROLL,
+                                                               BehandlingÅrsak.NYE_OPPLYSNINGER)
     }
 
 }

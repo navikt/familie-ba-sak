@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.nare.Resultat.*
+import no.nav.familie.ba.sak.nare.Resultat.NEI
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
@@ -51,7 +51,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
         if (behandling.skalBehandlesAutomatisk && fødselshendelseSkalRullesTilbake()) return null
 
-        val behandlingResultat =  behandlingResultatService.hentAktivForBehandling(behandlingId)
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
@@ -62,13 +62,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                         .mapNotNull { it.datoMottatt }
                         .minOrNull() ?: behandling.opprettetTidspunkt
             }
-            BehandlingÅrsak.FØDSELSHENDELSE -> {
-                behandling.opprettetTidspunkt
-            }
-            BehandlingÅrsak.TEKNISK_OPPHØR -> {
-                behandling.opprettetTidspunkt
-            }
-            else -> error("Statistikkhåndtering for behandling med opprinnelse ${behandling.opprettetÅrsak.name} ikke implementert.")
+            else -> behandling.opprettetTidspunkt
         }
 
         val behandlendeEnhetsKode = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
@@ -78,7 +72,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId)
 
         val now = ZonedDateTime.now()
-        val behandlingDVH = BehandlingDVH(funksjonellTid = now,
+        return BehandlingDVH(funksjonellTid = now,
                                           tekniskTid = now, // TODO burde denne vært satt til opprettetTidspunkt/endretTidspunkt?
                                           mottattDato = datoMottatt.atZone(TIMEZONE),
                                           registrertDato = datoMottatt.atZone(TIMEZONE),
@@ -105,14 +99,10 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                                           resultatBegrunnelser = behandlingResultat?.samletResultatBegrunnelser() ?: emptyList(),
                                           behandlingOpprettetAv = behandling.opprettetAv,
                                           behandlingOpprettetType = "saksbehandlerId",
-                                          behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling"
+                                          behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
+                                          beslutter = totrinnskontroll?.beslutter,
+                                          saksbehandler = totrinnskontroll?.saksbehandler
         )
-        if (totrinnskontroll != null) {
-            behandlingDVH.copy(beslutter = totrinnskontroll.beslutter,
-                               saksbehandler = totrinnskontroll.saksbehandler)
-        }
-
-        return behandlingDVH
     }
 
     fun mapTilSakDvh(sakId: Long): SakDVH? {
@@ -184,7 +174,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
         }
     }
 
-    private fun fødselshendelseSkalRullesTilbake() : Boolean =
+    private fun fødselshendelseSkalRullesTilbake(): Boolean =
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
 
     companion object {

@@ -31,6 +31,7 @@ import java.time.LocalDate
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class PersonopplysningerServiceTest {
+
     @Autowired
     lateinit var personopplysningerService: PersonopplysningerService
 
@@ -38,7 +39,7 @@ class PersonopplysningerServiceTest {
     lateinit var mockIntegrasjonClient: IntegrasjonClient
 
     @Test
-    fun `hentPersoninfoMedRelasjoner() skal return riktig personinfo`(){
+    fun `hentPersoninfoMedRelasjoner() skal return riktig personinfo`() {
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
@@ -47,7 +48,7 @@ class PersonopplysningerServiceTest {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
         } returns listOf(Tilgang(false, null))
 
-        val personInfo= personopplysningerService.hentPersoninfoMedRelasjoner(ID_MOR)
+        val personInfo = personopplysningerService.hentPersoninfoMedRelasjoner(ID_MOR)
 
         assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
         assertThat(personInfo.adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
@@ -56,60 +57,68 @@ class PersonopplysningerServiceTest {
     }
 
     @Test
-    fun `hentStatsborgerskap() skal return riktig statsborgerskap`(){
-        val statsborgerskap= personopplysningerService.hentStatsborgerskap(Ident(ID_MOR))
+    fun `hentStatsborgerskap() skal return riktig statsborgerskap`() {
+        val statsborgerskap = personopplysningerService.hentStatsborgerskap(Ident(ID_MOR))
         assert(statsborgerskap.size == 1)
         assert(statsborgerskap.first().land == "XXX")
     }
 
     @Test
-    fun `hentOpphold() skal returnere riktig opphold`(){
+    fun `hentOpphold() skal returnere riktig opphold`() {
         val opphold = personopplysningerService.hentOpphold(ID_MOR)
         assert(opphold.size == 1)
         assert(opphold.first().type == OPPHOLDSTILLATELSE.MIDLERTIDIG)
     }
 
     @Test
-    fun `hentBostedsadresseperioder() skal returnere riktige perioder`(){
+    fun `hentBostedsadresseperioder() skal returnere riktige perioder`() {
         val bostedsadresseperioder = personopplysningerService.hentBostedsadresseperioder(ID_MOR)
         assert(bostedsadresseperioder.size == 1)
         assert(bostedsadresseperioder.first().periode?.fom != null)
     }
 
     @Test
-    fun `hentLandkodeUtenlandskAdresse() skal returnere landkode `(){
+    fun `hentLandkodeUtenlandskAdresse() skal returnere landkode `() {
         val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_MOR)
         assertThat(landkode).isEqualTo("DK")
     }
 
     @Test
-    fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen landkode `(){
+    fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen landkode `() {
         val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_BARN_1)
         assertThat(landkode).isEqualTo("ZZ")
     }
 
     @Test
-    fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen bostedsadresse `(){
+    fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen bostedsadresse `() {
         val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_MOR_MED_TOM_BOSTEDSADRESSE)
         assertThat(landkode).isEqualTo("ZZ")
     }
 
     @Test
-    fun `hentadressebeskyttelse skal returnere gradering`(){
+    fun `hentadressebeskyttelse skal returnere gradering`() {
         val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_BARN_1)
         assertThat(gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }
 
     @Test
-    fun `hentadressebeskyttelse feiler`(){
+    fun `hentadressebeskyttelse skal returnere ugradert ved tom liste fra pdl`() {
+        val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_UGRADERT_PERSON)
+        assertThat(gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
+    }
+
+    @Test
+    fun `hentadressebeskyttelse feiler`() {
         assertThrows<Feil> { personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_MOR) }
     }
 
-    companion object{
-        val ID_MOR= "22345678901"
-        val ID_MOR_MED_TOM_BOSTEDSADRESSE= "22345678903"
-        val ID_BARN_1= "32345678901"
-        val ID_BARN_2= "32345678902"
+    companion object {
+
+        val ID_MOR = "22345678901"
+        val ID_MOR_MED_TOM_BOSTEDSADRESSE = "22345678903"
+        val ID_BARN_1 = "32345678901"
+        val ID_BARN_2 = "32345678902"
+        val ID_UGRADERT_PERSON = "32345678903"
 
         private fun gyldigRequest(queryFilnavn: String, requestFilnavn: String): String {
             return readfile(requestFilnavn)
@@ -137,7 +146,7 @@ class PersonopplysningerServiceTest {
 
         @BeforeAll
         @JvmStatic
-        fun lagMockForPersoner(){
+        fun lagMockForPersoner() {
             lagMockForPdl("hentperson-med-relasjoner.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
                           readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"))
 
@@ -170,6 +179,9 @@ class PersonopplysningerServiceTest {
 
             lagMockForPdl("hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse2.json",
                           readfile("pdlAdressebeskyttelseResponse.json"))
+
+            lagMockForPdl("hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse3.json",
+                          readfile("PdlIntegrasjon/pdlAdressebeskyttelseMedTomListeResponse.json"))
         }
 
     }
