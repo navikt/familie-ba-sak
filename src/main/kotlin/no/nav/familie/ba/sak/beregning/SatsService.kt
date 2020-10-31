@@ -2,7 +2,10 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.beregning.domene.Sats
 import no.nav.familie.ba.sak.beregning.domene.SatsType
-import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -22,7 +25,7 @@ object SatsService {
 
     fun finnSatsendring(startDato: LocalDate, beløp: Int): List<Sats> =
             finnSatsendring(startDato)
-            .filter { it.beløp == beløp }
+                    .filter { it.beløp == beløp }
 
     fun finnSatsendring(startDato: LocalDate): List<Sats> = satser
             .filter { it.gyldigFom == startDato }
@@ -52,11 +55,13 @@ object SatsService {
 
     fun hentPeriodeUnder6år(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? =
             when {
-                oppfyltFom.isSameOrAfter(seksårsdag) -> {
+                oppfyltFom.toYearMonth().isAfter(seksårsdag.toYearMonth()) -> {
                     null
                 }
                 else -> {
-                    Periode(oppfyltFom, minOf(oppfyltTom, seksårsdag.sisteDagIForrigeMåned()))
+                    Periode(oppfyltFom,
+                            minOf(oppfyltTom,
+                                  if (oppfyltTom.toYearMonth() == seksårsdag.toYearMonth()) seksårsdag else seksårsdag.sisteDagIForrigeMåned()))
                 }
             }
 
@@ -64,11 +69,13 @@ object SatsService {
                                    oppfyltFom: LocalDate,
                                    oppfyltTom: LocalDate): Periode? =
             when {
-                oppfyltTom.isSameOrBefore(seksårsdag) -> {
+                oppfyltTom.toYearMonth().isBefore(seksårsdag.toYearMonth()) -> {
                     null
                 }
                 else -> {
-                    Periode(maxOf(oppfyltFom, seksårsdag.førsteDagIInneværendeMåned()), oppfyltTom)
+                    Periode(if (oppfyltFom.toYearMonth() == seksårsdag.toYearMonth()) oppfyltFom.førsteDagINesteMåned() else maxOf(
+                            oppfyltFom,
+                            seksårsdag.førsteDagIInneværendeMåned()), oppfyltTom)
                 }
             }
 

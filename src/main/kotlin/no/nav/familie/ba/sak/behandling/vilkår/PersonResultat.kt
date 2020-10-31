@@ -40,7 +40,7 @@ class PersonResultat(
     }
 
     fun getVilkårResultat(index: Int): VilkårResultat? {
-        return vilkårResultater.elementAtOrNull(index)
+        return vilkårResultater.toSortedSet(comparator).elementAtOrNull(index)
     }
 
     fun addVilkårResultat(vilkårResultat: VilkårResultat) {
