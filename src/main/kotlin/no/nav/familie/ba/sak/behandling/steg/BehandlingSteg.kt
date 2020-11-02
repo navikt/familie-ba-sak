@@ -166,3 +166,8 @@ enum class BehandlerRolle(val nivå: Int) {
     VEILEDER(1),
     UKJENT(0)
 }
+
+enum class BehandlingStegStatus(val navn: String, val beskrivelse: String) {
+    IKKE_UTFØRT("IKKE_UTFØRT", "Steget er ikke utført"),
+    UTFØRT("UTFØRT", "Utført")
+}

@@ -262,7 +262,7 @@ class StegServiceTest(
                                          BehandlingÅrsak.SØKNAD), behandling.stegTemp)
 
         totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling = behandling)
-        behandling.behandlingStegTilstand.forEach{ it.utført = true}
+        behandling.behandlingStegTilstand.forEach{ it.behandlingStegStatus = BehandlingStegStatus.UTFØRT}
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         stegService.håndterBeslutningForVedtak(behandling,
@@ -280,11 +280,11 @@ class StegServiceTest(
                 vilkårsvurdertBehandling, RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
                                                                     begrunnelse = ""))
         Assertions.assertTrue(henlagtBehandling.behandlingStegTilstand.filter {
-            it.behandlingSteg == StegType.HENLEGG_SØKNAD && it.utført
+            it.behandlingSteg == StegType.HENLEGG_SØKNAD && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
         }
                                       .firstOrNull() != null)
         Assertions.assertTrue(henlagtBehandling.behandlingStegTilstand.filter {
-            it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && !it.utført
+            it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
         }
                                       .firstOrNull() != null)
 

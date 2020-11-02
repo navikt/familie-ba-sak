@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.domene
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -60,7 +61,8 @@ data class Behandling(
 
     //TODO: Etter at oppgaven er klar skal steg fjernes og stegTemp skal endre navn til steg.
     val stegTemp: StegType
-        get() = behandlingStegTilstand.firstOrNull { !it.utført }?.behandlingSteg ?: steg
+        get() = behandlingStegTilstand.firstOrNull { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }?.behandlingSteg
+                ?: steg
 
     fun sendVedtaksbrev(): Boolean {
         return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
@@ -73,8 +75,10 @@ data class Behandling(
     }
 
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
-        val sisteBehandlingStegTilstand = behandlingStegTilstand.filter { !it.utført }.single()
-        sisteBehandlingStegTilstand.utført = true
+        val sisteBehandlingStegTilstand = behandlingStegTilstand.filter {
+            it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
+        }.single()
+        sisteBehandlingStegTilstand.behandlingStegStatus = BehandlingStegStatus.UTFØRT
         behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
 
         BehandlingService.LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer siste steg på behandling $id fra ${sisteBehandlingStegTilstand.behandlingSteg} til $steg")
