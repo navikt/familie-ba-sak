@@ -16,7 +16,6 @@ object VilkårsvurderingUtils {
      */
     fun muterPersonResultatDelete(personResultat: PersonResultat, vilkårResultatId: Long) {
         personResultat.slettEllerNullstill(vilkårResultatId = vilkårResultatId)
-        fyllHullForVilkårResultater(personResultat)
     }
 
     /**
@@ -32,7 +31,8 @@ object VilkårsvurderingUtils {
                                                 regelInput = null,
                                                 regelOutput = null)
         if (harUvurdertePerioder(personResultat, vilkårType)) {
-            throw Feil("Det finnes allerede uvurderte vilkår av samme vilkårType")
+            throw FunksjonellFeil(melding = "Det finnes allerede uvurderte vilkår av samme vilkårType",
+                                  frontendFeilmelding = "Du må ferdigstille vilkårsvurderingen på en periode som allerede er påbegynt, før du kan legge til en ny periode")
         }
         personResultat.addVilkårResultat(vilkårResultat = nyttVilkårResultat)
     }
@@ -50,8 +50,6 @@ object VilkårsvurderingUtils {
                     restVilkårResultat = restVilkårResultat
             )
         }
-
-        fyllHullForVilkårResultater(personResultat)
     }
 
     fun harUvurdertePerioder(personResultat: PersonResultat, vilkårType: Vilkår): Boolean {
@@ -86,12 +84,12 @@ object VilkårsvurderingUtils {
                 periodePåNyttVilkår.kanSplitte(periode) -> {
                     personResultat.removeVilkårResultat(vilkårResultatId = vilkårResultat.id)
                     personResultat.addVilkårResultat(
-                            vilkårResultat.kopierMedNyPeriode(fom = nyFom,
-                                                              tom = periode.tom,
-                                                              behandlingId = personResultat.behandlingResultat.behandling.id))
-                    personResultat.addVilkårResultat(
                             vilkårResultat.kopierMedNyPeriode(fom = periode.fom,
                                                               tom = nyTom,
+                                                              behandlingId = personResultat.behandlingResultat.behandling.id))
+                    personResultat.addVilkårResultat(
+                            vilkårResultat.kopierMedNyPeriode(fom = nyFom,
+                                                              tom = periode.tom,
                                                               behandlingId = personResultat.behandlingResultat.behandling.id))
                 }
                 periodePåNyttVilkår.kanFlytteFom(periode) -> {
@@ -101,27 +99,6 @@ object VilkårsvurderingUtils {
                 periodePåNyttVilkår.kanFlytteTom(periode) -> {
                     vilkårResultat.periodeTom = nyTom
                     vilkårResultat.oppdaterPekerTilBehandling()
-                }
-            }
-        }
-    }
-
-    private fun fyllHullForVilkårResultater(personResultat: PersonResultat) {
-        val kopiAvVilkårResultater = personResultat.vilkårResultater.toSortedSet(PersonResultat.comparator)
-
-        kopiAvVilkårResultater.forEachIndexed { index, vilkårResultat ->
-            val neste = hentNesteVilkårResultat(kopiAvVilkårResultater, index)
-            if (neste != null && vilkårResultat.vilkårType == neste.vilkårType) {
-                when {
-                    !vilkårResultat.erEtterfølgendePeriode(neste) -> {
-                        val nyttVilkår = lagUvurdertVilkårsresultat(
-                                personResultat = vilkårResultat.personResultat
-                                                 ?: throw Feil(message = "Finner ikke personresultat ved opprettelse av uvurdert periode"),
-                                vilkårType = vilkårResultat.vilkårType,
-                                fom = vilkårResultat.toPeriode().tom.plusDays(1),
-                                tom = neste.toPeriode().fom.minusDays(1))
-                        personResultat.addVilkårResultat(nyttVilkår)
-                    }
                 }
             }
         }

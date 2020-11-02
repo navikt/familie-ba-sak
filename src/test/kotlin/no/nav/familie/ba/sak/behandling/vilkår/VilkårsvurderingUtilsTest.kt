@@ -90,7 +90,7 @@ class VilkårsvurderingUtilsTest {
         VilkårsvurderingUtils.muterPersonResultatPut(personResultat,
                                                      restVilkårResultat)
 
-        assertEquals(5, personResultat.vilkårResultater.size)
+        assertEquals(4, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
                               LocalDate.of(2010, 3, 4)), personResultat.getVilkårResultat(0)!!.toPeriode()
         )
@@ -100,11 +100,8 @@ class VilkårsvurderingUtilsTest {
         assertPeriode(Periode(LocalDate.of(2010, 5, 21),
                               LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
         )
-        assertPeriode(Periode(LocalDate.of(2010, 6, 2),
-                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(3)!!.toPeriode()
-        )
         assertPeriode(Periode(LocalDate.of(2010, 8, 2),
-                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(4)!!.toPeriode()
+                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(3)!!.toPeriode()
         )
     }
 
@@ -157,19 +154,15 @@ class VilkårsvurderingUtilsTest {
     }
 
     @Test
-    fun `Skal fjerne og fylle inn tom periode i midten`() {
+    fun `Skal fjerne og ikke fylle inn tom periode i midten`() {
         VilkårsvurderingUtils.muterPersonResultatDelete(personResultat, 2)
 
-        assertEquals(3, personResultat.vilkårResultater.size)
+        assertEquals(2, personResultat.vilkårResultater.size)
         assertPeriode(Periode(LocalDate.of(2010, 1, 1),
                               LocalDate.of(2010, 6, 1)), personResultat.getVilkårResultat(0)!!.toPeriode()
         )
-        assertPeriode(Periode(LocalDate.of(2010, 6, 2),
-                              LocalDate.of(2010, 8, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
-        )
-        assertEquals(Resultat.KANSKJE, personResultat.getVilkårResultat(1)!!.resultat)
         assertPeriode(Periode(LocalDate.of(2010, 8, 2),
-                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(2)!!.toPeriode()
+                              LocalDate.of(2010, 12, 1)), personResultat.getVilkårResultat(1)!!.toPeriode()
         )
     }
 
@@ -225,16 +218,12 @@ class VilkårsvurderingUtilsTest {
         assertEquals(3, personResultat.vilkårResultater.size)
         VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
         assertEquals(4, personResultat.vilkårResultater.size)
-
-        assertThrows(Feil::class.java) {
-            VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
-        }
     }
 
     @Test
     fun `Skal kaste feil når det legges til periode i en vilkårtype der det allerede finnes en uvurdert periode`() {
         VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
-        assertThrows(Feil::class.java) {
+        assertThrows(FunksjonellFeil::class.java) {
             VilkårsvurderingUtils.muterPersonResultatPost(personResultat, Vilkår.BOR_MED_SØKER)
         }
     }
