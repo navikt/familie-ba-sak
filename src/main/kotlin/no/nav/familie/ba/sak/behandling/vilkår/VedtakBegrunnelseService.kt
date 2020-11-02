@@ -31,5 +31,7 @@ object VedtakBegrunnelseSerivce {
     val ikkeStøttet = listOf(VedtakBegrunnelse.REDUKSJON_MANGLENDE_OPPLYSNINGER,
                              VedtakBegrunnelse.REDUKSJON_BARN_DØD)
 
-    val utenVilkår = listOf(VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR, VedtakBegrunnelse.INNVILGET_SATSENDRING)
+    val utenVilkår = listOf(VedtakBegrunnelse.REDUKSJON_UNDER_6_ÅR,
+                            VedtakBegrunnelse.REDUKSJON_UNDER_18_ÅR,
+                            VedtakBegrunnelse.INNVILGET_SATSENDRING)
 }

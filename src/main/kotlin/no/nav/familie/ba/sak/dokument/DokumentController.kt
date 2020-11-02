@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.dokument.domene.BrevType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -129,15 +130,6 @@ class DokumentController(
         dokumentService.sendManueltBrev(behandling = behandlingService.hent(behandlingId),
                                         manueltBrevRequest = manueltBrevRequest)
         return fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
-    }
-
-    enum class BrevType(val malId: String, val arkivType: String, val visningsTekst: String) {
-        INNHENTE_OPPLYSNINGER("innhente-opplysninger", "BARNETRYGD_INNHENTE_OPPLYSNINGER", "innhenting av opplysninger"),
-        VEDTAK("vedtak", "BARNETRYGD_VEDTAK", "vedtak");
-
-        override fun toString(): String {
-            return visningsTekst
-        }
     }
 
     data class GammelManueltBrevRequest(
