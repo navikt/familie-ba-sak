@@ -65,7 +65,7 @@ object SatsService {
                 }
             }
 
-    private fun hentPeriodeOver6år(seksårsdag: LocalDate,
+    fun hentPeriodeOver6år(seksårsdag: LocalDate,
                                    oppfyltFom: LocalDate,
                                    oppfyltTom: LocalDate): Periode? =
             when {

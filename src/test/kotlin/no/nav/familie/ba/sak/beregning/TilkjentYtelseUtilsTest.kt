@@ -35,6 +35,24 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
+    fun `Barn som fyller 6 år i det vilkårene ikke lenger er oppfylt får andel den måneden også`() {
+        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2021, 2, 12))
+        val seksårsdag = LocalDate.of(2021, 2, 12)
+
+        assertEquals(periode,
+                     SatsService.hentPeriodeUnder6år(seksårsdag, periode.fom, periode.tom))
+    }
+
+    @Test
+    fun `Barn som fyller 6 år i det vilkårene er oppfylt får andel måneden etter`() {
+        val periode = Periode(LocalDate.of(2021, 2, 15), LocalDate.of(2025, 2, 12))
+        val seksårsdag = LocalDate.of(2021, 2, 12)
+
+        assertEquals(Periode(periode.fom.førsteDagINesteMåned(), periode.tom),
+                     SatsService.hentPeriodeOver6år(seksårsdag, periode.fom, periode.tom))
+    }
+
+    @Test
     fun `Uendrede beregninger får endringskode UENDRET og UENDRET_SATS`() {
         val person = tilfeldigPerson()
         val personopplysningsgrunnlag = lagTestPersonopplysningGrunnlag(0, person)
