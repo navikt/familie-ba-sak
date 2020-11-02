@@ -1,12 +1,13 @@
 name: Build-Deploy-Preprod
 on:
-  pull_request:
   workflow_dispatch:
+  pull_request:
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
 jobs:
   deploy-to-dev:
+    if: github.event.pull_request.draft == false
     name: Bygg app/image, push til github, deploy til dev-fss
     runs-on: ubuntu-latest
     steps:
