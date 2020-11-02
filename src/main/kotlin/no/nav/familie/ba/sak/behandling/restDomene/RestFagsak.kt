@@ -20,7 +20,7 @@ fun Fagsak.toRestFagsak(restBehandlinger: List<RestBehandling>) = RestFagsak(
         søkerFødselsnummer = this.hentAktivIdent().ident,
         status = this.status,
         underBehandling = restBehandlinger.any {
-            it.status == BehandlingStatus.UTREDES || (it.steg >= StegType.BESLUTTE_VEDTAK && it.steg != StegType.BEHANDLING_AVSLUTTET)
+            it.status == BehandlingStatus.UTREDES || (it.gjeldendeSteg >= StegType.BESLUTTE_VEDTAK && it.gjeldendeSteg != StegType.BEHANDLING_AVSLUTTET)
         },
         behandlinger = restBehandlinger
 )

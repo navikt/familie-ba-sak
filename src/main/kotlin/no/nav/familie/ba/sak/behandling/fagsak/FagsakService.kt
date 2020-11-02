@@ -173,7 +173,8 @@ class FagsakService(
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
                     type = behandling.type,
                     status = behandling.status,
-                    steg = behandling.stegTemp,
+                    gjeldendeSteg = behandling.stegTemp,
+                    steg = behandling.behandlingStegTilstand.map { it.behandlingSteg }.toList(),
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                     samletResultat =
