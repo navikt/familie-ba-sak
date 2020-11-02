@@ -66,7 +66,10 @@ class VedtakBegrunnelseTest(
         private val taskRepository: TaskRepository,
 
         @Autowired
-        private val behandlingResultService: BehandlingResultatService
+        private val behandlingResultService: BehandlingResultatService,
+
+        @Autowired
+        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -83,7 +86,8 @@ class VedtakBegrunnelseTest(
                 fagsakService,
                 loggService,
                 arbeidsfordelingService,
-                saksstatistikkEventPublisher
+                saksstatistikkEventPublisher,
+                behandlingStegTilstandRepository
         )
     }
 

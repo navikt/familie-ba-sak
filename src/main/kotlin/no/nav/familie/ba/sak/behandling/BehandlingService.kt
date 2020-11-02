@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -35,7 +36,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakService: FagsakService,
                         private val loggService: LoggService,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
-                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
+                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+                        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -98,10 +100,21 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
+//    private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
+//        return hentBehandlinger(fagsakId).filter {
+//            val tilkjentYtelsePåBehandling = beregningService.hentOptionalTilkjentYtelseForBehandling(it.id)
+//            tilkjentYtelsePåBehandling != null && tilkjentYtelsePåBehandling.erSendtTilIverksetting()
+//        }
+//    }
+
     private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
         return hentBehandlinger(fagsakId).filter {
+            val henleggsteg = behandlingStegTilstandRepository.finnBehandlingStegTilstand(it.id)
+                    .firstOrNull { behandlingStegTilstand ->
+                        behandlingStegTilstand.behandlingSteg == StegType.HENLEGG_SØKNAD
+                    }
             val tilkjentYtelsePåBehandling = beregningService.hentOptionalTilkjentYtelseForBehandling(it.id)
-            tilkjentYtelsePåBehandling != null && tilkjentYtelsePåBehandling.erSendtTilIverksetting()
+            henleggsteg == null && tilkjentYtelsePåBehandling != null && tilkjentYtelsePåBehandling.erSendtTilIverksetting()
         }
     }
 
