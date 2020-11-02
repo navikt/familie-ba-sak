@@ -39,9 +39,9 @@ class FerdigstillBehandling(
         }
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
+        behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
             oppdaterFagsakStatus(behandling = behandling)
-           behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
         } else {
             behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.apply {
                 aktiv = true
