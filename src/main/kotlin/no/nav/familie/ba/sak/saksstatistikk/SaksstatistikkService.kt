@@ -73,49 +73,57 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
         val now = ZonedDateTime.now()
         return BehandlingDVH(funksjonellTid = now,
-                                          tekniskTid = now, // TODO burde denne vært satt til opprettetTidspunkt/endretTidspunkt?
-                                          mottattDato = datoMottatt.atZone(TIMEZONE),
-                                          registrertDato = datoMottatt.atZone(TIMEZONE),
-                                          behandlingId = behandling.id.toString(),
-                                          sakId = behandling.fagsak.id.toString(),
-                                          behandlingType = behandling.type.name,
-                                          behandlingStatus = behandling.status.name,
-                                          behandlingKategori = behandling.kategori.name,
-                                          behandlingUnderkategori = behandling.underkategori.name,
-                                          utenlandstilsnitt = "NASJONAL",
-                                          ansvarligEnhetKode = ansvarligEnhetKode,
-                                          behandlendeEnhetKode = behandlendeEnhetsKode,
-                                          ansvarligEnhetType = "NORG",
-                                          behandlendeEnhetType = "NORG",
-                                          totrinnsbehandling = totrinnskontroll?.saksbehandler != SYSTEM_NAVN,
-                                          avsender = "familie-ba-sak",
-                                          versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
+                             tekniskTid = now, // TODO burde denne vært satt til opprettetTidspunkt/endretTidspunkt?
+                             mottattDato = datoMottatt.atZone(TIMEZONE),
+                             registrertDato = datoMottatt.atZone(TIMEZONE),
+                             behandlingId = behandling.id.toString(),
+                             sakId = behandling.fagsak.id.toString(),
+                             behandlingType = behandling.type.name,
+                             behandlingStatus = behandling.status.name,
+                             behandlingKategori = behandling.kategori.name,
+                             behandlingUnderkategori = behandling.underkategori.name,
+                             utenlandstilsnitt = "NASJONAL",
+                             ansvarligEnhetKode = ansvarligEnhetKode,
+                             behandlendeEnhetKode = behandlendeEnhetsKode,
+                             ansvarligEnhetType = "NORG",
+                             behandlendeEnhetType = "NORG",
+                             totrinnsbehandling = totrinnskontroll?.saksbehandler != SYSTEM_NAVN,
+                             avsender = "familie-ba-sak",
+                             versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
                 // Ikke påkrevde felt
-                                          vedtaksDato = aktivtVedtak?.vedtaksdato,
-                                          relatertBehandlingId = forrigeBehandlingId?.toString(),
-                                          vedtakId = aktivtVedtak?.id?.toString(),
-                                          resultat = behandlingResultat?.samletResultat?.name,
-                                          behandlingTypeBeskrivelse = behandling.type.visningsnavn,
-                                          resultatBegrunnelser = behandlingResultat?.samletResultatBegrunnelser() ?: emptyList(),
-                                          behandlingOpprettetAv = behandling.opprettetAv,
-                                          behandlingOpprettetType = "saksbehandlerId",
-                                          behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
-                                          beslutter = totrinnskontroll?.beslutter,
-                                          saksbehandler = totrinnskontroll?.saksbehandler
+                             vedtaksDato = aktivtVedtak?.vedtaksdato,
+                             relatertBehandlingId = forrigeBehandlingId?.toString(),
+                             vedtakId = aktivtVedtak?.id?.toString(),
+                             resultat = behandlingResultat?.samletResultat?.name,
+                             behandlingTypeBeskrivelse = behandling.type.visningsnavn,
+                             resultatBegrunnelser = behandlingResultat?.samletResultatBegrunnelser() ?: emptyList(),
+                             behandlingOpprettetAv = behandling.opprettetAv,
+                             behandlingOpprettetType = "saksbehandlerId",
+                             behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
+                             beslutter = totrinnskontroll?.beslutter,
+                             saksbehandler = totrinnskontroll?.saksbehandler
         )
     }
 
     fun mapTilSakDvh(sakId: Long): SakDVH? {
         val fagsak = fagsakService.hentRestFagsak(sakId).getDataOrThrow()
-
+        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
         //Skipper saker som har automatisk behandling
-        val skalBehandleAutomatisk = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)?.skalBehandlesAutomatisk ?: false
+        val skalBehandleAutomatisk = aktivBehandling?.skalBehandlesAutomatisk ?: false
         if (skalBehandleAutomatisk && fødselshendelseSkalRullesTilbake()) return null
 
         val søkersAktørId = personopplysningerService.hentAktivAktørId(Ident(fagsak.søkerFødselsnummer))
 
-        val deltagere = fagsakService.hentFagsakDeltager(fagsak.søkerFødselsnummer).filter { it.fagsakId == sakId }
-                .map { AktørDVH(personopplysningerService.hentAktivAktørId(Ident(it.ident)).id.toLong(), it.rolle.name) }
+        val deltagere = if (aktivBehandling != null) {
+            val personer = persongrunnlagService.hentAktiv(aktivBehandling.id)?.personer ?: emptySet()
+            personer.map {
+                AktørDVH(personopplysningerService.hentAktivAktørId(Ident(it.personIdent.ident)).id.toLong(),
+                         it.type.name)
+            }
+        } else {
+            listOf(AktørDVH(personopplysningerService.hentAktivAktørId(Ident(fagsak.søkerFødselsnummer)).id.toLong(),
+                            PersonType.SØKER.name))
+        }
 
         return SakDVH(
                 funksjonellTid = ZonedDateTime.now(),
