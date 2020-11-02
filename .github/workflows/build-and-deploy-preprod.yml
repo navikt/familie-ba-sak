@@ -7,8 +7,8 @@ on:
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/familie-ba-sak:${{ github.sha }}
 jobs:
-  if: github.event.pull_request.draft == false
   deploy-to-dev:
+    if: github.event.pull_request.draft == false
     name: Bygg app/image, push til github, deploy til dev-fss
     runs-on: ubuntu-latest
     steps:
