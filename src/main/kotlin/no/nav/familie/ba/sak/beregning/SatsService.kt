@@ -2,10 +2,7 @@ package no.nav.familie.ba.sak.beregning
 
 import no.nav.familie.ba.sak.beregning.domene.Sats
 import no.nav.familie.ba.sak.beregning.domene.SatsType
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.*
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -53,21 +50,20 @@ object SatsService {
 
     private fun LocalDate.toYearMonth() = YearMonth.from(this)
 
-    fun hentPeriodeUnder6år(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? =
+    fun hentPeriodeTil6år(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? =
             when {
-                oppfyltFom.toYearMonth().isAfter(seksårsdag.toYearMonth()) -> {
+                oppfyltFom.toYearMonth().isSameOrAfter(seksårsdag.toYearMonth()) -> {
                     null
                 }
                 else -> {
                     Periode(oppfyltFom,
-                            minOf(oppfyltTom,
-                                  if (oppfyltTom.toYearMonth() == seksårsdag.toYearMonth()) seksårsdag else seksårsdag.sisteDagIForrigeMåned()))
+                            minOf(oppfyltTom, seksårsdag.sisteDagIForrigeMåned()))
                 }
             }
 
-    fun hentPeriodeOver6år(seksårsdag: LocalDate,
-                                   oppfyltFom: LocalDate,
-                                   oppfyltTom: LocalDate): Periode? =
+    fun hentPeriodeFraOgMed6år(seksårsdag: LocalDate,
+                               oppfyltFom: LocalDate,
+                               oppfyltTom: LocalDate): Periode? =
             when {
                 oppfyltTom.toYearMonth().isBefore(seksårsdag.toYearMonth()) -> {
                     null
@@ -87,7 +83,7 @@ object SatsService {
      * 01.10.2020 - 31.12.2020
      */
     fun splittPeriodePå6Årsdag(seksårsdag: LocalDate, fom: LocalDate, tom: LocalDate): Pair<Periode?, Periode?> =
-            Pair(hentPeriodeUnder6år(seksårsdag, fom, tom), hentPeriodeOver6år(seksårsdag, fom, tom))
+            Pair(hentPeriodeTil6år(seksårsdag, fom, tom), hentPeriodeFraOgMed6år(seksårsdag, fom, tom))
 
     fun hentDatoForSatsendring(satstype: SatsType,
                                oppdatertBeløp: Int): LocalDate? = satser.find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom
