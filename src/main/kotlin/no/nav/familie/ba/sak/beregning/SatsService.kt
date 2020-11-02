@@ -22,7 +22,7 @@ object SatsService {
 
     fun finnSatsendring(startDato: LocalDate, beløp: Int): List<Sats> =
             finnSatsendring(startDato)
-            .filter { it.beløp == beløp }
+                    .filter { it.beløp == beløp }
 
     fun finnSatsendring(startDato: LocalDate): List<Sats> = satser
             .filter { it.gyldigFom == startDato }
@@ -50,25 +50,28 @@ object SatsService {
 
     private fun LocalDate.toYearMonth() = YearMonth.from(this)
 
-    fun hentPeriodeUnder6år(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? =
+    fun hentPeriodeTil6år(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? =
             when {
-                oppfyltFom.isSameOrAfter(seksårsdag) -> {
+                oppfyltFom.toYearMonth().isSameOrAfter(seksårsdag.toYearMonth()) -> {
                     null
                 }
                 else -> {
-                    Periode(oppfyltFom, minOf(oppfyltTom, seksårsdag.sisteDagIForrigeMåned()))
+                    Periode(oppfyltFom,
+                            minOf(oppfyltTom, seksårsdag.sisteDagIForrigeMåned()))
                 }
             }
 
-    private fun hentPeriodeOver6år(seksårsdag: LocalDate,
-                                   oppfyltFom: LocalDate,
-                                   oppfyltTom: LocalDate): Periode? =
+    fun hentPeriodeFraOgMed6år(seksårsdag: LocalDate,
+                               oppfyltFom: LocalDate,
+                               oppfyltTom: LocalDate): Periode? =
             when {
-                oppfyltTom.isSameOrBefore(seksårsdag) -> {
+                oppfyltTom.toYearMonth().isBefore(seksårsdag.toYearMonth()) -> {
                     null
                 }
                 else -> {
-                    Periode(maxOf(oppfyltFom, seksårsdag.førsteDagIInneværendeMåned()), oppfyltTom)
+                    Periode(if (oppfyltFom.toYearMonth() == seksårsdag.toYearMonth()) oppfyltFom.førsteDagINesteMåned() else maxOf(
+                            oppfyltFom,
+                            seksårsdag.førsteDagIInneværendeMåned()), oppfyltTom)
                 }
             }
 
@@ -80,7 +83,7 @@ object SatsService {
      * 01.10.2020 - 31.12.2020
      */
     fun splittPeriodePå6Årsdag(seksårsdag: LocalDate, fom: LocalDate, tom: LocalDate): Pair<Periode?, Periode?> =
-            Pair(hentPeriodeUnder6år(seksårsdag, fom, tom), hentPeriodeOver6år(seksårsdag, fom, tom))
+            Pair(hentPeriodeTil6år(seksårsdag, fom, tom), hentPeriodeFraOgMed6år(seksårsdag, fom, tom))
 
     fun hentDatoForSatsendring(satstype: SatsType,
                                oppdatertBeløp: Int): LocalDate? = satser.find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom
