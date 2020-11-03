@@ -69,9 +69,7 @@ object SatsService {
                     null
                 }
                 else -> {
-                    Periode(if (oppfyltFom.toYearMonth() == seksårsdag.toYearMonth()) oppfyltFom.førsteDagINesteMåned() else maxOf(
-                            oppfyltFom,
-                            seksårsdag.førsteDagIInneværendeMåned()), oppfyltTom)
+                    Periode(maxOf(oppfyltFom, seksårsdag.førsteDagIInneværendeMåned()), oppfyltTom)
                 }
             }
 
