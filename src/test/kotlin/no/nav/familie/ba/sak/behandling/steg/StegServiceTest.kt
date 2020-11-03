@@ -291,7 +291,6 @@ class StegServiceTest(
         stegService.håndterFerdigstillBehandling(henlagtBehandling)
 
         val behandlingEtterFerdigstiltBehandling = behandlingService.hent(behandlingId = henlagtBehandling.id)
-        // TODO: Verifisere hva som skal være riktig statuser og steg her.
         Assertions.assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.stegTemp)
     }
 

@@ -22,11 +22,11 @@ class HenleggBehandling(
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {
         loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)
 
-        val henleggelseType = when (data.årsak) {
+        val behandlingResultatType = when (data.årsak) {
             HenleggÅrsak.FEILAKTIG_OPPRETTET -> BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET
             HenleggÅrsak.SØKNAD_TRUKKET -> BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
         }
-        behandlingResultatService.settBehandlingResultatTilHenlagt(behandling, henleggelseType)
+        behandlingResultatService.settBehandlingResultatTilHenlagt(behandling, behandlingResultatType)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.HENLEGG_SØKNAD)
         opprettFerdigstillBehandling(behandling.id, behandling.fagsak.hentAktivIdent().ident)
