@@ -23,7 +23,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -354,19 +353,32 @@ fun vurderBehandlingResultatTilInnvilget(behandlingResultat: BehandlingResultat,
     }
 }
 
-fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat): BehandlingResultat {
+fun lagBehandlingResultat(søkerFnr: String,
+                          behandling: Behandling,
+                          resultat: Resultat,
+                          søkerPeriodeFom: LocalDate? = LocalDate.now().minusMonths(1),
+                          søkerPeriodeTom: LocalDate? = LocalDate.now().plusYears(2)): BehandlingResultat {
     val behandlingResultat = BehandlingResultat(
             behandling = behandling
     )
     val personResultat = PersonResultat(
             behandlingResultat = behandlingResultat,
-            personIdent = fnr)
+            personIdent = søkerFnr)
     personResultat.setVilkårResultater(
             setOf(VilkårResultat(personResultat = personResultat,
                                  vilkårType = Vilkår.BOSATT_I_RIKET,
                                  resultat = resultat,
-                                 periodeFom = LocalDate.now().minusMonths(1),
-                                 periodeTom = LocalDate.now().plusYears(2),
+                                 periodeFom = søkerPeriodeFom,
+                                 periodeTom = søkerPeriodeTom,
+                                 begrunnelse = "",
+                                 behandlingId = behandling.id,
+                                 regelInput = null,
+                                 regelOutput = null),
+                  VilkårResultat(personResultat = personResultat,
+                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                 resultat = resultat,
+                                 periodeFom = søkerPeriodeFom,
+                                 periodeTom = søkerPeriodeTom,
                                  begrunnelse = "",
                                  behandlingId = behandling.id,
                                  regelInput = null,
