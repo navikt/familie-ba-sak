@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
@@ -159,7 +160,11 @@ class FagsakService(
             val forrigeBehandling = behandlinger
                     .filter { it.opprettetTidspunkt.isBefore(behandling.opprettetTidspunkt) }
                     .sortedBy { it.opprettetTidspunkt }
-                    .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.stegTemp == StegType.BEHANDLING_AVSLUTTET }
+                    .findLast {
+                        it.type != BehandlingType.TEKNISK_OPPHØR &&
+                        it.stegTemp == StegType.BEHANDLING_AVSLUTTET &&
+                        !erBehandlingHenlagt(it)
+                    }
 
             val opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
 
@@ -199,6 +204,10 @@ class FagsakService(
                     opplysningsplikt = opplysningsplikt?.toRestOpplysningsplikt()
             )
         }
+    }
+
+    private fun erBehandlingHenlagt(behandling: Behandling): Boolean {
+        return behandlingResultatService.hentAktivForBehandling(behandling.id)?.erHenlagt() == true
     }
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
