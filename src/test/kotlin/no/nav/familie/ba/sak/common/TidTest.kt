@@ -224,6 +224,14 @@ internal class TidTest {
         Assertions.assertThat(result.filter { it.tom != null}).hasSize(1)
     }
 
+    @Test
+    fun `formatering gir forventet resultat`() {
+        assertEquals("31. desember 2020", dato("2020-12-31").tilDagMånedÅr())
+        assertEquals("311220", dato("2020-12-31").tilddMMyy())
+        assertEquals("31.12.20", dato("2020-12-31").tilKortString())
+        assertEquals("desember 2020", dato("2020-12-31").tilMånedÅr())
+    }
+
     private fun dato(s: String): LocalDate {
         return LocalDate.parse(s)
     }
