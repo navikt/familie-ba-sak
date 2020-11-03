@@ -223,7 +223,7 @@ class FødselshendelseServiceTest {
         personopplysningGrunnlag.personer.addAll(barna)
         personopplysningGrunnlag.personer.add(søker)
 
-        every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
+        every { featureToggleServiceMock.isEnabled(any(), any()) } returns toggleVerdi
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every {
