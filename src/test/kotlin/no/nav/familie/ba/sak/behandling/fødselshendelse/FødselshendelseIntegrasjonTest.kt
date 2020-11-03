@@ -212,7 +212,9 @@ class FødselshendelseIntegrasjonTest(
     @BeforeEach
     fun initMocks() {
         every { infotrygdFeedServiceMock.sendTilInfotrygdFeed(any()) } just runs
-        every { featureToggleServiceMock.isEnabled(any()) } returns false
+
+
+        every { featureToggleServiceMock.isEnabled(any(), any()) } returns false
     }
 }
 
