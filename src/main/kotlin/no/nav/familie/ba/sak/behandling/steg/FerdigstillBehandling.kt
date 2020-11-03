@@ -38,7 +38,6 @@ class FerdigstillBehandling(
             loggService.opprettFerdigstillBehandling(behandling)
         }
 
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
         behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
             oppdaterFagsakStatus(behandling = behandling)
@@ -49,6 +48,7 @@ class FerdigstillBehandling(
             }
         }
 
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
         return hentNesteStegForNormalFlyt(behandling)
     }
 
