@@ -360,9 +360,12 @@ class ClientMocks {
     fun mockFeatureToggleService(): FeatureToggleService {
         val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
+        val slot = slot<Boolean>()
         every {
-            mockFeatureToggleService.isEnabled(any())
-        } returns false
+            mockFeatureToggleService.isEnabled(any(), capture(slot))
+        } answers {
+            slot.captured
+        }
 
         return mockFeatureToggleService
     }
