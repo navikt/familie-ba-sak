@@ -180,9 +180,10 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.totrinnsbehandling).isTrue
         assertThat(behandlingDvh?.saksbehandler).isEqualTo("Saksbehandler")
         assertThat(behandlingDvh?.beslutter).isEqualTo("Beslutter")
-        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
                 .extracting("resultatBegrunnelse")
-                .containsOnly("BOSATT_I_RIKET ikke oppfylt for barn 01010000001")
+                .containsOnly("BOSATT_I_RIKET ikke oppfylt for barn 01010000001",
+                              "LOVLIG_OPPHOLD ikke oppfylt for barn 01010000001")
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
 
