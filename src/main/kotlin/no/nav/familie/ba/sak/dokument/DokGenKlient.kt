@@ -54,7 +54,7 @@ class DokGenKlient(
             error("Ugyldig mal.")
         } catch (e: Exception) {
             if (request.url.host == "familie-ba-dokgen.adeo.no") {
-                LOG.error("Feilet mot prod-gcp. Redirect'er request til prod-fss")
+                LOG.warn("Feilet mot prod-gcp. Redirect'er request til prod-fss")
                 val url_prod_fss = URI.create(request.url.toString().replace("adeo.no", "nais.adeo.no"))
                 return utførRequest(lagPostRequest(url_prod_fss, request.body!!), responseType)
             }

@@ -12,10 +12,10 @@ val TIDENES_MORGEN = LocalDate.MIN
 val TIDENES_ENDE = LocalDate.MAX
 
 
-fun LocalDate.tilddMMYY() = this.format(DateTimeFormatter.ofPattern("ddMMYY", nbLocale))
-fun LocalDate.tilKortString() = this.format(DateTimeFormatter.ofPattern("dd.MM.YY", nbLocale))
-fun LocalDate.tilDagMånedÅr() = this.format(DateTimeFormatter.ofPattern("d. MMMM YYYY", nbLocale))
-fun LocalDate.tilMånedÅr() = this.format(DateTimeFormatter.ofPattern("MMMM YYYY", nbLocale))
+fun LocalDate.tilddMMyy() = this.format(DateTimeFormatter.ofPattern("ddMMyy", nbLocale))
+fun LocalDate.tilKortString() = this.format(DateTimeFormatter.ofPattern("dd.MM.yy", nbLocale))
+fun LocalDate.tilDagMånedÅr() = this.format(DateTimeFormatter.ofPattern("d. MMMM yyyy", nbLocale))
+fun LocalDate.tilMånedÅr() = this.format(DateTimeFormatter.ofPattern("MMMM yyyy", nbLocale))
 
 fun LocalDate.sisteDagIForrigeMåned(): LocalDate {
     val sammeDagForrigeMåned = this.minusMonths(1)
@@ -50,6 +50,10 @@ fun LocalDate.erFraInneværendeEllerForrigeMåned(now: LocalDate = now()): Boole
     val førsteDatoForrigeMåned = now.withDayOfMonth(1).minusMonths(1)
     val førsteDatoNesteMåned = førsteDatoForrigeMåned.plusMonths(2)
     return this.isSameOrAfter(førsteDatoForrigeMåned) && isBefore(førsteDatoNesteMåned)
+}
+
+fun YearMonth.isSameOrAfter(toCompare: YearMonth): Boolean {
+    return this.isAfter(toCompare) || this == toCompare
 }
 
 fun LocalDate.isSameOrBefore(toCompare: LocalDate): Boolean {

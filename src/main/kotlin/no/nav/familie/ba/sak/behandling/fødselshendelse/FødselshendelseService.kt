@@ -178,7 +178,7 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     }
 
     private fun fødselshendelseSkalRullesTilbake() : Boolean =
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring")
+            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", defaultValue = true)
 
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
 

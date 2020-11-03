@@ -8,12 +8,12 @@ import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.behandling.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
-import no.nav.familie.ba.sak.behandling.vilkår.*
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.domene.Arbeidsfordelingsenhet
@@ -79,7 +79,7 @@ internal class SaksstatistikkServiceTest {
                 behandlendeEnhetNavn = "Nav",
                 behandlingId = 1)
         every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
-        every { featureToggleService.isEnabled(any()) } returns false
+        every { featureToggleService.isEnabled(any(), any()) } returns false
     }
 
     @Test
@@ -180,9 +180,10 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.totrinnsbehandling).isTrue
         assertThat(behandlingDvh?.saksbehandler).isEqualTo("Saksbehandler")
         assertThat(behandlingDvh?.beslutter).isEqualTo("Beslutter")
-        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
                 .extracting("resultatBegrunnelse")
-                .containsOnly("BOSATT_I_RIKET ikke oppfylt for barn 01010000001")
+                .containsOnly("BOSATT_I_RIKET ikke oppfylt for barn 01010000001",
+                              "LOVLIG_OPPHOLD ikke oppfylt for barn 01010000001")
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
 
@@ -190,7 +191,7 @@ internal class SaksstatistikkServiceTest {
 
 
     @Test
-    fun `Skal mappe til sakDVH`() {
+    fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER`() {
         every { fagsakService.hentRestFagsak(any()) } returns Ressurs.success(RestFagsak(LocalDateTime.now(),
                                                                                          1, "12345678910",
                                                                                          FagsakStatus.OPPRETTET,
@@ -200,19 +201,41 @@ internal class SaksstatistikkServiceTest {
         every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
         every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
 
-        every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(ident = "12345678910",
-                                                                                            rolle = FagsakDeltagerRolle.FORELDER,
-                                                                                            fagsakId = 1),
-                                                                         RestFagsakDeltager(ident = "12345678911",
-                                                                                            rolle = FagsakDeltagerRolle.BARN,
-                                                                                            fagsakId = 2))
         every { behandlingService.hentAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
         assertThat(sakDvh?.aktorId).isEqualTo(1234567891011)
-        assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").containsOnly("FORELDER")
+        assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").contains("SØKER")
+        assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
+        assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
+
+    }
+
+    @Test
+    fun `Skal mappe til sakDVH, aktører har SØKER og BARN`() {
+        every { fagsakService.hentRestFagsak(any()) } returns Ressurs.success(RestFagsak(LocalDateTime.now(),
+                                                                                         1, "12345678910",
+                                                                                         FagsakStatus.OPPRETTET,
+                                                                                         true,
+                                                                                         emptyList()))
+        val randomAktørId = randomAktørId()
+        every { personopplysningerService.hentAktivAktørId(any()) } returns randomAktørId
+
+        every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(1,
+                                                                                                 tilfeldigPerson(personType = PersonType.BARN),
+                                                                                                 tilfeldigPerson(personType = PersonType.SØKER))
+
+
+
+        every { behandlingService.hentAktivForFagsak(any()) } returns lagBehandling()
+
+        val sakDvh = sakstatistikkService.mapTilSakDvh(1)
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
+
+        assertThat(sakDvh?.aktorId).isEqualTo(randomAktørId.id.toLong())
+        assertThat(sakDvh?.aktorer).hasSize(2).extracting("rolle").containsOnly("SØKER", "BARN")
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
 
