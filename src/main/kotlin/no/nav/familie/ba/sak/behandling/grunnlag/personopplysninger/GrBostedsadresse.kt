@@ -12,7 +12,7 @@ abstract class GrBostedsadresse(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "po_bostedsadresse_seq_generator")
         @SequenceGenerator(name = "po_bostedsadresse_seq_generator", sequenceName = "po_bostedsadresse_seq", allocationSize = 50)
-        val id: Long = 0
+        open val id: Long = 0
 ) : BaseEntitet() {
 
     abstract fun toSecureString(): String

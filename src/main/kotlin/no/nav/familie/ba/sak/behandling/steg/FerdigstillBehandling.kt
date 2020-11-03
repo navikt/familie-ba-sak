@@ -38,17 +38,14 @@ class FerdigstillBehandling(
             loggService.opprettFerdigstillBehandling(behandling)
         }
 
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
+        behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
-            behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
-
             oppdaterFagsakStatus(behandling = behandling)
-
-            behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
         } else {
             behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.apply {
                 aktiv = true
                 behandlingService.lagre(this)
-
             }
         }
 
