@@ -45,12 +45,7 @@ class StatusFraOppdrag(
 
                         error("Mottok status '$it' fra oppdrag")
                     } else {
-                        val featureToggleSendVedtaksbrev =
-                                featureToggleService.isEnabled(toggleId = "familie-ba-sak.send-vedtaksbrev",
-                                                               defaultValue = true)
-
-                        LOG.info("Feature toggle for å sende vedtaksbrev er ${if (featureToggleSendVedtaksbrev) "på." else "av."}")
-                        if (behandling.sendVedtaksbrev() && featureToggleSendVedtaksbrev) {
+                        if (behandling.sendVedtaksbrev()) {
                             opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
                                                              task)
                         } else {
