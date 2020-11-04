@@ -150,7 +150,7 @@ class MalerService(
 
                     DuFårSeksjon(
                             fom = utbetalingsperiode.periodeFom.tilDagMånedÅr(),
-                            tom = if (!utbetalingsperiode.periodeTom.erSenereEnnNesteMåned()) utbetalingsperiode.periodeTom.tilDagMånedÅr() else "",
+                            tom = if (!utbetalingsperiode.periodeTom.erSenereEnnInneværendeMåned()) utbetalingsperiode.periodeTom.tilDagMånedÅr() else "",
                             belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
                             antallBarn = utbetalingsperiode.antallBarn,
                             barnasFodselsdatoer = barnasFødselsdatoer,
