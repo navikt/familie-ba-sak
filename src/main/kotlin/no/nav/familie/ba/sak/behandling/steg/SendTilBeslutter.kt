@@ -26,20 +26,10 @@ class SendTilBeslutter(
         private val loggService: LoggService,
         private val totrinnskontrollService: TotrinnskontrollService,
         private val opplysningspliktService: OpplysningspliktService,
-        private val behandlingResultatService: BehandlingResultatService,
-        private val vedtakService: VedtakService
+        private val behandlingResultatService: BehandlingResultatService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-        if (vedtak?.stønadBrevPdF == null) {
-            // TODO sjekke med fag angående feilmelding
-            throw FunksjonellFeil(
-                    melding = "Forsøker å sende vedtak til beslutter uten å ha verifisert innholdet i brevet",
-                    frontendFeilmelding = "Vedtaksbrevet må vært sett på før behandling kan sendes til beslutter.",
-            )
-        }
-
         val opplysningsplikt = opplysningspliktService.hent(behandlingId = behandling.id);
         if (opplysningsplikt !== null && opplysningsplikt.status == OpplysningspliktStatus.IKKE_SATT) {
             throw FunksjonellFeil(

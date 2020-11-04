@@ -77,6 +77,6 @@ class BeslutteVedtakTest {
 
         verify(exactly = 1) { FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak, any()) }
-        Assertions.assertEquals(StegType.REGISTRERE_SØKNAD, nesteSteg)
+        Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
     }
 }

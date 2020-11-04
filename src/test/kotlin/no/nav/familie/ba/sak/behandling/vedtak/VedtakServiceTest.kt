@@ -198,38 +198,6 @@ class VedtakServiceTest(
         Assertions.assertEquals(vedtak2.id, hentetVedtak?.id)
     }
 
-    @Test
-    @Tag("integration")
-    fun `Saksbehandler skal ikke kunne sende fra seg vedtak uten å ha sett på brevet`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
-
-        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag
-        )
-
-        behandling.steg = StegType.SEND_TIL_BESLUTTER
-
-        val feil = assertThrows<FunksjonellFeil> {
-            stegService.håndterSendTilBeslutter(behandling, "4820")
-        }
-
-        assertEquals("Forsøker å sende vedtak til beslutter uten å ha verifisert innholdet i brevet", feil.melding)
-    }
-
     private fun opprettNyttInvilgetVedtak(behandling: Behandling): Vedtak {
         vedtakService.lagreOgDeaktiverGammel(Vedtak(behandling = behandling,
                                                     vedtaksdato = LocalDate.now())

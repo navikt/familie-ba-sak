@@ -244,7 +244,7 @@ class StegServiceTest(
     }
 
     @Test
-    fun `Underkjent beslutning resetter steg`() {
+    fun `Underkjent beslutning setter steg tilbake til send til beslutter`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -263,6 +263,6 @@ class StegServiceTest(
                                                RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil"))
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.REGISTRERE_SØKNAD, behandlingEtterPersongrunnlagSteg.steg)
+        Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterPersongrunnlagSteg.steg)
     }
 }
