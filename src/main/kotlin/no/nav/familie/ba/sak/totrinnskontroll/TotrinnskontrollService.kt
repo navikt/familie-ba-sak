@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.totrinnskontroll
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.totrinnskontroll.domene.Totrinnskontroll
 import org.slf4j.LoggerFactory
@@ -19,24 +19,12 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         return totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun opprettEllerHentTotrinnskontroll(behandling: Behandling,
-                                         saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn()): Totrinnskontroll {
-        return when (val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)) {
-            null -> lagreOgDeaktiverGammel(Totrinnskontroll(
-                    behandling = behandling,
-                    saksbehandler = saksbehandler
-            ))
-            else -> {
-                if (totrinnskontroll.saksbehandler != saksbehandler && behandling.steg.rekkefølge < StegType.BESLUTTE_VEDTAK.rekkefølge) {
-                    lagreOgDeaktiverGammel(Totrinnskontroll(
-                            behandling = behandling,
-                            saksbehandler = saksbehandler
-                    ))
-                } else {
-                    totrinnskontroll
-                }
-            }
-        }
+    fun opprettTotrinnskontrollMedSaksbehandler(behandling: Behandling,
+                                                saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn()): Totrinnskontroll {
+        return lagreOgDeaktiverGammel(Totrinnskontroll(
+                behandling = behandling,
+                saksbehandler = saksbehandler
+        ))
     }
 
     fun besluttTotrinnskontroll(behandling: Behandling, beslutter: String, beslutning: Beslutning) {
@@ -46,7 +34,10 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         totrinnskontroll.beslutter = beslutter
         totrinnskontroll.godkjent = beslutning.erGodkjent()
         if (totrinnskontroll.erUgyldig()) {
-            error("Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak")
+            // TODO avklare feilmelding
+            throw FunksjonellFeil(
+                    melding = "Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak",
+                    frontendFeilmelding = "Du kan ikke godkjenne ditt eget vedtak")
         }
 
         lagreEllerOppdater(totrinnskontroll)

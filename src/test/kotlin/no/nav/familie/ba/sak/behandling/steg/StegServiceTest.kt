@@ -256,7 +256,7 @@ class StegServiceTest(
         Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
                                          BehandlingÅrsak.SØKNAD), behandling.steg)
 
-        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling = behandling)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
         behandling.steg = StegType.BESLUTTE_VEDTAK
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         stegService.håndterBeslutningForVedtak(behandling,

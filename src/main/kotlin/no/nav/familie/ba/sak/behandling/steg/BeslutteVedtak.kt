@@ -58,7 +58,7 @@ class BeslutteVedtak(
                     fristForFerdigstillelse = LocalDate.now()
             )
             taskRepository.save(behandleUnderkjentVedtakTask)
-            StegType.REGISTRERE_SØKNAD
+            StegType.SEND_TIL_BESLUTTER
         }
     }
 

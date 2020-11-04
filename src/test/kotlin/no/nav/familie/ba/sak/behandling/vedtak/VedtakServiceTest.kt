@@ -5,10 +5,13 @@ import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.behandling.steg.StegService
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.*
@@ -19,10 +22,8 @@ import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.Assert.assertEquals
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -73,7 +74,10 @@ class VedtakServiceTest(
         private val loggService: LoggService,
 
         @Autowired
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+
+        @Autowired
+        private val stegService: StegService
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -165,7 +169,7 @@ class VedtakServiceTest(
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling, "ansvarligSaksbehandler")
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler")
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", Beslutning.GODKJENT)
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
@@ -192,6 +196,38 @@ class VedtakServiceTest(
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertEquals(vedtak2.id, hentetVedtak?.id)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Saksbehandler skal ikke kunne sende fra seg vedtak uten å ha sett på brevet`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val behandlingResultat = lagBehandlingResultat(fnr, behandling, Resultat.JA)
+
+        behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
+
+        val personopplysningGrunnlag =
+                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
+                behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag
+        )
+
+        behandling.steg = StegType.SEND_TIL_BESLUTTER
+
+        val feil = assertThrows<FunksjonellFeil> {
+            stegService.håndterSendTilBeslutter(behandling, "4820")
+        }
+
+        assertEquals("Forsøker å sende vedtak til beslutter uten å ha verifisert innholdet i brevet", feil.melding)
     }
 
     private fun opprettNyttInvilgetVedtak(behandling: Behandling): Vedtak {
