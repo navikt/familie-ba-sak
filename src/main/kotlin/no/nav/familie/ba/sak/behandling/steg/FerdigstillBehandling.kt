@@ -41,7 +41,10 @@ class FerdigstillBehandling(
         behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
             oppdaterFagsakStatus(behandling = behandling)
-        } else {
+        } else { // Dette betyr henleggelse.
+            if (behandlingService.hentBehandlinger(behandling.fagsak.id).size == 1) {
+                fagsakService.oppdaterStatus(behandling.fagsak, FagsakStatus.AVSLUTTET)
+            }
             behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.apply {
                 aktiv = true
                 behandlingService.lagre(this)
@@ -53,7 +56,6 @@ class FerdigstillBehandling(
     }
 
     private fun oppdaterFagsakStatus(behandling: Behandling) {
-
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val erLøpende = tilkjentYtelse.andelerTilkjentYtelse.any { it.stønadTom >= now() }
         if (erLøpende) {
