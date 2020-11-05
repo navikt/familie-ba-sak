@@ -12,7 +12,7 @@ internal class DokumentUtilsTest {
      * Siden navnet til saksbehandler blir hentet fra sikkerhetscontext er det riktig at denne er system her.
      */
     @Test
-    fun `Saksbehandler blir hentet fra sikkerhetscontext og beslutter er bindestrek under behandling`() {
+    fun `Saksbehandler blir hentet fra sikkerhetscontext og beslutter viser placeholder tekst under behandling`() {
         val behandling = lagBehandling()
 
         val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
@@ -21,7 +21,7 @@ internal class DokumentUtilsTest {
         )
 
         assertEquals("System", saksbehandler)
-        assertEquals("-", beslutter)
+        assertEquals("Beslutter", beslutter)
     }
 
     @Test
@@ -39,6 +39,23 @@ internal class DokumentUtilsTest {
 
         assertEquals("Mock Saksbehandler", saksbehandler)
         assertEquals("System", beslutter)
+    }
+
+    @Test
+    fun `Saksbehandler blir hentet og beslutter viser placeholder tekst under beslutning`() {
+        val behandling = lagBehandling()
+        behandling.steg = StegType.BESLUTTE_VEDTAK
+
+        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+                behandling = behandling,
+                totrinnskontroll = Totrinnskontroll(
+                        behandling = behandling,
+                        saksbehandler = "System"
+                )
+        )
+
+        assertEquals("System", saksbehandler)
+        assertEquals("Beslutter", beslutter)
     }
 
     @Test
