@@ -116,13 +116,16 @@ class MalerService(
                                         beregningOversikt: List<RestBeregningOversikt>,
                                         enhet: String,
                                         målform: Målform): String {
-        val totrinnskontroll = totrinnskontrollService.opprettEllerHentTotrinnskontroll(vedtak.behandling)
+        val (saksbehandler, beslutter) = DokumentUtils.hentSaksbehandlerOgBeslutter(
+                behandling = vedtak.behandling,
+                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
+        )
+
         val etterbetalingsbeløp = økonomiService.hentEtterbetalingsbeløp(vedtak).etterbetaling.takeIf { it > 0 }
         val innvilget = Innvilget(
                 enhet = enhet,
-                saksbehandler = totrinnskontroll.saksbehandler,
-                beslutter = totrinnskontroll.beslutter
-                            ?: totrinnskontroll.saksbehandler,
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
                 hjemler = VedtakUtils.hentHjemlerBruktIVedtak(vedtak),
                 maalform = målform,
                 etterbetalingsbelop = etterbetalingsbeløp?.run { Utils.formaterBeløp(this) } ?: "",
