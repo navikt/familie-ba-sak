@@ -69,7 +69,6 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                   automatiskOpprettelse: Boolean = false
 ) = Behandling(id = nesteBehandlingId(),
                fagsak = fagsak,
-               behandlingStegTilstand = mutableListOf(),
                skalBehandlesAutomatisk = automatiskOpprettelse,
                type = behandlingType,
                kategori = behandlingKategori,

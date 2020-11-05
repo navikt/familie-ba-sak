@@ -83,7 +83,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         }
 
         val nyBehandling = Behandling(fagsak = gjeldendeBehandling.fagsak,
-                                      behandlingStegTilstand = mutableListOf(),
                                       type = nyBehandlingType,
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori,

@@ -49,7 +49,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
             val behandling = Behandling(fagsak = fagsak,
-                                        behandlingStegTilstand = mutableListOf(),
                                         opprettetÅrsak = nyBehandling.behandlingÅrsak,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,

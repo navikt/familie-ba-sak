@@ -6,10 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.beregning.domene.personResultaterTilPeriodeResultater
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.maksimum
-import no.nav.familie.ba.sak.common.minimum
+import no.nav.familie.ba.sak.common.*
 import javax.persistence.*
 
 @Entity(name = "BehandlingResultat")
@@ -47,7 +44,7 @@ data class BehandlingResultat(
 
     fun oppdaterSamletResultat(nyttBehandlingsresultat: BehandlingResultatType) {
         if (erHenlagt()) {
-            error("Kan ikke endre på behandlingsresultat som er henlagt.")
+            throw Feil("Kan ikke endre på behandlingsresultat som er henlagt.")
         }
 
         samletResultat = nyttBehandlingsresultat

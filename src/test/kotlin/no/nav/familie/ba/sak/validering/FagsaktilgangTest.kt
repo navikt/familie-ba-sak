@@ -87,7 +87,6 @@ internal class FagsaktilgangTest {
 
     private val behandlinger = listOf(Behandling(id = 1,
                                                  fagsak = mockk(),
-                                                 behandlingStegTilstand = mutableListOf(),
                                                  kategori = BehandlingKategori.NASJONAL,
                                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                  underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -96,7 +95,6 @@ internal class FagsaktilgangTest {
                                       },
                                       Behandling(id = 2,
                                                  fagsak = mockk(),
-                                                 behandlingStegTilstand = mutableListOf(),
                                                  kategori = BehandlingKategori.NASJONAL,
                                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                  underkategori = BehandlingUnderkategori.ORDINÆR,

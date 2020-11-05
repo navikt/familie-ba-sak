@@ -50,7 +50,7 @@ class BeregningService(
 
     fun hentSisteTilkjentYtelseFørBehandling(behandling: Behandling): TilkjentYtelse? {
         val iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id).filter {
-            behandlingResultatRepository.finnBehandlingResultater(it.id).firstOrNull()?.erHenlagt() == false
+            !fagsakService.erBehandlingHenlagt(it)
         }
         val forrigeBehandling =
                 Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger = iverksatteBehandlinger,

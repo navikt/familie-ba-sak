@@ -38,7 +38,6 @@ class PeriodeMapperTest {
     fun initEach() {
         val fagsak = defaultFagsak
         val behandling = Behandling(fagsak = fagsak,
-                                    behandlingStegTilstand = mutableListOf(),
                                     kategori = BehandlingKategori.NASJONAL,
                                     underkategori = BehandlingUnderkategori.ORDINÆR,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,

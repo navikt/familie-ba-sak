@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.behandling.domene
 
-import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
@@ -8,6 +7,8 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import javax.persistence.*
 
 @Entity(name = "Behandling")
@@ -23,7 +24,7 @@ data class Behandling(
         val fagsak: Fagsak,
 
         @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-        val behandlingStegTilstand: MutableList<BehandlingStegTilstand>,
+        val behandlingStegTilstand: MutableList<BehandlingStegTilstand> = mutableListOf(),
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
@@ -81,7 +82,7 @@ data class Behandling(
         sisteBehandlingStegTilstand.behandlingStegStatus = BehandlingStegStatus.UTFØRT
         behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
 
-        BehandlingService.LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har utført ${sisteBehandlingStegTilstand.behandlingSteg}. Neste steg er $steg.")
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har utført ${sisteBehandlingStegTilstand.behandlingSteg}. Neste steg er $steg.")
         return this
     }
 
@@ -90,6 +91,10 @@ data class Behandling(
                 behandling = this,
                 behandlingSteg = initSteg(behandlingType = type, behandlingÅrsak = opprettetÅrsak)))
         return this
+    }
+
+    companion object {
+        val LOG: Logger = LoggerFactory.getLogger(Behandling::class.java)
     }
 }
 

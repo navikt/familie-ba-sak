@@ -206,7 +206,7 @@ class FagsakService(
         }
     }
 
-    private fun erBehandlingHenlagt(behandling: Behandling): Boolean {
+    fun erBehandlingHenlagt(behandling: Behandling): Boolean {
         return behandlingResultatService.hentAktivForBehandling(behandling.id)?.erHenlagt() == true
     }
 

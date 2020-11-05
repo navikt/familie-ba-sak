@@ -143,7 +143,6 @@ class OppgaveServiceTest {
                 fagsak = Fagsak(id = FAGSAK_ID).also {
                     it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
                 },
-                behandlingStegTilstand = mutableListOf(),
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
