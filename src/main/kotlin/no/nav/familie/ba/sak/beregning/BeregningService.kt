@@ -29,7 +29,7 @@ class BeregningService(
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val behandlingRepository: BehandlingRepository,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
@@ -49,8 +49,11 @@ class BeregningService(
     }
 
     fun hentSisteTilkjentYtelseFørBehandling(behandling: Behandling): TilkjentYtelse? {
+        val iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id).filter {
+            behandlingResultatRepository.finnBehandlingResultater(it.id).firstOrNull()?.erHenlagt() == false
+        }
         val forrigeBehandling =
-                Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id),
+                Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger = iverksatteBehandlinger,
                                                                 behandlingFørFølgende = behandling)
         return if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(behandlingId = forrigeBehandling.id) else null
     }

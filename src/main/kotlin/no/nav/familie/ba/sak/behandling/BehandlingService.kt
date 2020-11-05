@@ -100,13 +100,6 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
-//    private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
-//        return hentBehandlinger(fagsakId).filter {
-//            val tilkjentYtelsePåBehandling = beregningService.hentOptionalTilkjentYtelseForBehandling(it.id)
-//            tilkjentYtelsePåBehandling != null && tilkjentYtelsePåBehandling.erSendtTilIverksetting()
-//        }
-//    }
-
     private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
         return hentBehandlinger(fagsakId).filter {
             val henleggsteg = behandlingStegTilstandRepository.finnBehandlingStegTilstand(it.id)
