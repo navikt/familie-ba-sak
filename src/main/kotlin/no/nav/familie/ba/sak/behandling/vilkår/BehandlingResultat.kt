@@ -46,6 +46,10 @@ data class BehandlingResultat(
     }
 
     fun oppdaterSamletResultat(nyttBehandlingsresultat: BehandlingResultatType) {
+        if (erHenlagt()) {
+            error("Kan ikke endre på behandlingsresultat som er henlagt.")
+        }
+
         samletResultat = nyttBehandlingsresultat
     }
 

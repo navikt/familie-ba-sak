@@ -81,7 +81,7 @@ data class Behandling(
         sisteBehandlingStegTilstand.behandlingStegStatus = BehandlingStegStatus.UTFØRT
         behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
 
-        BehandlingService.LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer siste steg på behandling $id fra ${sisteBehandlingStegTilstand.behandlingSteg} til $steg")
+        BehandlingService.LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har utført ${sisteBehandlingStegTilstand.behandlingSteg}. Neste steg er $steg.")
         return this
     }
 

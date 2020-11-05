@@ -73,12 +73,11 @@ class BehandlingResultatService(
     fun settBehandlingResultatTilHenlagt(behandling: Behandling, behandlingResultatType: BehandlingResultatType) {
         val behandlingsresultat = hentAktivForBehandling(behandling.id) ?:
                                   lagreInitielt(BehandlingResultat(behandling = behandling))
-        behandlingsresultat.samletResultat = behandlingResultatType
+        behandlingsresultat.oppdaterSamletResultat(behandlingResultatType)
         oppdater(behandlingsresultat)
     }
 
     companion object {
-
         private val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
