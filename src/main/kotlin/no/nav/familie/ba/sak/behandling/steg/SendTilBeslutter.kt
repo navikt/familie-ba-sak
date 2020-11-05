@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
+import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.oppgave.OppgaveService
-import no.nav.familie.ba.sak.opplysningsplikt.Opplysningsplikt
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktService
 import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktStatus
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
@@ -32,7 +32,9 @@ class SendTilBeslutter(
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         val opplysningsplikt = opplysningspliktService.hent(behandlingId = behandling.id);
         if (opplysningsplikt !== null && opplysningsplikt.status == OpplysningspliktStatus.IKKE_SATT) {
-            throw FunksjonellFeil("Forsøker å ferdigstille uten å ha fylt ut påkrevd opplysningsplikt","Opplysningsplikt må tas stilling til før behandling kan sendes til beslutter.")
+            throw FunksjonellFeil(
+                    melding = "Forsøker å ferdigstille uten å ha fylt ut påkrevd opplysningsplikt",
+                    frontendFeilmelding = "Opplysningsplikt må tas stilling til før behandling kan sendes til beslutter.")
         }
 
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
@@ -42,7 +44,7 @@ class SendTilBeslutter(
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: String): StegType {
         loggService.opprettSendTilBeslutterLogg(behandling)
-        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
 
         val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,

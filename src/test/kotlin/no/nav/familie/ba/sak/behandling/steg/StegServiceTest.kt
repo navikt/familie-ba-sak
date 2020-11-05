@@ -249,7 +249,7 @@ class StegServiceTest(
     }
 
     @Test
-    fun `Underkjent beslutning resetter steg`() {
+    fun `Underkjent beslutning setter steg tilbake til send til beslutter`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -261,7 +261,7 @@ class StegServiceTest(
         Assertions.assertEquals(initSteg(BehandlingType.FØRSTEGANGSBEHANDLING,
                                          BehandlingÅrsak.SØKNAD), behandling.stegTemp)
 
-        totrinnskontrollService.opprettEllerHentTotrinnskontroll(behandling = behandling)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
         behandling.behandlingStegTilstand.forEach{ it.behandlingStegStatus = BehandlingStegStatus.UTFØRT}
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.FATTER_VEDTAK
@@ -269,7 +269,7 @@ class StegServiceTest(
                                                RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil"))
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
-        Assertions.assertEquals(StegType.REGISTRERE_SØKNAD, behandlingEtterPersongrunnlagSteg.stegTemp)
+        Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterPersongrunnlagSteg.stegTemp)
     }
 
     @Test
