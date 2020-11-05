@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.totrinnskontroll
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -26,7 +27,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
                     saksbehandler = saksbehandler
             ))
             else -> {
-                if (totrinnskontroll.saksbehandler != saksbehandler && totrinnskontroll.beslutter == null) {
+                if (totrinnskontroll.saksbehandler != saksbehandler && behandling.steg.rekkefølge < StegType.BESLUTTE_VEDTAK.rekkefølge) {
                     lagreOgDeaktiverGammel(Totrinnskontroll(
                             behandling = behandling,
                             saksbehandler = saksbehandler
@@ -81,6 +82,7 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
     }
 
     companion object {
+
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
