@@ -27,7 +27,7 @@ class ApplicationConfig {
 
     @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> {
-        log.info("Registering LogFilter filterr")
+        log.info("Registering LogFilter filter")
         val filterRegistration: FilterRegistrationBean<LogFilter> = FilterRegistrationBean()
         filterRegistration.filter = LogFilter()
         filterRegistration.order = 1
