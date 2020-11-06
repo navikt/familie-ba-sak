@@ -27,6 +27,8 @@ class HenleggBehandling(
             HenleggÅrsak.SØKNAD_TRUKKET -> BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
         }
         behandlingResultatService.settBehandlingResultatTilHenlagt(behandling, behandlingResultatType)
+        behandling.aktiv = false
+        behandlingService.lagre(behandling)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.HENLEGG_SØKNAD)
         opprettFerdigstillBehandling(behandling.id, behandling.fagsak.hentAktivIdent().ident)
