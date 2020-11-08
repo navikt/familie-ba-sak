@@ -200,6 +200,9 @@ class StegService(
         val behandlingSteg: DistribuerVedtaksbrev =
                 hentBehandlingSteg(StegType.DISTRIBUER_VEDTAKSBREV) as DistribuerVedtaksbrev
 
+        //Temporrær log for feilsøking
+        behandling.behandlingStegTilstand.forEach{LOG.info("håndterDistribuerVedtaksbrev1: ${it.behandlingSteg}, ${it.behandlingStegStatus}")}
+
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, distribuerVedtaksbrevDTO)
         }
@@ -245,22 +248,11 @@ class StegService(
             if (behandling.stegTemp == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
                 error("Behandlingen er på steg '${behandling.stegTemp.displayName()}', og er da låst for alle andre type endringer.")
             }
-            //Temporær logging
-            behandling.behandlingStegTilstand.forEach{LOG.info("Behandlingststegtilstand1: ${it.behandlingSteg}, ${it.behandlingStegStatus}")}
 
             behandlingSteg.preValiderSteg(behandling, this)
             val nesteSteg = utførendeSteg()
-
-            //Temporær logging
-            behandling.behandlingStegTilstand.forEach{LOG.info("Behandlingststegtilstand2: ${it.behandlingSteg}, ${it.behandlingStegStatus}")}
-
-
             behandlingSteg.postValiderSteg(behandling)
             val behandlingEtterUtførtSteg = behandlingService.hent(behandling.id)
-
-            //Temporær logging
-            behandlingEtterUtførtSteg.behandlingStegTilstand.forEach{LOG.info("Behandlingststegtilstand3: ${it.behandlingSteg}, ${it.behandlingStegStatus}")}
-            behandling.behandlingStegTilstand.forEach{LOG.info("Behandlingststegtilstand4: ${it.behandlingSteg}, ${it.behandlingStegStatus}")}
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
