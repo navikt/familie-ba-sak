@@ -66,7 +66,7 @@ class BeregningService(
     /**
      * Denne metoden henter alle tilkjent ytelser for et barn gruppert på behandling.
      * Den går gjennom alle fagsaker og sørger for å filtrere bort bort behandlende behandling,
-     * samt fagsaker som ikke lengre har barn i gjeldende behandling.
+     * henlagte behandlinger, samt fagsaker som ikke lengre har barn i gjeldende behandling.
      */
     fun hentIverksattTilkjentYtelseForBarn(barnIdent: PersonIdent,
                                            behandlendeBehandling: Behandling): List<TilkjentYtelse> {
@@ -76,6 +76,7 @@ class BeregningService(
         return andreFagsaker.map { fagsak ->
             behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
                     .filter { it.status == BehandlingStatus.AVSLUTTET }
+                    .filter { !fagsakService.erBehandlingHenlagt(it) }
                     .map { behandling ->
                         hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
                     }
