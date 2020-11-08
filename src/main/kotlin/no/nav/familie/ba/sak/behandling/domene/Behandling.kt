@@ -76,9 +76,6 @@ data class Behandling(
     }
 
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
-        //Logg-steg for feilsøking
-        behandlingStegTilstand.forEach{ LOG.info("Alle Behandlingssteg: ${it.behandlingSteg}, ${it.behandlingStegStatus}")}
-
         val sisteBehandlingStegTilstand = behandlingStegTilstand.filter {
             it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
         }.single()
@@ -94,7 +91,6 @@ data class Behandling(
                 behandling = this,
                 behandlingSteg = initSteg(behandlingType = type, behandlingÅrsak = opprettetÅrsak)))
 
-        behandlingStegTilstand.forEach{ LOG.info("Alle init Behandlingssteg: ${it.behandlingSteg}, ${it.behandlingStegStatus}")}
         return this
     }
 
