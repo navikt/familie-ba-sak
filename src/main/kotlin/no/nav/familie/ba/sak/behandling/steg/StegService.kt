@@ -190,6 +190,9 @@ class StegService(
         val behandlingSteg: JournalførVedtaksbrev =
                 hentBehandlingSteg(StegType.JOURNALFØR_VEDTAKSBREV) as JournalførVedtaksbrev
 
+        //Temporrær log for feilsøking
+        behandling.behandlingStegTilstand.forEach{LOG.info("håndterDistribuerVedtaksbrev1: ${it.behandlingSteg}, ${it.behandlingStegStatus}")}
+
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, journalførVedtaksbrevDTO)
         }
@@ -199,9 +202,6 @@ class StegService(
     fun håndterDistribuerVedtaksbrev(behandling: Behandling, distribuerVedtaksbrevDTO: DistribuerVedtaksbrevDTO): Behandling {
         val behandlingSteg: DistribuerVedtaksbrev =
                 hentBehandlingSteg(StegType.DISTRIBUER_VEDTAKSBREV) as DistribuerVedtaksbrev
-
-        //Temporrær log for feilsøking
-        behandling.behandlingStegTilstand.forEach{LOG.info("håndterDistribuerVedtaksbrev1: ${it.behandlingSteg}, ${it.behandlingStegStatus}")}
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, distribuerVedtaksbrevDTO)
