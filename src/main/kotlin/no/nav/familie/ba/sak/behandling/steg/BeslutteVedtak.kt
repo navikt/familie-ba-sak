@@ -40,7 +40,7 @@ class BeslutteVedtak(
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                          ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-            vedtakService.besluttVedtak(vedtak)
+            vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
 
             opprettTaskIverksettMotOppdrag(behandling, vedtak)
         }

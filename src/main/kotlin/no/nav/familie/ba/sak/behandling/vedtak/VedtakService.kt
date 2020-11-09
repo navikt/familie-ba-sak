@@ -55,7 +55,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
                      ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-        return lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
+        return lagreEllerOppdater(vedtak = vedtak, oppdaterStønadsbrev = true)
     }
 
     @Transactional
@@ -427,17 +427,19 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         return vedtakRepository.save(vedtak)
     }
 
-    fun lagreEllerOppdater(vedtak: Vedtak): Vedtak {
-        return vedtakRepository.save(vedtak)
+    fun lagreEllerOppdater(vedtak: Vedtak, oppdaterStønadsbrev: Boolean = false): Vedtak {
+        val ikkeTekniskOpphør = vedtak.behandling.type != BehandlingType.TEKNISK_OPPHØR
+        val vedtakForLagring = if (oppdaterStønadsbrev && ikkeTekniskOpphør) oppdaterVedtakMedStønadsbrev(vedtak) else vedtak
+        return vedtakRepository.save(vedtakForLagring)
     }
 
     /**
      * Oppdater vedtaksdato og brev.
      * Vi oppdaterer brevet for å garantere å få riktig beslutter og vedtaksdato.
      */
-    fun besluttVedtak(vedtak: Vedtak) {
+    fun oppdaterVedtaksdatoOgBrev(vedtak: Vedtak) {
         vedtak.vedtaksdato = now()
-        lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
+        lagreEllerOppdater(vedtak = vedtak, oppdaterStønadsbrev = true)
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
     }
