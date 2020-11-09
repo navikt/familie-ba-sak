@@ -29,6 +29,10 @@ data class Totrinnskontroll(
         var godkjent: Boolean = false
 ) : BaseEntitet() {
 
+    fun erBesluttet(): Boolean {
+        return beslutter != null
+    }
+
     fun erUgyldig(): Boolean {
         return saksbehandler == beslutter &&
                !(saksbehandler == SikkerhetContext.SYSTEM_NAVN && beslutter == SikkerhetContext.SYSTEM_NAVN)
