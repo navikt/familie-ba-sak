@@ -190,10 +190,6 @@ class StegService(
         val behandlingSteg: JournalførVedtaksbrev =
                 hentBehandlingSteg(StegType.JOURNALFØR_VEDTAKSBREV) as JournalførVedtaksbrev
 
-        // Temporær logging for feilsøking
-        behandling.behandlingStegTilstand
-                .forEach{LOG.info("håndterJournalførVedtaksbrev1: ${it.behandlingStegStatus}, ${it.behandlingSteg}, ${it.id}")}
-
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, journalførVedtaksbrevDTO)
         }

@@ -24,7 +24,7 @@ data class Behandling(
         val fagsak: Fagsak,
 
         @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-        val behandlingStegTilstand: MutableList<BehandlingStegTilstand> = mutableListOf(),
+        val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = mutableSetOf(),
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
