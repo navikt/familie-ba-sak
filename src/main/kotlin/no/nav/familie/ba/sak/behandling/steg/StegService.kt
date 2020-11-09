@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -37,6 +38,7 @@ class StegService(
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
+    private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
 
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
@@ -208,7 +210,8 @@ class StegService(
                             utførendeSteg: () -> StegType): Behandling {
         try {
             val behandlerRolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, behandling.steg.tillattFor.minByOrNull { it.nivå })
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig,
+                                                                          behandling.steg.tillattFor.minByOrNull { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.steg.tillattFor.contains(behandlerRolle)) {
@@ -252,10 +255,16 @@ class StegService(
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             return returBehandling
         } catch (exception: Exception) {
-            stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
-            LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
-            secureLogger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.",
-                               exception)
+
+            if (exception is FunksjonellFeil) {
+                stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
+                LOG.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling ${behandling.id}. Melding: ${exception.melding}")
+            } else {
+                stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
+                LOG.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
+                secureLogger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.", exception)
+            }
+
             throw exception
         }
     }
