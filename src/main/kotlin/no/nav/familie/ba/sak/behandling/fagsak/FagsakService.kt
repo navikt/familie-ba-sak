@@ -183,12 +183,8 @@ class FagsakService(
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                     samletResultat =
-                    if (personopplysningGrunnlag == null)
-                        BehandlingResultatType.IKKE_VURDERT
-                    else
-                        behandlingResultatService.hentAktivForBehandling(
-                                behandling.id)?.samletResultat
-                        ?: BehandlingResultatType.IKKE_VURDERT,
+                    behandlingResultatService.hentAktivForBehandling(behandling.id)?.samletResultat
+                    ?: BehandlingResultatType.IKKE_VURDERT,
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
                     underkategori = behandling.underkategori,
