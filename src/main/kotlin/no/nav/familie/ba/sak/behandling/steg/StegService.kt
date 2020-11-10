@@ -45,7 +45,7 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         return when (nyBehandling.behandlingType) {
-            BehandlingType.MIGRERING_FRA_INFOTRYGD ->
+            BehandlingType.MIGRERING_FRA_INFOTRYGD, BehandlingType.TEKNISK_OPPHØR ->
                 håndterPersongrunnlag(behandling,
                                       RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
                                                                  barnasIdenter = nyBehandling.barnasIdenter,
