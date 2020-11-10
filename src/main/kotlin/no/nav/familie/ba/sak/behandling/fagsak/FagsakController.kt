@@ -94,7 +94,7 @@ class FagsakController(
                 .fold(
                         onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                         onFailure = {
-                            logger.info("Søk etter pågående sak feilet: ${it.message}")
+                            logger.info("Søk etter pågående sak feilet.")
                             secureLogger.info("Søk etter pågående sak feilet: ${it.message}", it)
                             ResponseEntity
                                     .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
