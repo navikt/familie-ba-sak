@@ -29,8 +29,6 @@ import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.familie.ba.sak.task.OpphørVedtakTask
-import no.nav.familie.ba.sak.task.OpphørVedtakTask.Companion.opprettOpphørVedtakTask
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -38,8 +36,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
-import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -213,67 +209,6 @@ class BehandlingIntegrationTest(
 
         val behandlinger = behandlingService.hentBehandlinger(fagsakId = fagsak.id)
         Assertions.assertEquals(1, behandlinger.size)
-    }
-
-    @Test
-    fun `Opphør migrert vedtak via task`() {
-
-        val søkerFnr = randomFnr()
-        val barn1Fnr = randomFnr()
-        val barn2Fnr = randomFnr()
-        val stønadFom = LocalDate.of(2020, 1, 1)
-        val stønadTom = stønadFom.plusYears(17)
-
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        val behandlingResultat =
-                BehandlingResultat(behandling = behandling)
-        behandlingResultat.personResultater =
-                lagPersonResultaterForSøkerOgToBarn(behandlingResultat, søkerFnr, barn1Fnr, barn2Fnr, stønadFom, stønadTom)
-        behandlingResultatRepository.save(behandlingResultat)
-
-        vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
-                behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag)
-
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-        Assertions.assertNotNull(vedtak)
-
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-
-        val task = opprettOpphørVedtakTask(
-                behandling,
-                vedtak!!,
-                "saksbehandler",
-                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-                LocalDate.now()
-        )
-
-        val taskRepository: TaskRepository = mockk()
-        val slot = slot<Task>()
-
-        every { taskRepository.save(capture(slot)) } answers { slot.captured }
-
-        OpphørVedtakTask(
-                vedtakService,
-                totrinnskontrollService,
-                taskRepository
-        ).doTask(task)
-
-        verify(exactly = 1) {
-            taskRepository.save(any())
-            Assertions.assertEquals("iverksettMotOppdrag", slot.captured.taskStepType)
-        }
-
-        val aktivBehandling = behandlingService.hentAktivForFagsak(behandling.fagsak.id)
-
-        Assertions.assertEquals(BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT, aktivBehandling!!.type)
-        Assertions.assertNotEquals(behandling.id, aktivBehandling.id)
     }
 
     @Test

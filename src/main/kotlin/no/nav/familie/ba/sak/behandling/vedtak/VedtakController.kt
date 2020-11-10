@@ -1,21 +1,13 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegService
 import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.OpphørVedtakTask
-import no.nav.familie.ba.sak.validering.FagsaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -24,7 +16,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/fagsaker")
@@ -110,44 +101,11 @@ class VedtakController(
                 )
     }
 
-    @PostMapping(path = ["/{fagsakId}/opphoer-migrert-vedtak/v2"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun opphørMigrertVedtak(@PathVariable @FagsaktilgangConstraint fagsakId: Long, @RequestBody
-    opphørsvedtak: Opphørsvedtak): ResponseEntity<Ressurs<String>> {
-        val saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter task for opphør av migrert vedtak for fagsak med id $fagsakId")
-
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                         ?: return notFound("Fant ikke behandling på fagsak $fagsakId")
-
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                     ?: return notFound("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-
-        if (behandling.status != BehandlingStatus.AVSLUTTET) {
-            return forbidden("Prøver å opphøre et vedtak for behandling ${behandling.id}, som ikke er avsluttet")
-        }
-
-        val task = OpphørVedtakTask.opprettOpphørVedtakTask(behandling,
-                                                            vedtak,
-                                                            saksbehandlerId,
-                                                            if (behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD)
-                                                                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
-                                                            else BehandlingType.TEKNISK_OPPHØR,
-                                                            opphørsvedtak.opphørsdato)
-        taskRepository.save(task)
-
-        return ResponseEntity.ok(Ressurs.success("Task for opphør av migrert behandling og vedtak på fagsak $fagsakId opprettet"))
-    }
-
     companion object {
 
         val LOG = LoggerFactory.getLogger(this::class.java)
     }
 }
-
-data class Opphørsvedtak(
-        val opphørsdato: LocalDate
-)
 
 data class RestBeslutningPåVedtak(
         val beslutning: Beslutning,
