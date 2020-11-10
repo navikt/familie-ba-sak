@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
@@ -31,7 +30,6 @@ import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -66,9 +64,6 @@ class BehandlingIntegrationTest(
         private val personRepository: PersonRepository,
 
         @Autowired
-        private val vedtakRepository: VedtakRepository,
-
-        @Autowired
         private val vedtakService: VedtakService,
 
         @Autowired
@@ -85,9 +80,6 @@ class BehandlingIntegrationTest(
 
         @Autowired
         private val fagsakPersonRepository: FagsakPersonRepository,
-
-        @Autowired
-        private val totrinnskontrollService: TotrinnskontrollService,
 
         @Autowired
         private val fagsakService: FagsakService,
@@ -109,12 +101,6 @@ class BehandlingIntegrationTest(
 
         @Autowired
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-
-        @Autowired
-        private val taskRepository: TaskRepository,
-
-        @Autowired
-        private val behandlingResultService: BehandlingResultatService,
 
         @Autowired
         private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository
