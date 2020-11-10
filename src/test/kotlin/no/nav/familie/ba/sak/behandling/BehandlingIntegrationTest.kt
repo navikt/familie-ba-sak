@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -106,7 +108,16 @@ class BehandlingIntegrationTest(
         private val arbeidsfordelingService: ArbeidsfordelingService,
 
         @Autowired
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+
+        @Autowired
+        private val taskRepository: TaskRepository,
+
+        @Autowired
+        private val behandlingResultService: BehandlingResultatService,
+
+        @Autowired
+        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -125,7 +136,8 @@ class BehandlingIntegrationTest(
                 fagsakService,
                 loggService,
                 arbeidsfordelingService,
-                saksstatistikkEventPublisher
+                saksstatistikkEventPublisher,
+                behandlingStegTilstandRepository
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
@@ -178,7 +190,7 @@ class BehandlingIntegrationTest(
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
-        behandling.steg = StegType.BESLUTTE_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandlingRepository.saveAndFlush(behandling)
 
         Assertions.assertThrows(Exception::class.java) {

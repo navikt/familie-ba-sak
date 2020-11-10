@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -79,7 +79,7 @@ class FerdigstillBehandlingTaskTest {
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
         val behandlingSomSkalKjøreVilkårsvurdering =
-                behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VILKÅRSVURDERING)
+                behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.VILKÅRSVURDERING)
         stegService.håndterVilkårsvurdering(behandlingSomSkalKjøreVilkårsvurdering)
 
         vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
@@ -88,10 +88,12 @@ class FerdigstillBehandlingTaskTest {
         )
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = StegType.FERDIGSTILLE_BEHANDLING)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id, steg = StegType.FERDIGSTILLE_BEHANDLING)
 
         return FerdigstillBehandlingTask.opprettTask(personIdent = fnr, behandlingsId = behandling.id)
     }
+
+
 
     @Test
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
@@ -105,11 +107,12 @@ class FerdigstillBehandlingTaskTest {
 
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = ferdigstillBehandlingDTO.behandlingsId)
         assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
-        //assertEquals(BehandlingStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltBehandling) as BehandlingDVH).behandlingStatus) TODO: Stig fikser
+        assertEquals(BehandlingStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltBehandling) as BehandlingDVH)?.behandlingStatus)
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         assertEquals(FagsakStatus.LØPENDE, ferdigstiltFagsak.status)
-        //assertEquals(FagsakStatus.LØPENDE.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH).sakStatus) TODO: Stig fikser
+
+        assertEquals(FagsakStatus.LØPENDE.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH)?.sakStatus)
     }
 
     @Test
@@ -126,7 +129,7 @@ class FerdigstillBehandlingTaskTest {
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
         assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
-        //assertEquals(FagsakStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH).sakStatus) TODO: Stig fikser
+        assertEquals(FagsakStatus.AVSLUTTET.name, (meldingSendtFor(ferdigstiltFagsak) as SakDVH)?.sakStatus)
     }
 
     private fun iverksettMotOppdrag(vedtak: Vedtak) {

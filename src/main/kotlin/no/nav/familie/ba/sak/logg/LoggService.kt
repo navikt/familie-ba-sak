@@ -169,6 +169,16 @@ class LoggService(
         ))
     }
 
+    fun opprettHenleggBehandling(behandling: Behandling, årsak: String, begrunnelse: String) {
+        lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.HENLEGG_BEHANDLING,
+                tittel = "Behandling er henlagt",
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = "$årsak: $begrunnelse"
+        ))
+    }
+
     fun lagre(logg: Logg): Logg {
         metrikkPerLoggType[logg.type]?.increment()
 

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.behandling.vilkår
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
@@ -202,7 +203,7 @@ class VilkårServiceTest(
             }
         }
 
-        behandling.steg = StegType.BEHANDLING_AVSLUTTET
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandlingService.lagre(behandling)
 
         val barnFnr2 = randomFnr()
@@ -254,7 +255,7 @@ class VilkårServiceTest(
         vurderBehandlingResultatTilInnvilget(behandlingResultat, barn)
 
         behandlingResultatService.oppdater(behandlingResultat)
-        behandling.steg = StegType.BEHANDLING_AVSLUTTET
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandlingService.lagre(behandling)
 
         val barnFnr2 = randomFnr()

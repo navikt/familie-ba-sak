@@ -129,6 +129,8 @@ class VilkårService(
 
         val forrigeBehandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = annenBehandling.id)
                                         ?: throw Feil(message = "Finner ikke behandlingsresultat fra annen behandling.")
+        if (forrigeBehandlingResultat.erHenlagt())
+            throw Feil(message = "Behandlingsresultat skal ikke kopieres fra henlagt behandling.")
         val (oppdatert) = flyttResultaterTilInitielt(aktivtBehandlingResultat = forrigeBehandlingResultat,
                                                      initieltBehandlingResultat = initieltBehandlingResultat)
         return oppdatert

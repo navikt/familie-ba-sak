@@ -1,9 +1,14 @@
 package no.nav.familie.ba.sak.behandling.domene
 
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
+import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import no.nav.familie.ba.sak.common.Feil
 import javax.persistence.*
 
@@ -18,6 +23,9 @@ data class Behandling(
         @ManyToOne(optional = false)
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         val fagsak: Fagsak,
+
+        @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+        val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = mutableSetOf(),
 
         @Enumerated(EnumType.STRING)
         @Column(name = "behandling_type", nullable = false)
@@ -53,6 +61,11 @@ data class Behandling(
         var steg: StegType = initSteg()
 ) : BaseEntitet() {
 
+    //TODO: Etter at oppgaven er klar skal steg fjernes og stegTemp skal endre navn til steg.
+    val stegTemp: StegType
+        get() = behandlingStegTilstand.firstOrNull { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }?.behandlingSteg
+                ?: steg
+
     fun sendVedtaksbrev(): Boolean {
         return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
                && type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
@@ -73,13 +86,35 @@ data class Behandling(
             false
         }
     }
+
+    fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
+        val sisteBehandlingStegTilstand = behandlingStegTilstand.filter {
+            it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
+        }.single()
+        sisteBehandlingStegTilstand.behandlingStegStatus = BehandlingStegStatus.UTFØRT
+        behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har utført ${sisteBehandlingStegTilstand.behandlingSteg}. Neste steg er $steg.")
+        return this
+    }
+
+    fun initBehandlingStegTilstand(): Behandling {
+        behandlingStegTilstand.add(BehandlingStegTilstand(
+                behandling = this,
+                behandlingSteg = initSteg(behandlingType = type, behandlingÅrsak = opprettetÅrsak)))
+
+        return this
+    }
+
+    companion object {
+        val LOG: Logger = LoggerFactory.getLogger(Behandling::class.java)
+    }
 }
 
 /**
  * Årsak er knyttet til en behandling og sier noe om hvorfor behandling ble opprettet.
  */
 enum class BehandlingÅrsak(val visningsnavn: String) {
-
     SØKNAD("Søknad"),
     FØDSELSHENDELSE("Fødselshendelse"),
     ÅRLIG_KONTROLL("Årsak kontroll"),

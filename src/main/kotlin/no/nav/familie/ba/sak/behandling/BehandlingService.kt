@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.FATTER_VEDTAK
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -34,7 +36,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                         private val fagsakService: FagsakService,
                         private val loggService: LoggService,
                         private val arbeidsfordelingService: ArbeidsfordelingService,
-                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
+                        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+                        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -50,8 +53,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         type = nyBehandling.behandlingType,
                                         kategori = nyBehandling.kategori,
                                         underkategori = nyBehandling.underkategori,
-                                        skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk,
-                                        steg = initSteg(nyBehandling.behandlingType))
+                                        skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk)
+                    .initBehandlingStegTilstand()
 
             if (behandling.type == BehandlingType.TEKNISK_OPPHØR || behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR) behandling.erTekniskOpphør()
 
@@ -59,9 +62,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             loggService.opprettBehandlingLogg(behandling)
             loggBehandlinghendelse(behandling)
             behandling
-        } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
-            aktivBehandling.steg = initSteg(nyBehandling.behandlingType)
+        } else if (aktivBehandling.stegTemp < StegType.BESLUTTE_VEDTAK) {
+            aktivBehandling.leggTilBehandlingStegTilstand(initSteg(nyBehandling.behandlingType))
             aktivBehandling.status = initStatus()
+
             lagre(aktivBehandling)
         } else {
             throw FunksjonellFeil(melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
@@ -70,8 +74,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun loggBehandlinghendelse(behandling: Behandling) {
-        saksstatistikkEventPublisher.publish(behandling.id,
-                                             hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
+                                                                   hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
                                                      .takeIf { erRevurderingEllerKlage(behandling) }?.id)
     }
 
@@ -99,8 +103,12 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
 
     private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
         return hentBehandlinger(fagsakId).filter {
+            val henleggsteg = behandlingStegTilstandRepository.finnBehandlingStegTilstand(it.id)
+                    .firstOrNull { behandlingStegTilstand ->
+                        behandlingStegTilstand.behandlingSteg == StegType.HENLEGG_SØKNAD
+                    }
             val tilkjentYtelsePåBehandling = beregningService.hentOptionalTilkjentYtelseForBehandling(it.id)
-            tilkjentYtelsePåBehandling != null && tilkjentYtelsePåBehandling.erSendtTilIverksetting()
+            henleggsteg == null && tilkjentYtelsePåBehandling != null && tilkjentYtelsePåBehandling.erSendtTilIverksetting()
         }
     }
 
@@ -153,11 +161,10 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.save(behandling).also { loggBehandlinghendelse(behandling) }
     }
 
-    fun oppdaterStegPåBehandling(behandlingId: Long, steg: StegType): Behandling {
+    fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId: Long, steg: StegType): Behandling {
         val behandling = hent(behandlingId)
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer steg på behandling $behandlingId fra ${behandling.steg} til $steg")
+        behandling.leggTilBehandlingStegTilstand(steg)
 
-        behandling.steg = steg
         return behandlingRepository.save(behandling)
     }
 
