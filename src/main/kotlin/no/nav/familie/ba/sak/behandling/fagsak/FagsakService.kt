@@ -72,7 +72,9 @@ class FagsakService(
             )
         }
         val fagsak = hentEllerOpprettFagsak(personIdent)
-        return hentRestFagsak(fagsakId = fagsak.id)
+        return hentRestFagsak(fagsakId = fagsak.id).also {
+            saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
+        }
     }
 
     @Transactional
@@ -84,14 +86,12 @@ class FagsakService(
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
-            saksstatistikkEventPublisher.publish(fagsak.id)
             antallFagsakerOpprettet.increment()
         } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent == personIdent }) {
             fagsak.also {
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
                 lagre(it)
             }
-            saksstatistikkEventPublisher.publish(fagsak.id)
         }
         return fagsak
     }
@@ -116,7 +116,7 @@ class FagsakService(
         fagsak.status = nyStatus
 
         lagre(fagsak)
-        saksstatistikkEventPublisher.publish(fagsak.id)
+        saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
     }
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {

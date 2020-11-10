@@ -13,15 +13,15 @@ class SaksstatistikkEventPublisherFailSafe: SaksstatistikkEventPublisher() {
         return this
     }
 
-    override fun publish(behandlingId: Long, forrigeBehandlingId: Long?) {
+    override fun publiserBehandlingsstatistikk(behandlingId: Long, forrigeBehandlingId: Long?) {
         runCatching {
-            super.publish(behandlingId, forrigeBehandlingId)
+            super.publiserBehandlingsstatistikk(behandlingId, forrigeBehandlingId)
         }
     }
 
-    override fun publish(fagsakId: Long) {
+    override fun publiserSaksstatistikk(fagsakId: Long) {
         runCatching {
-            super.publish(fagsakId)
+            super.publiserSaksstatistikk(fagsakId)
         }
     }
 }
