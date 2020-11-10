@@ -101,8 +101,7 @@ class ØkonomiService(
         val erFørsteIverksatteBehandlingPåFagsak =
                 beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
 
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = oppdatertBehandling.fagsak.id,
-                                                                                      behandlingFørFølgende = oppdatertBehandling)
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
 
         return if (erFørsteIverksatteBehandlingPåFagsak) {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(

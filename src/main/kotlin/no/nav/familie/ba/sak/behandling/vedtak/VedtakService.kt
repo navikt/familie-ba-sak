@@ -151,7 +151,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
     fun leggTilInitielleUtbetalingsbegrunnelser(fagsakId: Long, behandling: Behandling) {
         slettUtbetalingBegrunnelser(behandling.id)
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId, behandling)
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
         val forrigeTilkjentYtelse =
                 if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(forrigeBehandling.id) else null
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
@@ -395,7 +395,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     private fun hentVedtakPåNestSisteBehandling(fagsakId: Long): Vedtak? {
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId)
                               ?: error("Finner ikke aktiv behandling på fagsak $fagsakId")
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId, aktivBehandling)
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(aktivBehandling)
         return if (forrigeBehandling != null) hentAktivForBehandling(forrigeBehandling.id) else null
     }
 

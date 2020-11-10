@@ -104,14 +104,20 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
+    /**
+     * Henter siste iverksatte behandling på fagsak
+     */
     fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
         val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
         return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
     }
 
-    fun hentForrigeBehandlingSomErIverksatt(fagsakId: Long, behandlingFørFølgende: Behandling): Behandling? {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
-        return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandlingFørFølgende)
+    /**
+     * Henter siste iverksatte behandling FØR en gitt behandling
+     */
+    fun hentForrigeBehandlingSomErIverksatt(behandling: Behandling): Behandling? {
+        val iverksatteBehandlinger = hentIverksatteBehandlinger(behandling.fagsak.id)
+        return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
     }
 
     fun lagre(behandling: Behandling): Behandling {

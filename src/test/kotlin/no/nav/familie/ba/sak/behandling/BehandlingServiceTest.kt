@@ -60,10 +60,7 @@ class BehandlingServiceTest(
                 behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak = fagsak,
                                                                                    behandlingType = BehandlingType.REVURDERING))
 
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(
-                fagsakId = revurderingInnvilgetBehandling.fagsak.id,
-                behandlingFørFølgende = revurderingInnvilgetBehandling
-        )
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = revurderingInnvilgetBehandling)
         Assertions.assertNotNull(forrigeBehandling)
         Assertions.assertEquals(behandling.id, forrigeBehandling?.id)
     }
