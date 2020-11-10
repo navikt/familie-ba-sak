@@ -92,7 +92,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              avsender = "familie-ba-sak",
                              versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
                 // Ikke påkrevde felt
-                             vedtaksDato = aktivtVedtak?.vedtaksdato,
+                             vedtaksDato = aktivtVedtak?.vedtaksdato?.toLocalDate(),
                              relatertBehandlingId = forrigeBehandlingId?.toString(),
                              vedtakId = aktivtVedtak?.id?.toString(),
                              resultat = behandlingResultat?.samletResultat?.name,

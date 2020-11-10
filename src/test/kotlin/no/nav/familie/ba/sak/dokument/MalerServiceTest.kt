@@ -55,7 +55,7 @@ class MalerServiceTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val fødselsdato = personopplysningGrunnlag.barna.first().fødselsdato
         val vedtak = lagVedtak(behandling)
-        vedtak.vedtaksdato = LocalDateTime.of(fødselsdato.year, fødselsdato.month, fødselsdato.plusDays(7).dayOfMonth, 4, 35)
+        vedtak.vedtaksdato = fødselsdato.plusDays(7).atStartOfDay()
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(fødselsdato.plusMonths(1).withDayOfMonth(1).toString(),
                                                          fødselsdato.plusYears(18).toString(),
                                                          YtelseType.ORDINÆR_BARNETRYGD,

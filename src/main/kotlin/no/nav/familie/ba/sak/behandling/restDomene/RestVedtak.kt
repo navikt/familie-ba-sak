@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 data class RestVedtak(
         val aktiv: Boolean,
-        val vedtaksdato: LocalDate?,
+        val vedtaksdato: LocalDateTime?,
         val personBeregninger: List<RestVedtakPerson>,
         val utbetalingBegrunnelser: List<RestUtbetalingBegrunnelse>,
         val id: Long
@@ -37,7 +37,7 @@ data class RestVedtakBegrunnelse(
 fun Vedtak.toRestVedtak(restVedtakPerson: List<RestVedtakPerson>) = RestVedtak(
         aktiv = this.aktiv,
         personBeregninger = restVedtakPerson,
-        vedtaksdato = this.vedtaksdato?.toLocalDate(),
+        vedtaksdato = this.vedtaksdato,
         id = this.id,
         utbetalingBegrunnelser = this.utbetalingBegrunnelser.map {
             it.toRestUtbetalingBegrunnelse()
