@@ -41,7 +41,6 @@ class StegService(
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
-
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
     private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
 
@@ -55,7 +54,10 @@ class StegService(
                                       RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
                                                                  barnasIdenter = nyBehandling.barnasIdenter,
                                                                  bekreftEndringerViaFrontend = true))
-            else -> behandling
+            else ->
+                håndterPersongrunnlag(behandling,
+                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                                                 barnasIdenter = emptyList()))
         }
     }
 
@@ -87,7 +89,6 @@ class StegService(
                                                                 barnasIdenter = nyBehandling.barnasIdenter,
                                                                 bekreftEndringerViaFrontend = true))
     }
-
 
 
     fun evaluerVilkårForFødselshendelse(behandling: Behandling,
@@ -235,7 +236,8 @@ class StegService(
                             utførendeSteg: () -> StegType): Behandling {
         try {
             val behandlerRolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, behandling.stegTemp.tillattFor.minByOrNull { it.nivå })
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig,
+                                                                          behandling.stegTemp.tillattFor.minByOrNull { it.nivå })
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             if (!behandling.stegTemp.tillattFor.contains(behandlerRolle)) {
@@ -275,7 +277,9 @@ class StegService(
                 error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandlingEtterUtførtSteg.status}")
             }
 
-            val returBehandling = behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id, steg = nesteSteg)
+            val returBehandling =
+                    behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id,
+                                                                                          steg = nesteSteg)
 
             LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             return returBehandling
@@ -308,7 +312,7 @@ class StegService(
         }.toMap()
     }
 
-    private fun fødselshendelseSkalRullesTilbake() : Boolean =
+    private fun fødselshendelseSkalRullesTilbake(): Boolean =
             featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", defaultValue = true)
 
     companion object {
