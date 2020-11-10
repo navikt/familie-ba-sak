@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakSøk
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
-import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
@@ -90,12 +90,17 @@ class FagsakController(
 
     @PostMapping(path = ["fagsaker/sok/ba-sak-og-infotrygd"])
     fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<RestPågåendeSakSøk>> {
-        return Result.runCatching {
-            fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent)
-        }
+        return Result.runCatching { fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent) }
                 .fold(
                         onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
-                        onFailure = { throw it }
+                        onFailure = {
+                            logger.info("Søk etter pågående sak feilet: ${it.message}")
+                            secureLogger.info("Søk etter pågående sak feilet: ${it.message}", it)
+                            ResponseEntity
+                                    .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
+                                    .body(Ressurs.failure(error = it,
+                                                          errorMessage = "Søk etter pågående sak feilet: ${it.message}"))
+                        }
                 )
     }
 
