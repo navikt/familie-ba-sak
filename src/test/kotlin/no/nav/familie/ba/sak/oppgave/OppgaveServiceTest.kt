@@ -8,8 +8,10 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
+import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.oppgave.OppgaveService.Behandlingstema
 import no.nav.familie.ba.sak.oppgave.domene.DbOppgave
@@ -127,12 +129,15 @@ class OppgaveServiceTest {
 
     @Test
     fun `Tilbakestill oppgave skal nullstille tildeling på oppgave`() {
-        val oppgaveSlot = slot<Long>()
-        every { integrasjonClient.fordelOppgave(capture(oppgaveSlot), any()) } returns OPPGAVE_ID
+        val fordelOppgaveSlot = slot<Long>()
+        val finnOppgaveSlot = slot<Long>()
+        every { integrasjonClient.fordelOppgave(capture(fordelOppgaveSlot), any()) } returns OPPGAVE_ID
+        every { integrasjonClient.finnOppgaveMedId(capture(finnOppgaveSlot))} returns Oppgave()
 
         oppgaveService.tilbakestillFordelingPåOppgave(OPPGAVE_ID.toLong())
 
-        Assertions.assertEquals(OPPGAVE_ID.toLong(), oppgaveSlot.captured)
+        Assertions.assertEquals(OPPGAVE_ID.toLong(), fordelOppgaveSlot.captured)
+        Assertions.assertEquals(OPPGAVE_ID.toLong(), finnOppgaveSlot.captured)
         verify(exactly = 1) { integrasjonClient.fordelOppgave(any(), null) }
     }
 
@@ -144,7 +149,9 @@ class OppgaveServiceTest {
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                opprettetÅrsak = BehandlingÅrsak.SØKNAD)
+                opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+        }
     }
 
     private fun lagTestOppgave(): DbOppgave {

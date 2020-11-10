@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
+import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.logg.LoggService
 import org.slf4j.LoggerFactory
@@ -18,6 +20,7 @@ class FerdigstillBehandling(
         private val beregningService: BeregningService,
         private val behandlingService: BehandlingService,
         private val behandlingMetrikker: BehandlingMetrikker,
+        private val behandlingResultatService: BehandlingResultatService,
         private val loggService: LoggService
 ) : BehandlingSteg<String> {
 
@@ -25,17 +28,30 @@ class FerdigstillBehandling(
                                       data: String): StegType {
         LOG.info("Forsøker å ferdigstille behandling ${behandling.id}")
 
-        if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK) {
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
+
+        if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK && behandlingResultat?.erHenlagt() == false) {
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 
-        loggService.opprettFerdigstillBehandling(behandling)
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
-
-        oppdaterFagsakStatus(behandling = behandling)
+        if (behandlingResultat?.erHenlagt() == false) {
+            loggService.opprettFerdigstillBehandling(behandling)
+        }
 
         behandlingMetrikker.oppdaterBehandlingMetrikker(behandling)
+        if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
+            oppdaterFagsakStatus(behandling = behandling)
+        } else { // Dette betyr henleggelse.
+            if (behandlingService.hentBehandlinger(behandling.fagsak.id).size == 1) {
+                fagsakService.oppdaterStatus(behandling.fagsak, FagsakStatus.AVSLUTTET)
+            }
+            behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)?.apply {
+                aktiv = true
+                behandlingService.lagre(this)
+            }
+        }
 
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
         return hentNesteStegForNormalFlyt(behandling)
     }
 

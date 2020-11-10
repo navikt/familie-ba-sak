@@ -48,14 +48,16 @@ class OppgaveControllerTest {
     }
 
     @Test
-    fun `Tilbakestilling av tildeling på oppgave skal returnere OK og sende med OppgaveId i respons`() {
-        val OPPGAVE_ID = "1234"
-        every { oppgaveService.tilbakestillFordelingPåOppgave(any()) } returns OPPGAVE_ID
+    fun `Tilbakestilling av tildeling på oppgave skal returnere OK og sende med Oppgave i respons`() {
+        val oppgave = Oppgave(
+                id = 1234,
+        )
+        every { oppgaveService.tilbakestillFordelingPåOppgave(oppgave.id!!) } returns oppgave
 
-        val respons = oppgaveController.tilbakestillFordelingPåOppgave(OPPGAVE_ID.toLong())
+        val respons = oppgaveController.tilbakestillFordelingPåOppgave(oppgave.id!!)
 
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
-        Assertions.assertEquals(OPPGAVE_ID, respons.body?.data)
+        Assertions.assertEquals(oppgave, respons.body?.data)
     }
 
     @Test

@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.validering
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -73,14 +75,14 @@ internal class FagsaktilgangTest {
             PersonopplysningGrunnlag(1,
                                      1,
                                      mutableSetOf(Person(
-                                                         type = PersonType.SØKER,
-                                                         fødselsdato = LocalDate.of(1984, 12, 16),
-                                                         navn = "Mock Mockson",
-                                                         kjønn = Kjønn.MANN,
-                                                         sivilstand = SIVILSTAND.GIFT,
-                                                         personIdent = PersonIdent(randomFnr()),
-                                                         målform = Målform.NB,
-                                                         personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1))),
+                                             type = PersonType.SØKER,
+                                             fødselsdato = LocalDate.of(1984, 12, 16),
+                                             navn = "Mock Mockson",
+                                             kjønn = Kjønn.MANN,
+                                             sivilstand = SIVILSTAND.GIFT,
+                                             personIdent = PersonIdent(randomFnr()),
+                                             målform = Målform.NB,
+                                             personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1))),
                                      true)
 
     private val behandlinger = listOf(Behandling(id = 1,
@@ -88,11 +90,15 @@ internal class FagsaktilgangTest {
                                                  kategori = BehandlingKategori.NASJONAL,
                                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                  underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                 opprettetÅrsak = BehandlingÅrsak.SØKNAD),
+                                                 opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
+                                        it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+                                      },
                                       Behandling(id = 2,
                                                  fagsak = mockk(),
                                                  kategori = BehandlingKategori.NASJONAL,
                                                  type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                                  underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                 opprettetÅrsak = BehandlingÅrsak.SØKNAD))
+                                                 opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
+                                          it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+                                      })
 }

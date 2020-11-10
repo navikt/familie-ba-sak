@@ -13,7 +13,7 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
-        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(),
+        return behandling.stegTemp.hentNesteSteg(utførendeStegType = this.stegType(),
                                              behandlingType = behandling.type,
                                              behandlingÅrsak = behandling.opprettetÅrsak)
     }
@@ -37,7 +37,12 @@ val sisteSteg = StegType.BEHANDLING_AVSLUTTET
 enum class StegType(val rekkefølge: Int,
                     val tillattFor: List<BehandlerRolle>,
                     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>) {
-
+    // Henlegg søknad går utenfor den normale stegflyten og går direkte til ferdigstilt.
+    // Denne typen av steg skal bli endret til å bli av type aksjonspunkt isteden for steg.
+    HENLEGG_SØKNAD(
+            rekkefølge = 0,
+            tillattFor = listOf(BehandlerRolle.SAKSBEHANDLER),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
     REGISTRERE_SØKNAD(
             rekkefølge = 1,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
@@ -81,11 +86,11 @@ enum class StegType(val rekkefølge: Int,
     FERDIGSTILLE_BEHANDLING(
             rekkefølge = 9,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.UTREDES)),
     BEHANDLING_AVSLUTTET(
             rekkefølge = 10,
             tillattFor = emptyList(),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET));
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET, BehandlingStatus.UTREDES));
 
     fun displayName(): String {
         return this.name.replace('_', ' ').toLowerCase().capitalize()
@@ -129,6 +134,7 @@ enum class StegType(val rekkefølge: Int,
                         BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                         IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                         VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                        HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
                         FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                         BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                         else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk opphør")
@@ -144,6 +150,7 @@ enum class StegType(val rekkefølge: Int,
                         VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                         JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                         DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                        HENLEGG_SØKNAD -> FERDIGSTILLE_BEHANDLING
                         FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                         BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                     }
@@ -158,4 +165,9 @@ enum class BehandlerRolle(val nivå: Int) {
     SAKSBEHANDLER(2),
     VEILEDER(1),
     UKJENT(0)
+}
+
+enum class BehandlingStegStatus(val navn: String, val beskrivelse: String) {
+    IKKE_UTFØRT("IKKE_UTFØRT", "Steget er ikke utført"),
+    UTFØRT("UTFØRT", "Utført")
 }

@@ -75,10 +75,13 @@ class BehandlingMetrikker(
     }
 
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                     ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
-        vedtak.utbetalingBegrunnelser.mapNotNull { it.vedtakBegrunnelse }
-                .forEach { brevbegrunelse: VedtakBegrunnelse -> antallBrevBegrunnelser[brevbegrunelse]?.increment() }
+        val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId = behandling.id)
+        if (behandlingResultat?.erHenlagt() != true) {
+            val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+                         ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
+            vedtak.utbetalingBegrunnelser.mapNotNull { it.vedtakBegrunnelse }
+                    .forEach { brevbegrunelse: VedtakBegrunnelse -> antallBrevBegrunnelser[brevbegrunelse]?.increment() }
+        }
     }
 
     private fun økOpplysningspliktStatuseMetrikk(behandling: Behandling) {

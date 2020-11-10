@@ -29,7 +29,7 @@ class BeregningService(
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val behandlingResultatRepository: BehandlingResultatRepository,
         private val behandlingRepository: BehandlingRepository,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> {
@@ -49,8 +49,11 @@ class BeregningService(
     }
 
     fun hentSisteTilkjentYtelseFørBehandling(behandling: Behandling): TilkjentYtelse? {
+        val iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id).filter {
+            !fagsakService.erBehandlingHenlagt(it)
+        }
         val forrigeBehandling =
-                Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id),
+                Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger = iverksatteBehandlinger,
                                                                 behandlingFørFølgende = behandling)
         return if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(behandlingId = forrigeBehandling.id) else null
     }
@@ -63,7 +66,7 @@ class BeregningService(
     /**
      * Denne metoden henter alle tilkjent ytelser for et barn gruppert på behandling.
      * Den går gjennom alle fagsaker og sørger for å filtrere bort bort behandlende behandling,
-     * samt fagsaker som ikke lengre har barn i gjeldende behandling.
+     * henlagte behandlinger, samt fagsaker som ikke lengre har barn i gjeldende behandling.
      */
     fun hentIverksattTilkjentYtelseForBarn(barnIdent: PersonIdent,
                                            behandlendeBehandling: Behandling): List<TilkjentYtelse> {
@@ -73,6 +76,7 @@ class BeregningService(
         return andreFagsaker.map { fagsak ->
             behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
                     .filter { it.status == BehandlingStatus.AVSLUTTET }
+                    .filter { !fagsakService.erBehandlingHenlagt(it) }
                     .map { behandling ->
                         hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
                     }

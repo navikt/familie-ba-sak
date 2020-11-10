@@ -74,8 +74,9 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return integrasjonClient.fordelOppgave(oppgaveId, saksbehandler)
     }
 
-    fun tilbakestillFordelingPåOppgave(oppgaveId: Long): String {
-        return integrasjonClient.fordelOppgave(oppgaveId, null)
+    fun tilbakestillFordelingPåOppgave(oppgaveId: Long): Oppgave {
+        integrasjonClient.fordelOppgave(oppgaveId, null)
+        return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }
 
     fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): DbOppgave? {

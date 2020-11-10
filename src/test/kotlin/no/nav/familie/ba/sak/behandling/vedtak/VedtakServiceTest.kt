@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
@@ -77,7 +79,15 @@ class VedtakServiceTest(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 
         @Autowired
-        private val stegService: StegService
+        private val stegService: StegService,
+        @Autowired
+        private val taskRepository: TaskRepository,
+
+        @Autowired
+        private val behandlingResultService: BehandlingResultatService,
+
+        @Autowired
+        private val behandlingStegTilstandRepository: BehandlingStegTilstandRepository
 ) {
 
     lateinit var behandlingService: BehandlingService
@@ -102,7 +112,8 @@ class VedtakServiceTest(
                 fagsakService,
                 loggService,
                 arbeidsfordelingService,
-                saksstatistikkEventPublisher
+                saksstatistikkEventPublisher,
+                behandlingStegTilstandRepository
         )
 
         stubFor(get(urlEqualTo("/api/aktoer/v1"))
