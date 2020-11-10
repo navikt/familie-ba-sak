@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.KontrollertRollbackException
@@ -34,8 +33,6 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
 import java.time.LocalDate
 
 class FødselshendelseServiceTest {
@@ -186,7 +183,7 @@ class FødselshendelseServiceTest {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
                   toggleVerdi = true,
-                  flerlinlinger = true)
+                  flerlinger = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseFlerlingerBehandling)
 
@@ -197,7 +194,7 @@ class FødselshendelseServiceTest {
     private fun initMockk(vilkårsvurderingsResultat: BehandlingResultatType,
                           filtreringResultat: Evaluering,
                           toggleVerdi: Boolean,
-                          flerlinlinger: Boolean = false) {
+                          flerlinger: Boolean = false) {
 
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling = behandling)
@@ -216,7 +213,7 @@ class FødselshendelseServiceTest {
                                   kjønn = Kjønn.KVINNE,
                                   personopplysningGrunnlag = personopplysningGrunnlag,
                                   sivilstand = SIVILSTAND.UGIFT))
-        if (flerlinlinger) barna.plus(Person(type = PersonType.BARN,
+        if (flerlinger) barna.plus(Person(type = PersonType.BARN,
                                              personIdent = PersonIdent("01101800034"),
                                              fødselsdato = LocalDate.of(2018, 1, 12),
                                              kjønn = Kjønn.KVINNE,
@@ -227,6 +224,7 @@ class FødselshendelseServiceTest {
         personopplysningGrunnlag.personer.add(søker)
 
         every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
+        every { featureToggleServiceMock.isPresent(any()) } returns true
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every {

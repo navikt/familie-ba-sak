@@ -366,6 +366,12 @@ class ClientMocks {
             true
         }
 
+        every {
+            mockFeatureToggleService.isPresent(any())
+        } answers {
+            true
+        }
+
         return mockFeatureToggleService
     }
 

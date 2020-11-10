@@ -308,8 +308,10 @@ class StegService(
         }.toMap()
     }
 
-    private fun fødselshendelseSkalRullesTilbake() : Boolean =
-            !featureToggleService.isEnabled("familie-ba-sak.skal-iverksette-fodselshendelse")
+    private fun fødselshendelseSkalRullesTilbake(): Boolean {
+        return featureToggleService.isPresent("familie-ba-sak.skal-iverksette-fodselshendelse") &&
+                !featureToggleService.isEnabled("familie-ba-sak.skal-iverksette-fodselshendelse")
+    }
 
     companion object {
 

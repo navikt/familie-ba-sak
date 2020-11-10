@@ -48,6 +48,10 @@ class FeatureToggleConfig(private val enabled: Boolean,
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
                 return unleash.isEnabled(toggleId, defaultValue)
             }
+
+            override fun isPresent(toggleId: String): Boolean {
+                return unleash.getFeatureToggleDefinition(toggleId).isPresent()
+            }
         }
 
     }
@@ -86,13 +90,17 @@ class FeatureToggleConfig(private val enabled: Boolean,
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
                 if (unleash.cluster == "lokalutvikling") {
-                    return true
+                    return false
                 }
                 if (unleash.cluster == "e2e" && toggleId=="familie-ba-sak.skal-iverksette-fodselshendelse") {
-                    return false
+                    return true
                 }
 
                 return defaultValue
+            }
+
+            override fun isPresent(toggleId: String): Boolean {
+                return true
             }
         }
     }
@@ -111,5 +119,7 @@ interface FeatureToggleService {
     }
 
     fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
+
+    fun isPresent(toggleId: String): Boolean
 }
 
