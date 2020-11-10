@@ -18,6 +18,7 @@ data class RestBehandling(val aktiv: Boolean,
                           val type: BehandlingType,
                           val status: BehandlingStatus,
                           val steg: StegType,
+                          val stegTilstand: List<RestBehandlingStegTilstand>,
                           val kategori: BehandlingKategori,
                           val personer: List<RestPerson>,
                           val opprettetTidspunkt: LocalDateTime,
@@ -28,7 +29,8 @@ data class RestBehandling(val aktiv: Boolean,
                           val gjeldendeForUtbetaling: Boolean,
                           val totrinnskontroll: RestTotrinnskontroll?,
                           val beregningOversikt: List<RestBeregningOversikt>,
-                          val endretAv: String)
+                          val endretAv: String,
+                          val opplysningsplikt: RestOpplysningsplikt?)
 
 data class RestPersonResultat(
         val personIdent: String,

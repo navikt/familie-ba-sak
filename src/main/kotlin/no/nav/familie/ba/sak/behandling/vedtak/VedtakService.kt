@@ -6,12 +6,14 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
+import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.beregning.SatsService
@@ -87,6 +89,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                                       kategori = gjeldendeBehandling.kategori,
                                       underkategori = gjeldendeBehandling.underkategori,
                                       opprettetÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR)
+                .initBehandlingStegTilstand()
 
         // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
         behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
@@ -112,10 +115,10 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
         )
         tilkjentYtelseRepository.save(nyTilkjentYtelse)
 
-        totrinnskontrollService.opprettEllerHentTotrinnskontroll(nyBehandling, saksbehandler)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(nyBehandling, saksbehandler)
         totrinnskontrollService.besluttTotrinnskontroll(nyBehandling, SYSTEM_NAVN, Beslutning.GODKJENT)
 
-        behandlingRepository.save(nyBehandling.also { it.steg = StegType.FERDIGSTILLE_BEHANDLING })
+        behandlingRepository.save(nyBehandling.leggTilBehandlingStegTilstand(StegType.FERDIGSTILLE_BEHANDLING))
 
         postProsessor(nyttVedtak)
 

@@ -6,10 +6,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.beregning.domene.personResultaterTilPeriodeResultater
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.maksimum
-import no.nav.familie.ba.sak.common.minimum
+import no.nav.familie.ba.sak.common.*
 import javax.persistence.*
 
 @Entity(name = "BehandlingResultat")
@@ -46,6 +43,10 @@ data class BehandlingResultat(
     }
 
     fun oppdaterSamletResultat(nyttBehandlingsresultat: BehandlingResultatType) {
+        if (erHenlagt()) {
+            throw Feil("Kan ikke endre på behandlingsresultat som er henlagt.")
+        }
+
         samletResultat = nyttBehandlingsresultat
     }
 
@@ -113,12 +114,15 @@ data class BehandlingResultat(
         val nyttBehandlingResultat = BehandlingResultat(
                 behandling = behandling,
                 aktiv = aktiv,
-                samletResultat = samletResultat
+                samletResultat = samletResultat,
         )
 
         nyttBehandlingResultat.personResultater = personResultater.map { it.kopierMedParent(nyttBehandlingResultat) }.toSet()
         return nyttBehandlingResultat
     }
+
+    fun erHenlagt() =
+            samletResultat == BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET || samletResultat == BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET
 }
 
 enum class BehandlingResultatType(val brevMal: String, val displayName: String) {
@@ -126,7 +130,8 @@ enum class BehandlingResultatType(val brevMal: String, val displayName: String) 
     DELVIS_INNVILGET(brevMal = "ukjent", displayName = "Delvis innvilget"),
     AVSLÅTT(brevMal = "avslag", displayName = "Avslått"),
     OPPHØRT(brevMal = "opphor", displayName = "Opphørt"),
-    HENLAGT(brevMal = "ukjent", displayName = "Henlagt"),
+    HENLAGT_FEILAKTIG_OPPRETTET(brevMal = "ukjent", displayName = "Henlagt feilaktig opprettet"),
+    HENLAGT_SØKNAD_TRUKKET(brevMal = "ukjent", displayName = "Henlagt søknad trukket"),
     IKKE_VURDERT(brevMal = "ukjent", displayName = "Ikke vurdert")
 }
 

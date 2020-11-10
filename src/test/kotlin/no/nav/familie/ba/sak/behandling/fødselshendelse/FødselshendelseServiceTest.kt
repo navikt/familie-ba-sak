@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.nare.Evaluering
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.KontrollertRollbackException
@@ -33,6 +34,8 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import java.time.LocalDate
 
 class FødselshendelseServiceTest {
@@ -68,12 +71,12 @@ class FødselshendelseServiceTest {
                                                                 gdprServiceMock)
 
     @Test
-    fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer false`() {
+    fun `fødselshendelseSkalBehandlesHosInfotrygd skal returne true dersom klienten returnerer true`() {
         every { personopplysningerServiceMock.hentIdenter(any()) } returns listOf(IdentInformasjon(søkerFnr,
-                                                                                                   false,
+                                                                                                     false,
                                                                                                    "FOLKEREGISTERIDENT"))
-        every { infotrygdBarnetrygdClientMock.harIkkeLøpendeSakIInfotrygd(any(), any()) } returns false
 
+        every { infotrygdBarnetrygdClientMock.harLøpendeSakIInfotrygd(listOf("12345678910"), listOf("12345678910")) } returns true
         val skalBehandlesHosInfotrygd =
                 fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
 
@@ -93,7 +96,7 @@ class FødselshendelseServiceTest {
                                                                                                              "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
-        every { infotrygdBarnetrygdClientMock.harIkkeLøpendeSakIInfotrygd(capture(slot), any()) } returns false
+        every { infotrygdBarnetrygdClientMock.harLøpendeSakIInfotrygd(capture(slot), listOf("12345678911")) } returns true
 
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr))
 
@@ -120,7 +123,7 @@ class FødselshendelseServiceTest {
                                                                                                              "FOLKEREGISTERIDENT"))
 
         val slot = slot<List<String>>()
-        every { infotrygdBarnetrygdClientMock.harIkkeLøpendeSakIInfotrygd(any(), capture(slot)) } returns false
+        every { infotrygdBarnetrygdClientMock.harLøpendeSakIInfotrygd(listOf("12345678910"), capture(slot)) } returns true
 
         fødselshendelseService.fødselshendelseSkalBehandlesHosInfotrygd(søkerFnr, listOf(barn1Fnr, barn2Fnr))
 
@@ -223,7 +226,7 @@ class FødselshendelseServiceTest {
         personopplysningGrunnlag.personer.addAll(barna)
         personopplysningGrunnlag.personer.add(søker)
 
-        every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
+        every { featureToggleServiceMock.isEnabled(any(), any()) } returns toggleVerdi
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every {
@@ -265,4 +268,7 @@ class FødselshendelseServiceTest {
         val fødselshendelseFlerlingerBehandling =
                 NyBehandlingHendelse(morsIdent = "12345678910", barnasIdenter = listOf("01101800033", "01101800034"))
     }
+
 }
+
+

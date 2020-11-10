@@ -22,3 +22,8 @@ data class RestFagsakDeltager(
         var adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
         var harTilgang: Boolean = true
 )
+
+data class RestPågåendeSakSøk(
+    val harPågåendeSakIBaSak: Boolean,
+    val harPågåendeSakIInfotrygd: Boolean
+)

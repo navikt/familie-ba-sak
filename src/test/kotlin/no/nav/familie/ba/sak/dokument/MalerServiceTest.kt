@@ -37,7 +37,6 @@ class MalerServiceTest {
                                                           beregningService,
                                                           persongrunnlagService,
                                                           arbeidsfordelingService,
-                                                          søknadGrunnlagService,
                                                           økonomiService)
 
     @Test

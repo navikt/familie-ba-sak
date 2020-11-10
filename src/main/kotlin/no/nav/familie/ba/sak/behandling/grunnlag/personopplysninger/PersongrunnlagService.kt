@@ -49,6 +49,11 @@ class PersongrunnlagService(
                 .filter { person -> person.type == PersonType.BARN }
     }
 
+    fun hentPersonPåBehandling(personIdent: PersonIdent, behandling: Behandling): Person? {
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer
+                .find { person -> person.personIdent == personIdent }
+    }
+
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
     }

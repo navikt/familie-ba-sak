@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.arbeidsfordeling.domene.toRestArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -18,6 +20,8 @@ import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.opplysningsplikt.OpplysningspliktRepository
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
@@ -49,7 +53,9 @@ class FagsakService(
         private val tilkjentYtelseRepository: TilkjentYtelseRepository,
         private val personopplysningerService: PersonopplysningerService,
         private val integrasjonClient: IntegrasjonClient,
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher) {
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+        private val opplysningspliktRepository: OpplysningspliktRepository) {
 
 
     private val antallFagsakerOpprettet = Metrics.counter("familie.ba.sak.fagsak.opprettet")
@@ -66,7 +72,9 @@ class FagsakService(
             )
         }
         val fagsak = hentEllerOpprettFagsak(personIdent)
-        return hentRestFagsak(fagsakId = fagsak.id)
+        return hentRestFagsak(fagsakId = fagsak.id).also {
+            saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
+        }
     }
 
     @Transactional
@@ -78,14 +86,12 @@ class FagsakService(
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
-            saksstatistikkEventPublisher.publish(fagsak.id)
             antallFagsakerOpprettet.increment()
         } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent == personIdent }) {
             fagsak.also {
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
                 lagre(it)
             }
-            saksstatistikkEventPublisher.publish(fagsak.id)
         }
         return fagsak
     }
@@ -110,7 +116,7 @@ class FagsakService(
         fagsak.status = nyStatus
 
         lagre(fagsak)
-        saksstatistikkEventPublisher.publish(fagsak.id)
+        saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
     }
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> {
@@ -154,7 +160,13 @@ class FagsakService(
             val forrigeBehandling = behandlinger
                     .filter { it.opprettetTidspunkt.isBefore(behandling.opprettetTidspunkt) }
                     .sortedBy { it.opprettetTidspunkt }
-                    .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+                    .findLast {
+                        it.type != BehandlingType.TEKNISK_OPPHØR &&
+                        it.stegTemp == StegType.BEHANDLING_AVSLUTTET &&
+                        !erBehandlingHenlagt(it)
+                    }
+
+            val opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
 
             RestBehandling(
                     aktiv = behandling.aktiv,
@@ -166,16 +178,13 @@ class FagsakService(
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
                     type = behandling.type,
                     status = behandling.status,
-                    steg = behandling.steg,
+                    steg = behandling.stegTemp,
+                    stegTilstand = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                     samletResultat =
-                    if (personopplysningGrunnlag == null)
-                        BehandlingResultatType.IKKE_VURDERT
-                    else
-                        behandlingResultatService.hentAktivForBehandling(
-                                behandling.id)?.samletResultat
-                        ?: BehandlingResultatType.IKKE_VURDERT,
+                    behandlingResultatService.hentAktivForBehandling(behandling.id)?.samletResultat
+                    ?: BehandlingResultatType.IKKE_VURDERT,
                     opprettetTidspunkt = behandling.opprettetTidspunkt,
                     kategori = behandling.kategori,
                     underkategori = behandling.underkategori,
@@ -187,9 +196,14 @@ class FagsakService(
                                 personopplysningGrunnlag = personopplysningGrunnlag,
                                 tilkjentYtelseForForrigeBehandling = if (forrigeBehandling != null) tilkjentYtelseRepository.findByBehandling(
                                         behandlingId = forrigeBehandling.id) else null),
-                    gjeldendeForUtbetaling = behandling.gjeldendeForFremtidigUtbetaling
+                    gjeldendeForUtbetaling = behandling.gjeldendeForFremtidigUtbetaling,
+                    opplysningsplikt = opplysningsplikt?.toRestOpplysningsplikt()
             )
         }
+    }
+
+    fun erBehandlingHenlagt(behandling: Behandling): Boolean {
+        return behandlingResultatService.hentAktivForBehandling(behandling.id)?.erHenlagt() == true
     }
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String): Fagsak {
@@ -334,6 +348,23 @@ class FagsakService(
                     harTilgang = false
             )
         } else null
+    }
+
+    fun hentPågåendeSakStatus(personIdent: String): RestPågåendeSakSøk {
+        val fagsak = hent(PersonIdent(personIdent))
+        val behandling = fagsak?.let { behandlingRepository.findByFagsakAndAktiv(it.id) }
+
+        return RestPågåendeSakSøk(
+                harPågåendeSakIBaSak = fagsak?.status.let { it == FagsakStatus.LØPENDE } ||
+                                       behandling?.status.let { it != null && it != BehandlingStatus.AVSLUTTET },
+                harPågåendeSakIInfotrygd = harLøpendeSakIInfotrygd(personIdent)
+        )
+    }
+
+    private fun harLøpendeSakIInfotrygd(personIdent: String): Boolean {
+        val identer = personopplysningerService.hentIdenter(Ident(personIdent)).filter { it.gruppe == "FOLKEREGISTERIDENT" }
+                .map { it.ident }
+        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter = identer)
     }
 
     companion object {

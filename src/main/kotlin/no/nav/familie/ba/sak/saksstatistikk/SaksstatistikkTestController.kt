@@ -26,9 +26,9 @@ class SaksstatistikkTestController(
     @Unprotected
     fun hentBehandlingDvh(@PathVariable(name = "behandlingId", required = true) behandlingId: Long): BehandlingDVH {
         try {
-            return saksstatistikkService.mapTilBehandlingDVH(behandlingId, null)
+            return saksstatistikkService.mapTilBehandlingDVH(behandlingId, null)!!
         } catch (e: Exception) {
-            LOG.warn("Feil ved henting av sakstatistikk", e)
+            LOG.warn("Feil ved henting av sakstatistikk behandling", e)
             throw e
         }
     }
@@ -37,7 +37,7 @@ class SaksstatistikkTestController(
     @Unprotected
     fun hentSakDvh(@PathVariable(name = "fagsakId", required = true) fagsakId: Long): SakDVH {
         try {
-            return saksstatistikkService.mapTilSakDvh(fagsakId)
+            return saksstatistikkService.mapTilSakDvh(fagsakId)!!
         } catch (e: Exception) {
             LOG.warn("Feil ved henting av sakstatistikk sak", e)
             throw e

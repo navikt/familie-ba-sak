@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.behandling.NyBehandling
 import no.nav.familie.ba.sak.behandling.domene.*
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
@@ -9,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.statsborgers
 import no.nav.familie.ba.sak.behandling.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.behandling.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.behandling.vedtak.UtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.*
@@ -71,7 +73,9 @@ fun lagBehandling(fagsak: Fagsak = defaultFagsak,
                type = behandlingType,
                kategori = behandlingKategori,
                underkategori = BehandlingUnderkategori.ORDINÆR,
-               opprettetÅrsak = årsak)
+               opprettetÅrsak = årsak).also {
+    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, initSteg()))
+}
 
 fun tilfeldigPerson(fødselsdato: LocalDate = LocalDate.now(),
                     personType: PersonType = PersonType.BARN,
@@ -353,19 +357,32 @@ fun vurderBehandlingResultatTilInnvilget(behandlingResultat: BehandlingResultat,
     }
 }
 
-fun lagBehandlingResultat(fnr: String, behandling: Behandling, resultat: Resultat): BehandlingResultat {
+fun lagBehandlingResultat(søkerFnr: String,
+                          behandling: Behandling,
+                          resultat: Resultat,
+                          søkerPeriodeFom: LocalDate? = LocalDate.now().minusMonths(1),
+                          søkerPeriodeTom: LocalDate? = LocalDate.now().plusYears(2)): BehandlingResultat {
     val behandlingResultat = BehandlingResultat(
             behandling = behandling
     )
     val personResultat = PersonResultat(
             behandlingResultat = behandlingResultat,
-            personIdent = fnr)
+            personIdent = søkerFnr)
     personResultat.setVilkårResultater(
             setOf(VilkårResultat(personResultat = personResultat,
                                  vilkårType = Vilkår.BOSATT_I_RIKET,
                                  resultat = resultat,
-                                 periodeFom = LocalDate.now().minusMonths(1),
-                                 periodeTom = LocalDate.now().plusYears(2),
+                                 periodeFom = søkerPeriodeFom,
+                                 periodeTom = søkerPeriodeTom,
+                                 begrunnelse = "",
+                                 behandlingId = behandling.id,
+                                 regelInput = null,
+                                 regelOutput = null),
+                  VilkårResultat(personResultat = personResultat,
+                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                 resultat = resultat,
+                                 periodeFom = søkerPeriodeFom,
+                                 periodeTom = søkerPeriodeTom,
                                  begrunnelse = "",
                                  behandlingId = behandling.id,
                                  regelInput = null,

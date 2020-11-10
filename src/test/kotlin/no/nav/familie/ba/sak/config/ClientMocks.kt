@@ -234,7 +234,7 @@ class ClientMocks {
         every { mockIntegrasjonClient.journalførVedtaksbrev(any(), any(), any(), any()) } returns "journalpostId"
 
         every {
-            mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any())
+            mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any(), any())
         } returns "journalpostId"
 
         every { mockIntegrasjonClient.distribuerBrev(any()) } returns success("bestillingsId")
@@ -360,9 +360,12 @@ class ClientMocks {
     fun mockFeatureToggleService(): FeatureToggleService {
         val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
+        val slot = slot<String>()
         every {
-            mockFeatureToggleService.isEnabled(any())
-        } returns false
+            mockFeatureToggleService.isEnabled(capture(slot), any())
+        } answers {
+            slot.captured != "familie-ba-sak.rollback-automatisk-regelkjoring"
+        }
 
         return mockFeatureToggleService
     }
@@ -402,7 +405,7 @@ class ClientMocks {
 
         val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
         val barnFødselsdatoer = arrayOf(LocalDate.now().minusYears(4), LocalDate.now().førsteDagIInneværendeMåned())
-        val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMYY() + "00033", barnFødselsdatoer[1].tilddMMYY() + "00033")
+        val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "00033", barnFødselsdatoer[1].tilddMMyy() + "00033")
         val barnDetIkkeGisTilgangTilFnr = "12345678912"
         val integrasjonerFnr = "10000111111"
         val bostedsadresse = Bostedsadresse(

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import io.mockk.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.vedtak.Beslutning
 import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
@@ -47,7 +48,7 @@ class BeslutteVedtakTest {
 
         val behandling = lagBehandling()
         behandling.status = BehandlingStatus.FATTER_VEDTAK
-        behandling.steg = StegType.BESLUTTE_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
@@ -64,7 +65,7 @@ class BeslutteVedtakTest {
     fun `Skal ferdigstille Godkjenne vedtak-oppgave og opprette Behandle Underkjent Vedtak-oppgave ved Underkjent vedtak`() {
         val behandling = lagBehandling()
         behandling.status = BehandlingStatus.FATTER_VEDTAK
-        behandling.steg = StegType.BESLUTTE_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
@@ -77,6 +78,6 @@ class BeslutteVedtakTest {
 
         verify(exactly = 1) { FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
         verify(exactly = 1) { OpprettOppgaveTask.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak, any()) }
-        Assertions.assertEquals(StegType.REGISTRERE_SØKNAD, nesteSteg)
+        Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
     }
 }

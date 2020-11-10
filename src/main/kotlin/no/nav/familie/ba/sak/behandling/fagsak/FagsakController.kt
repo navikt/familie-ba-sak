@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.behandling.fagsak
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.behandling.restDomene.RestPågåendeSakSøk
 import no.nav.familie.ba.sak.behandling.restDomene.RestSøkParam
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -30,7 +32,7 @@ import java.time.LocalDateTime
 @Validated
 class FagsakController(
         private val fagsakService: FagsakService,
-        private val taskRepository: TaskRepository
+        private val taskRepository: TaskRepository,
 ) {
 
     @PostMapping(path = ["fagsaker"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -82,6 +84,22 @@ class FagsakController(
                             } else {
                                 illegalState("Søker fagsak feilet: ${it.message}", it)
                             }
+                        }
+                )
+    }
+
+    @PostMapping(path = ["fagsaker/sok/ba-sak-og-infotrygd"])
+    fun søkEtterPågåendeSak(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<RestPågåendeSakSøk>> {
+        return Result.runCatching { fagsakService.hentPågåendeSakStatus(restSøkParam.personIdent) }
+                .fold(
+                        onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
+                        onFailure = {
+                            logger.info("Søk etter pågående sak feilet.")
+                            secureLogger.info("Søk etter pågående sak feilet: ${it.message}", it)
+                            ResponseEntity
+                                    .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
+                                    .body(Ressurs.failure(error = it,
+                                                          errorMessage = "Søk etter pågående sak feilet: ${it.message}"))
                         }
                 )
     }
