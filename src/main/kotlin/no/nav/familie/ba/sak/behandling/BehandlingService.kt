@@ -52,6 +52,9 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         underkategori = nyBehandling.underkategori,
                                         skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk,
                                         steg = initSteg(nyBehandling.behandlingType))
+
+            if (behandling.type == BehandlingType.TEKNISK_OPPHØR || behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR) behandling.erTekniskOpphør()
+
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
             loggBehandlinghendelse(behandling)

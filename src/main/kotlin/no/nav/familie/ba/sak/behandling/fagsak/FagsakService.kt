@@ -159,7 +159,7 @@ class FagsakService(
             val forrigeBehandling = behandlinger
                     .filter { it.opprettetTidspunkt.isBefore(behandling.opprettetTidspunkt) }
                     .sortedBy { it.opprettetTidspunkt }
-                    .findLast { it.type != BehandlingType.TEKNISK_OPPHØR && it.steg == StegType.BEHANDLING_AVSLUTTET }
+                    .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
 
             val opplysningsplikt = opplysningspliktRepository.findByBehandlingId(behandlingId = behandling.id)
 

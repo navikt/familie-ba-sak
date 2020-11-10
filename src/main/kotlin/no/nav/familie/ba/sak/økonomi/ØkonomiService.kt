@@ -87,7 +87,7 @@ class ØkonomiService(
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
         val behandlingResultatType =
-                if (oppdatertBehandling.type == BehandlingType.TEKNISK_OPPHØR
+                if (oppdatertBehandling.erTekniskOpphør()
                     || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
                     BehandlingResultatType.OPPHØRT
                 else {

@@ -428,7 +428,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     fun lagreEllerOppdater(vedtak: Vedtak, oppdaterStønadsbrev: Boolean = false): Vedtak {
-        val ikkeTekniskOpphør = vedtak.behandling.type != BehandlingType.TEKNISK_OPPHØR
+        val ikkeTekniskOpphør = !vedtak.behandling.erTekniskOpphør()
         val vedtakForLagring = if (oppdaterStønadsbrev && ikkeTekniskOpphør) oppdaterVedtakMedStønadsbrev(vedtak) else vedtak
         return vedtakRepository.save(vedtakForLagring)
     }

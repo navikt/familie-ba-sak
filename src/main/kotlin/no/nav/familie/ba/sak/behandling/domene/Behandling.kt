@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.Fagsak
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import javax.persistence.*
 
 @Entity(name = "Behandling")
@@ -61,18 +62,30 @@ data class Behandling(
     override fun toString(): String {
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }
+
+    fun erTekniskOpphør(): Boolean {
+        return if (type == BehandlingType.TEKNISK_OPPHØR
+                   || opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR) {
+            if (type == BehandlingType.TEKNISK_OPPHØR
+                && opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR)
+                true else throw Feil("Behandling er teknisk opphør, men årsak ${opprettetÅrsak} og type ${type} samsvarer ikke.")
+        } else {
+            false
+        }
+    }
 }
 
 /**
  * Årsak er knyttet til en behandling og sier noe om hvorfor behandling ble opprettet.
  */
 enum class BehandlingÅrsak(val visningsnavn: String) {
+
     SØKNAD("Søknad"),
     FØDSELSHENDELSE("Fødselshendelse"),
     ÅRLIG_KONTROLL("Årsak kontroll"),
     DØDSFALL("Dødsfall"),
     NYE_OPPLYSNINGER("Nye opplysninger"),
-    TEKNISK_OPPHØR("Teknisk opphør")
+    TEKNISK_OPPHØR("Teknisk opphør") // Kan være tilbakeføring til infotrygd, feilutbetaling
 }
 
 enum class BehandlingType(val visningsnavn: String) {
