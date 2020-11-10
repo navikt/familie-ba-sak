@@ -186,8 +186,8 @@ class GDPRInnhentingTest(
     @Test
     fun `Lagring av fødselshendelse til midlertidig tabell`() {
         every {
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", any())
-        } returns true
+            featureToggleService.isEnabled("familie-ba-sak.skal-iverksette-fodselshendelse")
+        } returns false
 
         behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(NyBehandlingHendelse(

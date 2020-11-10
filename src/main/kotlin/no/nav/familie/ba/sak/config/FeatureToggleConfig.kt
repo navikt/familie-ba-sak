@@ -88,7 +88,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
                 if (unleash.cluster == "lokalutvikling") {
                     return true
                 }
-                if (unleash.cluster == "e2e" && toggleId=="familie-ba-sak.rollback-automatisk-regelkjoring") {
+                if (unleash.cluster == "e2e" && toggleId=="familie-ba-sak.skal-iverksette-fodselshendelse") {
                     return false
                 }
 

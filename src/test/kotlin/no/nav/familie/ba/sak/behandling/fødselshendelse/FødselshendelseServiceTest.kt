@@ -134,7 +134,7 @@ class FødselshendelseServiceTest {
     fun `Skal iverksette behandling hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  toggleVerdi = false)
+                  toggleVerdi = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -147,7 +147,7 @@ class FødselshendelseServiceTest {
     fun `Skal opprette oppgave hvis filtrering eller vilkårsvurdering gir avslag og toggle er skrudd av`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.AVSLÅTT,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  toggleVerdi = false)
+                  toggleVerdi = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -159,7 +159,7 @@ class FødselshendelseServiceTest {
     fun `Skal kaste KontrollertRollbackException når toggle er skrudd på`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  toggleVerdi = true)
+                  toggleVerdi = false)
 
         assertThrows<KontrollertRollbackException> {
             fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
@@ -172,7 +172,7 @@ class FødselshendelseServiceTest {
     fun `Skal ikke kjøre vilkårsvurdering og lage oppgave når filtreringsregler gir avslag`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.nei(MOR_ER_UNDER_18_ÅR),
-                  toggleVerdi = false)
+                  toggleVerdi = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseBehandling)
 
@@ -185,7 +185,7 @@ class FødselshendelseServiceTest {
     fun `Skal iverksette behandling også for flerlinger hvis filtrering og vilkårsvurdering passerer og toggle er skrudd av`() {
         initMockk(vilkårsvurderingsResultat = BehandlingResultatType.INNVILGET,
                   filtreringResultat = Evaluering.ja(MOR_ER_OVER_18_ÅR),
-                  toggleVerdi = false,
+                  toggleVerdi = true,
                   flerlinlinger = true)
 
         fødselshendelseService.opprettBehandlingOgKjørReglerForFødselshendelse(fødselshendelseFlerlingerBehandling)
@@ -226,7 +226,7 @@ class FødselshendelseServiceTest {
         personopplysningGrunnlag.personer.addAll(barna)
         personopplysningGrunnlag.personer.add(søker)
 
-        every { featureToggleServiceMock.isEnabled(any(), any()) } returns toggleVerdi
+        every { featureToggleServiceMock.isEnabled(any()) } returns toggleVerdi
         every { stegServiceMock.evaluerVilkårForFødselshendelse(any(), any()) } returns vilkårsvurderingsResultat
         every { stegServiceMock.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(any()) } returns behandling
         every {

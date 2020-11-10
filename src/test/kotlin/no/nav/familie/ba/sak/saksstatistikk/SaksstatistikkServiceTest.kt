@@ -79,7 +79,7 @@ internal class SaksstatistikkServiceTest {
                 behandlendeEnhetNavn = "Nav",
                 behandlingId = 1)
         every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
-        every { featureToggleService.isEnabled(any(), any()) } returns false
+        every { featureToggleService.isEnabled(any()) } returns true
     }
 
     @Test

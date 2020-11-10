@@ -183,7 +183,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
     }
 
     private fun fødselshendelseSkalRullesTilbake(): Boolean =
-            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", defaultValue = true)
+            !featureToggleService.isEnabled("familie-ba-sak.skal-iverksette-fodselshendelse")
 
     companion object {
 
