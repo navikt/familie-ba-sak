@@ -72,8 +72,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     }
 
     private fun loggBehandlinghendelse(behandling: Behandling) {
-        saksstatistikkEventPublisher.publish(behandling.id,
-                                             hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
+                                                                   hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
                                                      .takeIf { erRevurderingEllerKlage(behandling) }?.id)
     }
 
