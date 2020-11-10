@@ -79,7 +79,7 @@ class FerdigstillBehandlingTaskTest {
 
         behandlingResultatService.lagreNyOgDeaktiverGammel(behandlingResultat = behandlingResultat)
         val behandlingSomSkalKjøreVilkårsvurdering =
-                behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VILKÅRSVURDERING)
+                behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.VILKÅRSVURDERING)
         stegService.håndterVilkårsvurdering(behandlingSomSkalKjøreVilkårsvurdering)
 
         vedtak = vedtakService.lagreEllerOppdaterVedtakForAktivBehandling(
@@ -88,7 +88,7 @@ class FerdigstillBehandlingTaskTest {
         )
 
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = StegType.FERDIGSTILLE_BEHANDLING)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id, steg = StegType.FERDIGSTILLE_BEHANDLING)
 
         return FerdigstillBehandlingTask.opprettTask(personIdent = fnr, behandlingsId = behandling.id)
     }

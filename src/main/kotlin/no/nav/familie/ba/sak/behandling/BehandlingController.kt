@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*
 @Validated
 class BehandlingController(private val fagsakService: FagsakService,
                            private val stegService: StegService,
+                           private val behandlingsService: BehandlingService,
                            private val taskRepository: TaskRepository) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -68,6 +69,15 @@ class BehandlingController(private val fagsakService: FagsakService,
             illegalState("Task kunne ikke opprettes for behandling av fødselshendelse: ${ex.message}", ex)
         }
     }
+
+    @PutMapping(path = ["behandlinger/{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun henleggBehandling(@PathVariable(name = "behandlingId") behandlingId: Long,
+                          @RequestBody henleggInfo: RestHenleggBehandlingInfo): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingsService.hent(behandlingId)
+        val response = stegService.håndterHenleggBehandling(behandling, henleggInfo)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = response.fagsak.id))
+    }
 }
 
 data class NyBehandling(
@@ -84,3 +94,13 @@ class NyBehandlingHendelse(
         val morsIdent: String,
         val barnasIdenter: List<String>
 )
+
+class RestHenleggBehandlingInfo(
+        val årsak: HenleggÅrsak,
+        val begrunnelse: String
+)
+
+enum class HenleggÅrsak(val beskrivelse: String) {
+    SØKNAD_TRUKKET("Søknad trukket"),
+    FEILAKTIG_OPPRETTET("Behandling feilaktig opprettet")
+}

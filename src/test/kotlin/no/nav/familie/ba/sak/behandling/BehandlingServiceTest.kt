@@ -70,7 +70,7 @@ class BehandlingServiceTest(
 
     private fun ferdigstillBehandling(behandling: Behandling) {
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
-        behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.BEHANDLING_AVSLUTTET)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.BEHANDLING_AVSLUTTET)
     }
 }
 
