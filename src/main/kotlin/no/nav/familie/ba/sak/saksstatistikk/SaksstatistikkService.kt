@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.saksstatistikk
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
@@ -49,7 +50,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
     fun mapTilBehandlingDVH(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH? {
         val behandling = behandlingService.hent(behandlingId)
 
-        if (behandling.skalBehandlesAutomatisk && fødselshendelseSkalRullesTilbake()) return null
+        if (behandling.opprettetÅrsak == FØDSELSHENDELSE && fødselshendelseSkalRullesTilbake()) return null
 
         val behandlingResultat = behandlingResultatService.hentAktivForBehandling(behandlingId)
 
@@ -108,9 +109,8 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
     fun mapTilSakDvh(sakId: Long): SakDVH? {
         val fagsak = fagsakService.hentRestFagsak(sakId).getDataOrThrow()
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
-        //Skipper saker som har automatisk behandling
-        val skalBehandleAutomatisk = aktivBehandling?.skalBehandlesAutomatisk ?: false
-        if (skalBehandleAutomatisk && fødselshendelseSkalRullesTilbake()) return null
+        //Skipper saker som er fødselshendelse
+        if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && fødselshendelseSkalRullesTilbake()) return null
 
         val søkersAktørId = personopplysningerService.hentAktivAktørId(Ident(fagsak.søkerFødselsnummer))
 

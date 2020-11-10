@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import java.lang.IllegalStateException
 
 interface KafkaProducer {
     fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long
@@ -83,13 +84,13 @@ class MockKafkaProducer : KafkaProducer {
     companion object {
         var sendteMeldinger = mutableMapOf<String, Any>()
 
-        fun meldingSendtFor(hendelse: Any): Any? {
+        fun meldingSendtFor(hendelse: Any): Any {
             return when (hendelse) {
                 is Behandling -> sendteMeldinger.get("behandling-${hendelse.id}")
                 is Fagsak -> sendteMeldinger.get("sak-${hendelse.id}")
                 is Vedtak -> sendteMeldinger.get("vedtak-${hendelse.behandling.id}")
-                else -> throw NotImplementedError()
-            }
+                else -> null
+            } ?: throw IllegalStateException("Fant ingen statistikkhendelse i mockkafka for $hendelse")
         }
     }
 }

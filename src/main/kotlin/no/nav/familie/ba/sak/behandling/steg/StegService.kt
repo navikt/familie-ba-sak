@@ -16,8 +16,10 @@ import no.nav.familie.ba.sak.behandling.vedtak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
@@ -33,7 +35,9 @@ class StegService(
         private val loggService: LoggService,
         private val rolleConfig: RolleConfig,
         private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val søknadGrunnlagService: SøknadGrunnlagService
+        private val søknadGrunnlagService: SøknadGrunnlagService,
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val featureToggleService: FeatureToggleService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -57,7 +61,13 @@ class StegService(
 
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling: NyBehandlingHendelse): Behandling {
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.morsIdent)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandling.morsIdent)
+        if (!fødselshendelseSkalRullesTilbake()) { //Ikke send statistikk for fødselshendelser før man skrur det på.
+            //Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
+            //filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
+            //hentEllerOpprettFagsak
+            saksstatistikkEventPublisher.publiserSaksstatistikk(fagsak.id)
+        }
 
         val behandling = behandlingService.opprettBehandling(NyBehandling(
                 søkersIdent = nyBehandling.morsIdent,
@@ -68,6 +78,8 @@ class StegService(
                 skalBehandlesAutomatisk = true
         ))
 
+
+
         loggService.opprettFødselshendelseLogg(behandling)
 
         return håndterPersongrunnlag(behandling,
@@ -75,6 +87,8 @@ class StegService(
                                                                 barnasIdenter = nyBehandling.barnasIdenter,
                                                                 bekreftEndringerViaFrontend = true))
     }
+
+
 
     fun evaluerVilkårForFødselshendelse(behandling: Behandling,
                                         personopplysningGrunnlag: PersonopplysningGrunnlag?): BehandlingResultatType? {
@@ -293,6 +307,9 @@ class StegService(
                                              it.stegType().rekkefølge.toString() + " " + it.stegType().displayName())
         }.toMap()
     }
+
+    private fun fødselshendelseSkalRullesTilbake() : Boolean =
+            featureToggleService.isEnabled("familie-ba-sak.rollback-automatisk-regelkjoring", defaultValue = true)
 
     companion object {
 
