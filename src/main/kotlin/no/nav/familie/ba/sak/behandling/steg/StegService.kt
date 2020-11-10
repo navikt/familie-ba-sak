@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.behandling.restDomene.writeValueAsString
@@ -32,7 +33,8 @@ class StegService(
         private val loggService: LoggService,
         private val rolleConfig: RolleConfig,
         private val behandlingResultatRepository: BehandlingResultatRepository,
-        private val søknadGrunnlagService: SøknadGrunnlagService
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val søknadGrunnlagService: SøknadGrunnlagService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -45,11 +47,18 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         return when (nyBehandling.behandlingType) {
-            BehandlingType.MIGRERING_FRA_INFOTRYGD, BehandlingType.TEKNISK_OPPHØR ->
+            BehandlingType.MIGRERING_FRA_INFOTRYGD ->
                 håndterPersongrunnlag(behandling,
                                       RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
                                                                  barnasIdenter = nyBehandling.barnasIdenter,
                                                                  bekreftEndringerViaFrontend = true))
+            BehandlingType.TEKNISK_OPPHØR -> {
+                val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne tidligere iverksatt behandling på fagsak ${behandling.fagsak.id}")
+                val barnFraSisteBehandling = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteBehandling.id)?.barna?.map { it.personIdent.ident } ?: error("Forsøker å gjøre teknisk opphør, men kan ikke finne personopplysningsgrunnlag på siste behandling ${behandling.id}")
+                håndterPersongrunnlag(behandling,
+                                      RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
+                                                                 barnasIdenter = barnFraSisteBehandling))
+            }
             else -> behandling
         }
     }
