@@ -109,8 +109,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
     fun mapTilSakDvh(sakId: Long): SakDVH? {
         val fagsak = fagsakService.hentRestFagsak(sakId).getDataOrThrow()
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
-        //Skipper saker som har automatisk behandling
-        val skalBehandleAutomatisk = aktivBehandling?.skalBehandlesAutomatisk ?: false
+        //Skipper saker som er fødselshendelse
         if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && fødselshendelseSkalRullesTilbake()) return null
 
         val søkersAktørId = personopplysningerService.hentAktivAktørId(Ident(fagsak.søkerFødselsnummer))
