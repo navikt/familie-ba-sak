@@ -162,7 +162,7 @@ class FagsakService(
                     .sortedBy { it.opprettetTidspunkt }
                     .findLast {
                         it.type != BehandlingType.TEKNISK_OPPHØR &&
-                        it.stegTemp == StegType.BEHANDLING_AVSLUTTET &&
+                        it.steg == StegType.BEHANDLING_AVSLUTTET &&
                         !erBehandlingHenlagt(it)
                     }
 
@@ -178,7 +178,7 @@ class FagsakService(
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
                     type = behandling.type,
                     status = behandling.status,
-                    steg = behandling.stegTemp,
+                    steg = behandling.steg,
                     stegTilstand = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),

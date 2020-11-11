@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.common.BaseEntitet
+import java.util.*
 import javax.persistence.*
 
 @Entity(name = "BehandlingStegTilstand")
@@ -34,13 +35,16 @@ data class BehandlingStegTilstand(
         if (javaClass != other?.javaClass) return false
 
         other as BehandlingStegTilstand
-        if (id != other.id) return false
+        if (id != other.id ||
+            behandlingSteg != other.behandlingSteg  ||
+            behandlingStegStatus != other.behandlingStegStatus  ||
+            opprettetTidspunkt != other.opprettetTidspunkt) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return id.hashCode()
+        return return Objects.hash(id, behandlingSteg, behandlingStegStatus, opprettetTidspunkt)
     }
 
     override fun toString(): String {

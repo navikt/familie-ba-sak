@@ -54,16 +54,10 @@ data class Behandling(
         @Enumerated(EnumType.STRING)
         @Column(name = "status", nullable = false)
         var status: BehandlingStatus = initStatus(),
-
-        @Enumerated(EnumType.STRING)
-        @Column(name = "steg", nullable = false)
-        var steg: StegType = initSteg()
 ) : BaseEntitet() {
 
-    //TODO: Etter at oppgaven er klar skal steg fjernes og stegTemp skal endre navn til steg.
-    val stegTemp: StegType
-        get() = behandlingStegTilstand.firstOrNull { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }?.behandlingSteg
-                ?: steg
+    val steg: StegType
+        get() = behandlingStegTilstand.single { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }.behandlingSteg
 
     fun sendVedtaksbrev(): Boolean {
         return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
@@ -79,6 +73,11 @@ data class Behandling(
         val sisteBehandlingStegTilstand = behandlingStegTilstand.filter {
             it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
         }.single()
+
+        if (steg == sisteBehandlingStegTilstand.behandlingSteg) {
+            return this
+        }
+
         sisteBehandlingStegTilstand.behandlingStegStatus = BehandlingStegStatus.UTFØRT
         behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
 
