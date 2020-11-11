@@ -191,6 +191,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
     companion object {
 
-        val TIMEZONE: ZoneId = ZoneId.of("Europe/Paris")
+        val TIMEZONE: ZoneId = ZoneId.systemDefault()
     }
 }
