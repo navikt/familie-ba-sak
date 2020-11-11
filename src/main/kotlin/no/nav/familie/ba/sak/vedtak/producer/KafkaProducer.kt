@@ -39,7 +39,7 @@ class DefaultKafkaProducer : KafkaProducer {
     lateinit var kafkaTemplate: KafkaTemplate<String, Any>
 
     override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
-        val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.behandlingsId, vedtak).get()
+        val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId, vedtak).get()
         logger.info("$VEDTAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         vedtakCounter.increment()
         return response.recordMetadata.offset()
