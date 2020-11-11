@@ -1,23 +1,16 @@
 package no.nav.familie.ba.sak.behandling.vedtak
 
-import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
-import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.beregning.SatsService
 import no.nav.familie.ba.sak.beregning.TilkjentYtelseUtils
-import no.nav.familie.ba.sak.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.common.*
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
@@ -26,13 +19,10 @@ import no.nav.familie.ba.sak.dokument.DokumentService
 import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
 import no.nav.familie.ba.sak.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
 
@@ -374,7 +364,7 @@ class VedtakService(private val behandlingService: BehandlingService,
      * Vi oppdaterer brevet for å garantere å få riktig beslutter og vedtaksdato.
      */
     fun oppdaterVedtaksdatoOgBrev(vedtak: Vedtak) {
-        vedtak.vedtaksdato = now()
+        vedtak.vedtaksdato = LocalDateTime.now()
         lagreEllerOppdater(vedtak = vedtak, oppdaterStønadsbrev = true)
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")

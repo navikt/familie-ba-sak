@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.notFound
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -26,7 +25,6 @@ class VedtakController(
         private val vedtakService: VedtakService,
         private val fagsakService: FagsakService,
         private val stegService: StegService,
-        private val taskRepository: TaskRepository
 ) {
 
     @PostMapping(path = ["/{fagsakId}/utbetaling-begrunnelse"])
