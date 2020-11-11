@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @SpringBootTest(classes = [ApplicationConfig::class],
                 properties = ["FAMILIE_OPPDRAG_API_URL=http://localhost:28085/api",
@@ -105,7 +106,7 @@ class ØkonomiIntegrasjonTest {
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
         Assertions.assertNotNull(vedtak)
-        vedtak!!.vedtaksdato = LocalDate.now()
+        vedtak!!.vedtaksdato = LocalDateTime.now()
         vedtakService.lagreEllerOppdater(vedtak)
 
         val oppdatertFagsak = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -136,7 +137,7 @@ class ØkonomiIntegrasjonTest {
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val vedtak = Vedtak(behandling = behandling,
-                            vedtaksdato = LocalDate.of(2020, 1, 1))
+                            vedtaksdato = LocalDateTime.of(2020, 1, 1,4,35))
 
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))

@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.persistence.*
 
 
@@ -21,7 +22,7 @@ class Vedtak(
         val behandling: Behandling,
 
         @Column(name = "vedtaksdato", nullable = true)
-        var vedtaksdato: LocalDate? = null,
+        var vedtaksdato: LocalDateTime? = null,
 
         @Column(name = "stonad_brev_pdf", nullable = true)
         var stønadBrevPdF: ByteArray? = null,

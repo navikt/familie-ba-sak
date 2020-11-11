@@ -6,14 +6,12 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.beregning.SatsService
@@ -36,6 +34,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDate.now
+import java.time.LocalDateTime
 
 @Service
 class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -99,7 +98,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
 
         val nyttVedtak = Vedtak(
                 behandling = nyBehandling,
-                vedtaksdato = now()
+                vedtaksdato = LocalDateTime.now()
         )
 
         // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
@@ -135,7 +134,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 behandling = behandling,
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
                         .førsteDagINesteMåned() else null,
-                vedtaksdato = if (behandling.skalBehandlesAutomatisk) now() else null
+                vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
         )
 
         return lagreOgDeaktiverGammel(vedtak)
@@ -439,7 +438,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
      * Vi oppdaterer brevet for å garantere å få riktig beslutter og vedtaksdato.
      */
     fun besluttVedtak(vedtak: Vedtak) {
-        vedtak.vedtaksdato = now()
+        vedtak.vedtaksdato = LocalDateTime.now()
         lagreEllerOppdater(oppdaterVedtakMedStønadsbrev(vedtak))
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
