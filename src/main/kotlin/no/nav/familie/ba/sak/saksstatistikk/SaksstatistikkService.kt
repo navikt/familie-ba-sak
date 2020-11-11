@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.*
 
 
 @Service
@@ -78,6 +79,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              mottattDato = datoMottatt.atZone(TIMEZONE),
                              registrertDato = datoMottatt.atZone(TIMEZONE),
                              behandlingId = behandling.id.toString(),
+                             funksjonellId = UUID.randomUUID().toString(),
                              sakId = behandling.fagsak.id.toString(),
                              behandlingType = behandling.type.name,
                              behandlingStatus = behandling.status.name,
@@ -92,7 +94,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              avsender = "familie-ba-sak",
                              versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
                 // Ikke påkrevde felt
-                             vedtaksDato = aktivtVedtak?.vedtaksdato,
+                             vedtaksDato = aktivtVedtak?.vedtaksdato?.toLocalDate(),
                              relatertBehandlingId = forrigeBehandlingId?.toString(),
                              vedtakId = aktivtVedtak?.id?.toString(),
                              resultat = behandlingResultat?.samletResultat?.name,
@@ -103,6 +105,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
                              beslutter = totrinnskontroll?.beslutter,
                              saksbehandler = totrinnskontroll?.saksbehandler
+
         )
     }
 
@@ -129,6 +132,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                 funksjonellTid = ZonedDateTime.now(),
                 tekniskTid = ZonedDateTime.now(),
                 opprettetDato = LocalDate.now(),
+                funksjonellId = UUID.randomUUID().toString(),
                 sakId = sakId.toString(),
                 aktorId = søkersAktørId.id.toLong(),
                 aktorer = deltagere,
@@ -187,6 +191,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
     companion object {
 
-        val TIMEZONE = ZoneId.of("Europe/Paris")
+        val TIMEZONE: ZoneId = ZoneId.systemDefault()
     }
 }

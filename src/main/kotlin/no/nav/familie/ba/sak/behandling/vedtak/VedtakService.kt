@@ -6,14 +6,12 @@ import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
 import no.nav.familie.ba.sak.behandling.restDomene.BeregningEndringType
 import no.nav.familie.ba.sak.behandling.restDomene.RestPutUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.RestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.restDomene.toRestUtbetalingBegrunnelse
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import no.nav.familie.ba.sak.behandling.steg.initSteg
 import no.nav.familie.ba.sak.behandling.vilkår.*
 import no.nav.familie.ba.sak.behandling.vilkår.VedtakBegrunnelse.Companion.finnVilkårFor
 import no.nav.familie.ba.sak.beregning.SatsService
@@ -36,17 +34,15 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDate.now
+import java.time.LocalDateTime
 
 @Service
-class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService,
-                    private val behandlingService: BehandlingService,
-                    private val behandlingRepository: BehandlingRepository,
+class VedtakService(private val behandlingService: BehandlingService,
                     private val behandlingResultatService: BehandlingResultatService,
                     private val persongrunnlagService: PersongrunnlagService,
                     private val loggService: LoggService,
                     private val vedtakRepository: VedtakRepository,
                     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-                    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
                     private val dokumentService: DokumentService,
                     private val totrinnskontrollService: TotrinnskontrollService) {
 
@@ -61,69 +57,6 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
     }
 
     @Transactional
-    fun opphørVedtak(saksbehandler: String,
-                     gjeldendeBehandlingsId: Long,
-                     nyBehandlingType: BehandlingType,
-                     opphørsdato: LocalDate,
-                     postProsessor: (Vedtak) -> Unit): Ressurs<Vedtak> {
-
-        val gjeldendeVedtak = vedtakRepository.findByBehandlingAndAktiv(gjeldendeBehandlingsId)
-                              ?: return Ressurs.failure("Fant ikke aktivt vedtak tilknyttet behandling $gjeldendeBehandlingsId")
-
-        val gjeldendeAndelerTilkjentYtelse =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(gjeldendeBehandlingsId))
-        if (gjeldendeAndelerTilkjentYtelse.isEmpty()) {
-            return Ressurs.failure(
-                    "Fant ikke andeler tilkjent ytelse tilknyttet behandling $gjeldendeBehandlingsId")
-        }
-
-        val gjeldendeBehandling = gjeldendeVedtak.behandling
-        if (!gjeldendeBehandling.aktiv) {
-            return Ressurs.failure("Aktivt vedtak er tilknyttet behandling $gjeldendeBehandlingsId som IKKE er aktivt")
-        }
-
-        val nyBehandling = Behandling(fagsak = gjeldendeBehandling.fagsak,
-                                      type = nyBehandlingType,
-                                      kategori = gjeldendeBehandling.kategori,
-                                      underkategori = gjeldendeBehandling.underkategori,
-                                      opprettetÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR)
-                .initBehandlingStegTilstand()
-
-        // Må flushe denne til databasen for å sørge å opprettholde unikhet på (fagsakid,aktiv)
-        behandlingRepository.saveAndFlush(gjeldendeBehandling.also { it.aktiv = false })
-        behandlingRepository.save(nyBehandling)
-        loggService.opprettBehandlingLogg(nyBehandling)
-
-        arbeidsfordelingService.settBehandlendeEnhet(nyBehandling,
-                                                     arbeidsfordelingService.hentArbeidsfordelingsenhet(gjeldendeBehandling))
-
-        val nyttVedtak = Vedtak(
-                behandling = nyBehandling,
-                vedtaksdato = now()
-        )
-
-        // Trenger ikke flush her fordi det kreves unikhet på (behandlingid,aktiv) og det er ny behandlingsid
-        vedtakRepository.save(gjeldendeVedtak.also { it.aktiv = false })
-        vedtakRepository.save(nyttVedtak)
-
-        val nyTilkjentYtelse = TilkjentYtelse(
-                behandling = nyBehandling,
-                opprettetDato = now(),
-                endretDato = now()
-        )
-        tilkjentYtelseRepository.save(nyTilkjentYtelse)
-
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(nyBehandling, saksbehandler)
-        totrinnskontrollService.besluttTotrinnskontroll(nyBehandling, SYSTEM_NAVN, Beslutning.GODKJENT)
-
-        behandlingRepository.save(nyBehandling.leggTilBehandlingStegTilstand(StegType.FERDIGSTILLE_BEHANDLING))
-
-        postProsessor(nyttVedtak)
-
-        return Ressurs.success(nyttVedtak)
-    }
-
-    @Transactional
     fun lagreEllerOppdaterVedtakForAktivBehandling(behandling: Behandling,
                                                    personopplysningGrunnlag: PersonopplysningGrunnlag): Vedtak {
         // TODO: Midlertidig fiks før støtte for delvis innvilget
@@ -135,7 +68,7 @@ class VedtakService(private val arbeidsfordelingService: ArbeidsfordelingService
                 behandling = behandling,
                 opphørsdato = if (behandlingResultatType == BehandlingResultatType.OPPHØRT) now()
                         .førsteDagINesteMåned() else null,
-                vedtaksdato = if (behandling.skalBehandlesAutomatisk) now() else null
+                vedtaksdato = if (behandling.skalBehandlesAutomatisk) LocalDateTime.now() else null
         )
 
         return lagreOgDeaktiverGammel(vedtak)
