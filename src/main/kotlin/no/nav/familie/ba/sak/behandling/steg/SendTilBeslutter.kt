@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.behandling.steg
 
 import no.nav.familie.ba.sak.behandling.BehandlingService
 import no.nav.familie.ba.sak.behandling.domene.Behandling
-import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
+import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -39,6 +39,18 @@ class SendTilBeslutter(
 
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         vilkårsvurdering.postValiderSteg(behandling)
+
+        var forrigeBehandlingStegTilstand: BehandlingStegTilstand? = null
+        //Todo: sortedBy skal muligens erstattes av annen løsning
+        behandling.behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }.forEach {
+            if (forrigeBehandlingStegTilstand != null && forrigeBehandlingStegTilstand!!.behandlingSteg >= it.behandlingSteg) {
+                throw Feil("Rekkefølge på steg registrert på behandling ${behandling.id} er feil eller redundante.")
+            }
+            forrigeBehandlingStegTilstand = it
+        }
+        if (behandling.behandlingStegTilstand.filter { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }.size > 1) {
+            throw Feil("Behandling ${behandling.id} har mer enn ett ikke fullført steg.")
+        }
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling,

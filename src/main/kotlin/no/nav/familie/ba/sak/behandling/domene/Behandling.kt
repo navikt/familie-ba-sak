@@ -57,7 +57,7 @@ data class Behandling(
 ) : BaseEntitet() {
 
     val steg: StegType
-        get() = behandlingStegTilstand.firstOrNull { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }
+        get() = behandlingStegTilstand.singleOrNull { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }
                 ?.behandlingSteg ?: behandlingStegTilstand.sortedBy { it.opprettetTidspunkt } .last().behandlingSteg
 
     fun sendVedtaksbrev(): Boolean {
