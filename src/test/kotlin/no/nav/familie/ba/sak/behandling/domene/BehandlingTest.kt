@@ -12,34 +12,51 @@ class BehandlingTest() {
     @Test
     fun `Verifiser at siste steg får status IKKE_UTFØRT`() {
         val behandling = opprettBehandling()
+        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
-        Assert.assertTrue(behandling.behandlingStegTilstand.filter { it.behandlingSteg == StegType.VILKÅRSVURDERING }
-                                  .first().behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
-        Assert.assertTrue(behandling.behandlingStegTilstand.filter { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }
-                                  .first().behandlingStegStatus == BehandlingStegStatus.UTFØRT)
-
+        Assert.assertTrue(behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
+        Assert.assertTrue(behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
+        Assert.assertTrue(behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
     }
 
     @Test
-    fun `Verifiser at to steg av samme type ikke kommer etter hverandre`() {
+    fun `Verifiser maks et steg av hver type`() {
         val behandling = opprettBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
+        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
-        Assert.assertTrue(behandling.behandlingStegTilstand.filter { it.behandlingSteg == StegType.VILKÅRSVURDERING }
-                                  .single().behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
+        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
     }
 
     @Test
-    fun `Verifiser at to steg av samme type kan opprettes om de ikke kommer etter hverandre`() {
+    fun `Verifiser at alle steg med høyere rekkefølge enn siste fjernes`() {
         val behandling = opprettBehandling()
+        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
-        Assert.assertTrue(behandling.behandlingStegTilstand.filter { it.behandlingSteg == StegType.VILKÅRSVURDERING }
-                                  .size == 2)
+        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
+        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
+        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
+        Assert.assertTrue(behandling.behandlingStegTilstand.none { it.behandlingSteg == StegType.SEND_TIL_BESLUTTER })
+    }
+
+    @Test
+    fun `Verifiser henlegg søknad ikke endrer stegstatus`() {
+        val behandling = opprettBehandling()
+        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
+        behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
+        behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
+        behandling.leggTilBehandlingStegTilstand(StegType.HENLEGG_SØKNAD)
+
+        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
+        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
+        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
+        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.SEND_TIL_BESLUTTER }.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
+        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.HENLEGG_SØKNAD }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
     }
 
     fun opprettBehandling(): Behandling {

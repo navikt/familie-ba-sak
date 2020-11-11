@@ -70,18 +70,24 @@ data class Behandling(
     }
 
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
-        val sisteBehandlingStegTilstand = behandlingStegTilstand.filter {
-            it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
-        }.single()
+        if (steg != StegType.HENLEGG_SØKNAD) {
+            behandlingStegTilstand.filter { steg.rekkefølge < it.behandlingSteg.rekkefølge }
+                    .forEach { behandlingStegTilstand.remove(it) }
 
-        if (steg == sisteBehandlingStegTilstand.behandlingSteg) {
-            return this
+            behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }.last().behandlingStegStatus = BehandlingStegStatus.UTFØRT
         }
 
-        sisteBehandlingStegTilstand.behandlingStegStatus = BehandlingStegStatus.UTFØRT
-        behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+        if (!behandlingStegTilstand.any{ it.behandlingSteg == steg }) {
+            behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+        }
 
-        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har utført ${sisteBehandlingStegTilstand.behandlingSteg}. Neste steg er $steg.")
+        if (steg == StegType.HENLEGG_SØKNAD || steg == StegType.BEHANDLING_AVSLUTTET) {
+            behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }.last().behandlingStegStatus = BehandlingStegStatus.UTFØRT
+        } else {
+            behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }.last().behandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT
+        }
+
+        LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()}. Neste steg er $steg.")
         return this
     }
 
@@ -94,6 +100,7 @@ data class Behandling(
     }
 
     companion object {
+
         val LOG: Logger = LoggerFactory.getLogger(Behandling::class.java)
     }
 }

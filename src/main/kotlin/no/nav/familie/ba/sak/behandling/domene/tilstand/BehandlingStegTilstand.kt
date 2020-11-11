@@ -35,16 +35,14 @@ data class BehandlingStegTilstand(
         if (javaClass != other?.javaClass) return false
 
         other as BehandlingStegTilstand
-        if (id != other.id ||
-            behandlingSteg != other.behandlingSteg  ||
-            behandlingStegStatus != other.behandlingStegStatus  ||
-            opprettetTidspunkt != other.opprettetTidspunkt) return false
+
+        if (behandlingSteg != other.behandlingSteg) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return return Objects.hash(id, behandlingSteg, behandlingStegStatus, opprettetTidspunkt)
+        return return Objects.hash(behandlingSteg)
     }
 
     override fun toString(): String {
