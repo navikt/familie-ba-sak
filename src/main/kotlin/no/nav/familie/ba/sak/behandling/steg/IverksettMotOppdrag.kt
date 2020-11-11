@@ -43,7 +43,7 @@ class IverksettMotOppdrag(private val økonomiService: ØkonomiService,
                                       data: IverksettingTaskDTO): StegType {
         infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(
                 hentFnrStoenadsmottaker(behandling.fagsak),
-                hentVedtaksdato(behandling.id)))
+                hentVedtaksdato(behandling.id).toLocalDate()))
 
         økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(vedtak = vedtakService.hent(data.vedtaksId),
                                                                saksbehandlerId = data.saksbehandlerId)

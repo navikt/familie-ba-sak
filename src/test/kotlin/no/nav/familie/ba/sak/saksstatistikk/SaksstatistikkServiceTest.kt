@@ -102,13 +102,14 @@ internal class SaksstatistikkServiceTest {
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
+
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.mottattDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
                                                                           SaksstatistikkService.TIMEZONE))
         assertThat(behandlingDvh?.registrertDato).isEqualTo(ZonedDateTime.of(behandling.opprettetTidspunkt,
                                                                              SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
+        assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
         assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo("1")
         assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())
@@ -129,6 +130,7 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.resultatBegrunnelser)
                 .extracting("resultatBegrunnelseBeskrivelse").toString()
                 .endsWith("Vilkår vurdert for barn: [Er under 18 år, Bor med søker, Gift/partnerskap, Bosatt i riket]")
+
     }
 
     @Test
@@ -166,11 +168,12 @@ internal class SaksstatistikkServiceTest {
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
+
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.mottattDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
         assertThat(behandlingDvh?.registrertDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato)
+        assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
         assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo("1")
         assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())
