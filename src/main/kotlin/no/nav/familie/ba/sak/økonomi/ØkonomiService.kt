@@ -121,8 +121,11 @@ class ØkonomiService(
             // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
-            oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
-            beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilstand.first().tilkjentYtelse)
+            if (oppdatertTilstand.isNotEmpty()) {
+                oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
+                val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
+                beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
+            }
 
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                     saksbehandlerId,
