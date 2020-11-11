@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
+import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -21,6 +22,9 @@ import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.logg.Logg
+import no.nav.familie.ba.sak.logg.LoggService
+import no.nav.familie.ba.sak.logg.LoggType
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -55,6 +59,7 @@ internal class SaksstatistikkServiceTest {
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
+    private val loggService: LoggService = mockk()
 
     private val vedtakService: VedtakService = mockk()
 
@@ -69,7 +74,8 @@ internal class SaksstatistikkServiceTest {
             fagsakService,
             personopplysningerService,
             persongrunnlagService,
-            featureToggleService)
+            featureToggleService,
+            loggService)
 
 
     @BeforeAll
@@ -80,6 +86,32 @@ internal class SaksstatistikkServiceTest {
                 behandlingId = 1)
         every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
         every { featureToggleService.isEnabled(any(), any()) } returns false
+    }
+
+    @Test
+    fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val behandlingResultat = lagBehandlingResultat("01010000001",
+                                                       behandling,
+                                                       Resultat.NEI).copy(samletResultat = BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET)
+
+        every { behandlingService.hent(any()) } returns behandling
+        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
+        every { vedtakService.hentAktivForBehandling(any()) } returns null
+        every { loggService.hentLoggForBehandling(any()) } returns listOf(Logg(behandlingId = behandling.id,
+                                                                               type = LoggType.HENLEGG_BEHANDLING,
+                                                                               tittel = "Behandling er henlagt",
+                                                                               rolle = BehandlerRolle.SAKSBEHANDLER,
+                                                                               tekst = "henleggelsesårsak"))
+
+
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
+
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
+                .extracting("resultatBegrunnelse")
+                .contains("henleggelsesårsak")
     }
 
     @Test
