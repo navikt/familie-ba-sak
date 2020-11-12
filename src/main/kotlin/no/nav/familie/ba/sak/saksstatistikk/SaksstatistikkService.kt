@@ -183,8 +183,11 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
     }
 
     private fun fødselshendelseSkalRullesTilbake(): Boolean {
-        return featureToggleService.isPresent("familie-ba-sak.skal-iverksette-fodselshendelse") &&
-                !featureToggleService.isEnabled("familie-ba-sak.skal-iverksette-fodselshendelse")
+        return if (featureToggleService.isProdCluster()) {
+            !featureToggleService.isEnabled("familie-ba-sak.skal-iverksette-fodselshendelse")
+        } else {
+            false
+        }
     }
 
     companion object {

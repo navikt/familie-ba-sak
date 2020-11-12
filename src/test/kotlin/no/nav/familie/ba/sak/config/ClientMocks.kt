@@ -367,7 +367,7 @@ class ClientMocks {
         }
 
         every {
-            mockFeatureToggleService.isPresent(any())
+            mockFeatureToggleService.isProdCluster()
         } answers {
             true
         }

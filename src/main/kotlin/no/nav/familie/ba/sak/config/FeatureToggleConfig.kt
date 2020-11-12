@@ -36,7 +36,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
             }
 
     private fun lagUnleashFeatureToggleService(): FeatureToggleService {
-        val unleash = DefaultUnleash(UnleashConfig.builder()
+        val defaultUnleash = DefaultUnleash(UnleashConfig.builder()
                                              .appName(unleash.applicationName)
                                              .unleashAPI(unleash.uri)
                                              .unleashContextProvider(lagUnleashContextProvider())
@@ -46,11 +46,11 @@ class FeatureToggleConfig(private val enabled: Boolean,
 
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-                return unleash.isEnabled(toggleId, defaultValue)
+                return defaultUnleash.isEnabled(toggleId, defaultValue)
             }
 
-            override fun isPresent(toggleId: String): Boolean {
-                return unleash.getFeatureToggleDefinition(toggleId).isPresent()
+            override fun isProdCluster(): Boolean {
+                return unleash.cluster == "prod-fss"
             }
         }
 
@@ -99,7 +99,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
                 return defaultValue
             }
 
-            override fun isPresent(toggleId: String): Boolean {
+            override fun isProdCluster(): Boolean {
                 return true
             }
         }
@@ -120,6 +120,6 @@ interface FeatureToggleService {
 
     fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
 
-    fun isPresent(toggleId: String): Boolean
+    fun isProdCluster(): Boolean
 }
 

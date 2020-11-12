@@ -178,8 +178,11 @@ class FødselshendelseService(private val infotrygdFeedService: InfotrygdFeedSer
     }
 
     private fun fødselshendelseSkalRullesTilbake(): Boolean {
-        return featureToggleService.isPresent("familie-ba-sak.skal-iverksette-fodselshendelse") &&
-                !featureToggleService.isEnabled("familie-ba-sak.skal-iverksette-fodselshendelse")
+        return if (featureToggleService.isProdCluster()) {
+            !featureToggleService.isEnabled("familie-ba-sak.skal-iverksette-fodselshendelse")
+        } else {
+            false
+        }
     }
 
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, beskrivelse: String?) {
