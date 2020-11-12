@@ -20,7 +20,7 @@ object RessursUtils {
             errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
 
     fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> =
-            errorResponse(HttpStatus.FORBIDDEN, errorMessage, null)
+            ikkeTilgangResponse(HttpStatus.FORBIDDEN, errorMessage, null)
 
     fun <T> illegalState(errorMessage: String, throwable: Throwable): ResponseEntity<Ressurs<T>> =
             errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
@@ -40,6 +40,16 @@ object RessursUtils {
         secureLogger.error("$className En feil har oppstått: $errorMessage", throwable)
         LOG.error("$className En feil har oppstått: $errorMessage")
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
+    }
+
+    private fun <T> ikkeTilgangResponse(httpStatus: HttpStatus,
+                                  errorMessage: String,
+                                  throwable: Throwable?): ResponseEntity<Ressurs<T>> {
+        val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
+
+        secureLogger.warn("$className Saksbehandler har ikke tilgang: $errorMessage", throwable)
+        LOG.warn("$className Saksbehandler har ikke tilgang: $errorMessage")
+        return ResponseEntity.status(httpStatus).body(Ressurs.ikkeTilgang(errorMessage))
     }
 
     private fun <T> frontendErrorResponse(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> {
