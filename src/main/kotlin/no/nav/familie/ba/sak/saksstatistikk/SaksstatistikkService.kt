@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.logg.LoggType
 import no.nav.familie.ba.sak.nare.Resultat.NEI
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
@@ -147,7 +148,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             IKKE_VURDERT -> emptyList()
             AVSLÅTT -> finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
-            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList() //TODO: Tor må hente henlagtinfo (årsak og begrunnelse) fra resultat tabellen.
+            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(samletResultat.displayName))
             OPPHØRT -> TODO()
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
                                                        "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
