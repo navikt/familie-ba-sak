@@ -41,8 +41,8 @@ class SendTilBeslutter(
         vilkårsvurdering.postValiderSteg(behandling)
 
         var forrigeBehandlingStegTilstand: BehandlingStegTilstand? = null
-        //Todo: sortedBy skal muligens erstattes av annen løsning
-        behandling.behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }.forEach {
+
+        behandling.behandlingStegTilstandSorted.forEach {
             if (forrigeBehandlingStegTilstand != null && forrigeBehandlingStegTilstand!!.behandlingSteg >= it.behandlingSteg) {
                 throw Feil("Rekkefølge på steg registrert på behandling ${behandling.id} er feil eller redundante.")
             }

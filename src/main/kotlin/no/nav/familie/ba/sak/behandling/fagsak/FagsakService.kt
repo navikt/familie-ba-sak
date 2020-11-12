@@ -179,7 +179,7 @@ class FagsakService(
                     type = behandling.type,
                     status = behandling.status,
                     steg = behandling.steg,
-                    stegTilstand = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
+                    stegTilstandSorted = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                     samletResultat =

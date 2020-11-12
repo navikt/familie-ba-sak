@@ -58,13 +58,11 @@ data class Behandling(
 ) : BaseEntitet() {
 
     val steg: StegType
-        get() = behandlingStegTilstand.singleOrNull { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }
-                ?.behandlingSteg ?: behandlingStegTilstandSortert().last().behandlingSteg
+        get() = behandlingStegTilstand.last().behandlingSteg
 
-    fun behandlingStegTilstandSortert(): List<BehandlingStegTilstand> {
-        return behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }
-    }
-
+    val behandlingStegTilstandSorted: List<BehandlingStegTilstand>
+        get() = behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }
+    
     fun sendVedtaksbrev(): Boolean {
         return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
                && type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
@@ -80,7 +78,7 @@ data class Behandling(
             behandlingStegTilstand.filter { steg.rekkefølge < it.behandlingSteg.rekkefølge }
                     .forEach { behandlingStegTilstand.remove(it) }
 
-            behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }.last().behandlingStegStatus = BehandlingStegStatus.UTFØRT
+            behandlingStegTilstandSorted.last().behandlingStegStatus = BehandlingStegStatus.UTFØRT
         }
 
         if (!behandlingStegTilstand.any{ it.behandlingSteg == steg }) {
@@ -88,9 +86,9 @@ data class Behandling(
         }
 
         if (steg == StegType.HENLEGG_SØKNAD || steg == StegType.BEHANDLING_AVSLUTTET) {
-            behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }.last().behandlingStegStatus = BehandlingStegStatus.UTFØRT
+            behandlingStegTilstandSorted.last().behandlingStegStatus = BehandlingStegStatus.UTFØRT
         } else {
-            behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }.last().behandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT
+            behandlingStegTilstandSorted.last().behandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT
         }
 
         LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()}. Neste steg er $steg.")
