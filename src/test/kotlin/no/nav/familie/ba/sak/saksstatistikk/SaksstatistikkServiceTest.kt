@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -55,7 +56,6 @@ internal class SaksstatistikkServiceTest {
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
-
     private val vedtakService: VedtakService = mockk()
 
     private val sakstatistikkService = SaksstatistikkService(
@@ -80,6 +80,26 @@ internal class SaksstatistikkServiceTest {
                 behandlingId = 1)
         every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
         every { featureToggleService.isEnabled(any(), any()) } returns false
+    }
+
+    @Test
+    fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val behandlingResultat = lagBehandlingResultat("01010000001",
+                                                       behandling,
+                                                       Resultat.NEI).copy(samletResultat = BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET)
+
+        every { behandlingService.hent(any()) } returns behandling
+        every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
+        every { vedtakService.hentAktivForBehandling(any()) } returns null
+
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
+
+        assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
+                .extracting("resultatBegrunnelse")
+                .contains("Henlagt feilaktig opprettet")
     }
 
     @Test
