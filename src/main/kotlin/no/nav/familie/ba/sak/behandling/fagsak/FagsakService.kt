@@ -179,7 +179,7 @@ class FagsakService(
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
                     type = behandling.type,
                     status = behandling.status,
-                    steg = finnSteg(behandling),
+                    steg = behandling.behandlingStegTilstandSorted.last().behandlingSteg,
                     stegTilstand = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
@@ -366,19 +366,6 @@ class FagsakService(
         val identer = personopplysningerService.hentIdenter(Ident(personIdent)).filter { it.gruppe == "FOLKEREGISTERIDENT" }
                 .map { it.ident }
         return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkersIdenter = identer)
-    }
-
-    private fun finnSteg(behandling: Behandling): StegType {
-        val steg = behandling.behandlingStegTilstandSorted.firstOrNull { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }
-                                       ?.behandlingSteg ?: behandling.behandlingStegTilstandSorted.last().behandlingSteg
-
-        val erHenlagt = behandling.behandlingStegTilstand.any { it.behandlingSteg == StegType.HENLEGG_SØKNAD }
-
-        return if (erHenlagt) {
-            behandling.behandlingStegTilstandSorted.first { it.behandlingSteg.rekkefølge == (steg.rekkefølge - 1)}.behandlingSteg
-        } else {
-            steg
-        }
     }
 
     companion object {
