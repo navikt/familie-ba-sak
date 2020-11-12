@@ -28,7 +28,7 @@ class ØkonomiService(
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdrag(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
-        iverksettOppdrag(utbetalingsoppdrag = utbetalingsoppdrag, behandlingId = vedtak.behandling.id)
+        iverksettOppdrag(utbetalingsoppdrag = utbetalingsoppdrag)
     }
 
     /**
@@ -53,9 +53,8 @@ class ØkonomiService(
                 )
     }
 
-    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: Long) {
-        val oppdragRequest = OppdragRequest(utbetalingsoppdrag = utbetalingsoppdrag, gjeldendeBehandlingId = behandlingId)
-        Result.runCatching { økonomiKlient.iverksettOppdrag(oppdragRequest) }
+    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
+        Result.runCatching { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
                 .fold(
                         onSuccess = {
                             assertGenerelleSuksessKriterier(it.body)
