@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.logg.LoggType
 import no.nav.familie.ba.sak.nare.Resultat.NEI
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
@@ -48,8 +47,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                             private val fagsakService: FagsakService,
                             private val personopplysningerService: PersonopplysningerService,
                             private val persongrunnlagService: PersongrunnlagService,
-                            private val featureToggleService: FeatureToggleService,
-                            private val loggService: LoggService) {
+                            private val featureToggleService: FeatureToggleService) {
 
     fun mapTilBehandlingDVH(behandlingId: Long, forrigeBehandlingId: Long? = null): BehandlingDVH? {
         val behandling = behandlingService.hent(behandlingId)
@@ -150,7 +148,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             IKKE_VURDERT -> emptyList()
             AVSLÅTT -> finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
-            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> hentÅrsakTilHenleggelse()
+            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(samletResultat.displayName))
             OPPHØRT -> TODO()
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
                                                        "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
@@ -187,17 +185,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                 ResultatBegrunnelseDVH("${negativtVilkår.name} ikke oppfylt for barn ${Utils.slåSammen(personer)}")
             }
         }
-    }
-
-    private fun BehandlingResultat.hentÅrsakTilHenleggelse(): List<ResultatBegrunnelseDVH> {
-        return loggService.hentLoggForBehandling(behandling.id)
-                .findLast { LoggType.HENLEGG_BEHANDLING == it.type }!!
-                .let {
-                    ResultatBegrunnelseDVH(
-                            resultatBegrunnelse = it.tekst,
-                            resultatBegrunnelseBeskrivelse = "Begrunnelsen for henleggelse, oppgitt av saksbehandler"
-                    ).run { listOf(this) }
-                }
     }
 
     private fun fødselshendelseSkalRullesTilbake(): Boolean =

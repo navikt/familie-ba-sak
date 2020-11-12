@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.RestFagsak
-import no.nav.familie.ba.sak.behandling.steg.BehandlerRolle
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
@@ -22,9 +21,7 @@ import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.logg.Logg
 import no.nav.familie.ba.sak.logg.LoggService
-import no.nav.familie.ba.sak.logg.LoggType
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -59,8 +56,6 @@ internal class SaksstatistikkServiceTest {
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
-    private val loggService: LoggService = mockk()
-
     private val vedtakService: VedtakService = mockk()
 
     private val sakstatistikkService = SaksstatistikkService(
@@ -74,8 +69,7 @@ internal class SaksstatistikkServiceTest {
             fagsakService,
             personopplysningerService,
             persongrunnlagService,
-            featureToggleService,
-            loggService)
+            featureToggleService)
 
 
     @BeforeAll
@@ -99,19 +93,13 @@ internal class SaksstatistikkServiceTest {
         every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
         every { vedtakService.hentAktivForBehandling(any()) } returns null
-        every { loggService.hentLoggForBehandling(any()) } returns listOf(Logg(behandlingId = behandling.id,
-                                                                               type = LoggType.HENLEGG_BEHANDLING,
-                                                                               tittel = "Behandling er henlagt",
-                                                                               rolle = BehandlerRolle.SAKSBEHANDLER,
-                                                                               tekst = "henleggelsesårsak"))
-
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2, 1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(1)
                 .extracting("resultatBegrunnelse")
-                .contains("henleggelsesårsak")
+                .contains("Henlagt feilaktig opprettet")
     }
 
     @Test
