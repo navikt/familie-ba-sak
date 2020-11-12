@@ -36,13 +36,11 @@ data class BehandlingStegTilstand(
 
         other as BehandlingStegTilstand
 
-        if (behandlingSteg != other.behandlingSteg) return false
-
-        return true
+        return id == other.id
     }
 
     override fun hashCode(): Int {
-        return return Objects.hash(behandlingSteg)
+        return id.hashCode()
     }
 
     override fun toString(): String {
