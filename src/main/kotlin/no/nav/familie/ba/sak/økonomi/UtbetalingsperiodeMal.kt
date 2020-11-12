@@ -46,7 +46,7 @@ data class UtbetalingsperiodeMal(
                                                                                     opphørForLinje = opphørKjedeFom!!) else null,
                     forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() },
                     periodeId = periodeIdOffset.toLong(),
-                    datoForVedtak = vedtak.vedtaksdato ?: now(),
+                    datoForVedtak = vedtak.vedtaksdato?.toLocalDate() ?: now(),
                     klassifisering = andel.type.klassifisering,
                     vedtakdatoFom = andel.stønadFom,
                     vedtakdatoTom = andel.stønadTom,

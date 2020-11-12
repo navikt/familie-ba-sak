@@ -34,6 +34,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @SpringBootTest(properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ExtendWith(SpringExtension::class)
@@ -211,7 +212,7 @@ class VedtakServiceTest(
 
     private fun opprettNyttInvilgetVedtak(behandling: Behandling): Vedtak {
         vedtakService.lagreOgDeaktiverGammel(Vedtak(behandling = behandling,
-                                                    vedtaksdato = LocalDate.now())
+                                                    vedtaksdato = LocalDateTime.now())
         )
 
         return vedtakService.hentAktivForBehandling(behandling.id)!!

@@ -18,7 +18,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 @Service
@@ -35,9 +34,7 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
         //DVH ønsker tidspunkt med klokkeslett
         val datoVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.vedtaksdato
                 ?: error("Fant ikke vedtaksdato")
-        val klokkeslettVedtak = vedtakService.hentAktivForBehandling(behandlingId)?.endretTidspunkt?.toLocalTime()
-                ?: error("Fant ikke sist endret klokkeslett for vedtaket")
-        val tidspunktVedtak = LocalDateTime.of(datoVedtak, klokkeslettVedtak)
+        val tidspunktVedtak = datoVedtak
 
         return VedtakDVH(fagsakId = behandling.fagsak.id.toString(),
                          behandlingsId = behandlingId.toString(),
