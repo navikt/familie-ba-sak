@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.behandling.restDomene.*
+import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
@@ -178,8 +179,9 @@ class FagsakService(
                     personer = personopplysningGrunnlag?.personer?.map { it.toRestPerson() } ?: emptyList(),
                     type = behandling.type,
                     status = behandling.status,
-                    steg = behandling.steg,
-                    stegTilstandSorted = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
+                    steg = behandling.behandlingStegTilstandSorted.firstOrNull { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }
+                            ?.behandlingSteg ?: behandling.behandlingStegTilstandSorted.last().behandlingSteg,
+                    stegTilstand = behandling.behandlingStegTilstand.map { it.toRestBehandlingStegTilstand() },
                     personResultater = behandlingResultatService.hentAktivForBehandling(behandling.id)
                                                ?.personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                     samletResultat =
