@@ -40,17 +40,8 @@ class SendTilBeslutter(
         val vilkårsvurdering: Vilkårsvurdering = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as Vilkårsvurdering
         vilkårsvurdering.postValiderSteg(behandling)
 
-        var forrigeBehandlingStegTilstand: BehandlingStegTilstand? = null
-
-        behandling.behandlingStegTilstandSorted.forEach {
-            if (forrigeBehandlingStegTilstand != null && forrigeBehandlingStegTilstand!!.behandlingSteg >= it.behandlingSteg) {
-                throw Feil("Rekkefølge på steg registrert på behandling ${behandling.id} er feil eller redundante.")
-            }
-            forrigeBehandlingStegTilstand = it
-        }
-        if (behandling.behandlingStegTilstand.filter { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }.size > 1) {
-            throw Feil("Behandling ${behandling.id} har mer enn ett ikke fullført steg.")
-        }
+        behandling.validerRekkefølgeOgUnikhetPåSteg()
+        behandling.validerMaksimaltEtStegIkkeFullført()
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -94,3 +85,29 @@ class SendTilBeslutter(
         return StegType.SEND_TIL_BESLUTTER
     }
 }
+
+fun Behandling.validerRekkefølgeOgUnikhetPåSteg() {
+    if (henlagt()) {
+        throw Feil("Valideringen kan ikke kjøres for henlagte behandlinger.")
+    }
+
+    var forrigeBehandlingStegTilstand: BehandlingStegTilstand? = null
+    behandlingStegTilstand.forEach {
+        if (forrigeBehandlingStegTilstand != null && forrigeBehandlingStegTilstand!!.behandlingSteg >= it.behandlingSteg) {
+            throw Feil("Rekkefølge på steg registrert på behandling ${id} er feil eller redundante.")
+        }
+        forrigeBehandlingStegTilstand = it
+    }
+}
+
+fun Behandling.validerMaksimaltEtStegIkkeFullført() {
+    if (henlagt()) {
+        throw Feil("Valideringen kan ikke kjøres for henlagte behandlinger.")
+    }
+
+    if (behandlingStegTilstand.filter { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }.size > 1) {
+        throw Feil("Behandling ${id} har mer enn ett ikke fullført steg.")
+    }
+}
+
+fun Behandling.henlagt() = behandlingStegTilstand.any { it.behandlingSteg == StegType.HENLEGG_SØKNAD }

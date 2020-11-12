@@ -256,6 +256,7 @@ class StegService(
                 }', men behandlingen er på steg '${behandling.steg.displayName()}'")
             }
 
+            //TODO: Det bør sees på en ytterligere robustgjøring for alle steg som SB kan utføre.
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
                 error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
             }
@@ -267,17 +268,17 @@ class StegService(
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
-            if (nesteSteg == sisteSteg) {
-                LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
-            }
-
             if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingEtterUtførtSteg.status)) {
                 error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandlingEtterUtførtSteg.status}")
             }
 
             val returBehandling = behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id, steg = nesteSteg)
 
-            LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+            if (nesteSteg == sisteSteg) {
+                LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
+            } else {
+                LOG.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}. Neste steg er $nesteSteg")
+            }
             return returBehandling
         } catch (exception: Exception) {
 

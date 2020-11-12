@@ -4,10 +4,11 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class BehandlingTest() {
+class BehandlingStegTilstandTest() {
 
     @Test
     fun `Verifiser at siste steg får status IKKE_UTFØRT`() {
@@ -15,9 +16,9 @@ class BehandlingTest() {
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
-        Assert.assertTrue(behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
-        Assert.assertTrue(behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
-        Assert.assertTrue(behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
+        assertEquals(BehandlingStegStatus.UTFØRT, behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus)
+        assertEquals(BehandlingStegStatus.UTFØRT, behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus)
+        assertEquals(BehandlingStegStatus.IKKE_UTFØRT, behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus)
     }
 
     @Test
@@ -27,7 +28,7 @@ class BehandlingTest() {
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
-        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
+        assertEquals(BehandlingStegStatus.IKKE_UTFØRT, behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus)
     }
 
     @Test
@@ -38,10 +39,10 @@ class BehandlingTest() {
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
-        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
-        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
-        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
-        Assert.assertTrue(behandling.behandlingStegTilstand.none { it.behandlingSteg == StegType.SEND_TIL_BESLUTTER })
+        assertEquals(BehandlingStegStatus.UTFØRT, behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus)
+        assertEquals(BehandlingStegStatus.UTFØRT, behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus)
+        assertEquals(BehandlingStegStatus.IKKE_UTFØRT, behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus)
+        assertTrue(behandling.behandlingStegTilstand.none { it.behandlingSteg == StegType.SEND_TIL_BESLUTTER })
     }
 
     @Test
@@ -52,11 +53,11 @@ class BehandlingTest() {
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
         behandling.leggTilBehandlingStegTilstand(StegType.HENLEGG_SØKNAD)
 
-        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
-        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
-        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
-        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.SEND_TIL_BESLUTTER }.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
-        Assert.assertTrue(behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.HENLEGG_SØKNAD }.behandlingStegStatus == BehandlingStegStatus.UTFØRT)
+        assertEquals(BehandlingStegStatus.UTFØRT, behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_SØKNAD }.behandlingStegStatus)
+        assertEquals(BehandlingStegStatus.UTFØRT, behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus)
+        assertEquals(BehandlingStegStatus.UTFØRT, behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.VILKÅRSVURDERING }.behandlingStegStatus)
+        assertEquals(BehandlingStegStatus.IKKE_UTFØRT, behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.SEND_TIL_BESLUTTER }.behandlingStegStatus)
+        assertEquals(BehandlingStegStatus.UTFØRT, behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.HENLEGG_SØKNAD }.behandlingStegStatus)
     }
 
     fun opprettBehandling(): Behandling {
