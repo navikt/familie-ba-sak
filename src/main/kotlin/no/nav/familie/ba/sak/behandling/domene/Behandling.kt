@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.*
 import javax.persistence.*
 
 @Entity(name = "Behandling")
@@ -58,7 +59,11 @@ data class Behandling(
 
     val steg: StegType
         get() = behandlingStegTilstand.singleOrNull { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }
-                ?.behandlingSteg ?: behandlingStegTilstand.sortedBy { it.opprettetTidspunkt } .last().behandlingSteg
+                ?.behandlingSteg ?: behandlingStegTilstandSortert().last().behandlingSteg
+
+    fun behandlingStegTilstandSortert(): List<BehandlingStegTilstand> {
+        return behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }
+    }
 
     fun sendVedtaksbrev(): Boolean {
         return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
