@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.behandling
 
-import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertTrue
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.common.lagBehandling
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 

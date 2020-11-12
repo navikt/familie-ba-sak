@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.common.http.interceptor
 
 import io.mockk.mockk
-import junit.framework.Assert.assertTrue
 import no.nav.familie.ba.sak.config.RolleConfig
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
