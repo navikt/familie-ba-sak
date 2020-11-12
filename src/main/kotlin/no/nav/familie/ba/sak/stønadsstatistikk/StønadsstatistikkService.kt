@@ -19,6 +19,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.ZoneId
+import java.util.*
 
 @Service
 class StønadsstatistikkService(private val behandlingService: BehandlingService,
@@ -49,7 +50,9 @@ class StønadsstatistikkService(private val behandlingService: BehandlingService
                              BehandlingÅrsak.FØDSELSHENDELSE -> BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
                              else -> BehandlingOpprinnelse.MANUELL
                          },
-                         utbetalingsperioder = hentUtbetalingsperioder(behandlingId))
+                         utbetalingsperioder = hentUtbetalingsperioder(behandlingId),
+                         funksjonellId = UUID.randomUUID().toString(),
+        )
     }
 
     private fun hentSøker(behandlingId: Long): PersonDVH {

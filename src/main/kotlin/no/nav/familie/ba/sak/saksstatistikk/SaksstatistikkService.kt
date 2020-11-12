@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.logg.LoggType
 import no.nav.familie.ba.sak.nare.Resultat.NEI
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.*
 
 
 @Service
@@ -78,6 +80,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                              mottattDato = datoMottatt.atZone(TIMEZONE),
                              registrertDato = datoMottatt.atZone(TIMEZONE),
                              behandlingId = behandling.id.toString(),
+                             funksjonellId = UUID.randomUUID().toString(),
                              sakId = behandling.fagsak.id.toString(),
                              behandlingType = behandling.type.name,
                              behandlingStatus = behandling.status.name,
@@ -130,6 +133,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
                 funksjonellTid = ZonedDateTime.now(),
                 tekniskTid = ZonedDateTime.now(),
                 opprettetDato = LocalDate.now(),
+                funksjonellId = UUID.randomUUID().toString(),
                 sakId = sakId.toString(),
                 aktorId = søkersAktørId.id.toLong(),
                 aktorer = deltagere,
@@ -144,7 +148,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             IKKE_VURDERT -> emptyList()
             AVSLÅTT -> finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
-            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList() //TODO: Tor må hente henlagtinfo (årsak og begrunnelse) fra resultat tabellen.
+            HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(samletResultat.displayName))
             OPPHØRT -> TODO()
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
                                                        "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
@@ -193,6 +197,6 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
 
     companion object {
 
-        val TIMEZONE = ZoneId.of("Europe/Paris")
+        val TIMEZONE: ZoneId = ZoneId.systemDefault()
     }
 }
