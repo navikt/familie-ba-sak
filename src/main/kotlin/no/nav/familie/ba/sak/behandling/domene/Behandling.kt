@@ -58,7 +58,7 @@ data class Behandling(
 ) : BaseEntitet() {
 
     val steg: StegType
-        get() = behandlingStegTilstand.last().behandlingSteg
+        get() = behandlingStegTilstandSorted.last().behandlingSteg
 
     val behandlingStegTilstandSorted: List<BehandlingStegTilstand>
         get() = behandlingStegTilstand.sortedBy { it.opprettetTidspunkt }
