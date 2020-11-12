@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.økonomi
 import no.nav.familie.ba.sak.common.BaseService
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppdrag.OppdragRequest
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -38,16 +39,16 @@ class ØkonomiKlient(
         oAuth2AccessTokenService
 ) {
 
-    fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<String>> {
+    fun iverksettOppdrag(oppdragRequest: OppdragRequest): ResponseEntity<Ressurs<String>> {
         val headers = HttpHeaders()
         headers.add("Content-Type", "application/json;charset=UTF-8")
         headers.acceptCharset = listOf(Charsets.UTF_8)
         headers.add(NavHttpHeaders.NAV_CALL_ID.asString(), MDC.get(MDCConstants.MDC_CALL_ID))
 
         return restOperations.exchange(
-                URI.create("$familieOppdragUri/oppdrag"),
+                URI.create("$familieOppdragUri/oppdrag/v2"),
                 HttpMethod.POST,
-                HttpEntity(utbetalingsoppdrag, headers))
+                HttpEntity(oppdragRequest, headers))
     }
 
     fun hentEtterbetalingsbeløp(utbetalingsoppdrag: Utbetalingsoppdrag): ResponseEntity<Ressurs<RestSimulerResultat>> {

@@ -11,10 +11,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
-import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppdrag.*
 import org.springframework.stereotype.Service
 
 @Service
@@ -31,7 +28,7 @@ class ØkonomiService(
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdrag(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
-        iverksettOppdrag(utbetalingsoppdrag)
+        iverksettOppdrag(utbetalingsoppdrag = utbetalingsoppdrag, behandlingId = vedtak.behandling.id)
     }
 
     /**
@@ -56,8 +53,9 @@ class ØkonomiService(
                 )
     }
 
-    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
-        Result.runCatching { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
+    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: Long) {
+        val oppdragRequest = OppdragRequest(utbetalingsoppdrag = utbetalingsoppdrag, gjeldendeBehandlingId = behandlingId)
+        Result.runCatching { økonomiKlient.iverksettOppdrag(oppdragRequest) }
                 .fold(
                         onSuccess = {
                             assertGenerelleSuksessKriterier(it.body)
