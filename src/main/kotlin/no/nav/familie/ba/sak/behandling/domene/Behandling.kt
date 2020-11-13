@@ -57,7 +57,7 @@ data class Behandling(
 
     val steg: StegType
         get() = behandlingStegTilstand.last().behandlingSteg
-    
+
     fun sendVedtaksbrev(): Boolean {
         return type !== BehandlingType.MIGRERING_FRA_INFOTRYGD
                && type !== BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
@@ -70,22 +70,39 @@ data class Behandling(
 
     fun leggTilBehandlingStegTilstand(steg: StegType): Behandling {
         if (steg != StegType.HENLEGG_SØKNAD) {
-            behandlingStegTilstand.filter { steg.rekkefølge < it.behandlingSteg.rekkefølge }
-                    .forEach { behandlingStegTilstand.remove(it) }
-
-            behandlingStegTilstand.last().behandlingStegStatus = BehandlingStegStatus.UTFØRT
+            fjernAlleSenereSteg(steg)
+            setSisteStegSomUtført()
         }
 
-        if (!behandlingStegTilstand.any{ it.behandlingSteg == steg }) {
-            behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
-        }
+        leggTilStegOmDetIkkeFinnesFraFør(steg)
 
         if (steg == StegType.HENLEGG_SØKNAD || steg == StegType.BEHANDLING_AVSLUTTET) {
-            behandlingStegTilstand.last().behandlingStegStatus = BehandlingStegStatus.UTFØRT
+            setSisteStegSomUtført()
         } else {
-            behandlingStegTilstand.last().behandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT
+            setSisteStegSomIkkeUtført()
         }
         return this
+    }
+
+    private fun leggTilStegOmDetIkkeFinnesFraFør(steg: StegType) {
+        if (!behandlingStegTilstand.any { it.behandlingSteg == steg }) {
+            behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this, behandlingSteg = steg))
+        }
+    }
+
+    private fun setSisteStegSomUtført() {
+        behandlingStegTilstand.last().behandlingStegStatus = BehandlingStegStatus.UTFØRT
+    }
+
+    private fun setSisteStegSomIkkeUtført() {
+        behandlingStegTilstand.last().behandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT
+    }
+
+    private fun fjernAlleSenereSteg(steg: StegType) {
+        behandlingStegTilstand.filter { steg.rekkefølge < it.behandlingSteg.rekkefølge }
+                .forEach {
+                    behandlingStegTilstand.remove(it)
+                }
     }
 
     fun initBehandlingStegTilstand(): Behandling {
@@ -96,6 +113,7 @@ data class Behandling(
     }
 
     companion object {
+
         val comparator = BehandlingStegComparator()
     }
 }
@@ -144,7 +162,8 @@ enum class BehandlingStatus {
     AVSLUTTET,
 }
 
-class BehandlingStegComparator: Comparator<BehandlingStegTilstand> {
+class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {
+
     override fun compare(bst1: BehandlingStegTilstand, bst2: BehandlingStegTilstand): Int {
         return bst1.opprettetTidspunkt.compareTo(bst2.opprettetTidspunkt)
     }
