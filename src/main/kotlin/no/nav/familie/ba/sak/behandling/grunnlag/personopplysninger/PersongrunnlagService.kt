@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.behandling.vilkår.personHarLøpendeArbeidsforhold
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.pdl.internal.FAMILIERELASJONSROLLE
 import no.nav.familie.ba.sak.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -25,7 +26,8 @@ class PersongrunnlagService(
         private val oppholdService: OppholdService,
         private val arbeidsforholdService: ArbeidsforholdService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val personopplysningerService: PersonopplysningerService
+        private val personopplysningerService: PersonopplysningerService,
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 ) {
 
     fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
@@ -106,6 +108,7 @@ class PersongrunnlagService(
              * Dette gjør vi fordi det kan ha blitt introdusert personer med fortrolig adresse.
              */
             arbeidsfordelingService.fastsettBehandlendeEnhet(behandling)
+            saksstatistikkEventPublisher.publiserSaksstatistikk(behandling.fagsak.id)
         }
     }
 
