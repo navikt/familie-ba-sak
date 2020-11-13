@@ -41,7 +41,7 @@ class SendTilBeslutter(
         vilkårsvurdering.postValiderSteg(behandling)
 
         behandling.validerRekkefølgeOgUnikhetPåSteg()
-        behandling.validerMaksimaltEtStegIkkeFullført()
+        behandling.validerMaksimaltEtStegIkkeUtført()
     }
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -100,7 +100,7 @@ fun Behandling.validerRekkefølgeOgUnikhetPåSteg() {
     }
 }
 
-fun Behandling.validerMaksimaltEtStegIkkeFullført() {
+fun Behandling.validerMaksimaltEtStegIkkeUtført() {
     if (henlagt()) {
         throw Feil("Valideringen kan ikke kjøres for henlagte behandlinger.")
     }
