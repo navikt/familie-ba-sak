@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.domene.*
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.behandling.domene.BehandlingStatus.FATTER_VEDTAK
-import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.behandling.domene.tilstand.BehandlingStegTilstandRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -76,7 +75,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun loggBehandlinghendelse(behandling: Behandling) {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
                                                                    hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
-                                                     .takeIf { erRevurderingEllerKlage(behandling) }?.id)
+                                                     .takeIf { erRevurderingKlageTekniskOpphør(behandling) }?.id)
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
@@ -206,8 +205,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.findByFagsakAndGjeldendeForUtbetaling(fagsakId)
     }
 
-    private fun erRevurderingEllerKlage(behandling: Behandling) =
-            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.KLAGE
+    private fun erRevurderingKlageTekniskOpphør(behandling: Behandling) =
+            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.KLAGE || behandling.type == BehandlingType.TEKNISK_OPPHØR
 
 
     companion object {
