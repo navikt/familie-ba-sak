@@ -7,14 +7,11 @@ import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
 import no.nav.familie.ba.sak.common.Utils.midlertidigUtledBehandlingResultatType
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
-import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
-import no.nav.familie.kontrakter.felles.oppdrag.RestSimulerResultat
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppdrag.*
 import org.springframework.stereotype.Service
 
 @Service
@@ -31,7 +28,7 @@ class ØkonomiService(
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdrag(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
-        iverksettOppdrag(utbetalingsoppdrag)
+        iverksettOppdrag(utbetalingsoppdrag = utbetalingsoppdrag)
     }
 
     /**
@@ -87,7 +84,7 @@ class ØkonomiService(
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
         val behandlingResultatType =
-                if (oppdatertBehandling.type == BehandlingType.TEKNISK_OPPHØR
+                if (oppdatertBehandling.erTekniskOpphør()
                     || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT)
                     BehandlingResultatType.OPPHØRT
                 else {
@@ -101,8 +98,6 @@ class ØkonomiService(
         val erFørsteIverksatteBehandlingPåFagsak =
                 beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
 
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(fagsakId = oppdatertBehandling.fagsak.id,
-                                                                                      behandlingFørFølgende = oppdatertBehandling)
 
         return if (erFørsteIverksatteBehandlingPåFagsak) {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
@@ -111,19 +106,20 @@ class ØkonomiService(
                     behandlingResultatType = behandlingResultatType,
                     erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                     oppdaterteKjeder = oppdaterteKjeder,
-                    forrigeBehandling = forrigeBehandling
             )
         } else {
-            if (forrigeBehandling == null) {
-                error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
-            }
+            val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
+                                    ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
 
             val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
             // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
-            oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
-            beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilstand.first().tilkjentYtelse)
+            if (oppdatertTilstand.isNotEmpty()) {
+                oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
+                val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
+                beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
+            }
 
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                     saksbehandlerId,
@@ -132,7 +128,6 @@ class ØkonomiService(
                     erFørsteIverksatteBehandlingPåFagsak,
                     forrigeKjeder = forrigeKjeder,
                     oppdaterteKjeder = oppdaterteKjeder,
-                    forrigeBehandling = forrigeBehandling
             )
         }
     }
