@@ -55,6 +55,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk)
                     .initBehandlingStegTilstand()
 
+            if (behandling.type == BehandlingType.TEKNISK_OPPHØR || behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR) behandling.erTekniskOpphør()
+
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
             loggBehandlinghendelse(behandling)
@@ -73,7 +75,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
     private fun loggBehandlinghendelse(behandling: Behandling) {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id,
                                                                    hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
-                                                     .takeIf { erRevurderingEllerKlage(behandling) }?.id)
+                                                     .takeIf { erRevurderingKlageTekniskOpphør(behandling) }?.id)
     }
 
     fun hentAktivForFagsak(fagsakId: Long): Behandling? {
@@ -109,14 +111,20 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         }
     }
 
+    /**
+     * Henter siste iverksatte behandling på fagsak
+     */
     fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
         val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
         return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
     }
 
-    fun hentForrigeBehandlingSomErIverksatt(fagsakId: Long, behandlingFørFølgende: Behandling): Behandling? {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
-        return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandlingFørFølgende)
+    /**
+     * Henter siste iverksatte behandling FØR en gitt behandling
+     */
+    fun hentForrigeBehandlingSomErIverksatt(behandling: Behandling): Behandling? {
+        val iverksatteBehandlinger = hentIverksatteBehandlinger(behandling.fagsak.id)
+        return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
     }
 
     fun lagre(behandling: Behandling): Behandling {
@@ -197,8 +205,8 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
         return behandlingRepository.findByFagsakAndGjeldendeForUtbetaling(fagsakId)
     }
 
-    private fun erRevurderingEllerKlage(behandling: Behandling) =
-            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.KLAGE
+    private fun erRevurderingKlageTekniskOpphør(behandling: Behandling) =
+            behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.KLAGE || behandling.type == BehandlingType.TEKNISK_OPPHØR
 
 
     companion object {

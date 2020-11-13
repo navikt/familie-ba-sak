@@ -131,9 +131,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                         behandlingResultatType,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerTilkjentYtelse),
-                        // Setter inn samme behandling fordi vi forventer en tidligere behandling ved opphør
-                        forrigeBehandling = behandling
+                                andelerTilkjentYtelse)
                 )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
@@ -176,9 +174,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                         behandlingResultatType,
                         false,
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerTilkjentYtelse),
-                        // Setter inn samme behandling fordi vi forventer en tidligere behandling ved opphør
-                        forrigeBehandling = behandling
+                                andelerTilkjentYtelse)
                 )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.UEND, utbetalingsoppdrag.kodeEndring)
@@ -287,8 +283,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerFørstegangsbehandling),
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerRevurdering),
-                        forrigeBehandling = behandling
+                                andelerRevurdering)
                 )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -387,8 +382,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                                 andelerFørstegangsbehandling),
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                                andelerRevurdering),
-                        forrigeBehandling = behandling
+                                andelerRevurdering)
                 )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)

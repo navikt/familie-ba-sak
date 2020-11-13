@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.økonomi
 
-import no.nav.familie.ba.sak.behandling.domene.Behandling
 import no.nav.familie.ba.sak.behandling.vedtak.Vedtak
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.beregning.BeregningService
@@ -34,7 +33,6 @@ class UtbetalingsoppdragGenerator(
      * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
      * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
      * har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
-     * @param[forrigeBehandling] peker til forrige iverksatte behandling. Brukes på opphørsperioder.
      * @return Utbetalingsoppdrag for vedtak
      */
     fun lagUtbetalingsoppdrag(saksbehandlerId: String,
@@ -42,8 +40,7 @@ class UtbetalingsoppdragGenerator(
                               behandlingResultatType: BehandlingResultatType,
                               erFørsteBehandlingPåFagsak: Boolean,
                               forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
-                              oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
-                              forrigeBehandling: Behandling? = null
+                              oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap()
     ): Utbetalingsoppdrag {
 
         val erFullstendigOpphør = behandlingResultatType == BehandlingResultatType.OPPHØRT
@@ -80,14 +77,12 @@ class UtbetalingsoppdragGenerator(
                     vedtak = vedtak,
                     sisteOffsetIKjedeOversikt = gjeldendeForrigeOffsetForKjede(forrigeKjeder),
                     sisteOffsetPåFagsak = sisteOffsetPåFagsak,
-                    forrigeBehandling = forrigeBehandling
             ) else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
             lagUtbetalingsperioderForOpphør(
                     andeler = andelerTilOpphør,
                     vedtak = vedtak,
-                    forrigeBehandling = forrigeBehandling
             ) else emptyList()
 
         return Utbetalingsoppdrag(
@@ -101,12 +96,10 @@ class UtbetalingsoppdragGenerator(
     }
 
     fun lagUtbetalingsperioderForOpphør(andeler: List<Pair<AndelTilkjentYtelse, LocalDate>>,
-                                        vedtak: Vedtak,
-                                        forrigeBehandling: Behandling?): List<Utbetalingsperiode> {
+                                        vedtak: Vedtak): List<Utbetalingsperiode> {
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
                 vedtak = vedtak,
-                erEndringPåEksisterendePeriode = true,
-                forrigeBehandling = forrigeBehandling
+                erEndringPåEksisterendePeriode = true
         )
 
         return andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
@@ -121,8 +114,7 @@ class UtbetalingsoppdragGenerator(
                                              vedtak: Vedtak,
                                              erFørsteBehandlingPåFagsak: Boolean,
                                              sisteOffsetIKjedeOversikt: Map<String, Int>,
-                                             sisteOffsetPåFagsak: Int? = null,
-                                             forrigeBehandling: Behandling?): List<Utbetalingsperiode> {
+                                             sisteOffsetPåFagsak: Int? = null): List<Utbetalingsperiode> {
         var offset =
                 if (!erFørsteBehandlingPåFagsak)
                     sisteOffsetPåFagsak?.plus(1)
@@ -130,8 +122,7 @@ class UtbetalingsoppdragGenerator(
                 else 0
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
-                vedtak = vedtak,
-                forrigeBehandling = forrigeBehandling
+                vedtak = vedtak
         )
 
         val utbetalingsperioder = andeler.filter { kjede -> kjede.isNotEmpty() }

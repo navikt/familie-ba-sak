@@ -162,7 +162,7 @@ class FagsakService(
                     .filter { it.opprettetTidspunkt.isBefore(behandling.opprettetTidspunkt) }
                     .sortedBy { it.opprettetTidspunkt }
                     .findLast {
-                        it.type != BehandlingType.TEKNISK_OPPHØR &&
+                        !it.erTekniskOpphør() &&
                         it.steg == StegType.BEHANDLING_AVSLUTTET &&
                         !erBehandlingHenlagt(it)
                     }
