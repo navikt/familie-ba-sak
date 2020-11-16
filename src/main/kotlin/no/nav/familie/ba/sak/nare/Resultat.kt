@@ -46,11 +46,8 @@ fun Resultat.tilRestResultat(): RestResultat {
 
 fun RestResultat.tilResultat(): Resultat {
     return when(this) {
-        RestResultat.OPPFYLT -> Resultat.OPPFYLT
-        RestResultat.JA -> Resultat.OPPFYLT
-        RestResultat.IKKE_OPPFYLT -> Resultat.IKKE_OPPFYLT
-        RestResultat.NEI -> Resultat.IKKE_OPPFYLT
-        RestResultat.KANSKJE -> Resultat.IKKE_VURDERT
-        RestResultat.IKKE_VURDERT -> Resultat.IKKE_VURDERT
+        RestResultat.OPPFYLT, RestResultat.JA -> Resultat.OPPFYLT
+        RestResultat.IKKE_OPPFYLT, RestResultat.NEI -> Resultat.IKKE_OPPFYLT
+        RestResultat.KANSKJE, RestResultat.IKKE_VURDERT -> Resultat.IKKE_VURDERT
     }
 }
