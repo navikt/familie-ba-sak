@@ -297,11 +297,11 @@ class VedtakService(private val behandlingService: BehandlingService,
                         false
                     }
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        vilkårResultat.periodeFom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.JA
+                        vilkårResultat.periodeFom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(1).monthValue && vilkårResultat.resultat == Resultat.OPPFYLT
                     }
                     else -> {
                         vilkårResultat.periodeTom != null && vilkårResultat.periodeTom!!.monthValue == opprinneligUtbetalingBegrunnelse.fom.minusMonths(
-                                1).monthValue && vilkårResultat.resultat == Resultat.NEI
+                                1).monthValue && vilkårResultat.resultat == Resultat.IKKE_OPPFYLT
                     }
                 }
             }

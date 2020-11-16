@@ -276,7 +276,7 @@ fun lagPersonResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat,
     return setOf(
             lagPersonResultat(behandlingResultat = behandlingResultat,
                               fnr = søkerFnr,
-                              resultat = Resultat.JA,
+                              resultat = Resultat.OPPFYLT,
                               periodeFom = stønadFom,
                               periodeTom = stønadTom,
                               lagFullstendigVilkårResultat = true,
@@ -284,7 +284,7 @@ fun lagPersonResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat,
             ),
             lagPersonResultat(behandlingResultat = behandlingResultat,
                               fnr = barn1Fnr,
-                              resultat = Resultat.JA,
+                              resultat = Resultat.OPPFYLT,
                               periodeFom = stønadFom,
                               periodeTom = stønadTom,
                               lagFullstendigVilkårResultat = true,
@@ -292,7 +292,7 @@ fun lagPersonResultaterForSøkerOgToBarn(behandlingResultat: BehandlingResultat,
             ),
             lagPersonResultat(behandlingResultat = behandlingResultat,
                               fnr = barn2Fnr,
-                              resultat = Resultat.JA,
+                              resultat = Resultat.OPPFYLT,
                               periodeFom = stønadFom,
                               periodeTom = stønadTom,
                               lagFullstendigVilkårResultat = true,
@@ -346,11 +346,11 @@ fun vurderBehandlingResultatTilInnvilget(behandlingResultat: BehandlingResultat,
     behandlingResultat.personResultater.forEach { personResultat ->
         personResultat.vilkårResultater.forEach {
             if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
-                it.resultat = Resultat.JA
+                it.resultat = Resultat.OPPFYLT
                 it.periodeFom = barn.fødselsdato
                 it.periodeTom = barn.fødselsdato.plusYears(18)
             } else {
-                it.resultat = Resultat.JA
+                it.resultat = Resultat.OPPFYLT
                 it.periodeFom = LocalDate.now()
             }
         }

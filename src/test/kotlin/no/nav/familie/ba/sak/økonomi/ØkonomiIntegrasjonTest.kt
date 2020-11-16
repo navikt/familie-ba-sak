@@ -171,7 +171,7 @@ class ØkonomiIntegrasjonTest {
         behandlingResultat.personResultater = setOf(
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = søkerFnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = stønadFom,
                                   periodeTom = stønadTom,
                                   lagFullstendigVilkårResultat = true,
@@ -179,7 +179,7 @@ class ØkonomiIntegrasjonTest {
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = barnFnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = stønadFom,
                                   periodeTom = stønadTom,
                                   lagFullstendigVilkårResultat = true,

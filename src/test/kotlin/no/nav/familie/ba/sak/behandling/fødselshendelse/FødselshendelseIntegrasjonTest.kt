@@ -132,7 +132,7 @@ class FødselshendelseIntegrasjonTest(
 
         Assert.assertTrue(behandlingResultat.personResultater.all { personResultat ->
             personResultat.vilkårResultater.all {
-                it.resultat == Resultat.JA
+                it.resultat == Resultat.OPPFYLT
             }
         })
 
@@ -186,9 +186,9 @@ class FødselshendelseIntegrasjonTest(
             it.personIdent == ikkeOppfyltBarnFnr[1]
         }!!.vilkårResultater
 
-        Assert.assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter { it.resultat == Resultat.NEI }.size)
+        Assert.assertEquals(1, ikkeOppfyltBarnVilkårResultater.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
         Assert.assertEquals(Vilkår.BOR_MED_SØKER,
-                            ikkeOppfyltBarnVilkårResultater.find { it.resultat == Resultat.NEI }!!.vilkårType)
+                            ikkeOppfyltBarnVilkårResultater.find { it.resultat == Resultat.IKKE_OPPFYLT }!!.vilkårType)
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 

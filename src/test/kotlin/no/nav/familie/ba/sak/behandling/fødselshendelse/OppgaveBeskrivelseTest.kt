@@ -211,7 +211,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                resultat = if (søkersVilkår.bosattIRiket) Resultat.JA else Resultat.NEI,
+                                                resultat = if (søkersVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -219,7 +219,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                                resultat = if (søkersVilkår.lovligOpphold) Resultat.JA else Resultat.NEI,
+                                                resultat = if (søkersVilkår.lovligOpphold) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "Begrunnelse fra vilkårsvurdering",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -233,7 +233,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.UNDER_18_ÅR,
-                                                resultat = if (barnasVilkår.under18År) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.under18År) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -241,7 +241,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOR_MED_SØKER,
-                                                resultat = if (barnasVilkår.borMedSøker) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.borMedSøker) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -249,7 +249,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                                resultat = if (barnasVilkår.giftPartnerskap) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.giftPartnerskap) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
@@ -257,7 +257,7 @@ class OppgaveBeskrivelseTest {
                                         VilkårResultat(
                                                 personResultat = null,
                                                 vilkårType = Vilkår.BOSATT_I_RIKET,
-                                                resultat = if (barnasVilkår.bosattIRiket) Resultat.JA else Resultat.NEI,
+                                                resultat = if (barnasVilkår.bosattIRiket) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                                                 begrunnelse = "whatever",
                                                 behandlingId = behandling.id,
                                                 regelInput = null,
