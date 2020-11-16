@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.behandling.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
 import no.nav.familie.ba.sak.behandling.grunnlag.personopplysninger.*
+import no.nav.familie.ba.sak.behandling.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vedtak.VedtakService
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultat
@@ -176,7 +177,8 @@ class BehandlingIntegrationTest(
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morId))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+        behandling.behandlingStegTilstand.forEach { it.behandlingStegStatus = BehandlingStegStatus.UTFØRT }
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.BESLUTTE_VEDTAK))
         behandlingRepository.saveAndFlush(behandling)
 
         Assertions.assertThrows(Exception::class.java) {
@@ -236,7 +238,7 @@ class BehandlingIntegrationTest(
         behandlingResultat.personResultater = setOf(
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = søkerFnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = dato_2020_01_01.minusMonths(1),
                                   periodeTom = stønadTom,
                                   lagFullstendigVilkårResultat = true,
@@ -244,7 +246,7 @@ class BehandlingIntegrationTest(
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = barn1Fnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = dato_2020_01_01.minusMonths(1),
                                   periodeTom = stønadTom,
                                   lagFullstendigVilkårResultat = true,
@@ -252,7 +254,7 @@ class BehandlingIntegrationTest(
                 ),
                 lagPersonResultat(behandlingResultat = behandlingResultat,
                                   fnr = barn2Fnr,
-                                  resultat = Resultat.JA,
+                                  resultat = Resultat.OPPFYLT,
                                   periodeFom = dato_2020_10_01.minusMonths(1),
                                   periodeTom = stønadTom,
                                   lagFullstendigVilkårResultat = true,

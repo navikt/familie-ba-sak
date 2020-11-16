@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.journalføring.JournalføringService
 import no.nav.familie.ba.sak.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.logg.LoggService
 import no.nav.familie.ba.sak.nare.Resultat
 import no.nav.familie.ba.sak.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.personopplysninger.domene.AktørId
@@ -87,7 +86,7 @@ internal class SaksstatistikkServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val behandlingResultat = lagBehandlingResultat("01010000001",
                                                        behandling,
-                                                       Resultat.NEI).copy(samletResultat = BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET)
+                                                       Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.HENLAGT_FEILAKTIG_OPPRETTET)
 
         every { behandlingService.hent(any()) } returns behandling
         every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
@@ -107,7 +106,7 @@ internal class SaksstatistikkServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true)
         val behandlingResultat = lagBehandlingResultat(behandling.fagsak.hentAktivIdent().ident,
                                                        behandling,
-                                                       Resultat.JA).copy(samletResultat = BehandlingResultatType.INNVILGET)
+                                                       Resultat.OPPFYLT).copy(samletResultat = BehandlingResultatType.INNVILGET)
         val vedtak = lagVedtak(behandling)
         every { behandlingService.hent(any()) } returns behandling
         every { behandlingRestultatService.hentAktivForBehandling(any()) } returns behandlingResultat
@@ -158,7 +157,7 @@ internal class SaksstatistikkServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val behandlingResultat = lagBehandlingResultat("01010000001",
                                                        behandling,
-                                                       Resultat.NEI).copy(samletResultat = BehandlingResultatType.AVSLÅTT)
+                                                       Resultat.IKKE_OPPFYLT).copy(samletResultat = BehandlingResultatType.AVSLÅTT)
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
                 saksbehandler = "Saksbehandler",

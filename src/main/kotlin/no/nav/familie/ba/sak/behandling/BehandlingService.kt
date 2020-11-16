@@ -61,7 +61,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
             loggService.opprettBehandlingLogg(behandling)
             loggBehandlinghendelse(behandling)
             behandling
-        } else if (aktivBehandling.stegTemp < StegType.BESLUTTE_VEDTAK) {
+        } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
             aktivBehandling.leggTilBehandlingStegTilstand(initSteg(nyBehandling.behandlingType))
             aktivBehandling.status = initStatus()
 

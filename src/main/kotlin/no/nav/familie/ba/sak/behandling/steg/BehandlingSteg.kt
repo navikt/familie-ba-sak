@@ -13,7 +13,7 @@ interface BehandlingSteg<T> {
     fun stegType(): StegType
 
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
-        return behandling.stegTemp.hentNesteSteg(utførendeStegType = this.stegType(),
+        return behandling.steg.hentNesteSteg(utførendeStegType = this.stegType(),
                                              behandlingType = behandling.type,
                                              behandlingÅrsak = behandling.opprettetÅrsak)
     }

@@ -25,7 +25,7 @@ class OppdaterBehandlingGrunnlagTest {
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(3, oppdatert.personResultater.first().vilkårResultater.size)
-        Assertions.assertEquals(Resultat.JA,
+        Assertions.assertEquals(Resultat.OPPFYLT,
                                 oppdatert.personResultater.first()
                                         .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat
         )
@@ -41,7 +41,7 @@ class OppdaterBehandlingGrunnlagTest {
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.first().vilkårResultater.size)
-        Assertions.assertEquals(Resultat.JA,
+        Assertions.assertEquals(Resultat.OPPFYLT,
                                 oppdatert.personResultater.first()
                                         .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat
         )
@@ -106,7 +106,7 @@ class OppdaterBehandlingGrunnlagTest {
             personResultat.setVilkårResultater(
                     setOf(VilkårResultat(personResultat = personResultat,
                                          vilkårType = Vilkår.BOSATT_I_RIKET,
-                                         resultat = Resultat.JA,
+                                         resultat = Resultat.OPPFYLT,
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
                                          begrunnelse = "",
@@ -115,7 +115,7 @@ class OppdaterBehandlingGrunnlagTest {
                                          regelOutput = null),
                           VilkårResultat(personResultat = personResultat,
                                          vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                         resultat = Resultat.JA,
+                                         resultat = Resultat.OPPFYLT,
                                          periodeFom = LocalDate.now(),
                                          periodeTom = LocalDate.now(),
                                          begrunnelse = "",
@@ -143,7 +143,7 @@ class OppdaterBehandlingGrunnlagTest {
                     setOf(
                             VilkårResultat(personResultat = personResultat,
                                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                                           resultat = Resultat.JA,
+                                           resultat = Resultat.OPPFYLT,
                                            periodeFom = LocalDate.now(),
                                            periodeTom = LocalDate.now(),
                                            begrunnelse = "",
@@ -153,7 +153,7 @@ class OppdaterBehandlingGrunnlagTest {
                             ),
                             VilkårResultat(personResultat = personResultat,
                                            vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                                           resultat = Resultat.JA,
+                                           resultat = Resultat.OPPFYLT,
                                            periodeFom = LocalDate.now(),
                                            periodeTom = LocalDate.now(),
                                            begrunnelse = "",
@@ -163,7 +163,7 @@ class OppdaterBehandlingGrunnlagTest {
                             ),
                             VilkårResultat(personResultat = personResultat,
                                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                                           resultat = Resultat.JA,
+                                           resultat = Resultat.OPPFYLT,
                                            periodeFom = LocalDate.now(),
                                            periodeTom = LocalDate.now(),
                                            begrunnelse = "",

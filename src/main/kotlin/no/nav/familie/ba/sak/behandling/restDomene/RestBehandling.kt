@@ -6,7 +6,9 @@ import no.nav.familie.ba.sak.behandling.steg.StegType
 import no.nav.familie.ba.sak.behandling.vilkår.BehandlingResultatType
 import no.nav.familie.ba.sak.behandling.vilkår.PersonResultat
 import no.nav.familie.ba.sak.behandling.vilkår.Vilkår
+import no.nav.familie.ba.sak.nare.RestResultat
 import no.nav.familie.ba.sak.nare.Resultat
+import no.nav.familie.ba.sak.nare.tilRestResultat
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -45,7 +47,7 @@ data class RestNyttVilkår(
 data class RestVilkårResultat(
         val id: Long,
         val vilkårType: Vilkår,
-        val resultat: Resultat,
+        val resultat: RestResultat,
         val periodeFom: LocalDate?,
         val periodeTom: LocalDate?,
         val begrunnelse: String,
@@ -57,17 +59,17 @@ data class RestVilkårResultat(
 
 fun PersonResultat.tilRestPersonResultat() =
         RestPersonResultat(personIdent = this.personIdent,
-                           vilkårResultater = this.vilkårResultater.map { resultat ->
+                           vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
                                RestVilkårResultat(
-                                       resultat = resultat.resultat,
-                                       id = resultat.id,
-                                       vilkårType = resultat.vilkårType,
-                                       periodeFom = resultat.periodeFom,
-                                       periodeTom = resultat.periodeTom,
-                                       begrunnelse = resultat.begrunnelse,
-                                       endretAv = resultat.endretAv,
-                                       endretTidspunkt = resultat.endretTidspunkt,
-                                       behandlingId = resultat.behandlingId,
-                                       erVurdert = resultat.resultat != Resultat.KANSKJE || resultat.versjon > 0
+                                       resultat = vilkårResultat.resultat.tilRestResultat(),
+                                       id = vilkårResultat.id,
+                                       vilkårType = vilkårResultat.vilkårType,
+                                       periodeFom = vilkårResultat.periodeFom,
+                                       periodeTom = vilkårResultat.periodeTom,
+                                       begrunnelse = vilkårResultat.begrunnelse,
+                                       endretAv = vilkårResultat.endretAv,
+                                       endretTidspunkt = vilkårResultat.endretTidspunkt,
+                                       behandlingId = vilkårResultat.behandlingId,
+                                       erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0
                                )
                            })
