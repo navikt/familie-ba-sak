@@ -193,7 +193,7 @@ internal class TilkjentYtelseUtilsTest {
         val behandlingResultat = lagBehandlingResultat(
                 søkerFnr = søkerFnr,
                 behandling = behandling,
-                resultat = Resultat.JA,
+                resultat = Resultat.OPPFYLT,
                 søkerPeriodeFom = LocalDate.of(2014, 1, 1),
                 søkerPeriodeTom = null)
 
@@ -201,7 +201,7 @@ internal class TilkjentYtelseUtilsTest {
         barnResultat.setVilkårResultater(setOf(
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.BOSATT_I_RIKET,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = vilkårOppfyltFom,
                                periodeTom = vilkårOppfyltTom,
                                begrunnelse = "",
@@ -210,7 +210,7 @@ internal class TilkjentYtelseUtilsTest {
                                regelOutput = null),
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.UNDER_18_ÅR,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = barnFødselsdato,
                                periodeTom = barnFødselsdato.plusYears(18),
                                begrunnelse = "",
@@ -219,7 +219,7 @@ internal class TilkjentYtelseUtilsTest {
                                regelOutput = null),
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = barnFødselsdato,
                                periodeTom = null,
                                begrunnelse = "",
@@ -228,7 +228,7 @@ internal class TilkjentYtelseUtilsTest {
                                regelOutput = null),
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = barnFødselsdato,
                                periodeTom = null,
                                begrunnelse = "",
@@ -237,7 +237,7 @@ internal class TilkjentYtelseUtilsTest {
                                regelOutput = null),
                 VilkårResultat(personResultat = barnResultat,
                                vilkårType = Vilkår.BOR_MED_SØKER,
-                               resultat = Resultat.JA,
+                               resultat = Resultat.OPPFYLT,
                                periodeFom = barnFødselsdato,
                                periodeTom = null,
                                begrunnelse = "",

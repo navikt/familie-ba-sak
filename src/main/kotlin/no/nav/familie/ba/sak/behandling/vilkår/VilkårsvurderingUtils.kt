@@ -26,7 +26,8 @@ object VilkårsvurderingUtils {
     fun muterPersonResultatPost(personResultat: PersonResultat, vilkårType: Vilkår) {
         val nyttVilkårResultat = VilkårResultat(personResultat = personResultat,
                                                 vilkårType = vilkårType,
-                                                resultat = Resultat.KANSKJE, begrunnelse = "",
+                                                resultat = Resultat.IKKE_VURDERT,
+                                                begrunnelse = "",
                                                 behandlingId = personResultat.behandlingResultat.behandling.id,
                                                 regelInput = null,
                                                 regelOutput = null)
@@ -55,7 +56,7 @@ object VilkårsvurderingUtils {
     fun harUvurdertePerioder(personResultat: PersonResultat, vilkårType: Vilkår): Boolean {
         val uvurdetePerioderMedSammeVilkårType = personResultat.vilkårResultater
                 .filter { it.vilkårType == vilkårType }
-                .find { it.resultat == Resultat.KANSKJE }
+                .find { it.resultat == Resultat.IKKE_VURDERT }
         return uvurdetePerioderMedSammeVilkårType != null
     }
 
@@ -183,7 +184,7 @@ object VilkårsvurderingUtils {
                                            tom: LocalDate? = null): VilkårResultat {
         return VilkårResultat(personResultat = personResultat,
                               vilkårType = vilkårType,
-                              resultat = Resultat.KANSKJE,
+                              resultat = Resultat.IKKE_VURDERT,
                               begrunnelse = "",
                               periodeFom = fom,
                               periodeTom = tom,
