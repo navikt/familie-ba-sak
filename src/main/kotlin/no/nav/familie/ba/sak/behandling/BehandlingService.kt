@@ -55,7 +55,7 @@ class BehandlingService(private val behandlingRepository: BehandlingRepository,
                                         skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk)
                     .initBehandlingStegTilstand()
 
-            if (behandling.type == BehandlingType.TEKNISK_OPPHØR || behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR) behandling.erTekniskOpphør()
+            behandling.erTekniskOpphør() // Sjekker om teknisk opphør og kaster feil dersom BehandlingType og BehandlingÅrsak ikke samsvarer på eventuelt teknisk opphør
 
             lagreNyOgDeaktiverGammelBehandling(behandling)
             loggService.opprettBehandlingLogg(behandling)
