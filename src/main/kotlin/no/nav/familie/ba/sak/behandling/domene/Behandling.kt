@@ -22,7 +22,7 @@ data class Behandling(
         @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
         val fagsak: Fagsak,
 
-        @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+        @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
         @SortComparator(BehandlingStegComparator::class)
         val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = sortedSetOf(comparator),
 
