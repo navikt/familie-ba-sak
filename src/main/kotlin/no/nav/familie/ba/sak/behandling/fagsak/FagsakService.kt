@@ -88,6 +88,9 @@ class FagsakService(
                 lagre(it)
             }
             antallFagsakerOpprettet.increment()
+
+            val aktørId = personopplysningerService.hentAktivAktørId(Ident(personIdent.ident))
+            integrasjonClient.opprettSkyggesak(aktørId, fagsak.id)
         } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent == personIdent }) {
             fagsak.also {
                 it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
