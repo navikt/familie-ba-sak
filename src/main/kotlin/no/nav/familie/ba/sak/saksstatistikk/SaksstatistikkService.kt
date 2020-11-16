@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.saksstatistikk
 
 import no.nav.familie.ba.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.behandling.BehandlingService
+import no.nav.familie.ba.sak.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
 import no.nav.familie.ba.sak.behandling.fagsak.FagsakService
@@ -149,7 +150,7 @@ class SaksstatistikkService(private val behandlingService: BehandlingService,
             AVSLÅTT -> finnÅrsakerTilAvslag()
             DELVIS_INNVILGET -> TODO()
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> listOf(ResultatBegrunnelseDVH(samletResultat.displayName))
-            OPPHØRT -> TODO()
+            OPPHØRT -> if (behandling.type == BehandlingType.TEKNISK_OPPHØR) emptyList() else TODO()
             INNVILGET -> listOf(ResultatBegrunnelseDVH("Alle vilkår er oppfylt",
                                                        "Vilkår vurdert for søker: ${Vilkår.hentVilkårFor(PersonType.SØKER)}\n" +
                                                        "Vilkår vurdert for barn: ${
